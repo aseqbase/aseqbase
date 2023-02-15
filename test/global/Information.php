@@ -9,10 +9,10 @@ class Information extends InformationBase{
 	public $Slogan = "<u>a seq</u>uence-<u>base</u>d framework";
 	public $FullSlogan = "Develop websites by <u>a seq</u>uence-<u>base</u>d framework";
 	public $Description = "An original, safe, very flexible, and innovative framework for web developments!";
-	public $FullDescription = "A special framework for web development called "aseqbase" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.";
+	public $FullDescription = "A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.";
 
 	public $Path = "https://aseqbase.ir";
-	public $DownloadPath = null;
+	public $DownloadPath = "https://github.com/mimfa/aseqbase";
 	public $Location = null;
 
 	public $KeyWords = array("MiMFa aseqbase Framework", "MiMFa", "aseqbase", "Web Development", "Development", "Web Framework", "Website", "Framework");

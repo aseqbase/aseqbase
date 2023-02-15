@@ -189,7 +189,6 @@ function USING($dir,$name = null, $variables = array(), $print = true, $format =
 }
 
 function forceUSING($nodeDir, $baseDir, $name, $variables = array(), $print = true){
-	$seq;
 	if(($seq = USING($nodeDir,$name, $variables, $print)) !== null) return $seq;
 	if(count(\_::$SEQUENCES) > 0){
 		$dir = substr($nodeDir, strlen(\_::$DIR));
