@@ -1,0 +1,93 @@
+
+
+/* Screens Resolution : 992px
+-------------------------------------------------------------------------- */
+@media only screen and (max-width: 1200px) {
+	
+	/* ---------------------------------
+	4. RIGHT SECTION
+	--------------------------------- */
+
+	#rounded-countdown{ width: 100%; }
+	
+}
+
+/* Screens Resolution : 992px
+-------------------------------------------------------------------------- */
+@media only screen and (max-width: 992px) {
+	
+	
+	.main-area{ position: relative; height: 200vh; }
+
+
+	/* ---------------------------------
+	3. LEFT SECTION
+	--------------------------------- */
+
+	.left-section{ float: none; width: 100%; height: 50%; }
+	
+	.left-section .main-content{ padding: 40px 0; }
+	
+	.main-content .email-input-area{ width: 100%; }
+	
+	.main-content .email-input-area .email-input{ padding: 0 115px 0 20px; }
+	
+	.main-content .email-input-area .submit-btn{ width: 100px; } 
+	
+	.left-section .footer-icons > li > a > i{ height: 30px; line-height: 28px; width: 30px; }
+	
+	
+	/* ---------------------------------
+	4. RIGHT SECTION
+	--------------------------------- */
+
+	.right-section{ top: 50%; bottom: auto; width: 100%; height: 50%; }
+
+	.date-countdown{ width: 100%; }
+	
+	.date-countdown .time_circles > div > h4{ font-size: .7em!important; }
+
+}
+
+
+/* Screens Resolution : 767px
+-------------------------------------------------------------------------- */
+@media only screen and (max-width: 767px) {
+	
+	/* ---------------------------------
+	1. PRIMARY STYLES
+	--------------------------------- */
+
+	p{ line-height: 1.4; }
+
+	h1{ font-size: 2.8em; line-height: 1; }
+	h2{ font-size: 2.2em; line-height: 1.1; }
+	h3{ font-size: 1.8em; }
+	
+}
+
+/* Screens Resolution : 479px
+-------------------------------------------------------------------------- */
+@media only screen and (max-width: 479px) {
+
+	/* ---------------------------------
+	1. PRIMARY STYLES
+	--------------------------------- */
+
+	body{ font-size: 12px;  }
+
+}
+
+/* Screens Resolution : 359px
+-------------------------------------------------------------------------- */
+@media only screen and (max-width: 359px) {
+	
+	
+}
+
+/* Screens Resolution : 290px
+-------------------------------------------------------------------------- */
+@media only screen and (max-width: 290px) {
+	
+	
+}

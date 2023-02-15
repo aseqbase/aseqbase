@@ -1,0 +1,78 @@
+.background-screen{
+	min-height: 100vh;
+	width: 100vw;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	position: fixed;
+	z-index: -999999999;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    left: 0px;
+}
+.background-fixed{
+	height: 100%;
+	width: 100%;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	position: fixed;
+	z-index: -999999999;
+}
+
+.horizontal-center{
+	display: flex;
+	justify-content: center;
+}
+.vertical-center{
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	-moz-transform: translateY(-50%);
+	-o-transform: translateY(-50%);
+	-ms-transform: translateY(-50%);
+	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
+.vertical-middle{
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+}
+
+.light{
+	-webkit-filter: brightness(100) grayscale(100);
+	-moz-filter: brightness(100) grayscale(100);
+	-o-filter: brightness(100) grayscale(100);
+	-ms-filter: brightness(100) grayscale(100);
+	filter: brightness(100) grayscale(100);
+}
+
+.dark{
+	-webkit-filter: brightness(-100) grayscale(100);
+	-moz-filter: brightness(-100) grayscale(100);
+	-o-filter: brightness(-100) grayscale(100);
+	-ms-filter: brightness(-100) grayscale(100);
+	filter: brightness(-100) grayscale(100);
+}
+
+.text{
+	text-align: justify;
+	margin-bottom: 1vmax;
+}
+
+.page{
+   min-height: 80%;
+}
+
+.blackwhite{
+	-webkit-filter: brightness(100) grayscale(100) contrast(0.8);
+	-moz-filter: brightness(100) grayscale(100) contrast(0.8);
+	-o-filter: brightness(100) grayscale(100) contrast(0.8);
+	-ms-filter: brightness(100) grayscale(100) contrast(0.8);
+	filter: brightness(100) grayscale(100) contrast(0.8);
+}
+
+
+
