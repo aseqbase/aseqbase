@@ -1,9 +1,9 @@
-# MiMFa aseqbase
+# MiMFa aseqbase v1.0.0
 a sequence-based web development framework
 
 A special framework for web development called "aseqbase" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.
 
-The latest version is available for:
+This version is available for:
 
 	TECH			VER
 
@@ -11,7 +11,7 @@ The latest version is available for:
 	Nginx			1.x
 	Microsoft IIS		7
 
-	PHP				7.x
+	PHP			7.x
 
 	MySQL			5.1 +
 	SQL Server		10.50.1600.1 +
