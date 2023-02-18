@@ -19,6 +19,8 @@ class _ {
 	public static $MODEL_DIR = null;
 	public static $VIEW_DIR = null;
 	public static $GLOBAL_DIR = null;
+	public static $PRIVATE_DIR = null;
+	public static $PUBLIC_DIR = null;
 	public static $FILE_DIR = null;
 	public static $STORAGE_DIR = null;
 
@@ -26,13 +28,13 @@ class _ {
 	public static $COMPONENT_DIR = null;
 	public static $TEMPLATE_DIR = null;
 	public static $MODULE_DIR = null;
-	
+
 	public static $PAGE_DIR = null;
 	public static $REGION_DIR = null;
 	public static $PART_DIR = null;
 	public static $SCRIPT_DIR = null;
 	public static $STYLE_DIR = null;
-	
+
 	public static $BASE_ROOT = null;
 	public static $BASE_DIR = null;
 
@@ -93,6 +95,8 @@ _::$DIR = $GLOBALS["DIR"];
 _::$MODEL_DIR = \_::$DIR."model/";
 _::$VIEW_DIR = \_::$DIR."view/";
 _::$GLOBAL_DIR = \_::$DIR."global/";
+_::$PRIVATE_DIR = \_::$DIR."private/";
+_::$PUBLIC_DIR = \_::$DIR."public/";
 _::$FILE_DIR = \_::$DIR."file/";
 _::$STORAGE_DIR = \_::$DIR."storage/";
 _::$LIBRARY_DIR = \_::$MODEL_DIR."library/";
@@ -346,8 +350,8 @@ function getValue($source, $key, $ismultiline = true){
 }
 
 function isValid($obj,$item = null){
-	if($item === null) return isset($obj) && $obj !== null && !empty($obj); 
-	else return isset($obj) && isset($item) && isset($obj[$item]) && $obj[$item] !== null && !empty($obj[$item]); 
+	if($item === null) return isset($obj) && $obj !== null && !empty($obj);
+	else return isset($obj) && isset($item) && isset($obj[$item]) && $obj[$item] !== null && !empty($obj[$item]);
 }
 function isEmpty($text){
 	return !isset($text) || trim($text."") == "" || trim($text."","'\"") == "";

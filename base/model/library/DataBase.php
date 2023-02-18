@@ -1,13 +1,10 @@
 <?php namespace MiMFa\Library;
 
-use Illuminate\Database\DatabaseManager;
-
-class DataBase
-{
+class DataBase {
 	public static function Connection()
 	{
-		$conn = new PDO("mysql:host=".\_:;$CONFIG->DataBaseHost.";dbname=".\_:;$CONFIG->DataBaseName, \_:;$CONFIG->DataBaseUser, \_:;$CONFIG->DataBasePassword);
-		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$conn = new \PDO("mysql:host=".\_::$CONFIG->DataBaseHost.";dbname=".\_::$CONFIG->DataBaseName, \_::$CONFIG->DataBaseUser, \_::$CONFIG->DataBasePassword);
+		$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		return $conn;
 	}
 
@@ -22,7 +19,7 @@ class DataBase
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
 		$isdone = $stmt->execute($params);
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
+		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 		return $stmt->fetchAll(); 
 	}
 

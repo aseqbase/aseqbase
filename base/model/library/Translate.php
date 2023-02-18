@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Library;
-require_once "db.php";
+require_once "DataBase.php";
 
 class Translate
 {
@@ -22,9 +22,9 @@ class Translate
 				$args[":message_data$i"]= json_encode($data);
 				$query .= "UPDATE ".self::$TableName." SET message_data=:message_data$i WHERE code=:code${i};";
 			}
- 
+
 		}
-		DB::Update($query,$args);
+		DataBase::Update($query,$args);
 		self::$Lang = $lang;
 	}
 
@@ -34,7 +34,7 @@ class Translate
 		$data = json_encode(array('x'=>$text));
 		if(count($col)==0) {
 			$args = [":code"=>$code,":message_data"=>$data];
-			DB::Insert("INSERT INTO ".self::$TableName." (code,message_data) VALUES(:code,:message_data)",$args);
+			DataBase::Insert("INSERT INTO ".self::$TableName." (code,message_data) VALUES(:code,:message_data)",$args);
 		}
 		else {
 			$data = json_decode($col[0]["message_data"]);
@@ -43,13 +43,13 @@ class Translate
 		foreach($params as $key=>$val) $text = str_replace($key,$val,$text);
 		return $text;
 	}
-	
+
 	public static function Set($text,$val=null){
 		$code = self::CreateKey($text);
 		$col = DataBase::Select("SELECT message_data FROM ".self::$TableName." WHERE code=:code",[":code"=>$code]);
 		if(count($col)> 0) $data = $col[0]["message_data"];
 		$data = json_encode(array('x'=>$text));
-		if(!is_null($val))$data->{self::$Lang} = $val; 
+		if(!is_null($val))$data->{self::$Lang} = $val;
 		$args = [":code"=>$code,":message_data"=>$data];
 		if(count($col)==0) DataBase::Insert("INSERT INTO ".self::$TableName." (code,message_data) VALUES(:code,:message_data)",$args);
 		else DataBase::Update("UPDATE ".self::$TableName." SET message_data=:message_data WHERE code=:code",$args);
@@ -57,7 +57,7 @@ class Translate
 	}
 
 	public static function CreateKey($text){
-		$key = 
+		$key =
 				str_replace(
 					array("\r","\n","\t","|",":",";","`","'",'"', ")","(","*","&","^","%", "#","@","!","~",".",",","/","\\","}","]","{","["),
 					" ",

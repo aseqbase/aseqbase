@@ -64,7 +64,7 @@ class Style{
 		return $text;
 	}
 	public static function DoStyle($text,$keyWords=null){
-		return DoStrong($text,$keyWords); 
+		return self::DoStrong($text,$keyWords); 
 	}
 }
 ?>

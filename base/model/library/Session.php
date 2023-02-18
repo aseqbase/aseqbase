@@ -1,5 +1,4 @@
 <?php namespace MiMFa\Library;
-require_once "Base.php";
 require_once "DataBase.php";
 
 class Session
@@ -27,7 +26,7 @@ class Session
 
 	public static function pull($key,$database = false){
 		$val = self::get($key,$database);
-		forget($key,$database);
+		self::forget($key,$database);
 		return $val;
 	}
 

@@ -1,9 +1,10 @@
 <?php
-$GLOBALS["ASEQ"] = end(explode("/", __DIR__));
+$dirs = explode("/", __DIR__);
+$GLOBALS["ASEQ"] = end($dirs);
 $GLOBALS["BASE"] = "base";
 
 if(!isset($GLOBALS["HOST"])){
-	$host_parts = explode(".", strtolower(trim($_SERVER[HTTP_HOST])));
+	$host_parts = explode(".", strtolower(trim($_SERVER["HTTP_HOST"])));
 	$GLOBALS["HOST"] = (isset($_SERVER['HTTPS'])?"https://":"http://").$host_parts[count($host_parts)-2].".".$host_parts[count($host_parts)-1];
 }
 

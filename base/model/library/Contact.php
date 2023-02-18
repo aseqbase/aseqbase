@@ -11,10 +11,9 @@ class Contact{
 			$subject,
 			$message,
 			$header);
-		} catch (Exception $ex){
+		} catch (\Exception $ex){
 			return false;
 		}
-		return false;
 	}
 	
 	public static function SendHTMLEmail($from,$to,$subject,$message,$reply=null,$cc=null)
@@ -30,10 +29,9 @@ class Contact{
 			$subject,
 			$message,
 			$header);
-		} catch (Exception $ex){
+		} catch (\Exception $ex){
 			return false;
 		}
-		return false;
 	}
 }
 ?>

@@ -47,8 +47,8 @@ class Local{
 		if(is_dir($path)) return $path;
 		if(is_dir(\_::$DIR.$path)) return \_::$DIR.$path;
 		$path = ltrim(GetDirection($path), "/\/");
-		if(count(\_::$ASEQ_DIR) > 0){
-			foreach(\_::$ASEQ_DIR as $aseq)
+		if(count(\_::$SEQUENCES) > 0){
+			foreach(\_::$SEQUENCES as $aseq)
 				if(is_dir($aseq.$path)) return $aseq.$path;
 		}
 		if(is_dir(\_::$BASE_DIR.$path)) return \_::$BASE_DIR.$path;
@@ -59,8 +59,8 @@ class Local{
 		if(file_exists($path)) return $path;
 		if(file_exists(\_::$DIR.$path)) return \_::$DIR.$path;
 		$path = ltrim(GetDirection($path), "/\/");
-		if(count(\_::$ASEQ_DIR) > 0){
-			foreach(\_::$ASEQ_DIR as $aseq)
+		if(count(\_::$SEQUENCES) > 0){
+			foreach(\_::$SEQUENCES as $aseq)
 				if(file_exists($aseq.$path)) return $aseq.$path;
 		}
 		if(file_exists(\_::$BASE_DIR.$path)) return \_::$BASE_DIR.$path;
@@ -68,12 +68,12 @@ class Local{
 	}
 
 	public static function GetFileObject($inputName){
-		return $_FILES[$inputName]; 
+		return $_FILES[$inputName];
 	}
 	public static function UploadFile($fileobject, $destdir, $minSize=10000, $maxSize=5000000, $extensions=[]){
-		if(is_string($fileobject)) $fileobject = GetFileObject($fileobject);
+		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
 
-		$obj = new stdClass();
+		$obj = new \stdClass();
 		$obj->status = false;
 		$obj->result = null;
 		$obj->error = [];
@@ -84,7 +84,7 @@ class Local{
 		$fileName = explode(".",basename($fileobject["name"]))[0]."_".getId().".".$fileType;
 		$filepath = $dir.$fileName;
 		$obj->result .= "/".$fileName;
-		
+
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) $obj->error[] = "There is not any file!";
 
 		// Allow certain file formats
@@ -105,18 +105,18 @@ class Local{
 		return $obj;
 	}
 	public static function UploadImage($fileobject, $destdir, $minSize=10000, $maxSize=5000000,$extensions=["jpg","jpeg","png","bmp","gif","ico"]){
-		if(is_string($fileobject)) $fileobject = GetFileObject($fileobject);
-		
-		$obj = new stdClass();
+		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
+
+		$obj = new \stdClass();
 		$obj->status = false;
 		$obj->result = null;
 		$obj->error = [];
-		
+
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) $obj->error[] = "There is not any file!";
 
 		// Check if image file is an actual image or fake image
 		if(getimagesize($fileobject["tmp_name"]) === false) $obj->error[] = "The image file is not an actual image!";
-		return (count($obj->error)===0)? self::File($fileobject, $destdir,$minSize, $maxSize, $extensions) : $obj;
+		return (count($obj->error)===0)? self::UploadFile($fileobject, $destdir,$minSize, $maxSize, $extensions) : $obj;
 	}
 }
 
