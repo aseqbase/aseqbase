@@ -11,7 +11,7 @@ This version is available for:
 	Nginx			1.x
 	Microsoft IIS		7
 
-	PHP			7.4+
+	PHP			7.4 +
 
 	MySQL			5.1 +
 	SQL Server		10.50.1600.1 +
