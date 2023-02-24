@@ -1,7 +1,10 @@
-<h2>
+<h1 align="center">
+	<a href="http://aseqbase.ir">
+		<img alt="MiMFa aseqbase" height="50px" src="http://aseqbase.mimfa.net/file/logo/logo.svg"/>
+	</a>
 	MiMFa aseqbase v1.0.0
 	<br><sub>a sequence-based web development framework</sub>
-</h2>
+</h1>
 
 <p>A special framework for web development called "aseqbase" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>
 
