@@ -27,6 +27,6 @@ abstract class ConfigurationBase extends \MiMFa\Base{
 	public $DataBaseUser = null;
 	public $DataBasePassword = null;
 	public $DataBaseName = 'localhost';
-	public $DataBasePrefix = 'mimfa_';
+	public $DataBasePrefix = 'base_';
 }
 ?>

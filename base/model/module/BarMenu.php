@@ -69,7 +69,7 @@ class BarMenu extends Module{
 				background-size: auto 60%;
 				color: var(--ForeColor-2);
 				padding: 10px 24px; /* Some padding */
-				<?php if($this->AllowChangeColor) echo \MiMFa\Library\Style::UniversalProperty("filter",(\_::$TEMPLATE->IsDark(\_::$TEMPLATE->ForeColor(2))?"brightness(0)":"brightness(1000)")." grayscale(100)") ?>
+				<?php if($this->AllowChangeColor) echo \MiMFa\Library\Style::DropColor(\_::$TEMPLATE->ForeColor(2)); ?>
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)) ?>
 			}
 			.<?php echo $this->Name; ?>>a>.button:hover>div{

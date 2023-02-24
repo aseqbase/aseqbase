@@ -120,6 +120,10 @@ class FontAwesome extends Component{
 			background-color: #ff5700;
 			}
 
+			<?php echo $root; ?> .fa-github:hover {
+			background-color: #8957e5;
+			}
+
 			<?php echo $root; ?> .fa-rss:hover {
 			background-color: #ff6600;
 			}

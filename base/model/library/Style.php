@@ -1,7 +1,7 @@
 <?php namespace MiMFa\Library;
 class Style{
 	public static function UniversalProperty($prop,$val){
-		return 
+		return
 		"-webkit-".$prop.": ".$val.";
 		-moz-".$prop.": ".$val.";
 		-ms-".$prop.": ".$val.";
@@ -48,7 +48,7 @@ class Style{
 
 		return $res.";";
 	}
-	
+
 	public static function DoStrong($text,$keyWords=null){
 		if($keyWords === null) $keyWords = \_::$INFO->KeyWords;
 		foreach($keyWords as $item)
@@ -64,7 +64,18 @@ class Style{
 		return $text;
 	}
 	public static function DoStyle($text,$keyWords=null){
-		return self::DoStrong($text,$keyWords); 
+		return self::DoStrong($text,$keyWords);
 	}
+
+	public static function DropColor($color){
+		return self::UniversalProperty("filter","brightness(1000%) grayscale(100%) opacity(0.1)
+													drop-shadow(0 0 0 $color)
+													drop-shadow(0 0 0 $color)
+													drop-shadow(0 0 0 $color)
+													drop-shadow(0 0 0 $color)
+													drop-shadow(0 0 0 $color)
+");
+	}
+
 }
 ?>

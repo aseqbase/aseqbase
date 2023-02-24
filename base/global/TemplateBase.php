@@ -50,8 +50,8 @@ abstract class TemplateBase extends \MiMFa\Base{
 	public function Pattern($ind = 0) { $ind %= count($this->PatternPalette); return \MiMFa\Library\Local::GetUrl($this->PatternPalette[$ind]);}
 
 	public function __construct(){
-		if($this->IsDark($this->ForeColor(0))===true) $this->DarkMode = false;
-		else $this->DarkMode = true;
+		if($this->IsDark($this->BackColor(0))===true) $this->DarkMode = true;
+		else $this->DarkMode = false;
 	}
 
 	public function GetInitial(){
@@ -295,7 +295,7 @@ abstract class TemplateBase extends \MiMFa\Base{
 
 	
 	public function IsDark($color = null){
-		if(!isValid($color)) return $this->IsDark($this->ForeColor(0)) === false;
+		if(!isValid($color)) return $this->IsDark($this->BackColor(0)) === false;
 		list($r, $g, $b) = sscanf($color, "#%02x%02x%02x");
 		$sc = $r+$g+$b;
 		if($sc<127) return true;

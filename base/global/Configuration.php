@@ -24,6 +24,6 @@ class Configuration extends ConfigurationBase {
 	public $DataBaseUser = null;
 	public $DataBasePassword = null;
 	public $DataBaseName = 'localhost';
-	public $DataBasePrefix = 'mimfa_';
+	public $DataBasePrefix = 'base_';
 }
 ?>

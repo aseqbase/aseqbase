@@ -128,7 +128,7 @@ class RingSlide extends Module{
 				background-size: 50% 50%;
 				width: <?php echo $this->ButtonsSize; ?>px;
 				height: <?php echo $this->ButtonsSize; ?>px;
-				<?php if($this->AllowChangeColor) echo \MiMFa\Library\Style::UniversalProperty("filter",(\_::$TEMPLATE->IsDark(\_::$TEMPLATE->ForeColor(2))?"brightness(0)":"brightness(1000)")." grayscale(100)") ?>
+                                                                        				<?php if($this->AllowChangeColor) echo \MiMFa\Library\Style::DropColor(\_::$TEMPLATE->ForeColor(2)); ?>
 			}
 			.<?php echo $this->Name; ?> .menu>.center>a:hover>.button>.image {
 				background-size: 60% 60%;

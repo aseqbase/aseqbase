@@ -1,7 +1,7 @@
 <?php
 class Information extends InformationBase{
 	public $Owner = "MiMFa";
-	public $FullOwner = "Minimal Memeber Factory";
+	public $FullOwner = "Minimal Member Factory";
 	public $Product = "aseqbase";
 	public $FullProduct = "aseqbase";
 	public $Name = "aseqbase";
@@ -27,9 +27,8 @@ class Information extends InformationBase{
 
 	public $SideMenus = array(
 		array("Layer"=>1,"Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png","Attributes"=> "class='menu-link'"),
-		array("Layer"=>1,"Name"=>"GIT","Link"=>"http://github.com/mimfa/aseqbase","Image"=>"/file/symbol/market.png","Attributes"=> "class='menu-link'"),
 		array("Layer"=>2,"Name"=>"FORUM","Link"=>"https://github.com/mimfa/aseqbase/issues","Image"=>"/file/symbol/chat.png","Attributes"=> "class='menu-link'"),
-		array("Layer"=>1,"Name"=>"PRODUCTS","Link"=>"http://github.com/mimfa","Image"=>"/file/symbol/product.png", "Attributes"=>"class='menu-link'"),
+		array("Layer"=>1,"Name"=>"PRODUCTS","Link"=>"http://mimfa.net/products","Image"=>"/file/symbol/product.png", "Attributes"=>"class='menu-link'"),
 		array("Layer"=>1,"Name"=>"ABOUT","Link"=>"/about","Image"=>"","Attributes"=> "class='menu-link'")
 		);
 
@@ -48,9 +47,10 @@ class Information extends InformationBase{
 		);
 
 	public $Contacts = array(
-		array("Name"=>"Instagram","Link"=>"/?page=https://www.instagram.com/aseqbase","Image"=>"/file/symbol/chat.png","Icon"=> "fa fa-instagram"),
-		array("Name"=>"Telegram","Link"=>"https://t.me/aseqbase","Image"=>"/file/symbol/chat.png","Icon"=> "fa fa-telegram"),
-		array("Name"=>"Email","Link"=>"mailto:aseqbase@mimfa.net","Image"=>"/file/symbol/chat.png","Icon"=> "fa fa-envelope"),
+		array("Name"=>"Instagram","Link"=>"/?page=https://www.instagram.com/aseqbase","Icon"=> "fa fa-instagram"),
+		array("Name"=>"Telegram","Link"=>"https://t.me/aseqbase","Icon"=> "fa fa-telegram"),
+		array("Name"=>"Email","Link"=>"mailto:aseqbase@mimfa.net","Icon"=> "fa fa-envelope"),
+		array("Name"=>"Github","Link"=>"http://github.com/mimfa","Icon"=> "fa fa-github"),
 		array("Name"=>"Forum","Link"=>"/chat","Image"=>"/file/symbol/chat.png","Icon"=> "fa fa-comments")
 	);
 }
