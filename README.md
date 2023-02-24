@@ -2,7 +2,7 @@
 	<a href="http://aseqbase.ir">
 		<img alt="MiMFa aseqbase" height="50px" src="https://aseqbase.ir/base/file/logo/full-logo.svg"/>
 	</a><br>
-	MiMFa aseqbase v1.0.0
+	MiMFa aseqbase (Gen1)
 	<br><sub>a sequence-based web development framework</sub>
 </h1>
 
