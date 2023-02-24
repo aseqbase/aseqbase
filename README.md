@@ -1,6 +1,6 @@
 <h1 align="center">
 	<a href="http://aseqbase.ir">
-		<img alt="MiMFa aseqbase" height="50px" src="https://aseqbase.ir/base/file/logo/full-logo.svg"/>
+		<img alt="MiMFa aseqbase" height="50px" src="https://aseqbase.ir/aseq/file/logo/full-logo.svg"/>
 	</a><br>
 	MiMFa aseqbase (Gen1)
 	<br><sub>a sequence-based web development framework</sub>
