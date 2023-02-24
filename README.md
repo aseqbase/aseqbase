@@ -1,12 +1,13 @@
 <h1 align="center">
 	<a href="http://aseqbase.ir">
-		<img alt="MiMFa aseqbase" height="25px" src="https://aseqbase.ir/aseq/file/logo/full-logo.svg"/>
-	</a><br>
-	MiMFa aseqbase (Gen1)
-	<br><sub>a sequence-based web development framework</sub>
+		<img alt="MiMFa aseqbase" width="20%" src="https://aseqbase.ir/aseq/file/logo/logo.svg"/>
+		<br>
+		MiMFa <img alt="MiMFa aseqbase" height="25px" src="https://aseqbase.ir/aseq/file/logo/full-logo.svg"/> (Gen1)
+	</a>
+	<br><sub><a href="http://aseqbase.ir">a seq</a>uence-<a href="http://aseqbase.ir">base</a>d web development framework</sub>
 </h1>
 
-<p>A special framework for web development called "aseqbase" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>
+<p><a href="http://aseqbase.ir">MiMFa aseqbase</a> is a special framework for web development called "aseqbase" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>
 
 <h3>Demonstrations</h3>
 	<p>There are a list of multipe websites, developed by this framework:</p>
