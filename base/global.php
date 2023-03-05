@@ -26,7 +26,7 @@ class _ {
      * X		.	xx	xx	x
 	 * @var float
 	 */
-	public static float $VERSION = 1.00000;
+	public static float $VERSION = 1.00001;
 
 	public static string|null $URL = null;
 	public static string|null $HOST = null;
