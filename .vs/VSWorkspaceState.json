@@ -1,10 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\base",
-    "\\base\\private",
-    "\\base\\view"
+    "\\aseqbase\\administration\\view",
+    "\\aseq\\view\\page"
   ],
-  "SelectedNode": "\\base\\view\\403.php",
+  "SelectedNode": "\\aseq",
   "PreviewInSolutionExplorer": false
 }

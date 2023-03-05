@@ -50,7 +50,7 @@ class Content extends Module{
 			<div class="frame"></div>
 		</div>
 		<div class="page internal-page active" id="internal">
-			<div class="frame"><?php if(isEmpty($this->Content)) PAGE(NormalizePath($_GET[\_::$CONFIG->PathKey])); else echo $this->Content; ?></div>
+			<div class="frame"><?php if(isEmpty($this->Content) && isValid($_GET, \_::$CONFIG->PathKey)) PAGE(NormalizePath($_GET[\_::$CONFIG->PathKey])); else echo $this->Content; ?></div>
 		</div>
 		<div class="page embed-page" id="embed" style="display: none;">
 			<iframe class="frame" ></iframe>
