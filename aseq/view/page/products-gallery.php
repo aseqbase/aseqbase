@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	MODULE("PrePage");
 	$module = new MiMFa\Module\PrePage();
 	$module->Title = "Gallery";

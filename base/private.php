@@ -1,5 +1,4 @@
 <?php
-//echo("<br>__DIR__: ".__DIR__); echo("<br>BASE_DIR: ".$GLOBALS["BASE_DIR"]); echo("<br>DIR: ".$GLOBALS["DIR"]); die;
 if(
 	$_SERVER["REQUEST_METHOD"] != "POST"
 	//|| $_SERVER['SERVER_ADDR'] !== $_SERVER['REMOTE_ADDR']

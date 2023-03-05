@@ -12,7 +12,7 @@
 //
 //	VALUE		//The indicated value
 
-class Module extends \MiMFa\Base{
+class Module extends \Base{
 	///$*Direction: Options = array(null,"ltr","rtl");
 	///$*Id: Type = name;
 	///$*Name: Access = read;

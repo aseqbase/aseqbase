@@ -1,5 +1,10 @@
 <?php namespace MiMFa\Library;
 class Local{
+    /**
+     * Get or Find a file, then get the external url
+     * @param mixed $path Probable file external url or path
+     * @return mixed
+     */
 	public static function GetUrl($path){
 		if(!isValid($path) || isAbsoluteUrl($path)) return $path;
 		if(startsWith($path, "/")){
@@ -17,6 +22,11 @@ class Local{
 		}
 		return $path;
 	}
+	/**
+	 * Get or Find a file, then get the internal path
+	 * @param mixed $path Probable file internal path
+	 * @return mixed
+	 */
 	public static function GetPath($path){
 		if(!isValid($path) || IsAbsoluteUrl($path)) return $path;
 		$p = ltrim(GetDirection($path), "/\\");
@@ -30,19 +40,13 @@ class Local{
 		return $path;
 	}
 
-	public static function CreateDirectory($destPath){
-		$dirs = explode("/",trim($destPath,"/"));
-		$dir = rtrim(\_::$PUBLIC_DIR);
-		foreach($dirs as $d){
-			$dir .= "/".$d;
-			if(!file_exists($dir)) mkdir($dir, 0777, true);
-		}
-		return $dir."/";
-	}
-	public static function DeleteDirectory($destPath){
-		$dir = \_::$PUBLIC_DIR.trim($destPath,"/");
-		return unlink($dir);
-	}
+    public static function CreateNewAddress(string $dir, string $format = "", int $length = 10):string{
+        $id = time();
+		$path = $dir.$id.$format;
+		while(self::FileExists($path)) $path = $dir.$id."_".randomString(3).$format;
+        return $path;
+    }
+
 	public static function GetDirectory($path){
 		if(is_dir($path)) return $path;
 		if(is_dir(\_::$DIR.$path)) return \_::$DIR.$path;
@@ -54,6 +58,54 @@ class Local{
 		if(is_dir(\_::$BASE_DIR.$path)) return \_::$BASE_DIR.$path;
 		return null;
 	}
+	public static function DirectoryExists($path):bool{
+		return is_dir($path);
+	}
+	public static function CreateDirectory($destPath):string|null{
+		$dirs = explode("/",trim($destPath,"/"));
+		$dir = rtrim(\_::$PUBLIC_DIR);
+		foreach($dirs as $d){
+			$dir .= "/".$d;
+			if(!file_exists($dir)){
+                mkdir($dir, 0777, true);
+				self::CreateFile($dir."/index.html");
+            }
+		}
+		return $dir."/";
+	}
+	public static function DeleteDirectory($destPath){
+		$dir = \_::$PUBLIC_DIR.trim($destPath,"/");
+		return unlink($dir);
+	}
+	public static function MoveDirectory($source_dir, $dest_dir, $recursive = true){
+		if(self::CopyDirectory($source_dir, $dest_dir, $recursive))
+			return self::DeleteDirectory($source_dir);
+		return false;
+    }
+	public static function CopyDirectory($source_dir, $dest_dir, $recursive = true):bool{
+		set_time_limit (24 * 60 * 60);
+		$b = true;
+		$source_paths = scandir($source_dir);
+        if($recursive)
+			foreach ($source_paths as $source)
+            {
+                $bn = basename($source);
+                if(is_dir($source)){
+                    self::CreateDirectory($dest_dir . $bn);
+                    $b = self::CopyDirectory($source, $dest_dir . $bn) && $b;
+                } else $b = self::CopyFile($source, $dest_dir . $bn) && $b;
+            }
+		return $b;
+    }
+	public static function CopyDirectories($source_dirs, $dest_dirs, $recursive = true):bool{
+		set_time_limit (24 * 60 * 60);
+		$b = true;
+        foreach ($source_dirs as $s_dir)
+            foreach ($dest_dirs as $d_dir)
+                $b = self::CopyDirectory($s_dir, $d_dir, $recursive) && $b;
+		return $b;
+    }
+
 
 	public static function GetFile($path){
 		if(file_exists($path)) return $path;
@@ -65,6 +117,59 @@ class Local{
 		}
 		if(file_exists(\_::$BASE_DIR.$path)) return \_::$BASE_DIR.$path;
 		return null;
+	}
+	public static function FileExists($path):bool{
+		return file_exists($path);
+	}
+	public static function CreateFile($path){
+		return fopen($path,"w");
+	}
+	public static function DeleteFile($path){
+		return unlink($path);
+	}
+	public static function MoveFile($source_path, $dest_path):bool{
+		if(self::CopyFile($source_path, $dest_path))
+			return self::DeleteFile($source_path);
+		return false;
+    }
+	public static function CopyFile($source_path, $dest_path):bool{
+		set_time_limit (24 * 60 * 60);
+		$b = false;
+        $s_file = fopen ($source_path, "rb");
+        if ($s_file) {
+            $d_file = fopen ($dest_path, "wb");
+            if ($d_file)
+            {
+                while(!feof($s_file)) {
+                    fwrite($d_file, fread($s_file, 1024 * 8 ), 1024 * 8 );
+                }
+                $b = true;
+            }
+        }
+
+        if ($s_file) {
+            fclose($s_file);
+        }
+        if ($d_file) {
+            fclose($d_file);
+        }
+
+		return $b;
+    }
+	public static function CopyFiles($source_paths, $dest_paths):bool{
+		set_time_limit (24 * 60 * 60);
+		$b = true;
+        foreach ($source_paths as $s_path)
+            foreach ($dest_paths as $d_path)
+                $b = self::CopyFile($s_path, $d_path) && $b;
+		return $b;
+    }
+
+	public static function ReadText($path):string|null{
+		return file_get_contents($path);
+	}
+	public static function WriteText($path, string|null $text){
+		return fwrite($path,$text);
 	}
 
 	public static function GetFileObject($inputName){
@@ -101,7 +206,7 @@ class Local{
 
 		if(count($obj->error) > 0) $obj->error[] = "Sorry, your file was not uploaded.";
 		elseif(!($obj->status=move_uploaded_file($fileobject["tmp_name"], $filepath)))
-			 $obj->error[] = "Sorry, there was an error uploading your file.";
+            $obj->error[] = "Sorry, there was an error uploading your file.";
 		return $obj;
 	}
 	public static function UploadImage($fileobject, $destdir, $minSize=10000, $maxSize=5000000,$extensions=["jpg","jpeg","png","bmp","gif","ico"]){

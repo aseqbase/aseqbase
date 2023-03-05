@@ -1,10 +1,12 @@
 <?php
+$aseq = $GLOBALS["NEST"]>0?preg_replace("/\./", "/", $GLOBALS["ASEQ"])."/":"";
 //Don't change the codes below:
-if(isset($GLOBALS["DIR"])) $GLOBALS["SEQUENCES"][__DIR__."/../"] = $GLOBALS["HOST"]."/".$GLOBALS["ASEQ"]."/";
+if(isset($GLOBALS["DIR"])) $GLOBALS["SEQUENCES"][__DIR__."/"] = $GLOBALS["HOST"]."/".$aseq;
 else {
+	$GLOBALS["ASEQBASE"] = $GLOBALS["ASEQ"];
 	$GLOBALS["SEQUENCES"] = array();
-	$GLOBALS["ROOT"] = $GLOBALS["HOST"]."/".$GLOBALS["ASEQ"]."/";
-	$GLOBALS["DIR"] = __DIR__."/../";
+	$GLOBALS["ROOT"] = $GLOBALS["HOST"]."/".$aseq;
+	$GLOBALS["DIR"] = __DIR__."/";
 }
 
 //Filter the sequences

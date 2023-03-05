@@ -1,7 +1,7 @@
 ##
-# @package    MiMFa aseqbase
+# @package    MiMFa
 # @copyright  Copyright (C) 2005 - 2023 Open Source Matters. All rights reserved.
-# @license    GNU General Public License version 3 or later; see LICENSE.txt
+# @license    GNU General Public License version 2 or later; see LICENSE.txt
 ##
 #
 #Alternate default index pages
@@ -42,5 +42,5 @@ RewriteCond %{REQUEST_FILENAME} !-f
 # and the requested path and file don't directly match a physical folder
 RewriteCond %{REQUEST_FILENAME} !-d
 # Redirect all virtual paths to the main index.php
-RewriteRule (^[^\?]*)|((?<=\?).*$) /index.php?path=$1&$2 [QSA,L]
+RewriteRule (^[^\?]*)|((?<=\?).*$) /administration/index.php?path=$1&$2 [QSA,L]
 ## End - MiMFa! core SEF Section.

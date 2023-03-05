@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Component;
-      class Profile extends \MiMFa\Base{
+class Profile extends \Base{
 	public $Id = null;
 	public $Image = null;
 	public $Name = null;

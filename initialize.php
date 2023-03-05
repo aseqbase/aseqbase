@@ -1,16 +1,15 @@
 <?php
-$dirs = explode("/", __DIR__);
-$GLOBALS["ASEQ"] = end($dirs);
-$GLOBALS["BASE"] = "base";
+//$dirs = explode("/", __DIR__);// Uncomment for a sub domain website
+$GLOBALS["ASEQ"] = null;//end($dirs);// Replace for a sub domain website
+$GLOBALS["BASE"] = "aseq";
 
-$GLOBALS["NEST"] = (isset($GLOBALS["ASEQ"]) && !is_null($ASEQ))?preg_match_all("/\.+/",$ASEQ)+1:0;
+$GLOBALS["NEST"] = (isset($GLOBALS["ASEQ"]) && !is_null($GLOBALS["ASEQ"]))?preg_match_all("/\.+/",$GLOBALS["ASEQ"])+1:0;
 if(!isset($GLOBALS["HOST"])){
 	$GLOBALS["HOST"] = (isset($_SERVER['HTTPS'])?"https://":"http://");
 	if($NEST > 0){
 		$host_parts = explode(".", strtolower(trim($_SERVER["HTTP_HOST"])));
-		$hpc = count($host_parts);
-		$GLOBALS["HOST"] .= $host_parts[$hpc-(1+$NEST)];
-		for ($i = $NEST; $i > 0; $i--) $GLOBALS["HOST"] .=".".$host_parts[$hpc-$i];
+		$GLOBALS["HOST"] .= $host_parts[count($host_parts)-1-$NEST];
+		for ($i = $NEST; $i > 0; $i--) $GLOBALS["HOST"] .=".".$host_parts[count($host_parts)-$i];
     }
 	else $GLOBALS["HOST"] .= strtolower(trim($_SERVER["HTTP_HOST"]));
 }

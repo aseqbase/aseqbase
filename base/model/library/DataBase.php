@@ -14,50 +14,33 @@ class DataBase {
 		return $query;
 	}
 
-	
+
 	public static function Select($query,$params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
-		$isdone = $stmt->execute($params);
+		$stmt->execute($params);
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
-		return $stmt->fetchAll(); 
+		return $stmt->fetchAll();
 	}
-
 	public static function SelectValue($query,$params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
-		$isdone = $stmt->execute($params);
-		return $stmt->fetchColumn(); 
+		$stmt->execute($params);
+		return $stmt->fetchColumn();
 	}
-
-	public static function DoSelect($tableName, $params=[], $condition=null)
+	public static function DoSelect($tableName, $columns = "*", $params=[], $condition=null)
 	{
-		$query = "SELECT * FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition);
+		$query = "SELECT ".$columns." FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition);
 		$result = self::Select($query,$params);
-		return count($result) > 0 ? $result[0] : null;
+		return count($result) > 0 ? $result : array();
 	}
 
-	public static function GetMax($tableName, $col = "id",$condition =null)
-	{
-		$query = "SELECT MAX(".$col.") FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition).";";
-		$result = self::SelectValue($query);
-		return $result;
-	}
-
-	public static function GetMin($tableName, $col = "id",$condition =null)
-	{
-		$query = "SELECT MIN(".$col.") FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition).";";
-		$result = self::SelectValue($query);
-		return $result;
-	}
-	
 	public static function Insert($query,$params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
 		$isdone = $stmt->execute($params);
-		return $isdone; 
+		return $isdone;
 	}
-
 	public static function DoInsert($tableName, $params=[], $condition=null){
 		$vals = array();
 		$sets = array();
@@ -77,7 +60,6 @@ class DataBase {
 		$isdone = $stmt->execute($params);
 		return $isdone;
 	}
-
 	public static function DoUpdate($tableName, $params=[], $condition=null){
 		$sets = array();
 		foreach($params as $key => $value)
@@ -93,10 +75,47 @@ class DataBase {
 		$isdone = $stmt->execute($params);
 		return $isdone;
 	}
-
 	public static function DoDelete($tableName,  $params=[], $condition=null){
 		$query = "DELETE FROM `$tableName`".(is_null($condition)?"":" WHERE ".$condition);
 		return self::Delete($query, $params);
+	}
+
+	public static function GetCount($tableName, $col = "ID",$condition =null)
+	{
+		$query = "SELECT COUNT(".$col.") FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition).";";
+		$result = self::SelectValue($query);
+		return $result;
+	}
+	public static function GetSum($tableName, $col = "ID",$condition =null)
+	{
+		$query = "SELECT SUM(".$col.") FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition).";";
+		$result = self::SelectValue($query);
+		return $result;
+	}
+	public static function GetAverage($tableName, $col = "ID",$condition =null)
+	{
+		$query = "SELECT AVG(".$col.") FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition).";";
+		$result = self::SelectValue($query);
+		return $result;
+	}
+	public static function GetMax($tableName, $col = "ID",$condition =null)
+	{
+		$query = "SELECT MAX(".$col.") FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition).";";
+		$result = self::SelectValue($query);
+		return $result;
+	}
+	public static function GetMin($tableName, $col = "ID",$condition =null)
+	{
+		$query = "SELECT MIN(".$col.") FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition).";";
+		$result = self::SelectValue($query);
+		return $result;
+	}
+
+	public static function Exists($tableName, $col = null,$condition =null)
+	{
+		$query = "SELECT ".(is_null($col)?"1":$col)." FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition).";";
+		$result = self::SelectValue($query);
+		return !is_null($result);
 	}
 }
 ?>

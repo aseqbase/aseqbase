@@ -14,6 +14,6 @@ class Configuration extends ConfigurationBase {
 	public $DataBaseUser = null;
 	public $DataBasePassword = null;
 	public $DataBaseName = 'localhost';
-	public $DataBasePrefix = 'aseq_';
+	public $DataBasePrefix = 'qba_';
 }
 ?>

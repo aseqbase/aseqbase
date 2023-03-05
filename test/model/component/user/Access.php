@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Component;
-class Access extends \MiMFa\Base{
+class Access extends \Base{
 	public $Id = null;
 	public $Group = null;
 

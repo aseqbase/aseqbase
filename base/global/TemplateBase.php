@@ -1,10 +1,10 @@
 <?php
-abstract class TemplateBase extends \MiMFa\Base{
+abstract class TemplateBase extends Base{
 	public $ViewName = "main";
 	public $HomeViewName = "splash";
 	public $DefaultViewName = "main";
 	public $RestrictionViewName = "restriction";
-	
+
 	public $AnimationSpeed = 250;
 	public $DarkMode = null;
 
@@ -18,13 +18,13 @@ abstract class TemplateBase extends \MiMFa\Base{
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js' crossorigin='anonymous'></script>
 	";
 	public $CustomPack = "";
-	
+
 	//0:	ForeColor
 	//1:	Input ForeColor
 	//2:	Button ForeColor
 	//3:	BackColor
 	//4:	Input BackColor
-	//5:	Button BackColor 
+	//5:	Button BackColor
 	public $ColorPalette = array("#dd2222","#22dd22","#2222dd","#dddd22","#22dddd","#dd22dd");
 	public $ForeColorPalette = array("#010203","#010203","#010203","#010203","#fdfeff","#fdfeff");
 	public $BackColorPalette = array("#fafcfd","#fdfeff","#fdfeff","#fafcfd","#3aa3e9","#3aa3e9");
@@ -36,25 +36,25 @@ abstract class TemplateBase extends \MiMFa\Base{
 	public $TransitionPalette = array("none","all .25s linear","all .5s linear","all .75s linear","all 1s linear","all 1.5s linear");
 	public $OverlayPalette = array("/file/overlay/glass.png","/file/overlay/cloud.png","/file/overlay/tile.png");
 	public $PatternPalette = array("/file/pattern/main.svg","/file/pattern/doddle.png","/file/pattern/doddle-color.png","/file/pattern/moon.png","/file/pattern/moon-color.png");
-	
-	public function Color($ind = 0) { $ind %= count($this->ColorPalette); return $this->ColorPalette[$ind];}
-	public function ForeColor($ind = 0) { $ind %= count($this->ForeColorPalette); return $this->ForeColorPalette[$ind];}
-	public function BackColor($ind = 0) { $ind %= count($this->BackColorPalette); return $this->BackColorPalette[$ind];}
-	public function Font($ind = 0) { $ind %= count($this->FontPalette); return $this->FontPalette[$ind];}
-	public function Size($ind = 0) { $ind %= count($this->SizePalette); return $this->SizePalette[$ind];}
-	public function Shadow($ind = 0) { $ind %= count($this->ShadowPalette); return $this->ShadowPalette[$ind];}
-	public function Border($ind = 0) { $ind %= count($this->BorderPalette); return $this->BorderPalette[$ind];}
-	public function Radius($ind = 0) { $ind %= count($this->RadiusPalette); return $this->RadiusPalette[$ind];}
-	public function Transition($ind = 0) { $ind %= count($this->TransitionPalette); return $this->TransitionPalette[$ind];}
-	public function Overlay($ind = 0) { $ind %= count($this->OverlayPalette); return \MiMFa\Library\Local::GetUrl($this->OverlayPalette[$ind]);}
-	public function Pattern($ind = 0) { $ind %= count($this->PatternPalette); return \MiMFa\Library\Local::GetUrl($this->PatternPalette[$ind]);}
+
+	public function Color(int $ind = 0) { $ind %= count($this->ColorPalette); return $this->ColorPalette[$ind];}
+	public function ForeColor(int $ind = 0) { $ind %= count($this->ForeColorPalette); return $this->ForeColorPalette[$ind];}
+	public function BackColor(int $ind = 0) { $ind %= count($this->BackColorPalette); return $this->BackColorPalette[$ind];}
+	public function Font(int $ind = 0) { $ind %= count($this->FontPalette); return $this->FontPalette[$ind];}
+	public function Size(int $ind = 0) { $ind %= count($this->SizePalette); return $this->SizePalette[$ind];}
+	public function Shadow(int $ind = 0) { $ind %= count($this->ShadowPalette); return $this->ShadowPalette[$ind];}
+	public function Border(int $ind = 0) { $ind %= count($this->BorderPalette); return $this->BorderPalette[$ind];}
+	public function Radius(int $ind = 0) { $ind %= count($this->RadiusPalette); return $this->RadiusPalette[$ind];}
+	public function Transition(int $ind = 0) { $ind %= count($this->TransitionPalette); return $this->TransitionPalette[$ind];}
+	public function Overlay(int $ind = 0) { $ind %= count($this->OverlayPalette); return \MiMFa\Library\Local::GetUrl($this->OverlayPalette[$ind]);}
+	public function Pattern(int $ind = 0) { $ind %= count($this->PatternPalette); return \MiMFa\Library\Local::GetUrl($this->PatternPalette[$ind]);}
 
 	public function __construct(){
 		if($this->IsDark($this->BackColor(0))===true) $this->DarkMode = true;
 		else $this->DarkMode = false;
 	}
 
-	public function GetInitial(){
+	public function GetInitial():string|null{
 		return "
 		<script>
 			const load = function(url){
@@ -84,7 +84,7 @@ abstract class TemplateBase extends \MiMFa\Base{
 					+selector+' input[type=submit], '
 					+selector+' input[type=reset], '
 					+selector+' button';
-					
+
 				$.ajax({
 					type: 'GET',
 					url: request,
@@ -130,7 +130,7 @@ abstract class TemplateBase extends \MiMFa\Base{
 					+selector+' button';
 
 				beforeFunc(requestData,selector);
-				return  $.post(request,requestData,function(data){successFunc(data,selector);}).fail(function(data){errorfunc(data,selector);});		
+				return  $.post(request,requestData,function(data){successFunc(data,selector);}).fail(function(data){errorfunc(data,selector);});
 					"
 					/*$.ajax({
 						type: 'POST',
@@ -164,7 +164,7 @@ abstract class TemplateBase extends \MiMFa\Base{
 					});*/
 			."}
 		</script>
-		
+
 		<style>
 			:root{
 				--Color-0: ".$this->Color(0).";
@@ -282,10 +282,10 @@ abstract class TemplateBase extends \MiMFa\Base{
 			}
 		</style>";
 	}
-	public function GetBody(){
+	public function GetBody():string|null{
 		return "";
 	}
-	public function GetFinal(){
+	public function GetFinal():string|null{
 		return "<script>
 			AOS.init({
 			  easing: 'ease-in-out-sine'
@@ -293,8 +293,8 @@ abstract class TemplateBase extends \MiMFa\Base{
 		</script>";
 	}
 
-	
-	public function IsDark($color = null){
+
+	public function IsDark($color = null):bool|null{
 		if(!isValid($color)) return $this->IsDark($this->BackColor(0)) === false;
 		list($r, $g, $b) = sscanf($color, "#%02x%02x%02x");
 		$sc = $r+$g+$b;
@@ -302,5 +302,5 @@ abstract class TemplateBase extends \MiMFa\Base{
 		elseif($sc>382) return false;
 		return null;
 	}
-}	
+}
 ?>

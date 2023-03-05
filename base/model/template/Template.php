@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Template;
-class Template extends \MiMFa\Base{
+class Template extends \Base{
 	public function Draw(){
 		
 	}

@@ -1,5 +1,5 @@
 <?php
-abstract class InformationBase extends \MiMFa\Base{
+abstract class InformationBase extends Base{
 	public $Owner = null;
 	public $FullOwner = null;
 	public $OwnerDescription = null;
@@ -11,7 +11,7 @@ abstract class InformationBase extends \MiMFa\Base{
 	public $FullSlogan = null;
 	public $Description = null;
 	public $FullDescription = null;
-	
+
 	public $Path = null;
 	public $LogoPath = "/file/logo/logo.png";
 	public $FullLogoPath = "/file/logo/full-logo.png";
@@ -22,11 +22,11 @@ abstract class InformationBase extends \MiMFa\Base{
 	public $WaitSymbolPath = "/file/general/wait.gif";
 	public $ProcessSymbolPath = "/file/general/process.gif";
 	public $ErrorSymbolPath = "/file/general/error.png";
-	
+
 	public $User = null;
-	
+
 	public $Location = null;
-	
+
 	public $KeyWords = array("MiMFa","Minimal Member Factory");
 
 	public $MainMenus = array(
@@ -41,11 +41,11 @@ abstract class InformationBase extends \MiMFa\Base{
 	public $Shortcuts = array(
 		array("Name"=>"Home","Link"=>"#internal","Image"=>"/file/symbol/home.png","Attributes"=> "class='internal-link' data-target='.page' onclick='ViewInternal(\"/home\",\"fade\"); ViewSideMenu(false);'")
 	);
-		
+
 	public $Services = array();
 
 	public $Members = array();
-	
+
 	public $Contacts = array();
 
 	public function __construct(){
@@ -63,5 +63,6 @@ abstract class InformationBase extends \MiMFa\Base{
 		$this->Members = forceUrls($this->Members);
 		$this->Contacts = forceUrls($this->Contacts);
 	}
+
 }
 ?>

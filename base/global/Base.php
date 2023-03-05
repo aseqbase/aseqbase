@@ -1,4 +1,4 @@
-<?php namespace MiMFa;
+<?php
 class Base{
 	public $Name = null;
 	
