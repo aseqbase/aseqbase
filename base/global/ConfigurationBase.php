@@ -16,7 +16,7 @@ abstract class ConfigurationBase extends Base {
 	 */
 	public $StatusMode = null;
 	/**
-     * The accessibility mode: 1 for whitelist IPs, -1 for blacklisted IPs
+     * The accessibility mode: 1 for whitelisted IPs, -1 for blacklisted IPs
 	 * @var mixed
 	 */
 	public $AccessMode = null;
@@ -52,9 +52,10 @@ abstract class ConfigurationBase extends Base {
 	public $DataBasePassword = null;
 	public $DataBaseName = 'localhost';
 	public $DataBasePrefix = 'base_';
+	public $DataBaseAddNameToPrefix = true;
 
 	public function __construct(){
-        $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"])."_";
+        if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"])."_";
     }
 
 

@@ -1,0 +1,5 @@
+{
+    "require": {
+        "coinremitterphp/coinremitter-php": "^0.1.5"
+    }
+}
