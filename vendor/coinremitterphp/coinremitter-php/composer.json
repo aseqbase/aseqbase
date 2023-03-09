@@ -1,0 +1,34 @@
+{
+    "name": "coinremitterphp/coinremitter-php",
+    "description": "Official PHP SDK for coinremitter cryptocurrency payment gateway",
+    "type": "library",
+    "keywords": ["coinremitter", "php", "cryptocurrency", "payment gateway", "api"],
+    "homepage": "https://coinremitter.com/",
+    "license": "MIT",
+    
+    "authors": [
+        {
+            "name": "Coinremitter",
+            "email": "coinremitter@outlook.com"
+        }
+    ],
+
+   
+    "require": {
+        "php": ">=5.4 <=8.2"
+    },
+    "require-dev": {
+        "php": ">=5.4 <=7.4"
+    },
+    "autoload": {
+        "psr-0": {
+            "CoinRemitter": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1-dev"
+        }
+    }
+
+}

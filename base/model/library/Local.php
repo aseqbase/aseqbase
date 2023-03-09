@@ -1,4 +1,11 @@
 <?php namespace MiMFa\Library;
+/**
+ * A simple library to work by the local files and folders
+*@copyright All rights are reserved for MiMFa Development Group
+*@author Mohammad Fathi
+*@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
+ *@link https://github.com/mimfa/aseqbase/wiki/Libraries#local See the Library Documentation
+*/
 class Local{
     /**
      * Get or Find a file, then get the external url

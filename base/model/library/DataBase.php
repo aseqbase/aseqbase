@@ -1,5 +1,11 @@
 <?php namespace MiMFa\Library;
-
+/**
+ * A simple library to connect the database and run the most uses SQL queries
+ *@copyright All rights are reserved for MiMFa Development Group
+ *@author Mohammad Fathi
+ *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
+ *@link https://github.com/mimfa/aseqbase/wiki/Libraries#database See the Library Documentation
+ */
 class DataBase {
 	public static function Connection()
 	{
@@ -20,11 +26,11 @@ class DataBase {
 		$stmt->execute($params);
 		return $stmt->fetchColumn();
 	}
-	public static function TrySelectValue($query,$params=[])
+	public static function TrySelectValue($query,$params=[], $defaultValue = null)
 	{
 		try{
 			return self::SelectValue($query,$params);
-        }catch(\Exception $ex){ return null; }
+        }catch(\Exception $ex){ return $defaultValue; }
 	}
 
 	public static function Select($query,$params=[]){
@@ -34,19 +40,17 @@ class DataBase {
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 		return $stmt->fetchAll();
 	}
-	public static function TrySelect($query,$params=[])
+	public static function TrySelect($query,$params=[], $defaultValue = array())
 	{
 		try{
 			return self::Select($query,$params);
-        }catch(\Exception $ex){ return null; }
+        }catch(\Exception $ex){ return $defaultValue; }
 	}
-	public static function DoSelect($tableName, $columns = "*", $params=[], $condition=null)
+	public static function DoSelect($tableName, $columns = "*", $params=[], $condition=null, $defaultValue = array())
 	{
-		try{
-			$query = "SELECT ".$columns." FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition);
-			$result = self::Select($query,$params);
-			return count($result) > 0 ? $result : array();
-        }catch(\Exception $ex){ return null; }
+		$query = "SELECT ".$columns." FROM `$tableName` ".(is_null($condition)?"":" WHERE ".$condition);
+		$result = self::TrySelect($query,$params,$defaultValue);
+		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
 	}
 
 	public static function Insert($query,$params=[]){
@@ -55,25 +59,23 @@ class DataBase {
 		$isdone = $stmt->execute($params);
 		return $isdone;
 	}
-	public static function TryInsert($query,$params=[])
+	public static function TryInsert($query,$params=[], $defaultValue = false)
 	{
 		try{
 			return self::Insert($query,$params);
-        }catch(\Exception $ex){ return null; }
+        }catch(\Exception $ex){ return $defaultValue; }
 	}
-	public static function DoInsert($tableName, $params=[], $condition=null){
-		try{
-			$vals = array();
-			$sets = array();
-			foreach($params as $key => $value)
-			{
-				$sets[] = "`".ltrim($key,":")."`";
-				$vals[] = $key;
-			}
+	public static function DoInsert($tableName, $params=[], $condition=null, $defaultValue = false){
+		$vals = array();
+		$sets = array();
+		foreach($params as $key => $value)
+		{
+			$sets[] = "`".ltrim($key,":")."`";
+			$vals[] = $key;
+		}
 
-			$query = "INSERT INTO `$tableName` (".implode(", ",$sets).") VALUES (".implode(", ",$vals).")".(is_null($condition)?"":" WHERE ".$condition);
-			return self::Insert($query,$params);
-        }catch(\Exception $ex){ return null; }
+		$query = "INSERT INTO `$tableName` (".implode(", ",$sets).") VALUES (".implode(", ",$vals).")".(is_null($condition)?"":" WHERE ".$condition);
+		return self::TryInsert($query,$params,$defaultValue);
 	}
 
 	public static function Update($query, $params=[]){
@@ -82,21 +84,19 @@ class DataBase {
 		$isdone = $stmt->execute($params);
 		return $isdone;
 	}
-	public static function TryUpdate($query,$params=[])
+	public static function TryUpdate($query,$params=[], $defaultValue = false)
 	{
 		try{
 			return self::Update($query,$params);
-        }catch(\Exception $ex){ return null; }
+        }catch(\Exception $ex){ return $defaultValue; }
 	}
-	public static function DoUpdate($tableName, $params=[], $condition=null){
-		try{
-			$sets = array();
-			foreach($params as $key => $value)
-				$sets[] = "`".ltrim($key,":")."`=".$key;
+	public static function DoUpdate($tableName, $params=[], $condition=null, $defaultValue = false){
+		$sets = array();
+		foreach($params as $key => $value)
+			$sets[] = "`".ltrim($key,":")."`=".$key;
 
-			$query = "UPDATE `$tableName` SET ".implode(", ",$sets).(is_null($condition)?"":" WHERE ".$condition);
-			return self::Update($query,$params);
-        }catch(\Exception $ex){ return null; }
+		$query = "UPDATE `$tableName` SET ".implode(", ",$sets).(is_null($condition)?"":" WHERE ".$condition);
+		return self::TryUpdate($query,$params,$defaultValue);
 	}
 
 	public static function Delete($query, $params=[]){
@@ -105,17 +105,15 @@ class DataBase {
 		$isdone = $stmt->execute($params);
 		return $isdone;
 	}
-	public static function TryDelete($query,$params=[])
+	public static function TryDelete($query,$params=[], $defaultValue = false)
 	{
 		try{
 			return self::Delete($query,$params);
-        }catch(\Exception $ex){ return null; }
+        }catch(\Exception $ex){ return $defaultValue; }
 	}
-	public static function DoDelete($tableName,  $params=[], $condition=null){
-		try{
-			$query = "DELETE FROM `$tableName`".(is_null($condition)?"":" WHERE ".$condition);
-            return self::Delete($query, $params);
-        }catch(\Exception $ex){ return null; }
+	public static function DoDelete($tableName,  $params=[], $condition=null, $defaultValue = false){
+		$query = "DELETE FROM `$tableName`".(is_null($condition)?"":" WHERE ".$condition);
+        return self::TryDelete($query, $params,$defaultValue);
 	}
 
 	public static function GetCount($tableName, $col = "ID",$condition =null)

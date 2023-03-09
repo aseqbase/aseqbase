@@ -1,6 +1,12 @@
 <?php namespace MiMFa\Library;
 require_once "DataBase.php";
-
+/**
+ * A simple library to Translate texts and documents
+ *@copyright All rights are reserved for MiMFa Development Group
+ *@author Mohammad Fathi
+ *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
+ *@link https://github.com/mimfa/aseqbase/wiki/Libraries#translate See the Library Documentation
+ */
 class Translate
 {
 	public static $TableName = "rainlab_translate_messages";

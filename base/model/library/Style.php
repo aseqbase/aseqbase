@@ -1,4 +1,11 @@
 <?php namespace MiMFa\Library;
+/**
+ * A simple library to prepare css styles and apply them on the elements
+*@copyright All rights are reserved for MiMFa Development Group
+*@author Mohammad Fathi
+*@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
+ *@link https://github.com/mimfa/aseqbase/wiki/Libraries#style See the Library Documentation
+*/
 class Style{
 	public static function UniversalProperty($prop,$val){
 		return
