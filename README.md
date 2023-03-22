@@ -1,8 +1,8 @@
 <h1 align="center">
 	<a href="http://aseqbase.ir" target="_blank">
-		<img alt="MiMFa aseqbase" width="20%" src="https://aseqbase.ir/aseq/file/logo/logo.svg"/>
+		<img alt="MiMFa aseqbase" width="20%" src="https://aseqbase.ir/.aseq/file/logo/logo.svg"/>
 		<br>
-		MiMFa <img alt="MiMFa aseqbase" height="25px" src="https://aseqbase.ir/aseq/file/logo/full-logo.svg"/> (Gen1)
+		MiMFa <img alt="MiMFa aseqbase" height="25px" src="https://aseqbase.ir/.aseq/file/logo/full-logo.svg"/> (Gen1)
 	</a>
 	<br><sub><a href="http://aseqbase.ir" target="_blank">a seq</a>uence-<a href="http://aseqbase.ir" target="_blank">base</a>d web development framework</sub>
 </h1>
