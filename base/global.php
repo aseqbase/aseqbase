@@ -1,4 +1,12 @@
 <?php
+/**
+ * The Global Static Class
+ * It contains the most useful objects along developments
+ *@copyright All rights are reserved for MiMFa Development Group
+ *@author Mohammad Fathi
+ *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
+ *@link https://github.com/mimfa/aseqbase/wiki/Globals See the Documentation
+ */
 class _ {
 	/**
      * The top domain name
@@ -160,18 +168,18 @@ _::$TEMPLATE = new Template();
 \MiMFa\Library\Local::CreateDirectory(\_::$LOG_DIR);
 
 function ACCESS($access=0, bool $showPage = true):bool{
-	if(isValid(\_::$CONFIG->AccessMode)) {
-		$ip = GetClientIP();
+	if(isValid(\_::$CONFIG->StatusMode)) {
+		if($showPage) VIEW(\_::$CONFIG->StatusMode,$_GET)??VIEW(\_::$TEMPLATE->RestrictionViewName??"restriction",$_GET);
+		return false;
+	}
+	elseif(isValid(\_::$CONFIG->AccessMode)) {
+		$ip = getClientIP();
 		$cip = false;
 		foreach(\_::$CONFIG->AccessPatterns as $pat) if($cip = preg_match($pat, $ip)) break;
 		if((\_::$CONFIG->AccessMode > 0 && !$cip) || (\_::$CONFIG->AccessMode < 0 && $cip)){
-			if($showPage) VIEW(\_::$TEMPLATE->RestrictionViewName??"restriction",$_GET);
+			if($showPage) VIEW(\_::$TEMPLATE->RestrictionViewName??"restriction",$_GET)??VIEW("401",$_GET);
 			return false;
 		}
-	}
-	elseif(isValid(\_::$CONFIG->StatusMode)) {
-		if($showPage) VIEW(\_::$CONFIG->StatusMode,$_GET)??VIEW(\_::$TEMPLATE->RestrictionViewName??"restriction",$_GET);
-		return false;
 	}
 	return true ||
 		\_::$INFO->User->Access($access) ||
@@ -192,7 +200,7 @@ function GET($input = null){
 	return $input;
 }
 
-function INCLUDING(string|null $filePath, array $variables = array(), bool $print = true){
+function INCLUDING(string $filePath, array $variables = array(), bool $print = true){
 	global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT, $URL, $HOST, $PATH, $QUERY;
 	if(file_exists($filePath)){
 		//if(count($variables) > 0) $filePath = rtrim($filePath,"/")."?". http_build_query($variables);
@@ -205,7 +213,7 @@ function INCLUDING(string|null $filePath, array $variables = array(), bool $prin
 	}
 	return null;
 }
-function REQUIRING(string|null $filePath, array $variables = array(), bool $print = true){
+function REQUIRING(string $filePath, array $variables = array(), bool $print = true){
 	global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT, $URL, $HOST, $PATH, $QUERY;
 	if(file_exists($filePath)){
 		if(count($variables) > 0) extract($variables);
@@ -217,7 +225,7 @@ function REQUIRING(string|null $filePath, array $variables = array(), bool $prin
 	}
 	return null;
 }
-function USING(string|null $dir, string|null $name = null, array $variables = array(), bool $print = true, string|null $format = ".php"){
+function USING(string $dir, string|null $name = null, array $variables = array(), bool $print = true, string|null $format = ".php"){
 	if(empty($name))
 		if(isFormat($dir, $format)) return INCLUDING($dir, $variables, $print);
 		else return INCLUDING($dir.$format, $variables, $print);
@@ -225,7 +233,7 @@ function USING(string|null $dir, string|null $name = null, array $variables = ar
 	else return INCLUDING($dir.$name.$format, $variables, $print);
 }
 
-function forceUSING(string|null $nodeDir, string|null $baseDir, string|null $name, array $variables = array(), bool $print = true){
+function forceUSING(string $nodeDir, string $baseDir, string $name, array $variables = array(), bool $print = true){
 	if(($seq = USING($nodeDir,$name, $variables, $print)) !== null) return $seq;
 	if(count(\_::$SEQUENCES) > 0){
 		$dir = substr($nodeDir, strlen(\_::$DIR));
@@ -237,36 +245,106 @@ function forceUSING(string|null $nodeDir, string|null $baseDir, string|null $nam
 	return null;
 }
 
+/**
+ * To interprete, the specified path
+ * @param non-empty-string $name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
 function RUN(string|null $name, array $variables = array(), bool $print = true){
 	return forceUSING(\_::$DIR, \_::$BASE_DIR, $name, $variables, $print);
 }
-function MODEL(string|null $name, array $variables = array(), bool $print = true){
+/**
+ * To interprete, the specified ModelName
+ * @param non-empty-string $Name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function MODEL(string $name, array $variables = array(), bool $print = true){
 	return forceUSING(\_::$MODEL_DIR, \_::$BASE_MODEL_DIR, $name, $variables, $print);
 }
-function VIEW(string|null $name, array $variables = array(), bool $print = true){
+/**
+ * To interprete, the specified LibraryName
+ * @param non-empty-string $Name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function LIBRARY(string $Name, array $variables = array(), bool $print = true){
+	return forceUSING(\_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $Name, $variables, $print);
+}
+/**
+ * To interprete, the specified ComponentName
+ * @param non-empty-string $Name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function COMPONENT(string $Name, array $variables = array(), bool $print = true){
+	return forceUSING(\_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $Name, $variables, $print);
+}
+/**
+ * To interprete, the specified TemplateName
+ * @param non-empty-string $Name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function MODULE(string $Name, array $variables = array(), bool $print = true){
+	return forceUSING(\_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $Name, $variables, $print);
+}
+/**
+ * To interprete, the specified TemplateName
+ * @param non-empty-string $Name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function TEMPLATE(string $Name, array $variables = array(), bool $print = true){
+	return forceUSING(\_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $Name, $variables, $print);
+}
+/**
+ * To interprete, the specified viewname
+ * @param non-empty-lowercase-string $name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function VIEW(string $name, array $variables = array(), bool $print = true){
 	$output = forceUSING(\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, $variables, false);
 	if($print) return SET(ReduceSize($output));
 	else return $output;
 }
-function LIBRARY(string|null $name, array $variables = array(), bool $print = true){
-	return forceUSING(\_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $name, $variables, $print);
-}
-function COMPONENT(string|null $name, array $variables = array(), bool $print = true){
-	return forceUSING(\_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $name, $variables, $print);
-}
-function MODULE(string|null $name, array $variables = array(), bool $print = true){
-	return forceUSING(\_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $name, $variables, $print);
-}
-function TEMPLATE(string|null $name, array $variables = array(), bool $print = true){
-	return forceUSING(\_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $name, $variables, $print);
-}
-function PAGE(string|null $name, array $variables = array(), bool $print = true){
+/**
+ * To interprete, the specified pagename
+ * @param non-empty-lowercase-string $name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function PAGE(string $name, array $variables = array(), bool $print = true){
 	return forceUSING(\_::$PAGE_DIR, \_::$BASE_PAGE_DIR, $name, $variables, $print);
 }
-function REGION(string|null $name, array $variables = array(), bool $print = true){
+/**
+ * To interprete, the specified regionname
+ * @param non-empty-lowercase-string $name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function REGION(string $name, array $variables = array(), bool $print = true){
 	return forceUSING(\_::$REGION_DIR, \_::$BASE_REGION_DIR, $name, $variables, $print);
 }
-function PART(string|null $name, array $variables = array(), bool $print = true){
+/**
+ * To interprete, the specified partname
+ * @param non-empty-lowercase-string $name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function PART(string $name, array $variables = array(), bool $print = true){
 	return forceUSING(\_::$PART_DIR, \_::$BASE_PART_DIR, $name, $variables, $print);
 }
 
@@ -381,6 +459,12 @@ function getValue(string|null $source, string|null $key, bool $ismultiline = tru
 		}
 	}
 	return trim($res);
+}
+function getValid($obj, string|null $item = null, $defultValue = null){
+	if(isValid($obj,$item))
+        if($item === null) return $obj;
+		else return $obj[$item];
+    else $defultValue;
 }
 
 function isASEQ(string|null $directory):bool{

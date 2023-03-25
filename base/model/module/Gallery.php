@@ -1,26 +1,67 @@
-<?php namespace MiMFa\Module;
-class Gallery extends Module{
-	public $Class = "container";
-	public $Items = null;
-	public $DefaultImage = null;
-	public $DefaultName = null;
-	public $DefaultDescription = null;
+<?php
+namespace MiMFa\Module;
+MODULE("Collection");
+/**
+ * To show a gallery of images
+ *@copyright All rights are reserved for MiMFa Development Group
+ *@author Mohammad Fathi
+ *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
+ *@link https://github.com/mimfa/aseqbase/wiki/Modules See the Documentation
+ */
+class Gallery extends Collection{
+	/**
+     * The default Content HTML
+     * @var string|null
+     */
 	public $DefaultContent = null;
-	public $DefaultLink = null;
+	/**
+     * The default Path for more button reference
+     * @var string|null
+     */
 	public $DefaultPath = null;
-	public $MaximumColumns = 4;
+	/**
+     * The size of Blur effect
+     * @var string
+     */
 	public $BlurSize = "5px";
+	/**
+     * The label text of More button
+     * @var string|null
+     */
 	public $MoreButtonLabel = "View";
+
+	/**
+     * The Width of thumbnail preshow
+     * @var string
+     */
 	public $ThumbnailWidth = "100%";
+	/**
+     * The Height of thumbnail preshow
+     * @var string
+     */
 	public $ThumbnailHeight = "fit-content";
+	/**
+     * The Minimum Width of thumbnail preshow
+     * @var string
+     */
 	public $ThumbnailMinWidth = "100%";
+	/**
+     * The Minimum Height of thumbnail preshow
+     * @var string
+     */
 	public $ThumbnailMinHeight = "11vmax";
+    /**
+     * The Maximum Width of thumbnail preshow
+     * @var string
+     */
 	public $ThumbnailMaxWidth = "100%";
+	/**
+     * The Maximum Height of thumbnail preshow
+     * @var string
+     */
 	public $ThumbnailMaxHeight = "50vh";
 
-
 	public function EchoStyle(){
-		parent::EchoStyle();
 ?>
 		<style>
 			.<?php echo $this->Name; ?> {
@@ -115,35 +156,35 @@ class Gallery extends Module{
 		//echo "<div class='row'>";
 		foreach($this->Items as $item) {
 			if($i % $this->MaximumColumns === 0)  echo "<div class='row'>";
-			$p_icon = isValid($item,'Image')?$item['Image']:$this->DefaultImage;
-			$p_name = isValid($item,'Name')?$item['Name']:(isValid($item,'Title')?$item['Title']:$this->DefaultName);
-			$p_title = isValid($item,'Title')?$item['Title']:(isValid($item,'Name')?$item['Name']:$this->DefaultName);
-			$p_description = isValid($item,'Description')?$item['Description']:$this->DefaultDescription;
-			$p_details = (isValid($item,'Content')?$item['Content']:$this->DefaultContent)??$p_description;
-			$p_download = isValid($item,'Download')?$item['Download']:null;
-			$p_link = (isValid($item,'Link')?$item['Link']:$this->DefaultLink)??(isEmpty($this->MoreButtonLabel)?null:$p_download??$p_icon);
-			$p_path = (isValid($item,'Path')?$item['Path']:$this->DefaultPath)??$p_link;
-			$img->Source = $p_icon;
-			$clickact = "onclick=\"".$viewer->ShowScript("`$p_name`","$(`.".$this->Name.">*>.item-$i>.description>:last-child`).html()","`".($p_link??$p_path??$p_icon)."`","``", "`".getFullUrl($p_download??$p_path??$p_link??$p_icon)."`")."\"";
+			$p_image = getValid($item,'Image', $this->DefaultImage);
+			$p_name = getValid($item,'Name')??getValid($item,'Title', $this->DefaultTitle);
+			$p_title = getValid($item,'Title', $p_name);
+			$p_description = getValid($item,'Description', $this->DefaultDescription);
+			$p_details = getValid($item,'Content',$this->DefaultContent)??$p_description;
+			$p_download = getValid($item,'Download');
+			$p_link = getValid($item,'Link',$this->DefaultLink)??(isEmpty($this->MoreButtonLabel)?null:$p_download??$p_image);
+			$p_path = getValid($item,'Path', $this->DefaultPath)??$p_link;
+			$p_buttons = getValid($item,'ButtonsContent', $this->DefaultButtons);
+			$img->Source = $p_image;
+			$clickact = "onclick=\"".$viewer->ShowScript("`$p_title`","$(`.".$this->Name.">*>.item-$i>.description>:last-child`).html()","`".($p_link??$p_path??$p_image)."`","`$p_buttons`", "`".getFullUrl($p_download??$p_path??$p_link??$p_image)."`")."\"";
 			$img->Attributes = $clickact;
-?>
+			?>
 			<div class="item item-<?php echo $i; ?> col-md" data-aos="zoom-up" data-aos-offset="-500">
 				<?php $img->ReDraw(); ?>
 				<div class="description">
-					<h4><?php echo __($p_title,true,false); ?></h4>
+					<h4><?php echo __($p_name,true,false); ?></h4>
 					<p><?php echo __($p_description,true,false); ?></p>
 					<?php if(isValid($p_path)) {?><button class="btn btn-outline btn-block" <?php echo $clickact; ?>><?php echo __($this->MoreButtonLabel); ?></button><?php } ?>
-					<p class="hide"><?php echo __(($p_details??$p_description),true,false); ?></p>
+					<p class="hide"><?php echo __($p_details??$p_description,true,false); ?></p>
 				</div>
 			</div>
 			<?php 
-				if(++$i % $this->MaximumColumns === 0) echo "</div>";
-			}
-			if($i % $this->MaximumColumns !== 0) 
-				echo "</div>";
+			if(++$i % $this->MaximumColumns === 0) echo "</div>";
+		}
+
+		if($i % $this->MaximumColumns !== 0)  echo "</div>";
 			
 		$viewer->Draw();
 	}
-
 }
 ?>

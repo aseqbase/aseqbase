@@ -1,0 +1,65 @@
+{
+    "packages": [
+        {
+            "name": "coinremitterphp/coinremitter-php",
+            "version": "0.1.5",
+            "version_normalized": "0.1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/CoinRemitter/coinremitter-php.git",
+                "reference": "3723d4c1424a7b6bb1dcf2578e0f2dee17f0857c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/CoinRemitter/coinremitter-php/zipball/3723d4c1424a7b6bb1dcf2578e0f2dee17f0857c",
+                "reference": "3723d4c1424a7b6bb1dcf2578e0f2dee17f0857c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4 <=8.2"
+            },
+            "require-dev": {
+                "php": ">=5.4 <=7.4"
+            },
+            "time": "2023-01-27T10:03:00+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.1-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-0": {
+                    "CoinRemitter": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Coinremitter",
+                    "email": "coinremitter@outlook.com"
+                }
+            ],
+            "description": "Official PHP SDK for coinremitter cryptocurrency payment gateway",
+            "homepage": "https://coinremitter.com/",
+            "keywords": [
+                "api",
+                "coinremitter",
+                "cryptocurrency",
+                "payment gateway",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/CoinRemitter/coinremitter-php/issues",
+                "source": "https://github.com/CoinRemitter/coinremitter-php/tree/0.1.5"
+            },
+            "install-path": "../coinremitterphp/coinremitter-php"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}

@@ -1,0 +1,245 @@
+/*
+ MiMFa.net
+ Responsive Style
+ */
+.hide {
+  display: none !important; }
+
+.visible {
+  visibility: visible !important; }
+
+.invisible {
+  visibility: hidden !important; }
+
+.xxlg-invisible, .xxlg-range-invisible {
+  visibility: visible !important; }
+
+.xxlg-visible, .xxlg-range-visible {
+  visibility: hidden !important; }
+
+.xxlg-show, .xxlg-range-show, .xxlg-block, .xxlg-range-block {
+  display: none !important; }
+
+@media screen and (max-width: 99999px) {
+  .xxlg-visible {
+    visibility: visible !important; }
+    .xxlg-show {
+      display: inherit !important; }
+    .xxlg-block {
+      display: block !important; }
+    .xxlg-invisible {
+      visibility: hidden !important; }
+    .xxlg-hide {
+      display: none !important; } }
+
+@media screen and (min-width: 1201px) and (max-width: 99999px) {
+  .xxlg-range-visible {
+    visibility: visible !important; }
+    .xxlg-range-show {
+      display: inherit !important; }
+    .xxlg-range-block {
+      display: block !important; }
+    .xxlg-range-invisible {
+      visibility: hidden !important; }
+    .xxlg-range-hide {
+      display: none !important; } }
+
+.xlg-invisible, .xlg-range-invisible {
+  visibility: visible !important; }
+
+.xlg-visible, .xlg-range-visible {
+  visibility: hidden !important; }
+
+.xlg-show, .xlg-range-show, .xlg-block, .xlg-range-block {
+  display: none !important; }
+
+@media screen and (max-width: 1200px) {
+  .xlg-visible {
+    visibility: visible !important; }
+    .xlg-show {
+      display: inherit !important; }
+    .xlg-block {
+      display: block !important; }
+    .xlg-invisible {
+      visibility: hidden !important; }
+    .xlg-hide {
+      display: none !important; } }
+
+@media screen and (min-width: 993px) and (max-width: 1200px) {
+  .xlg-range-visible {
+    visibility: visible !important; }
+    .xlg-range-show {
+      display: inherit !important; }
+    .xlg-range-block {
+      display: block !important; }
+    .xlg-range-invisible {
+      visibility: hidden !important; }
+    .xlg-range-hide {
+      display: none !important; } }
+
+.lg-invisible, .lg-range-invisible {
+  visibility: visible !important; }
+
+.lg-visible, .lg-range-visible {
+  visibility: hidden !important; }
+
+.lg-show, .lg-range-show, .lg-block, .lg-range-block {
+  display: none !important; }
+
+@media screen and (max-width: 992px) {
+  .lg-visible {
+    visibility: visible !important; }
+    .lg-show {
+      display: inherit !important; }
+    .lg-block {
+      display: block !important; }
+    .lg-invisible {
+      visibility: hidden !important; }
+    .lg-hide {
+      display: none !important; } }
+
+@media screen and (min-width: 769px) and (max-width: 992px) {
+  .lg-range-visible {
+    visibility: visible !important; }
+    .lg-range-show {
+      display: inherit !important; }
+    .lg-range-block {
+      display: block !important; }
+    .lg-range-invisible {
+      visibility: hidden !important; }
+    .lg-range-hide {
+      display: none !important; } }
+
+.md-invisible, .md-range-invisible {
+  visibility: visible !important; }
+
+.md-visible, .md-range-visible {
+  visibility: hidden !important; }
+
+.md-show, .md-range-show, .md-block, .md-range-block {
+  display: none !important; }
+
+@media screen and (max-width: 768px) {
+  .md-visible {
+    visibility: visible !important; }
+    .md-show {
+      display: inherit !important; }
+    .md-block {
+      display: block !important; }
+    .md-invisible {
+      visibility: hidden !important; }
+    .md-hide {
+      display: none !important; } }
+
+@media screen and (min-width: 577px) and (max-width: 768px) {
+  .md-range-visible {
+    visibility: visible !important; }
+    .md-range-show {
+      display: inherit !important; }
+    .md-range-block {
+      display: block !important; }
+    .md-range-invisible {
+      visibility: hidden !important; }
+    .md-range-hide {
+      display: none !important; } }
+
+.xxsm-invisible, .xxsm-range-invisible {
+  visibility: visible !important; }
+
+.xxsm-visible, .xxsm-range-visible {
+  visibility: hidden !important; }
+
+.xxsm-show, .xxsm-range-show, .xxsm-block, .xxsm-range-block {
+  display: none !important; }
+
+@media screen and (max-width: 360px) {
+  .xxsm-visible {
+    visibility: visible !important; }
+    .xxsm-show {
+      display: inherit !important; }
+    .xxsm-block {
+      display: block !important; }
+    .xxsm-invisible {
+      visibility: hidden !important; }
+    .xxsm-hide {
+      display: none !important; } }
+
+@media screen and (min-width: 10px) and (max-width: 360px) {
+  .xxsm-range-visible {
+    visibility: visible !important; }
+    .xxsm-range-show {
+      display: inherit !important; }
+    .xxsm-range-block {
+      display: block !important; }
+    .xxsm-range-invisible {
+      visibility: hidden !important; }
+    .xxsm-range-hide {
+      display: none !important; } }
+
+.xsm-invisible, .xsm-range-invisible {
+  visibility: visible !important; }
+
+.xsm-visible, .xsm-range-visible {
+  visibility: hidden !important; }
+
+.xsm-show, .xsm-range-show, .xsm-block, .xsm-range-block {
+  display: none !important; }
+
+@media screen and (max-width: 480px) {
+  .xsm-visible {
+    visibility: visible !important; }
+    .xsm-show {
+      display: inherit !important; }
+    .xsm-block {
+      display: block !important; }
+    .xsm-invisible {
+      visibility: hidden !important; }
+    .xsm-hide {
+      display: none !important; } }
+
+@media screen and (min-width: 361px) and (max-width: 480px) {
+  .xsm-range-visible {
+    visibility: visible !important; }
+    .xsm-range-show {
+      display: inherit !important; }
+    .xsm-range-block {
+      display: block !important; }
+    .xsm-range-invisible {
+      visibility: hidden !important; }
+    .xsm-range-hide {
+      display: none !important; } }
+
+.sm-invisible, .sm-range-invisible {
+  visibility: visible !important; }
+
+.sm-visible, .sm-range-visible {
+  visibility: hidden !important; }
+
+.sm-show, .sm-range-show, .sm-block, .sm-range-block {
+  display: none !important; }
+
+@media screen and (max-width: 576px) {
+  .sm-visible {
+    visibility: visible !important; }
+    .sm-show {
+      display: inherit !important; }
+    .sm-block {
+      display: block !important; }
+    .sm-invisible {
+      visibility: hidden !important; }
+    .sm-hide {
+      display: none !important; } }
+
+@media screen and (min-width: 481px) and (max-width: 576px) {
+  .sm-range-visible {
+    visibility: visible !important; }
+    .sm-range-show {
+      display: inherit !important; }
+    .sm-range-block {
+      display: block !important; }
+    .sm-range-invisible {
+      visibility: hidden !important; }
+    .sm-range-visible {
+      visibility: visible !important; }
+    .sm-range-hide {
+      display: none !important; } }
