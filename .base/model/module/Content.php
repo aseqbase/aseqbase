@@ -36,9 +36,6 @@ class Content extends Module{
 				opacity:0;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
 			}
-			.<?php echo $this->Name; ?>>.page>div.frame{
-				padding: var(--Size-0) var(--Size-3);
-			}
 		</style>
 		<?php
 	}

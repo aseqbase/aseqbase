@@ -1,4 +1,7 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+LIBRARY("Style");
+use MiMFa\Library\Style;
 /**
  * One or some related classes, that contain one or more routines. aseqbase contains several different modules, and each module serves unique and separate important operations.
  * Module tends to refer to larger bundles. There's often a set of interfaces and the module tends to be able to stand on its own.
@@ -30,8 +33,6 @@
  *@example Image.php
  */
 class Module extends \Base{
-
-
 	/**
      * The custom classes for the module
      * @var enum-string
@@ -105,6 +106,11 @@ class Module extends \Base{
      * @var bool
      */
 	public $AllowDefaultStyles = true;
+	/**
+     * The Module Style
+     * @var Style
+     */
+	public null|Style $Style = null;
 	/**
      * To custom Styles
      * @var string
@@ -258,6 +264,10 @@ class Module extends \Base{
 		\_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
 		$this->PreDraw();
 		if($this->AllowDefaultStyles) $this->EchoStyle();
+		if(isValid($this->Style)){
+			$st = $this->Style->Get();
+			if(isValid($st)) echo "<style>.".$this->Name."{ $st }</style>";
+        }
 		if(isValid($this->Styles)) echo $this->Styles;
 		$this->EchoOpenTag();
 		$this->Echo();

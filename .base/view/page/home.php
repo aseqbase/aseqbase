@@ -1,6 +1,6 @@
 <style>
 	.page-home {
-		padding: var(--Size-2) var(--Size-2) var(--Size-5);
+		padding: 0px;
 	}
 </style>
 

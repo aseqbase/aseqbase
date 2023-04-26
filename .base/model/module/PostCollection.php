@@ -183,21 +183,21 @@ class PostCollection extends Collection{
 		<style>
 			.<?php echo $this->Name; ?>>*>.item {
 				height: fit-content;
-				background-Color: var(--BackColor-0);
+				background-Color: var(--BackColor-1);
 				color: var(--ForeColor-0);
 				margin: var(--Size-2);
             	padding: var(--Size-3);
-				font-size:  var(--Size-0);
-				box-shadow:  var(--Shadow-1);
-				border-radius:  var(--Radius-1);
-            	border:  var(--Border-1) var(--BackColor-4);
+				font-size: var(--Size-0);
+				box-shadow: var(--Shadow-1);
+				border-radius: var(--Radius-2);
+            	border: var(--Border-1) var(--BackColor-5);
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
 			}
 			.<?php echo $this->Name; ?>>*>.item:hover{
 				box-shadow: var(--Shadow-2);
-				border-radius:  var(--Radius-2);
-				border-color: var(--BackColor-5);
-				background-Color: var(--BackColor-1);
+				border-radius:  var(--Radius-1);
+				border-color: var(--BackColor-4);
+				background-Color: var(--BackColor-0);
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
 			}
 

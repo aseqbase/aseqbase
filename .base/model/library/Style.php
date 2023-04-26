@@ -7,13 +7,79 @@
  *@link https://github.com/mimfa/aseqbase/wiki/Libraries#style See the Library Documentation
 */
 class Style{
+	public null|string $Background = null;
+	public null|string $BackColor = null;
+	public null|string $BackImage = null;
+	public null|string $BackSize = null;
+	public null|string $BackRepeat = null;
+	public null|string $BackPosition = null;
+	public null|string $BackAttachment = null;
+	public null|string $BackClip = null;
+	public null|string $BackFilter = null;
+	public null|string $Content = null;
+	public null|string $Color = null;
+	public null|string $Opacity = null;
+	public null|string $Font = null;
+	public null|string $FontFamily = null;
+	public null|string $FontSize = null;
+	public null|string $FontWeight = null;
+	public null|string $Height = null;
+	public null|string $Width = null;
+	public null|string $Margin = null;
+	public null|string $Padding = null;
+	public null|string $TextAlign = null;
+	public null|string $Display = null;
+	public null|string $Position = null;
+	public null|string $Overflow = null;
+	public null|string $Border = null;
+	public null|string $BorderRadius = null;
+	public null|string $BoxShadow = null;
+	public null|string $TextShadow = null;
+	public null|string $Filter = null;
+	
+	public function IsValid(){
+		return !isempty($this->Get());
+    }
+	public function Get(){
+		return 
+			self::DoProperty("content",$this->Content).
+			self::DoProperty("color",$this->Color).
+			self::DoProperty("background",$this->Background).
+			self::DoProperty("background-color",$this->BackColor).
+			self::DoProperty("background-image",$this->BackImage).
+			self::DoProperty("background-size",$this->BackSize).
+			self::DoProperty("background-repeat",$this->BackRepeat).
+			self::DoProperty("background-attachment",$this->BackAttachment).
+			self::DoProperty("background-position",$this->BackPosition).
+			self::DoProperty("background-clip",$this->BackClip).
+			self::DoProperty("backdrop-filter",$this->BackFilter,false,true).
+			self::DoProperty("opacity",$this->Opacity).
+			self::DoProperty("font",$this->Font).
+			self::DoProperty("font-family",$this->FontFamily).
+			self::DoProperty("font-size",$this->FontSize).
+			self::DoProperty("font-weight",$this->FontWeight).
+			self::DoProperty("height",$this->Height).
+			self::DoProperty("width",$this->Width).
+			self::DoProperty("margin",$this->Margin).
+			self::DoProperty("padding",$this->Padding).
+			self::DoProperty("text-align",$this->TextAlign).
+			self::DoProperty("display",$this->Display).
+			self::DoProperty("position",$this->Position).
+			self::DoProperty("overflow",$this->Overflow).
+			self::DoProperty("border",$this->Border).
+			self::DoProperty("border-radius",$this->BorderRadius).
+			self::DoProperty("box-shadow",$this->BoxShadow).
+			self::DoProperty("text-shadow",$this->TextShadow).
+			self::DoProperty("filter",$this->Filter,false,true);
+	}
+
 	public static function UniversalProperty($prop,$val){
 		return
-		"-webkit-".$prop.": ".$val.";
-		-moz-".$prop.": ".$val.";
-		-ms-".$prop.": ".$val.";
-		-o-".$prop.": ".$val.";
-		".$prop.": ".$val.";";
+		"-webkit-$prop: $val;
+		-moz-$prop: $val;
+		-ms-$prop: $val;
+		-o-$prop: $val;
+		$prop: $val;";
 	}
 	public static function UniversalValue(){
 		$prop = func_get_arg(0);
@@ -56,6 +122,17 @@ class Style{
 		return $res.";";
 	}
 
+	public static function DoProperty($prop,$val,$isUniversalProperty=false,$isUniversalValue=false){
+		return is_null($val)?null:
+			(
+				$isUniversalProperty?self::UniversalProperty($prop,$val):
+				(
+					$isUniversalValue?self::UniversalValue($prop,$val):
+					"$prop: $val;"
+				)
+			);
+	}
+
 	/**
 	 * Specify the keywords in the tag content automatically
 	 * @param string|null $text
@@ -67,8 +144,8 @@ class Style{
 	public static function DoStrong($text, $keyWords=null, $caseSensitive = false, $multiline = true){
 		if($text === null) return $text;
 		if($keyWords === null) $keyWords = \_::$INFO->KeyWords;
-        $start = "/(?<!\\\§)";
-        $end = "(?!§\\\>)/".($caseSensitive?"":"i").($multiline?"m":"");
+        $start = "/\b(?<!\\\§)";
+        $end = "(?!§\\\>)\b/".($caseSensitive?"":"i").($multiline?"m":"");
         $length = count($keyWords);
 		$keywordPatterns = array();
         for ($i = 0; $i < $length; $i++)
@@ -92,6 +169,5 @@ class Style{
 													drop-shadow(0 0 0 $color)
 ");
 	}
-
 }
 ?>

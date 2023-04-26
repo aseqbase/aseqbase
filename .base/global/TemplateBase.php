@@ -36,8 +36,8 @@ abstract class TemplateBase extends Base{
 	public $BorderPalette = array("0px","1px solid","2px solid","5px solid","10px solid","25px solid");
 	public $RadiusPalette = array("0px","3px","5px","25%","50%","100%");
 	public $TransitionPalette = array("none","all .25s linear","all .5s linear","all .75s linear","all 1s linear","all 1.5s linear");
-	public $OverlayPalette = array("/file/overlay/glass.png","/file/overlay/cloud.png","/file/overlay/tile.png");
-	public $PatternPalette = array("/file/pattern/main.svg","/file/pattern/doddle.png","/file/pattern/doddle-color.png","/file/pattern/moon.png","/file/pattern/moon-color.png");
+	public $OverlayPalette = array("/file/overlay/glass.png","/file/overlay/cotton.png","/file/overlay/cloud.png","/file/overlay/wings.svg","/file/overlay/sands.png","/file/overlay/dirty.png");
+	public $PatternPalette = array("/file/pattern/main.svg","/file/pattern/doddle.png","/file/pattern/doddle-fantasy.png","/file/pattern/triangle.png","/file/pattern/slicksline.png","/file/pattern/doddle-mess.png");
 
 	public function Color(int $ind = 0) { $ind %= count($this->ColorPalette); return $this->ColorPalette[$ind];}
 	public function ForeColor(int $ind = 0) { $ind %= count($this->ForeColorPalette); return $this->ForeColorPalette[$ind];}
@@ -240,13 +240,13 @@ abstract class TemplateBase extends Base{
 				--Url-Overlay-2: URL(\"".$this->Overlay(2)."\");
 				--Url-Overlay-3: URL(\"".$this->Overlay(3)."\");
 				--Url-Overlay-4: URL(\"".$this->Overlay(4)."\");
-				--Url-Overlay-5: URL(\"".$this->Overlay(4)."\");
+				--Url-Overlay-5: URL(\"".$this->Overlay(5)."\");
 				--Url-Pattern-0: URL(\"".$this->Pattern(0)."\");
 				--Url-Pattern-1: URL(\"".$this->Pattern(1)."\");
 				--Url-Pattern-2: URL(\"".$this->Pattern(2)."\");
 				--Url-Pattern-3: URL(\"".$this->Pattern(3)."\");
 				--Url-Pattern-4: URL(\"".$this->Pattern(4)."\");
-				--Url-Pattern-5: URL(\"".$this->Pattern(4)."\");
+				--Url-Pattern-5: URL(\"".$this->Pattern(5)."\");
 
 				--Owner: \"".__(\_::$INFO->Owner,true,false)."\";
 				--FullOwner: \"".__(\_::$INFO->FullOwner,true,false)."\";
