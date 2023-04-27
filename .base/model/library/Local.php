@@ -86,9 +86,9 @@ class Local{
 	public static function DirectoryExists($path):bool{
 		return is_dir($path);
 	}
-	public static function CreateDirectory($destPath):string|null{
+	public static function CreateDirectory($destPath){
 		$dirs = explode("/",trim($destPath,"/"));
-		$dir = rtrim(\_::$PUBLIC_DIR);
+		$dir = "";
 		foreach($dirs as $d){
 			$dir .= "/".$d;
 			if(!file_exists($dir)){
@@ -99,7 +99,7 @@ class Local{
 		return $dir."/";
 	}
 	public static function DeleteDirectory($destPath){
-		$dir = \_::$PUBLIC_DIR.trim($destPath,"/");
+		$dir = trim($destPath,"/");
 		return unlink($dir);
 	}
 	public static function MoveDirectory($source_dir, $dest_dir, $recursive = true){
@@ -190,7 +190,7 @@ class Local{
 		return $b;
     }
 
-	public static function ReadText($path):string|null{
+	public static function ReadText($path){
 		return file_get_contents($path);
 	}
 	public static function WriteText($path, string|null $text){
@@ -208,9 +208,9 @@ class Local{
 	public static function GetFileObject($inputName){
 		return $_FILES[$inputName];
 	}
-	public static function UploadFile($fileobject, $destdir, $minSize=10000, $maxSize=5000000, $extensions=[]){
+	public static function UploadFile($fileobject, $destdir=null, $minSize=10000, $maxSize=5000000, $extensions=[]){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
-
+		if(is_string($fileobject)) $destdir = \_::$PUBLIC_DIR;
 		$obj = new \stdClass();
 		$obj->status = false;
 		$obj->result = null;

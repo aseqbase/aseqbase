@@ -60,8 +60,10 @@ class Route extends Module{
 		if(count($this->Items)<1 && isValid($this->Path)){
             $host = "";
             $paths = preg_split("/(?<=[^\\/\\\])\\//i",$this->Path);
-			foreach ($paths as $value)
-                $this->Items[trim($value,"/\\")] = $host.= $value."/";
+			$host = $paths[0];
+			$this->Items[trim($host,"/\\")] = $host;
+			foreach (array_slice($paths,1) as $value)
+                $this->Items[trim($value,"/\\")] = $host.= "/".$value;
         }
 		if(count($this->Items) > 0){
 			$route = "<a href='".array_values($this->Items)[0]."'>".__($this->RootLabel??array_keys($this->Items)[0],true,false)."</a>";
