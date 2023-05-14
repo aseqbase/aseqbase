@@ -8,10 +8,10 @@
     
     $module->Style->TextAlign = "justify";
     $module->Style->Padding = "calc(2*var(--Size-5))";
-    $module->Style->BackColor =
-    $separator->Style->BackColor = "var(--Color-5)";
-    $module->Style->ForeColor =
-    $separator->Style->ForeColor = "#fffe";
+    $module->Style->BackgroundColor =
+    $separator->Style->BackgroundColor = "var(--Color-5)";
+    $module->Style->Color =
+    $separator->Style->Color = "#fffe";
     $separator->Style->BorderRadius = "0px 0px 100% 100%";
     $separator->MergeTop = true;
     $separator->MergeBottom = true;
@@ -23,8 +23,8 @@
 
     $module->Set_Defaults();
     $separator->Set_Defaults();
-    $module->Style->BackColor =
-    $separator->Style->BackColor = "var(--Color-4)";
+    $module->Style->BackgroundColor =
+    $separator->Style->BackgroundColor = "var(--Color-4)";
     $separator->MergeBottom = false;
     $module->Title = "Who We Are?";
     $module->Image = null;

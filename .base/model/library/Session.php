@@ -14,7 +14,7 @@ class Session
 	public static $Time = 86400;
 
 	public static function Start(){
-        session_start();
+        if(session_id() == "") session_start();
 		if(is_null(self::GetID())){
             self::Set("IP",getClientIP());
 			return true;
@@ -87,6 +87,7 @@ class Session
 	}
 
 	public static function SetCookie($key,$val){
+		if($val == null) return false;
 		return setcookie(self::FromKey($key),self::FromValue($val), time() + self::$Time,"/");
 	}
 	public static function GetCookie($key){
@@ -143,11 +144,11 @@ class Session
 
 
 	protected static function FromKey($key){
-		if(\_::$CONFIG->EncryptSessionKey) return self::GetID()."-".self::Encrypt($key);
+		if(\_::$CONFIG->EncryptSessionKey && !\_::$CONFIG->ClientSession) return self::GetID()."-".self::Encrypt($key);
 		else return self::GetID()."-$key";
     }
 	protected static function ToKey($key){
-		if(\_::$CONFIG->EncryptSessionKey) return substr(self::Decrypt($key),65);
+		if(\_::$CONFIG->EncryptSessionKey && !\_::$CONFIG->ClientSession) return substr(self::Decrypt($key),65);
 		else return substr($key,65);
     }
 	protected static function FromValue($value){

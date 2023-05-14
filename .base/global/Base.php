@@ -53,6 +53,36 @@ class Base{
 		$v = $this->Get_Namespaces();
 		return end($v);
 	}
+	
+	/**
+	 * Echo all the HTML document and elements of the Object
+	 */
+	public function Echo(){
+		echo $this->Name;
+    }
 
+	/**
+     * Echo whole the Document contains Elements, Styles, Scripts, etc. completely, as a new Object.
+     */
+	public function NewDraw(){
+		$this->Set_Defaults();
+		$this->Draw();
+    }
+	/**
+     * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
+     */
+	public function Draw(){
+		$this->PreDraw();
+		$this->Echo();
+		$this->PostDraw();
+    }
+	/**
+     * Echo in the Draw function before everything.
+     */
+	public function PreDraw(){ }
+	/**
+     * Echo in the Draw function after everything.
+     */
+	public function PostDraw(){ }
 }
 ?>

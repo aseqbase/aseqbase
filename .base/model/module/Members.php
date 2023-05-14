@@ -1,6 +1,5 @@
 <?php namespace MiMFa\Module;
 class Members extends Module{
-	public $Name = "Members";
 	public $Items = null;
 	public $DefaultIcon = null;
 	public $DefaultName = null;
@@ -11,8 +10,8 @@ class Members extends Module{
 
 	public function EchoStyle(){
 		parent::EchoStyle();
-?>
-<style>
+		?>
+		<style>
 			.<?php echo $this->Name; ?> .teammember{
 				background-color: <?php echo \_::$TEMPLATE->BackColor(0) ?>99 var(--Url-Overlay-0); no-repeat center;
 				background-size: 100% auto;

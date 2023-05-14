@@ -66,6 +66,20 @@
    min-height: 80%;
 }
 
+.result {
+	padding: 5px 10px;
+	margin: 5px;
+}
+.success {
+	color: #00ff21;
+}
+.error {
+	color: #ff0000;
+}
+.warning {
+	color: #dd6a00;
+}
+
 .blackwhite{
 	-webkit-filter: brightness(100) grayscale(100) contrast(0.8);
 	-moz-filter: brightness(100) grayscale(100) contrast(0.8);

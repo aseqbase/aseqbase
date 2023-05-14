@@ -13,7 +13,7 @@ class Local{
      * @return mixed
      */
 	public static function GetFullUrl($path){
-		return self::CatchOptimizeUrl(self::GetUrl($path));
+		return self::OptimizeUrl(self::GetUrl($path));
     }
     /**
      * Get or Find a file, then get the external url
@@ -22,19 +22,15 @@ class Local{
      */
 	public static function GetUrl($path){
 		if(!isValid($path) || isAbsoluteUrl($path)) return $path;
-		if(startsWith($path, "/")){
-			$p = ltrim(GetDirection($path), "/\\");
-			if(file_exists(\_::$DIR.$p)) return \_::$ROOT.$p;
-			if(count(\_::$SEQUENCES) > 0){
-				foreach(\_::$SEQUENCES as $dir=>$root)
-					if(file_exists($dir.$p))
-						return $root.$p;
-			}
-			if(file_exists(\_::$BASE_DIR.$p)) return \_::$BASE_ROOT.$p;
-		} else {
-			$p = rtrim(\_::$PATH, "/\\")."/".$path;
-			if(file_exists(realpath($p))) return $p;
+		if(!startsWith($path, "/")) $path = \_::$DIRECTION."/".$path;
+		$p = ltrim(getRelative($path), "/\\");
+		if(file_exists(\_::$DIR.$p)) return \_::$ROOT.$p;
+		if(count(\_::$SEQUENCES) > 0){
+			foreach(\_::$SEQUENCES as $dir=>$root)
+				if(file_exists($dir.$p))
+					return $root.$p;
 		}
+		if(file_exists(\_::$BASE_DIR.$p)) return \_::$BASE_ROOT.$p;
 		return $path;
 	}
 	/**
@@ -43,23 +39,23 @@ class Local{
 	 * @return mixed
 	 */
 	public static function GetPath($path){
-		if(!isValid($path) || IsAbsoluteUrl($path)) return $path;
-		$p = ltrim(GetDirection($path), "/\\");
-		if(file_exists(\_::$DIR.$p)) return \_::$DIR.$p;
+		if(!isValid($path) || IsAbsoluteUrl($path)) return realpath($path);
+		$p = ltrim(getRelative($path), "/\\");
+		if(file_exists(\_::$DIR.$p)) return realpath(\_::$DIR.$p);
 		if(count(\_::$SEQUENCES) > 0){
 			foreach(\_::$SEQUENCES as $dir=>$root)
 				if(file_exists($dir.$p))
-					return $root.$p;
+					return realpath($root.$p);
 		}
-		if(file_exists(\_::$BASE_DIR.$p)) return \_::$BASE_DIR.$p;
-		return $path;
+		if(file_exists(\_::$BASE_DIR.$p)) return realpath(\_::$BASE_DIR.$p);
+		return realpath($path);
 	}
     /**
      * Get the external url pointed to catch status
      * @param mixed $path The external url or path
      * @return mixed
      */
-	public static function CatchOptimizeUrl($path){
+	public static function OptimizeUrl($path){
 		if(\_::$CONFIG->AllowCache) return $path;
 		if(strpos($path,"?")>0) $path .= "&";
 		else $path .= "?";
@@ -75,7 +71,7 @@ class Local{
 	public static function GetDirectory($path){
 		if(is_dir($path)) return $path;
 		if(is_dir(\_::$DIR.$path)) return \_::$DIR.$path;
-		$path = ltrim(GetDirection($path), "/\/");
+		$path = ltrim(getRelative($path), "/\/");
 		if(count(\_::$SEQUENCES) > 0){
 			foreach(\_::$SEQUENCES as $aseq)
 				if(is_dir($aseq.$path)) return $aseq.$path;
@@ -135,7 +131,7 @@ class Local{
 	public static function GetFile($path){
 		if(file_exists($path)) return $path;
 		if(file_exists(\_::$DIR.$path)) return \_::$DIR.$path;
-		$path = ltrim(GetDirection($path), "/\/");
+		$path = ltrim(getRelative($path), "/\/");
 		if(count(\_::$SEQUENCES) > 0){
 			foreach(\_::$SEQUENCES as $aseq)
 				if(file_exists($aseq.$path)) return $aseq.$path;

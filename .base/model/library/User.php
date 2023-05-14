@@ -4,12 +4,25 @@ require_once "Session.php";
 require_once "DataBase.php";
 class User extends \Base{
 	public static $HandlerPath = "/sign";
+	public static $SignHandlerPath = "/sign/sign";
+	public static $UpHandlerPath = "/sign/up";
+	public static $InHandlerPath = "/sign/in";
+	public static $OutHandlerPath = "/sign/out";
+	public static $RememberHandlerPath = "/sign/remember";
+	public static $ProfileHandlerPath = "/sign/profile";
+	public static $ResetHandlerPath = "/sign/reset";
+	public static $ActiveHandlerPath = "/sign/active";
+
 	public static $ResetPasswordRequestKey = "resetpassword";
-	public static $ActivationRequestKey = "active";
+	public static $ActiveRequestKey = "active";
+
 	protected $ID = null;
 	protected $GroupID = null;
-	protected $Access = null;
+	protected $Access = 0;
 	protected $Accesses = array();
+	
+	public $TemporaryName = null;
+	public $TemporaryEmail = null;
 
 	public $Image = null;
 	public $Name = null;
@@ -29,11 +42,11 @@ class User extends \Base{
 	}
 	public function LoadAccess(){
 		$this->ID = Session::GetSecure("ID");
-		$this->GroupID =Session::GetSecure("GroupID");
-		$this->Access =Session::GetSecure("Access");
+		$this->GroupID = Session::GetSecure("GroupID");
+		$this->Access = Session::GetSecure("Access")??\_::$CONFIG->GuestAccess;
 		$this->Image = Session::Get("Image");
-		$this->Name = Session::Get("Name");
-		$this->Email =Session::Get("Email");
+		$this->Name = $this->TemporaryName = Session::Get("Name");
+		$this->Email = $this->TemporaryEmail = Session::Get("Email");
 		return !is_null($this->ID);
 	}
 	public function LoadProfile(){
@@ -42,39 +55,59 @@ class User extends \Base{
 
 	public function Access($task=null){
 		if(is_null($task)) return $this->Access??\_::$CONFIG->GuestAccess;
-		if(is_string($task)) in_array($task,$this->Accesses);
-		else return $task >= $this->Access;
+		if(is_integer($task)) return $this->Access >= $task;
+		return in_array($task, $this->Accesses);
 	}
 
 
-	public function SignUp($signature, $email, $password){
-		return DataBase::DoInsert(\_::$CONFIG->DataBasePrefix."User",null, [":Signature"=>$signature, ":Email"=>$email, ":GroupID"=>\_::$CONFIG->RegisteredGroup, ":Password"=> $password]);
+	public function SignUp($email, $password, $signature = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){
+		$password = sha1($password);
+		return DataBase::DoInsert(\_::$CONFIG->DataBasePrefix."User",null, 
+			[
+				":Signature"=>$signature??$email,
+				":Email"=>$this->TemporaryEmail = $email,
+				":Password"=> $password,
+				":Name"=> $this->TemporaryName = $name?? trim($firstName." ".$lastName),
+				":FirstName"=> $firstName,
+				":LastName"=> $lastName,
+				":Contact"=> $phone,
+				":GroupID"=> $groupID??\_::$CONFIG->RegisteredGroup,
+				":Status"=> $status
+			]);
 	}
 
 	public function SignIn($signature, $password){
-		$person = getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","ID, GroupID, Image, Name, Email","`Signature`=:Signature AND `Password`=:Password",[":Signature"=>$signature,":Password"=> $password]),0);
-		if(is_null($person)) throw new \ErrorException("Unfortunetely the username address is incorrect!");
+		$password = sha1($password);
+		$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
+					"`ID`, `GroupID`, `Image`, `Name`, `Email`",
+					"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
+					[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature,":Password"=> $password]
+				);
+		if(is_null($person)) throw new \ErrorException("There a problem is occured!");
+		if(count($person) < 1) throw new \ErrorException("The username or password is incorrect!");
+		$person = $person[0];
 		Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
 		Session::SetSecure("GroupID",$this->GroupID = getValid($person,"GroupID"));
 		Session::Set("Image",$this->Image = getValid($person,"Image"));
-		Session::Set("Name",$this->Name = getValid($person,"Name"));
-		Session::Set("Email",$this->Email = getValid($person,"Email"));
-		Session::Set("Access",$this->Access = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID` = ".$this->GroupID));
+		Session::Set("Name",$this->Name = $this->TemporaryName = getValid($person,"Name"));
+		Session::Set("Email",$this->Email = $this->TemporaryEmail = getValid($person,"Email"));
+		Session::SetSecure("Access",$this->Access = DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID`=".$this->GroupID));
 		return true;
 	}
 
-	public function SignInOrSignUp($signature, $email, $password){
-		return $this->SignIn($signature, $password)??$this->SignUp($signature, $email, $password);
+	public function SignInOrSignUp($email, $password, $signature){
+		return $this->SignIn($signature??$email, $password)??
+			$this->SignUp($email, $password, $signature);
 	}
 
 	public function SignOut(){
 		Session::FlushSecure();
 		Session::Flush();
-		return true;
+		return Session::Has("ID");
 	}
 
 	public function ManageRequests(){
-		if(isValid($_REQUEST,$this->ActivationRequestKey)) return $this->ReceiveActivationLink();
+		if(isValid($_REQUEST,$this->ActiveRequestKey)) return $this->ReceiveActivationLink();
 		if(isValid($_REQUEST,$this->ResetPasswordRequestKey)) return $this->ReceiveResetPasswordLink();
     }
 
@@ -91,15 +124,15 @@ class User extends \Base{
      * $IMAGE: for the user image path
      * @return bool
      */
-	public function SendActivationEmail($emailFrom, $emailTo, $subject='Activation Request', $content='$HYPERLINK',$linkAnchor ="Click to Activate Your Account"){
-		return $this->SendEmail($emailFrom, $emailTo, $subject, $content,$linkAnchor , $this->ActivationRequestKey);
+	public function SendActivationEmail($emailFrom=null, $emailTo=null, $subject='Activation Request', $content='$HYPERLINK',$linkAnchor ="Click to Activate Your Account"){
+		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject, $content,$linkAnchor , $this->ActiveRequestKey);
 	}
 	/**
      * Receive the Activation Link and return the user Signature
      * @return bool|string return the user Signature or false otherwise
      */
 	public function ReceiveActivationLink(){
-		return $this->ReceiveLink($this->ActivationRequestKey);
+		return $this->ReceiveLink($this->ActiveRequestKey);
     }
 
 	/**
@@ -115,8 +148,8 @@ class User extends \Base{
      * $IMAGE: for the user image path
 	 * @return bool
 	 */
-	public function SendResetPasswordEmail($emailFrom, $emailTo, $subject='Reset Password Request', $content='$HYPERLINK', $linkAnchor = "Click to Reset the Password"){
-		return $this->SendEmail($emailFrom, $emailTo, $subject, $content,$linkAnchor , $this->ResetPasswordRequestKey);
+	public function SendResetPasswordEmail($emailFrom = null, $emailTo = null, $subject='Reset Password Request', $content='$HYPERLINK', $linkAnchor = "Click to Reset the Password"){
+		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject, $content,$linkAnchor , $this->ResetPasswordRequestKey);
 	}
 	/**
 	 * Receive the Reset Password Link and return the user Signature

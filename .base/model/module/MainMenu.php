@@ -1,14 +1,31 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+MODULE("SearchForm");
+MODULE("UserMenu");
 class MainMenu extends Module{
 	public $Class = "row";
 	public $Image = null;
 	public $Items = null;
 	public $Shortcuts = null;
+	public SearchForm|null $SearchForm = null;
+	public UserMenu|null $UserMenu = null;
+	public $HasBranding = true;
+	public $HasItems = true;
+	public $HasOthers = true;
 	public $AllowFixed = false;
 	public $HideItemsScreenSize = 'md';
 	public $ShowItemsScreenSize = null;
+	public $HideOthersScreenSize = 'md';
+	public $ShowOthersScreenSize = null;
+
+	public function __construct(){
+        parent::__construct();
+		$this->SearchForm = new SearchForm();
+		$this->UserMenu = new UserMenu();
+    }
 
 	public function EchoStyle(){
+		$rtl = \MiMFa\Library\Translate::$Direction == "RTL";
 		parent::EchoStyle();
 		?>
 		<style>
@@ -23,7 +40,7 @@ class MainMenu extends Module{
 				top:0;
 				left:0;
 				right:0;
-				z-index:999999999;
+				z-index: 999;
 				<?php }?>
 				box-shadow: var(--Shadow-2);
 			}
@@ -33,7 +50,7 @@ class MainMenu extends Module{
 				background: transparent;
 				<?php }?>
 			}
-
+			
 			.<?php echo $this->Name; ?> .header{
 				margin: 0px 10px;
 			}
@@ -70,6 +87,10 @@ class MainMenu extends Module{
 				padding: 0;
 				overflow: hidden;
 				display: inline-block;
+				<?php if($this->SearchForm != $this->UserForm): ?>
+				min-width: fit-content;
+				max-width: 70% !important;
+				<?php endif; ?>
 			}
 			.<?php echo $this->Name; ?> ul.Items>li {
 				display: inline-block;
@@ -107,7 +128,7 @@ class MainMenu extends Module{
 				background-color: var(--BackColor-1);
 				min-width: 160px;
 				max-width: 90vw;
-				max-heigth: 70vh;
+				max-height: 70vh;
 				padding: 0px;
 				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 				z-index: 1;
@@ -151,12 +172,75 @@ class MainMenu extends Module{
 				display: contents;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)); ?>;
 			}
+			
+
+			.<?php echo $this->Name; ?> .other{
+				text-align: end;
+				position: absolute;
+				clear: both;
+				<?php echo $rtl?"left":"right" ?>: var(--Size-2);
+			}
+			
+			.<?php echo $this->Name; ?> .other>*{
+				width: fit-content;
+				display: inline-flex;
+			}
+			
+			.<?php echo $this->Name; ?> form{
+				text-decoration: none;
+				padding: 4px 10px;
+				margin: 10px;
+				display: block;
+				color: var(--ForeColor-2);
+				background-color: var(--BackColor-2);
+				border: var(--Border-1) var(--BackColor-5);
+				border-radius: var(--Radius-3);
+				box-shadow: var(--Shadow-1);
+				overflow: hidden;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) {
+				font-weight: bold;
+				color: var(--ForeColor-1);
+				background-color: var(--BackColor-1);
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form *{
+				padding: 0px;
+				margin: 0px;
+				display: inline-block;
+				color: var(--ForeColor-2);
+				background-color: transparent;
+				outline: none;
+				border: none;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) * {
+				font-weight: bold;
+				outline: none;
+				border: none;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) :is(button, button *)  {
+				color: var(--BackColor-2);
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form input[type="search"]{
+				max-width: 100%;
+				width: 0px;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) input[type="search"], .<?php echo $this->Name; ?> form input[type="search"]:is(:hover, :active, :focus){
+				color: var(--ForeColor-1);
+				width: 200px;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
 		</style>
 		<?php
 	}
 
 	public function Echo(){
-		?>
+		if($this->HasBranding): ?>
 			<div class="header td row" >
 					<?php if(isValid($this->Image)) echo "<div class='td image' rowspan='2' style='background-image: url(\"".$this->Image."\");'></div>"; ?>
 				<div class="td">
@@ -164,7 +248,8 @@ class MainMenu extends Module{
 					<?php if(isValid($this->Title)) echo "<div class='td title'><a href='/'>".__($this->Title,true,false)."</a></div>"; ?>
 				</div>
 			</div>
-			<?php
+		<?php endif;
+		if($this->HasItems):
 			$count = count($this->Items);
 			if($count > 0){
 				echo "<ul class='Items td ".(isValid($this->ShowItemsScreenSize)?$this->ShowItemsScreenSize.'-show':'').' '.(isValid($this->HideItemsScreenSize)?$this->HideItemsScreenSize.'-hide':'')."'>";
@@ -173,7 +258,14 @@ class MainMenu extends Module{
 				} 
 				echo "</ul>";
 			}
+		endif;
+		if($this->HasOthers):
+		echo "<div class='other ".((isValid($this->ShowOthersScreenSize)?$this->ShowOthersScreenSize.'-show':'').' '.(isValid($this->HideOthersScreenSize)?$this->HideOthersScreenSize.'-hide':''))."'>";
 			if(isValid($this->Content)) echo $this->Content;
+			if($this->SearchForm != null) $this->SearchForm->Draw();
+			if($this->UserMenu != null) $this->UserMenu->Draw();
+		echo "</div>";
+		endif;
 	}
 	public function PostDraw(){
 		parent::PostDraw();

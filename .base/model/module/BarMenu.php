@@ -1,6 +1,5 @@
 <?php namespace MiMFa\Module;
 class BarMenu extends Module{
-	public $Name = "BarMenu";
 	public $Items = null;
 	public $AllowLabels = false;
 	public $AllowAnimate = true;

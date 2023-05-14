@@ -1,6 +1,11 @@
 <?php namespace MiMFa\Component;
 class FontAwesome extends Component{
 	public $DefaultRoot = "body";
+	
+	public function Echo(){
+		$this->EchoStyle();
+		$this->EchoTechnologyStyle();
+	}
 
 	public function EchoStyle($root=null){
 		$root = $root??$this->DefaultRoot;

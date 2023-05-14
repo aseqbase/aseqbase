@@ -265,7 +265,7 @@ class Post extends Module{
 
 	public function Echo(){
 		$item = $this->Item;
-		$p_access = getValid($item,'Access');
+		$p_access = getValid($item,'Access',0);
 		if(!ACCESS($p_access,false)) return;
 		MODULE("Image");
 		$img = new Image();
@@ -302,6 +302,9 @@ class Post extends Module{
 				);
 
 		$p_meta = null;
+        $authorName = null;
+        $createTime = getValid($item,'CreateTime');
+        $modifyTime = getValid($item,'UpdateTime');
 		if($p_showmeta){
             if($this->ShowAuthor)
                 doValid(
@@ -313,21 +316,11 @@ class Post extends Module{
                     'AuthorID'
                 );
             if($this->ShowCreateTime)
-                doValid(
-                    function($val) use(&$p_meta){
-                        if(isValid($val)) $p_meta .= "<span class='CreateTime'>$val</span>";
-                    },
-                    $item,
-                    'CreateTime'
-                );
+                if(isValid($createTime))
+                    $p_meta .= "<span class='CreateTime'>$createTime</span>";
             if($this->ShowUpdateTime)
-                doValid(
-                    function($val) use(&$p_meta){
-                        if(isValid($val)) $p_meta .= "<span class='UpdateTime'>$val</span>";
-                    },
-                    $item,
-                    'UpdateTime'
-                );
+                if(isValid($modifyTime))
+                    $p_meta .= "<span class='UpdateTime'>$modifyTime</span>";
             if($this->ShowStatus)
                 doValid(
                     function($val) use(&$p_meta){
@@ -347,7 +340,13 @@ class Post extends Module{
                 );
         }
 
-		$img->Source = $p_image;?>
+		$img->Source = $p_image;
+        
+        COMPONENT("JSONLD");
+        $mod = new \MiMFa\Component\JSONLD();
+        $mod->EchoArticle(__($p_title),__($p_description),$p_image,
+            author:["name"=>$authorName],datePublished: explode(" ", $createTime)[0],dateModified:explode(" ", $modifyTime)[0]);
+        ?>
 		<div class="head row">
 			<div class="col-md">
                 <?php

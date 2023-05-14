@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Template;
+<?php
+namespace MiMFa\Template;
 class Main extends Template{
 	public $WindowTitle = null;
 	public $WindowLogo = null;
@@ -134,6 +135,19 @@ class Main extends Template{
 					box-shadow: var(--Shadow-2);
 					<?php echo \MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)"); ?>
 				}
+				.btn-main, .btn-main:visited {
+					background-color: var(--BackColor-2);
+					color: var(--ForeColor-2);
+					border-color: var(--BackColor-2);
+				}
+				.btn-main:hover{
+					background-color: var(--BackColor-4);
+					color: var(--ForeColor-4);
+					border-color: var(--BackColor-4);
+					border-radius: var(--Radius-0);
+					box-shadow: var(--Shadow-3);
+					<?php echo \MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)"); ?>
+				}
 				.btn-primary, .btn-primary:visited {
 					background-color: var(--BackColor-2);
 					color: var(--ForeColor-2);
@@ -195,6 +209,9 @@ class Main extends Template{
 					background-size: 70% auto;
 				}
 
+				.page{
+					margin-top: 5vmax;
+				}
 
 				.main-bullet{
 					list-style-type: none;

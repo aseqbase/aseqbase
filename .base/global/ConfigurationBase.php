@@ -39,16 +39,18 @@ abstract class ConfigurationBase extends Base {
      */
 	public $DefaultViewName = "main";
     /**
-     * An array of all patterns=>handler file names to handle the virtual pathes
+     * An array of all patterns=>handler view names to handle the virtual pathes
      * @var array<string,string>
      * @category General
      */
 	public $Handlers = array(
-        "/^post\b/i"=>"post",
-        "/^page\b/i"=>"page",
-        "/^query\b/i"=>"query",
-        "/^tag\b/i"=>"tag",
-        "/^category\b/i"=>"category"
+        "/^post(\/|\?|$)/i"=>"post",
+        "/^page(\/|\?|$)/i"=>"page",
+        "/^query(\/|\?|$)/i"=>"query",
+        "/^search(\/|\?|$)/i"=>"search",
+        "/^tag(\/|\?|$)/i"=>"tag",
+        "/^sign(\/|\?|$)/i"=>"sign",
+        "/^category(\/|\?|$)/i"=>"category"
     );
 
 
@@ -119,13 +121,13 @@ abstract class ConfigurationBase extends Base {
      * @var bool
      * @category Security
      */
-	public $ClientSession = false;
+	public $ClientSession = true;
 	/**
      * Encrypt all session keys (true for default)
      * @var bool
      * @category Security
      */
-	public $EncryptSessionKey = true;
+	public $EncryptSessionKey = false;
 	/**
      * Encrypt all session values (true for default)
      * @var bool

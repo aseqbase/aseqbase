@@ -9,36 +9,57 @@
  */
 class _ {
 	/**
+	 * The version of aseqbase framework
+     * Generation	.	Major	Minor	0:basic|1:alpha|2:beta|5<=9:stable
+     * X		.	xx	xx	x
+	 * @var float
+	 */
+	public static float $VERSION = 1.00006;
+
+	/**
      * The top domain name
+     * Example: "mimfa"
      * @var string
      */
 	public static string|null $ASEQ = null;
 	/**
-	 * All sequences between $ASEQBASE and $BASE
-	 * @var array
-	 */
-	public static array|null $SEQUENCES = null;
-	/**
 	 * The base directory and the end point of all sequences
+     * Example: ".base"
 	 * @var string|null
      */
 	public static string|null $BASE = null;
+	
+	/**
+	 * All sequences
+     * Example: "[
+     *	'home/mimfa/mimfa/' => 'https://mimfa.net/',
+     *	'home/mimfa/seq1/' => 'https://seq1.mimfa.net/',
+     *	'home/mimfa/seq2/' => 'https://seq2.mimfa.net/',
+     *	'home/mimfa/seq3/' => 'https://seq3.mimfa.net/',
+     *	'home/mimfa/.base/' => 'https://mimfa.net/.base/',
+     *]"
+	 * @var array
+	 */
+	public static array|null $SERIES = null;
+	/**
+	 * All sequences between $ASEQ and $BASE
+     * Example: "[
+     *	'home/mimfa/seq1/' => 'https://seq1.mimfa.net/',
+     *	'home/mimfa/seq2/' => 'https://seq2.mimfa.net/',
+     *	'home/mimfa/seq3/' => 'https://seq3.mimfa.net/',
+     *]"
+	 * @var array
+	 */
+	public static array|null $SEQUENCES = null;
 	/**
 	 * Number of subdomains nestings
      * @var int|null
 	 */
 	public static int|null $NEST = null;
-	/**
-	 * The version of aseqbase framework
-     * Generation	.	Major	Minor	0:basic/1:alpha/2:beta/5:stable
-     * X		.	xx	xx	x
-	 * @var float
-	 */
-	public static float $VERSION = 1.00005;
 
 	/**
 	 * Full part of the current url
-     * Example: "https://mimfa.net/Category/mimfa/service/web?p=3&l=10"
+     * Example: "https://mimfa.net/Category/mimfa/service/web?p=3&l=10#serp"
 	 * @var string|null
 	 */
 	public static string|null $URL = null;
@@ -55,17 +76,45 @@ class _ {
      */
 	public static string|null $HOST = null;
 	/**
+     * The host part of the current url
+     * Example: "/Category/mimfa/service/web"
+     * @var string|null
+     */
+	public static string|null $DIRECTION = null;
+	/**
      * The query part of the current url
      * Example: "p=3&l=10"
      * @var string|null
      */
 	public static string|null $QUERY = null;
+	/**
+     * The anchor part of the current url
+     * Example: "#serp"
+     * @var string|null
+     */
+	public static string|null $ANCHOR = null;
+	/**
+	 * The default email acount
+     * Example: "info@mimfa.net"
+	 * @var string|null
+	 */
+	public static string|null $EMAIL = null;
 
 	public static ConfigurationBase|null $CONFIG = null;
 	public static InformationBase|null $INFO = null;
 	public static TemplateBase|null $TEMPLATE = null;
-
+	
+	/**
+     * The current website url root
+     * Example: "http://mimfa.net/"
+     * @var string|null
+     */
 	public static string|null $ROOT = null;
+	/**
+     * The current website internal root directory
+     * Example: "home/mimfa/public_html/"
+     * @var string|null
+     */
 	public static string|null $DIR = null;
 
 	public static string|null $MODEL_DIR = null;
@@ -87,8 +136,18 @@ class _ {
 	public static string|null $PART_DIR = null;
 	public static string|null $SCRIPT_DIR = null;
 	public static string|null $STYLE_DIR = null;
-
+	
+	/**
+     * The base website url root
+     * Example: "http://base.aseqbase.ir/"
+     * @var string|null
+     */
 	public static string|null $BASE_ROOT = null;
+	/**
+     * The base internal root directory
+     * Example: "home/base/public_html/"
+     * @var string|null
+     */
 	public static string|null $BASE_DIR = null;
 
 	public static string|null $BASE_MODEL_DIR = null;
@@ -110,16 +169,19 @@ class _ {
 	public static string|null $BASE_STYLE_DIR = null;
 }
 
-_::$SEQUENCES = $GLOBALS["SEQUENCES"];
 _::$ASEQ = $GLOBALS["ASEQBASE"];
 _::$BASE = $GLOBALS["BASE"];
+
+_::$SEQUENCES = $GLOBALS["SEQUENCES"];
 _::$NEST = $GLOBALS["NEST"];
 
-_::$URL = $GLOBALS["URL"] = GetUrl();
-_::$HOST = $GLOBALS["HOST"] = GetHost();
-_::$PATH = $GLOBALS["PATH"] = GetPath();
-_::$QUERY = $GLOBALS["QUERY"] = GetQuery();
-
+_::$URL = $GLOBALS["URL"] = getUrl();
+_::$HOST = $GLOBALS["HOST"] = getHost();
+_::$PATH = $GLOBALS["PATH"] = getPath();
+_::$DIRECTION = $GLOBALS["DIRECTION"] = getDirection();
+_::$QUERY = $GLOBALS["QUERY"] = getQuery();
+_::$ANCHOR = $GLOBALS["ANCHOR"] = getAnchor();
+_::$EMAIL = $GLOBALS["EMAIL"] = getEmail();
 
 _::$BASE_ROOT = $GLOBALS["BASE_ROOT"];
 _::$BASE_DIR = $GLOBALS["BASE_DIR"] = __DIR__."/";
@@ -161,6 +223,8 @@ _::$REGION_DIR = \_::$VIEW_DIR."region/";
 _::$PART_DIR = \_::$VIEW_DIR."part/";
 _::$SCRIPT_DIR = \_::$VIEW_DIR."script/";
 _::$STYLE_DIR = \_::$VIEW_DIR."style/";
+
+_::$SERIES = array_merge([\_::$DIR=>\_::$ROOT], $GLOBALS["SEQUENCES"], [\_::$BASE_DIR=>\_::$BASE_ROOT]);
 
 RUN("global/Base.php");
 RUN("global/EnumBase.php");
@@ -208,8 +272,7 @@ function ACCESS($access = 0, bool $showPage = true):bool{
 			return false;
 		}
 	}
-	return true ||
-		\_::$INFO->User->Access($access);
+	return \_::$INFO->User->Access($access);
 }
 function getAccess($access = null):int{
 	if(is_null($access)) return getValid(\_::$INFO->User,"Access",0);
@@ -232,7 +295,7 @@ function GET($input = null){
 }
 
 function INCLUDING(string $filePath, array $variables = array(), bool $print = true){
-	global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT, $URL, $HOST, $PATH, $QUERY;
+	global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT, $URL, $HOST, $PATH, $DIRECTION, $QUERY, $ANCHOR, $EMAIL;
 	if(file_exists($filePath)){
 		//if(count($variables) > 0) $filePath = rtrim($filePath,"/")."?". http_build_query($variables);
 		if(count($variables) > 0) extract($variables);
@@ -245,7 +308,7 @@ function INCLUDING(string $filePath, array $variables = array(), bool $print = t
 	return null;
 }
 function REQUIRING(string $filePath, array $variables = array(), bool $print = true){
-	global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT, $URL, $HOST, $PATH, $QUERY;
+	global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT, $URL, $HOST, $PATH, $DIRECTION, $QUERY, $ANCHOR, $EMAIL;
 	if(file_exists($filePath)){
 		if(count($variables) > 0) extract($variables);
 		ob_start();
@@ -344,7 +407,7 @@ function TEMPLATE(string $Name, array $variables = array(), bool $print = true){
  * @return mixed
  */
 function VIEW(string $name, array $variables = array(), bool $print = true){
-	$output = forceUSING(\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, $variables, false);
+	$output = executeCommands(forceUSING(\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, $variables, false));
 	if($print) return SET(\_::$CONFIG->AllowReduceSize?ReduceSize($output):$output);
 	else return $output;
 }
@@ -386,7 +449,7 @@ function __(string|null $text, bool $translate = true, bool $styling = true):str
 }
 
 
-function Code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/\<\S+[\w\W]*\>/i")
+function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/\<\S+[\w\W]*\>/i")
 {
 	if(!is_array($dic)) $dic = array();
 	return preg_replace_callback($pattern,function($a) use(&$dic,$startCode, $endCode){
@@ -395,7 +458,7 @@ function Code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = 
         return $dic[$key];
     },$html);
 }
-function Decode($html, $dic)
+function decode($html, $dic)
 {
 	if(is_array($dic))
 		foreach($dic as $k=>$v)
@@ -456,7 +519,7 @@ function forcePath(string|null $path):string|null{
 
 function getFullUrl(string|null $path = null):string|null{
 	if($path === null) $path = getUrl();
-	return \MiMFa\Library\Local::CatchOptimizeUrl($path);
+	return \MiMFa\Library\Local::GetFullUrl($path);
 }
 function getUrl(string|null $path = null):string|null{
 	if($path === null) $path = isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:"";
@@ -468,15 +531,26 @@ function getHost(string|null $path = null):string|null{
 	return PREG_Find($pat, $path);
 }
 function getPath(string|null $path = null):string|null{
-	return PREG_Find("/(^[^\?]*)/", $path??getUrl());
+	return PREG_Find("/(^[^\?#]*)/", $path??getUrl());
 }
 function getDirection(string|null $path = null):string|null{
-	if($path == null) $path = "/";
+	if($path == null) $path = getUrl();
 	if(startsWith($path,\_::$BASE_DIR)) return substr($path, strlen(\_::$BASE_DIR));
-	return PREG_Replace("/^\w+\:\/*[^\/]+/","", $path);
+	return PREG_Replace("/(^\w+:\/*[^\/]+)|((\?|#).+$)/","", $path);
+}
+function getRelative(string|null $path = null):string|null{
+	if($path == null) $path = getUrl();
+	if(startsWith($path,\_::$BASE_DIR)) return substr($path, strlen(\_::$BASE_DIR));
+	return PREG_Replace("/^\w+:\/*[^\/]+/","", $path);
 }
 function getQuery(string|null $path = null):string|null{
-	return PREG_Find("/((?<=\?).*$)/", $path??getUrl());
+	return PREG_Find("/((?<=\?)[^#]*($|#))/", $path??getUrl());
+}
+function getAnchor(string|null $path = null):string|null{
+	return PREG_Find("/((?<=#)[^\?]*($|\?))/", $path??getUrl());
+}
+function getEmail(string|null $path = null, $mailName = "info"):string|null{
+	return $mailName."@".PREG_replace("/\w+:\/{1,2}(www\.)?/","", getHost($path));
 }
 
 function getClientIP():string|null{
@@ -514,12 +588,12 @@ function getValue(string|null $source, string|null $key, bool $ismultiline = tru
 }
 
 function isEmpty($text):bool{
-	return !isset($text) || trim($text."") == "" || trim($text."","'\"") == "";
+	return !isset($text) || is_null($text) || trim($text."") == "" || trim($text."","'\"") == "";
 }
 function isValid($obj, string|null $item = null):bool{
-	if($item === null) return !empty($obj) && !is_null($obj);
+	if($item === null) return isset($obj) && !is_null($obj) && (!is_string($obj) || !(trim($obj) == "" || trim($obj,"'\"") == ""));
 	elseif(is_array($obj)) return isValid($obj) && isValid($item) && !empty($obj[$item]) && isValid($obj[$item]);
-	else return isValid($obj) && !empty($obj->$item) && isValid($obj->$item);
+	else return isValid($obj) && isset($obj->$item) && isValid($obj->$item);
 }
 function getValid($obj, string|null $item = null, $defultValue = null){
 	if(isValid($obj,$item))
@@ -594,14 +668,53 @@ function deleteFromString(string $mainstr, int $index, int $length = 1):string
 }
 
 /**
+ * Execute the Command Comments (Commands by the pattern <!---Name:Command---> <!---Name--->)
+ * @param string|null $page The source document
+ * @return string|null
+ */
+function executeCommands(string|null $page, string|null $name = null):string|null{
+	if($page == null) return $page;
+	if($name == null){
+        //$page = executeCommands($page, "append");
+        //$page = executeCommands($page, "prepend");
+    } else {
+		$name = strtolower($name);
+		$patfull = "/<!-{3}$name:[\w\W]*-{3}>[\w\W]*<!-{3}$name-{3}>/i";
+		$patcommand = "/(?<=<!-{3}$name:)[\w\W]*(?=-{3}>)/i";
+		$matches = [];
+		switch($name){
+            case "append":
+				$page = preg_replace_callback($patfull, function($m) use(&$matches){
+					array_push($matches,$m[0]);
+					return "";
+				}, $page);
+				foreach($matches as $m)
+					$page = preg_replace("/".preg_find($patcommand,$m)."/i", "\1$m", $page);
+			break;
+            case "prepend":
+				$page = preg_replace_callback($patfull, function($m) use(&$matches){
+					array_push($matches,$m[0]);
+					return "";
+				}, $page);
+				foreach($matches as $m)
+					$page = preg_replace("/".preg_find($patcommand,$m)."/i", "$m\1", $page);
+				break;
+		}
+		$pat = "/<!-{3}".$name."[\w\W]*-{3}>/i";
+		$page = preg_replace($pat, "", $page);
+    }
+	return $page;
+}
+
+/**
  * Compress and reduce the size of document
  * @param string|null $page The source document
- * @return array|string|null
+ * @return string|null
  */
 function reduceSize(string|null $page):string|null{
 	if($page == null) return $page;
 	$ls = array();
-	$pat ="/\<\s*(style)[\s\S]*\>[\s\S]*\<\\/\s*\\1\s*\>/ixU";
+	$pat ="/<\s*(style)[\s\S]*>[\s\S]*<\/\s*\1\s*>/ixU";
 	//$pat ="/\<\s*((style)|(script))[\s\S]*\>[\s\S]*\<\\/\s*\\1\s*\>/ixU";
 	$matches = null;
 	if(preg_match_all($pat, $page, $matches)){
@@ -609,9 +722,9 @@ function reduceSize(string|null $page):string|null{
 			if(!in_array($item, $ls)) array_push($ls, preg_replace("/\s+/im", " ", $item));
 		//echo count($ls);
 		$page = preg_replace($pat, "", $page);
-		$page = preg_replace("/\<\\/\s*head\s*\>/im", implode(PHP_EOL, $ls).PHP_EOL."</head>", $page);
+		$page = preg_replace("/<\/\s*head\s*>/im", implode(PHP_EOL, $ls).PHP_EOL."</head>", $page);
 		//$page = preg_replace("/(?<!(\<\s*(script)[\s\S]*\>[\s\S]+))\s+(?!([\s\S]+\<\\/\s*\\2\s*\>))/ixU", " ", $page);
-		return preg_replace("/\<\s*\\/\s*(style)\s*\>\s*\<\s*\\1\s*\>/ixU", PHP_EOL, $page);
+		return preg_replace("/<\s*\/\s*(style)\s*>\s*\<\s*\1\s*>/ixU", PHP_EOL, $page);
 	}
 	return $page;
 }

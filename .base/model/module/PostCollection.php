@@ -284,7 +284,7 @@ class PostCollection extends Collection{
         }
 		$i = 0;
 		foreach($this->Items as $item) {
-			$p_access = getValid($item,'Access');
+			$p_access = getValid($item,'Access', 0);
 			if(!ACCESS($p_access,false)) continue;
 			$p_id = getValid($item,'ID');
 			$p_type = getValid($item,'Type');

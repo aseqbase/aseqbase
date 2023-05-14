@@ -8,14 +8,14 @@
 */
 class Style{
 	public null|string $Background = null;
-	public null|string $BackColor = null;
-	public null|string $BackImage = null;
-	public null|string $BackSize = null;
-	public null|string $BackRepeat = null;
-	public null|string $BackPosition = null;
-	public null|string $BackAttachment = null;
-	public null|string $BackClip = null;
-	public null|string $BackFilter = null;
+	public null|string $BackgroundColor = null;
+	public null|string $BackgroundImage = null;
+	public null|string $BackgroundSize = null;
+	public null|string $BackgroundRepeat = null;
+	public null|string $BackgroundPosition = null;
+	public null|string $BackgroundAttachment = null;
+	public null|string $BackgroundClip = null;
+	public null|string $BackgroundFilter = null;
 	public null|string $Content = null;
 	public null|string $Color = null;
 	public null|string $Opacity = null;
@@ -45,14 +45,14 @@ class Style{
 			self::DoProperty("content",$this->Content).
 			self::DoProperty("color",$this->Color).
 			self::DoProperty("background",$this->Background).
-			self::DoProperty("background-color",$this->BackColor).
-			self::DoProperty("background-image",$this->BackImage).
-			self::DoProperty("background-size",$this->BackSize).
-			self::DoProperty("background-repeat",$this->BackRepeat).
-			self::DoProperty("background-attachment",$this->BackAttachment).
-			self::DoProperty("background-position",$this->BackPosition).
-			self::DoProperty("background-clip",$this->BackClip).
-			self::DoProperty("backdrop-filter",$this->BackFilter,false,true).
+			self::DoProperty("background-color",$this->BackgroundColor).
+			self::DoProperty("background-image",$this->BackgroundImage).
+			self::DoProperty("background-size",$this->BackgroundSize).
+			self::DoProperty("background-repeat",$this->BackgroundRepeat).
+			self::DoProperty("background-attachment",$this->BackgroundAttachment).
+			self::DoProperty("background-position",$this->BackgroundPosition).
+			self::DoProperty("background-clip",$this->BackgroundClip).
+			self::DoProperty("backdrop-filter",$this->BackgroundFilter,false,true).
 			self::DoProperty("opacity",$this->Opacity).
 			self::DoProperty("font",$this->Font).
 			self::DoProperty("font-family",$this->FontFamily).
@@ -141,19 +141,23 @@ class Style{
      * @param bool $multiline
 	 * @return string|null
 	 */
-	public static function DoStrong($text, $keyWords=null, $caseSensitive = false, $multiline = true){
+	public static function DoStrong($text, $keyWords=null, $caseSensitive = false, $multiline = true, $standardization = false){
 		if($text === null) return $text;
 		if($keyWords === null) $keyWords = \_::$INFO->KeyWords;
-        $start = "/\b(?<!\\\§)";
-        $end = "(?!§\\\>)\b/".($caseSensitive?"":"i").($multiline?"m":"");
+        $start = "/\b(?<!\\\§)(";
+        $end = ")(?!§\\\>)\b/".($caseSensitive?"":"i").($multiline?"m":"");
         $length = count($keyWords);
 		$keywordPatterns = array();
         for ($i = 0; $i < $length; $i++)
             $keywordPatterns[$i] = $start.preg_quote($keyWords[$i]).$end;
 		$dic = array();
 		$text = Code($text, $dic, "\\§", "§\\");
-        for ($i = 0; $i < $length; $i++)
-		    $text = preg_replace($keywordPatterns[$i],"<strong>{$keyWords[$i]}</strong>",$text);
+        if($standardization)
+			for ($i = 0; $i < $length; $i++)
+				$text = preg_replace($keywordPatterns[$i],"<strong>{$keyWords[$i]}</strong>",$text);
+		else 
+			for ($i = 0; $i < $length; $i++)
+				$text = preg_replace($keywordPatterns[$i],"<strong>$1</strong>",$text);
 		return Decode($text, $dic);
 	}
 	public static function DoStyle($text,$keyWords=null){

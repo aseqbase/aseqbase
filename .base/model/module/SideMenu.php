@@ -4,9 +4,20 @@ class SideMenu extends Module{
 	public $Items = null;
 	public $Shortcuts = null;
 	public $Direction = "ltr";
+	public SearchForm|null $SearchForm = null;
+	public UserMenu|null $UserMenu = null;
+	public $HasBranding = true;
+	public $HasItems = true;
+	public $HasOthers = true;
 	public $AllowSignButton = true;
 	public $SignButtonText = "&#9776;";
 	public $SignButtonScreenSize = "md";
+
+	public function __construct(){
+        parent::__construct();
+		$this->SearchForm = new SearchForm();
+		$this->UserMenu = new UserMenu();
+    }
 
 	public function EchoStyle(){
 		parent::EchoStyle();
@@ -122,13 +133,77 @@ class SideMenu extends Module{
 					color:  var(--ForeColor-0);
 					<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 				}
+
+				
+			.<?php echo $this->Name; ?> .other{
+				text-align: center;
+			}
+			
+			.<?php echo $this->Name; ?> .other>*{
+				width: fit-content;
+				display: inline-flex;
+			}
+			
+			.<?php echo $this->Name; ?> .other .btn{
+				color: unset;
+				background-color: unset;
+				border: none;
+			}
+			
+			.<?php echo $this->Name; ?> form{
+				text-decoration: none;
+				padding: 4px 10px;
+				margin: 10px;
+				display: block;
+				color: var(--ForeColor-2);
+				background-color: var(--BackColor-2);
+				border: var(--Border-1) var(--BackColor-5);
+				border-radius: var(--Radius-3);
+				box-shadow: var(--Shadow-1);
+				overflow: hidden;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) {
+				font-weight: bold;
+				color: var(--ForeColor-1);
+				background-color: var(--BackColor-1);
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form *{
+				padding: 0px;
+				margin: 0px;
+				display: inline-block;
+				color: var(--ForeColor-2);
+				background-color: transparent;
+				outline: none;
+				border: none;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) * {
+				font-weight: bold;
+				outline: none;
+				border: none;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) :is(button, button *)  {
+				color: var(--BackColor-2);
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form input[type="search"]{
+				max-width: 90%;
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) input[type="search"], .<?php echo $this->Name; ?> form input[type="search"]:is(:hover, :active, :focus){
+				color: var(--ForeColor-1);
+				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			}
 			<?php } ?>
 		</style>
 		<?php
 	}
 
 	public function Echo(){
-		?>
+		if($this->HasBranding): ?>
 			<div class="header td row" >
 					<?php if(isValid($this->Image)) echo "<div class='td image' rowspan='2' style='background-image: url(\"".$this->Image."\");'></div>"; ?>
 				<div class="td">
@@ -136,7 +211,16 @@ class SideMenu extends Module{
 					<?php if(isValid($this->Title)) echo "<div class='td title'><a href='/'>".__($this->Title,true,false)."</a></div>"; ?>
 				</div>
 			</div>
-			<?php
+			<?php endif;
+
+			if($this->HasOthers):
+				echo "<div class='other'>";
+					if($this->SearchForm != null) $this->SearchForm->Draw();
+					if($this->UserMenu != null) $this->UserMenu->Draw();
+				echo "</div>";
+			endif;
+
+			if($this->HasItems):
 			$count = count($this->Items);
 			if($count > 0){
 			?>
@@ -165,6 +249,7 @@ class SideMenu extends Module{
 					</ul>
 				</div>
 			<?php }
+			endif;
 			MODULE("Shortcuts");
 			$module = new Shortcuts();
 			$module->Items = $this->Shortcuts;

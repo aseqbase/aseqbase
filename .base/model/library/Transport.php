@@ -41,19 +41,19 @@ class Transport
 	public static function Success($message,$translate = true){
 		if($translate) $message = Translate::Get($message);
 		self::PushMessage("Success",$message);
-		return "<DIV CLASS='success'>$message</DIV>";
+		return "<div class='success'>$message</div>";
 	}
 
 	public static function Error($message,$translate = true){
 		if($translate) $message = Translate::Get($message);
 		self::PushMessage("Error",$message);
-		return "<DIV CLASS='error'>$message</DIV>";
+		return "<div class='error'>$message</div>";
 	}
 	
 	public static function Message($message,$translate = true){
 		if($translate) $message = Translate::Get($message);
 		self::PushMessage("Message",$message);
-		return "<DIV CLASS='message'>$message</DIV>";
+		return "<div class='message'>$message</div>";
 	}
 
 
@@ -85,13 +85,13 @@ class Transport
 		self::Send($result);
 	}
 
-	public static function SendError($message,$num = -1,$translate = true){
+	public static function SendError($message, $num = -1,$translate = true){
 		self::$ResultNum = $num;
 		$result= "{\"type\":\"${num}\",\"message\":\"".self::Error($message,$translate)."\"}";
 		self::Send($result);
 	}
 
-	public static function SendException($ex,$num = -1,$translate = true){
+	public static function SendException($ex, $num = -1,$translate = true){
 		self::SendError($ex->getMessage(),$num);
 	}
 
