@@ -3,8 +3,6 @@ namespace MiMFa\Library;
 require_once "HashCrypt.php";
 class SpecialCrypt extends HashCrypt
 {
-    public static $Algorithm = 'sha256';
-
     /**
      * Encrypts then MACs a message
      *
@@ -86,7 +84,7 @@ class SpecialCrypt extends HashCrypt
     protected static function RemoveSampleChars($text)
     {
         $indexer = strlen($text) - strlen($text)%\_::$CONFIG->EncryptIndexer;
-        for (; $indexer >= 0 ; $indexer-=\_::$CONFIG->EncryptIndexer)
+        for (; $indexer > 0 ; $indexer-=\_::$CONFIG->EncryptIndexer)
             $text = deleteFromString($text, $indexer, 1);
         return $text;
     }

@@ -82,6 +82,7 @@ class HashCrypt extends SimpleCrypt
      */
     protected static function SplitKeys($masterKey)
     {
+        if(empty($masterKey)) return ["",""];
         // You really want to implement HKDF here instead!
         return [
             hash_hmac(self::$Algorithm, 'ENCRYPTION', $masterKey, true),

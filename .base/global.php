@@ -99,6 +99,12 @@ class _ {
 	 * @var string|null
 	 */
 	public static string|null $EMAIL = null;
+	/**
+	 * The default files extensions
+     * Example: ".php"
+	 * @var string|null
+	 */
+	public static string $EXTENSION = ".php";
 
 	public static ConfigurationBase|null $CONFIG = null;
 	public static InformationBase|null $INFO = null;
@@ -226,8 +232,8 @@ _::$STYLE_DIR = \_::$VIEW_DIR."style/";
 
 _::$SERIES = array_merge([\_::$DIR=>\_::$ROOT], $GLOBALS["SEQUENCES"], [\_::$BASE_DIR=>\_::$BASE_ROOT]);
 
-RUN("global/Base.php");
-RUN("global/EnumBase.php");
+RUN("global/Base");
+RUN("global/EnumBase");
 
 LIBRARY("Local");
 LIBRARY("DataBase");
@@ -238,20 +244,20 @@ LIBRARY("Convert");
 LIBRARY("Contact");
 LIBRARY("User");
 
-RUN("global/ConfigurationBase.php");
-RUN("Configuration.php");
+RUN("global/ConfigurationBase");
+RUN("Configuration");
 _::$CONFIG = new Configuration();
 ini_set('display_errors', \_::$CONFIG->DisplayError);
 ini_set('display_startup_errors', \_::$CONFIG->DisplayStartupError);
 error_reporting(\_::$CONFIG->ReportError);
 
-RUN("global/InformationBase.php");
-RUN("Information.php");
+RUN("global/InformationBase");
+RUN("Information");
 _::$INFO = new Information();
 _::$INFO->User = new \MiMFa\Library\User();
 
-RUN("global/TemplateBase.php");
-RUN("Template.php");
+RUN("global/TemplateBase");
+RUN("Template");
 _::$TEMPLATE = new Template();
 
 
@@ -319,12 +325,13 @@ function REQUIRING(string $filePath, array $variables = array(), bool $print = t
 	}
 	return null;
 }
-function USING(string $dir, string|null $name = null, array $variables = array(), bool $print = true, string|null $format = ".php"){
+function USING(string $dir, string|null $name = null, array $variables = array(), bool $print = true, string|null $extension = ".php"){
+	$extension = $extension??\_::$EXTENSION;
 	if(empty($name))
-		if(isFormat($dir, $format)) return INCLUDING($dir, $variables, $print);
-		else return INCLUDING($dir.$format, $variables, $print);
-	elseif(isFormat($name, $format)) return INCLUDING($dir.$name, $variables, $print);
-	else return INCLUDING($dir.$name.$format, $variables, $print);
+		if(isFormat($dir, $extension)) return INCLUDING($dir, $variables, $print);
+		else return INCLUDING($dir.$extension, $variables, $print);
+	elseif(isFormat($name, $extension)) return INCLUDING($dir.$name, $variables, $print);
+	else return INCLUDING($dir.$name.$extension, $variables, $print);
 }
 
 function forceUSING(string $nodeDir, string $baseDir, string $name, array $variables = array(), bool $print = true){
@@ -553,12 +560,13 @@ function getEmail(string|null $path = null, $mailName = "info"):string|null{
 	return $mailName."@".PREG_replace("/\w+:\/{1,2}(www\.)?/","", getHost($path));
 }
 
-function getClientIP():string|null{
+function getClientIP($ver = null):string|null{
 	foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key){
 		if (array_key_exists($key, $_SERVER) === true){
 			foreach (explode(',', $_SERVER[$key]) as $ip){
 				$ip = trim($ip); // just to be safe
 				if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false){
+					if($ver == 6) return gethostbyaddr($ip);
 					return $ip;
 				}
 			}
@@ -638,7 +646,16 @@ function isFormat(string|null $path, string|null $format):bool{
 function isAbsoluteUrl(string|null $path):bool{
 	return $path != null && preg_match("/^\w+\:\/*[^\/]+/",$path);
 }
-
+function isInASEQ(string|null $filePath):bool{
+	$filePath = preg_replace("/^\\\\/",\_::$DIR,str_replace(\_::$DIR,"",trim($filePath??getUrl())));
+	if(isFormat($filePath, \_::$EXTENSION)) return file_exists($filePath);
+	return is_dir($filePath) || file_exists($filePath.\_::$EXTENSION);
+}
+function isInBASE(string|null $filePath):bool{
+	$filePath = \_::$BASE_DIR.preg_replace("/^\\\\/","",str_replace(\_::$BASE_DIR,"",trim($filePath??getUrl())));
+	if(isFormat($filePath, \_::$EXTENSION)) return file_exists($filePath);
+	return is_dir($filePath) || file_exists($filePath.\_::$EXTENSION);
+}
 
 /**
  * Remove all changeable command signs from a path (such as ../ or /./.)

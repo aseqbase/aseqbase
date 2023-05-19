@@ -194,7 +194,7 @@ class Module extends \Base{
 			(isValid($this->ShowFromScreenSize)?" ".$this->ShowFromScreenSize."-show":"").
 			(isValid($this->HideFromScreenSize)?" ".$this->HideFromScreenSize."-hide":"")
 		).
-		(isValid($this->Attributes)?" ".(is_string($this->Attributes)? $this->Attributes:implode($this->Attributes," ")):"");
+		(isValid($this->Attributes)?" ".(is_string($this->Attributes)? $this->Attributes : implode(" ",$this->Attributes)):"");
 	}
 	/**
      * Create a standard Attribute and its value for a tag
@@ -232,23 +232,33 @@ class Module extends \Base{
 
 	public function EchoTitle($attrs = null){
 		if(isValid($this->Title)){
-            echo (isValid($this->TitleTag)?"<".$this->TitleTag." $attrs>":"").__($this->Title).(isValid($this->TitleTag)?"</".$this->TitleTag.">":"");
+			echo (isValid($this->TitleTag)?"<".$this->TitleTag." $attrs>":"");
+			if(is_string($this->Title))
+				echo __($this->Title);
+            else ($this->Title)($attrs);
+			echo (isValid($this->TitleTag)?"</".$this->TitleTag.">":"");
             return true;
         }
         return false;
     }
 	public function EchoDescription($attrs = null){
 		if(isValid($this->Description)){
-			echo (isValid($this->DescriptionTag)?"<".$this->DescriptionTag." $attrs>":"").__($this->Description).(isValid($this->DescriptionTag)?"</".$this->DescriptionTag.">":"");
+			echo (isValid($this->DescriptionTag)?"<".$this->DescriptionTag." $attrs>":"");
+			if(is_string($this->Description))
+				echo __($this->Description);
+            else ($this->Description)($attrs);
+			echo (isValid($this->DescriptionTag)?"</".$this->DescriptionTag.">":"");
             return true;
         }
         return false;
     }
 	public function EchoContent($attrs = null){
 		if(isValid($this->Content)){
+			echo (isValid($this->ContentTag)?"<".$this->ContentTag." $attrs>":"");
 			if(is_string($this->Content))
-				echo (isValid($this->ContentTag)?"<".$this->ContentTag." $attrs>":"").__($this->Content).(isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
+				echo __($this->Content);
             else ($this->Content)($attrs);
+			echo (isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
             return true;
         }
         return false;

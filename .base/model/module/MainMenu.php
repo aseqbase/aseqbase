@@ -131,6 +131,7 @@ class MainMenu extends Module{
 				max-height: 70vh;
 				padding: 0px;
 				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+				overflow: scroll;
 				z-index: 1;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}

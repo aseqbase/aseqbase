@@ -54,7 +54,8 @@ class Content extends Module{
 										PAGE(NormalizePath($_GET[\_::$CONFIG->PathKey]));
 								   else PAGE("home");
 							   elseif(is_string($this->Content)) echo "".$this->Content;
-							   else ($this->Content)(); ?></div>
+							   else ($this->Content)(); ?>
+			</div>
 		</div>
 		<div class="page embed-page" id="embed" style="display: none;">
 			<iframe class="frame" ></iframe>
