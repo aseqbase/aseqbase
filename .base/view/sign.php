@@ -1,7 +1,7 @@
 <?php
-$path = $_GET[\_::$CONFIG->PathKey];
+$path = \_::$DIRECTION;
 if(isValid($path)){
-    $p = strtolower(implode("/", array_slice(explode("/",$_GET[\_::$CONFIG->PathKey]),1)));
+    $p = strtolower(implode("/", array_slice(explode("/",\_::$DIRECTION),1)));
     switch($p){
         case "in":
 		    MODULE("SignInForm");

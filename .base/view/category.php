@@ -1,6 +1,6 @@
 <?php
 use MiMFa\Library\DataBase;
-$paths = explode("/",trim($_GET[\_::$CONFIG->PathKey],"/\\"));
+$paths = explode("/",trim(\_::$DIRECTION,"/\\"));
 $acc = getAccess();
 $parentID = (int)DataBase::DoSelectValue(
         \_::$CONFIG->DataBasePrefix."Category",

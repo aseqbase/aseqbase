@@ -2,6 +2,7 @@
 namespace MiMFa\Module;
 MODULE("SearchForm");
 MODULE("UserMenu");
+MODULE("TemplateButton");
 class MainMenu extends Module{
 	public $Class = "row";
 	public $Image = null;
@@ -9,6 +10,7 @@ class MainMenu extends Module{
 	public $Shortcuts = null;
 	public SearchForm|null $SearchForm = null;
 	public UserMenu|null $UserMenu = null;
+	public TemplateButton|null $TemplateButton = null;
 	public $HasBranding = true;
 	public $HasItems = true;
 	public $HasOthers = true;
@@ -22,6 +24,7 @@ class MainMenu extends Module{
         parent::__construct();
 		$this->SearchForm = new SearchForm();
 		$this->UserMenu = new UserMenu();
+		$this->TemplateButton = new TemplateButton();
     }
 
 	public function EchoStyle(){
@@ -182,7 +185,7 @@ class MainMenu extends Module{
 				<?php echo $rtl?"left":"right" ?>: var(--Size-2);
 			}
 			
-			.<?php echo $this->Name; ?> .other>*{
+			.<?php echo $this->Name; ?> .other>div{
 				width: fit-content;
 				display: inline-flex;
 			}
@@ -265,6 +268,7 @@ class MainMenu extends Module{
 			if(isValid($this->Content)) echo $this->Content;
 			if($this->SearchForm != null) $this->SearchForm->Draw();
 			if($this->UserMenu != null) $this->UserMenu->Draw();
+			if($this->TemplateButton != null) $this->TemplateButton->Draw();
 		echo "</div>";
 		endif;
 	}

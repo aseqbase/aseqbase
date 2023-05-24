@@ -3,6 +3,96 @@
 # @copyright  Copyright (C) 2005 - 2023 Open Source Matters. All rights reserved.
 # @license    GNU General Public License version 3 or later; see LICENSE.txt
 ##
+AddDefaultCharset UTF-8
+AddCharset utf-8 .html .css .js .xml .json .rss
+AddType application/x-font-woff .woff
+##
+#
+# Remove the ETag (entity tag) response header field
+Header unset ETag
+FileETag none
+#
+<IfModule mod_expires.c>
+ExpiresActive on
+ExpiresByType image/jpg  "access 1 year"
+ExpiresByType image/gif  "access 1 year"
+ExpiresByType image/jpeg  "access 1 year"
+ExpiresByType image/png  "access 1 year"
+ExpiresByType video/webm  "access 1 year"
+ExpiresByType application/x-shockwave-flash "access 1 year"
+ExpiresByType application/x-javascript  "access 1 year"
+ExpiresByType application/javascript  "access 1 year"
+ExpiresByType application/pdf "access 1 month"
+ExpiresByType application/woff "access 1 year"
+ExpiresByType application/eot "access 1 year"
+ExpiresByType text/javascript  "access 1 year"
+ExpiresByType text/css "access 1 year"
+ExpiresDefault  "access plus 7 days"
+</IfModule>
+#
+<IfModule mod_headers.c>
+<FilesMatch "\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm)$">
+Header append Cache-Control "public"
+</FilesMatch>
+<FilesMatch "\.(txt|html)$">
+Header append Cache-Control "proxy-revalidate"
+</FilesMatch>
+<FilesMatch "\.(php|cgi|pl|htm|xml)$">
+Header set Cache-Control "private, no-cache, no-store, proxy-revalidate, no-transform"
+Header set Pragma "no-cache"
+</FilesMatch>
+</IfModule>
+#
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/xml
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE application/xml
+AddOutputFilterByType DEFLATE application/xhtml+xml
+AddOutputFilterByType DEFLATE application/rss+xml
+AddOutputFilterByType DEFLATE application/javascript
+AddOutputFilterByType DEFLATE application/x-javascript
+AddOutputFilterByType DEFLATE application/x-httpd-php
+AddOutputFilterByType DEFLATE application/x-httpd-fastphp
+AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+AddOutputFilterByType DEFLATE application/x-font
+AddOutputFilterByType DEFLATE application/x-font-opentype
+AddOutputFilterByType DEFLATE application/x-font-otf
+AddOutputFilterByType DEFLATE application/x-font-truetype
+AddOutputFilterByType DEFLATE application/x-font-ttf
+AddOutputFilterByType DEFLATE font/opentype
+AddOutputFilterByType DEFLATE font/otf
+AddOutputFilterByType DEFLATE font/ttf
+AddOutputFilterByType DEFLATE image/svg+xml
+AddOutputFilterByType DEFLATE image/x-icon
+AddOutputFilterByType DEFLATE text/javascript
+BrowserMatch ^Mozilla/4 gzip-only-text/html
+BrowserMatch ^Mozilla/4\.0[678] no-gzip
+BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+Header append Vary User-Agent env=!dont-vary
+</IfModule>
+#
+# Block/Forbid Referer Spammers/Referer Phishing
+RewriteCond %{HTTP_REFERER} ^.*(ranksonic\.|semalt\.|kambasoft\.|buttons-for-website\.|buttons-for-your-website\.com|4webmasters\.org|social-buttons\.com|best-seo-offer\.com|best-seo-solution\.com).*$ [NC]
+RewriteRule ^(.*)$ - [F]
+#
+<files wp-config.php>
+order allow,deny
+deny from all
+</files>
+<files "xmlrpc.php">
+order allow,deny
+deny from all
+</files>
+<files .htaccess>
+order allow,deny
+deny from all
+</files>
+#
+RewriteEngine on
+RewriteCond %{HTTP_USER_AGENT} ^msnbot
+RewriteRule ^.* - [F,L]
 #
 #Alternate default index pages
 DirectoryIndex index.php index.htm index.html static.php
@@ -42,5 +132,5 @@ RewriteCond %{REQUEST_FILENAME} !-f
 # and the requested path and file don't directly match a physical folder
 RewriteCond %{REQUEST_FILENAME} !-d
 # Redirect all virtual paths to the main index.php
-RewriteRule (^[^\?]*)|((?<=\?).*$) /index.php?path=$1&$2 [QSA,L]
+RewriteRule ^ /index.php [L]
 ## End - MiMFa! core SEF Section.

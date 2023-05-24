@@ -4,7 +4,7 @@
 	}
 </style>
 
-<div class="page-service">
+<div class="page page-service">
     <?php
 	PART("small-header");
 	PART("access");

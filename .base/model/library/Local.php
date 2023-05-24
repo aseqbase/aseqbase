@@ -12,8 +12,9 @@ class Local{
      * @param mixed $path Probable file external url or path
      * @return mixed
      */
-	public static function GetFullUrl($path){
-		return self::OptimizeUrl(self::GetUrl($path));
+	public static function GetFullUrl($path, $optimize = true){
+		if($optimize) return self::OptimizeUrl(self::GetUrl($path));
+		return self::GetUrl($path);
     }
     /**
      * Get or Find a file, then get the external url
@@ -22,7 +23,7 @@ class Local{
      */
 	public static function GetUrl($path){
 		if(!isValid($path) || isAbsoluteUrl($path)) return $path;
-		if(!startsWith($path, "/")) $path = \_::$DIRECTION."/".$path;
+		if(!startsWith($path, "/")) $path = \_::$REQUEST."/".$path;
 		$p = ltrim(getRelative($path), "/\\");
 		if(file_exists(\_::$DIR.$p)) return \_::$ROOT.$p;
 		if(count(\_::$SEQUENCES) > 0){

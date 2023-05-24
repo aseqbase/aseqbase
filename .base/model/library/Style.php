@@ -6,7 +6,7 @@
  *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
  *@link https://github.com/mimfa/aseqbase/wiki/Libraries#style See the Library Documentation
 */
-class Style{
+class Style extends \ArrayObject{
 	public null|string $Background = null;
 	public null|string $BackgroundColor = null;
 	public null|string $BackgroundImage = null;
@@ -41,7 +41,7 @@ class Style{
 		return !isempty($this->Get());
     }
 	public function Get(){
-		return 
+		$styles = 
 			self::DoProperty("content",$this->Content).
 			self::DoProperty("color",$this->Color).
 			self::DoProperty("background",$this->Background).
@@ -71,6 +71,8 @@ class Style{
 			self::DoProperty("box-shadow",$this->BoxShadow).
 			self::DoProperty("text-shadow",$this->TextShadow).
 			self::DoProperty("filter",$this->Filter,false,true);
+		foreach($this as $key=>$val) $styles .= self::DoProperty($key,$val);
+		return $styles;
 	}
 
 	public static function UniversalProperty($prop,$val){

@@ -79,7 +79,7 @@ class Route extends Module{
 
 	public function SetValue($itemsOrpath = null){
 		if(is_null($itemsOrpath)){
-            $this->Path = getValid(getDirection(\_::$URL),null,"/".$_GET[\_::$CONFIG->PathKey]);
+            $this->Path = getValid(getRequest(\_::$URL),null,"/".\_::$DIRECTION);
             $this->Items = null;
         }elseif(is_array($itemsOrpath)){
             $this->Path = null;

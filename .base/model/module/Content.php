@@ -50,8 +50,8 @@ class Content extends Module{
 		<div class="page internal-page active" id="internal">
 			<div class="frame"><?php
 							   if(!isValid($this->Content))
-								   if(isValid($_GET, \_::$CONFIG->PathKey))
-										PAGE(NormalizePath($_GET[\_::$CONFIG->PathKey]));
+								   if(isValid(\_::$DIRECTION))
+										PAGE(NormalizePath(\_::$DIRECTION));
 								   else PAGE("home");
 							   elseif(is_string($this->Content)) echo "".$this->Content;
 							   else ($this->Content)(); ?>
@@ -190,11 +190,6 @@ class Content extends Module{
 				frame.src = link;
 			}
 
-			// $(document).ready(function(){
-			// 	var purl = "<?php echo isset($_GET[\_::$CONFIG->PathKey])?$_GET[\_::$CONFIG->PathKey]:'home'; ?>";
-			// 	if(purl.search(/(^https?\:\/\/.*)|(^www\..*)/i) < 0) <?php echo $this->Name."_"; ?>ViewInternal(purl);
-			// 	else <?php echo $this->Name."_"; ?>ViewEmbed(purl);
-			// });
 		</script>
 		<?php
 	}

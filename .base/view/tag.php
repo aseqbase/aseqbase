@@ -1,6 +1,6 @@
 <?php
 use MiMFa\Library\DataBase;
-$path = implode("/", array_slice(explode("/",$_GET[\_::$CONFIG->PathKey]),1));
+$path = implode("/", array_slice(explode("/",\_::$DIRECTION),1));
 if(!isValid($path)){
     TEMPLATE("Main");
     $templ = new \MiMFa\Template\Main();

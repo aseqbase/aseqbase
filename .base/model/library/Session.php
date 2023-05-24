@@ -170,4 +170,6 @@ class Session
     }
 
 }
+
+Session::Start();
 ?>

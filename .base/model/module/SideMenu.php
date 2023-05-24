@@ -1,4 +1,8 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+MODULE("SearchForm");
+MODULE("UserMenu");
+MODULE("TemplateButton");
 class SideMenu extends Module{
 	public $Image = null;
 	public $Items = null;
@@ -6,6 +10,7 @@ class SideMenu extends Module{
 	public $Direction = "ltr";
 	public SearchForm|null $SearchForm = null;
 	public UserMenu|null $UserMenu = null;
+	public TemplateButton|null $TemplateButton = null;
 	public $HasBranding = true;
 	public $HasItems = true;
 	public $HasOthers = true;
@@ -17,6 +22,7 @@ class SideMenu extends Module{
         parent::__construct();
 		$this->SearchForm = new SearchForm();
 		$this->UserMenu = new UserMenu();
+		$this->TemplateButton = new TemplateButton();
     }
 
 	public function EchoStyle(){
@@ -139,7 +145,7 @@ class SideMenu extends Module{
 				text-align: center;
 			}
 			
-			.<?php echo $this->Name; ?> .other>*{
+			.<?php echo $this->Name; ?> .other>div{
 				width: fit-content;
 				display: inline-flex;
 			}
@@ -217,6 +223,7 @@ class SideMenu extends Module{
 				echo "<div class='other'>";
 					if($this->SearchForm != null) $this->SearchForm->Draw();
 					if($this->UserMenu != null) $this->UserMenu->Draw();
+					if($this->TemplateButton != null) $this->TemplateButton->Draw();
 				echo "</div>";
 			endif;
 

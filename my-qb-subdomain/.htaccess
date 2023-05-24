@@ -42,5 +42,5 @@ RewriteCond %{REQUEST_FILENAME} !-f
 # and the requested path and file don't directly match a physical folder
 RewriteCond %{REQUEST_FILENAME} !-d
 # Redirect all virtual paths to the main index.php
-RewriteRule (^[^\?]*)|((?<=\?).*$) /index.php?path=$1&$2 [QSA,L]
+RewriteRule ^ /index.php [L]
 ## End - MiMFa! core SEF Section.

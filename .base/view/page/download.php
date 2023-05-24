@@ -1,3 +1,4 @@
+<div class="page page-download">
 <script>load('<?php echo \_::$INFO->DownloadPath; ?>'); </script>
 <?php
 	MODULE("PrePage");
@@ -13,3 +14,4 @@
 	</div>";
 	$module->Draw();
 ?>
+</div>

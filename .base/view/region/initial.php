@@ -14,7 +14,7 @@
 		<meta name="abstract" content="<?php echo \_::$INFO->FullDescription; ?>">
 		<meta name="description" content="<?php echo \_::$INFO->FullDescription; ?>">
 		<meta name="twitter:description" content="<?php echo \_::$INFO->Description; ?>">
-		<meta name="twitter:image" content="<?php echo forceFullUrl('/view/style/view.css'); ?>">
+		<meta name="twitter:image" content="<?php echo forceFullUrl(\_::$INFO->LogoPath); ?>">
 		<?php COMPONENT("JSONLD"); (new \MiMFa\Component\JSONLD())->Draw(); ?>
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/reset.css'); ?>'>
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/general.css'); ?>'>

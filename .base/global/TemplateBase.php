@@ -1,4 +1,4 @@
-	<?php
+<?php
 	/**
 	 *All the basic website template values and functions
 	 *@copyright All rights are reserved for MiMFa Development Group
@@ -8,6 +8,7 @@
 	 */
 	abstract class TemplateBase extends Base{
 		public $AnimationSpeed = 250;
+		public $DetectMode = true;
 		public $DarkMode = null;
 
 		public $BasePack = "
@@ -56,6 +57,20 @@
 		public function __construct(){
 			if($this->IsDark($this->BackColor(0))===true) $this->DarkMode = true;
 			else $this->DarkMode = false;
+			changeSession("LightMode",getValid($_REQUEST,"LightMode"));
+			changeSession("DarkMode",getValid($_REQUEST,"DarkMode"));
+			if(
+				$this->DetectMode && (
+				($this->DarkMode && getSession("LightMode"))
+				||
+				(!$this->DarkMode && getSession("DarkMode"))
+			))
+			{
+                $middle = $this->ForeColorPalette;
+                $this->ForeColorPalette = $this->BackColorPalette;
+                $this->BackColorPalette = $middle;
+				$this->DarkMode = !$this->DarkMode;
+            }
 		}
 
 		public function GetInitial():string|null{
@@ -63,19 +78,19 @@
 			<script>
 				const load = function(url){
 					window.location.assign(url);
-				}
-				const open = function(url){
-					window.open(url, '_blank');
-				}
+				};
+				const open = function(url, target = '_blank'){
+					window.open(url, target);
+				};
 				const share = function(url, path=null){
-					window.open('sms://'+path+'?body='+url, '_blank');
-				}
+					open('sms://'+path+'?body='+url, '_blank');
+				};
 				const message = function(url, path=null){
-					window.open('sms://'+path+'?body='+url, '_blank');
-				}
+					open('sms://'+path+'?body='+url, '_blank');
+				};
 				const mailTo = function(url){
-					window.open('mailto:'+url, '_blank');
-				}
+					open('mailto:'+url, '_blank');
+				};
 				const getData = function(
 					request,
 					requestData,
@@ -87,6 +102,10 @@
 				
 					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
 
+					beforeFunc(requestData,selector);
+					return  $.get(request+'?'+requestData,function(data){successFunc(data,selector);}).fail(function(data){errorfunc(data,selector);});
+						"
+						/*
 					$.ajax({
 						type: 'GET',
 						url: request,
@@ -117,7 +136,8 @@
 						processData: false,
 						timeout: 600000
 					});
-				}
+					*/."
+				};
 				const postData = function(
 					request,
 					requestData,
@@ -163,7 +183,59 @@
 							processData: false,
 							timeout: 600000
 						});*/
-				."}
+				."};
+				const submitForm = function(
+					selector = 'form',
+					successFunc = function(data, selector){
+						$(selector + ' .result').remove();
+						$(selector).append(Html.success('".__("The form submitted successfully!")."'));
+					},
+					errorfunc = function(data, selector){
+						$(selector + ' .result').remove();
+						$(selector).append(Html.error(data??'".__("There a problem occured!")."'));
+					},
+					beforeFunc = function(data, selector){
+						$(selector + ' .result').remove();
+					},
+					processHandler = function(data){},
+					timeout = 600000
+				){
+					const actionPath = $(selector).attr('action');
+					const methodName = $(selector).attr('method');
+					const requestData = $(selector).serialize();
+					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
+
+					$.ajax({
+						type: methodName,
+						url: actionPath,
+						xhr: function () {
+							var myXhr = $.ajaxSettings.xhr();
+							if (myXhr.upload) myXhr.upload.addEventListener('progress', processHandler, false);
+							return myXhr;
+						},
+						success: function (data) {
+							successFunc(data,selector);
+							$(btns).removeClass('hide');
+							$(selector).css('opacity','1');
+						},
+						error: function (data) {
+							errorfunc(data,selector);
+							$(btns).removeClass('hide');
+							$(selector).css('opacity','1');
+						},
+						beforeSend: function (data) {
+							beforeFunc(data,selector);
+							$(btns).addClass('hide');
+							$(selector).css('opacity','.5');
+						},
+						async: true,
+						data: requestData,
+						cache: false,
+						contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':false,
+						processData: false,
+						timeout: timeout
+					});
+				};
 				const handleForm = function(
 					selector = 'form',
 					successFunc = function(data, selector){
@@ -220,7 +292,7 @@
 							timeout: timeout
 						});
 					});
-				}
+				};
 			</script>
 
 			<style>
@@ -361,4 +433,4 @@
 			return null;
 		}
 	}
-	?>
+?>

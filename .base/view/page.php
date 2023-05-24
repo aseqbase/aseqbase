@@ -1,5 +1,5 @@
 <?php
-$path = implode("/", array_slice(explode("/",$_GET[\_::$CONFIG->PathKey]),1));
+$path = implode("/", array_slice(explode("/",\_::$DIRECTION),1));
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
 if(!isValid($path))

@@ -2,8 +2,8 @@
 MODULE("Content");
 $module = new \MiMFa\Module\Content();
 $module->Content = function(){
-	if(isValid($_GET, \_::$CONFIG->PathKey))
-		PAGE(NormalizePath($_GET[\_::$CONFIG->PathKey]));
+	if(isValid(\_::$DIRECTION))
+		PAGE(NormalizePath(\_::$DIRECTION));
 	else PAGE("home");
 };
 $module->Draw();
