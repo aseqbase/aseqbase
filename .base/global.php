@@ -10,7 +10,7 @@
 	class _ {
 		/**
 		 * The version of aseqbase framework
-		 * Generation	.	Major	Minor	0:base|1:test|2:alpha|3:beta|4:beta-stable|5<=9:stable
+		 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 		 * X		.	xx	xx	x
 		 * @var float
 		 */
