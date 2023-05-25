@@ -10,11 +10,11 @@
 	class _ {
 		/**
 		 * The version of aseqbase framework
-		 * Generation	.	Major	Minor	0:basic|1:alpha|2:beta|5<=9:stable
+		 * Generation	.	Major	Minor	0:base|1:test|2:alpha|3:beta|4:beta-stable|5<=9:stable
 		 * X		.	xx	xx	x
 		 * @var float
 		 */
-		public static float $VERSION = 1.00006;
+		public static float $VERSION = 0.21003;
 
 		/**
 		 * The top domain name
@@ -536,7 +536,15 @@
 		return \MiMFa\Library\Local::GetFullUrl($path, $optimize);
 	}
 	function getUrl(string|null $path = null):string|null{
-		if($path === null) $path = isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:((empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
+		if($path === null)
+			$path = //$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'] or
+				(
+					(
+						getValid($_SERVER,'SCRIPT_URI')??
+						(((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https":"http").
+						"://".$_SERVER["HTTP_HOST"].(getValid($_SERVER,'PHP_SELF')?? $_SERVER["REQUEST_URI"])
+					).($_SERVER['QUERY_STRING']?"?".$_SERVER['QUERY_STRING']:"")
+				);
 		return preg_replace("/^[\/\\\]/",rtrim(GetHost(),"/\\")."$1",$path);
 	}
 	function getHost(string|null $path = null):string|null{
@@ -553,7 +561,7 @@
 		return PREG_Replace("/(^\w+:\/*[^\/]+)|([\?#].+$)/","", $path);
 	}
 	function getDirection(string|null $path = null):string|null{
-		if($path == null) $path = ltrim($_SERVER["REQUEST_URI"],"\\\/");
+		if($path == null) $path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
 		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
 		return PREG_Replace("/(^\w+:\/{2}[^\/]+\/)|([\?#].+$)/","", $path);
 	}
@@ -828,7 +836,7 @@
 	}
 
 	//Test Region
-	function echoDetails(){
+	function test_Details(){
 		echo "<br>"."PHP_SELF: ".$_SERVER['PHP_SELF'];
 		echo "<br>"."GATEWAY_INTERFACE: ".$_SERVER['GATEWAY_INTERFACE'];
 		echo "<br>"."SERVER_ADDR: ".$_SERVER['SERVER_ADDR'];
@@ -854,7 +862,17 @@
 		echo "<br>"."SCRIPT_NAME: ".$_SERVER['SCRIPT_NAME'];
 		echo "<br>"."SCRIPT_URI: ".$_SERVER['SCRIPT_URI'];
 	}
-	function test($func,$res=null){
+	function test_Address(){
+		echo "<br>URL: "._::$URL;
+		echo "<br>HOST: "._::$HOST;
+		echo "<br>PATH: "._::$PATH;
+		echo "<br>REQUEST: "._::$REQUEST;
+		echo "<br>DIRECTION: "._::$DIRECTION;
+		echo "<br>QUERY: "._::$QUERY;
+		echo "<br>ANCHOR: "._::$ANCHOR;
+		echo "<br>EMAIL: "._::$EMAIL;
+	}
+	function test_Access($func,$res=null){
 		$r = null;
 		if(ACCESS(0, false)){
 			if($r = $func()) echo "<b>TRUE: ".($r??$res)."</b><br>";
