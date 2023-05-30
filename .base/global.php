@@ -115,6 +115,9 @@
 		public static ConfigurationBase|null $CONFIG = null;
 		public static InformationBase|null $INFO = null;
 		public static TemplateBase|null $TEMPLATE = null;
+		
+		public static $PREPENDS = array();
+		public static $APPENDS = array();
 	
 		/**
 		 * The current website url root
@@ -332,15 +335,17 @@
 		}
 		return null;
 	}
+	
 	function USING(string $dir, string|null $name = null, array $variables = array(), bool $print = true, string|null $extension = ".php"){
 		$extension = $extension??\_::$EXTENSION;
-		if(empty($name))
-			if(isFormat($dir, $extension)) return INCLUDING($dir, $variables, $print);
-			else return INCLUDING($dir.$extension, $variables, $print);
-		elseif(isFormat($name, $extension)) return INCLUDING($dir.$name, $variables, $print);
-		else return INCLUDING($dir.$name.$extension, $variables, $print);
+		try{ applyPrepends($dir, $name);
+			if(empty($name))
+				if(isFormat($dir, $extension)) return INCLUDING($dir, $variables, $print);
+				else return INCLUDING($dir.$extension, $variables, $print);
+			elseif(isFormat($name, $extension)) return INCLUDING($dir.$name, $variables, $print);
+			else return INCLUDING($dir.$name.$extension, $variables, $print);
+        } finally{ applyAppends($dir, $name); }
 	}
-
 	function forceUSING(string $nodeDir, string $baseDir, string $name, array $variables = array(), bool $print = true){
 		if(($seq = USING($nodeDir,$name, $variables, $print)) !== null) return $seq;
 		if(count(\_::$SEQUENCES) > 0){
@@ -352,6 +357,54 @@
 		if(($seq = USING($baseDir,$name, $variables, $print)) !== null) return $seq;
 		return null;
 	}
+	/**
+	 * Prepend something to any function or directory's files or actions
+	 * @param mixed function name or directory 
+	 * @param null|string file name 
+	 * @param null|string|callable the action or content tou want to do 
+	 */
+	function prepend($toCase, string|null $name = null, null|string|callable $value = null){
+        if(isValid($value)){
+			$toCase = strtoupper($toCase??"");
+			$name = strtoupper($name??"");
+            if(!isset(\_::$PREPENDS[$toCase])) \_::$PREPENDS[$toCase] = array();
+            if(!isset(\_::$PREPENDS[$toCase][$name])) \_::$PREPENDS[$toCase][$name] = array();
+            array_push(\_::$PREPENDS[$toCase][$name], $value);
+        }
+    }
+		/**
+	 * Append something to any function or directory's files or actions
+	 * @param mixed function name or directory 
+	 * @param null|string file name 
+	 * @param null|string|callable the action or content tou want to do 
+	 */
+	function append($toCase, string|null $name = null, null|string|callable $value = null){
+        if(isValid($value)){
+			$toCase = strtoupper($toCase??"");
+			$name = strtoupper($name??"");
+            if(!isset(\_::$APPENDS[$toCase])) \_::$APPENDS[$toCase] = array();
+            if(!isset(\_::$APPENDS[$toCase][$name])) \_::$APPENDS[$toCase][$name] = array();
+            array_push(\_::$APPENDS[$toCase][$name], $value);
+        }
+    }
+	function applyPrepends($toCase, string|null $name = null){
+		$toCase = strtoupper($toCase??"");
+		$name = strtoupper($name??"");
+        if(!isset(\_::$PREPENDS[$toCase][$name])) return;
+        $value = \_::$PREPENDS[$toCase][$name];
+		if(is_string($value))
+			echo $value;
+        else return ($value)();
+    }
+	function applyAppends($toCase, string|null $name = null){
+		$toCase = strtoupper($toCase??"");
+		$name = strtoupper($name??"");
+        if(!isset(\_::$APPENDS[$toCase][$name])) return;
+        $value = \_::$APPENDS[$toCase][$name];
+		if(is_string($value))
+			echo $value;
+        else return ($value)();
+    }
 
 	/**
 	 * To interprete, the specified path
@@ -361,7 +414,9 @@
 	 * @return mixed
 	 */
 	function RUN(string|null $name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$DIR, \_::$BASE_DIR, $name, $variables, $print);
+		try{ applyPrepends("RUN", $name);
+			return forceUSING(\_::$DIR, \_::$BASE_DIR, $name, $variables, $print);
+        } finally{ applyAppends("RUN", $name); }
 	}
 	/**
 	 * To interprete, the specified ModelName
@@ -371,7 +426,9 @@
 	 * @return mixed
 	 */
 	function MODEL(string $name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$MODEL_DIR, \_::$BASE_MODEL_DIR, $name, $variables, $print);
+		try{ applyPrepends("MODEL", $name);
+			return forceUSING(\_::$MODEL_DIR, \_::$BASE_MODEL_DIR, $name, $variables, $print);
+        } finally{ applyAppends("MODEL", $name); }
 	}
 	/**
 	 * To interprete, the specified LibraryName
@@ -381,7 +438,9 @@
 	 * @return mixed
 	 */
 	function LIBRARY(string $Name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $Name, $variables, $print);
+		try{ applyPrepends("LIBRARY", $Name);
+			return forceUSING(\_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $Name, $variables, $print);
+        } finally{ applyAppends("LIBRARY", $Name); }
 	}
 	/**
 	 * To interprete, the specified ComponentName
@@ -391,7 +450,9 @@
 	 * @return mixed
 	 */
 	function COMPONENT(string $Name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $Name, $variables, $print);
+		try{ applyPrepends("COMPONENT", $Name);
+			return forceUSING(\_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $Name, $variables, $print);
+        } finally{ applyAppends("COMPONENT", $Name); }
 	}
 	/**
 	 * To interprete, the specified TemplateName
@@ -401,7 +462,9 @@
 	 * @return mixed
 	 */
 	function MODULE(string $Name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $Name, $variables, $print);
+		try{ applyPrepends("MODULE", $Name);
+			return forceUSING(\_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $Name, $variables, $print);
+        } finally{ applyAppends("MODULE", $Name); }
 	}
 	/**
 	 * To interprete, the specified TemplateName
@@ -411,7 +474,9 @@
 	 * @return mixed
 	 */
 	function TEMPLATE(string $Name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $Name, $variables, $print);
+		try{ applyPrepends("TEMPLATE", $Name);
+			return forceUSING(\_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $Name, $variables, $print);
+        } finally{ applyAppends("TEMPLATE", $Name); }
 	}
 	/**
 	 * To interprete, the specified viewname
@@ -421,9 +486,11 @@
 	 * @return mixed
 	 */
 	function VIEW(string $name, array $variables = array(), bool $print = true){
-		$output = executeCommands(forceUSING(\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, $variables, false));
-		if($print) return SET(\_::$CONFIG->AllowReduceSize?ReduceSize($output):$output);
-		else return \_::$CONFIG->AllowReduceSize?ReduceSize($output):$output;
+		try{ applyPrepends("VIEW", $name);
+			$output = executeCommands(forceUSING(\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, $variables, false));
+			if($print) return SET(\_::$CONFIG->AllowReduceSize?ReduceSize($output):$output);
+			else return \_::$CONFIG->AllowReduceSize?ReduceSize($output):$output;
+        } finally{ applyAppends("VIEW", $name); }
 	}
 	/**
 	 * To interprete, the specified pagename
@@ -433,7 +500,9 @@
 	 * @return mixed
 	 */
 	function PAGE(string $name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$PAGE_DIR, \_::$BASE_PAGE_DIR, $name, $variables, $print);
+		try{ applyPrepends("PAGE", $name);
+			return forceUSING(\_::$PAGE_DIR, \_::$BASE_PAGE_DIR, $name, $variables, $print);
+        } finally{ applyAppends("PAGE", $name); }
 	}
 	/**
 	 * To interprete, the specified regionname
@@ -443,7 +512,9 @@
 	 * @return mixed
 	 */
 	function REGION(string $name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$REGION_DIR, \_::$BASE_REGION_DIR, $name, $variables, $print);
+		try{ applyPrepends("REGION", $name);
+			return forceUSING(\_::$REGION_DIR, \_::$BASE_REGION_DIR, $name, $variables, $print);
+        } finally{ applyAppends("REGION", $name); }
 	}
 	/**
 	 * To interprete, the specified partname
@@ -453,7 +524,9 @@
 	 * @return mixed
 	 */
 	function PART(string $name, array $variables = array(), bool $print = true){
-		return forceUSING(\_::$PART_DIR, \_::$BASE_PART_DIR, $name, $variables, $print);
+		try{ applyPrepends("PART", $name);
+			return forceUSING(\_::$PART_DIR, \_::$BASE_PART_DIR, $name, $variables, $print);
+        } finally{ applyAppends("PART", $name); }
 	}
 
 	function __(string|null $text, bool $translate = true, bool $styling = true):string|null {
