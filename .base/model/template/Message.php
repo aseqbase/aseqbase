@@ -98,7 +98,7 @@ class Message extends Template{
 					}
 				</style>
         <?php }
-		public function DrawBody(){?>
+		public function DrawMain(){?>
 			</head>
 			<body>
         <?php }

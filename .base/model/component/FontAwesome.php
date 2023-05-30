@@ -2,6 +2,11 @@
 class FontAwesome extends Component{
 	public $DefaultRoot = "body";
 	
+	public function __construct(){
+		parent::__construct();
+		append("REGION", "initial","<script src='https://kit.fontawesome.com/e557f8d9f4.js' crossorigin='anonymous'></script>");
+	}
+
 	public function Echo(){
 		$this->EchoStyle();
 		$this->EchoTechnologyStyle();

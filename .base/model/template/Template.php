@@ -50,7 +50,7 @@ class Template extends \Base{
      * Leave null for default action or replace an action to change
      * @var callable|null
      */
-	public $Body = null;
+	public $Main = null;
 	/**
      * Leave null for default action or replace an action to change
      * @var callable|null
@@ -77,10 +77,10 @@ class Template extends \Base{
             if(is_string($this->Initial)) echo $this->Initial;
             else ($this->Initial)();
 		else $this->DrawInitial();
-		if(isValid($this->Body))
-            if(is_string($this->Body)) echo $this->Body;
-            else ($this->Body)();
-		else $this->DrawBody();
+		if(isValid($this->Main))
+            if(is_string($this->Main)) echo $this->Main;
+            else ($this->Main)();
+		else $this->DrawMain();
         if(isValid($this->Header))
             if(is_string($this->Header))  echo $this->Header;
             else ($this->Header)();
@@ -107,8 +107,8 @@ class Template extends \Base{
 		<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??\_::$INFO->LogoPath); ?>" />
 	<?php
     }
-	public function DrawBody(){
-        REGION("body");
+	public function DrawMain(){
+        REGION("main");
     }
 	public function DrawHeader(){
     }

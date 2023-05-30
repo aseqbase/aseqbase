@@ -255,17 +255,17 @@ class Main extends Template{
 				}
 			</style>
 		<?php }
-		public function DrawBody(){
-			parent::DrawBody();?>
-			<div class='background-screen'></div>
-			<?php if($this->AllowTopMenu) PART("main-menu"); ?>
-			<?php if($this->AllowSideMenu) PART("side-menu"); ?>
-		<?php }
-		public function DrawContent(){
-			parent::DrawContent();
-			PART("content");
-		}
-		public function DrawFooter(){
+	public function DrawMain(){
+		parent::DrawMain();?>
+		<div class='background-screen'></div>
+		<?php if($this->AllowTopMenu) PART("main-menu"); ?>
+		<?php if($this->AllowSideMenu) PART("side-menu"); ?>
+	<?php }
+	public function DrawContent(){
+		parent::DrawContent();
+		PART("content");
+	}
+	public function DrawFooter(){
 			parent::DrawFooter(); ?>
 			<?php if($this->AllowFooter) PART("footer"); ?>
 			<?php if($this->AllowBarMenu) PART("bar-menu"); ?>

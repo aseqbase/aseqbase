@@ -412,7 +412,7 @@
 				}
 			</style>";
 		}
-		public function GetBody():string|null{
+		public function GetMain():string|null{
 			return "";
 		}
 		public function GetFinal():string|null{

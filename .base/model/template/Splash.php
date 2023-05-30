@@ -188,8 +188,8 @@ class Splash extends Template{
 		}
 	</style>
 <?php }
-    public function DrawBody(){
-        parent::DrawBody();?>
+    public function DrawMain(){
+        parent::DrawMain();?>
 	<div class='splash-view'>
 		<div class='content'>
 			<div class='frame frame-1'>
