@@ -57,13 +57,13 @@
 		public function __construct(){
 			if($this->IsDark($this->BackColor(0))===true) $this->DarkMode = true;
 			else $this->DarkMode = false;
-			changeSession("LightMode",getValid($_REQUEST,"LightMode"));
-			changeSession("DarkMode",getValid($_REQUEST,"DarkMode"));
+			$lm = getValid($_REQUEST,"LightMode")? changeMemo("LightMode",getValid($_REQUEST,"LightMode", null)) : false;
+			$dm = getValid($_REQUEST,"DarkMode")? changeMemo("DarkMode",getValid($_REQUEST,"DarkMode", null)) : false;
 			if(
 				$this->DetectMode && (
-				($this->DarkMode && getSession("LightMode"))
+				($this->DarkMode && (!empty($lm) || getMemo("LightMode")))
 				||
-				(!$this->DarkMode && getSession("DarkMode"))
+				(!$this->DarkMode && (!empty($dm) || getMemo("DarkMode")))
 			))
 			{
                 $middle = $this->ForeColorPalette;
@@ -76,20 +76,20 @@
 		public function GetInitial():string|null{
 			return "
 			<script>
-				const load = function(url){
-					window.location.assign(url);
+				const load = function(url=null){
+					window.location.assign(url??location.href);
 				};
-				const open = function(url, target = '_blank'){
-					window.open(url, target);
+				const open = function(url=null, target = '_blank'){
+					window.open(url??location.href, target);
 				};
-				const share = function(url, path=null){
-					open('sms://'+path+'?body='+url, '_blank');
+				const share = function(url=null, path=null){
+					open('sms://'+path+'?body='+(url??location.href), '_blank');
 				};
-				const message = function(url, path=null){
-					open('sms://'+path+'?body='+url, '_blank');
+				const message = function(url=null, path=null){
+					open('sms://'+path+'?body='+(url??location.href), '_blank');
 				};
-				const mailTo = function(url){
-					open('mailto:'+url, '_blank');
+				const mailTo = function(url=null){
+					open('mailto:'+(url??`".\_::$EMAIL."`), '_blank');
 				};
 				const getData = function(
 					request,

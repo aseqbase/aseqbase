@@ -109,13 +109,19 @@ abstract class ConfigurationBase extends Base {
      * @category Optimization
      */
 	public $AllowTranslate = false;
-
+    
 	/**
      * A special key for yhis website
      * @var string
      * @category Security
      */
 	public $SecretKey = '~a!s@e#q$b%a^s&e*';
+    /**
+     * The prefix to use in sessions and public whare!
+     * @var string
+     * @category DataBase
+     */
+	public $PublicPrefix = 'qb';
 	/**
      * Allow to set sessions on the client side (false for default)
      * @var bool
