@@ -247,9 +247,9 @@
 
 	LIBRARY("Local");
 	LIBRARY("DataBase");
+	LIBRARY("Session");
 	LIBRARY("Style");
 	LIBRARY("Translate");
-	LIBRARY("Session");
 	LIBRARY("Convert");
 	LIBRARY("Contact");
 	LIBRARY("User");
@@ -291,9 +291,8 @@
 		return \_::$INFO->User->Access($access);
 	}
 	function getAccess($access = null):int{
-		if(is_null($access)) return getValid(\_::$INFO->User,"Access",0);
-		elseif(!is_null(\_::$INFO->User)) return \_::$INFO->User->Access($access);
-		else return 0;
+		if(is_null($access) && !is_null(\_::$INFO->User)) return \_::$INFO->User->Access($access);
+		else return \_::$CONFIG->GuestAccess;
 	}
 
 	function SET($output = null){
@@ -534,7 +533,19 @@
 		if($translate && \_::$CONFIG->AllowTranslate) $text = \MiMFa\Library\Translate::Get($text);
 		return $text;
 	}
-
+	
+	function go($url){
+        echo "<script>load('$url');</script>";
+    }
+	function load($url = null){
+        echo "<script>load(".(isValid($url)?"'$url'":"null").");</script>";
+    }
+	function open($url = null, $target = "_blank"){
+        echo "<script>open(".(isValid($url)?"'$url'":"null").", '$target');</script>";
+    }
+	function share($url = null, $path = null){
+        echo "<script>share(".(isValid($url)?"'$url'":"null").", ".(isValid($path)?"'$path'":"null").");</script>";
+    }
 
 	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/\<\S+[\w\W]*\>/i")
 	{
@@ -552,6 +563,17 @@
 				$html = str_replace($v,$k,$html);
 		return $html;
 	}
+	
+	function encrypt($plain){
+		if(is_null($plain)) return null;
+		if(empty($plain)) return $plain;
+		return \MiMFa\Library\HashCrypt::Encrypt($plain,\_::$CONFIG->SecretKey, true);
+    }
+	function decrypt($cipher){
+		if(is_null($cipher)) return null;
+		if(empty($cipher)) return $cipher;
+		return \MiMFa\Library\HashCrypt::Decrypt($cipher,\_::$CONFIG->SecretKey, true);
+    }
 
 	function startsWith(string|null $haystack, string|null $needle):bool {
 		return substr_compare($haystack, $needle, 0, strlen($needle)) === 0;
@@ -653,22 +675,69 @@
 		return $mailName."@".PREG_replace("/\w+:\/{1,2}(www\.)?/","", getHost($path));
 	}
 	
-	function changeSession($key, $val){
-		if($val=="!") {
-			\MiMFa\Library\Session::Pop($key);
-			return false;
+	function changeMemo($key, $val){
+		if($val=="!" || is_null($val)) {
+			popMemo($key);
+			return null;
         }
-		else \MiMFa\Library\Session::Set($key,$val);
-		return true;
+		else setMemo($key,$val);
+		return $val;
+	}
+	function popMemo($key){
+		$val = getMemo($key);
+		forgetMemo($key);
+		return $val;
+	}
+	function setMemo($key, $val){
+		if($val == null) return false;
+		return setcookie($key, $val, 0,"/");
+	}
+	function getMemo($key){
+		if(isset($_COOKIE[$key])) return $_COOKIE[$key];
+		else return null;
+	}
+	function hasMemo($key){
+		return !is_null(getMemo($key));
+	}
+	function forgetMemo($key){
+		unset($_COOKIE[$key]);
+		return setcookie($key, "", 0,"/");
+	}
+	function flushMemos($key){
+		foreach($_COOKIE as $key => $val){
+            unset($_COOKIE[$key]);
+            return setcookie($key, "", 0,"/");
+        }
+	}
+
+	function changeSession($key, $val){
+		if($val=="!" || is_null($val)) {
+			popSession($key);
+			return null;
+        }
+		else setSession($key,$val);
+		return $val;
 	}
 	function popSession($key){
-		return \MiMFa\Library\Session::Pop($key);
+		$val = getSession($key);
+		forgetSession($key);
+		return $val;
 	}
 	function setSession($key, $val){
-		return \MiMFa\Library\Session::Set($key,$val);
+		return $_SESSION[$key] = $val;
 	}
 	function getSession($key){
-		return \MiMFa\Library\Session::Get($key);
+		return getValid($_SESSION,$key);
+	}
+	function hasSession($key){
+		return isValid($_SESSION,$key);
+	}
+	function forgetSession($key){
+		unset($_SESSION[$key]);
+	}
+	function flushSessions($key){
+		foreach($_SESSION as $key => $val)
+			unset($_SESSION[$key]);
 	}
 
 	function getClientIP($ver = null):string|null{
