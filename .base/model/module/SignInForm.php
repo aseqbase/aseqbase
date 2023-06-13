@@ -17,10 +17,12 @@ class SignInForm extends Module{
 	public $SignUpLabel = "Do not have an account?";
 	public $RememberLabel = "Forgot your password?";
 	public $BackLabel = "Back to Home";
+	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="%3$s"><p class="welcome">Hello %1$s,<br>You are signed in now, also there you can sign with another account!</p></div>';
 	public $BackLink = "/";
 	public $InternalMethod = "post";
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
+	public $MultipleSignIn = false;
 	public $SignUpIfNotRegistered = false;
 
 	public function EchoStyle(){
@@ -83,19 +85,34 @@ class SignInForm extends Module{
 			.<?php echo $this->Name ?> .form-control:focus {
 				box-shadow: none;
 			}
-
+			
+			.<?php echo $this->Name ?> div.welcome {
+				text-align: center;
+			}
+			.<?php echo $this->Name ?> div.welcome img.welcome {
+				width: 50%;
+				max-width: 300px;
+				border-radius: 100%;
+			}
+			.<?php echo $this->Name ?> div.welcome p.welcome {
+				text-align: center;
+			}
+			
 		</style>
 		<?php
 	}
 
 	public function Echo(){
 		$src = ($this->Path??\MiMFa\Library\User::$InHandlerPath);
-		if(isValid($src)): ?>
+		$acc = \_::$INFO->User->Access(1);
+		if($acc && !$this->MultipleSignIn) printf(__($this->WelcomeFormat), \_::$INFO->User->Name, \_::$INFO->User->Email, \_::$INFO->User->Image);
+		else if(isValid($src)): ?>
 			<div class="signform container">
 				<div class="row align-items-center">
 					<!-- For Demo Purpose -->
 					<div class="col-md-5 pr-lg-5 mb-5 mb-md-0">
 						<img src="<?php echo forceUrl($this->Image);?>" alt="" class="img-fluid mb-3 d-none d-md-block">
+						<?php if($acc) printf(__($this->WelcomeFormat), \_::$INFO->User->Name, \_::$INFO->User->Email, \_::$INFO->User->Image); ?>
 						<h2><?php echo __($this->Title);?></h2>
 						<p class="font-italic text-muted mb-0"><?php echo __($this->Description??\_::$INFO->Slogan) ?></p>
 						<a href="<?php echo __($this->BackLink);?>" class="text-muted">
@@ -184,6 +201,7 @@ class SignInForm extends Module{
 						if (data.includes("result success")) {
 							$('.<?php echo $this->Name ?> .signform').remove();
 							$(".<?php echo $this->Name ?>").append(data);
+							load();
 						}
 						else {
 							$(".<?php echo $this->Name ?> form .result").remove();
@@ -212,15 +230,18 @@ class SignInForm extends Module{
 				$_req = $_POST;
 			break;
         }
-        if(!ACCESS(1)) try {
-			if(isValid($_req,"username") && isValid($_req,"password"))
-                if($this->SignUpIfNotRegistered?
+		if(!ACCESS(1)) try {
+			if(isValid($_req,"username") && isValid($_req,"password")){
+				$res = $this->SignUpIfNotRegistered?
 						\_::$INFO->User->SignInOrSignUp(getValid($_req,"username"), getValid($_req,"password")):
-						\_::$INFO->User->SignIn(getValid($_req,"username"), getValid($_req,"password"))
-				) {
-                	echo "<div class='result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', you have logged in successfully")."</div>";
-                }
-                else echo "<div class='result error'>".__("UserName or password is not correct!")."</div>";
+						\_::$INFO->User->SignIn(getValid($_req,"username"), getValid($_req,"password"));
+				if($res === true)
+                	echo "<div class='page result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', you have logged in successfully")."</div>";
+				elseif($res === false)
+					echo "<div class='result error'>".__("UserName or password is not correct!")."</div>";
+				else
+					echo "<div class='result error'>".__($res)."</div>";
+			}
 			else echo "<div class='result warning'>".__("Please fill all fields correctly!")."</div>";
 		} catch(\Exception $ex) { echo "<div class='result error'>".__($ex->getMessage())."</div>"; }
 		else echo "<div class='result warning'>".__("You are logged in!")."</div>";

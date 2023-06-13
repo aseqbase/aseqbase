@@ -41,10 +41,6 @@ if(isValid($path)){
             }
         break;
 
-        case "active":
-		    PART("sign/active");
-        break;
-
         default:
             TEMPLATE("Main");
             $templ = new \MiMFa\Template\Main();

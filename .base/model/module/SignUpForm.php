@@ -46,12 +46,21 @@ class SignUpForm extends Module{
 	public $RoutePlaceHolder = "Introduction Method";
 	public $SignInLabel = "Do you have an account?";
 	public $BackLabel = "Back to Home";
+	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="%3$s"><p class="welcome">Hello %1$s,<br>You are signed in now, also there you can sign with another account!</p></div>';
 	public $BackLink = "/";
 	public $InternalMethod = "post";
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
+	public $MultipleSignIn = false;
 	public $SendActivationEmail = true;
 	public $GroupID = null;
+	/**
+	 * Initial User Status:
+     *		true/1:		Activated
+     *		null/0:		Default Action
+     *		false/-1:		Deactivated
+	 * @var bool|null
+	 */
 	public $InitialStatus = null;
 
 	public function EchoStyle(){
@@ -118,18 +127,34 @@ class SignUpForm extends Module{
 			.<?php echo $this->Name ?> .form-control:focus {
 				box-shadow: none;
 			}
+
+			.<?php echo $this->Name ?> div.welcome {
+				text-align: center;
+			}
+			.<?php echo $this->Name ?> div.welcome img.welcome {
+				width: 50%;
+				max-width: 300px;
+				border-radius: 100%;
+			}
+			.<?php echo $this->Name ?> div.welcome p.welcome {
+				text-align: center;
+			}
+			
 		</style>
 		<?php
 	}
 
 	public function Echo(){
 		$src = ($this->Path??\MiMFa\Library\User::$UpHandlerPath);
-		if(isValid($src)): ?>
+		$acc = \_::$INFO->User->Access(1);
+		if($acc && !$this->MultipleSignIn) printf(__($this->WelcomeFormat), \_::$INFO->User->Name, \_::$INFO->User->Email, \_::$INFO->User->Image);
+		else if(isValid($src)): ?>
 			<div class="signform container">
 				<div class="row align-items-center">
 					<!-- For Demo Purpose -->
 					<div class="col-md-5 pr-lg-5 mb-5 mb-md-0">
 						<img src="<?php echo forceUrl($this->Image);?>" alt="" class="img-fluid mb-3 d-none d-md-block">
+						<?php if($acc) printf(__($this->WelcomeFormat), \_::$INFO->User->Name, \_::$INFO->User->Email, \_::$INFO->User->Image); ?>
 						<h2><?php echo __($this->Title);?></h2>
 						<p class="font-italic text-muted mb-0"><?php echo __($this->Description??\_::$INFO->Slogan) ?></p>
 						<a href="<?php echo __($this->BackLink);?>" class="text-muted">
@@ -285,6 +310,7 @@ class SignUpForm extends Module{
 						if (data.includes("result success")) {
 							$('.<?php echo $this->Name ?> .signform').remove();
 							$(".<?php echo $this->Name ?>").append(data);
+							load();
 						}
 						else {
 							$(".<?php echo $this->Name ?> form .result").remove();
@@ -313,15 +339,15 @@ class SignUpForm extends Module{
 				$_req = $_POST;
 			break;
         }
-        if(!ACCESS(1)) try {
+		if(!ACCESS(1)) try {
 			if(isValid($_req,"email") || isValid($_req,"password"))
-            {
+			{
 				$phone = getValid($_req,"countrycode").getValid($_req,"phone");
 				if(strlen($phone) < 6) $phone = null;
 				if(\_::$INFO->User->SignUp(
-					getValid($_req,"email"),
-					getValid($_req,"password"),
 					getValid($_req,"username"),
+					getValid($_req,"password"),
+					getValid($_req,"email"),
 					null,
 					getValid($_req,"firstname"),
 					getValid($_req,"lastname"),
@@ -329,12 +355,14 @@ class SignUpForm extends Module{
 					$this->GroupID,
 					$this->InitialStatus
 				))
-                {
-                	echo "<div class='result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully")."</div>";
-					if($this->SendActivationEmail) PART("sign/active");
-                }
-                else echo "<div class='result error'>".__("The user with these email and username could not register!")."</div>";
-            }
+				{
+					echo "<div class='page'>";
+                		echo "<div class='result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully")."</div>";
+						if($this->SendActivationEmail) PART("sign/active");
+					echo "</div>";
+				}
+				else echo "<div class='result error'>".__("The user with these email and username could not register!")."</div>";
+			}
 			else echo "<div class='result warning'>".__("Please fill all required fields correctly!")."</div>";
 		} catch(\Exception $ex) { echo "<div class='result error'>".__($ex->getMessage())."</div>"; }
 		else echo "<div class='result warning'>".__("You are logged in!")."</div>";
