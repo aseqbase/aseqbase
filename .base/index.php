@@ -6,6 +6,6 @@ if(ACCESS()){
             if(preg_match($pat, \_::$DIRECTION)
 				&& VIEW($handler, $_REQUEST)) return;
 		VIEW(\_::$CONFIG->ViewName??\_::$CONFIG->DefaultViewName??"main",$_REQUEST);
-    } else VIEW(\_::$CONFIG->HomeViewName);
+    } else VIEW(\_::$CONFIG->HomeViewName, $_REQUEST);
 }
 ?>

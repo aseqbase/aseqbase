@@ -314,6 +314,7 @@
 		if(file_exists($filePath)){
 			//if(count($variables) > 0) $filePath = rtrim($filePath,"/")."?". http_build_query($variables);
 			//if(count($variables) > 0) extract($variables);
+			//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
 			ob_start();
 			include_once $filePath;
 			$output = ob_get_clean();
@@ -326,6 +327,7 @@
 		global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT;
 		if(file_exists($filePath)){
 			//if(count($variables) > 0) extract($variables);
+			//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
 			ob_start();
 			require_once $filePath;
 			$output = ob_get_clean();

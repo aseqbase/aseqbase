@@ -230,9 +230,9 @@
 						},
 						async: true,
 						data: requestData,
-						cache: false,
-						contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':false,
-						processData: false,
+						//cache: false,
+						//contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':'application/x-www-form-urlencoded',
+						//processData: false,
 						timeout: timeout
 					});
 				};
@@ -286,9 +286,9 @@
 							},
 							async: true,
 							data: requestData,
-							cache: false,
-							contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':false,
-							processData: false,
+							//cache: false,
+							//contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':'application/x-www-form-urlencoded',
+							//processData: false,
 							timeout: timeout
 						});
 					});

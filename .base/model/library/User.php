@@ -5,14 +5,14 @@ require_once "DataBase.php";
 require_once "SpecialCrypt.php";
 class User extends \Base{
 	public static $HandlerPath = "/sign";
-	public static $SignHandlerPath = "/sign/sign";
-	public static $UpHandlerPath = "/sign/up";
-	public static $InHandlerPath = "/sign/in";
-	public static $OutHandlerPath = "/sign/out";
-	public static $RememberHandlerPath = "/sign/remember";
-	public static $ProfileHandlerPath = "/sign/profile";
-	public static $ResetHandlerPath = "/sign/reset";
-	public static $ActiveHandlerPath = "/sign/active";
+	public static $SignHandlerPath = "/sign/sign.php";
+	public static $UpHandlerPath = "/sign/up.php";
+	public static $InHandlerPath = "/sign/in.php";
+	public static $OutHandlerPath = "/sign/out.php";
+	public static $RememberHandlerPath = "/sign/remember.php";
+	public static $ProfileHandlerPath = "/sign/profile.php";
+	public static $ResetHandlerPath = "/sign/reset.php";
+	public static $ActiveHandlerPath = "/sign/active.php";
 
 	public static $ResetRequestKey = "resetkey";
 	public static $ActiveRequestKey = "activekey";
@@ -73,25 +73,7 @@ class User extends \Base{
 		return in_array($task, $this->Accesses);
 	}
 
-
-	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){
-		$password = $this->CheckPassword($password);
-		return DataBase::DoInsert(\_::$CONFIG->DataBasePrefix."User",null, 
-			[
-				":Signature"=>$signature??$email,
-				":Email"=>$this->TemporaryEmail = $email,
-				":Password"=> $password,
-				":Name"=> $this->TemporaryName = $name?? trim($firstName." ".$lastName),
-				":FirstName"=> $firstName,
-				":LastName"=> $lastName,
-				":Contact"=> $phone,
-				":GroupID"=> $groupID??\_::$CONFIG->RegisteredGroup,
-				":Status"=> $status
-			]);
-	}
-
-	public function SignIn($signature, $password = null){
-		$person;
+	public function GetUser($signature, $password = null){
 		if(isValid($password)) {
 			$password = $this->CheckPassword($password);
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
@@ -109,6 +91,30 @@ class User extends \Base{
 		if(is_null($person)) throw new \ErrorException("There a problem is occured!");
 		if(count($person) < 1) throw new \ErrorException("The username or password is incorrect!");
 		$person = $person[0];
+		$this->TemporaryName = getValid($person,"Name");
+		$this->TemporaryEmail = getValid($person,"Email");
+		return $person;
+	}
+
+	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){
+		$password = $this->CheckPassword($password);
+		return DataBase::DoInsert(\_::$CONFIG->DataBasePrefix."User",null, 
+			[
+				":Signature"=>$signature??$email,
+				":Email"=>$this->TemporaryEmail = $email,
+				":Password"=> $password,
+				":Name"=> $this->TemporaryName = $name?? trim($firstName." ".$lastName),
+				":FirstName"=> $firstName,
+				":LastName"=> $lastName,
+				":Contact"=> $phone,
+				":GroupID"=> $groupID??\_::$CONFIG->RegisteredGroup,
+				":Status"=> $status
+			]);
+	}
+
+	public function SignIn($signature, $password){
+		if(!isValid($password)) return false;
+		$person = self::GetUser($signature, $password);
 		$status = getValid($person,"Status",0);
 		if($status === false || ((int)$status) < self::$ActiveStatus)
 			throw new \ErrorException(
@@ -135,6 +141,15 @@ class User extends \Base{
 		return !Access(1);
 	}
 	
+	public function ResetPassword($signature, $password){
+		$password = $this->CheckPassword($password);
+		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User",
+			"`Signature`=:Signature",
+			[
+				":Signature"=>$signature,
+				":Password"=> $password
+			]);
+    }
 	public function CheckPassword($password){
 		if(!preg_match(self::$PasswordPattern, $password))
 			throw new \ErrorException(self::$PasswordTips);
@@ -197,19 +212,12 @@ class User extends \Base{
 	 * Receive the Reset Password Link and return the user Signature
      * @return bool|string return the user Signature or false otherwise
 	 */
-	public function ReceiveResetPasswordLink($newPass = null){
+	public function ReceiveResetPasswordLink(){
 		$sign =  $this->ReceiveLink(self::$ResetRequestKey);
 		if(empty($sign)) return null;
-		if(isValid($newPass)) {
-			$newPass = $this->CheckPassword($newPass);
-			return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User",
-				"`Signature`=:Signature",
-				[
-					":Signature"=>$sign,
-					":Password"=> $newPass
-				]);
-		}
-		return $sign;
+		$newPass =  getValid($_REQUEST,"password");
+		if(isValid($newPass)) return self::ResetPassword($sign, $newPass);
+		return false;
     }
 
 
