@@ -35,6 +35,7 @@ class MainMenu extends Module{
 			.<?php echo $this->Name; ?> {
 				margin: 0;
 				padding: 0;
+				display: flex;
 				overflow: hidden;
 				background-color: <?php echo \_::$TEMPLATE->BackColor(2).($this->AllowFixed?"ee":""); ?>;
 				color: var(--ForeColor-2);
@@ -55,7 +56,9 @@ class MainMenu extends Module{
 			}
 			
 			.<?php echo $this->Name; ?> .header{
-				margin: 0px 10px;
+				width: fit-content;
+				padding: 5px 10px;
+				display: inline-table;
 			}
 			.<?php echo $this->Name; ?> .header,.<?php echo $this->Name; ?> .header a,.<?php echo $this->Name; ?> .header a:visited{
 				color: var(--ForeColor-2);
@@ -68,7 +71,6 @@ class MainMenu extends Module{
 			.<?php echo $this->Name; ?> .header .description{
 				font-size: var(--Size-0);
 				padding: 0px 10px;
-				margin-top: 1vmin;
 			}
 			.<?php echo $this->Name; ?> .header .image{
 				background-position: center;
@@ -89,12 +91,13 @@ class MainMenu extends Module{
 				margin: 0;
 				padding: 0;
 				overflow: hidden;
-				display: inline-block;
-				<?php if($this->SearchForm != $this->UserForm): ?>
+				display: inline-table;
+				<?php if($this->SearchForm != null): ?>
 				min-width: fit-content;
 				max-width: 70% !important;
 				<?php endif; ?>
 			}
+
 			.<?php echo $this->Name; ?> ul.Items>li {
 				display: inline-block;
 			}
@@ -180,8 +183,11 @@ class MainMenu extends Module{
 
 			.<?php echo $this->Name; ?> .other{
 				text-align: end;
+				width: fit-content;
 				position: absolute;
 				clear: both;
+				display: flex;
+				align-items: center;
 				<?php echo $rtl?"left":"right" ?>: var(--Size-2);
 			}
 			

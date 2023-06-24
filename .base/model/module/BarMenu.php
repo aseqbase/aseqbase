@@ -6,6 +6,7 @@ class BarMenu extends Module{
 	public $AllowMiddle = true;
 	public $AllowChangeColor = true;
 	public $ShowFromScreenSize = "sm";
+	public $Height = 40;
 		
 	public function EchoStyle(){
 		parent::EchoStyle();
@@ -15,7 +16,7 @@ class BarMenu extends Module{
 				text-transform: uppercase;
 				text-align: center;
 				width:100vw;
-				height: 40px;
+				height: <?php echo $this->Height."px";?>;
 				<?php if(!$this->AllowMiddle){ ?>
 					overflow: hidden;
 				<?php } ?>
@@ -47,7 +48,7 @@ class BarMenu extends Module{
 				background-repeat: no-repeat;
 				background-size: cover;
 				color: var(--ForeColor-2);
-				height: 40px;
+				height: <?php echo $this->Height."px";?>;
 				cursor: pointer; /* Pointer/hand icon */
 				float: left; /* Float the buttons side by side */
 			}
@@ -67,7 +68,6 @@ class BarMenu extends Module{
 				background-repeat: no-repeat;
 				background-size: auto 60%;
 				color: var(--ForeColor-2);
-				padding: 10px 24px; /* Some padding */
 				<?php if($this->AllowChangeColor) echo \MiMFa\Library\Style::DropColor(\_::$TEMPLATE->ForeColor(2)); ?>
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)) ?>
 			}
@@ -93,8 +93,8 @@ class BarMenu extends Module{
 
 			<?php if($this->AllowMiddle){ ?>
 				.<?php echo $this->Name; ?>>a>.button.middle {
-					margin-top: -10px;
-					height: 50px;
+					margin-top: -<?php echo ($this->Height*0.25)."px";?>;
+					height: <?php echo ($this->Height*1.25)."px";?>;
 					border-radius: 100% 100% 0px 0px;
 					box-shadow: var(--Shadow-1);
 				}

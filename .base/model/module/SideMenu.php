@@ -57,24 +57,22 @@ class SideMenu extends Module{
 			.<?php echo $this->Name; ?> .container{
 				padding: 0px;
 			}
-
+			
 			.<?php echo $this->Name; ?> .header{
 				background-color:  var(--BackColor-2);
-				padding: 10px 10px;
-				margin-bottom: 10px;
+				padding: 5px;
 			}
 			.<?php echo $this->Name; ?> .header,.<?php echo $this->Name; ?> .header a,.<?php echo $this->Name; ?> .header a:visited{
-				color:  var(--ForeColor-2);
+				color: var(--ForeColor-2);
 			}
 			.<?php echo $this->Name; ?> .header .title{
-				font-size:  var(--Size-2);
+				font-size: var(--Size-2);
 				padding: 0px 10px;
-				<?php if(isValid($this->Description)) echo "margin-bottom: 8px; line-height: 80%;"; ?>
+				<?php if(isValid($this->Description)) echo "line-height: var(--Size-2);"; ?>
 			}
 			.<?php echo $this->Name; ?> .header .description{
-				font-size:  var(--Size-0);
+				font-size: var(--Size-0);
 				padding: 0px 10px;
-				margin-top: 2px;
 			}
 			.<?php echo $this->Name; ?> .header .image{
 				background-position: center;
@@ -83,7 +81,7 @@ class SideMenu extends Module{
 				background-color: transparent;
 				width: 50px;
 				display: table-cell;
-				font-size:  var(--Size-0);
+				font-size: var(--Size-0);
 			}
 
 			.<?php echo $this->Name; ?> .items{
@@ -100,7 +98,6 @@ class SideMenu extends Module{
 				color:  var(--BackColor-2);
 			}
 			.<?php echo $this->Name; ?> .row{
-				padding: 0px;
 				margin: 0px;
 			}
 			.<?php echo $this->Name; ?> .item:hover{
