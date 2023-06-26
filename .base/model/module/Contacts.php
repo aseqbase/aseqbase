@@ -8,8 +8,12 @@ class Contacts extends Module{
 		parent::EchoStyle();
 		?>
 		<style>
+			.<?php echo $this->Name; ?> ul.contacts{
+				margin:0px !important;
+			}
 			.<?php echo $this->Name; ?> ul.contacts li{
 				padding: 10px;
+				margin:0px !important;
 			}
 			.<?php echo $this->Name; ?> a.badge, a.badge:visited {
 				background-color: var(--BackColor-1);
