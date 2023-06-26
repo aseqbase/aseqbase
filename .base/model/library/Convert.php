@@ -27,10 +27,12 @@ class Convert{
 	 * @param string $text
 	 * @return array<string>
 	 */
-	public static function ToParagraphs($text){
+	public static function ToParagraphs($html, $getText = false){
+        if(!$getText) $html = strip_tags($html, '<a><input><button><ul><ol><li><select><option>');
+		else $html = self::ToText($html);
 		$out = null;
-		preg_match_all("/((<(\w+)(\s.)*>\s*)[\w\W]*(\s*<\/\3(\s.)*>))|(^[\W\d]+((<(\w+)(\s.)*>\s*)|(\s*<\/\10(\s.)*>)|.)+((\r\n)+|\n+|[\s\S]$))|(((<(\w+)(\s.)*>\s*)|(\s*<\/\19(\s.)*>)|.)+([\\.\\?\\!\\:]+|(\r\n)+|\n+|[\s\S]$))/mi",
-			$text,$out, PREG_PATTERN_ORDER);
+		preg_match_all("/((<(br|hr|vr|img|input)(\s.)*>)\s*[\w\W]*([\\.\\?\\!\\:]+|(\r\n)+|\n+|[\s\S]$))|((<(\w+)(\s.)*>\s*)[\w\W]*(\s*<\/\9(\s.)*>))|(^[\W\d]+((<(\w+)(\s.)*>\s*)|(\s*<\/\16(\s.)*>)|.)+((\r\n)+|\n+|[\s\S]$))|(((<(\w+)(\s.)*>\s*)|(\s*<\/\25(\s.)*>)|.)+([\\.\\?\\!\\:]+|(\r\n)+|\n+|[\s\S]$))/mi",
+			$html,$out, PREG_PATTERN_ORDER);
 		return $out[0];
 	}
 
@@ -41,7 +43,7 @@ class Convert{
      */
 	public static function ToText($html){
         $html = strip_tags($html, '<br><hr><section><content><main><header><footer><p>li><tr><h1><h2><h3><h3><h4><h5><h6>');
-        return preg_replace ('/<[^>]*>/', PHP_EOL, $html);
+        return preg_replace ('/(\s*<[^>]*>\s*)+/', PHP_EOL, $html);
 	}
 }
 ?>
