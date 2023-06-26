@@ -18,16 +18,8 @@ $module->EchoStyle();
 		    text-align: center;
 		    font-size: var(--Size-5);
 	    }
-        .lead, .lead .content{
-		    text-align: justify;
-		    padding: var(--Size-0) 0px;
-	    }
-        .lead li{
-    		    content: initial;
-		    text-indent: var(--Size-2);
-	    }
     </style>
-    <div class="lead center-lead container">
+    <div class="center-lead container">
         <?php if(isValid(\_::$INFO,"IntroductionVideoPath")){
                   MODULE("EmbededYoutube");
                   $ytm = new MiMFa\Module\EmbededYoutube();

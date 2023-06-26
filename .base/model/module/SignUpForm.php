@@ -51,6 +51,7 @@ class SignUpForm extends Form{
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
+	public $UpdateMode = false;
 	public $SendActivationEmail = true;
 	public $GroupID = null;
 	/**
@@ -288,7 +289,28 @@ class SignUpForm extends Form{
 			}
 			else echo "<div class='result warning'>".__("Please fill all required fields correctly!")."</div>";
 		} catch(\Exception $ex) { echo "<div class='result error'>".__($ex->getMessage())."</div>"; }
-		else echo "<div class='result warning'>".__("You are logged in!")."</div>";
+		elseif($this->UpdateMode) {
+			$phone = getValid($_req,"countrycode").getValid($_req,"phone");
+			if(strlen($phone) < 6) $phone = null;
+			if(\_::$INFO->User->SignUp(
+				getValid($_req,"username"),
+				getValid($_req,"password"),
+				getValid($_req,"email"),
+				null,
+				getValid($_req,"firstname"),
+				getValid($_req,"lastname"),
+				$phone,
+				$this->GroupID,
+				$this->InitialStatus
+			))
+			{
+				echo "<div class='page'>";
+                	echo "<div class='result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully")."</div>";
+					if($this->SendActivationEmail) PART("sign/active");
+				echo "</div>";
+			}
+			else echo "<div class='result error'>".__("The user with these email and username could not register!")."</div>";
+        } else echo "<div class='result warning'>".__("You are logged in!")."</div>";
     }
 }
 ?>

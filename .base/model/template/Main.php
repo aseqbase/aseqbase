@@ -57,18 +57,6 @@ class Main extends Template{
 				footer{
 					padding-bottom: 50px;
 				}
-				content>.page>.frame>.page{
-					color: var(--ForeColor-1);
-					background-color: <?php echo \_::$TEMPLATE->BackColor(1); ?>88;
-					border: var(--Border-1) var(--BackColor-1);
-					box-shadow: var(--Shadow-2);
-					border-radius: var(--Radius-1);
-					padding: var(--Size-0) var(--Size-3) var(--Size-4) var(--Size-3);
-					margin: var(--Size-2) var(--Size-3) var(--Size-1) var(--Size-3);
-				}
-				content>.page:is(.external-page, .embed-page)>.frame{
-					min-Height: calc(100vh - 70px);
-				}
 
 				:is(h1,h2,h3,h4,h5,h6) strong{
 					font-weight: normal;
@@ -210,7 +198,39 @@ class Main extends Template{
 				}
 
 				.page{
+					line-height: 1.5;
+					padding: var(--Size-3);
+				}
+				content>.page{
 					margin-top: 5vmax;
+				}
+				content>.page:is(.external-page, .embed-page)>.frame{
+					min-Height: calc(100vh - 70px);
+				}
+				content>.page h1 {
+					font-weight: bold;
+				}
+				content>.page h1 sub {
+					font-weight: normal;
+				}
+				content>.page p {
+					margin: var(--Size-1) 0;
+				}
+				content>.page :is(ul, ol) {
+					margin: var(--Size-2) 0;
+					margin-inline-start: var(--Size-5);
+				}
+				content>.page li {
+					margin: var(--Size-0) 0;
+				}
+				content>.page>.frame>.page{
+					color: var(--ForeColor-1);
+					background-color: <?php echo \_::$TEMPLATE->BackColor(1); ?>88;
+					border: var(--Border-1) var(--BackColor-1);
+					box-shadow: var(--Shadow-2);
+					border-radius: var(--Radius-1);
+					padding: var(--Size-0) var(--Size-3) var(--Size-4) var(--Size-3);
+					margin: var(--Size-2) var(--Size-3) var(--Size-1) var(--Size-3);
 				}
 
 				.main-bullet{

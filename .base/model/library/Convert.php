@@ -29,7 +29,8 @@ class Convert{
 	 */
 	public static function ToParagraphs($text){
 		$out = null;
-		preg_match_all("/[^\\.]+(\\.+)|\\S$/i",$text,$out, PREG_PATTERN_ORDER);
+		preg_match_all("/((<(\w+)(\s.)*>\s*)[\w\W]*(\s*<\/\3(\s.)*>))|(^[\W\d]+((<(\w+)(\s.)*>\s*)|(\s*<\/\10(\s.)*>)|.)+((\r\n)+|\n+|[\s\S]$))|(((<(\w+)(\s.)*>\s*)|(\s*<\/\19(\s.)*>)|.)+([\\.\\?\\!\\:]+|(\r\n)+|\n+|[\s\S]$))/mi",
+			$text,$out, PREG_PATTERN_ORDER);
 		return $out[0];
 	}
 
@@ -39,7 +40,7 @@ class Convert{
      * @return string
      */
 	public static function ToText($html){
-        $html = strip_tags($html, '<br><p><li><hr><tr>');
+        $html = strip_tags($html, '<br><hr><section><content><main><header><footer><p>li><tr><h1><h2><h3><h3><h4><h5><h6>');
         return preg_replace ('/<[^>]*>/', PHP_EOL, $html);
 	}
 }

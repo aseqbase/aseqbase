@@ -373,7 +373,7 @@
             array_push(\_::$PREPENDS[$toCase][$name], $value);
         }
     }
-		/**
+	/**
 	 * Append something to any function or directory's files or actions
 	 * @param mixed function name or directory 
 	 * @param null|string file name 
