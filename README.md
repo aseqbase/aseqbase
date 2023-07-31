@@ -55,7 +55,7 @@
 	<ul>
 		<li>To download the latest release, click <a href="http://aseqbase.mimfa.net/download" target="_blank">here &#128279</a>.</li>
 		<li>To watch demonstration and tutorial videos, click <a href="http://media.mimfa.net" target="_blank">here &#128279</a>.</li>
-		<li>To read about documentations, click <a href="https://github.com/mimfa/aseqbase/wiki" target="_blank">here &#128279</a>.</li>
-		<li>To learn about issues, click <a href="https://github.com/mimfa/aseqbase/issues" target="_blank">here &#128279</a>.</li>
+		<li>To read about documentations, click <a href="https://github.com/aseqbase/aseqbase/wiki" target="_blank">here &#128279</a>.</li>
+		<li>To learn about issues, click <a href="https://github.com/aseqbase/aseqbase/issues" target="_blank">here &#128279</a>.</li>
 		<li>To suggest documentation improvements, click <a href="http://chat.mimfa.net" target="_blank">here &#128279</a>.</li>
 	</ul>
