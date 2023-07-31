@@ -7,7 +7,7 @@
  *@link https://github.com/mimfa/aseqbase/wiki/Modules See the Documentation
  */
 class Collection extends Module{
-	public $Class = "container";
+	public $Class = "container-fluid";
 	/**
      * An array of items, which contains a Key-Value based array of features
      * @var null|array<array<enum-string,mixed>>

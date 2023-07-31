@@ -80,9 +80,14 @@ class Members extends Module{
 			.<?php echo $this->Name; ?> .teammember .list-item {
 				background-color: transparent;
 				padding: 1vmin 0px;
+				margin: initial;
 				border: none;
 			}
-
+			
+			.<?php echo $this->Name; ?> .teammember .list-item a{
+				text-wrap: wrap;
+				overflow-wrap: anywhere;
+			}
 			.<?php echo $this->Name; ?> .teammember .badge-primary {
 				background-color: var(--ForeColor-0);
 				color: var(--BackColor-0);

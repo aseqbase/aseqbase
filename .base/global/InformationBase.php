@@ -26,6 +26,8 @@ abstract class InformationBase extends Base{
 	public $FullBannerPath = null;
 	public $HomePath = "/home";
 	public $DownloadPath = null;
+	public $PaymentPath = null;
+	public $PaymentContent = null;
 	public $WaitSymbolPath = "/file/general/wait.gif";
 	public $ProcessSymbolPath = "/file/general/process.gif";
 	public $ErrorSymbolPath = "/file/general/error.png";

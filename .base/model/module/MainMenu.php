@@ -56,6 +56,7 @@ class MainMenu extends Module{
 			}
 			
 			.<?php echo $this->Name; ?> .header{
+				margin: 0;
 				width: fit-content;
 				padding: 5px 10px;
 				display: inline-table;

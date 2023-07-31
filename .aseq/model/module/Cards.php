@@ -9,6 +9,7 @@ MODULE("Collection");
  *@link https://github.com/mimfa/aseqbase/wiki/Modules See the Documentation
  */
 class Cards extends Collection{
+	public $Class = "container";
 	/**
      * The default Content HTML
      * @var string|null
