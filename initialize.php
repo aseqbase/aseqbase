@@ -1,7 +1,7 @@
 <?php
 //$dirs = explode("/", __DIR__);// Uncomment for a sub domain website
 $GLOBALS["ASEQ"] = null;//end($dirs);// Replace for a sub domain website
-$GLOBALS["BASE"] = "aseq";
+$GLOBALS["BASE"] = ".aseq";
 
 $GLOBALS["NEST"] = !empty($GLOBALS["ASEQ"])?preg_match_all("/(?<=\S|\s)\.(?=\S|\s)/",$ASEQ)+1:0;
 if(!isset($GLOBALS["HOST"])){
