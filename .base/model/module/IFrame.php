@@ -19,24 +19,25 @@ class IFrame extends Module{
 		?>
 		<style>
 			.<?php echo $this->Name; ?>{
-				color: <?php echo $this->ForeColor; ?>;
+				<?php echo \MiMFa\Library\Style::DoProperty("color", $this->ForeColor); ?>
 				text-align: center;
 			}
 			.<?php echo $this->Name; ?> .block{
 				background: <?php echo $this->BackColor; ?>88 url('<?php echo $this->Image; ?>') no-repeat center;
-				min-width: <?php echo $this->MinWidth; ?>;
-				min-height: <?php echo $this->MinHeight; ?>;
-				max-width: <?php echo $this->MaxWidth; ?>;
-				max-height: <?php echo $this->MaxHeight; ?>;
-				height: <?php echo $this->Height; ?>;
-				width: <?php echo $this->Width; ?>;
+				<?php echo \MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("width", $this->Width); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("height", $this->Height); ?>
 				margin-bottom: 30px;
 				border: <?php echo \_::$TEMPLATE->Border(1); ?> transparent;
-				border-radius: <?php echo \_::$TEMPLATE->Radius(1); ?>;
+				<?php echo \MiMFa\Library\Style::DoProperty("border", \_::$TEMPLATE->Border(1) . " transparent"); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(1)); ?>
 			}
 			.<?php echo $this->Name; ?> .block:hover{
-				background-color: <?php echo $this->BackColor; ?>;
-				border-color: <?php echo $this->BackColor; ?>;
+				<?php echo \MiMFa\Library\Style::DoProperty("background-color", $this->BackColor); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("border-color", $this->BorderColor); ?>
 			}
 		</style>
 		<?php

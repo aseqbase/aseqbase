@@ -173,7 +173,7 @@ class Style extends \ArrayObject{
 													drop-shadow(0 0 0 $color)
 													drop-shadow(0 0 0 $color)
 													drop-shadow(0 0 0 $color)
-");
+		");
 	}
 }
 ?>
