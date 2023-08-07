@@ -117,22 +117,22 @@ class Form extends Module{
 				handleForm(".<?php echo $this->Name ?> form",
 					function (data, selector)  {//success
 						if (data.includes("result success")) {
-							$('.<?php echo $this->Name ?> .page').remove();
-							$(".<?php echo $this->Name ?>").append(data);
-							if(isValid($this->SuccessPath)) load($this->SuccessPath);
+							$(`.<?php echo $this->Name ?> .page`).remove();
+							$(`.<?php echo $this->Name ?>`).append(data);
+							<?php if(isValid($this->SuccessPath)) echo "load(`$this->SuccessPath`);";?>
 						}
 						else {
-							$(".<?php echo $this->Name ?> form .result").remove();
-							$(".<?php echo $this->Name ?> form").append(data);
-							if(isValid($this->ErrorPath)) load($this->ErrorPath);
+							$(`.<?php echo $this->Name ?> form .result`).remove();
+							$(`.<?php echo $this->Name ?> form`).append(data);
+            							<?php if(isValid($this->ErrorPath)) echo "load(`$this->ErrorPath`);";?>
 						}
 					}
 				);
-				$('.<?php echo $this->Name ?> :is(input, select, textarea)').on('focus', function () {
-					$(this).parent().find('.<?php echo $this->Name ?> .input-group-text').css('border-color', 'var(--ForeColor-2)');
+				$(`.<?php echo $this->Name ?> :is(input, select, textarea)`).on('focus', function () {
+					$(this).parent().find(`.<?php echo $this->Name ?> .input-group-text`).css('border-color', 'var(--ForeColor-2)');
 				});
-				$('.<?php echo $this->Name ?> :is(input, select, textarea)').on('blur', function () {
-					$(this).parent().find('.<?php echo $this->Name ?> .input-group-text').css('border-color', 'var(--ForeColor-2)');
+				$(`.<?php echo $this->Name ?> :is(input, select, textarea)`).on('blur', function () {
+					$(this).parent().find(`.<?php echo $this->Name ?> .input-group-text`).css('border-color', 'var(--ForeColor-2)');
 				});
 			});
 		</script>

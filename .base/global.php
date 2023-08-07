@@ -673,7 +673,7 @@
 	function getAnchor(string|null $path = null):string|null{
 		return PREG_Find("/((?<=#)[^\?]*($|\?))/", $path??getUrl());
 	}
-	function getEmail(string|null $path = null, $mailName = "info"):string|null{
+	function getEmail(string|null $path = null, $mailName = "do-not-reply"):string|null{
 		return $mailName."@".PREG_replace("/\w+:\/{1,2}(www\.)?/","", getHost($path));
 	}
 	

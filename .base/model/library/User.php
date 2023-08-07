@@ -9,7 +9,7 @@ class User extends \Base{
 	public static $UpHandlerPath = "/sign/up.php";
 	public static $InHandlerPath = "/sign/in.php";
 	public static $OutHandlerPath = "/sign/out.php";
-	public static $RememberHandlerPath = "/sign/remember.php";
+	public static $RememberHandlerPath = "/sign/reset.php";
 	public static $ProfileHandlerPath = "/sign/profile.php";
 	public static $ResetHandlerPath = "/sign/reset.php";
 	public static $ActiveHandlerPath = "/sign/active.php";
@@ -19,7 +19,7 @@ class User extends \Base{
 
 	public static $PasswordPattern = "/[\w\W]{8,}/";
 	public static $PasswordTips = "The password should be more than 8 alphabetic and numeric characters.";
-	
+
 	public static $SeparatorSign = "¶";
 	public static $DateTimeSignFormat = "Y/m/d";
 	/**
@@ -34,7 +34,7 @@ class User extends \Base{
 	protected $GroupID = null;
 	protected $Access = 0;
 	protected $Accesses = array();
-	
+
 	public $TemporaryName = null;
 	public $TemporaryEmail = null;
 
@@ -98,7 +98,7 @@ class User extends \Base{
 
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){
 		$password = $this->CheckPassword($password);
-		return DataBase::DoInsert(\_::$CONFIG->DataBasePrefix."User",null, 
+		return DataBase::DoInsert(\_::$CONFIG->DataBasePrefix."User",null,
 			[
 				":Signature"=>$signature??$email,
 				":Email"=>$this->TemporaryEmail = $email,
@@ -140,7 +140,7 @@ class User extends \Base{
 		$this->Load();
 		return !Access(1);
 	}
-	
+
 	public function ResetPassword($signature, $password){
 		$password = $this->CheckPassword($password);
 		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User",
@@ -226,7 +226,7 @@ class User extends \Base{
 		if(is_null($person)) throw new \ErrorException("Unfortunately the email address is incorrect!");
 		$sign = getValid($person,"Signature");
 		Session::SetData($sign,$requestKey);
-		$path = \_::$HOST.($handlerPath??self::$HandlerPath)."?".$requestKey."=".urlencode(SpecialCrypt::Encrypt($sign.self::$SeparatorSign.date(self::$DateTimeSignFormat),\_::$CONFIG->SecretKey));
+		$path = \_::$HOST.($handlerPath??self::$HandlerPath)."?".$requestKey."=".urlencode(SpecialCrypt::Encrypt($sign.self::$SeparatorSign.date(self::$DateTimeSignFormat),\_::$CONFIG->SecretKey, true));
 		$dic = array();
 		$dic['$HYPERLINK'] ="<a href='$path'>".__($linkAnchor)."</a>";
 		$dic['$LINK'] ="<a href='$path'></a>";
@@ -249,7 +249,7 @@ class User extends \Base{
 	public function ReceiveLink($requestKey){
 		$rp = getValid($_REQUEST, $requestKey);
 		if(is_null($rp)) return false;
-		$sign = SpecialCrypt::Decrypt(urldecode($rp),\_::$CONFIG->SecretKey);
+		$sign = SpecialCrypt::Decrypt(urldecode($rp),\_::$CONFIG->SecretKey, true);
 		list($sign, $date) = explode(self::$SeparatorSign, $sign);
 		if(Session::GetData($sign) != $requestKey) throw new \ErrorException("Your request is invalid!");
 		if($date != date(self::$DateTimeSignFormat)) throw new \ErrorException("Your request is expired!");
