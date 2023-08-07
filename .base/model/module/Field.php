@@ -14,6 +14,7 @@ class Field extends Module{
 	public $MinWidth = "10px";
 	public $MaxHeight = "100vh";
 	public $MaxWidth = "100vw";
+	public $Lock = false;
 	
 	
 	public function __construct($type = "text", $title = null, $value = null, $description = null, $placeholder = null){
@@ -242,29 +243,33 @@ class Field extends Module{
 		if(isValid($this->Title)) echo "<label for='$id' class='title'>$this->Title</label>";
 		$this->PlaceHolder = $this->PlaceHolder??(isValid($this->Value)?"":$this->Name);
 		switch (strtolower($this->Type??"text")) {
-            case 'multiline':
-            case 'textarea':
-				echo "<textarea id='$id' name='$this->Name' placeholder='$this->PlaceHolder' class='field'>$this->Value</textarea>";
+			case 'multiline':
+			case 'textarea':
+				echo "<textarea id='$id' name='$this->Name' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").">$this->Value</textarea>";
 				break;
 			case 'dropdown':
 			case 'combobox':
 			case 'select':
-				echo "<select id='$id' name='$this->Name' placeholder='$this->PlaceHolder' class='field'>";
+				echo "<select id='$id' name='$this->Name' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").">";
 				if(isValid($this->Options))
 					foreach($this->Options as $key=>$value)
 						echo "<option value='$key'".($key==$this->Value?" selected":"").">$value</option>";
 				echo "</select>";
 				break;
 			case 'radio':
-			case 'check':
 			case 'radiobox':
+			case 'radiobutton':
+				echo "<input id='$id' name='$this->Name' type='radio' checked='$this->Value' value='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").">";
+				break;
+			case 'check':
 			case 'checkbox':
-				echo "<input id='$id' name='$this->Name' type='$this->Type' checked='$this->Value' value='$this->PlaceHolder' class='field'>";
+			case 'checkbutton':
+				echo "<input id='$id' name='$this->Name' type='checkbox' checked='$this->Value' value='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").">";
 				break;
 			default:
-				echo "<input id='$id' name='$this->Name' type='$this->Type' value='$this->Value' placeholder='$this->PlaceHolder' class='field'>";
+				echo "<input id='$id' name='$this->Name' type='$this->Type' value='$this->Value' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").">";
 				break;
-        }
+		}
 		if(isValid($this->Description)) echo "<label for='$id' class='description'>$this->Description</label>";
 	}
 }

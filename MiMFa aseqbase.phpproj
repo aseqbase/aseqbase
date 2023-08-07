@@ -1,0 +1,5 @@
+<Project Sdk="Devsense.Php.Sdk">
+  <ItemGroup>
+    <Content Remove="*.tmp" />
+  </ItemGroup>
+</Project>

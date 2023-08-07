@@ -294,3 +294,16 @@ const scrollTo = function (selector = "#element", time = 1000) {
 		scrollTop: parseInt($(selector).offset().top)
 	}, time);
 };
+
+const load = function(url=null){
+	window.location.assign(url??location.href);
+};
+const open = function(url=null, target = '_blank'){
+	window.open(url??location.href, target);
+};
+const share = function(url=null, path=null){
+	open('sms://'+path+'?body='+(url??location.href), '_blank');
+};
+const message = function(url=null, path=null){
+	open('sms://'+path+'?body='+(url??location.href), '_blank');
+};

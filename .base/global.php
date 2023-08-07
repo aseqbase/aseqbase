@@ -101,7 +101,7 @@
 		public static string|null $ANCHOR = null;
 		/**
 		 * The default email acount
-		 * Example: "info@mimfa.net"
+		 * Example: "do-not-reply@mimfa.net"
 		 * @var string|null
 		 */
 		public static string|null $EMAIL = null;

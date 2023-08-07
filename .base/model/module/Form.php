@@ -3,12 +3,14 @@ class Form extends Module{
 	public $Path = null;
 	public $Action = null;
 	public $Image = null;
-	public $Title = "Reset Password";
+	public $Title = "Reset";
 	public $SubmitLabel = "Submit";
 	public $ResetLabel = "Reset";
 	public $BackLabel = "Back to Home";
 	public $BackLink = "/";
 	public $Method = "GET";
+	public $SuccessPath = null;
+	public $ErrorPath = null;
 
 	public function EchoStyle(){
 		parent::EchoStyle();
@@ -53,7 +55,7 @@ class Form extends Module{
 	}
 
 	public function Echo(){
-		$src =$this->Action??$this->Path;
+		$src = $this->Action??$this->Path??\_::$PATH;
 		if(isValid($src)): ?>
 			<div class="page container">
 				<div class="row align-items-center">
@@ -72,20 +74,23 @@ class Form extends Module{
 					<!-- Form -->
 					<div class="col-md col-lg ml-auto">
 						<form action="<?php echo $src; ?>" method="<?php echo $this->Method;?>">
-							<?php $this->EchoFields();?>
-								<!-- Submit Button -->
-								<div class="form-group mx-auto mb-0 row">
-									<?php if(isValid($this->ResetLabel)):?>
-										<button type="reset" id="reset" name="reset" class="btn col-sm-3 py-2">
-											<?php echo __($this->ResetLabel);?>
-										</button>
-									<?php endif;
-									if(isValid($this->SubmitLabel)):?>
-										<button type="submit" id="submit" name="submit" class="btn col-sm btn-main py-2">
-											<?php echo __($this->SubmitLabel);?>
-										</button>
-									<?php endif;?>
-								</div>
+							<?php
+								$this->EchoContent();
+								$this->EchoFields();
+							?>
+							<!-- Submit Button -->
+							<div class="form-group mx-auto mb-0 row">
+								<?php if(isValid($this->ResetLabel)):?>
+									<button type="reset" id="reset" name="reset" class="btn col-sm-3 py-2">
+										<?php echo __($this->ResetLabel);?>
+									</button>
+								<?php endif;
+								if(isValid($this->SubmitLabel)):?>
+									<button type="submit" id="submit" name="submit" class="btn col-sm btn-main py-2">
+										<?php echo __($this->SubmitLabel);?>
+									</button>
+								<?php endif;?>
+							</div>
 						</form>
 						<?php $this->EchoFooter();?>
 					</div>
@@ -93,7 +98,6 @@ class Form extends Module{
 			</div>
 			<?php
 		endif;
-		$this->EchoContent();
 	}
 	public function EchoHeader(){
         
@@ -115,11 +119,12 @@ class Form extends Module{
 						if (data.includes("result success")) {
 							$('.<?php echo $this->Name ?> .page').remove();
 							$(".<?php echo $this->Name ?>").append(data);
-							load();
+							if(isValid($this->SuccessPath)) load($this->SuccessPath);
 						}
 						else {
 							$(".<?php echo $this->Name ?> form .result").remove();
 							$(".<?php echo $this->Name ?> form").append(data);
+							if(isValid($this->ErrorPath)) load($this->ErrorPath);
 						}
 					}
 				);

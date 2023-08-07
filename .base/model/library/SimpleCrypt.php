@@ -47,7 +47,7 @@ class SimpleCrypt
         if ($encoded) {
             $message = base64_decode($message, true);
             if ($message === false) {
-                throw new \Exception('Encryption failure');
+                throw new \Exception('Decoding failure');
             }
         }
 

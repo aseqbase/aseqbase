@@ -215,7 +215,7 @@ class User extends \Base{
 	public function ReceiveResetPasswordLink(){
 		$sign =  $this->ReceiveLink(self::$ResetRequestKey);
 		if(empty($sign)) return null;
-		$newPass =  getValid($_REQUEST,"password");
+		$newPass = getValid($_REQUEST,"password");
 		if(isValid($newPass)) return self::ResetPassword($sign, $newPass);
 		return false;
     }

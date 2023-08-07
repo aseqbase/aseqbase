@@ -1,4 +1,5 @@
 <?php namespace MiMFa\Module;
+MODULE("Form");
 class ResetPasswordForm extends Form{
 	public $Action = null;
 	public $Title = "Reset Password";
@@ -72,7 +73,7 @@ class ResetPasswordForm extends Form{
 						== $(".<?php echo $this->Name ?> form #password").value) return;
 					e.preventDefault();
 					$(".<?php echo $this->Name ?> form result").remove();
-					$(".<?php echo $this->Name ?> form").append(Html.error("Confirmation of your password is not the same to the password!"));
+					$(".<?php echo $this->Name ?> form").append(Html.error("New password and confirm password does not match!"));
                 });
 			});
 		</script>
@@ -100,7 +101,7 @@ class ResetPasswordForm extends Form{
 					echo "<div class='result error'>".__($res)."</div>";
 			}
 			elseif(isValid($_req,"username")){
-				\_::$INFO->User->GetUser(isValid($_req,"username"));
+				\_::$INFO->User->GetUser(getValid($_req,"username"));
 				$res = \_::$INFO->User->SendResetPasswordEmail();
 				if($res === true)
                 	echo "<div class='page result success'>".__("Dear user, the reset password sent to your email successfully!")."</div>";

@@ -27,6 +27,7 @@ class SignInForm extends Form{
 	public function __construct(){
         parent::__construct();
 		$this->Action = \MiMFa\Library\User::$InHandlerPath;
+		$this->SuccessPath = \_::$PATH;
 	}
 
 	public function EchoStyle(){

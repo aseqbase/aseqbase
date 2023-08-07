@@ -102,6 +102,12 @@ class Module extends \Base{
      */
 	public $Attributes = null;
 	/**
+     * Additional Children of the module
+     * @var array<Module>|array<callable>|array<string>|Module|callable|string
+     * @medium
+     */
+	public $Children = null;
+	/**
      * To replace the custom Styles with the defaults if true, otherwise append them to the defaults
      * @var bool
      */
@@ -130,22 +136,22 @@ class Module extends \Base{
 	public $Scripts = null;
 	/**
      * Show this module when the screen size is one of the options below:
-     * @var \ScreenSize
+     * @var \ScreenSize|string
 	 */
 	public $ShowFromScreenSize = null;
 	/**
      * Hide this module when the screen size is one of the options below:
-     * @var \ScreenSize
+     * @var \ScreenSize|string
      */
 	public $HideFromScreenSize = null;
 	/**
      * Visible this module when the screen size is one of the options below:
-     * @var \ScreenSize
+     * @var \ScreenSize|string
      */
 	public $VisibleFromScreenSize = null;
 	/**
      * Invisible this module when the screen size is one of the options below:
-     * @var \ScreenSize
+     * @var \ScreenSize|string
      */
 	public $InvisibleFromScreenSize = null;
 
@@ -259,6 +265,21 @@ class Module extends \Base{
 				echo __($this->Content);
             else ($this->Content)($attrs);
 			echo (isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
+            return true;
+        }
+		if(isValid($this->Children)){
+			if(is_string($this->Children))
+				echo __($this->Children);
+            elseif(is_array($this->Children))
+				foreach ($this->Children as $value){
+					if(isValid($value)){
+						if(is_string($value)) echo __($value);
+						elseif(is_a($value, "Module")) $value->Echo();
+                        else ($value)($attrs);
+                    }
+                }
+			elseif(is_a($this->Children, "Module")) $this->Children->Echo();
+            else ($this->Children)($attrs);
             return true;
         }
         return false;

@@ -66,6 +66,7 @@ class SignUpForm extends Form{
 	public function __construct(){
         parent::__construct();
 		$this->Action = \MiMFa\Library\User::$UpHandlerPath;
+		$this->SuccessPath = \_::$PATH;
 	}
 
 	public function EchoStyle(){

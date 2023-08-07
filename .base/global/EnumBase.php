@@ -1,5 +1,5 @@
 <?php
-enum ScreenSize:string{
+enum ScreenSize: string{
     case xxlg = "xxlg";
 	case xxlg_range = "xxlg-range";
 	case xlg = "xlg";
@@ -14,5 +14,10 @@ enum ScreenSize:string{
 	case xsm_range = "xsm-range";
 	case xxsm = "xxsm";
 	case xxsm_range = "xxsm-range";
+}
+
+enum HTTPMethods: string {
+    case GET = 'get';
+    case POST = 'post';
 }
 ?>

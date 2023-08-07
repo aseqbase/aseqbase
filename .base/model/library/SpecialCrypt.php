@@ -44,7 +44,7 @@ class SpecialCrypt extends HashCrypt
         if ($encoded) {
             $message = base64_decode($message, true);
             if ($message === false) {
-                throw new \Exception('Encryption failure');
+                throw new \Exception('Decoding failure');
             }
         }
 
@@ -62,7 +62,7 @@ class SpecialCrypt extends HashCrypt
         );
 
         if (!self::HashEquals($mac, $calculated)) {
-            throw new \Exception('Encryption failure');
+            throw new \Exception('Decryption failure');
         }
 
         // Pass to SimpleCrypt::decrypt
