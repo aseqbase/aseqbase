@@ -3,8 +3,8 @@
  * A simple library to work by the local files and folders
 *@copyright All rights are reserved for MiMFa Development Group
 *@author Mohammad Fathi
-*@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
- *@link https://github.com/mimfa/aseqbase/wiki/Libraries#local See the Library Documentation
+*@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#local See the Library Documentation
 */
 class Local{
     /**
@@ -23,7 +23,7 @@ class Local{
      */
 	public static function GetUrl($path){
 		if(!isValid($path) || isAbsoluteUrl($path)) return $path;
-		if(!startsWith($path, "/")) $path = \_::$REQUEST."/".$path;
+		if(!startsWith($path, "/")) $path = "/".\_::$DIRECTION."/".$path;
 		$p = ltrim(getRelative($path), "/\\");
 		if(file_exists(\_::$DIR.$p)) return \_::$ROOT.$p;
 		if(count(\_::$SEQUENCES) > 0){

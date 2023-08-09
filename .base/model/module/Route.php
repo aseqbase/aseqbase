@@ -3,8 +3,8 @@
  * Automatic crate route map through url or item iterations
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
- *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
- *@link https://github.com/mimfa/aseqbase/wiki/Modules See the Documentation
+ *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Route extends Module{
 	/**
@@ -79,7 +79,7 @@ class Route extends Module{
 
 	public function SetValue($itemsOrpath = null){
 		if(is_null($itemsOrpath)){
-            $this->Path = getValid(getRequest(\_::$URL),null,"/".\_::$DIRECTION);
+            $this->Path = getValid("/".getDirection(\_::$URL),null,"/".\_::$DIRECTION);
             $this->Items = null;
         }elseif(is_array($itemsOrpath)){
             $this->Path = null;

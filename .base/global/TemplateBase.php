@@ -3,8 +3,8 @@
 	 *All the basic website template values and functions
 	 *@copyright All rights are reserved for MiMFa Development Group
 	 *@author Mohammad Fathi
-	 *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
-	 *@link https://github.com/mimfa/aseqbase/wiki/Structures See the Structures Documentation
+	 *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+	 *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
 	 */
 	abstract class TemplateBase extends Base{
 		public $AnimationSpeed = 250;

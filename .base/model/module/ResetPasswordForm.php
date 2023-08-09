@@ -64,22 +64,22 @@ class ResetPasswordForm extends Form{
     }
 	
 	public function EchoScript(){
-		parent::EchoScript();
 		?>
 		<script>
 			$(function () {
                 $(".<?php echo $this->Name ?> form").submit(function(e) {
-					if ($(".<?php echo $this->Name ?> form #passwordConfirmation").value
-						== $(".<?php echo $this->Name ?> form #password").value) return;
-					e.preventDefault();
+					if ($(".<?php echo $this->Name ?> form #passwordConfirmation").val() == $(".<?php echo $this->Name ?> form #password").val()) return true;
 					$(".<?php echo $this->Name ?> form result").remove();
 					$(".<?php echo $this->Name ?> form").append(Html.error("New password and confirm password does not match!"));
+					e.preventDefault();
+					return false;
                 });
 			});
 		</script>
 		<?php
+		parent::EchoScript();
     }
-	
+
 	public function Action(){
 		$_req = $_REQUEST;
 		switch(strtolower($this->Method)){

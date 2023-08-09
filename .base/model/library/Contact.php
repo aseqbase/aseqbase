@@ -3,8 +3,8 @@
  * A simple library to send email and comunications
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
- *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
- *@link https://github.com/mimfa/aseqbase/wiki/Libraries#contact See the Library Documentation
+ *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#contact See the Library Documentation
 */
 class Contact{
 	public static function SendEmail($from,$to,$subject,$message,$reply=null,$cc=null)

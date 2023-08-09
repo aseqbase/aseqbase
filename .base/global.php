@@ -4,8 +4,8 @@
 	 * It contains the most useful objects along developments
 	 *@copyright All rights are reserved for MiMFa Development Group
 	 *@author Mohammad Fathi
-	 *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
-	 *@link https://github.com/mimfa/aseqbase/wiki/Globals See the Documentation
+	 *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+	 *@link https://github.com/aseqbase/aseqbase/wiki/Globals See the Documentation
 	 */
 	class _ {
 		/**
@@ -28,7 +28,7 @@
 		 * @var string|null
 		 */
 		public static string|null $BASE = null;
-	
+
 		/**
 		 * All sequences
 		 * Example: "[
@@ -77,7 +77,7 @@
 		public static string|null $HOST = null;
 		/**
 		 * The request part of the current url
-		 * Example: "/Category/mimfa/service/web"
+		 * Example: "/Category/mimfa/service/web?p=3&l=10#serp"
 		 * @var string|null
 		 */
 		public static string|null $REQUEST = null;
@@ -115,10 +115,10 @@
 		public static ConfigurationBase|null $CONFIG = null;
 		public static InformationBase|null $INFO = null;
 		public static TemplateBase|null $TEMPLATE = null;
-		
+
 		public static $PREPENDS = array();
 		public static $APPENDS = array();
-	
+
 		/**
 		 * The current website url root
 		 * Example: "http://mimfa.net/"
@@ -151,7 +151,7 @@
 		public static string|null $PART_DIR = null;
 		public static string|null $SCRIPT_DIR = null;
 		public static string|null $STYLE_DIR = null;
-	
+
 		/**
 		 * The base website url root
 		 * Example: "http://base.aseqbase.ir/"
@@ -336,7 +336,7 @@
 		}
 		return null;
 	}
-	
+
 	function USING(string $dir, string|null $name = null, array $variables = array(), bool $print = true, string|null $extension = ".php"){
 		$extension = $extension??\_::$EXTENSION;
 		try{ applyPrepends($dir, $name);
@@ -360,9 +360,9 @@
 	}
 	/**
 	 * Prepend something to any function or directory's files or actions
-	 * @param mixed function name or directory 
-	 * @param null|string file name 
-	 * @param null|string|callable the action or content tou want to do 
+	 * @param mixed function name or directory
+	 * @param null|string file name
+	 * @param null|string|callable the action or content tou want to do
 	 */
 	function prepend($toCase, string|null $name = null, null|string|callable $value = null){
         if(isValid($value)){
@@ -375,9 +375,9 @@
     }
 	/**
 	 * Append something to any function or directory's files or actions
-	 * @param mixed function name or directory 
-	 * @param null|string file name 
-	 * @param null|string|callable the action or content tou want to do 
+	 * @param mixed function name or directory
+	 * @param null|string file name
+	 * @param null|string|callable the action or content tou want to do
 	 */
 	function append($toCase, string|null $name = null, null|string|callable $value = null){
         if(isValid($value)){
@@ -535,7 +535,7 @@
 		if($translate && \_::$CONFIG->AllowTranslate) $text = \MiMFa\Library\Translate::Get($text);
 		return $text;
 	}
-	
+
 	function go($url){
         echo "<script>load('$url');</script>";
     }
@@ -565,7 +565,7 @@
 				$html = str_replace($v,$k,$html);
 		return $html;
 	}
-	
+
 	function encrypt($plain){
 		if(is_null($plain)) return null;
 		if(empty($plain)) return $plain;
@@ -655,12 +655,12 @@
 	function getRequest(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();
 		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
-		return PREG_Replace("/(^\w+:\/*[^\/]+)|([\?#].+$)/","", $path);
+		return PREG_Replace("/(^\w+:\/*[^\/]+)/","", $path);
 	}
 	function getDirection(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
 		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
-		return PREG_Replace("/(^\w+:\/{2}[^\/]+\/)|([\?#].+$)/","", $path);
+		return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/","", $path);
 	}
 	function getRelative(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();
@@ -676,7 +676,7 @@
 	function getEmail(string|null $path = null, $mailName = "do-not-reply"):string|null{
 		return $mailName."@".PREG_replace("/\w+:\/{1,2}(www\.)?/","", getHost($path));
 	}
-	
+
 	function changeMemo($key, $val){
 		if($val=="!" || is_null($val)) {
 			popMemo($key);

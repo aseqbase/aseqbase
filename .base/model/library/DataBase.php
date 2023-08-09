@@ -3,8 +3,8 @@
  * A simple library to connect the database and run the most uses SQL queries
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
- *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
- *@link https://github.com/mimfa/aseqbase/wiki/Libraries#database See the Library Documentation
+ *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#database See the Library Documentation
  */
 class DataBase {
 	public static function Connection()

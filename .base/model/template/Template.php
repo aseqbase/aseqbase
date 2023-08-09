@@ -25,8 +25,8 @@ namespace MiMFa\Template;
  *
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
- *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
- *@link https://github.com/mimfa/aseqbase/wiki/Template See the Documentation
+ *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ *@link https://github.com/aseqbase/aseqbase/wiki/Template See the Documentation
  *@example Main.php
  */
 class Template extends \Base{

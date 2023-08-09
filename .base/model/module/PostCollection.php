@@ -8,8 +8,8 @@ MODULE("Collection");
  * To show data as posts
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
- *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
- *@link https://github.com/mimfa/aseqbase/wiki/Modules See the Documentation
+ *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class PostCollection extends Collection{
 	public $MaximumColumns = 2;

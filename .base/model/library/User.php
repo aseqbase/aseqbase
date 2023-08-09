@@ -17,8 +17,8 @@ class User extends \Base{
 	public static $ResetRequestKey = "resetkey";
 	public static $ActiveRequestKey = "activekey";
 
-	public static $PasswordPattern = "/[\w\W]{8,}/";
-	public static $PasswordTips = "The password should be more than 8 alphabetic and numeric characters.";
+	public static $PasswordPattern = "/([\w\W]+){8,64}/";
+	public static $PasswordTips = "The password should be more than 8 and less than 64 alphabetic and numeric characters.";
 
 	public static $SeparatorSign = "¶";
 	public static $DateTimeSignFormat = "Y/m/d";
@@ -151,9 +151,8 @@ class User extends \Base{
 			]);
     }
 	public function CheckPassword($password){
-		if(!preg_match(self::$PasswordPattern, $password))
-			throw new \ErrorException(self::$PasswordTips);
-		return sha1($password);
+		if(preg_match(self::$PasswordPattern, $password)) return sha1($password);
+        throw new \ErrorException(self::$PasswordTips);
     }
 
 	public function ManageRequests(){
@@ -174,7 +173,7 @@ class User extends \Base{
      * $IMAGE: for the user image path
      * @return bool
      */
-	public function SendActivationEmail($emailFrom=null, $emailTo=null, $subject='Activation Request', $content='Hello dear $NAME<br>Thank you for registration, Please $HYPERLINK to Active Your Account!', $linkAnchor = "CLICK ON THIS LINK"){
+	public function SendActivationEmail($emailFrom=null, $emailTo=null, $subject='Activation Request', $content='Hello dear $NAME,<br><br>Thank you for registration, Please $HYPERLINK or the below link to Active Your Account!<br>$LINK', $linkAnchor = "CLICK ON THIS LINK"){
 		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject, $content, $linkAnchor, self::$ActiveHandlerPath, self::$ActiveRequestKey);
 	}
 	/**
@@ -205,7 +204,7 @@ class User extends \Base{
      * $IMAGE: for the user image path
 	 * @return bool
 	 */
-	public function SendResetPasswordEmail($emailFrom = null, $emailTo = null, $subject='Reset Password Request', $content='Hello dear $NAME<br>Please $HYPERLINK if you want to Reset your Password... else ignore this message.', $linkAnchor = "CLICK ON THIS LINK"){
+	public function SendResetPasswordEmail($emailFrom = null, $emailTo = null, $subject='Reset Password Request', $content='Hello dear $NAME,<br><br>Please $HYPERLINK or the below link if you want to Reset your Password... else ignore this message.<br>$LINK', $linkAnchor = "CLICK ON THIS LINK"){
 		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject, $content,$linkAnchor, self::$ResetHandlerPath, self::$ResetRequestKey);
 	}
 	/**
@@ -213,10 +212,13 @@ class User extends \Base{
      * @return bool|string return the user Signature or false otherwise
 	 */
 	public function ReceiveResetPasswordLink(){
-		$sign =  $this->ReceiveLink(self::$ResetRequestKey);
-		if(empty($sign)) return null;
 		$newPass = getValid($_REQUEST,"password");
-		if(isValid($newPass)) return self::ResetPassword($sign, $newPass);
+		if(isValid($newPass)){
+			$this->CheckPassword($newPass);
+            $sign = $this->ReceiveLink(self::$ResetRequestKey);
+            if(empty($sign)) return null;
+            return self::ResetPassword($sign, $newPass);
+        }
 		return false;
     }
 
@@ -229,7 +231,7 @@ class User extends \Base{
 		$path = \_::$HOST.($handlerPath??self::$HandlerPath)."?".$requestKey."=".urlencode(SpecialCrypt::Encrypt($sign.self::$SeparatorSign.date(self::$DateTimeSignFormat),\_::$CONFIG->SecretKey, true));
 		$dic = array();
 		$dic['$HYPERLINK'] ="<a href='$path'>".__($linkAnchor)."</a>";
-		$dic['$LINK'] ="<a href='$path'></a>";
+		$dic['$LINK'] ="<a href='$path'>$path</a>";
 		$dic['$PATH'] =$path;
 		$dic['$SIGNATURE'] =$sign;
 		$dic['$NAME'] =getValid($person,"Name")??$this->TemporaryName;
@@ -249,7 +251,7 @@ class User extends \Base{
 	public function ReceiveLink($requestKey){
 		$rp = getValid($_REQUEST, $requestKey);
 		if(is_null($rp)) return false;
-		$sign = SpecialCrypt::Decrypt(urldecode($rp),\_::$CONFIG->SecretKey, true);
+		$sign = SpecialCrypt::Decrypt($rp,\_::$CONFIG->SecretKey, true);
 		list($sign, $date) = explode(self::$SeparatorSign, $sign);
 		if(Session::GetData($sign) != $requestKey) throw new \ErrorException("Your request is invalid!");
 		if($date != date(self::$DateTimeSignFormat)) throw new \ErrorException("Your request is expired!");

@@ -12,7 +12,7 @@ class Information extends InformationBase{
 	public $FullDescription = "A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.";
 
 	public $Path = "https://aseqbase.ir";
-	public $DownloadPath = "https://github.com/mimfa/aseqbase";
+	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
 	public $Location = null;
 
 	public $KeyWords = array("MiMFa aseqbase Framework", "MiMFa", "aseqbase", "Web Development", "Development", "Web Framework", "Website", "Framework");
@@ -20,24 +20,24 @@ class Information extends InformationBase{
 	public $MainMenus = array(
 		array("Layer"=>1,"Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png","Attributes"=> "class='menu-link'"),
 		array("Layer"=>1,"Name"=>"GIT","Link"=>"http://github.com/mimfa/aseqbase","Image"=>"/file/symbol/market.png","Attributes"=> "class='menu-link'"),
-		array("Layer"=>2,"Name"=>"FORUM","Link"=>"https://github.com/mimfa/aseqbase/issues","Image"=>"/file/symbol/chat.png","Attributes"=> "class='menu-link'"),
+		array("Layer"=>2,"Name"=>"FORUM","Link"=>"https://github.com/aseqbase/aseqbase/issues","Image"=>"/file/symbol/chat.png","Attributes"=> "class='menu-link'"),
 		array("Layer"=>1,"Name"=>"PRODUCTS","Link"=>"http://github.com/mimfa","Image"=>"/file/symbol/product.png", "Attributes"=>"class='menu-link'"),
 		array("Layer"=>1,"Name"=>"ABOUT","Link"=>"/about","Image"=>"","Attributes"=> "class='menu-link'")
 		);
 
 	public $SideMenus = array(
 		array("Layer"=>1,"Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png","Attributes"=> "class='menu-link'"),
-		array("Layer"=>2,"Name"=>"FORUM","Link"=>"https://github.com/mimfa/aseqbase/issues","Image"=>"/file/symbol/chat.png","Attributes"=> "class='menu-link'"),
+		array("Layer"=>2,"Name"=>"FORUM","Link"=>"https://github.com/aseqbase/aseqbase/issues","Image"=>"/file/symbol/chat.png","Attributes"=> "class='menu-link'"),
 		array("Layer"=>1,"Name"=>"PRODUCTS","Link"=>"http://mimfa.net/products","Image"=>"/file/symbol/product.png", "Attributes"=>"class='menu-link'"),
 		array("Layer"=>1,"Name"=>"ABOUT","Link"=>"/about","Image"=>"","Attributes"=> "class='menu-link'")
 		);
 
 	public $Shortcuts = array(
 		array("Name"=>"Menu","Link"=>"","Image"=>"/file/symbol/menu.png", "Attributes"=>"onclick='viewSideMenu()'"),
-		array("Name"=>"Market","Link"=>"#embed","Image"=>"/file/symbol/market.png","Attributes"=> "class='embed-link' onclick='viewEmbed(\"https://github.com/mimfa/aseqbase\",\"fade\"); viewSideMenu(false);'"),
+		array("Name"=>"Market","Link"=>"#embed","Image"=>"/file/symbol/market.png","Attributes"=> "class='embed-link' onclick='viewEmbed(\"https://github.com/aseqbase/aseqbase\",\"fade\"); viewSideMenu(false);'"),
 		array("Name"=>"Home","Link"=>"#internal","Image"=>"/file/symbol/home.png","Attributes"=> "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
 		array("Name"=>"Products","Link"=>"#internal","Image"=>"/file/symbol/product.png", "Attributes"=>"class='internal-link' onclick='viewInternal(\"https://github.com/mimfa\",\"fade\"); viewSideMenu(false);'"),
-		array("Name"=>"Chat","Link"=>"#internal","Image"=>"/file/symbol/chat.png","Attributes"=> "class='internal-link' onclick='viewInternal(\"https://github.com/mimfa/aseqbase/issues\",\"fade\"); viewSideMenu(false);'")
+		array("Name"=>"Chat","Link"=>"#internal","Image"=>"/file/symbol/chat.png","Attributes"=> "class='internal-link' onclick='viewInternal(\"https://github.com/aseqbase/aseqbase/issues\",\"fade\"); viewSideMenu(false);'")
 		);
 
 	public $Services = array(

@@ -4,8 +4,8 @@ namespace MiMFa\Library;
  * A simple library to convert datatypes to eachother
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
- *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
- *@link https://github.com/mimfa/aseqbase/wiki/Libraries#convert See the Library Documentation
+ *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#convert See the Library Documentation
 */
 class Convert{
 	/**

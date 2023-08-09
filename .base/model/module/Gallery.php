@@ -5,8 +5,8 @@ MODULE("Collection");
  * To show a gallery of images
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
- *@see https://aseqbase.ir, https://github.com/mimfa/aseqbase
- *@link https://github.com/mimfa/aseqbase/wiki/Modules See the Documentation
+ *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Gallery extends Collection{
 	public $Class = "container";
