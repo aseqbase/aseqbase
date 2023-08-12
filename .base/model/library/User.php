@@ -9,32 +9,51 @@ class User extends \Base{
 	public static $UpHandlerPath = "/sign/up.php";
 	public static $InHandlerPath = "/sign/in.php";
 	public static $OutHandlerPath = "/sign/out.php";
-	public static $RememberHandlerPath = "/sign/reset.php";
 	public static $ProfileHandlerPath = "/sign/profile.php";
-	public static $ResetHandlerPath = "/sign/reset.php";
+	public static $RecoveryHandlerPath = "/sign/recovery.php";
+	public static $RecoveryEmailSubject = 'Account Recovery Request';
+	public static $RecoveryEmailContent = 'Hello dear $NAME,<br><br>
+We received an account recovery request on $HOSTLINK for $EMAILLINK.<br>
+This email address is associated with an account but no password is associated with it yet, so it can’t be used to log in.<br>
+Please $HYPERLINK or the below link if you want to reset your password... else ignore this message.<br>$LINK<br><br>
+With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
+	public static $RecoveryLinkAnchor = "CLICK ON THIS LINK";
 	public static $ActiveHandlerPath = "/sign/active.php";
+	public static $ActiveEmailSubject = "Account Activation Request";
+	public static $ActiveEmailContent = 'Hello dear $NAME,<br><br>
+We received an account activation request on $HOSTLINK for $EMAILLINK.<br>
+Thank you for registration, This email address is associated with an account but is not activated yet, so it can’t be used to log in.<br>
+Please $HYPERLINK or the below link to active your account!<br>$LINK<br><br>
+With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
+	public static $ActiveLinkAnchor = "CLICK ON THIS LINK";
 
-	public static $ResetRequestKey = "resetkey";
-	public static $ActiveRequestKey = "activekey";
+	public static $RecoveryRequestKey = "rk";
+	public static $ActiveRequestKey = "ak";
 
 	public static $PasswordPattern = "/([\w\W]+){8,64}/";
-	public static $PasswordTips = "The password should be more than 8 and less than 64 alphabetic and numeric characters.";
+	public static $PasswordTips = "The password should be more than eigh and less than 64 alphabetic and numeric characters.";
 
 	public static $SeparatorSign = "¶";
 	public static $DateTimeSignFormat = "Y/m/d";
 	/**
-	 * Initial User Status:
+     * Initial User Default Status:
      *		true/1:		Activated
      *		false/-1:		Deactivated
-	 * @var bool
-	 */
+     * @var int
+     */
 	public static $ActiveStatus = 1;
+	public static $InitialStatus = 0;
+	public static $DeactiveStatus = -1;
 
+
+
+	protected $Signature = null;
 	protected $ID = null;
 	protected $GroupID = null;
 	protected $Access = 0;
 	protected $Accesses = array();
 
+	public $TemporarySignature = null;
 	public $TemporaryName = null;
 	public $TemporaryEmail = null;
 
@@ -55,6 +74,7 @@ class User extends \Base{
 		$this->LoadProfile();
 	}
 	public function LoadAccess(){
+		$this->Signature = Session::GetSecure("Signature");
 		$this->ID = Session::GetSecure("ID");
 		$this->GroupID = Session::GetSecure("GroupID");
 		$this->Access = Session::GetSecure("Access")??\_::$CONFIG->GuestAccess;
@@ -73,34 +93,48 @@ class User extends \Base{
 		return in_array($task, $this->Accesses);
 	}
 
-	public function GetUser($signature, $password = null){
+	public function Find($signature = null, $password = null){
+		$signature = $signature??$this->Signature??Session::GetSecure("Signature");
 		if(isValid($password)) {
 			$password = $this->CheckPassword($password);
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
-						"`ID`, `GroupID`, `Image`, `Name`, `Email`, `Status`",
+						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Status`",
 						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
 						[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature,":Password"=> $password]
 					);
+            if(is_null($person)) throw new \ErrorException("There a problem is occured!");
+            if(count($person) < 1) throw new \ErrorException("The username or password is incorrect!");
         } else {
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
-						"`ID`, `GroupID`, `Image`, `Name`, `Email`, `Status`",
+						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Status`",
 						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact))",
 						[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature]
 					);
+            if(is_null($person)) throw new \ErrorException("There a problem is occured!");
+            if(count($person) < 1) throw new \ErrorException("The username is incorrect!");
         }
-		if(is_null($person)) throw new \ErrorException("There a problem is occured!");
-		if(count($person) < 1) throw new \ErrorException("The username or password is incorrect!");
 		$person = $person[0];
+		$this->TemporarySignature = getValid($person,"Signature");
 		$this->TemporaryName = getValid($person,"Name");
 		$this->TemporaryEmail = getValid($person,"Email");
 		return $person;
 	}
+	public function Get($signature = null, $password = null){
+		$person = $this->Find($signature, $password);
+		return getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","*","`ID`=:ID",[":ID"=>$person["ID"]]),0);
+    }
+	public function Set($fieldsDictionary, $signature = null, $password = null){
+		$person = $this->Find($signature, $password);
+		if(getValid($fieldsDictionary,"Email")!=getValid($person,"Email"))
+			$fieldsDictionary["Status"] = self::$InitialStatus;
+		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='{$person["ID"]}'",$fieldsDictionary);
+    }
 
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){
 		$password = $this->CheckPassword($password);
 		return DataBase::DoInsert(\_::$CONFIG->DataBasePrefix."User",null,
 			[
-				":Signature"=>$signature??$email,
+				":Signature"=>$this->TemporarySignature = $signature??$email,
 				":Email"=>$this->TemporaryEmail = $email,
 				":Password"=> $password,
 				":Name"=> $this->TemporaryName = $name?? trim($firstName." ".$lastName),
@@ -111,30 +145,28 @@ class User extends \Base{
 				":Status"=> $status
 			]);
 	}
-
 	public function SignIn($signature, $password){
 		if(!isValid($password)) return false;
-		$person = self::GetUser($signature, $password);
-		$status = getValid($person,"Status",0);
+		$person = self::Find($signature, $password);
+		$status = getValid($person,"Status",self::$InitialStatus);
 		if($status === false || ((int)$status) < self::$ActiveStatus)
 			throw new \ErrorException(
 				"This account is not active yet!<br>".
-				"<a href='".\MiMFa\Library\User::$ActiveHandlerPath."'>".__("Try to send the activation email again!")."</a>"
+				"<a href='".\MiMFa\Library\User::$ActiveHandlerPath."?signature=$signature'>".__("Try to send the activation email again!")."</a>"
 			);
+		Session::SetSecure("Signature", $this->Signature = getValid($person,"Signature"));
 		Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
 		Session::SetSecure("GroupID",$this->GroupID = getValid($person,"GroupID"));
 		Session::Set("Image",$this->Image = getValid($person,"Image"));
-		Session::Set("Name",$this->Name = $this->TemporaryName = getValid($person,"Name"));
-		Session::Set("Email",$this->Email = $this->TemporaryEmail = getValid($person,"Email"));
+		Session::Set("Name",$this->Name = getValid($person,"Name"));
+		Session::Set("Email",$this->Email = getValid($person,"Email"));
 		Session::SetSecure("Access",$this->Access = DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID`=".$this->GroupID));
 		return true;
 	}
-
 	public function SignInOrSignUp($signature, $password, $email = null){
 		return $this->SignIn($signature??$email, $password)??
 			$this->SignUp($signature, $password, $email);
 	}
-
 	public function SignOut(){
 		Session::Restart();
 		$this->Load();
@@ -157,7 +189,7 @@ class User extends \Base{
 
 	public function ManageRequests(){
 		if(isValid($_REQUEST,self::$ActiveRequestKey)) return $this->ReceiveActivationLink();
-		if(isValid($_REQUEST,self::$ResetRequestKey)) return $this->ReceiveResetPasswordLink();
+		if(isValid($_REQUEST,self::$RecoveryRequestKey)) return $this->ReceiveRecoveryLink();
     }
 
 	/**
@@ -173,9 +205,16 @@ class User extends \Base{
      * $IMAGE: for the user image path
      * @return bool
      */
-	public function SendActivationEmail($emailFrom=null, $emailTo=null, $subject='Activation Request', $content='Hello dear $NAME,<br><br>Thank you for registration, Please $HYPERLINK or the below link to Active Your Account!<br>$LINK', $linkAnchor = "CLICK ON THIS LINK"){
-		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject, $content, $linkAnchor, self::$ActiveHandlerPath, self::$ActiveRequestKey);
+	public function SendActivationEmail($emailFrom=null, $emailTo=null, $subject= null, $content=null, $linkAnchor = null){
+		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject??self::$ActiveEmailSubject, $content??self::$ActiveEmailContent, $linkAnchor??self::$ActiveLinkAnchor, self::$ActiveHandlerPath, self::$ActiveRequestKey);
 	}
+	/**
+     * Receive the Activation Email and return the basic data of user
+     * @return array<string>|null return the user Signature or false otherwise
+     */
+	public function ReceiveActivationEmail(){
+        return $this->ReceiveEmail(self::$ActiveRequestKey);
+    }
 	/**
      * Receive the Activation Link and return the user Signature
      * @return bool|string return the user Signature or false otherwise
@@ -187,12 +226,12 @@ class User extends \Base{
 			"`Signature`=:Signature",
 			[
 				":Signature"=>$sign,
-				":Status"=> 1
+				":Status"=> self::$ActiveStatus
 			]);
     }
 
 	/**
-	 * Send a Reset Password Email
+     * Send a Recovery Email
      * @param string $emailFrom Sender
      * @param string $emailTo Receiver
      * @param string The email text or html contents, contains:
@@ -204,18 +243,26 @@ class User extends \Base{
      * $IMAGE: for the user image path
 	 * @return bool
 	 */
-	public function SendResetPasswordEmail($emailFrom = null, $emailTo = null, $subject='Reset Password Request', $content='Hello dear $NAME,<br><br>Please $HYPERLINK or the below link if you want to Reset your Password... else ignore this message.<br>$LINK', $linkAnchor = "CLICK ON THIS LINK"){
-		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject, $content,$linkAnchor, self::$ResetHandlerPath, self::$ResetRequestKey);
+	public function SendRecoveryEmail($emailFrom = null, $emailTo = null, $subject=null, $content=null, $linkAnchor = null){
+		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject??self::$RecoveryEmailSubject, $content??self::$RecoveryEmailContent, $linkAnchor??self::$RecoveryLinkAnchor, self::$RecoveryHandlerPath, self::$RecoveryRequestKey);
 	}
 	/**
-	 * Receive the Reset Password Link and return the user Signature
+     * Receive the Recovery Email and return the basic data of user
+     * @return array<string>|null return the user Signature or false otherwise
+     */
+	public function ReceiveRecoveryEmail(){
+        return $this->ReceiveEmail(self::$RecoveryRequestKey);
+    }
+	/**
+     * Receive the Recovery Link and return the user Signature
      * @return bool|string return the user Signature or false otherwise
 	 */
-	public function ReceiveResetPasswordLink(){
+	public function ReceiveRecoveryLink(){
 		$newPass = getValid($_REQUEST,"password");
-		if(isValid($newPass)){
+		if($newPass != getValid($_REQUEST, "passwordConfirmation", $newPass)) throw new \ErrorException("New password and its confirmation does not match!");
+		else if(isValid($newPass)){
 			$this->CheckPassword($newPass);
-            $sign = $this->ReceiveLink(self::$ResetRequestKey);
+            $sign = $this->ReceiveLink(self::$RecoveryRequestKey);
             if(empty($sign)) return null;
             return self::ResetPassword($sign, $newPass);
         }
@@ -235,9 +282,15 @@ class User extends \Base{
 		$dic['$PATH'] =$path;
 		$dic['$SIGNATURE'] =$sign;
 		$dic['$NAME'] =getValid($person,"Name")??$this->TemporaryName;
-		$dic['$EMAIL'] =getValid($person,"Email")??$this->TemporaryEmail;
-		$dic['$IMAGE'] =getValid($person,"Image");
+		$email = getEmail(null,"info");
+		$dic['$HOSTEMAILLINK'] ="<a href='mailto:".$email."'>".$email."</a>";
+		$dic['$HOSTEMAIL'] = $email;
+		$dic['$HOSTLINK'] ="<a href='".\_::$HOST."'>".\_::$SITE."</a>";
 		$dic['$HOST'] =\_::$HOST;
+		$email = getValid($person,"Email")??$this->TemporaryEmail;
+		$dic['$EMAILLINK'] ="<a href='mailto:".$email."'>".$email."</a>";
+		$dic['$EMAIL'] = getValid($person,"Email")??$this->TemporaryEmail;
+		$dic['$IMAGE'] = getValid($person,"Image");
 		$subject = __($subject)??"";
 		$content = __($content)??"";
 		foreach ($dic as $key => $value){
@@ -248,15 +301,26 @@ class User extends \Base{
         }
 		return Contact::SendHTMLEmail($emailFrom, $emailTo, $subject, $content);
 	}
+	public function ReceiveEmail($requestKey){
+		$rp = getValid($_REQUEST, $requestKey);
+		if(is_null($rp)) throw new \ErrorException("It is not a valid request!");
+		$sign = SpecialCrypt::Decrypt($rp,\_::$CONFIG->SecretKey, true);
+		list($sign, $date) = explode(self::$SeparatorSign, $sign);
+		if(Session::GetData($sign) != $requestKey) throw new \ErrorException("Your request is invalid or used before!");
+		if($date != date(self::$DateTimeSignFormat)) throw new \ErrorException("Your request is expired!");
+        $person = self::Find($sign);
+		return $person;
+    }
 	public function ReceiveLink($requestKey){
 		$rp = getValid($_REQUEST, $requestKey);
 		if(is_null($rp)) return false;
 		$sign = SpecialCrypt::Decrypt($rp,\_::$CONFIG->SecretKey, true);
 		list($sign, $date) = explode(self::$SeparatorSign, $sign);
-		if(Session::GetData($sign) != $requestKey) throw new \ErrorException("Your request is invalid!");
+		if(Session::GetData($sign) != $requestKey) throw new \ErrorException("Your request is invalid or used before!");
 		if($date != date(self::$DateTimeSignFormat)) throw new \ErrorException("Your request is expired!");
 		Session::ForgetData($sign);
-		return $sign;
+        $person = self::Find($sign);
+		return $person["Signature"];
     }
 }
 ?>

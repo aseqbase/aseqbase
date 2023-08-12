@@ -34,7 +34,7 @@
 		public $ForeColorPalette = array("#010203","#010203","#010203","#010203","#fdfeff","#fdfeff");
 		public $BackColorPalette = array("#fafcfd","#fdfeff","#fdfeff","#fafcfd","#3aa3e9","#3aa3e9");
 		public $FontPalette = array("'dubai light', sans-serif","'dubai', sans-serif","'dubai', sans-serif","'Tahoma', sans-serif","'Tahoma', sans-serif","'Times new Romance', sans-serif");
-		public $SizePalette = array("12pt","15pt","18pt","24pt","32pt","48pt","65pt");
+		public $SizePalette = array("2.3vh","2.4vh","2.6vh","3vh","3.6vh","4.4vh","5.4vh");
 		public $ShadowPalette = array("none","4px 7px 20px #00000005","4px 7px 20px #00000015","4px 7px 20px #00000030","5px 10px 25px #00000030","5px 10px 25px #00000050","5px 10px 50px #00000050");
 		public $BorderPalette = array("0px","1px solid","2px solid","5px solid","10px solid","25px solid");
 		public $RadiusPalette = array("0px","3px","5px","50px","50%","100%");
@@ -87,7 +87,7 @@
 					selector = '',
 					beforeFunc=function(data,selector){ },
 					processHandler=function(data){}) {
-				
+
 					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
 
 					beforeFunc(requestData,selector);

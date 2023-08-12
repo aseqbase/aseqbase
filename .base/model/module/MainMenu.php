@@ -238,6 +238,7 @@ class MainMenu extends Module{
 			}
 			.<?php echo $this->Name; ?> form input[type="search"]{
 				max-width: 100%;
+				width: 80%;
 				width: 0px;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}

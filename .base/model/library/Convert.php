@@ -45,5 +45,71 @@ class Convert{
         $html = strip_tags($html, '<br><hr><section><content><main><header><footer><p>li><tr><h1><h2><h3><h3><h4><h5><h6>');
         return preg_replace ('/(\s*<[^>]*>\s*)+/', PHP_EOL, $html);
 	}
+
+	/**
+	 * Convert everything to a simple string format
+	 * @param mixed $value
+	 * @return string
+	 */
+	public static function ToString($value, $separator = "\r\n"){
+		if(!is_null($value)){
+			if(is_string($value)) return $value;
+			if(is_subclass_of($value,"Base")) return $value->ToString();
+			if(is_array($value)){
+				$texts = array();
+				foreach ($value as $key => $item)
+					if(is_numeric($key)) array_push($texts, self::ToString($item, $separator));
+					else array_push($texts, "$key=\"". self::ToString($item), $separator)."\"";
+                return join($separator,$texts);
+            }
+			if(is_callable($value)) return self::ToString(($value)(), $separator);
+            return $value."";
+        }
+		return "";
+    }
+
+	/**
+     * Convert a text to normal Name
+     * @param string $text
+     * @return string
+     */
+	public static function ToName($text){
+        return preg_replace ('/\W/', "", ucwords($text??""));
+	}
+
+	/**
+     * Convert a text to a secreted text
+     * @param string $text
+     * @return string
+     */
+	public static function ToSecret($text, $secretChar = "*", $showCharsFromFirst = 0, $showCharsFromLast = 0){
+		$txts = str_split($text."");
+		$text = "";
+		for ($i = 0; $i < $showCharsFromFirst; $i++)
+            $text .= $txts[$i];
+		for ($i = $showCharsFromFirst; $i < count($txts)-$showCharsFromLast; $i++)
+            $text .= $secretChar;
+		for ($i = count($txts)-$showCharsFromLast; $i < count($txts); $i++)
+            $text .= $txts[$i];
+        return $text;
+	}
+
+	/**
+     * Get items of all input arrays into a generator array
+     * @param mixed $arguments
+     */
+	public static function ToIteration(){
+		foreach (func_get_args() as $key=>$value)
+			if(is_array($value)) yield from self::ToIteration($value);
+			else yield $key=>$value;
+	}
+	/**
+     * Get items of all input arrays into one array
+     * @param mixed $arguments
+     * @return array
+     */
+	public static function ToArray(){
+		return iterator_to_array(self::ToIteration(func_get_args()));
+	}
 }
 ?>

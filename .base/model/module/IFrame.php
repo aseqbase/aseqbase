@@ -13,10 +13,27 @@ class IFrame extends Module{
 	public $MinWidth = "10px";
 	public $MaxHeight = "100vh";
 	public $MaxWidth = "100vw";
-	
+
+	/**
+     * Create the module
+     * @param string|null $source The module source
+     */
+	public function __construct($source =  null){
+        parent::__construct();
+		$this->Set($source);
+    }
+	/**
+     * Set the main properties of module
+     * @param string|null $source The module source
+	 */
+	public function Set($source =  null){
+		$this->Source = $source;
+		return $this;
+    }
+
 	public function EchoStyle(){
 		parent::EchoStyle();
-		?>
+?>
 		<style>
 			.<?php echo $this->Name; ?>{
 				<?php echo \MiMFa\Library\Style::DoProperty("color", $this->ForeColor); ?>

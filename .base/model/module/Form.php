@@ -3,7 +3,7 @@ class Form extends Module{
 	public $Path = null;
 	public $Action = null;
 	public $Image = null;
-	public $Title = "Reset";
+	public $Title = "Form";
 	public $SubmitLabel = "Submit";
 	public $ResetLabel = "Reset";
 	public $BackLabel = "Back to Home";
@@ -117,14 +117,14 @@ class Form extends Module{
 				handleForm(".<?php echo $this->Name ?> form",
 					function (data, selector)  {//success
 						if (data.includes("result success")) {
-							$(`.<?php echo $this->Name ?> .page`).remove();
-							$(`.<?php echo $this->Name ?>`).append(data);
+							$(`.<?php echo $this->Name ?> form .result`).remove();
+							$(`.<?php echo $this->Name ?> form`).append(data);
 							<?php if(isValid($this->SuccessPath)) echo "load(`$this->SuccessPath`);";?>
 						}
 						else {
 							$(`.<?php echo $this->Name ?> form .result`).remove();
 							$(`.<?php echo $this->Name ?> form`).append(data);
-            							<?php if(isValid($this->ErrorPath)) echo "load(`$this->ErrorPath`);";?>
+            				<?php if(isValid($this->ErrorPath)) echo "load(`$this->ErrorPath`);";?>
 						}
 					}
 				);

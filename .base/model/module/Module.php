@@ -1,7 +1,9 @@
 <?php
 namespace MiMFa\Module;
 LIBRARY("Style");
+LIBRARY("Convert");
 use MiMFa\Library\Style;
+use MiMFa\Library\Convert;
 /**
  * One or some related classes, that contain one or more routines. aseqbase contains several different modules, and each module serves unique and separate important operations.
  * Module tends to refer to larger bundles. There's often a set of interfaces and the module tends to be able to stand on its own.
@@ -102,12 +104,6 @@ class Module extends \Base{
      */
 	public $Attributes = null;
 	/**
-     * Additional Children of the module
-     * @var array<Module>|array<callable>|array<string>|Module|callable|string
-     * @medium
-     */
-	public $Children = null;
-	/**
      * To replace the custom Styles with the defaults if true, otherwise append them to the defaults
      * @var bool
      */
@@ -168,6 +164,9 @@ class Module extends \Base{
      */
 	public $AllowTranslate = true;
 
+	public $OnceEchoStyle = false;
+	public $OnceEchoScript = false;
+
 	public function __construct(){
         parent::__construct();
 	}
@@ -200,7 +199,7 @@ class Module extends \Base{
 			(isValid($this->ShowFromScreenSize)?" ".$this->ShowFromScreenSize."-show":"").
 			(isValid($this->HideFromScreenSize)?" ".$this->HideFromScreenSize."-hide":"")
 		).
-		(isValid($this->Attributes)?" ".(is_string($this->Attributes)? $this->Attributes : implode(" ",$this->Attributes)):"");
+		(isValid($this->Attributes)?" ".Convert::ToString($this->Attributes," "):"");
 	}
 	/**
      * Create a standard Attribute and its value for a tag
@@ -241,7 +240,9 @@ class Module extends \Base{
 			echo (isValid($this->TitleTag)?"<".$this->TitleTag." $attrs>":"");
 			if(is_string($this->Title))
 				echo __($this->Title);
-            else ($this->Title)($attrs);
+			elseif(is_callable($this->Title))
+				($this->Title)($attrs);
+			else echo $this->Title;
 			echo (isValid($this->TitleTag)?"</".$this->TitleTag.">":"");
             return true;
         }
@@ -252,38 +253,47 @@ class Module extends \Base{
 			echo (isValid($this->DescriptionTag)?"<".$this->DescriptionTag." $attrs>":"");
 			if(is_string($this->Description))
 				echo __($this->Description);
-            else ($this->Description)($attrs);
+			elseif(is_callable($this->Description))
+				($this->Description)($attrs);
+			else echo $this->Description;
 			echo (isValid($this->DescriptionTag)?"</".$this->DescriptionTag.">":"");
             return true;
         }
         return false;
     }
 	public function EchoContent($attrs = null){
+		$b = false;
 		if(isValid($this->Content)){
 			echo (isValid($this->ContentTag)?"<".$this->ContentTag." $attrs>":"");
 			if(is_string($this->Content))
 				echo __($this->Content);
-            else ($this->Content)($attrs);
-			echo (isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
-            return true;
+			elseif(is_callable($this->Content))
+				($this->Content)($attrs);
+			else echo $this->Content;
+            echo (isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
+            $b = true;
         }
-		if(isValid($this->Children)){
-			if(is_string($this->Children))
-				echo __($this->Children);
-            elseif(is_array($this->Children))
-				foreach ($this->Children as $value){
-					if(isValid($value)){
-						if(is_string($value)) echo __($value);
-						elseif(is_a($value, "Module")) $value->Echo();
-                        else ($value)($attrs);
-                    }
-                }
-			elseif(is_a($this->Children, "Module")) $this->Children->Echo();
-            else ($this->Children)($attrs);
-            return true;
-        }
-        return false;
+        echo parent::ToString();
+        return $b;
     }
+
+    public function ToString(){ return $this->Draw(); }
+
+    //public function ToStrings(){
+    //    if(isValid($this->Title))
+    //        yield (isValid($this->TitleTag)?"<".$this->TitleTag.">":"")
+    //            .__(Convert::ToString($this->Title))
+    //            .(isValid($this->TitleTag)?"</".$this->TitleTag.">":"");
+    //    if(isValid($this->Description))
+    //        yield (isValid($this->DescriptionTag)?"<".$this->DescriptionTag.">":"")
+    //            .__(Convert::ToString($this->Description))
+    //            .(isValid($this->DescriptionTag)?"</".$this->DescriptionTag.">":"");
+    //    if(isValid($this->Content))
+    //        yield (isValid($this->ContentTag)?"<".$this->ContentTag.">":"")
+    //            .__(Convert::ToString($this->Content))
+    //            .(isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
+    //    yield from parent::ToStrings();
+    //}
 
 	/**
      * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
@@ -294,17 +304,23 @@ class Module extends \Base{
 		\_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
 		\_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
 		$this->PreDraw();
-		if($this->AllowDefaultStyles) $this->EchoStyle();
-		if(isValid($this->Style)){
-			$st = $this->Style->Get();
-			if(isValid($st)) echo "<style>.".$this->Name."{ $st }</style>";
+		if($this->OnceEchoStyle !== null){
+			$this->OnceEchoStyle = $this->OnceEchoStyle?null:$this->OnceEchoStyle;
+            if($this->AllowDefaultStyles) $this->EchoStyle();
+            if(isValid($this->Style)){
+                $st = $this->Style->Get();
+                if(isValid($st)) echo "<style>.".$this->Name."{ $st }</style>";
+            }
+            echo Convert::ToString($this->Styles);
         }
-		if(isValid($this->Styles)) echo $this->Styles;
 		$this->EchoOpenTag();
 		$this->Echo();
 		$this->EchoCloseTag();
-		if(isValid($this->Scripts)) echo $this->Scripts;
-		if($this->AllowDefaultScripts) $this->EchoScript();
+		if($this->OnceEchoScript !== null){
+			$this->OnceEchoScript = $this->OnceEchoScript?null:$this->OnceEchoScript;
+            echo Convert::ToString($this->Scripts);
+            if($this->AllowDefaultScripts) $this->EchoScript();
+        }
 		$this->PostDraw();
 		\_::$CONFIG->AllowTranslate = $translate;
 		\_::$CONFIG->AllowTextAnalyzing = $analyze;

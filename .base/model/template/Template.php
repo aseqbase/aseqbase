@@ -1,5 +1,6 @@
 <?php
 namespace MiMFa\Template;
+use MiMFa\Library\Convert;
 /**
  * Pre-designed layouts that allow you to arrange content onto a web page to quickly create a well-designed website.
  *
@@ -73,29 +74,17 @@ class Template extends \Base{
 	public $Footer = null;
 
 	public function Draw(){
-		if(isValid($this->Initial))
-            if(is_string($this->Initial)) echo $this->Initial;
-            else ($this->Initial)();
+		if(isValid($this->Initial)) echo Convert::ToString($this->Initial);
 		else $this->DrawInitial();
-		if(isValid($this->Main))
-            if(is_string($this->Main)) echo $this->Main;
-            else ($this->Main)();
+		if(isValid($this->Main)) echo Convert::ToString($this->Main);
 		else $this->DrawMain();
-        if(isValid($this->Header))
-            if(is_string($this->Header))  echo $this->Header;
-            else ($this->Header)();
+        if(isValid($this->Header)) echo Convert::ToString($this->Header);
         else $this->DrawHeader();
-        if(isValid($this->Content))
-            if(is_string($this->Content))  echo $this->Content;
-            else ($this->Content)();
+        if(isValid($this->Content)) echo Convert::ToString($this->Content);
         else $this->DrawContent();
-        if(isValid($this->Footer))
-            if(is_string($this->Footer))  echo $this->Footer;
-            else ($this->Footer)();
+        if(isValid($this->Footer)) echo Convert::ToString($this->Footer);
         else $this->DrawFooter();
-		if(isValid($this->Final))
-            if(is_string($this->Final))  echo $this->Final;
-            else ($this->Final)();
+		if(isValid($this->Final)) echo Convert::ToString($this->Final);
 		else $this->DrawFinal();
 	}
 

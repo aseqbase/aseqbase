@@ -194,6 +194,7 @@ class SideMenu extends Module{
 			}
 			.<?php echo $this->Name; ?> form input[type="search"]{
 				max-width: 90%;
+				width: 80%;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) input[type="search"], .<?php echo $this->Name; ?> form input[type="search"]:is(:hover, :active, :focus){

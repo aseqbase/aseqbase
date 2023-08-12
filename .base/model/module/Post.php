@@ -345,7 +345,7 @@ class Post extends Module{
         COMPONENT("JSONLD");
         $mod = new \MiMFa\Component\JSONLD();
         $mod->EchoArticle(__($p_title),__($p_description),$p_image,
-            author:["name"=>$authorName],datePublished: explode(" ", $createTime)[0],dateModified:explode(" ", $modifyTime)[0]);
+            author:["name"=>$authorName],datePublished: explode(" ", $createTime)[0], dateModified:explode(" ", $modifyTime)[0]);
         ?>
 		<div class="head row">
 			<div class="col-md">
@@ -382,18 +382,18 @@ class Post extends Module{
                 echo "</div>";
             }?>
 		</div>
-        <?php if($p_showcontent && isValid($p_content)): ?>
+        <?php if($p_showcontent && isValid($p_content)){ ?>
 		<div class="content">
 			<?php echo __($p_content); ?>
 		</div>
-		<?php elseif($p_showmorebutton):?>
+		<?php }
+        if($p_showmorebutton) {?>
 		<div class="more md-show">
 			<a class="btn btn-block btn-outline" href="<?php echo $p_path; ?>">
                 <?php echo __($p_morebuttontext); ?>
 			</a>
 		</div>
-		<?php endif; ?>
-		<?php
+		<?php }
 	}
 }
 ?>

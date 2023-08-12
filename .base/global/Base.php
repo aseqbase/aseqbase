@@ -1,4 +1,5 @@
 <?php
+use MiMFa\Library\Convert;
 /**
  *Guide for Documentations
  *
@@ -27,6 +28,12 @@
  */
 class Base{
 	public $Name = null;
+	/**
+     * Additional Children of the object
+     * @var array<Base>|array<callable>|array<string>|Base|callable|string
+     * @medium
+     */
+	public $Children = null;
 
 	function __construct(){
 		$this->Set_Defaults();
@@ -53,12 +60,42 @@ class Base{
 		$v = $this->Get_Namespaces();
 		return end($v);
 	}
-	
+
+
+	public function AddChild($child){
+		if(is_null($this->Children)) $this->Children = array();
+		if(!is_null($child)) $child = is_subclass_of($child,"Base")? function()use($child){ $child->ToString(); }:$child;
+		if(is_string($this->Children)) $this->Children .= Convert::ToString($child);
+		else array_push($this->Children, $child);
+        return true;
+    }
+	public function RemoveChild($child){
+		if(is_null($this->Children)) $this->Children = array();
+		if(!is_null($child)) $child = is_subclass_of($child,"Base")? function() use($child){ $child->ToString(); }:$child;
+		if(is_string($this->Children)){
+            $this->Children = str_replace(Convert::ToString($child),"",$this->Children);
+            return true;
+        }else{
+            $key = array_search($child, $this->Children);
+            if($key){
+                unset($this->Children[$key]);
+                return true;
+            }
+        }
+		return false;
+    }
+	public function ToStrings(){
+        yield Convert::ToString($this->Children);
+    }
+	public function ToString(){
+		return join("", iterator_to_array($this->ToStrings()));
+    }
+
 	/**
 	 * Echo all the HTML document and elements of the Object
 	 */
 	public function Echo(){
-		echo $this->Name;
+		echo $this->ToString();
     }
 
 	/**

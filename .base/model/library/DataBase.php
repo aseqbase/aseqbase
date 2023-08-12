@@ -74,14 +74,16 @@ class DataBase {
 	public static function DoInsert($tableName, $condition=null, $params=[], $defaultValue = false){
 		$vals = array();
 		$sets = array();
-		foreach($params as $key => $value)
-		{
-			$sets[] = "`".ltrim($key,":")."`";
-			$vals[] = $key;
-		}
+		$args = array();
+		foreach($params as $key => $value){
+			$k = ltrim($key,":");
+			$sets[] = "`$k`";
+			$vals[] = ":$k";
+			$args[":$k"] = $value;
+        }
 
 		$query = "INSERT INTO `$tableName` (".implode(", ",$sets).") VALUES (".implode(", ",$vals).")".(is_null($condition)?"":" WHERE ".$condition);
-		return self::TryInsert($query,$params,$defaultValue);
+		return self::TryInsert($query,$args,$defaultValue);
 	}
 
 	public static function Replace($query, $params=[]){
@@ -99,14 +101,16 @@ class DataBase {
 	public static function DoReplace($tableName, $condition=null, $params=[], $defaultValue = false){
 		$vals = array();
 		$sets = array();
-		foreach($params as $key => $value)
-		{
-			$sets[] = "`".ltrim($key,":")."`";
-			$vals[] = $key;
-		}
+		$args = array();
+		foreach($params as $key => $value){
+			$k = ltrim($key,":");
+			$sets[] = "`$k`";
+			$vals[] = ":$k";
+			$args[":$k"] = $value;
+        }
 
 		$query = "REPLACE INTO `$tableName` (".implode(", ",$sets).") VALUES (".implode(", ",$vals).")".(is_null($condition)?"":" WHERE ".$condition);
-		return self::TryReplace($query,$params,$defaultValue);
+		return self::TryReplace($query, $args, $defaultValue);
 	}
 
 	public static function Update($query, $params=[]){
@@ -123,11 +127,14 @@ class DataBase {
 	}
 	public static function DoUpdate($tableName, $condition=null, $params=[], $defaultValue = false){
 		$sets = array();
-		foreach($params as $key => $value)
-			$sets[] = "`".ltrim($key,":")."`=".$key;
-
+		$args = array();
+		foreach($params as $key => $value){
+			$k = ltrim($key,":");
+			$sets[] = "`$k`=:$k";
+			$args[":$k"] = $value;
+        }
 		$query = "UPDATE `$tableName` SET ".implode(", ",$sets).(is_null($condition)?"":" WHERE ".$condition);
-		return self::TryUpdate($query, $params,$defaultValue);
+		return self::TryUpdate($query, $args, $defaultValue);
 	}
 
 	public static function Delete($query, $params=[]){
@@ -190,10 +197,13 @@ class DataBase {
             case 0:
 				break;
             case 1:
-				echo $ex->getMessage();
+				echo HTML::Error($ex->getMessage());
+				break;
+            case 2:
+				echo HTML::Error($ex);
 				break;
         	default:
-				echo $ex->getMessage();
+				echo HTML::Error($ex);
 				break;
         }
     }

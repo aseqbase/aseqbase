@@ -8,6 +8,9 @@
 	 *@link https://github.com/aseqbase/aseqbase/wiki/Globals See the Documentation
 	 */
 	class _ {
+		public static string $ID = "0";
+		public static int $DYNAMIC_ID = 0;
+
 		/**
 		 * The version of aseqbase framework
 		 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
@@ -59,22 +62,34 @@
 
 		/**
 		 * Full part of the current url
-		 * Example: "https://mimfa.net/Category/mimfa/service/web?p=3&l=10#serp"
+		 * Example: "https://www.mimfa.net/Category/mimfa/service/web?p=3&l=10#serp"
 		 * @var string|null
 		 */
 		public static string|null $URL = null;
 		/**
 		 * The path part of the current url
-		 * Example: "https://mimfa.net/Category/mimfa/service/web"
+		 * Example: "https://www.mimfa.net/Category/mimfa/service/web"
 		 * @var string|null
 		 */
 		public static string|null $PATH = null;
 		/**
-		 * The host part of the current url
-		 * Example: "https://mimfa.net"
-		 * @var string|null
-		 */
+         * The host part of the current url
+         * Example: "https://www.mimfa.net"
+         * @var string|null
+         */
 		public static string|null $HOST = null;
+		/**
+         * The site name part of the current url
+         * Example: "www.mimfa.net"
+         * @var string|null
+         */
+		public static string|null $SITE = null;
+		/**
+         * The domain name part of the current url
+         * Example: "mimfa.net"
+         * @var string|null
+         */
+		public static string|null $DOMAIN = null;
 		/**
 		 * The request part of the current url
 		 * Example: "/Category/mimfa/service/web?p=3&l=10#serp"
@@ -100,7 +115,7 @@
 		 */
 		public static string|null $ANCHOR = null;
 		/**
-		 * The default email acount
+		 * The default email account
 		 * Example: "do-not-reply@mimfa.net"
 		 * @var string|null
 		 */
@@ -190,8 +205,13 @@
 	_::$SEQUENCES = $GLOBALS["SEQUENCES"];
 	_::$NEST = $GLOBALS["NEST"];
 
+	_::$ID = getId(true)."";
+	_::$DYNAMIC_ID = getId(false);
+
 	_::$URL = getUrl();
 	_::$HOST = getHost();
+	_::$SITE = getSite();
+	_::$DOMAIN = getDomain();
 	_::$PATH = getPath();
 	_::$REQUEST = getRequest();
 	_::$DIRECTION = getDirection();
@@ -245,6 +265,7 @@
 	RUN("global/Base");
 	RUN("global/EnumBase");
 
+	LIBRARY("Math");
 	LIBRARY("Local");
 	LIBRARY("DataBase");
 	LIBRARY("Session");
@@ -253,6 +274,7 @@
 	LIBRARY("Convert");
 	LIBRARY("Contact");
 	LIBRARY("User");
+	LIBRARY("HTML");
 
 	RUN("global/ConfigurationBase");
 	RUN("Configuration");
@@ -539,6 +561,9 @@
 	function go($url){
         echo "<script>load('$url');</script>";
     }
+	function reload(){
+        load(\_::$URL);
+    }
 	function load($url = null){
         echo "<script>load(".(isValid($url)?"'$url'":"null").");</script>";
     }
@@ -584,10 +609,11 @@
 		return substr_compare($haystack, $needle, -strlen($needle)) === 0;
 	}
 
-	function getId():int
+	function getId($alwaysunique = false):int
 	{
+		if(!$alwaysunique) return ++\_::$DYNAMIC_ID;
 		list($usec, $sec) = explode(" ", microtime());
-		return (int)($sec*10000000+$usec*10000000);
+		return (int)($usec*10000000+$sec);
 	}
 
 	function getDomainUrl():string|null
@@ -628,10 +654,20 @@
 		return \MiMFa\Library\Local::GetPath($path);
 	}
 
+	/**
+	* Get the full part of a url pointed to catch status
+	* Example: "https://www.mimfa.net/Category/mimfa/service/web?p=3&l=10#serp"
+	* @return string|null
+	*/
 	function getFullUrl(string|null $path = null, bool $optimize = true):string|null{
 		if($path === null) $path = getUrl();
 		return \MiMFa\Library\Local::GetFullUrl($path, $optimize);
 	}
+	/**
+     * Get the full part of a url
+     * Example: "https://www.mimfa.net/Category/mimfa/service/web?p=3&l=10#serp"
+     * @return string|null
+     */
 	function getUrl(string|null $path = null):string|null{
 		if($path === null)
 			$path = //$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'] or
@@ -644,37 +680,93 @@
 				);
 		return preg_replace("/^[\/\\\]/",rtrim(GetHost(),"/\\")."$1",$path);
 	}
+	/**
+	* Get the host part of a url
+	* Example: "https://www.mimfa.net"
+	* @return string|null
+	*/
 	function getHost(string|null $path = null):string|null{
 		$pat = "/^\w+\:\/*[^\/]+/";
 		if($path == null || !preg_match($pat,$path)) $path = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://').$_SERVER['HTTP_HOST'];
 		return PREG_Find($pat, $path);
 	}
+	/**
+	* Get the site name part of a url
+	* Example: "www.mimfa.net"
+	* @return string|null
+	*/
+	function getSite(string|null $path = null):string|null{
+		return PREG_Find("/(?<=\/)[^\/]+/", getHost($path));
+	}
+	/**
+	* Get the domain name part of a url
+	* Example: "mimfa.net"
+	* @return string|null
+	*/
+	function getDomain(string|null $path = null):string|null{
+		return PREG_replace("/^\w+:\/*(www\.)?/","", getHost($path));
+	}
+	/**
+	* Get the path part of a url
+	* Example: "https://www.mimfa.net/Category/mimfa/service/web"
+	* @return string|null
+	*/
 	function getPath(string|null $path = null):string|null{
 		return PREG_Find("/(^[^\?#]*)/", $path??getUrl());
 	}
+	/**
+	* Get the request part of a url
+	* Example: "/Category/mimfa/service/web?p=3&l=10#serp"
+	* @return string|null
+	*/
 	function getRequest(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();
 		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
 		return PREG_Replace("/(^\w+:\/*[^\/]+)/","", $path);
 	}
+	/**
+	* Get the direction part of a url from the root
+	* Example: "Category/mimfa/service/web"
+	* @return string|null
+	*/
 	function getDirection(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
 		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
 		return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/","", $path);
 	}
+	/**
+	* Get the relative address from a url
+	* Example: "Category/mimfa/service/web?p=3&l=10#serp"
+	* @return string|null
+	*/
 	function getRelative(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();
 		if(startsWith($path,\_::$BASE_DIR)) return substr($path, strlen(\_::$BASE_DIR));
 		return PREG_Replace("/^\w+:\/*[^\/]+/","", $path);
 	}
+	/**
+	* Get the query part of a url
+	* Example: "p=3&l=10"
+	* @return string|null
+	*/
 	function getQuery(string|null $path = null):string|null{
 		return PREG_Find("/((?<=\?)[^#]*($|#))/", $path??getUrl());
 	}
+	/**
+	* Get the anchor part of a url
+	* Example: "serp"
+	* @return string|null
+	*/
 	function getAnchor(string|null $path = null):string|null{
 		return PREG_Find("/((?<=#)[^\?]*($|\?))/", $path??getUrl());
 	}
+	/**
+	* Create an email account
+	* Example: "do-not-reply@mimfa.net"
+	* @return string|null
+	*/
 	function getEmail(string|null $path = null, $mailName = "do-not-reply"):string|null{
-		return $mailName."@".PREG_replace("/\w+:\/{1,2}(www\.)?/","", getHost($path));
+		return $mailName."@".getDomain($path);
 	}
 
 	function changeMemo($key, $val){
@@ -959,7 +1051,7 @@
 	}
 
 	/**
-	 * Inser into an array
+	 * Insert into an array
 	 * @param array      $array
 	 * @param int|string $position
 	 * @param mixed      $insert
@@ -977,6 +1069,26 @@
 			);
 		}
 		return $array;
+	}
+	/**
+     * Find something from an array by a callable function
+     * @param array      $array
+     * @param callable $searching function($key, $val){ return true; }
+     * @param int|string|null $array_find_key
+     */
+	function array_find_key($array, callable $searching)
+	{
+		return array_key_first(array_filter($array, $searching, ARRAY_FILTER_USE_BOTH));
+	}
+	/**
+     * Find everythings are match from an array by a callable function
+     * @param array      $array
+     * @param callable $searching function($key, $val){ return true; }
+     * @param array $array_find_keys
+     */
+	function array_find_keys($array, callable $searching)
+	{
+		return array_filter($array, $searching, ARRAY_FILTER_USE_BOTH);
 	}
 
 	//Test Region
@@ -1009,6 +1121,7 @@
 	function test_Address(){
 		echo "<br>URL: "._::$URL;
 		echo "<br>HOST: "._::$HOST;
+		echo "<br>SITE: "._::$SITE;
 		echo "<br>PATH: "._::$PATH;
 		echo "<br>REQUEST: "._::$REQUEST;
 		echo "<br>DIRECTION: "._::$DIRECTION;

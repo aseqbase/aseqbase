@@ -1,5 +1,7 @@
 <?php
 namespace MiMFa\Module;
+use MiMFa\Library\HTML;
+use MiMFa\Library\User;
 MODULE("Form");
 class SignUpForm extends Form{
 	public $Action = null;
@@ -52,6 +54,10 @@ class SignUpForm extends Form{
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
 	public $UpdateMode = false;
+	/**
+	 * Account needs to confirm throght activation email way
+	 * @var bool
+	 */
 	public $SendActivationEmail = true;
 	public $GroupID = null;
 	/**
@@ -66,7 +72,8 @@ class SignUpForm extends Form{
 	public function __construct(){
         parent::__construct();
 		$this->Action = \MiMFa\Library\User::$UpHandlerPath;
-		$this->SuccessPath = \_::$PATH;
+		$this->InitialStatus = User::$InitialStatus;
+		$this->SendActivationEmail = User::$InitialStatus < User::$ActiveStatus;
 	}
 
 	public function EchoStyle(){
@@ -155,7 +162,7 @@ class SignUpForm extends Form{
 					<select id="countryCode" name="countrycode" style="max-width: 80px" class="custom-select form-control bg-white border-left-0 border-md h-100 font-weight-bold text-muted">
 						<?php
 						for ($i = 0; $i < 100; $i++)
-							echo "<option value='00$i'>+$i</option>";
+							echo "<option value='+$i'>+$i</option>";
                         ?>
 					</select>
 					<input id="phoneNumber" type="tel" pattern="[1-9]\d{5,10}" name="phone" placeholder="<?php echo $this->ContactPlaceHolder; ?>" class="form-control bg-white border-md border-left-0 pl-3">
@@ -238,20 +245,20 @@ class SignUpForm extends Form{
     }
 
 	public function EchoScript(){
-		parent::EchoScript();
-		?>
+        ?>
 		<script>
 			$(function () {
                 $(".<?php echo $this->Name ?> form").submit(function(e) {
-					if ($(".<?php echo $this->Name ?> form #passwordConfirmation").value
-						== $(".<?php echo $this->Name ?> form #password").value) return;
-					e.preventDefault();
+					if ($(".<?php echo $this->Name ?> form #passwordConfirmation").val() == $(".<?php echo $this->Name ?> form #password").val()) return true;
 					$(".<?php echo $this->Name ?> form result").remove();
-					$(".<?php echo $this->Name ?> form").append(Html.error("Confirmation of your password is not the same to the password!"));
+					$(".<?php echo $this->Name ?> form").append(Html.error("New password and confirm password does not match!"));
+					e.preventDefault();
+					return false;
                 });
 			});
 		</script>
 		<?php
+		parent::EchoScript();
     }
 
 	public function Action(){
@@ -281,37 +288,14 @@ class SignUpForm extends Form{
 					$this->InitialStatus
 				))
 				{
-					echo "<div class='page'>";
-                		echo "<div class='result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully")."</div>";
-						if($this->SendActivationEmail) PART("sign/active");
-					echo "</div>";
-				}
-				else echo "<div class='result error'>".__("The user with these email and username could not register!")."</div>";
-			}
-			else echo "<div class='result warning'>".__("Please fill all required fields correctly!")."</div>";
-		} catch(\Exception $ex) { echo "<div class='result error'>".__($ex->getMessage())."</div>"; }
-		elseif($this->UpdateMode) {
-			$phone = getValid($_req,"countrycode").getValid($_req,"phone");
-			if(strlen($phone) < 6) $phone = null;
-			if(\_::$INFO->User->SignUp(
-				getValid($_req,"username"),
-				getValid($_req,"password"),
-				getValid($_req,"email"),
-				null,
-				getValid($_req,"firstname"),
-				getValid($_req,"lastname"),
-				$phone,
-				$this->GroupID,
-				$this->InitialStatus
-			))
-			{
-				echo "<div class='page'>";
-                	echo "<div class='result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully")."</div>";
+					echo HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully");
 					if($this->SendActivationEmail) PART("sign/active");
-				echo "</div>";
+				}
+				else echo HTML::Error("The user with these email or username could not register!");
 			}
-			else echo "<div class='result error'>".__("The user with these email and username could not register!")."</div>";
-        } else echo "<div class='result warning'>".__("You are logged in!")."</div>";
+			else echo HTML::Warning("Please fill all required fields correctly!");
+		} catch(\Exception $ex) { echo HTML::Error($ex->getMessage()); }
+		else echo HTML::Warning("You are logged in!");
     }
 }
 ?>

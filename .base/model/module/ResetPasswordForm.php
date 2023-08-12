@@ -1,4 +1,6 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\HTML;
 MODULE("Form");
 class ResetPasswordForm extends Form{
 	public $Action = null;
@@ -19,16 +21,17 @@ class ResetPasswordForm extends Form{
 	public $SignaturePlaceHolder = "Email/Phone";
 	public $PasswordPlaceHolder = "Password";
 	public $PasswordConfirmationPlaceHolder = "Confirm Password";
-	
+
 	public function __construct(){
         parent::__construct();
-		$this->Action = \MiMFa\Library\User::$ResetHandlerPath;
+		$this->Action = \MiMFa\Library\User::$RecoveryHandlerPath;
+		$this->SuccessPath = \MiMFa\Library\User::$InHandlerPath;
 	}
 
 	public function EchoFields(){
-		if(isValid($_REQUEST, \MiMFa\Library\User::$ResetRequestKey)):
-			echo '<input type="hidden" name="'.\MiMFa\Library\User::$ResetRequestKey.'" value="'.getValid($_REQUEST, \MiMFa\Library\User::$ResetRequestKey).'">';
-			?>
+		if(isValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey)):
+			echo '<input type="hidden" name="'.\MiMFa\Library\User::$RecoveryRequestKey.'" value="'.getValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey).'">';
+?>
 			<div class="row">
 				<!-- Password -->
 				<div class="input-group col-lg-12 mb-4">
@@ -91,27 +94,27 @@ class ResetPasswordForm extends Form{
 			break;
         }
 		try {
-			if(isValid($_req,"password") && isValid($_REQUEST, \MiMFa\Library\User::$ResetRequestKey)){
-				$res = \_::$INFO->User->ReceiveResetPasswordLink();
+			if(isValid($_req,"password") && isValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey)){
+				$res = \_::$INFO->User->ReceiveRecoveryLink();
 				if($res === true)
-                	echo "<div class='page result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', your password changed successfully!")."</div>";
+                	echo HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', your password changed successfully!");
 				elseif($res === false)
-					echo "<div class='result error'>".__("There a problem is occured!")."</div>";
+					echo HTML::Error("There a problem is occured!");
 				else
-					echo "<div class='result error'>".__($res)."</div>";
+					echo HTML::Error($res);
 			}
 			elseif(isValid($_req,"username")){
-				\_::$INFO->User->GetUser(getValid($_req,"username"));
-				$res = \_::$INFO->User->SendResetPasswordEmail();
+				\_::$INFO->User->Find(getValid($_req,"username"));
+				$res = \_::$INFO->User->SendRecoveryEmail();
 				if($res === true)
-                	echo "<div class='page result success'>".__("Dear user, the reset password sent to your email successfully!")."</div>";
+                	echo HTML::Success("Dear user, the reset password sent to your email successfully!");
 				elseif($res === false)
-					echo "<div class='result error'>".__("There a problem is occured!")."</div>";
+					echo HTML::Error("There a problem is occured!");
 				else
-					echo "<div class='result error'>".__($res)."</div>";
+					echo HTML::Error($res);
 			}
-			else echo "<div class='result warning'>".__("Please fill fields correctly!")."</div>";
-		} catch(\Exception $ex) { echo "<div class='result error'>".__($ex->getMessage())."</div>"; }
+			else echo HTML::Warning("Please fill fields correctly!");
+		} catch(\Exception $ex) { echo HTML::Error($ex); }
     }
 }
 ?>

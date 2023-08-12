@@ -105,12 +105,15 @@ class Player extends Module{
 		echo "<div class=\"controls\">";
 		foreach($this->GetControls() as $btn) echo $btn;
 		echo "</div>";
+		MODULE("IFrame");
+		$mod = new IFrame($source);
+		$mod->Draw();
 		echo $this->GetContent($content);
 	}
 
 	public function EchoScript(){
 		parent::EchoScript();
-		?>
+?>
 		<script>
 		<?php if($this->AllowZoom){ ?>
 			let <?php echo $this->Name; ?>slider = null;

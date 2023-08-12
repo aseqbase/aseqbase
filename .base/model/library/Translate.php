@@ -12,6 +12,7 @@ class Translate
 {
 	public static $TableName = "Translate_Lexicon";
 	public static $Language = "EN";
+	public static $Encoding = "UTF-8";
 	public static $Direction = "LTR";
 	public static $CodeStart = "<";
 	public static $CodeEnd = ">";
@@ -21,9 +22,10 @@ class Translate
      * Default language is EN
 	 * @param string $lang
 	 */
-	public static function Initialize(string $lang, string $direction = "ltr"){
+	public static function Initialize(string $lang, string $direction = "LTR", string $encoding = "UTF-8"){
 		self::$Language = strtoupper($lang);
 		self::$Direction = strtoupper($direction);
+		self::$Encoding = strtoupper($encoding);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 <?php
 namespace MiMFa\Module;
+use MiMFa\Library\HTML;
 MODULE("Form");
 class SignInForm extends Form{
 	public $Action = null;
@@ -18,7 +19,7 @@ class SignInForm extends Form{
 	public $PasswordPlaceHolder = "Password";
 	public $SignUpLabel = "Do not have an account?";
 	public $RememberLabel = "Forgot your password?";
-	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="%3$s"><p class="welcome">Hello %1$s,<br>You are signed in now, also there you can sign with another account!</p></div>';
+	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="%3$s"><p class="welcome">Hello %1$s,<br>You are signed in now!</p></div>';
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
@@ -134,7 +135,7 @@ class SignInForm extends Form{
         ?>
 		<div class="col-lg-12 mx-auto align-items-center my-4">
 			<a class="text-muted font-weight-bold d-block" href="<?php echo \MiMFa\Library\User::$UpHandlerPath; ?>"><?php echo __($this->SignUpLabel);?></a>
-			<a class="text-muted font-weight-bold d-block" href="<?php echo \MiMFa\Library\User::$RememberHandlerPath; ?>"><?php echo __($this->RememberLabel);?></a>
+			<a class="text-muted font-weight-bold d-block" href="<?php echo \MiMFa\Library\User::$RecoveryHandlerPath; ?>"><?php echo __($this->RememberLabel);?></a>
 		</div>
 		<?php
     }
@@ -155,15 +156,15 @@ class SignInForm extends Form{
 						\_::$INFO->User->SignInOrSignUp(getValid($_req,"username"), getValid($_req,"password")):
 						\_::$INFO->User->SignIn(getValid($_req,"username"), getValid($_req,"password"));
 				if($res === true)
-                	echo "<div class='page result success'>".__("Dear '".\_::$INFO->User->TemporaryName."', you have logged in successfully")."</div>";
+                	echo HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', you have logged in successfully");
 				elseif($res === false)
-					echo "<div class='result error'>".__("UserName or password is not correct!")."</div>";
+					echo HTML::Error("UserName or password is not correct!");
 				else
-					echo "<div class='result error'>".__($res)."</div>";
+					echo HTML::Error($res);
 			}
-			else echo "<div class='result warning'>".__("Please fill all fields correctly!")."</div>";
-		} catch(\Exception $ex) { echo "<div class='result error'>".__($ex->getMessage())."</div>"; }
-		else echo "<div class='result warning'>".__("You are logged in!")."</div>";
+			else echo HTML::Warning("Please fill all fields correctly!");
+		} catch(\Exception $ex) { echo HTML::Error($ex); }
+		else echo HTML::Warning("You are logged in!");
     }
 }
 ?>
