@@ -1,6 +1,8 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
+use MiMFa\Library\Style;
+use MiMFa\Library\HTML;
 class Field extends Module{
 	public $Template = null;
 	/**
@@ -118,12 +120,12 @@ class Field extends Module{
 ?>
 		<style>
 			.<?php echo $this->Name; ?>{
-				<?php echo \MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("width", $this->Width); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("height", $this->Height); ?>
+				<?php echo Style::DoProperty("min-width",$this->MinWidth); ?>
+				<?php echo Style::DoProperty("min-height", $this->MinHeight); ?>
+				<?php echo Style::DoProperty("max-width", $this->MaxWidth); ?>
+				<?php echo Style::DoProperty("max-height", $this->MaxHeight); ?>
+				<?php echo Style::DoProperty("width", $this->Width); ?>
+				<?php echo Style::DoProperty("height", $this->Height); ?>
 				font-size: var(--Size-1);
 				text-align: start;
 				display: table-row;
@@ -137,19 +139,19 @@ class Field extends Module{
 				margin-right: -1px;
 				padding: 0px 10px;
 				z-index: 1;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?> .field{
-				<?php echo \MiMFa\Library\Style::DoProperty("color", $this->ForeColor); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("background-color", $this->BackColor); ?>
+				<?php echo Style::DoProperty("color", $this->ForeColor); ?>
+				<?php echo Style::DoProperty("background-color", $this->BackColor); ?>
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
 				border-radius: 3px;
-				<?php echo \MiMFa\Library\Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
+				<?php echo Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
 				border-color: transparent;
-				<?php echo \MiMFa\Library\Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0)); ?>
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0)); ?>
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?> label.description{
 				text-align: initial;
@@ -157,15 +159,15 @@ class Field extends Module{
 				font-size: 75%;
 				padding: 5px;
 				opacity: 0.5;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>:hover .field{
-				<?php echo \MiMFa\Library\Style::DoProperty("border-color", $this->BorderColor); ?>
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::DoProperty("border-color", $this->BorderColor); ?>
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>:hover label.description{
 				opacity: 0.75;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 		</style>
 		<?php
@@ -175,19 +177,19 @@ class Field extends Module{
 		?>
 		<style>
 			.<?php echo $this->Name; ?>{
-				<?php echo \MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("width", $this->Width); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("height", $this->Height); ?>
+				<?php echo Style::DoProperty("min-width",$this->MinWidth); ?>
+				<?php echo Style::DoProperty("min-height", $this->MinHeight); ?>
+				<?php echo Style::DoProperty("max-width", $this->MaxWidth); ?>
+				<?php echo Style::DoProperty("max-height", $this->MaxHeight); ?>
+				<?php echo Style::DoProperty("width", $this->Width); ?>
+				<?php echo Style::DoProperty("height", $this->Height); ?>
 				font-size: var(--Size-1);
 				text-align: start;
 				display: table-row;
 			}
 			.<?php echo $this->Name; ?> label.title{
-				<?php echo \MiMFa\Library\Style::DoProperty("color", $this->ForeColor); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("background-color", $this->BackColor); ?>
+				<?php echo Style::DoProperty("color", $this->ForeColor); ?>
+				<?php echo Style::DoProperty("background-color", $this->BackColor); ?>
 				width: fit-content;
 				display: table-cell;
 				position: relative;
@@ -196,24 +198,24 @@ class Field extends Module{
 				margin-right: -1px;
 				padding: 0px 10px;
 				border-radius: 3px 0px 0px 3px;
-				<?php echo \MiMFa\Library\Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
+				<?php echo Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
 				border-color: transparent;
 				border-right: 0px solid;
 				z-index: 1;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?> .field{
-				<?php echo \MiMFa\Library\Style::DoProperty("color", $this->ForeColor); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("background-color", $this->BackColor); ?>
+				<?php echo Style::DoProperty("color", $this->ForeColor); ?>
+				<?php echo Style::DoProperty("background-color", $this->BackColor); ?>
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
 				border-radius: 0px 3px 3px 0px;
-				<?php echo \MiMFa\Library\Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
+				<?php echo Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
 				border-color: transparent;
 				border-left: 0px solid;
-				<?php echo \MiMFa\Library\Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0)); ?>
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0)); ?>
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?> label.description{
 				text-align: initial;
@@ -222,19 +224,19 @@ class Field extends Module{
 				font-size: 75%;
 				padding: 0px 5px;
 				opacity: 0;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>:hover label.title{
-				<?php echo \MiMFa\Library\Style::DoProperty("border-color", $this->BorderColor); ?>
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::DoProperty("border-color", $this->BorderColor); ?>
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>:hover .field{
-				<?php echo \MiMFa\Library\Style::DoProperty("border-color", $this->BorderColor); ?>
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::DoProperty("border-color", $this->BorderColor); ?>
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>:hover label.description{
 				opacity: 0.75;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 		</style>
 		<?php
@@ -244,18 +246,18 @@ class Field extends Module{
 		?>
 		<style>
 			.<?php echo $this->Name; ?>{
-				<?php echo \MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("width", $this->Width); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("height", $this->Height); ?>
+				<?php echo Style::DoProperty("min-width",$this->MinWidth); ?>
+				<?php echo Style::DoProperty("min-height", $this->MinHeight); ?>
+				<?php echo Style::DoProperty("max-width", $this->MaxWidth); ?>
+				<?php echo Style::DoProperty("max-height", $this->MaxHeight); ?>
+				<?php echo Style::DoProperty("width", $this->Width); ?>
+				<?php echo Style::DoProperty("height", $this->Height); ?>
 				font-size: var(--Size-1);
 				text-align: start;
 			}
 			.<?php echo $this->Name; ?> label.title{
-				<?php echo \MiMFa\Library\Style::DoProperty("color", $this->ForeColor); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("background-color", $this->BackColor); ?>
+				<?php echo Style::DoProperty("color", $this->ForeColor); ?>
+				<?php echo Style::DoProperty("background-color", $this->BackColor); ?>
 				width: fit-content;
 				display: flex;
 				position: relative;
@@ -264,22 +266,22 @@ class Field extends Module{
 				margin-bottom: -1px;
 				padding: 2px;
 				border-radius: 3px 3px 0px 0px;
-				<?php echo \MiMFa\Library\Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
+				<?php echo Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
 				border-color: transparent;
 				border-bottom: 0px solid;
 				z-index: 1;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?> .field{
-				<?php echo \MiMFa\Library\Style::DoProperty("color", $this->ForeColor); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("background-color", $this->BackColor); ?>
+				<?php echo Style::DoProperty("color", $this->ForeColor); ?>
+				<?php echo Style::DoProperty("background-color", $this->BackColor); ?>
 				font-size: 100%;
 				width: 100%;
 				border-radius: 0px 3px 3px 3px;
-				<?php echo \MiMFa\Library\Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
+				<?php echo Style::DoProperty("border", \_::$TEMPLATE->Border(1)); ?>
 				border-color: transparent;
-				<?php echo \MiMFa\Library\Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0)); ?>
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0)); ?>
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?> label.description{
 				text-align: initial;
@@ -288,22 +290,22 @@ class Field extends Module{
 				margin-top: -1px;
 				padding: 3px;
 				opacity: 0;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>:hover label.title{
 				font-size: 75%;
-				<?php echo \MiMFa\Library\Style::DoProperty("border-color", $this->BorderColor); ?>
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::DoProperty("border-color", $this->BorderColor); ?>
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>:hover .field{
 				font-size: 125%;
-				<?php echo \MiMFa\Library\Style::DoProperty("border-color", $this->BorderColor); ?>
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::DoProperty("border-color", $this->BorderColor); ?>
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>:hover label.description{
 				font-size: 75%;
 				opacity: 0.75;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				<?php echo Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 		</style>
 		<?php
@@ -369,12 +371,32 @@ class Field extends Module{
 			case 'audio':
 			case 'video':
 			case 'file':
+				$p = null;
 				if(isValid($this->Value)){
 					MODULE("Player");
-                    $mod = new Player();
-                    $mod->Source = $this->Value;
-                    $mod->Draw();
+                    $p = new Player($this->Value);
+					$p->Style = new Style();
+					$p->Style->BackgroundColor = $this->BackColor;
+					$p->Style->Color = $this->ForeColor;
+					$p->Style->Border = "1px solid ". $this->BorderColor;
+					$p->MinWidth = "auto";
+					$p->MinHeight = "10vmin";
+					$p->MaxWidth = "100%";
+					$p->MaxHeight = "100%";
+					$p->Id = "Player".getId();
+					if(!$this->Lock) $p->PrependControls = "
+											<div class=\"fa fa-trash button\" onclick=\"
+												document.getElementById('$id').setAttribute('disabled','disabled');
+												document.getElementById('{$p->Id}').style.opacity='0.5';
+												document.getElementById('{$p->Id}').style.borderColor='#f33';\"></div>
+											<div class=\"fa fa-edit button\" onclick=\"
+												document.getElementById('$id').removeAttribute('disabled');
+												document.getElementById('{$p->Id}').style.opacity='1';
+												document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
+												document.getElementById('$id').click();\"></div>";
+					$p->Draw();
                 }
+				$others = "";
 				$accept = "";
 				if(isValid($this->Options))
                     $accept = join("|", array_values($this->Options));
@@ -383,21 +405,27 @@ class Field extends Module{
                         case 'doc':
                         case 'document':
                             $accept = " accept='.doc, .docx, .ppt, .pptx, .sls, .slx, .txt, .csv, .tsv'";
+							$others = is_null($p)?"": HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                             break;
                         case "image":
                             $accept = " accept='image/*'";
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                             break;
                         case "audio":
                             $accept = " accept='audio/*'";
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                             break;
                         case "video":
                             $accept = " accept='video/*'";
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
 							break;
                         default:
                             $accept = "";
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                             break;
                     }
-				echo "<input id='$id' name='$this->Key' type='file' value='$this->Value' placeholder='$this->PlaceHolder' class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='file' value='$this->Value' placeholder='$this->PlaceHolder' class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>"
+					.$others;
 				break;
 			case 'docs':
 			case 'documents':
@@ -405,6 +433,33 @@ class Field extends Module{
 			case 'audios':
 			case 'videos':
 			case 'files':
+				$p = "";
+				if(isValid($this->Value)){
+					MODULE("Player");
+                    $p = new Player($this->Value);
+					$p->Style = new Style();
+					$p->Style->BackgroundColor = $this->BackColor;
+					$p->Style->Color = $this->ForeColor;
+					$p->Style->Border = "1px solid ". $this->BorderColor;
+					$p->MinWidth = "auto";
+					$p->MinHeight = "10vmin";
+					$p->MaxWidth = "100%";
+					$p->MaxHeight = "100%";
+					$p->Id = "Player".getId();
+					if(!$this->Lock) $p->PrependControls = "
+											<div class=\"fa fa-trash button\" onclick=\"
+												document.getElementById('$id').setAttribute('disabled','disabled');
+												document.getElementById('{$p->Id}').style.opacity='0.5';
+												document.getElementById('{$p->Id}').style.borderColor='#f33';\"></div>
+											<div class=\"fa fa-edit button\" onclick=\"
+												document.getElementById('$id').removeAttribute('disabled');
+												document.getElementById('{$p->Id}').style.opacity='1';
+												document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
+												document.getElementById('$id').click();\"></div>";
+					$p->Draw();
+                }
+				$others = "";
+				$accept = "";
 				if(isValid($this->Options))
                     $accept = join("|", array_values($this->Options));
 				else switch ($type)
@@ -412,21 +467,27 @@ class Field extends Module{
                         case 'docs':
                         case 'documents':
                             $accept = " accept='.doc, .docx, .ppt, .pptx, .sls, .slx, .txt, .csv, .tsv'";
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                             break;
                         case "images":
                             $accept = " accept='image/*'";
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                             break;
                         case "audios":
                             $accept = " accept='audio/*'";
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                             break;
                         case "videos":
                             $accept = " accept='video/*'";
-                            break;
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+							break;
                         default:
                             $accept = "";
+							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                             break;
                     }
-				echo "<input id='$id' name='$this->Key' type='file' value='$this->Value' placeholder='$this->PlaceHolder' class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." multiple $attrs>";
+				echo "<input id='$id' name='$this->Key' type='file' value='$this->Value' placeholder='$this->PlaceHolder' class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." multiple $attrs>"
+					.$others;
 				break;
             case "dir":
             case "directory":

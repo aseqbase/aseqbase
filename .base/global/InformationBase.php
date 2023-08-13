@@ -31,7 +31,11 @@ abstract class InformationBase extends Base{
 	public $WaitSymbolPath = "/file/general/wait.gif";
 	public $ProcessSymbolPath = "/file/general/process.gif";
 	public $ErrorSymbolPath = "/file/general/error.png";
-
+	
+	/**
+	 * The user service
+	 * @var \MiMFa\Library\User
+	 */
 	public $User = null;
 
 	public $Location = null;

@@ -1,6 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
+use MiMFa\Library\Convert;
 MODULE("Form");
 class SignInForm extends Form{
 	public $Action = null;
@@ -19,7 +20,7 @@ class SignInForm extends Form{
 	public $PasswordPlaceHolder = "Password";
 	public $SignUpLabel = "Do not have an account?";
 	public $RememberLabel = "Forgot your password?";
-	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="%3$s"><p class="welcome">Hello %1$s,<br>You are signed in now!</p></div>';
+	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="$IMAGE"><br><p class="welcome">Hello dear $NAME,<br>You are signed in now!</p></div>';
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
@@ -76,12 +77,12 @@ class SignInForm extends Form{
 
 	public function Echo(){
 		if(\_::$INFO->User->Access(1) && !$this->MultipleSignIn)
-			printf(__($this->WelcomeFormat), \_::$INFO->User->Name, \_::$INFO->User->Email, \_::$INFO->User->Image);
+			$this->EchoHeader();
 		else parent::Echo();
 	}
 	public function EchoHeader(){
         if(\_::$INFO->User->Access(1))
-			printf(__($this->WelcomeFormat), \_::$INFO->User->Name, \_::$INFO->User->Email, \_::$INFO->User->Image);
+			echo __(Convert::FromDynamicString($this->WelcomeFormat));
     }
 	public function EchoFields(){
         if($this->HasInternalMethod):?>

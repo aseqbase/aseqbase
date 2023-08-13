@@ -23,6 +23,8 @@ class Local{
      */
 	public static function GetUrl($path){
 		if(!isValid($path) || isAbsoluteUrl($path)) return $path;
+		if(startsWith($path, \_::$DIR)) return \_::$ROOT.substr($path,strlen(\_::$DIR));
+		if(startsWith($path, \_::$BASE_DIR)) return \_::$BASE_ROOT.substr($path,strlen(\_::$BASE_DIR));
 		if(!startsWith($path, "/")) $path = "/".\_::$DIRECTION."/".$path;
 		$p = ltrim(getRelative($path), "/\\");
 		if(file_exists(\_::$DIR.$p)) return \_::$ROOT.$p;
@@ -40,15 +42,19 @@ class Local{
 	 * @return mixed
 	 */
 	public static function GetPath($path){
-		if(!isValid($path) || IsAbsoluteUrl($path)) return realpath($path);
-		$p = ltrim(getRelative($path), "/\\");
-		if(file_exists(\_::$DIR.$p)) return realpath(\_::$DIR.$p);
-		if(count(\_::$SEQUENCES) > 0){
-			foreach(\_::$SEQUENCES as $dir=>$root)
-				if(file_exists($dir.$p))
-					return realpath($root.$p);
-		}
-		if(file_exists(\_::$BASE_DIR.$p)) return realpath(\_::$BASE_DIR.$p);
+		if(!isValid($path)) return $path;
+		elseif(startsWith($path, \_::$ROOT)) $path = \_::$DIR.substr($path,strlen(\_::$ROOT));
+		elseif(startsWith($path, \_::$BASE_ROOT)) $path = \_::$BASE_DIR.substr($path,strlen(\_::$BASE_ROOT));
+		else{
+			$p = ltrim(getRelative($path), "/\\");
+            if(file_exists(\_::$DIR.$p)) return realpath(\_::$DIR.$p);
+            if(count(\_::$SEQUENCES) > 0){
+                foreach(\_::$SEQUENCES as $dir=>$root)
+                    if(file_exists($dir.$p))
+                        return realpath($root.$p);
+            }
+            if(file_exists(\_::$BASE_DIR.$p)) return realpath(\_::$BASE_DIR.$p);
+        }
 		return realpath($path);
 	}
     /**
@@ -62,10 +68,16 @@ class Local{
 		else $path .= "?";
         return $path."v=".date(\_::$CONFIG->CachePeriod);
     }
-    public static function CreateNewAddress(string $dir, string $format = "", int $length = 10):string{
-        $id = time();
-		$path = $dir.$id.$format;
-		while(self::FileExists($path)) $path = $dir.$id."_".randomString(3).$format;
+    /**
+     * Create a new unique address
+     * @param string $dir Root directory
+     * @param string $format The full format of extension (like .html)
+     * @param int $random Pass 0 or false to get the name sequential from the number 1 to infinity
+     * @return string
+     */
+    public static function NewUniquePath(string $dir, string $fileName = "new", string $format = "", bool $random = true):string{
+		do $path = "$dir$fileName".getId($random).$format;
+		while(file_exists($path));
         return $path;
     }
 
@@ -141,13 +153,13 @@ class Local{
 		return null;
 	}
 	public static function FileExists($path):bool{
-		return file_exists($path);
+		return file_exists(self::GetPath($path));
 	}
 	public static function CreateFile($path){
-		return fopen($path,"w");
+		return fopen(self::GetPath($path),"w");
 	}
 	public static function DeleteFile($path){
-		return unlink($path);
+		return unlink(self::GetPath($path));
 	}
 	public static function MoveFile($source_path, $dest_path):bool{
 		if(self::CopyFile($source_path, $dest_path))
@@ -157,6 +169,8 @@ class Local{
 	public static function CopyFile($source_path, $dest_path):bool{
 		set_time_limit (24 * 60 * 60);
 		$b = false;
+		$source_path = self::GetPath($source_path);
+		$dest_path = self::GetPath($dest_path);
         $s_file = fopen ($source_path, "rb");
         if ($s_file) {
             $d_file = fopen ($dest_path, "wb");
@@ -188,53 +202,69 @@ class Local{
     }
 
 	public static function ReadText($path){
-		return file_get_contents($path);
+		return file_get_contents(self::GetPath($path));
 	}
 	public static function WriteText($path, string|null $text){
-		return fwrite($path,$text);
+		return fwrite(self::GetPath($path),$text);
 	}
 
 
-    public static function GetForceImage($filePath="/file/image/image.png", $probableFormat = [".png",".jpg",".gif",".bmp",".jiff",".ico",".svg"]){
-		$path = preg_replace("/\.[^\.\\/\\\]+$/","",$filePath);
+    public static function GetForceImage($path="/file/image/image.png", $probableFormat = [".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg"]){
+		$filepath = self::GetPath(preg_replace("/\.[^\.\\/\\\]+$/","",$path));
 		foreach ($probableFormat as $format)
-            if(file_exists(self::GetUrl("$path$format"))) return self::GetUrl("$path$format");
-        return $filePath;
+            if(file_exists(self::GetUrl("$filepath$format"))) return self::GetUrl("$filepath$format");
+        return $filepath;
 	}
-
+	/**
+     * Get the fileobject by file key name
+     * @param mixed $inputName Posted file key name
+	 * @return mixed
+	 */
 	public static function GetFileObject($inputName){
 		return $_FILES[$inputName];
 	}
+	/**
+	 * Upload File
+	 * @param mixed $fileobject A file object or posted file key name
+     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $minSize Minimum file size in byte
+     * @param mixed $maxSize Maximum file size in byte
+     * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
+	 * @return string Return the uploaded file url, else return null
+	 */
 	public static function UploadFile($fileobject, $destdir=null, $minSize=10000, $maxSize=5000000, $extensions=[]){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
-		if(is_string($fileobject)) $destdir = \_::$PUBLIC_DIR;
+		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+		if(!isValid($destdir)) $destdir = \_::$PUBLIC_DIR;
 
 		$fileType = strtolower(pathinfo($fileobject["name"],PATHINFO_EXTENSION));
-		$result = trim($destdir,"/");
-		$dir = self::CreateDirectory($result);
-		$fileName = explode(".",basename($fileobject["name"]))[0]."_".getId().".".$fileType;
-		$filepath = $dir.$fileName;
-		$result .= "/".$fileName;
-
-		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+		$dir = self::CreateDirectory(trim($destdir,"/"));
+		$fileName = strtolower(pathinfo($fileobject["name"],PATHINFO_FILENAME))."_";
 
 		// Allow certain file formats
 		$allow = true;
-		foreach($extensions as $ext) if($allow = $fileType === $ext) break;
+		foreach($extensions as $ext) if($allow = $fileType === $ext || ".".$fileType === $ext) break;
 		if(!$allow) throw new \Exception("The file format is not acceptable!");
 
 		// Check file size
 		if($fileobject["size"]<$minSize) throw new \Exception("The file size is very small!");
 		elseif($fileobject["size"]>$maxSize) throw new \Exception("The file size is very big!");
 
-		// Check if file already exists
-		if(file_exists($filepath)) throw new \Exception("Sorry, your file was not uploaded, because the file is already exists!");
-
+		$filepath = self::NewUniquePath($dir,$fileName,".$fileType");
 		if(!move_uploaded_file($fileobject["tmp_name"], $filepath))
             throw new \Exception("Sorry, there was an error uploading your file.");
-		return $result;
+        return self::GetUrl($filepath);
 	}
-	public static function UploadImage($fileobject, $destdir, $minSize=10000, $maxSize=5000000,$extensions=["jpg","jpeg","png","bmp","gif","ico"]){
+	/**
+     * Upload Image
+     * @param mixed $fileobject An image object or posted file key name
+     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+     * @param mixed $minSize Minimum image size in byte
+     * @param mixed $maxSize Maximum image size in byte
+     * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
+     * @return string Return the uploaded image url, else return null
+     */
+	public static function UploadImage($fileobject, $destdir, $minSize=10000, $maxSize=5000000,$extensions=[".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg"]){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
 

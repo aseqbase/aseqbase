@@ -36,6 +36,23 @@ class Image extends Module{
      */
 	public $MaxHeight = "100vh";
 
+	/**
+     * Create the module
+     * @param string|null $source The module source
+     */
+	public function __construct($source =  null){
+        parent::__construct();
+		$this->Set($source);
+    }
+	/**
+     * Set the main properties of module
+     * @param string|null $source The module source
+     */
+	public function Set($source =  null){
+		$this->Source = $source;
+		return $this;
+    }
+
 	public function EchoStyle(){
 		parent::EchoStyle();
 ?>

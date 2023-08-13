@@ -22,20 +22,23 @@ class HTML
      * @return string
      */
     public static function Element($content = null, $tagName = "html", $attributes = array()) {
-        $isSingle = gettype($tagName) === 'object';
-        if ($isSingle) {
+        if (is_array($tagName)) {
             $attributes = $tagName;
             $tagName = $content;
+            $content = null;
         }
+        $isSingle = is_null($content);
         $tagName = trim(strtolower($tagName));
 
         $attrs = "";
         if(!is_null($attributes))
-            foreach($attributes as $key=>$value) {
-                $sp = str_contains($value,"'") ? '"' : "'";
-                $attrs .= join("",array(" ", trim(strtolower($key)), "=", $sp, $value, $sp));
-            }
-
+            foreach($attributes as $key=>$value)
+                if(is_null($value)){
+                    $attrs .= join("",array(" ", trim(strtolower($key)),""));
+                } else {
+                    $sp = str_contains($value,"'") ? '"' : "'";
+                    $attrs .= join("",array(" ", trim(strtolower($key)), "=", $sp, $value, $sp));
+                }
         if ($isSingle) return join("",array("<", $tagName, $attrs, "/>"));
         else return join("",array("<", $tagName, $attrs, ">", Convert::ToString($content), "</", $tagName, ">"));
     }
@@ -53,9 +56,7 @@ class HTML
     }
     public static function Style($content, $source = null, $attributes = array()){
         if (is_null($source)) $srci = self::Element($content, "style", $attributes);
-        else{
-            $srci = self::Element("link", [ ...[ "rel"=> "stylesheet", "href"=> $source ?? $content ], ...$attributes ]);
-        }
+        else $srci = self::Element("link", [ ...[ "rel"=> "stylesheet", "href"=> $source ?? $content ], ...$attributes ]);
         array_push(self::$Sources, $srci);
         return $srci;
     }
@@ -116,6 +117,31 @@ class HTML
     }
     public static function Warning($content, $attributes = array("class"=>'result warning')){
         return self::Element(__($content), "div", $attributes);
+    }
+
+    public static function Video($content, $source = null, $attributes = ["controls"=>null]){
+        if(!isValid($source)) $source = $content;
+        if(!isValid($content)) $content = $source;
+        return self::Element(self::Element("source", ["src"=> $source ]).$content, "video", $attributes);
+    }
+    public static function Audio($content, $source = null,  $attributes = ["controls"=>null]){
+        if(!isValid($source)) $source = $content;
+        if(!isValid($content)) $content = $source;
+        return self::Element(self::Element("source", ["src"=> $source ]).$content, "audio", $attributes);
+    }
+    public static function Image($content, $source = null, $attributes = array()){
+        if(!isValid($source)) $source = $content;
+        if(!isValid($content)) $content = getDomain($source);
+        return self::Element("img", [ ...[ "src"=> $source, "alt"=> $content ], ...$attributes ]);
+    }
+    public static function Link($content, $source = null, $attributes = array()){
+        if(!isValid($source)) $source = $content;
+        if(!isValid($content)) $content = getDomain($source);
+        return self::Element($content, "a", [ ...[ "href"=> $source ], ...$attributes ]);
+    }
+    public static function Frame($content, $source = null, $attributes = array()){
+        if(!isValid($source)) $source = $content;
+        return self::Element($content, "iframe", [ ...[ "src"=> $source ], ...$attributes ]);
     }
 
 }

@@ -1,21 +1,48 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\HTML;
+use MiMFa\Library\Convert;
 class Player extends Module{
 	public $Content = null;
 	public $Source = null;
 	public $AllowZoom = true;
 	public $AllowShare = true;
 	public $AllowDownload = true;
+	public $PrependControls = null;
+	public $AppendControls = null;
+	public $Width = "100%";
+	public $Height = "100%";
+	public $MinHeight = "10px";
+	public $MinWidth = "10px";
+	public $MaxHeight = "100vh";//"-webkit-fill-available";
+	public $MaxWidth = "100vw";
 
+	/**
+     * Create the module
+     * @param array|string|null $source The module source
+     */
+	public function __construct($source =  null){
+        parent::__construct();
+		$this->Set($source);
+    }
+	/**
+     * Set the main properties of module
+     * @param string|null $source The module source
+     */
+	public function Set($source =  null){
+		$this->Source = $source;
+		return $this;
+    }
 
 	public function EchoStyle(){
 		parent::EchoStyle();
-		?>
+?>
 		<style>
 			.<?php echo $this->Name; ?>>.controls{
 				opacity: 0;
 				position: absolute;
 				top: 5px;
-				right: 5px;
+				right: 10px;
 				font-size: var(--Size-1);
 				color: var(--ForeColor-3);
 				z-index: 1;
@@ -41,9 +68,12 @@ class Player extends Module{
 			}
 
 			.<?php echo $this->Name; ?>>.content {
-				height: 100%;
-				height: -webkit-fill-available;
-				width: 100%;
+				<?php echo \MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("width", $this->Width); ?>
+				<?php echo \MiMFa\Library\Style::DoProperty("height", $this->Height); ?>
 				padding: 0px;
 				position: relative;
 				text-align: center;
@@ -87,8 +117,8 @@ class Player extends Module{
 			.<?php echo $this->Name; ?>>.content>* {
 				width: 100%;
 				height: auto;
-				min-height: fit-content;
-				min-width: fit-content;
+				min-height: auto;
+				min-width: auto;
 				z-index: 0;
 			}
 
@@ -101,14 +131,33 @@ class Player extends Module{
 	}
 
 	public function EchoElements($content = null, $source = null){
-		$this->Source = $source;
+		$this->Source = $source??$this->Source;
+		$this->Content = $content??$this->Content;
 		echo "<div class=\"controls\">";
+		echo Convert::ToString($this->PrependControls);
 		foreach($this->GetControls() as $btn) echo $btn;
+		echo Convert::ToString($this->AppendControls);
 		echo "</div>";
-		MODULE("IFrame");
-		$mod = new IFrame($source);
-		$mod->Draw();
-		echo $this->GetContent($content);
+		echo self::ToElement($this->Source);
+		echo $this->GetContent($this->Content);
+	}
+	public function ToElement($source){
+		return join("\r\n",iterator_to_array(self::ToElements($source)));
+	}
+	public function ToElements($source){
+		yield "<div class=\"content\">";
+		if(isValid($this->Source))
+			if(is_array($this->Source))
+				foreach ($source as $value)
+				    yield from self::ToElements($value);
+			elseif(isFormat($this->Source,".mpg",".mpeg", ".mp4",".avi",".mkv",".mov",".wmv",".flv",".webm"))
+				yield HTML::Video($source);
+			elseif(isFormat($this->Source,".wav",".mp3",".aac",".amr",".ogg",".flac",".wma",".m4a"))
+				yield HTML::Audio($source);
+			elseif(isFormat($this->Source,".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg", ".webp"))
+				yield HTML::Image($source);
+			else yield HTML::Frame($source);
+		yield "</div>";
 	}
 
 	public function EchoScript(){
@@ -212,16 +261,17 @@ class Player extends Module{
 	}
 
 	public function GetContent($content){
-		return "<div class=\"content\" ondblclick=\"".$this->FocusScript()."\">".$content."</div>";
-	}
+		if(isValid($content)) return "<div class=\"content\" ondblclick=\"".$this->FocusScript()."\">".$content."</div>";
+		return null;
+    }
 	public function GetControls(){
-		if($this->AllowZoom)  yield  '<div class="fa fa-refresh button" onclick="'.$this->ResetScript().'"></div>';
-		if($this->AllowZoom)  yield  '<div class="fa fa-plus button" onclick="'.$this->ZoomInScript().'"></div>';
-		if($this->AllowZoom)  yield  '<div class="fa fa-minus button" onclick="'.$this->ZoomOutScript().'"></div>';
-		if($this->AllowShare)  yield  '<div class="fa fa-share-alt button" onclick="'.$this->ShareScript().'"></div>';
-		if($this->AllowDownload)  yield  '<div class="fa fa-download button" onclick="'.$this->DownloadScript().'"></div>';
+		if($this->AllowZoom)  yield '<div class="fa fa-refresh button" onclick="'.$this->ResetScript().'"></div>';
+		if($this->AllowZoom)  yield '<div class="fa fa-plus button" onclick="'.$this->ZoomInScript().'"></div>';
+		if($this->AllowZoom)  yield '<div class="fa fa-minus button" onclick="'.$this->ZoomOutScript().'"></div>';
+		if($this->AllowShare)  yield '<div class="fa fa-share-alt button" onclick="'.$this->ShareScript().'"></div>';
+		if($this->AllowDownload)  yield '<div class="fa fa-download button" onclick="'.$this->DownloadScript().'"></div>';
 	}
-	
+
 	public function ContentScript($content){
 		return $content;
 	}

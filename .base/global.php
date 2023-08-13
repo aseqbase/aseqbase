@@ -602,16 +602,20 @@
 		return \MiMFa\Library\HashCrypt::Decrypt($cipher,\_::$CONFIG->SecretKey, true);
     }
 
-	function startsWith(string|null $haystack, string|null $needle):bool {
-		return substr_compare($haystack, $needle, 0, strlen($needle)) === 0;
+	function startsWith(string|null $haystack, string|null ...$needles):bool {
+		foreach ($needles as $needle)
+            if(substr_compare($haystack, $needle, 0, strlen($needle)) === 0) return $needle||true;
+		return false;
 	}
-	function endsWith(string|null $haystack, string|null $needle):bool {
-		return substr_compare($haystack, $needle, -strlen($needle)) === 0;
+	function endsWith(string|null $haystack, string|null ...$needles):bool {
+		foreach ($needles as $needle)
+            if(substr_compare($haystack, $needle, -strlen($needle)) === 0) return $needle||true;
+		return false;
 	}
 
-	function getId($alwaysunique = false):int
+	function getId($random = false):int
 	{
-		if(!$alwaysunique) return ++\_::$DYNAMIC_ID;
+		if(!$random) return ++\_::$DYNAMIC_ID;
 		list($usec, $sec) = explode(" ", microtime());
 		return (int)($usec*10000000+$sec);
 	}
@@ -696,7 +700,7 @@
 	* @return string|null
 	*/
 	function getSite(string|null $path = null):string|null{
-		return PREG_Find("/(?<=\/)[^\/]+/", getHost($path));
+		return PREG_replace("/^\w+:\/*/","", getHost($path));
 	}
 	/**
 	* Get the domain name part of a url
@@ -922,8 +926,17 @@
 			&& \MiMFa\Library\Local::FileExists($directory."initialize.php")
 			&& \MiMFa\Library\Local::FileExists($directory."static.php");
 	}
-	function isFormat(string|null $path, string|null $format):bool{
-		return endsWith(getPath(strtolower($path)), $format);
+	/**
+	 * Check file format by thats extension
+	 * @param null|string $path
+	 * @param array<string> $formats
+	 * @return string|bool
+	 */
+	function isFormat(string|null $path, string ...$formats){
+		$p = getPath(strtolower($path));
+		foreach ($formats as $format)
+			if(endsWith($p, strtolower($format))) return $format;
+		return false;
 	}
 	function isAbsoluteUrl(string|null $path):bool{
 		return $path != null && preg_match("/^\w+\:\/*[^\/]+/",$path);

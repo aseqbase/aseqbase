@@ -10,6 +10,7 @@ class Form extends Module{
 	public $BackLink = "/";
 	public $Method = "POST";
 	public $EncType="multipart/form-data";
+	public $Timeout = 60000;
 	public $SuccessPath = null;
 	public $ErrorPath = null;
 
@@ -147,7 +148,8 @@ class Form extends Module{
 							$(`.<?php echo $this->Name ?> form`).append(data);
             				<?php if(isValid($this->ErrorPath)) echo "load(`$this->ErrorPath`);";?>
 						}
-					}
+					},
+					{ timeout: <?php echo $this->Timeout; ?> }
 				);
 				$(`.<?php echo $this->Name ?> :is(input, select, textarea)`).on('focus', function () {
 					$(this).parent().find(`.<?php echo $this->Name ?> .input-group-text`).css('border-color', 'var(--ForeColor-2)');

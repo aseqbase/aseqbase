@@ -2,14 +2,33 @@
 use MiMFa\Library\HTML;
 use MiMFa\Library\User;
 use MiMFa\Library\Local;
+if(!ACCESS(1)) {
+    echo HTML::Error("You should log in before!");
+    load(User::$InHandlerPath);
+    die;
+}
 if(isset($_REQUEST["Signature"])) {
     unset($_REQUEST["submit"]);
-    var_dump($_REQUEST);
-    if(isValid($_REQUEST,"Image")){
-        $person = \_::$INFO->User->Get(\_::$INFO->User->TemporarySignature);
-        if(isValid($person,"Image")) Local::DeleteFile(getValid($person,"Image"));
-        $_REQUEST["Image"] = Local::UploadImage(getValid($_REQUEST,"Image"),\_::$PUBLIC_DIR."images/");
-    } else unset($_REQUEST["Image"]);
+    $imgchange = false;
+    if(isValid($_FILES,"Image"))
+        if(isValid($_FILES["Image"],"size")){
+            if(isValid(\_::$INFO->User->TemporaryImage) && !Local::DeleteFile(\_::$INFO->User->TemporaryImage))
+                echo HTML::Error("Could not delete your previous image!");
+            else {
+                $_REQUEST["Image"] = Local::UploadImage("Image",\_::$PUBLIC_DIR."images/");
+                $imgchange = true;
+            }
+        } else unset($_REQUEST["Image"]);
+    else{
+        if(isValid(\_::$INFO->User->TemporaryImage) && !Local::DeleteFile(\_::$INFO->User->TemporaryImage)){
+            echo HTML::Error("Could not delete the profile picture!");
+            unset($_REQUEST["Image"]);
+        }
+        else {
+            $_REQUEST["Image"] = null;
+            $imgchange = true;
+        }
+    }
     try{
         if(\_::$INFO->User->Set($_REQUEST)){
             echo HTML::Success("Profile updated successfully!");
@@ -18,20 +37,25 @@ if(isset($_REQUEST["Signature"])) {
                 \_::$INFO->User->TemporaryEmail = $_REQUEST["Email"];
                 load(User::$ActiveHandlerPath);
             }
-            else if($_REQUEST["Signature"] != \_::$INFO->User->TemporarySignature){
+            elseif($_REQUEST["Signature"] != \_::$INFO->User->Signature){
                 \_::$INFO->User->SignOut();
                 load(User::$InHandlerPath);
+            }
+            elseif($imgchange){
+                $img = \_::$INFO->User->TemporaryImage;
+                \_::$INFO->User->Refresh();
+                if(isValid($img) != isValid(\_::$INFO->User->TemporaryImage)) load();
+                else echo HTML::Script("$(\"form .content img\").attr('src','".\_::$INFO->User->TemporaryImage."')");
             }
         }
         else echo HTML::Error("There a problem occured! You can not choice a duplicate signature!");
     }catch(\Exception $ex){echo HTML::Error($ex);}
     die;
-}
-else {
+} else {
     TEMPLATE("Main");
     $templ = new \MiMFa\Template\Main();
     $templ->Content = function(){
-        $user = \_::$INFO->User->LoadProfile();
+        $user = \_::$INFO->User->Get();
         if(isValid($user)){
             echo "<div class='page'>";
             MODULE("Form");
@@ -39,6 +63,7 @@ else {
             $form = new \MiMFa\Module\Form();
             $form->Title = "Edit Profile";
             $form->Method = "POST";
+            $form->Timeout = 60000;
             $form->SubmitLabel = "Update";
             $form->ResetLabel = null;
             $form->AddChild(new \MiMFa\Module\Field("image","Image", $user["Image"], "Click to change the image!"));

@@ -47,44 +47,48 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 
 
-	protected $Signature = null;
 	protected $ID = null;
 	protected $GroupID = null;
 	protected $Access = 0;
 	protected $Accesses = array();
 
-	public $TemporarySignature = null;
-	public $TemporaryName = null;
-	public $TemporaryEmail = null;
-
+	private $Password = null;
+	public $Signature = null;
 	public $Image = null;
 	public $Name = null;
 	public $Email = null;
+
+	public $TemporarySignature = null;
+	public $TemporaryImage = null;
+	public $TemporaryName = null;
+	public $TemporaryEmail = null;
 
 	public $Profile = null;
 
 	public function __construct(){
 		parent::__construct();
 		Session::Start();
-		$this->LoadAccess();
+		$this->Refresh();
 	}
 
 	public function Load(){
-		$this->LoadAccess();
-		$this->LoadProfile();
-	}
-	public function LoadAccess(){
-		$this->Signature = Session::GetSecure("Signature");
-		$this->ID = Session::GetSecure("ID");
-		$this->GroupID = Session::GetSecure("GroupID");
-		$this->Access = Session::GetSecure("Access")??\_::$CONFIG->GuestAccess;
-		$this->Image = Session::Get("Image");
-		$this->Name = $this->TemporaryName = Session::Get("Name");
-		$this->Email = $this->TemporaryEmail = Session::Get("Email");
-		return !is_null($this->ID);
-	}
-	public function LoadProfile(){
+		$this->Refresh();
 		return $this->Profile = getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","*","`ID`=:ID",[":ID"=>$this->ID]),0);
+	}
+	public function Refresh(){
+		$this->Signature = Session::GetSecure("Signature");
+		$this->Password = Session::GetSecure("Password");
+		$person = null;
+		if(isValid($this->Signature) && isValid($this->Password))
+			$person = $this->Find($this->Signature, $this->Password, false);
+        Session::SetSecure("Signature", $this->Signature = getValid($person,"Signature"));
+        Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
+        Session::SetSecure("GroupID",$this->GroupID = getValid($person,"GroupID"));
+        Session::SetSecure("Image",$this->Image = getValid($person,"Image"));
+        Session::SetSecure("Name",$this->Name = getValid($person,"Name"));
+        Session::SetSecure("Email",$this->Email = getValid($person,"Email"));
+        Session::SetSecure("Access",$this->Access = is_null($this->GroupID)? null: DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID`=".$this->GroupID));
+		return !is_null($this->ID);
 	}
 
 	public function Access($task=null){
@@ -93,12 +97,12 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return in_array($task, $this->Accesses);
 	}
 
-	public function Find($signature = null, $password = null){
-		$signature = $signature??$this->Signature??Session::GetSecure("Signature");
+	public function Find($signature = null, $password = null, $hashPassword = true){
+		$signature = $signature??$this->Signature??Session::GetSecure("Signature")??$this->TemporarySignature;
 		if(isValid($password)) {
-			$password = $this->CheckPassword($password);
+			if($hashPassword) $password = $this->CheckPassword($password);
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
-						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Status`",
+						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Password`, `Status`",
 						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
 						[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature,":Password"=> $password]
 					);
@@ -106,7 +110,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
             if(count($person) < 1) throw new \ErrorException("The username or password is incorrect!");
         } else {
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
-						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Status`",
+						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Password`, `Status`",
 						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact))",
 						[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature]
 					);
@@ -115,6 +119,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
         }
 		$person = $person[0];
 		$this->TemporarySignature = getValid($person,"Signature");
+		$this->TemporaryImage = getValid($person,"Image");
 		$this->TemporaryName = getValid($person,"Name");
 		$this->TemporaryEmail = getValid($person,"Email");
 		return $person;
@@ -132,6 +137,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){
 		$password = $this->CheckPassword($password);
+		$this->TemporaryImage = null;
 		return DataBase::DoInsert(\_::$CONFIG->DataBasePrefix."User",null,
 			[
 				":Signature"=>$this->TemporarySignature = $signature??$email,
@@ -147,19 +153,20 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 	public function SignIn($signature, $password){
 		if(!isValid($password)) return false;
-		$person = self::Find($signature, $password);
+		$person = $this->Find($signature, $password);
 		$status = getValid($person,"Status",self::$InitialStatus);
 		if($status === false || ((int)$status) < self::$ActiveStatus)
 			throw new \ErrorException(
 				"This account is not active yet!<br>".
 				"<a href='".\MiMFa\Library\User::$ActiveHandlerPath."?signature=$signature'>".__("Try to send the activation email again!")."</a>"
 			);
+		Session::SetSecure("Password", $this->Password = getValid($person,"Password"));
 		Session::SetSecure("Signature", $this->Signature = getValid($person,"Signature"));
 		Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
 		Session::SetSecure("GroupID",$this->GroupID = getValid($person,"GroupID"));
-		Session::Set("Image",$this->Image = getValid($person,"Image"));
-		Session::Set("Name",$this->Name = getValid($person,"Name"));
-		Session::Set("Email",$this->Email = getValid($person,"Email"));
+		Session::SetSecure("Image",$this->Image = getValid($person,"Image"));
+		Session::SetSecure("Name",$this->Name = getValid($person,"Name"));
+		Session::SetSecure("Email",$this->Email = getValid($person,"Email"));
 		Session::SetSecure("Access",$this->Access = DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID`=".$this->GroupID));
 		return true;
 	}
@@ -271,7 +278,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 
 	public function SendEmail($emailFrom, $emailTo, $subject, $content, $linkAnchor="Click Here", $handlerPath = null, $requestKey="key"){
-		$person = getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","ID, GroupID, Image, Name, Signature, Email","`Email`=:Email",[":Email"=> $emailTo]),0);
+		$person = getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","Signature","`Email`=:Email",[":Email"=> $emailTo]),0);
 		if(is_null($person)) throw new \ErrorException("Unfortunately the email address is incorrect!");
 		$sign = getValid($person,"Signature");
 		Session::SetData($sign,$requestKey);
@@ -280,26 +287,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$dic['$HYPERLINK'] ="<a href='$path'>".__($linkAnchor)."</a>";
 		$dic['$LINK'] ="<a href='$path'>$path</a>";
 		$dic['$PATH'] =$path;
-		$dic['$SIGNATURE'] =$sign;
-		$dic['$NAME'] =getValid($person,"Name")??$this->TemporaryName;
-		$email = getEmail(null,"info");
-		$dic['$HOSTEMAILLINK'] ="<a href='mailto:".$email."'>".$email."</a>";
-		$dic['$HOSTEMAIL'] = $email;
-		$dic['$HOSTLINK'] ="<a href='".\_::$HOST."'>".\_::$SITE."</a>";
-		$dic['$HOST'] =\_::$HOST;
-		$email = getValid($person,"Email")??$this->TemporaryEmail;
-		$dic['$EMAILLINK'] ="<a href='mailto:".$email."'>".$email."</a>";
-		$dic['$EMAIL'] = getValid($person,"Email")??$this->TemporaryEmail;
-		$dic['$IMAGE'] = getValid($person,"Image");
-		$subject = __($subject)??"";
-		$content = __($content)??"";
-		foreach ($dic as $key => $value){
-			$key = $key??"";
-			$value = $value??"";
-            $subject = str_replace($key, $value, $subject);
-            $content = str_replace($key, $value, $content);
-        }
-		return Contact::SendHTMLEmail($emailFrom, $emailTo, $subject, $content);
+		$dic['$SIGNATURE'] = $sign;
+		$subject = Convert::FromDynamicString($subject??"", $dic, true);
+		$content = Convert::FromDynamicString($content??"", $dic, false);
+		return Contact::SendHTMLEmail($emailFrom, $emailTo, __($subject), __($content));
 	}
 	public function ReceiveEmail($requestKey){
 		$rp = getValid($_REQUEST, $requestKey);

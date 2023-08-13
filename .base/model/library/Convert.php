@@ -111,5 +111,37 @@ class Convert{
 	public static function ToArray(){
 		return iterator_to_array(self::ToIteration(func_get_args()));
 	}
+
+    public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true){
+		if($addDefaultKeys){
+            $email = getEmail(null,"info");
+            if(!isset($additionalKeys['$HOSTEMAILLINK'])) $additionalKeys['$HOSTEMAILLINK'] = HTML::Link($email, "mailto:$email");
+            if(!isset($additionalKeys['$HOSTEMAIL'])) $additionalKeys['$HOSTEMAIL'] = $email;
+            if(!isset($additionalKeys['$HOSTLINK'])) $additionalKeys['$HOSTLINK'] = HTML::Link(\_::$SITE, \_::$HOST);
+            if(!isset($additionalKeys['$HOST'])) $additionalKeys['$HOST'] =\_::$HOST;
+            if(!isset($additionalKeys['$URLLINK'])) $additionalKeys['$URLLINK'] = $additionalKeys['$HOSTLINK'] = HTML::Link(\_::$URL, \_::$URL);
+            if(!isset($additionalKeys['$URL'])) $additionalKeys['$URL'] =\_::$URL;
+            if(isValid(\_::$INFO->User)){
+                $person = \_::$INFO->User->Get(getValid($additionalKeys,'$SIGNATURE'));
+                if(!isset($additionalKeys['$SIGNATURE'])) $additionalKeys['$SIGNATURE'] = getValid($person,"Signature")??\_::$INFO->User->TemporarySignature;
+                if(!isset($additionalKeys['$NAME'])) $additionalKeys['$NAME'] = getValid($person,"Name")??\_::$INFO->User->TemporaryName;
+                $email =  getValid($person,"Email")??\_::$INFO->User->TemporaryEmail;
+                if(!isset($additionalKeys['$EMAILLINK'])) $additionalKeys['$EMAILLINK'] = HTML::Link($email, "mailto:$email");
+                if(!isset($additionalKeys['$EMAIL'])) $additionalKeys['$EMAIL'] = $email;
+                if(!isset($additionalKeys['$IMAGE'])) $additionalKeys['$IMAGE'] = getValid($person,"Image")??\_::$INFO->User->TemporaryImage;
+                if(!isset($additionalKeys['$IMAGETAG'])) $additionalKeys['$IMAGETAG'] = HTML::Image($additionalKeys['$SIGNATURE'], getValid($person,"Image"));
+                if(!isset($additionalKeys['$ADDRESS'])) $additionalKeys['$ADDRESS'] = getValid($person,"Address");
+                if(!isset($additionalKeys['$CONTACT'])) $additionalKeys['$CONTACT'] = getValid($person,"Contact");
+                if(!isset($additionalKeys['$ORGANIZATION'])) $additionalKeys['$ORGANIZATION'] = getValid($person,"Organization");
+            }
+            uksort($additionalKeys, function($a, $b){
+                return (strlen( $a ) == strlen( $b ))?0:(( strlen( $a ) < strlen( $b ) )?1:-1);
+            });
+        }
+        foreach ($additionalKeys as $key => $value)
+            $text = str_replace($key, $value??"", $text);
+		return $text;
+	}
+
 }
 ?>
