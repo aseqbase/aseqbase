@@ -190,7 +190,7 @@
 				){
 					const actionPath = $(selector).attr('action');
 					const methodName = $(selector).attr('method');
-					const requestData = $(selector).serialize();
+					const requestData = new FormData(selector);
 					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
 
 					$.ajax({
@@ -216,11 +216,11 @@
 							$(btns).addClass('hide');
 							$(selector).css('opacity','.5');
 						},
-						async: true,
 						data: requestData,
-						//cache: false,
-						//contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':'application/x-www-form-urlencoded',
-						//processData: false,
+						async: true,
+						cache: false,
+						contentType: false,
+						processData: false,
 						timeout: timeout
 					});
 				};
@@ -246,7 +246,7 @@
 						const form = $(this);
 						const actionPath = form.attr('action');
 						const methodName = form.attr('method');
-						const requestData = form.serialize();
+						const requestData = new FormData(this);
 						const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
 
 						$.ajax({
@@ -272,11 +272,11 @@
 								$(btns).addClass('hide');
 								$(selector).css('opacity','.5');
 							},
-							async: true,
 							data: requestData,
-							//cache: false,
-							//contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':'application/x-www-form-urlencoded',
-							//processData: false,
+							async: true,
+							cache: false,
+							contentType: false,
+							processData: false,
 							timeout: timeout
 						});
 					});

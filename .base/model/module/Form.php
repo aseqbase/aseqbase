@@ -8,13 +8,33 @@ class Form extends Module{
 	public $ResetLabel = "Reset";
 	public $BackLabel = "Back to Home";
 	public $BackLink = "/";
-	public $Method = "GET";
+	public $Method = "POST";
+	public $EncType="multipart/form-data";
 	public $SuccessPath = null;
 	public $ErrorPath = null;
 
+	/**
+     * Create the module
+     */
+	public function __construct($title = "Form", $action =  null, $method = "POST", $children = [], $description = null){
+        parent::__construct();
+		$this->Set($title, $action, $method, $children, $description);
+    }
+	/**
+     * Set the main properties of module
+	 */
+	public function Set($title = null, $action =  null, $method = "POST", $children = [], $description = null){
+		$this->Title = $title;
+		$this->Description = $description;
+		$this->Action = $action;
+		$this->Method = $method;
+		$this->Children = $children;
+		return $this;
+    }
+
 	public function EchoStyle(){
 		parent::EchoStyle();
-		?>
+?>
 		<style>
 			.<?php echo $this->Name ?> .input-group-prepend{
 				margin-bottom: 0px;
@@ -55,6 +75,7 @@ class Form extends Module{
 	}
 
 	public function Echo(){
+		$name = $this->Name."_Form";
 		$src = $this->Action??$this->Path??\_::$PATH;
 		if(isValid($src)): ?>
 			<div class="page container">
@@ -73,25 +94,25 @@ class Form extends Module{
 
 					<!-- Form -->
 					<div class="col-md col-lg ml-auto">
-						<form action="<?php echo $src; ?>" method="<?php echo $this->Method;?>">
-							<?php
+                        <form id="<?php echo $name; ?>" name="<?php echo $name; ?>" action="<?php echo $src; ?>" enctype="<?php echo $this->EncType;?>" method="<?php echo $this->Method;?>">
+                            <?php
 								$this->EchoContent();
 								$this->EchoFields();
-							?>
-							<!-- Submit Button -->
-							<div class="form-group mx-auto mb-0 row">
-								<?php if(isValid($this->ResetLabel)):?>
-									<button type="reset" id="reset" name="reset" class="btn col-sm-3 py-2">
-										<?php echo __($this->ResetLabel);?>
-									</button>
-								<?php endif;
+                            ?>
+                            <!-- Submit Button -->
+                            <div class="form-group mx-auto mb-0 row">
+                                <?php if(isValid($this->ResetLabel)):?>
+                                <button type="reset" id="reset" name="reset" class="btn col-sm-3 py-2">
+                                    <?php echo __($this->ResetLabel);?>
+                                </button>
+                                <?php endif;
 								if(isValid($this->SubmitLabel)):?>
-									<button type="submit" id="submit" name="submit" class="btn col-sm btn-main py-2">
-										<?php echo __($this->SubmitLabel);?>
-									</button>
-								<?php endif;?>
-							</div>
-						</form>
+                                <button type="submit" id="submit" name="submit" class="btn col-sm btn-main py-2">
+                                    <?php echo __($this->SubmitLabel);?>
+                                </button>
+                                <?php endif;?>
+                            </div>
+                        </form>
 						<?php $this->EchoFooter();?>
 					</div>
 				</div>

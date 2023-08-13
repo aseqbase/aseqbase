@@ -4,7 +4,7 @@ use MiMFa\Library\User;
 use MiMFa\Library\Local;
 if(isset($_REQUEST["Signature"])) {
     unset($_REQUEST["submit"]);
-    print_r($_REQUEST);
+    var_dump($_REQUEST);
     if(isValid($_REQUEST,"Image")){
         $person = \_::$INFO->User->Get(\_::$INFO->User->TemporarySignature);
         if(isValid($person,"Image")) Local::DeleteFile(getValid($person,"Image"));
@@ -38,6 +38,7 @@ else {
             MODULE("Field");
             $form = new \MiMFa\Module\Form();
             $form->Title = "Edit Profile";
+            $form->Method = "POST";
             $form->SubmitLabel = "Update";
             $form->ResetLabel = null;
             $form->AddChild(new \MiMFa\Module\Field("image","Image", $user["Image"], "Click to change the image!"));
