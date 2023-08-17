@@ -1,15 +1,12 @@
 <?php
 MODULE("SignUpForm");
 $mod = new \MiMFa\Module\SignUpForm();
-if(isset($_REQUEST["username"])) $mod->Action();
+if(isset($_REQUEST["UserName"])) $mod->Action();
 else {
-    TEMPLATE("Main");
-    $templ = new \MiMFa\Template\Main();
-    $templ->Content = function() use($mod){
-        echo "<div class='page'>";
-        $mod->Draw();
-        echo "</div>";
-    };
-    $templ->Draw();
+    echo "<div class='page'>";
+    $mod->Title = "Sign Up";
+    $mod->Image = "user";
+    $mod->Draw();
+    echo "</div>";
 }
 ?>

@@ -2,7 +2,7 @@
 LIBRARY("Query");
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
-$templ->WindowTitle = __("Results")." - ".\_::$INFO->Name;
+$templ->WindowTitle = [isValid($_REQUEST,"q")? $_REQUEST["q"]:\_::$DIRECTION,isValid($_REQUEST,"type")? $_REQUEST["type"]:null];
 $templ->Content = function(){
     MODULE("Post");
     $module = new \MiMFa\Module\Post();

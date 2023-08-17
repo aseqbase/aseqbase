@@ -77,7 +77,7 @@ class Local{
      */
     public static function NewUniquePath(string $dir, string $fileName = "new", string $format = "", bool $random = true):string{
 		do $path = "$dir$fileName".getId($random).$format;
-		while(file_exists($path));
+        while(file_exists($path));
         return $path;
     }
 
@@ -159,7 +159,8 @@ class Local{
 		return fopen(self::GetPath($path),"w");
 	}
 	public static function DeleteFile($path){
-		return unlink(self::GetPath($path));
+		$path = self::GetPath($path);
+		return (!file_exists($path)) || unlink($path);
 	}
 	public static function MoveFile($source_path, $dest_path):bool{
 		if(self::CopyFile($source_path, $dest_path))

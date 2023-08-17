@@ -51,15 +51,28 @@ class Convert{
 	 * @param mixed $value
 	 * @return string
 	 */
-	public static function ToString($value, $separator = "\r\n"){
+	public static function ToString($value, $separator = PHP_EOL){
 		if(!is_null($value)){
 			if(is_string($value)) return $value;
 			if(is_subclass_of($value,"Base")) return $value->ToString();
-			if(is_array($value)){
+			if(is_countable($value) || is_iterable($value)){
 				$texts = array();
-				foreach ($value as $key => $item)
-					if(is_numeric($key)) array_push($texts, self::ToString($item, $separator));
-					else array_push($texts, "$key=\"". self::ToString($item), $separator)."\"";
+				foreach ($value as $key => $val){
+                    $item = self::ToString($val, $separator);
+					if(is_numeric($key)) array_push($texts, $item);
+					else {
+                        $sp;
+                        if(str_contains($item,'"')){
+                            if(str_contains($item,"'")){
+                                $item = str_replace("'","`",$item);
+                                $sp ="'";
+                            }
+                            else $sp = "'";
+                        }
+                        else $sp ='"';
+                        array_push($texts, "$key=$sp$item$sp");
+                    }
+                }
                 return join($separator,$texts);
             }
 			if(is_callable($value)) return self::ToString(($value)(), $separator);
@@ -75,6 +88,17 @@ class Convert{
      */
 	public static function ToName($text){
         return preg_replace ('/\W/', "", ucwords($text??""));
+	}
+	/**
+     * Convert a text to normal Title
+     * @param string[] $texts Parts of title
+     * @return string
+     */
+	public static function ToTitle(){
+        $ls=[];
+        foreach (self::ToIteration(func_get_args()) as $text)
+            if(!is_null($text)) $ls[] = ucwords(preg_replace('/\W/', " ", $text));
+        return join(" - ", array_unique($ls));
 	}
 
 	/**
@@ -98,18 +122,20 @@ class Convert{
      * Get items of all input arrays into a generator array
      * @param mixed $arguments
      */
-	public static function ToIteration(){
-		foreach (func_get_args() as $key=>$value)
-			if(is_array($value)) yield from self::ToIteration($value);
-			else yield $key=>$value;
-	}
+	public static function ToIteration(...$arguments){
+        foreach ($arguments as $key=>$val){
+			if(is_countable($val) || is_iterable($val))
+                yield from call_user_func_array("self::ToIteration",$val);
+            else yield $key=>$val;
+        }
+    }
 	/**
      * Get items of all input arrays into one array
      * @param mixed $arguments
      * @return array
      */
-	public static function ToArray(){
-		return iterator_to_array(self::ToIteration(func_get_args()));
+	public static function ToArray(...$arguments){
+		return iterator_to_array(call_user_func_array("self::ToIteration",$arguments));
 	}
 
     public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true){
@@ -118,8 +144,8 @@ class Convert{
             if(!isset($additionalKeys['$HOSTEMAILLINK'])) $additionalKeys['$HOSTEMAILLINK'] = HTML::Link($email, "mailto:$email");
             if(!isset($additionalKeys['$HOSTEMAIL'])) $additionalKeys['$HOSTEMAIL'] = $email;
             if(!isset($additionalKeys['$HOSTLINK'])) $additionalKeys['$HOSTLINK'] = HTML::Link(\_::$SITE, \_::$HOST);
-            if(!isset($additionalKeys['$HOST'])) $additionalKeys['$HOST'] =\_::$HOST;
-            if(!isset($additionalKeys['$URLLINK'])) $additionalKeys['$URLLINK'] = $additionalKeys['$HOSTLINK'] = HTML::Link(\_::$URL, \_::$URL);
+            if(!isset($additionalKeys['$HOST'])) $additionalKeys['$HOST'] = \_::$HOST;
+            if(!isset($additionalKeys['$URLLINK'])) $additionalKeys['$URLLINK'] = HTML::Link(\_::$URL, \_::$URL);
             if(!isset($additionalKeys['$URL'])) $additionalKeys['$URL'] =\_::$URL;
             if(isValid(\_::$INFO->User)){
                 $person = \_::$INFO->User->Get(getValid($additionalKeys,'$SIGNATURE'));
@@ -142,6 +168,5 @@ class Convert{
             $text = str_replace($key, $value??"", $text);
 		return $text;
 	}
-
 }
 ?>

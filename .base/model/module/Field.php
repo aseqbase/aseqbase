@@ -17,7 +17,7 @@ class Field extends Module{
 	public $Type = "text";
 	/**
      * The default value of the field
-     * @var string|null
+     * @var mixed
 	 */
 	public $Value = null;
 	/**
@@ -60,41 +60,41 @@ class Field extends Module{
      * Create the module
      * @param object|string|null $type Can be a datatype or an input type
      * @param string|null $title The label text of the field
-     * @param string|null $value The default value of the field
-     * @param string|null $description The more detaled text about the field
+     * @param mixed $value The default value of the field
+     * @param mixed $description The more detaled text about the field
      * @param array|string|null $options The other options of the field
      * @param array|string|null $attributes Other important attributes of the field
      * @param bool|null $lock Indicate the field be static or changable
      * @return Field
      */
-	public function __construct($type = "text", $title = null, $value = null, $description = null, $options = null,  $attributes = null, $required = null, $lock = null){
+	public function __construct($type = "text", $title = null, $value = null, $description = null, $options = null, $attributes = null, $required = null, $lock = null, $key = null){
         parent::__construct();
-		$this->Set($type, $title, $value, $description, $options,  $attributes, $required, $lock);
+		$this->Set($type, $title, $value, $description, $options,  $attributes, $required, $lock, $key);
     }
 	/**
 	 * Change the inputs tool
 	 * @param object|string|null $type Can be a datatype or an input type
 	 * @param string|null $title The label text of the field
-     * @param string|null $value The default value of the field
-     * @param string|null $description The more detaled text about the field
+     * @param mixed $value The default value of the field
+     * @param mixed $description The more detaled text about the field
      * @param array|string|null $options The other options of the field
      * @param array|string|null $attributes Other important attributes of the field
      * @param bool|null $lock Indicate the field be static or changable
 	 * @return Field
 	 */
-	public function Set($type = null, $title = null, $value = null, $description = null, $options = null, $attributes = null, $required = null, $lock = null){
+	public function Set($type = null, $title = null, $value = null, $description = null, $options = null, $attributes = null, $required = null, $lock = null, $key = null){
 		if(!is_null($type))
 			if(is_string($type)) $this->Type = $type;
 			else $this->Type = gettype($type);
         else $this->Type = null;
 		$this->Title = $title;
-		$this->Key = Convert::ToName($this->Title);
+		$this->Key = $key??Convert::ToName($this->Title);
 		$this->Value = $value;
 		$this->Description = $description;
 		$this->Options = $options;
 		$this->Attributes = $attributes;
-		$this->Required = $required??$this->Required;
-		$this->Lock = $lock??$this->Lock;
+		$this->Required = $required??($this->Required??!is_null($this->Value));
+		$this->Lock = $lock??($this->Lock??!is_null($this->Value));
 		$this->PlaceHolder = null;
 		return $this;
     }
@@ -314,21 +314,34 @@ class Field extends Module{
 	public function Echo(){
 		$this->EchoContent();
 		$id = $this->Key.getID();
-		if(isValid($this->Title)) echo "<label for='$id' class='title'>$this->Title</label>";
-		$this->PlaceHolder = $this->PlaceHolder??$this->Title;
+		if(isValid($this->Title)) echo "<label for='$id' class='title'>".__($this->Title, styling:false)."</label>";
+		$placeHolder = __($this->PlaceHolder??$this->Title, styling:false);
+		$placeHolderAttr = isValid($placeHolder)?"placeholder='$placeHolder'":"";
 		$attrs = Convert::ToString($this->Attributes, " ");
 		$type = strtolower($this->Type??"text");
 		switch ($type) {
-			case 'string':
+			case 'label':
+			case 'span':
+				echo "<label id='$id' name='$this->Key' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".Convert::ToString($this->Value)."</label>";
+				break;
+			case 'lines':
+			case 'texts':
+			case 'strings':
 			case 'multiline':
 			case 'textarea':
-				echo "<textarea id='$id' name='$this->Key' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>$this->Value</textarea>";
+				echo "<textarea id='$id' name='$this->Key' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".Convert::ToString($this->Value)."</textarea>";
+				break;
+			case 'line':
+			case 'text':
+			case 'string':
+			case 'singleline':
+				echo "<input id='$id' name='$this->Key' type='text' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 			case 'enum':
 			case 'dropdown':
 			case 'combobox':
 			case 'select':
-				echo "<select id='$id' name='$this->Key' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<select id='$id' name='$this->Key' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				if(isValid($this->Options))
 					foreach($this->Options as $key=>$value)
 						echo "<option value='$key'".($key==$this->Value?" selected":"").">$value</option>";
@@ -337,33 +350,33 @@ class Field extends Module{
 			case 'radio':
 			case 'radiobox':
 			case 'radiobutton':
-				echo "<input id='$id' name='$this->Key' type='radio' checked='$this->Value' value='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='radio' checked='".Convert::ToString($this->Value)."' value='$placeHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 			case 'bool':
 			case 'boolean':
 			case 'check':
 			case 'checkbox':
 			case 'checkbutton':
-				echo "<input id='$id' name='$this->Key' type='checkbox' checked='$this->Value' value='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='checkbox' checked='".Convert::ToString($this->Value)."' value='$placeHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 			case 'int':
 			case 'long':
 			case 'number':
-				echo "<input id='$id' name='$this->Key' type='number' value='$this->Value' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='number' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 			case 'float':
 			case 'double':
 			case 'decimal':
-				echo "<input id='$id' name='$this->Key' type='number' value='$this->Value' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='number' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 			case 'phone':
 			case 'tel':
 			case 'telephone':
-				echo "<input id='$id' name='$this->Key' type='tel' value='$this->Value' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='tel' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 			case 'url':
 			case 'path':
-				echo "<input id='$id' name='$this->Key' type='url' value='$this->Value' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='url' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 			case 'doc':
 			case 'document':
@@ -380,9 +393,9 @@ class Field extends Module{
 					$p->Style->Color = $this->ForeColor;
 					$p->Style->Border = "1px solid ". $this->BorderColor;
 					$p->MinWidth = "auto";
-					$p->MinHeight = "10vmin";
+					$p->Height = "25vmin";
 					$p->MaxWidth = "100%";
-					$p->MaxHeight = "100%";
+					$p->MaxHeight = "25vmin";
 					$p->Id = "Player".getId();
 					if(!$this->Lock) $p->PrependControls = "
 											<div class=\"fa fa-trash button\" onclick=\"
@@ -424,7 +437,7 @@ class Field extends Module{
 							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                             break;
                     }
-				echo "<input id='$id' name='$this->Key' type='file' value='$this->Value' placeholder='$this->PlaceHolder' class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>"
+				echo "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>"
 					.$others;
 				break;
 			case 'docs':
@@ -442,9 +455,9 @@ class Field extends Module{
 					$p->Style->Color = $this->ForeColor;
 					$p->Style->Border = "1px solid ". $this->BorderColor;
 					$p->MinWidth = "auto";
-					$p->MinHeight = "10vmin";
+					$p->Height = "25vmin";
 					$p->MaxWidth = "100%";
-					$p->MaxHeight = "100%";
+					$p->MaxHeight = "25vmin";
 					$p->Id = "Player".getId();
 					if(!$this->Lock) $p->PrependControls = "
 											<div class=\"fa fa-trash button\" onclick=\"
@@ -486,23 +499,23 @@ class Field extends Module{
 							$others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                             break;
                     }
-				echo "<input id='$id' name='$this->Key' type='file' value='$this->Value' placeholder='$this->PlaceHolder' class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." multiple $attrs>"
+				echo "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." multiple $attrs>"
 					.$others;
 				break;
             case "dir":
             case "directory":
             case "folder":
-				echo "<input id='$id' name='$this->Key' type='file' value='$this->Value' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." webkitdirectory multiple $attrs>";
+				echo "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." webkitdirectory multiple $attrs>";
 				break;
 			case 'imagesubmit':
 			case 'imgsubmit':
-				echo "<input id='$id' name='$this->Key' type='image' src='$this->Value' value='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='image' src='".Convert::ToString($this->Value)."' value='$placeHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 			default:
-				echo "<input id='$id' name='$this->Key' type='$type' value='$this->Value' placeholder='$this->PlaceHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+				echo "<input id='$id' name='$this->Key' type='$type' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
 				break;
 		}
-		if(isValid($this->Description)) echo "<label for='$id' class='description'>$this->Description</label>";
+		if(isValid($this->Description)) echo "<label for='$id' class='description'>".__($this->Description)."</label>";
 	}
 }
 ?>

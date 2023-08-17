@@ -18,7 +18,7 @@ if(count($items)<1){
 $doc = $items[0];
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
-$templ->WindowTitle = $doc['Title']." - ".\_::$INFO->Name;
+$templ->WindowTitle = [$doc['Title']];
 $templ->Content = function() use($doc){
     MODULE("Post");
     $module = new \MiMFa\Module\Post();

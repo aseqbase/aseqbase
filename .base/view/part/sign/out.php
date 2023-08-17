@@ -1,9 +1,7 @@
 <?php
 TEMPLATE("Main");
-$templ = new \MiMFa\Template\Main();
-$templ->Content = function(){
     echo "<div class='page'>";
-    if(!ACCESS(1)):
+    if(!getAccess(\_::$CONFIG->UserAccess)):
         echo "<center><div class='result success'>".__("You signed out successfully!")."</div>";
         PART("access");
         echo "</center>";
@@ -18,6 +16,4 @@ $templ->Content = function(){
         echo "</center>";
     endif;
     echo "</div>";
-};
-$templ->Draw();
 ?>

@@ -9,15 +9,18 @@ class User extends \Base{
 	public static $UpHandlerPath = "/sign/up.php";
 	public static $InHandlerPath = "/sign/in.php";
 	public static $OutHandlerPath = "/sign/out.php";
-	public static $ProfileHandlerPath = "/sign/profile.php";
-	public static $RecoveryHandlerPath = "/sign/recovery.php";
-	public static $RecoveryEmailSubject = 'Account Recovery Request';
-	public static $RecoveryEmailContent = 'Hello dear $NAME,<br><br>
+	public static $ViewHandlerPath = "/sign/view.php";
+	public static $EditHandlerPath = "/sign/edit.php";
+	public static $DashboardHandlerPath = "/sign/dashboard.php";
+	public static $RecoverHandlerPath = "/sign/recover.php";
+
+	public static $RecoverEmailSubject = 'Account Recovery Request';
+	public static $RecoverEmailContent = 'Hello dear $NAME,<br><br>
 We received an account recovery request on $HOSTLINK for $EMAILLINK.<br>
 This email address is associated with an account but no password is associated with it yet, so it can’t be used to log in.<br>
 Please $HYPERLINK or the below link if you want to reset your password... else ignore this message.<br>$LINK<br><br>
 With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
-	public static $RecoveryLinkAnchor = "CLICK ON THIS LINK";
+	public static $RecoverLinkAnchor = "CLICK ON THIS LINK";
 	public static $ActiveHandlerPath = "/sign/active.php";
 	public static $ActiveEmailSubject = "Account Activation Request";
 	public static $ActiveEmailContent = 'Hello dear $NAME,<br><br>
@@ -44,7 +47,6 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $ActiveStatus = 1;
 	public static $InitialStatus = 0;
 	public static $DeactiveStatus = -1;
-
 
 
 	protected $ID = null;
@@ -79,22 +81,29 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->Signature = Session::GetSecure("Signature");
 		$this->Password = Session::GetSecure("Password");
 		$person = null;
-		if(isValid($this->Signature) && isValid($this->Password))
-			$person = $this->Find($this->Signature, $this->Password, false);
-        Session::SetSecure("Signature", $this->Signature = getValid($person,"Signature"));
-        Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
-        Session::SetSecure("GroupID",$this->GroupID = getValid($person,"GroupID"));
-        Session::SetSecure("Image",$this->Image = getValid($person,"Image"));
-        Session::SetSecure("Name",$this->Name = getValid($person,"Name"));
-        Session::SetSecure("Email",$this->Email = getValid($person,"Email"));
-        Session::SetSecure("Access",$this->Access = is_null($this->GroupID)? null: DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID`=".$this->GroupID));
+		try{
+            if(isValid($this->Signature) && isValid($this->Password))
+                $person = $this->Find($this->Signature, $this->Password, false);
+            Session::SetSecure("Signature", $this->Signature = getValid($person,"Signature"));
+            Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
+            Session::SetSecure("GroupID",$this->GroupID = getValid($person,"GroupID"));
+            Session::SetSecure("Image",$this->Image = getValid($person,"Image"));
+            Session::SetSecure("Name",$this->Name = getValid($person,"Name"));
+            Session::SetSecure("Email",$this->Email = getValid($person,"Email"));
+            Session::SetSecure("Access",$this->Access = is_null($this->GroupID)? null: DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID`=".$this->GroupID));
+        }catch(\Exception $ex){ $this->SignOut(); }
 		return !is_null($this->ID);
-	}
+    }
 
-	public function Access($task=null){
-		if(is_null($task)) return $this->Access??\_::$CONFIG->GuestAccess;
-		if(is_integer($task)) return $this->Access >= $task;
-		return in_array($task, $this->Accesses);
+    /**
+     * Check if the user has access to the page or not
+     * @param int|null $minaccess The minimum accessibility for the user, pass null to give the user access
+     * @return int|mixed The user accessibility group
+     */
+	public function Access($minaccess=null){
+		if(is_null($minaccess)) return $this->Access??\_::$CONFIG->GuestAccess;
+		if(is_integer($minaccess)) return $this->Access >= $minaccess;
+		return in_array($minaccess, $this->Accesses);
 	}
 
 	public function Find($signature = null, $password = null, $hashPassword = true){
@@ -147,7 +156,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				":FirstName"=> $firstName,
 				":LastName"=> $lastName,
 				":Contact"=> $phone,
-				":GroupID"=> $groupID??\_::$CONFIG->RegisteredGroup,
+				":GroupID"=> $groupID??\_::$CONFIG->UserAccess,
 				":Status"=> $status
 			]);
 	}
@@ -177,7 +186,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SignOut(){
 		Session::Restart();
 		$this->Load();
-		return !Access(1);
+		return !self::Access(\_::$CONFIG->UserAccess);
 	}
 
 	public function ResetPassword($signature, $password){
@@ -251,7 +260,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 * @return bool
 	 */
 	public function SendRecoveryEmail($emailFrom = null, $emailTo = null, $subject=null, $content=null, $linkAnchor = null){
-		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject??self::$RecoveryEmailSubject, $content??self::$RecoveryEmailContent, $linkAnchor??self::$RecoveryLinkAnchor, self::$RecoveryHandlerPath, self::$RecoveryRequestKey);
+		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject??self::$RecoverEmailSubject, $content??self::$RecoverEmailContent, $linkAnchor??self::$RecoverLinkAnchor, self::$RecoverHandlerPath, self::$RecoveryRequestKey);
 	}
 	/**
      * Receive the Recovery Email and return the basic data of user
@@ -265,8 +274,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
      * @return bool|string return the user Signature or false otherwise
 	 */
 	public function ReceiveRecoveryLink(){
-		$newPass = getValid($_REQUEST,"password");
-		if($newPass != getValid($_REQUEST, "passwordConfirmation", $newPass)) throw new \ErrorException("New password and its confirmation does not match!");
+		$newPass = getValid($_REQUEST,"Password");
+		if($newPass != getValid($_REQUEST, "PasswordConfirmation", $newPass)) throw new \ErrorException("New password and its confirmation does not match!");
 		else if(isValid($newPass)){
 			$this->CheckPassword($newPass);
             $sign = $this->ReceiveLink(self::$RecoveryRequestKey);

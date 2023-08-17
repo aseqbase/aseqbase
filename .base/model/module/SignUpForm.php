@@ -5,8 +5,8 @@ use MiMFa\Library\User;
 MODULE("Form");
 class SignUpForm extends Form{
 	public $Action = null;
-	public $Image = null;
 	public $Title = "Sign Up";
+	public $Image = "user";
 	public $SubmitLabel = "Register";
 	public $SignatureLabel = "
 		<span class='input-group-text bg-white px-4 border-md border-right-0'>
@@ -120,12 +120,12 @@ class SignUpForm extends Form{
 	}
 	
 	public function Echo(){
-		if(\_::$INFO->User->Access(1) && !$this->MultipleSignIn)
+		if(getAccess(\_::$CONFIG->UserAccess) && !$this->MultipleSignIn)
 			printf(__($this->WelcomeFormat), \_::$INFO->User->Name, \_::$INFO->User->Email, \_::$INFO->User->Image);
 		else parent::Echo();
 	}
 	public function EchoHeader(){
-        if(\_::$INFO->User->Access(1))
+        if(getAccess(\_::$CONFIG->UserAccess))
 			printf(__($this->WelcomeFormat), \_::$INFO->User->Name, \_::$INFO->User->Email, \_::$INFO->User->Image);
     }
 	public function EchoFields(){
@@ -133,48 +133,48 @@ class SignUpForm extends Form{
 			<div class="row">
 				<!-- First Name -->
 				<div class="input-group col-lg-6 mb-4">
-					<label for="firstName" class="input-group-prepend">
+					<label for="FirstName" class="input-group-prepend">
 						<?php echo $this->FirstNameLabel; ?>
 					</label>
-					<input id="firstName" type="text" name="firstname" placeholder="<?php echo $this->FirstNamePlaceHolder; ?>" class="form-control bg-white border-left-0 border-md">
+					<input id="FirstName" name="Firstname" type="text" placeholder="<?php echo $this->FirstNamePlaceHolder; ?>" class="form-control bg-white border-left-0 border-md">
 				</div>
 				<!-- Last Name -->
 				<div class="input-group col-lg-6 mb-4">
-					<label for="lastName" class="input-group-prepend">
+					<label for="LastName" class="input-group-prepend">
 						<?php echo $this->LastNameLabel; ?>
 					</label>
-					<input id="lastName" type="text" name="lastname" placeholder="<?php echo $this->LastNamePlaceHolder; ?>" class="form-control bg-white border-left-0 border-md">
+					<input id="LastName" name="LastName" type="text" placeholder="<?php echo $this->LastNamePlaceHolder; ?>" class="form-control bg-white border-left-0 border-md">
 				</div>
 			</div>
 			<div class="row">
 				<!-- Email Address -->
 				<div class="input-group col-lg-12 mb-4">
-					<label for="email" class="input-group-prepend">
+					<label for="Email" class="input-group-prepend">
 						<?php echo $this->EmailLabel; ?>
 					</label>
-					<input id="email" type="email" name="email" placeholder="<?php echo $this->EmailPlaceHolder; ?>" class="form-control bg-white border-left-0 border-md">
+					<input id="Email" name="Email" type="email" placeholder="<?php echo $this->EmailPlaceHolder; ?>" class="form-control bg-white border-left-0 border-md">
 				</div>
 				<!-- Phone Number -->
 				<div class="input-group col-lg-12 mb-4">
-					<label for="phoneNumber" class="input-group-prepend">
+					<label for="Phone" class="input-group-prepend">
 						<?php echo $this->ContactLabel; ?>
 					</label>
-					<select id="countryCode" name="countrycode" style="max-width: 80px" class="custom-select form-control bg-white border-left-0 border-md h-100 font-weight-bold text-muted">
+					<select id="CountryCode" name="CountryCode" style="max-width: 80px" class="custom-select form-control bg-white border-left-0 border-md h-100 font-weight-bold text-muted">
 						<?php
 						for ($i = 0; $i < 100; $i++)
 							echo "<option value='+$i'>+$i</option>";
                         ?>
 					</select>
-					<input id="phoneNumber" type="tel" pattern="[1-9]\d{5,10}" name="phone" placeholder="<?php echo $this->ContactPlaceHolder; ?>" class="form-control bg-white border-md border-left-0 pl-3">
+					<input id="Phone" name="Phone" type="tel" pattern="[1-9]\d{5,10}" placeholder="<?php echo $this->ContactPlaceHolder; ?>" class="form-control bg-white border-md border-left-0 pl-3">
 				</div>
 			</div>
 			<div class="row">
 				<!-- Route -->
 				<div class="input-group col-lg-12 mb-4">
-					<label for="route" class="input-group-prepend">
+					<label for="Route" class="input-group-prepend">
 						<?php echo $this->RouteLabel;?>
 					</label>
-					<select id="route" name="route" class="form-control custom-select bg-white border-left-0 border-md">
+					<select id="Route" name="Route" class="form-control custom-select bg-white border-left-0 border-md">
 						<option value="None"><?php echo __($this->RoutePlaceHolder); ?></option>
 						<option value="Metting"><?php echo __("Metting"); ?></option>
 						<option value="Card"><?php echo __("Visit Card"); ?></option>
@@ -188,26 +188,26 @@ class SignUpForm extends Form{
 			<div class="row">
 				<!-- User Name -->
 				<div class="input-group col-lg-12 mb-4">
-					<label for="username" class="input-group-prepend">
+					<label for="UserName" class="input-group-prepend">
 						<?php echo $this->SignatureLabel; ?>
 					</label>
-					<input id="username" type="text" name="username" autocomplete="username" placeholder="<?php echo $this->SignaturePlaceHolder; ?>" class="form-control bg-white border-left-0 border-md">
+					<input id="UserName" name="UserName" type="text" autocomplete="username" placeholder="<?php echo $this->SignaturePlaceHolder; ?>" class="form-control bg-white border-left-0 border-md">
 				</div>
 			</div>
 			<div class="row">
 				<!-- Password -->
 				<div class="input-group col-lg-6 mb-4">
-					<label for="password" class="input-group-prepend">
+					<label for="Password" class="input-group-prepend">
 						<?php echo $this->PasswordLabel;?>
 					</label>
-					<input id="password" type="password" name="password" placeholder="<?php echo $this->PasswordPlaceHolder;?>" class="form-control bg-white border-left-0 border-md">
+					<input id="Password" name="Password" type="password" placeholder="<?php echo $this->PasswordPlaceHolder;?>" class="form-control bg-white border-left-0 border-md">
 				</div>
 				<!-- Password Confirmation -->
 				<div class="input-group col-lg-6 mb-4">
-					<label for="passwordConfirmation" class="input-group-prepend">
+					<label for="PasswordConfirmation" class="input-group-prepend">
 						<?php echo $this->PasswordConfirmationLabel;?>
 					</label>
-					<input id="passwordConfirmation" type="password" name="passwordConfirmation" placeholder="<?php echo $this->PasswordConfirmationPlaceHolder;?>" class="form-control bg-white border-left-0 border-md">
+					<input id="PasswordConfirmation" name="PasswordConfirmation" type="password" placeholder="<?php echo $this->PasswordConfirmationPlaceHolder;?>" class="form-control bg-white border-left-0 border-md">
 				</div>
 			</div>
 		<?php endif;	
@@ -239,7 +239,7 @@ class SignUpForm extends Form{
 	public function EchoFooter(){
         ?>
 		<div class="col-lg-12 mx-auto align-items-center my-4">
-			<a class="text-muted font-weight-bold d-block" href="<?php echo \MiMFa\Library\User::$InHandlerPath; ?>"><?php echo __($this->SignInLabel);?></a>
+			<a class="text-muted font-weight-bold d-block" href="<?php echo User::$InHandlerPath; ?>"><?php echo __($this->SignInLabel);?></a>
 		</div>
 		<?php
     }
@@ -249,7 +249,7 @@ class SignUpForm extends Form{
 		<script>
 			$(function () {
                 $(".<?php echo $this->Name ?> form").submit(function(e) {
-					if ($(".<?php echo $this->Name ?> form #passwordConfirmation").val() == $(".<?php echo $this->Name ?> form #password").val()) return true;
+					if ($(".<?php echo $this->Name ?> form #PasswordConfirmation").val() == $(".<?php echo $this->Name ?> form #Password").val()) return true;
 					$(".<?php echo $this->Name ?> form result").remove();
 					$(".<?php echo $this->Name ?> form").append(Html.error("New password and confirm password does not match!"));
 					e.preventDefault();
@@ -271,25 +271,23 @@ class SignUpForm extends Form{
 				$_req = $_POST;
 			break;
         }
-		if(!ACCESS(1)) try {
-			if(isValid($_req,"email") || isValid($_req,"password"))
+		if(!getAccess(\_::$CONFIG->UserAccess)) try {
+			if(isValid($_req,"Email") || isValid($_req,"Password"))
 			{
-				$phone = getValid($_req,"countrycode").getValid($_req,"phone");
-				if(strlen($phone) < 6) $phone = null;
 				if(\_::$INFO->User->SignUp(
-					getValid($_req,"username"),
-					getValid($_req,"password"),
-					getValid($_req,"email"),
+					getValid($_req,"UserName"),
+					getValid($_req,"Password"),
+					getValid($_req,"Email"),
 					null,
-					getValid($_req,"firstname"),
-					getValid($_req,"lastname"),
-					$phone,
+					getValid($_req,"FirstName"),
+					getValid($_req,"LastName"),
+					getValid($_req,"CountryCode").getValid($_req,"Phone"),
 					$this->GroupID,
 					$this->InitialStatus
 				))
 				{
 					echo HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully");
-					if($this->SendActivationEmail) PART("sign/active");
+					if($this->SendActivationEmail) PART(User::$ActiveHandlerPath);
 				}
 				else echo HTML::Error("The user with these email or username could not register!");
 			}

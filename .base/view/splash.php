@@ -1,6 +1,6 @@
 <?php TEMPLATE("Splash");
 $templ = new \MiMFa\Template\Splash();
-$templ->WindowTitle = \_::$INFO->FullName;
+$templ->WindowTitle = ["Welcome"];
 $templ->WindowLogo = \_::$INFO->LogoPath;
 $templ->WindowLogo = \_::$INFO->FullLogoPath;
 $templ->SupTitle = \_::$INFO->Owner;

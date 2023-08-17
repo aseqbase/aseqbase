@@ -40,6 +40,7 @@ abstract class ConfigurationBase extends Base {
 	public $DefaultViewName = "main";
     /**
      * An array of all patterns=>handler view names to handle the virtual pathes
+     * Empty array causing to pass all patterns to the ViewName or DefaultViewName or "main" view
      * @var array<string,string>
      * @category General
      */
@@ -109,9 +110,9 @@ abstract class ConfigurationBase extends Base {
      * @category Optimization
      */
 	public $AllowTranslate = false;
-    
+
 	/**
-     * A special key for yhis website
+     * A special key for yhis website, be sure to change this
      * @var string
      * @category Security
      */
@@ -165,7 +166,13 @@ abstract class ConfigurationBase extends Base {
      */
     public $EncryptNames = true;
 	/**
-     * Guest Access
+     * Allow signing in and up to the guests
+     * @var bool
+     * @category Security
+     */
+	public $AllowSigning = true;
+	/**
+     * Default accessibility for the guests
      * @var int
      * @category Security
      */
@@ -175,7 +182,13 @@ abstract class ConfigurationBase extends Base {
      * @var int
      * @category Security
      */
-    public $RegisteredGroup = 1;
+    public $UserAccess = 1;
+	/**
+     * Minimum accessibility needs to visit the website
+     * @var int
+     * @category Security
+     */
+    public $VisitAccess = 0;
 	/**
      * The status of all server response: 400, 404, 500, etc.
 	 * @var mixed

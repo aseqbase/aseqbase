@@ -18,7 +18,7 @@ if(count($items)<1){
 $doc = $items[0];
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
-$templ->WindowTitle = (getValid($doc,"Title")??getValid($doc,"Name"))." - ".\_::$INFO->Name;
+$templ->WindowTitle = [getValid($doc,"Title")??getValid($doc,"Name")];
 $templ->Content = function() use($doc){
     MODULE("Post");
     $module = new \MiMFa\Module\Post();

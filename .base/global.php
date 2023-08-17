@@ -292,13 +292,22 @@
 	RUN("Template");
 	_::$TEMPLATE = new Template();
 
-
 	\MiMFa\Library\Local::CreateDirectory(\_::$TMP_DIR);
 	\MiMFa\Library\Local::CreateDirectory(\_::$LOG_DIR);
 
-	function ACCESS($access = 0, bool $showPage = true):bool{
+	/**
+	 * Check if the client has access to the page or assign them to other page, based on thair IP, Accessibility, Restriction and etc.
+	 * @param int|null $minaccess The minimum accessibility for the client, pass null to give the user access
+	 * @param bool $assign Assign clients to other page, if they have not enough access
+	 * @param bool $die Pass true to die the process if clients have not enough access, else pass false
+	 * @param int|string|null $die Die the process with this status if clients have not enough access
+	 * @return bool The client has accessibility bigger than $minaccess or not
+	 * @return int|mixed The user accessibility group
+	 */
+	function ACCESS($minaccess = 0, bool $assign = true, bool|string|int|null $die = true):mixed{
 		if(isValid(\_::$CONFIG->StatusMode)) {
-			if($showPage) VIEW(\_::$CONFIG->StatusMode,$_GET)??VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_GET);
+			if($assign) VIEW(\_::$CONFIG->StatusMode,$_REQUEST)??VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_REQUEST);
+            if($die !== false) die($die);
 			return false;
 		}
 		elseif(isValid(\_::$CONFIG->AccessMode)) {
@@ -306,21 +315,44 @@
 			$cip = false;
 			foreach(\_::$CONFIG->AccessPatterns as $pat) if($cip = preg_match($pat, $ip)) break;
 			if((\_::$CONFIG->AccessMode > 0 && !$cip) || (\_::$CONFIG->AccessMode < 0 && $cip)){
-				if($showPage) VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_GET)??VIEW("401",$_GET);
+				if($assign) VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_REQUEST)??VIEW("401",$_REQUEST);
+                if($die !== false) die($die);
 				return false;
 			}
 		}
-		return \_::$INFO->User->Access($access);
+		$b = getAccess($minaccess);
+		if($b !== false) return $b;
+		if($assign) go(\MiMFa\Library\User::$InHandlerPath);
+        if($die !== false) die($die);
+		return $b;
 	}
-	function getAccess($access = null):int{
-		if(is_null($access) && !is_null(\_::$INFO->User)) return \_::$INFO->User->Access($access);
-		else return \_::$CONFIG->GuestAccess;
+	/**
+	 * Check if the user has access to the page or not
+	 * @param int|null $minaccess The minimum accessibility for the user, pass null to give the user access
+	 * @return int|bool The user accessibility group
+	 */
+	function getAccess($minaccess = null):mixed{
+		if(is_null(\_::$INFO->User))
+            if(is_null($minaccess)) return \_::$CONFIG->GuestAccess;
+            elseif(is_integer($minaccess)) return \_::$CONFIG->GuestAccess >= $minaccess;
+			else return \_::$CONFIG->GuestAccess;
+		else return \_::$INFO->User->Access($minaccess);
 	}
 
+/**
+	 * Print output on the client side
+	 * @param mixed $output The data that is ready to print
+	 * @return mixed Printed data
+	 */
 	function SET($output = null){
 		print $output;
 		return $output;
 	}
+	/**
+	 * Received input from the client side
+	 * @param mixed $input The data that is received to print
+	 * @return mixed Received data
+	 */
 	function GET($input = null){
 		if(is_string($input) && isAbsoluteUrl($input)){
 			$ch = curl_init();
@@ -552,26 +584,34 @@
         } finally{ applyAppends("PART", $name); }
 	}
 
-	function __(string|null $text, bool $translate = true, bool $styling = true):string|null {
-		if($styling && \_::$CONFIG->AllowTextAnalyzing) $text = \MiMFa\Library\Style::DoStrong($text);
-		if($translate && \_::$CONFIG->AllowTranslate) $text = \MiMFa\Library\Translate::Get($text);
-		return $text;
+	/**
+	 * Process and convert to string everythings
+	 * @param mixed $textOrObject The target object tot do process
+	 * @param bool $translation Do translation
+	 * @param bool $styling Do style and strongify the keywords
+	 * @return string|null
+	 */
+	function __(mixed $textOrObject, bool $translation = true, bool $styling = true):string|null {
+		$textOrObject = \MiMFa\Library\Convert::ToString($textOrObject);
+		if($styling && \_::$CONFIG->AllowTextAnalyzing) $textOrObject = \MiMFa\Library\Style::DoStrong($textOrObject);
+		if($translation && \_::$CONFIG->AllowTranslate) $textOrObject = \MiMFa\Library\Translate::Get($textOrObject);
+		return $textOrObject;
 	}
 
 	function go($url){
-        echo "<script>load('$url');</script>";
+        echo "<html><head><script>window.location.assign(".(isValid($url)?"'".\MiMFa\Library\Local::GetUrl($url)."'":"location.href").");</script></head></html>";
     }
 	function reload(){
         load(\_::$URL);
     }
 	function load($url = null){
-        echo "<script>load(".(isValid($url)?"'$url'":"null").");</script>";
+        echo "<script>window.location.assign(".(isValid($url)?"'".\MiMFa\Library\Local::GetUrl($url)."'":"location.href").");</script>";
     }
 	function open($url = null, $target = "_blank"){
-        echo "<script>open(".(isValid($url)?"'$url'":"null").", '$target');</script>";
+        echo "<script>window.open(".(isValid($url)?"'".\MiMFa\Library\Local::GetUrl($url)."'":"location.href").", '$target');</script>";
     }
-	function share($url = null, $path = null){
-        echo "<script>share(".(isValid($url)?"'$url'":"null").", ".(isValid($path)?"'$path'":"null").");</script>";
+	function share($urlOrText = null, $path = null){
+        echo "<script>window.open('sms://$path?body='+".(isValid($urlOrText)?"'$urlOrText'":"location.href").", '$target');</script>";
     }
 
 	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/\<\S+[\w\W]*\>/i")
@@ -862,8 +902,7 @@
 	}
 	function fetchValue(string|null $source, string|null $key, bool $ismultiline = true){
 		$source = getValue($source);
-		$arr = is_array($source)? $source : explode("
-	", $source);
+		$arr = is_array($source)? $source : explode("\n", $source);
 		$f = false;
 		$res = "";
 		foreach($arr as $i => $line) {
@@ -873,16 +912,15 @@
 				$f = $ismultiline;
 				if(!$f) break;
 			} elseif($f) {
-				if(strpos($line,"	")===0) $res .= "
-		".trim($line);
+				if(strpos($line,"	")===0) $res .= PHP_EOL."\t".trim($line);
 				else break;
 			}
 		}
 		return trim($res);
 	}
 
-	function isEmpty($text):bool{
-		return !isset($text) || is_null($text) || trim($text."") == "" || trim($text."","'\"") == "";
+	function isEmpty($obj):bool{
+		return !isset($obj) || is_null($obj) || (is_string($obj) && trim($obj.""," \n\r\t\v\0\f'\"") == "") || (is_array($obj) && count($obj) === 0);
 	}
 	function isValid($obj, string|null $item = null):bool{
 		if($item === null) return isset($obj) && !is_null($obj) && (!is_string($obj) || !(trim($obj) == "" || trim($obj,"'\"") == ""));
@@ -926,21 +964,6 @@
 			&& \MiMFa\Library\Local::FileExists($directory."initialize.php")
 			&& \MiMFa\Library\Local::FileExists($directory."static.php");
 	}
-	/**
-	 * Check file format by thats extension
-	 * @param null|string $path
-	 * @param array<string> $formats
-	 * @return string|bool
-	 */
-	function isFormat(string|null $path, string ...$formats){
-		$p = getPath(strtolower($path));
-		foreach ($formats as $format)
-			if(endsWith($p, strtolower($format))) return $format;
-		return false;
-	}
-	function isAbsoluteUrl(string|null $path):bool{
-		return $path != null && preg_match("/^\w+\:\/*[^\/]+/",$path);
-	}
 	function isInASEQ(string|null $filePath):bool{
 		$filePath = preg_replace("/^\\\\/",\_::$DIR,str_replace(\_::$DIR,"",trim($filePath??getUrl())));
 		if(isFormat($filePath, \_::$EXTENSION)) return file_exists($filePath);
@@ -950,6 +973,53 @@
 		$filePath = \_::$BASE_DIR.preg_replace("/^\\\\/","",str_replace(\_::$BASE_DIR,"",trim($filePath??getUrl())));
 		if(isFormat($filePath, \_::$EXTENSION)) return file_exists($filePath);
 		return is_dir($filePath) || file_exists($filePath.\_::$EXTENSION);
+	}
+
+	/**
+     * Check file format by thats extension
+     * @param null|string $path
+     * @param array<string> $formats
+     * @return string|bool
+     */
+	function isFormat(string|null $path, string ...$formats){
+		$p = getPath(strtolower($path));
+		foreach ($formats as $format)
+			if(endsWith($p, strtolower($format))) return $format;
+		return false;
+	}
+
+	/**
+	 * Check if the string is a relative or absolute URL
+	 * @param null|string $url The url string
+	 * @return bool
+	 */
+	function isUrl(string|null $url):bool{
+		return !empty($url) && preg_match("/^(\w+\:[\/]*)?(\/?[^\/\{\}\|^\[\]\"`\s]){1,}$/",$url);
+	}
+	/**
+	 * Check if the string is only a relative URL
+	 * @param null|string $url The url string
+	 * @return bool
+	 */
+	function isRelativeUrl(string|null $url):bool{
+		return !empty($url) && preg_match("/^(\/?[^\/\{\}\|^\[\]\"`\s]){1,}$/",$url);
+	}
+	/**
+	 * Check if the string is only an absolute URL
+     * @param null|string $url The url string
+     * @return bool
+     */
+	function isAbsoluteUrl(string|null $url):bool{
+		return !empty($url) && preg_match("/^\w+\:[\/]*(\/?[^\/\{\}\|^\[\]\"`\s]){1,}$/",$url);
+	}
+
+	/**
+     * Check if the string is a suitable name for a class or id or name field
+     * @param null|string $text The url string
+     * @return bool
+     */
+	function isIdentifier(string|null $text):bool{
+		return (!empty($text)) && preg_match("/^[A-z_\$][A-z0-9_\-\$]*$/",$text);
 	}
 
 	/**
@@ -1144,7 +1214,7 @@
 	}
 	function test_Access($func,$res=null){
 		$r = null;
-		if(ACCESS(0, false)){
+		if(ACCESS(0, false, false)){
 			if($r = $func()) echo "<b>TRUE: ".($r??$res)."</b><br>";
 			else echo "FALSE: ".$res."<br>";
 		}

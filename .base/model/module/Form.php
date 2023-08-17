@@ -1,4 +1,6 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\HTML;
 class Form extends Module{
 	public $Path = null;
 	public $Action = null;
@@ -34,12 +36,8 @@ class Form extends Module{
     }
 
 	public function EchoStyle(){
-		parent::EchoStyle();
-?>
+		parent::EchoStyle();?>
 		<style>
-			.<?php echo $this->Name ?> .input-group-prepend{
-				margin-bottom: 0px;
-			}
 			.<?php echo $this->Name ?> .btn{
 				color: var(--ForeColor-2);
 				background-color: var(--BackColor-2);
@@ -52,6 +50,9 @@ class Form extends Module{
 				background-color: var(--ForeColor-2);
 			}
 
+			.<?php echo $this->Name ?> .input-group-prepend{
+				margin-bottom: 0px;
+			}
 			.<?php echo $this->Name ?> .border-md {
 				border-width: 2px;
 			}
@@ -62,6 +63,10 @@ class Form extends Module{
 				height: 52px;
 				padding-left: 0.5rem;
 			}
+			.<?php echo $this->Name ?> .form-group {
+				margin-top: var(--Size-1);
+				margin-bottom: var(--Size-1);
+			}
 
 			.<?php echo $this->Name ?> .form-control::placeholder {
 				color: #888;
@@ -70,6 +75,20 @@ class Form extends Module{
 			}
 			.<?php echo $this->Name ?> .form-control:focus {
 				box-shadow: none;
+			}
+			.<?php echo $this->Name ?> :is(.image, .image:before) {
+				color: var(--ForeColor-3);
+				font-size: 300%;
+				margin: 0px 5%;
+            	width: 90%;
+				padding: var(--Size-1);
+				height: auto;
+				text-align: center;
+			}
+			.<?php echo $this->Name ?> :not(i):is(.image, .image:before) {
+				background-size: cover;
+				background-repeat: no-repeat;
+				aspect-ratio: 1;
 			}
 		</style>
 		<?php
@@ -83,11 +102,12 @@ class Form extends Module{
 				<div class="row align-items-center">
 					<!-- For Demo Purpose -->
 					<div class="col-md-5 pr-lg-5 mb-5 mb-md-0">
-						<img src="<?php echo forceUrl($this->Image);?>" alt="" class="img-fluid mb-3 d-none d-md-block">
-						<?php $this->EchoHeader();
+                        <?php
+							echo HTML::Media(null, $this->Image,["class"=>"image"]);
+							$this->EchoHeader();
 							$this->EchoTitle();
 							$this->EchoDescription();
-						?>
+                        ?>
 						<a href="<?php echo __($this->BackLink);?>" class="text-muted">
 							<?php echo __($this->BackLabel);?>
 						</a>

@@ -35,14 +35,13 @@ class Player extends Module{
     }
 
 	public function EchoStyle(){
-		parent::EchoStyle();
-?>
+		parent::EchoStyle();?>
 		<style>
 			.<?php echo $this->Name; ?>>.controls{
 				opacity: 0;
 				position: absolute;
-				top: 5px;
-				right: 10px;
+				top: 3px;
+				right: 13px;
 				font-size: var(--Size-1);
 				color: var(--ForeColor-3);
 				z-index: 1;
@@ -51,7 +50,7 @@ class Player extends Module{
 			}
 			.<?php echo $this->Name; ?>>.controls>.button {
 				text-align: center;
-				display: block;
+				display: inline;
 				padding: 1vh;
 				cursor: pointer;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
@@ -111,14 +110,20 @@ class Player extends Module{
 			}
 			.<?php echo $this->Name; ?>>.content::-webkit-scrollbar-thumb:hover {
 				background: var(--ForeColor-1);
-				<?php if($this->AllowZoom) ?> cursor: "grab";
+				<?php if($this->AllowZoom) ?> cursor: grab;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?>>.content>* {
-				width: 100%;
-				height: auto;
-				min-height: auto;
 				min-width: auto;
+				width: auto;
+				height: 100%;
+				text-align: center;
+				display: inline-block;
+				position: relative;
+				left: auto;
+				right: auto;
+				top: auto;
+				bottom: auto;
 				z-index: 0;
 			}
 
@@ -151,18 +156,17 @@ class Player extends Module{
 				foreach ($source as $value)
 				    yield from self::ToElements($value);
 			elseif(isFormat($this->Source,".mpg",".mpeg", ".mp4",".avi",".mkv",".mov",".wmv",".flv",".webm"))
-				yield HTML::Video($source);
+				yield HTML::Video(null,$source, "controls");
 			elseif(isFormat($this->Source,".wav",".mp3",".aac",".amr",".ogg",".flac",".wma",".m4a"))
-				yield HTML::Audio($source);
+				yield HTML::Audio($source, "controls");
 			elseif(isFormat($this->Source,".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg", ".webp"))
 				yield HTML::Image($source);
-			else yield HTML::Frame($source);
+			else yield HTML::Embed($source);
 		yield "</div>";
 	}
 
 	public function EchoScript(){
-		parent::EchoScript();
-?>
+		parent::EchoScript();?>
 		<script>
 		<?php if($this->AllowZoom){ ?>
 			let <?php echo $this->Name; ?>slider = null;
@@ -219,10 +223,10 @@ class Player extends Module{
 			}
 			function <?php echo $this->Name; ?>_Reset(){
 				let box = document.querySelector('.<?php echo $this->Name; ?>>.content>*');
-				box.style.width = "inherit";
-				box.style.height = "inherit";
-				box.style.left = "inherit";
-				box.style.top = "inherit";
+				box.style.width = null;
+				box.style.height = null;
+				box.style.left = null;
+				box.style.top = null;
 				zoomX = 0;
 			}
 			let zoomX = 0;
@@ -265,11 +269,11 @@ class Player extends Module{
 		return null;
     }
 	public function GetControls(){
-		if($this->AllowZoom)  yield '<div class="fa fa-refresh button" onclick="'.$this->ResetScript().'"></div>';
-		if($this->AllowZoom)  yield '<div class="fa fa-plus button" onclick="'.$this->ZoomInScript().'"></div>';
-		if($this->AllowZoom)  yield '<div class="fa fa-minus button" onclick="'.$this->ZoomOutScript().'"></div>';
-		if($this->AllowShare)  yield '<div class="fa fa-share-alt button" onclick="'.$this->ShareScript().'"></div>';
 		if($this->AllowDownload)  yield '<div class="fa fa-download button" onclick="'.$this->DownloadScript().'"></div>';
+		if($this->AllowShare)  yield '<div class="fa fa-share-alt button" onclick="'.$this->ShareScript().'"></div>';
+		if($this->AllowZoom)  yield '<div class="fa fa-minus button" onclick="'.$this->ZoomOutScript().'"></div>';
+		if($this->AllowZoom)  yield '<div class="fa fa-plus button" onclick="'.$this->ZoomInScript().'"></div>';
+		if($this->AllowZoom)  yield '<div class="fa fa-refresh button" onclick="'.$this->ResetScript().'"></div>';
 	}
 
 	public function ContentScript($content){

@@ -23,7 +23,7 @@ class MainMenu extends Module{
 	public function __construct(){
         parent::__construct();
 		$this->SearchForm = new SearchForm();
-		$this->UserMenu = new UserMenu();
+		if(\_::$CONFIG->AllowSigning) $this->UserMenu = new UserMenu();
 		$this->TemplateButton = new TemplateButton();
     }
 
@@ -138,7 +138,8 @@ class MainMenu extends Module{
 				max-height: 70vh;
 				padding: 0px;
 				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-				overflow: scroll;
+				overflow-x: hidden;
+				overflow-y: auto;
 				z-index: 1;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
@@ -266,18 +267,18 @@ class MainMenu extends Module{
 			if($count > 0){
 				echo "<ul class='Items td ".(isValid($this->ShowItemsScreenSize)?$this->ShowItemsScreenSize.'-show':'').' '.(isValid($this->HideItemsScreenSize)?$this->HideItemsScreenSize.'-hide':'')."'>";
 				foreach($this->Items as $item){
-					 echo $this->CreateItem($item,1); 
-				} 
+					 echo $this->CreateItem($item,1);
+				}
 				echo "</ul>";
 			}
 		endif;
 		if($this->HasOthers):
 		echo "<div class='other ".((isValid($this->ShowOthersScreenSize)?$this->ShowOthersScreenSize.'-show':'').' '.(isValid($this->HideOthersScreenSize)?$this->HideOthersScreenSize.'-hide':''))."'>";
-			if(isValid($this->Content)) echo $this->Content;
 			if($this->SearchForm != null) $this->SearchForm->Draw();
 			if($this->UserMenu != null) $this->UserMenu->Draw();
 			if($this->TemplateButton != null) $this->TemplateButton->Draw();
-		echo "</div>";
+			if(isValid($this->Content)) echo $this->Content;
+            echo "</div>";
 		endif;
 	}
 	public function PostDraw(){
@@ -317,8 +318,7 @@ class MainMenu extends Module{
 	}
 
 	public function EchoScript(){
-		parent::EchoScript();
-?>
+		parent::EchoScript();?>
 		<script type="text/javascript">
 			function ViewSideMenu(show){
 				if(show === undefined) $('.<?php echo $this->Name; ?>').toggleClass('active');

@@ -2,11 +2,12 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
+use MiMFa\Library\User;
 MODULE("Form");
 class SignInForm extends Form{
 	public $Action = null;
-	public $Image = null;
 	public $Title = "Sign In";
+	public $Image = "sign-in";
 	public $SubmitLabel = "Sign In";
 	public $SignatureLabel = "
 		<span class='input-group-text bg-white px-4 border-md border-right-0'>
@@ -21,20 +22,21 @@ class SignInForm extends Form{
 	public $SignUpLabel = "Do not have an account?";
 	public $RememberLabel = "Forgot your password?";
 	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="$IMAGE"><br><p class="welcome">Hello dear $NAME,<br>You are signed in now!</p></div>';
+	public $WelcomePart = null;
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
 	public $SignUpIfNotRegistered = false;
-	
+
 	public function __construct(){
         parent::__construct();
-		$this->Action = \MiMFa\Library\User::$InHandlerPath;
+		$this->Action = User::$InHandlerPath;
+		$this->WelcomePart = User::$DashboardHandlerPath;
 		$this->SuccessPath = \_::$PATH;
 	}
 
 	public function EchoStyle(){
-		parent::EchoStyle();
-		?>
+		parent::EchoStyle();?>
 		<style>
 			.<?php echo $this->Name ?> .btn-facebook {
 				background-color: #405D9D55 !important;
@@ -66,6 +68,7 @@ class SignInForm extends Form{
 				width: 50%;
 				max-width: 300px;
 				border-radius: 100%;
+				margin: var(--Size-1);
 			}
 			.<?php echo $this->Name ?> div.welcome p.welcome {
 				text-align: center;
@@ -76,12 +79,13 @@ class SignInForm extends Form{
 	}
 
 	public function Echo(){
-		if(\_::$INFO->User->Access(1) && !$this->MultipleSignIn)
+		if(getAccess(\_::$CONFIG->UserAccess) && !$this->MultipleSignIn){
 			$this->EchoHeader();
-		else parent::Echo();
+			PART($this->WelcomePart);
+        } else parent::Echo();
 	}
 	public function EchoHeader(){
-        if(\_::$INFO->User->Access(1))
+        if(getAccess(\_::$CONFIG->UserAccess))
 			echo __(Convert::FromDynamicString($this->WelcomeFormat));
     }
 	public function EchoFields(){
@@ -89,22 +93,22 @@ class SignInForm extends Form{
 			<div class="row">
 				<!-- Signature Address -->
 				<div class="input-group col-lg-12 mb-4">
-					<label for="username" class="input-group-prepend">
-						<?php echo $this->SignatureLabel; ?>
-					</label>
-					<input id="username" type="text" name="username" autocomplete="username"
-							placeholder="<?php echo __($this->SignaturePlaceHolder);?>"
-							aria-label="<?php echo __($this->SignaturePlaceHolder);?>"
-							class="form-control bg-white border-left-0 border-md">
+                    <label for="Signature" class="input-group-prepend">
+                        <?php echo $this->SignatureLabel; ?>
+                    </label>
+                    <input id="Signature" name="Signature" type="text" autocomplete="username"
+                        placeholder="<?php echo __($this->SignaturePlaceHolder);?>"
+                        aria-label="<?php echo __($this->SignaturePlaceHolder);?>"
+                        class="form-control bg-white border-left-0 border-md" />
 				</div>
 			</div>
 			<div class="row">
 				<!-- Password -->
 				<div class="input-group col-lg-12 mb-4">
-					<label for="password" class="input-group-prepend">
+					<label for="Password" class="input-group-prepend">
 						<?php echo $this->PasswordLabel; ?>
 					</label>
-					<input id="password" type="password" name="password" placeholder="<?php echo __($this->PasswordPlaceHolder);?>" aria-label="<?php echo __($this->PasswordPlaceHolder);?>" class="form-control bg-white border-left-0 border-md">
+                    <input id="Password" name="Password" type="password" placeholder="<?php echo __($this->PasswordPlaceHolder);?>" aria-label="<?php echo __($this->PasswordPlaceHolder);?>" class="form-control bg-white border-left-0 border-md" />
 				</div>
 			</div>
 		<?php endif;
@@ -135,8 +139,8 @@ class SignInForm extends Form{
 	public function EchoFooter(){
         ?>
 		<div class="col-lg-12 mx-auto align-items-center my-4">
-			<a class="text-muted font-weight-bold d-block" href="<?php echo \MiMFa\Library\User::$UpHandlerPath; ?>"><?php echo __($this->SignUpLabel);?></a>
-			<a class="text-muted font-weight-bold d-block" href="<?php echo \MiMFa\Library\User::$RecoveryHandlerPath; ?>"><?php echo __($this->RememberLabel);?></a>
+			<a class="text-muted font-weight-bold d-block" href="<?php echo User::$UpHandlerPath; ?>"><?php echo __($this->SignUpLabel);?></a>
+			<a class="text-muted font-weight-bold d-block" href="<?php echo User::$RecoverHandlerPath; ?>"><?php echo __($this->RememberLabel);?></a>
 		</div>
 		<?php
     }
@@ -151,15 +155,15 @@ class SignInForm extends Form{
 				$_req = $_POST;
 			break;
         }
-		if(!ACCESS(1)) try {
-			if(isValid($_req,"username") && isValid($_req,"password")){
+		if(!getAccess(\_::$CONFIG->UserAccess)) try {
+			if(isValid($_req,"Signature") && isValid($_req,"Password")){
 				$res = $this->SignUpIfNotRegistered?
-						\_::$INFO->User->SignInOrSignUp(getValid($_req,"username"), getValid($_req,"password")):
-						\_::$INFO->User->SignIn(getValid($_req,"username"), getValid($_req,"password"));
+						\_::$INFO->User->SignInOrSignUp(getValid($_req,"Signature"), getValid($_req,"Password")):
+						\_::$INFO->User->SignIn(getValid($_req,"Signature"), getValid($_req,"Password"));
 				if($res === true)
                 	echo HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', you have logged in successfully");
 				elseif($res === false)
-					echo HTML::Error("UserName or password is not correct!");
+					echo HTML::Error("UserName or Password is not correct!");
 				else
 					echo HTML::Error($res);
 			}

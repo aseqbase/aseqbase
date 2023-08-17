@@ -91,7 +91,9 @@ class Template extends \Base{
 	public function DrawInitial(){
         REGION("initial");?>
 		<title>
-			<?php echo $this->WindowTitle??\_::$INFO->FullName; ?>
+            <?php
+            $title = $this->WindowTitle??[\_::$DIRECTION];
+            echo __(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$INFO->Name]]:$title),styling:false); ?>
 		</title>
 		<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??\_::$INFO->LogoPath); ?>" />
 	<?php

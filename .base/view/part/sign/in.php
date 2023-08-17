@@ -1,15 +1,12 @@
 <?php
 MODULE("SignInForm");
 $mod = new \MiMFa\Module\SignInForm();
-if(isset($_REQUEST["username"])) $mod->Action();
+if(isset($_REQUEST["Signature"])) $mod->Action();
 else {
-    TEMPLATE("Main");
-    $templ = new \MiMFa\Template\Main();
-    $templ->Content = function() use($mod){
-        echo "<div class='page'>";
-        $mod->Draw();
-        echo "</div>";
-    };
-    $templ->Draw();
+    echo "<div class='page'>";
+    $mod->Title = "Sign In";
+    $mod->Image = "sign-in";
+    $mod->Draw();
+    echo "</div>";
 }
 ?>

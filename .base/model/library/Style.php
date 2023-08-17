@@ -30,18 +30,22 @@ class Style extends \ArrayObject{
 	public null|string $TextAlign = null;
 	public null|string $Display = null;
 	public null|string $Position = null;
+	public null|string $Left = null;
+	public null|string $Top = null;
+	public null|string $Right = null;
+	public null|string $Bottom = null;
 	public null|string $Overflow = null;
 	public null|string $Border = null;
 	public null|string $BorderRadius = null;
 	public null|string $BoxShadow = null;
 	public null|string $TextShadow = null;
 	public null|string $Filter = null;
-	
+
 	public function IsValid(){
 		return !isempty($this->Get());
     }
 	public function Get(){
-		$styles = 
+		$styles =
 			self::DoProperty("content",$this->Content).
 			self::DoProperty("color",$this->Color).
 			self::DoProperty("background",$this->Background).
@@ -65,6 +69,10 @@ class Style extends \ArrayObject{
 			self::DoProperty("text-align",$this->TextAlign).
 			self::DoProperty("display",$this->Display).
 			self::DoProperty("position",$this->Position).
+			self::DoProperty("left",$this->Left).
+			self::DoProperty("top",$this->Top).
+			self::DoProperty("right",$this->Right).
+			self::DoProperty("bottom",$this->Bottom).
 			self::DoProperty("overflow",$this->Overflow).
 			self::DoProperty("border",$this->Border).
 			self::DoProperty("border-radius",$this->BorderRadius).
@@ -157,7 +165,7 @@ class Style extends \ArrayObject{
         if($standardization)
 			for ($i = 0; $i < $length; $i++)
 				$text = preg_replace($keywordPatterns[$i],"<strong>{$keyWords[$i]}</strong>",$text);
-		else 
+		else
 			for ($i = 0; $i < $length; $i++)
 				$text = preg_replace($keywordPatterns[$i],"<strong>$1</strong>",$text);
 		return Decode($text, $dic);

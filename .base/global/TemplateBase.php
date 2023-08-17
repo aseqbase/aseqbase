@@ -186,7 +186,7 @@
 						$(selector + ' .result').remove();
 					},
 					processHandler = function(data){},
-					timeout = 600000
+					timeout = 30000
 				){
 					const actionPath = $(selector).attr('action');
 					const methodName = $(selector).attr('method');
@@ -238,7 +238,7 @@
 						$(selector + ' .result').remove();
 					},
 					processHandler = function(data){},
-					timeout = 600000
+					timeout = 30000
 				){
 					$(selector).submit(function(e) {
 						e.preventDefault();

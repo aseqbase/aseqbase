@@ -56,7 +56,7 @@ class BarMenu extends Module{
 			.<?php echo $this->Name; ?>>a>.button:hover{
 				<?php if($this->AllowAnimate) { ?>
 					background-color: var(--ForeColor-2);
-					color: var(--BackColor-2);;
+					color: var(--BackColor-2);
 				<?php 
 				} ?>
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)) ?>

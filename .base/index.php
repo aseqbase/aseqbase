@@ -1,8 +1,8 @@
 <?php //MiMFa aseqbase	http://aseqbase.ir
 require_once(__DIR__."/initialize.php");
-if(ACCESS()){
+if(ACCESS(\_::$CONFIG->VisitAccess, assign:false, die:true)){
 	if(isValid(\_::$REQUEST)){
-        $request = ltrim(\_::$REQUEST," \r\n\t\v\0\\/");
+        $request = ltrim(\_::$REQUEST," \r\n\t\v\0\f\\/");
 		foreach (\_::$CONFIG->Handlers as $pat=>$handler)
             if(preg_match($pat, $request)
 				&& VIEW($handler, $_REQUEST)) return;

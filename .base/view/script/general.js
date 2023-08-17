@@ -289,7 +289,8 @@ const isVisible = (element, partiallyVisible = true) => {
 		: top >= 0 && left >= 0 && bottom <= innerHeight && right <= innerWidth;
 };
 const isFocused = (element) => document.activeElement === element;
-const scrollTo = function (selector = "#element", time = 1000) {
+
+const scrollTo = function (selector = "body :nth-child(1)", time = 1000) {
 	$('html, body').animate({
 		scrollTop: parseInt($(selector).offset().top)
 	}, time);
