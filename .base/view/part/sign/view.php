@@ -9,13 +9,13 @@ if(ACCESS(\_::$CONFIG->UserAccess)){
         MODULE("Field");
         $form = new \MiMFa\Module\Form();
         $form->Title = $user["Name"];
-        $form->Description = between($user["Bio"],"New User!").
-            HTML::Center([
+        $form->Description = between($user["Bio"],"A New User!").
+            HTML::Rack(join(PHP_EOL,[
                 HTML::Button("Dashboard", User::$DashboardHandlerPath,["class"=>"col-lg"]),
-                HTML::Button("Edit Profile", User::$EditHandlerPath,["class"=>"btn-block"]),
-                HTML::Button("Reset Password", User::$RecoverHandlerPath,["class"=>"btn-block"]),
-                HTML::Button("Sign Out", User::$OutHandlerPath,["class"=>"btn-block"])
-            ]);
+                HTML::Button("Edit Profile", User::$EditHandlerPath,["class"=>"col-lg"]),
+                HTML::Button("Reset Password", User::$RecoverHandlerPath,["class"=>"col-lg"]),
+                HTML::Button("Sign Out", User::$OutHandlerPath,["class"=>"col-lg"])
+            ]));
         $form->Image = $user["Image"];
         $form->BackLabel = "More";
         $form->BackLink = User::$DashboardHandlerPath;
@@ -23,13 +23,13 @@ if(ACCESS(\_::$CONFIG->UserAccess)){
         $form->ResetLabel = null;
         $form->AddChild(new \MiMFa\Module\Field("label","Email", $user["Email"], lock:true));
         $form->AddChild(new \MiMFa\Module\Field("label","Signature", $user["Signature"], lock:true));
-        $form->AddChild(new \MiMFa\Module\Field("label","First Name", $user["FirstName"], lock:true));
-        $form->AddChild(new \MiMFa\Module\Field("label","Middle Name", $user["MiddleName"], lock:true));
-        $form->AddChild(new \MiMFa\Module\Field("label","Last Name", $user["LastName"], lock:true));
-        $form->AddChild(new \MiMFa\Module\Field("label","Gender", $user["Gender"], lock:true));
-        $form->AddChild(new \MiMFa\Module\Field("label","Contact", $user["Contact"], lock:true));
-        $form->AddChild(new \MiMFa\Module\Field("label","Address", $user["Address"], lock:true));
-        $form->AddChild(new \MiMFa\Module\Field("label","Organization", $user["Organization"], lock:true));
+        if(isValid($user["FirstName"])) $form->AddChild(new \MiMFa\Module\Field("label","First Name", $user["FirstName"], lock:true));
+        if(isValid($user["MiddleName"])) $form->AddChild(new \MiMFa\Module\Field("label","Middle Name", $user["MiddleName"], lock:true));
+        if(isValid($user["LastName"])) $form->AddChild(new \MiMFa\Module\Field("label","Last Name", $user["LastName"], lock:true));
+        if(isValid($user["Gender"])) $form->AddChild(new \MiMFa\Module\Field("label","Gender", $user["Gender"], lock:true));
+        if(isValid($user["Contact"])) $form->AddChild(new \MiMFa\Module\Field("label","Contact", $user["Contact"], lock:true));
+        if(isValid($user["Address"])) $form->AddChild(new \MiMFa\Module\Field("label","Address", $user["Address"], lock:true));
+        if(isValid($user["Organization"])) $form->AddChild(new \MiMFa\Module\Field("label","Organization", $user["Organization"], lock:true));
         $form->Draw();
         echo HTML::Style("
             .{$form->Name} .image {

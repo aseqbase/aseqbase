@@ -76,7 +76,7 @@ class Form extends Module{
 			.<?php echo $this->Name ?> .form-control:focus {
 				box-shadow: none;
 			}
-			.<?php echo $this->Name ?> :is(.image, .image:before) {
+			.<?php echo $this->Name ?> .header :is(.image, .image:before) {
 				color: var(--ForeColor-3);
 				font-size: 300%;
 				margin: 0px 5%;
@@ -85,7 +85,7 @@ class Form extends Module{
 				height: auto;
 				text-align: center;
 			}
-			.<?php echo $this->Name ?> :not(i):is(.image, .image:before) {
+			.<?php echo $this->Name ?> .header :not(i):is(.image, .image:before) {
 				background-size: cover;
 				background-repeat: no-repeat;
 				aspect-ratio: 1;
@@ -101,7 +101,7 @@ class Form extends Module{
 			<div class="page container">
 				<div class="row align-items-center">
 					<!-- For Demo Purpose -->
-					<div class="col-md-5 pr-lg-5 mb-5 mb-md-0">
+					<div class="col-md-5 pr-lg-5 mb-5 mb-md-0 header">
                         <?php
 							echo HTML::Media(null, $this->Image,["class"=>"image"]);
 							$this->EchoHeader();
@@ -114,7 +114,7 @@ class Form extends Module{
 					</div>
 
 					<!-- Form -->
-					<div class="col-md col-lg ml-auto">
+					<div class="col-md col-lg ml-auto content">
                         <form id="<?php echo $name; ?>" name="<?php echo $name; ?>" action="<?php echo $src; ?>" enctype="<?php echo $this->EncType;?>" method="<?php echo $this->Method;?>">
                             <?php
 								$this->EchoContent();

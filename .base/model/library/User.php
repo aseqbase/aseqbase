@@ -139,7 +139,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
     }
 	public function Set($fieldsDictionary, $signature = null, $password = null){
 		$person = $this->Find($signature, $password);
-		if(getValid($fieldsDictionary,"Email")!=getValid($person,"Email"))
+		if(getValid($fieldsDictionary, "Email", getValid($person,"Email"))!=getValid($person,"Email"))
 			$fieldsDictionary["Status"] = self::$InitialStatus;
 		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='{$person["ID"]}'",$fieldsDictionary);
     }

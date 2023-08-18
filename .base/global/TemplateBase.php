@@ -79,126 +79,44 @@
 				const mailTo = function(url=null){
 					open('mailto:'+(url??`".\_::$EMAIL."`), '_blank');
 				};
-				const getData = function(
-					request,
-					requestData,
-					successFunc = function(data,selector){},
-					errorfunc = function(data,selector){},
-					selector = '',
-					beforeFunc=function(data,selector){ },
-					processHandler=function(data){}) {
-
-					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
-
-					beforeFunc(requestData,selector);
-					return  $.get(request+'?'+requestData,function(data){successFunc(data,selector);}).fail(function(data){errorfunc(data,selector);});
-						"
-						/*
-					$.ajax({
-						type: 'GET',
-						url: request,
-						xhr: function () {
-							var myXhr = $.ajaxSettings.xhr();
-							if (myXhr.upload) myXhr.upload.addEventListener('progress', processHandler, false);
-							return myXhr;
-						},
-						success: function (data) {
-							successFunc(data,selector);
-							$(btns).removeClass('hide');
-							$(selector).css('opacity','1');
-						},
-						error: function (data) {
-							errorfunc(data,selector);
-							$(btns).removeClass('hide');
-							$(selector).css('opacity','1');
-						},
-						beforeSend: function (data) {
-							beforeFunc(data,selector);
-							$(btns).addClass('hide');
-							$(selector).css('opacity','.5');
-						},
-						async: true,
-						data: requestData,
-						cache: false,
-						contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':false,
-						processData: false,
-						timeout: 600000
-					});
-					*/."
-				};
-				const postData = function(
-					request,
-					requestData,
-					successFunc = function(data,selector){},
-					errorfunc = function(data,selector){},
-					selector = '',
-					beforeFunc = function(data,selector){},
-					processHandler=function(data){}) {
-
-					beforeFunc(requestData,selector);
-					return  $.post(request,requestData,function(data){successFunc(data,selector);}).fail(function(data){errorfunc(data,selector);});
-						"
-						/*
-						const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
-
-						$.ajax({
-							type: 'POST',
-							url: request,
-							xhr: function () {
-								var myXhr = $.ajaxSettings.xhr();
-								if (myXhr.upload) myXhr.upload.addEventListener('progress', processHandler, false);
-								return myXhr;
-							},
-							success: function (data) {
-								successFunc(data,selector);
-								$(btns).removeClass('hide');
-								$(selector).css('opacity','1');
-							},
-							error: function (data) {
-								errorfunc(data,selector);
-								$(btns).removeClass('hide');
-								$(selector).css('opacity','1');
-							},
-							beforeSend: function (data) {
-								beforeFunc(data,selector);
-								$(btns).addClass('hide');
-								$(selector).css('opacity','.5');
-							},
-							async: true,
-							data: requestData,
-							cache: false,
-							contentType: (typeof requestData === 'string')?'application/json; charset=utf-8':false,
-							processData: false,
-							timeout: 600000
-						});*/
-				."};
-				const submitForm = function(
+				const transitData = function(
+					methodName = 'POST',
+					actionPath = null,
+					requestData = null,
 					selector = 'form',
-					successFunc = function(data, selector){
+					successFunc = null,
+					errorfunc = null,
+					beforeFunc = null,
+					processHandler = null,
+					timeout = null) {
+
+					successFunc = successFunc??function(data, selector){
 						$(selector + ' .result').remove();
-						$(selector).append(Html.success('".__("The form submitted successfully!")."'));
-					},
-					errorfunc = function(data, selector){
+						$(selector).append(Html.success((data !=null) && typeof(data) == 'object'?data.statusText:data??'".__("The form submitted successfully!")."'));
+						if(isEmpty(data)) load();
+					};
+					errorfunc = errorfunc??function(data, selector){
 						$(selector + ' .result').remove();
-						$(selector).append(Html.error(data??'".__("There a problem occured!")."'));
-					},
-					beforeFunc = function(data, selector){
+						$(selector).append(Html.error((data !=null) && typeof(data) == 'object'?data.statusText:data??'".__("There a problem occured!")."'));
+					};
+					beforeFunc = beforeFunc??function(data, selector){
 						$(selector + ' .result').remove();
-					},
-					processHandler = function(data){},
-					timeout = 30000
-				){
-					const actionPath = $(selector).attr('action');
-					const methodName = $(selector).attr('method');
-					const requestData = new FormData(selector);
+					};
+					processHandler = processHandler??function(data, selector){
+						if(!isEmpty(data)) $(selector).append(typeof(data) == 'object'?data.statusText:data);
+					};
+
+					actionPath = actionPath??location.href;
+					timeout = timeout??30000;
 					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
 
-					$.ajax({
+					return $.ajax({
 						type: methodName,
 						url: actionPath,
+						data: requestData,
 						xhr: function () {
 							var myXhr = $.ajaxSettings.xhr();
-							if (myXhr.upload) myXhr.upload.addEventListener('progress', processHandler, false);
+							if (myXhr.upload) myXhr.upload.addEventListener('progress', (data)=>processHandler(data, selector), false);
 							return myXhr;
 						},
 						success: function (data) {
@@ -216,7 +134,6 @@
 							$(btns).addClass('hide');
 							$(selector).css('opacity','.5');
 						},
-						data: requestData,
 						async: true,
 						cache: false,
 						contentType: false,
@@ -224,22 +141,20 @@
 						timeout: timeout
 					});
 				};
-				const handleForm = function(
-					selector = 'form',
-					successFunc = function(data, selector){
-						$(selector + ' .result').remove();
-						$(selector).append(Html.success('".__("The form submitted successfully!")."'));
-					},
-					errorfunc = function(data, selector){
-						$(selector + ' .result').remove();
-						$(selector).append(Html.error(data??'".__("There a problem occured!")."'));
-					},
-					beforeFunc = function(data, selector){
-						$(selector + ' .result').remove();
-					},
-					processHandler = function(data){},
-					timeout = 30000
-				){
+				const getData = function( actionPath = null, requestData = null, selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null) {
+						return transitData('GET', actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
+				};
+				const postData = function(actionPath = null, requestData = null, selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null) {
+						return transitData('POST', actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
+				};
+				const submitForm = function(selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null){
+					const actionPath = $(selector).attr('action');
+					const methodName = $(selector).attr('method');
+					const requestData = new FormData(selector);
+
+					return transitData(methodName, actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
+				};
+				const handleForm = function(selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null){
 					$(selector).submit(function(e) {
 						e.preventDefault();
 
@@ -247,38 +162,8 @@
 						const actionPath = form.attr('action');
 						const methodName = form.attr('method');
 						const requestData = new FormData(this);
-						const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
 
-						$.ajax({
-							type: methodName,
-							url: actionPath,
-							xhr: function () {
-								var myXhr = $.ajaxSettings.xhr();
-								if (myXhr.upload) myXhr.upload.addEventListener('progress', processHandler, false);
-								return myXhr;
-							},
-							success: function (data) {
-								successFunc(data,selector);
-								$(btns).removeClass('hide');
-								$(selector).css('opacity','1');
-							},
-							error: function (data) {
-								errorfunc(data,selector);
-								$(btns).removeClass('hide');
-								$(selector).css('opacity','1');
-							},
-							beforeSend: function (data) {
-								beforeFunc(data,selector);
-								$(btns).addClass('hide');
-								$(selector).css('opacity','.5');
-							},
-							data: requestData,
-							async: true,
-							cache: false,
-							contentType: false,
-							processData: false,
-							timeout: timeout
-						});
+						return transitData(methodName, actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
 					});
 				};
 			</script>

@@ -176,8 +176,11 @@ class Module extends \Base{
      * @param string|null The specific TagName, set null for default
      */
 	public function EchoOpenTag($tag=null){
-		if(isValid($tag??$this->Tag)) echo "<".($tag??$this->Tag??"div")." ".$this->GetDefaultAttributes().">";
-	}
+		$st = null;
+		if(isValid($this->Style)) $st = $this->Style->Get();
+		if(isValid($tag??$this->Tag)) echo join("",["<",($tag??$this->Tag??"div")," ",$this->GetDefaultAttributes(), isValid($st)?" style=\"{$st}\"":"",">"]);
+		elseif(isValid($st)) echo "<style>.{$this->Name}{ $st }</style>";
+    }
 	/**
      * Echo the Close tag of the element
      * @param string|null The specific TagName, set null for default
@@ -192,14 +195,14 @@ class Module extends \Base{
      */
 	public function GetDefaultAttributes(){
 		return
-		$this->GetAttribute("id",$this->Id).
-		$this->GetAttribute(" class",$this->Name.' '.$this->Class.
-			(isValid($this->VisibleFromScreenSize)?" ".$this->VisibleFromScreenSize."-visible":"").
-			(isValid($this->InvisibleFromScreenSize)?" ".$this->InvisibleFromScreenSize."-invisible":"").
-			(isValid($this->ShowFromScreenSize)?" ".$this->ShowFromScreenSize."-show":"").
-			(isValid($this->HideFromScreenSize)?" ".$this->HideFromScreenSize."-hide":"")
-		).
-		(isValid($this->Attributes)?" ".Convert::ToString($this->Attributes," "):"");
+			$this->GetAttribute("id",$this->Id).
+			$this->GetAttribute(" class",$this->Name.' '.$this->Class.
+				(isValid($this->VisibleFromScreenSize)?" ".$this->VisibleFromScreenSize."-visible":"").
+				(isValid($this->InvisibleFromScreenSize)?" ".$this->InvisibleFromScreenSize."-invisible":"").
+				(isValid($this->ShowFromScreenSize)?" ".$this->ShowFromScreenSize."-show":"").
+				(isValid($this->HideFromScreenSize)?" ".$this->HideFromScreenSize."-hide":"")
+			).
+			(isValid($this->Attributes)?" ".Convert::ToString($this->Attributes," "):"");
 	}
 	/**
      * Create a standard Attribute and its value for a tag
@@ -307,18 +310,16 @@ class Module extends \Base{
 		if($this->OnceEchoStyle !== null){
 			$this->OnceEchoStyle = $this->OnceEchoStyle?null:$this->OnceEchoStyle;
             if($this->AllowDefaultStyles) $this->EchoStyle();
-            if(isValid($this->Style)){
-                $st = $this->Style->Get();
-                if(isValid($st)) echo "<style>.".$this->Name."{ $st }</style>";
-            }
-            echo Convert::ToString($this->Styles);
+            if(!isEmpty($this->Styles))
+				echo join(PHP_EOL,["<style>",Convert::ToString($this->Styles),"</style>"]);
         }
 		$this->EchoOpenTag();
 		$this->Echo();
 		$this->EchoCloseTag();
 		if($this->OnceEchoScript !== null){
 			$this->OnceEchoScript = $this->OnceEchoScript?null:$this->OnceEchoScript;
-            echo Convert::ToString($this->Scripts);
+            if(!isEmpty($this->Scripts))
+				echo join(PHP_EOL,["<script>", Convert::ToString($this->Scripts),"</script>"]);
             if($this->AllowDefaultScripts) $this->EchoScript();
         }
 		$this->PostDraw();

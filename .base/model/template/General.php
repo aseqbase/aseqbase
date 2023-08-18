@@ -103,6 +103,8 @@ class General extends Template{
 					<?php echo \MiMFa\Library\Style::UniversalProperty("filter","grayscale(100)"); ?>;
 				}
 				.btn, .btn:visited{
+					display: inline-grid;
+					align-items: center;
 					background-color: var(--BackColor-1);
 					color: var(--ForeColor-1);
 					border-color: var(--BackColor-1);

@@ -172,6 +172,12 @@ abstract class ConfigurationBase extends Base {
      */
 	public $AllowSigning = true;
 	/**
+     * The minimum group of banned user
+     * @var int
+     * @category Security
+     */
+    public $BanAccess = -1;
+	/**
      * Default accessibility for the guests
      * @var int
      * @category Security
@@ -183,6 +189,18 @@ abstract class ConfigurationBase extends Base {
      * @category Security
      */
     public $UserAccess = 1;
+	/**
+     * The minimum group of administrators
+     * @var int
+     * @category Security
+     */
+    public $AdminAccess = 5;
+	/**
+     * The maximum group of administrators
+     * @var int
+     * @category Security
+     */
+    public $SuperAccess = 9;
 	/**
      * Minimum accessibility needs to visit the website
      * @var int
