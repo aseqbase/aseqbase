@@ -1,6 +1,7 @@
 <?php
 namespace MiMFa\Template;
 use MiMFa\Library\Convert;
+use MiMFa\Library\HTML;
 /**
  * Pre-designed layouts that allow you to arrange content onto a web page to quickly create a well-designed website.
  *
@@ -97,6 +98,28 @@ class Template extends \Base{
 		</title>
 		<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??\_::$INFO->LogoPath); ?>" />
 	<?php
+        echo HTML::Style("
+        .tooltip {
+            font-family: inherit;
+            font-size: var(--Size-0);
+            font-weight: lighter;
+            max-width: 70vw;
+            min-width: 120px;
+            width: max-content;
+            background-color: var(--ForeColor-0);
+            color: var(--BackColor-0);
+            border: var(--Border-1);
+            border-radius: var(--Radius-1);
+            box-shadow: var(--Shadow-4);
+            padding: 9px 9px;
+            transition: var(--Transition-0);
+            z-index: -999;
+        }
+        *:hover>.tooltip {
+            opacity: 1;
+            transition: var(--Transition-1) 2s;
+            z-index: 999;
+        }");
     }
 	public function DrawMain(){
         REGION("main");

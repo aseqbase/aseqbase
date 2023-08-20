@@ -14,12 +14,12 @@ class Convert{
      * @return string
      */
 	public static function ToExcerpt($text,$from = 0,$maxlength = 100,$excerptedSign = "...", $reverse = false){
-        if (isValid($text)) return $text;
+        if (!isValid($text)) return $text;
         $text = trim(self::ToText($text));
 		$len = strlen($text);
         if ($len - $from <= $maxlength) return $text;
-        if($reverse) return $excerptedSign.substr($text, max(0,$len - $from - ($maxlength - count($excerptedSign))));
-        else return substr($text,$from, $maxlength - count($excerptedSign)).$excerptedSign;
+        if($reverse) return $excerptedSign.substr($text, max(0,$len - $from - ($maxlength - strlen($excerptedSign))));
+        else return substr($text,$from, $maxlength - strlen($excerptedSign)).$excerptedSign;
 	}
 
 	/**
@@ -51,16 +51,18 @@ class Convert{
 	 * @param mixed $value
 	 * @return string
 	 */
-	public static function ToString($value, $separator = PHP_EOL){
+	public static function ToString($value, $separator = PHP_EOL, $spacer = "\t", $assignFormat = "{0}:{\t{1}}"){
 		if(!is_null($value)){
 			if(is_string($value)) return $value;
-			if(is_subclass_of($value,"Base")) return $value->ToString();
+			if(is_subclass_of($value,"\Base")) return $value->ToString();
 			if(is_countable($value) || is_iterable($value)){
 				$texts = array();
 				foreach ($value as $key => $val){
-                    $item = self::ToString($val, $separator);
+                    $item = self::ToString($val, $separator, $spacer);
 					if(is_numeric($key)) array_push($texts, $item);
-					else {
+					elseif(is_countable($val) || is_iterable($val))
+                        array_push($texts, str_replace(["{0}","{1}"],[$key,$item],$assignFormat));
+                    else{
                         $sp;
                         if(str_contains($item,'"')){
                             if(str_contains($item,"'")){
@@ -70,12 +72,12 @@ class Convert{
                             else $sp = "'";
                         }
                         else $sp ='"';
-                        array_push($texts, "$key=$sp$item$sp");
+                        array_push($texts, "$key:$sp$item$sp");
                     }
                 }
                 return join($separator,$texts);
             }
-			if(is_callable($value)) return self::ToString(($value)(), $separator);
+			if(is_callable($value)) return self::ToString($value(), $separator, $spacer);
             return $value."";
         }
 		return "";
@@ -125,7 +127,8 @@ class Convert{
 	public static function ToIteration(...$arguments){
         foreach ($arguments as $key=>$val){
 			if(is_countable($val) || is_iterable($val))
-                yield from call_user_func_array("self::ToIteration",$val);
+                if(is_array($val)) yield from call_user_func_array("self::ToIteration", $val);
+                else yield from call_user_func_array("self::ToIteration", iterator_to_array($val));
             else yield $key=>$val;
         }
     }
@@ -164,8 +167,9 @@ class Convert{
                 return (strlen( $a ) == strlen( $b ))?0:(( strlen( $a ) < strlen( $b ) )?1:-1);
             });
         }
-        foreach ($additionalKeys as $key => $value)
-            $text = str_replace($key, $value??"", $text);
+        $text = str_replace(array_keys($additionalKeys), array_values($additionalKeys), $text);
+        //foreach ($additionalKeys as $key => $value)
+        //    $text = str_replace($key, $value??"", $text);
 		return $text;
 	}
 }

@@ -1,5 +1,4 @@
 <?php
-use MiMFa\Library\Convert;
 /**
  *Guide for Documentations
  *
@@ -34,6 +33,11 @@ class Base{
      * @medium
      */
 	public $Children = null;
+	/**
+     * This object is convertable to string and able to embedd anywhere or not
+     * @var bool|null
+     */
+	public $Capturable = null;
 
 	function __construct(){
 		$this->Set_Defaults();
@@ -61,19 +65,18 @@ class Base{
 		return end($v);
 	}
 
-
 	public function AddChild($child){
 		if(is_null($this->Children)) $this->Children = array();
-		if(!is_null($child)) $child = is_subclass_of($child,"Base")? function()use($child){ $child->ToString(); }:$child;
-		if(is_string($this->Children)) $this->Children .= Convert::ToString($child);
+		//if(!is_null($child)) $child = is_subclass_of($child,"Base")? function()use($child){ $child->ToString(); }:$child;
+		if(is_string($this->Children)) $this->Children .= MiMFa\Library\Convert::ToString($child);
 		else array_push($this->Children, $child);
         return true;
     }
 	public function RemoveChild($child){
 		if(is_null($this->Children)) $this->Children = array();
-		if(!is_null($child)) $child = is_subclass_of($child,"Base")? function() use($child){ $child->ToString(); }:$child;
+		//if(!is_null($child)) $child = is_subclass_of($child,"Base")? function() use($child){ $child->ToString(); }:$child;
 		if(is_string($this->Children)){
-            $this->Children = str_replace(Convert::ToString($child),"",$this->Children);
+            $this->Children = str_replace(MiMFa\Library\Convert::ToString($child),"",$this->Children);
             return true;
         }else{
             $key = array_search($child, $this->Children);
@@ -84,34 +87,49 @@ class Base{
         }
 		return false;
     }
-	public function ToStrings(){
-        yield Convert::ToString($this->Children);
+
+	public function Get(){
+		return MiMFa\Library\Convert::ToString($this->Children);
     }
+
+	public function Capture(){
+		return $this->Get();
+    }
+
+
 	public function ToString(){
-		return join("", iterator_to_array($this->ToStrings()));
+		return $this->Capturable?$this->Capture():$this->Draw();
     }
+	public function __toString(){
+		return $this->Capturable?$this->Capture():$this->Draw();
+    }
+
 
 	/**
 	 * Echo all the HTML document and elements of the Object
 	 */
 	public function Echo(){
-		echo $this->ToString();
+		echo $this->Get();
     }
 
+	/**
+     * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
+     */
+	public function Draw(){
+        if($this->Capturable) echo $this->Capture();
+		else{
+            $this->PreDraw();
+            $this->Echo();
+            $this->PostDraw();
+        }
+		return "";
+    }
 	/**
      * Echo whole the Document contains Elements, Styles, Scripts, etc. completely, as a new Object.
      */
 	public function NewDraw(){
 		$this->Set_Defaults();
 		$this->Draw();
-    }
-	/**
-     * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
-     */
-	public function Draw(){
-		$this->PreDraw();
-		$this->Echo();
-		$this->PostDraw();
     }
 	/**
      * Echo in the Draw function before everything.

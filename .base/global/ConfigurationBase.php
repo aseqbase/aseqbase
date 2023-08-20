@@ -239,6 +239,37 @@ abstract class ConfigurationBase extends Base {
 	public $RestrictionViewName = "restriction";
 
 	/**
+     * Acceptable image formats
+     * @var array<string>
+     * @category Security
+     */
+    public $AcceptableImageFormats = [".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg"];
+	/**
+     * Acceptable audio formats
+     * @var array<string>
+     * @category Security
+     */
+    public $AcceptableAudioFormats = [".wav",".mp3",".aac",".amr",".ogg",".flac",".wma",".m4a"];
+	/**
+     * Acceptable video formats
+     * @var array<string>
+     * @category Security
+     */
+    public $AcceptableVideoFormats = [".mpg",".mpeg", ".mp4",".avi",".mkv",".mov",".wmv",".flv",".webm"];
+	/**
+     * Acceptable document formats
+     * @var array<string>
+     * @category Security
+     */
+    public $AcceptableDocumentFormats = [".txt", ".rtf", ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".sls", ".slx", ".csv", ".tsv"];
+	/**
+     * Acceptable document formats
+     * @var array<string>
+     * @category Security
+     */
+    public $AcceptableFileFormats = [".zip", ".rar"];
+
+	/**
      * 0: Not show Errors; 1: To show Errors
 	 * @var int|null
      * @category Debug
@@ -306,7 +337,7 @@ abstract class ConfigurationBase extends Base {
      */
 	public $DataBasePrefix = 'qb_';
     /**
-     * Add the websie name to the selected DataBasePrefix for strongest privacy
+     * Add the website name to the selected DataBasePrefix for strongest privacy
      * @var string
      * @category DataBase
      */

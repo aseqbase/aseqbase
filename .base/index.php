@@ -1,6 +1,7 @@
 <?php //MiMFa aseqbase	http://aseqbase.ir
 require_once(__DIR__."/initialize.php");
-if(ACCESS(\_::$CONFIG->VisitAccess, assign:false, die:true)){
+if("/".\_::$DIRECTION == MiMFa\Library\User::$InHandlerPath ||
+	ACCESS(\_::$CONFIG->VisitAccess, assign:true, die:true)){
 	if(isValid(\_::$REQUEST)){
         $request = ltrim(\_::$REQUEST," \r\n\t\v\0\f\\/");
 		foreach (\_::$CONFIG->Handlers as $pat=>$handler)

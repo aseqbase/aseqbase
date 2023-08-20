@@ -3,6 +3,11 @@ namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 class Player extends Module{
+	/**
+     * This object is convertable to string and able to embedd anywhere or not
+     * @var bool|null
+     */
+	public $Capturable = true;
 	public $Content = null;
 	public $Source = null;
 	public $AllowZoom = true;
@@ -34,10 +39,9 @@ class Player extends Module{
 		return $this;
     }
 
-	public function EchoStyle(){
-		parent::EchoStyle();?>
-		<style>
-			.<?php echo $this->Name; ?>>.controls{
+	public function GetStyle(){
+		return HTML::Style("
+			.{$this->Name}>.controls{
 				opacity: 0;
 				position: absolute;
 				top: 3px;
@@ -45,75 +49,75 @@ class Player extends Module{
 				font-size: var(--Size-1);
 				color: var(--ForeColor-3);
 				z-index: 1;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("text-stroke","1px var(--BackColor-3)"); ?>;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("text-stroke","1px var(--BackColor-3)")."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>>.controls>.button {
+			.{$this->Name}>.controls>.button {
 				text-align: center;
 				display: inline;
 				padding: 1vh;
 				cursor: pointer;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>>.controls>.button:hover {
+			.{$this->Name}>.controls>.button:hover {
 				background-color: var(--BackColor-3);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("text-stroke","0px"); ?>;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("text-stroke","0px")."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
-			.<?php echo $this->Name; ?>:hover>.controls{
+			.{$this->Name}:hover>.controls{
 				opacity: 1;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
-			.<?php echo $this->Name; ?>>.content {
-				<?php echo \MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("width", $this->Width); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("height", $this->Height); ?>
+			.{$this->Name}>.content {
+				".\MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth)."
+				".\MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight)."
+				".\MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth)."
+				".\MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight)."
+				".\MiMFa\Library\Style::DoProperty("width", $this->Width)."
+				".\MiMFa\Library\Style::DoProperty("height", $this->Height)."
 				padding: 0px;
 				position: relative;
 				text-align: center;
 				overflow:auto;
 			}
-			
-			.<?php echo $this->Name; ?>>.content::-webkit-scrollbar {
+
+			.{$this->Name}>.content::-webkit-scrollbar {
 				background: var(--BackColor-3);
 				width: 0px;
 				height: 0px;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>:hover>.content::-webkit-scrollbar {
+			.{$this->Name}:hover>.content::-webkit-scrollbar {
 				width: 5px;
 				height: 5px;
 			}
-			.<?php echo $this->Name; ?>>.content::-webkit-scrollbar:hover {
+			.{$this->Name}>.content::-webkit-scrollbar:hover {
 				//background: var(--BackColor-1);
 				width: 10px;
 				height: 10px;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>>.content::-webkit-scrollbar-track {
+			.{$this->Name}>.content::-webkit-scrollbar-track {
 				border-radius: 1px;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>>.content::-webkit-scrollbar-track:hover {
+			.{$this->Name}>.content::-webkit-scrollbar-track:hover {
 				border-radius: 0px;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>>.content::-webkit-scrollbar-thumb {
-				background: var(--ForeColor-3); 
+			.{$this->Name}>.content::-webkit-scrollbar-thumb {
+				background: var(--ForeColor-3);
 				border-radius: 5px;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>>.content::-webkit-scrollbar-thumb:hover {
+			.{$this->Name}>.content::-webkit-scrollbar-thumb:hover {
 				background: var(--ForeColor-1);
-				<?php if($this->AllowZoom) ?> cursor: grab;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".($this->AllowZoom?"cursor: grab;":"")."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>>.content>* {
+			.{$this->Name}>.content>* {
 				min-width: auto;
 				width: auto;
 				height: 100%;
@@ -126,26 +130,24 @@ class Player extends Module{
 				bottom: auto;
 				z-index: 0;
 			}
-
-		</style>
-		<?php
+		");
 	}
 
-	public function Echo(){
-		$this->EchoElements($this->Content, $this->Source);
+	public function Get(){
+		return Convert::ToString($this->GetElements($this->Content, $this->Source));
 	}
 
-	public function EchoElements($content = null, $source = null){
-		$this->Source = $source??$this->Source;
-		$this->Content = $content??$this->Content;
-		echo "<div class=\"controls\">";
-		echo Convert::ToString($this->PrependControls);
-		foreach($this->GetControls() as $btn) echo $btn;
-		echo Convert::ToString($this->AppendControls);
-		echo "</div>";
-		echo self::ToElement($this->Source);
-		echo $this->GetContent($this->Content);
-	}
+	public function GetElements($content = null, $source = null){
+        $this->Source = $source??$this->Source;
+        $this->Content = $content??$this->Content;
+        yield "<div class=\"controls\">";
+        yield Convert::ToString($this->PrependControls);
+        foreach($this->GetControls() as $btn) yield $btn;
+        yield Convert::ToString($this->AppendControls);
+        yield "</div>";
+        yield self::ToElement($this->Source);
+        yield $this->GetContents($this->Content);
+    }
 	public function ToElement($source){
 		return join("\r\n",iterator_to_array(self::ToElements($source)));
 	}
@@ -165,64 +167,61 @@ class Player extends Module{
 		yield "</div>";
 	}
 
-	public function EchoScript(){
-		parent::EchoScript();?>
-		<script>
-		<?php if($this->AllowZoom){ ?>
-			let <?php echo $this->Name; ?>slider = null;
-			let <?php echo $this->Name; ?>mouseDown = false;
-			let <?php echo $this->Name; ?>startX, <?php echo $this->Name; ?>scrollLeft;
-			let <?php echo $this->Name; ?>startY, <?php echo $this->Name; ?>scrollTop;
+	public function GetScript(){
+		return HTML::Script(($this->AllowZoom?"
+			let {$this->Name}slider = null;
+			let {$this->Name}mouseDown = false;
+			let {$this->Name}startX, {$this->Name}scrollLeft;
+			let {$this->Name}startY, {$this->Name}scrollTop;
 
-			let <?php echo $this->Name; ?>startDragging = function (e) {
-				<?php echo $this->Name; ?>mouseDown = true;
-				<?php echo $this->Name; ?>startX = e.pageX - <?php echo $this->Name; ?>slider.offsetLeft;
-				<?php echo $this->Name; ?>startY = e.pageY - <?php echo $this->Name; ?>slider.offsetTop;
-				<?php echo $this->Name; ?>scrollLeft = <?php echo $this->Name; ?>slider.scrollLeft;
-				<?php echo $this->Name; ?>scrollTop = <?php echo $this->Name; ?>slider.scrollTop;
+			let {$this->Name}startDragging = function (e) {
+				{$this->Name}mouseDown = true;
+				{$this->Name}startX = e.pageX - {$this->Name}slider.offsetLeft;
+				{$this->Name}startY = e.pageY - {$this->Name}slider.offsetTop;
+				{$this->Name}scrollLeft = {$this->Name}slider.scrollLeft;
+				{$this->Name}scrollTop = {$this->Name}slider.scrollTop;
 			};
-			let <?php echo $this->Name; ?>stopDragging = function (event) {
-				<?php echo $this->Name; ?>slider.style.cursor = "grab";
-				<?php echo $this->Name; ?>mouseDown = false;
+			let {$this->Name}stopDragging = function (event) {
+				{$this->Name}slider.style.cursor = 'grab';
+				{$this->Name}mouseDown = false;
 			};
 			$(document).ready(
 				function(){
-					<?php echo $this->Name; ?>slider = document.querySelector('.<?php echo $this->Name; ?>>.content');
+					{$this->Name}slider = document.querySelector('.{$this->Name}>.content');
 
-					<?php echo $this->Name; ?>slider.addEventListener('mousemove', (e) => {
+					{$this->Name}slider.addEventListener('mousemove', (e) => {
 						e.preventDefault();
-						if(!<?php echo $this->Name; ?>mouseDown) { return; }
-						<?php echo $this->Name; ?>slider.style.cursor = "grabbing";
-						const x = e.pageX - <?php echo $this->Name; ?>slider.offsetLeft;
-						const y = e.pageY - <?php echo $this->Name; ?>slider.offsetTop;
-						const scrollx = x - <?php echo $this->Name; ?>startX;
-						const scrolly = y - <?php echo $this->Name; ?>startY;
-						<?php echo $this->Name; ?>slider.scrollLeft = <?php echo $this->Name; ?>scrollLeft - scrollx;
-						<?php echo $this->Name; ?>slider.scrollTop = <?php echo $this->Name; ?>scrollTop - scrolly;
+						if(!{$this->Name}mouseDown) { return; }
+						{$this->Name}slider.style.cursor = 'grabbing';
+						const x = e.pageX - {$this->Name}slider.offsetLeft;
+						const y = e.pageY - {$this->Name}slider.offsetTop;
+						const scrollx = x - {$this->Name}startX;
+						const scrolly = y - {$this->Name}startY;
+						{$this->Name}slider.scrollLeft = {$this->Name}scrollLeft - scrollx;
+						{$this->Name}slider.scrollTop = {$this->Name}scrollTop - scrolly;
 					});
 
 					// Add the event listeners
-					<?php echo $this->Name; ?>slider.addEventListener('mousedown', <?php echo $this->Name; ?>startDragging, false);
-					<?php echo $this->Name; ?>slider.addEventListener('mouseup', <?php echo $this->Name; ?>stopDragging, false);
-					<?php echo $this->Name; ?>slider.addEventListener('mouseleave', <?php echo $this->Name; ?>stopDragging, false);
+					{$this->Name}slider.addEventListener('mousedown', {$this->Name}startDragging, false);
+					{$this->Name}slider.addEventListener('mouseup', {$this->Name}stopDragging, false);
+					{$this->Name}slider.addEventListener('mouseleave', {$this->Name}stopDragging, false);
 				}
 			);
-		<?php } ?>
+		":"")."
+			let {$this->Name}_Source = ".(isValid($this->Source)?("`".$this->Source."`"):"null")."
 
-			let <?php echo $this->Name; ?>_Source = <?php echo isValid($this->Source)?("`".$this->Source."`"):"null"; ?>;
-
-			function <?php echo $this->Name; ?>_Set(content, source = null){
-				<?php echo $this->Name; ?>_Source = source??<?php echo $this->Name; ?>_Source??content;
-				if(content !== null) $('.<?php echo $this->Name; ?>>.content').html(<?php echo $this->ContentScript("content"); ?>);
+			function {$this->Name}_Set(content, source = null){
+				{$this->Name}_Source = source??{$this->Name}_Source??content;
+				if(content !== null) $('.{$this->Name}>.content').html(".$this->ContentScript("content").");
 			}
-			function <?php echo $this->Name; ?>_Clear(){
-				$('.<?php echo $this->Name; ?>>.content').html('');
+			function {$this->Name}_Clear(){
+				$('.{$this->Name}>.content').html('');
 			}
-			function <?php echo $this->Name; ?>_Focus(){
-				$('.<?php echo $this->Name; ?>>.controls').toggle(<?php echo \_::$TEMPLATE->AnimationSpeed; ?>);
+			function {$this->Name}_Focus(){
+				$('.{$this->Name}>.controls').toggle(".\_::$TEMPLATE->AnimationSpeed.");
 			}
-			function <?php echo $this->Name; ?>_Reset(){
-				let box = document.querySelector('.<?php echo $this->Name; ?>>.content>*');
+			function {$this->Name}_Reset(){
+				let box = document.querySelector('.{$this->Name}>.content>*');
 				box.style.width = null;
 				box.style.height = null;
 				box.style.left = null;
@@ -230,42 +229,41 @@ class Player extends Module{
 				zoomX = 0;
 			}
 			let zoomX = 0;
-			function <?php echo $this->Name; ?>_Zoom(){
-				if(zoomX > 0) <?php echo $this->Name; ?>_Reset();
-				else <?php echo $this->Name; ?>_ZoomIn(2);
+			function {$this->Name}_Zoom(){
+				if(zoomX > 0) {$this->Name}_Reset();
+				else {$this->Name}_ZoomIn(2);
 			}
-			function <?php echo $this->Name; ?>_ZoomIn(x = 1){
-				let box = document.querySelector('.<?php echo $this->Name; ?>>.content>*');
+			function {$this->Name}_ZoomIn(x = 1){
+				let box = document.querySelector('.{$this->Name}>.content>*');
 				let width = box.offsetWidth;
 				let height = box.offsetHeight;
-				box.style.width = (width*(x*1.2))+"px";
-				box.style.height = (height*(x*1.2))+"px";
+				box.style.width = (width*(x*1.2))+'px';
+				box.style.height = (height*(x*1.2))+'px';
 				box.parentElement.scrollLeft += width*1.1;
 				box.parentElement.scrollTop += height*1.1;
 				zoomX+=x;
 			}
-			function <?php echo $this->Name; ?>_ZoomOut(x = 1){
-				let box = document.querySelector('.<?php echo $this->Name; ?>>.content>*');
+			function {$this->Name}_ZoomOut(x = 1){
+				let box = document.querySelector('.{$this->Name}>.content>*');
 				let width = box.offsetWidth;
 				let height = box.offsetHeight;
-				box.style.width = (width/(x*1.2))+"px";
-				box.style.height = (height/(x*1.2))+"px";
+				box.style.width = (width/(x*1.2))+'px';
+				box.style.height = (height/(x*1.2))+'px';
 				box.parentElement.scrollLeft -= width*1.1;
 				box.parentElement.scrollTop -= height*1.1;
 				zoomX-=x;
 			}
-			function <?php echo $this->Name; ?>_Download(){
-				open(<?php echo $this->Name; ?>_Source, "_blank");
+			function {$this->Name}_Download(){
+				open({$this->Name}_Source, '_blank');
 			}
-			function <?php echo $this->Name; ?>_Share(){
-				share(<?php echo $this->Name; ?>_Source);
+			function {$this->Name}_Share(){
+				share({$this->Name}_Source);
 			}
-		</script>
-		<?php
+		");
 	}
 
-	public function GetContent($content){
-		if(isValid($content)) return "<div class=\"content\" ondblclick=\"".$this->FocusScript()."\">".$content."</div>";
+	public function GetContents($content){
+		if(isValid($content)) return "<div class='content' ondblclick=\"".$this->FocusScript()."\">".$content."</div>";
 		return null;
     }
 	public function GetControls(){

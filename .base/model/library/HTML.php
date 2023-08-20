@@ -23,7 +23,7 @@ class HTML
      * @return string
      */
     public static function Element($content = null, $tagName = null, ...$attributes) {
-        $isSingle = !is_null($content) && is_array($tagName);
+        $isSingle = !is_null($content) && is_string($content) && is_array($tagName);
         if ($isSingle) {
             $attributes = $tagName;
             $tagName = $content;
@@ -42,7 +42,7 @@ class HTML
                 foreach(Convert::ToIteration($attributes) as $key=>$value)
                     if(isEmpty($key) || is_integer($key))
                         if(isEmpty($value)) continue;
-                        else $attrdic[$value] = null;
+                    else $attrdic[$value] = null;
                     else {
                         $key = trim(strtolower($key));
                         if($key == "id") $id = $value;
@@ -159,7 +159,7 @@ $attachments"]);
                     ],
                     "head"
                     ),
-                    self::Element($content, "body", ["class"=>"document"], $attributes)
+                    self::Element($content??"", "body", ["class"=>"document"], $attributes)
                 ],
                 "html"
             );
@@ -190,7 +190,7 @@ $attachments"]);
         return $srci;
     }
     public static function Style($content, $source = null, ...$attributes){
-        if (is_null($source)) $srci = self::Element($content, "style", $attributes);
+        if (is_null($source)) $srci = self::Element($content??"", "style", $attributes);
         else $srci = self::Element(null,"link", [ "rel"=> "stylesheet", "href"=> $source ], $attributes);
         //array_push(self::$Sources, $srci);
         return $srci;
@@ -219,7 +219,10 @@ $attachments"]);
      * @return string
      */
     public static function Video($content, $source = null, ...$attributes){
-        if(!isValid($source)) $source = $content;
+        if(!isValid($source)) {
+            $source = $content;
+            $content = null;
+        }
         if(!isValid($source)) return null;
         $srcs = [];
         if(is_array($source)) foreach ($source as $key=>$value)
@@ -236,7 +239,10 @@ $attachments"]);
      * @return string
      */
     public static function Audio($content, $source = null, ...$attributes){
-        if(!isValid($source)) $source = $content;
+        if(!isValid($source)) {
+            $source = $content;
+            $content = null;
+        }
         if(!isValid($source)) return null;
         $srcs = [];
         if(is_array($source)) foreach ($source as $key=>$value)
@@ -254,8 +260,11 @@ $attachments"]);
      * @return string
      */
     public static function Image($content, $source = null, ...$attributes){
-        if(!isValid($source)) $source = $content;
-        elseif(is_array($source) && count($attributes)==0){
+        if(!isValid($source)){
+            $source = $content;
+            $content = null;
+        }
+        elseif(is_array($source) && count($attributes) === 0){
             $attributes = Convert::ToIteration($source, $attributes);
             $source = $content;
             $content = null;
@@ -274,8 +283,11 @@ $attachments"]);
      * @return string
      */
     public static function Media($content, $source = null, ...$attributes){
-        if(!isValid($source)) $source = $content;
-        elseif(is_array($source) && count($attributes)==0){
+        if(!isValid($source)) {
+            $source = $content;
+            $content = null;
+        }
+        elseif(is_array($source) && count($attributes) === 0){
             $attributes = Convert::ToIteration($source, $attributes);
             $source = $content;
             $content = null;
@@ -283,7 +295,7 @@ $attachments"]);
         if(!isValid($source)) return null;
         if(isIdentifier($source))
             return self::Element("", "i", [ "class"=>"media fa fa-".strtolower($source)], $attributes);
-        else return self::Element($content??"","div", [ "style"=> "background-image: url('$source'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
+        else return self::Element(__($content??""),"div", [ "style"=> "background-image: url('$source'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
     }
     /**
      * The <IFRAME> HTML Tag
@@ -294,15 +306,18 @@ $attachments"]);
      * @return string
      */
     public static function Embed($content, $source = null, ...$attributes){
-        if(!isValid($source)) $source = $content;
-        elseif(is_array($source) && count($attributes)==0){
+        if(!isValid($source)) {
+            $source = $content;
+            $content = null;
+        }
+        elseif(is_array($source) && count($attributes) === 0){
             $attributes = Convert::ToIteration($source, $attributes);
             $source = $content;
             $content = null;
         }
         if(isUrl($source))
-            return self::Element($content, "iframe", [ "src"=> $source, "class"=> "embed" ], $attributes);
-        return self::Element($content, "iframe", [ "srcdoc"=>str_replace("\"", "&quot;", Convert::ToString($source)), "class"=> "embed" ], $attributes);
+            return self::Element($content??"", "iframe", [ "src"=> $source, "class"=> "embed" ], $attributes);
+        return self::Element($content??"", "iframe", [ "srcdoc"=>str_replace("\"", "&quot;", Convert::ToString($source)), "class"=> "embed" ], $attributes);
     }
     /**
      * The <IFRAME> HTML Tag devided in a page
@@ -407,7 +422,7 @@ $attachments"]);
      */
     public static function ExternalHeading($content, $reference = null, ...$attributes){
         if(!is_null($reference))
-            if(is_array($reference) && count($attributes)==0){
+            if(is_array($reference) && count($attributes) === 0){
                 $attributes = Convert::ToIteration($reference, $attributes);
                 $reference = null;
             }
@@ -425,7 +440,7 @@ $attachments"]);
      */
     public static function SuperHeading($content, $reference = null, ...$attributes){
         if(!is_null($reference))
-            if(is_array($reference) && count($attributes)==0){
+            if(is_array($reference) && count($attributes) === 0){
                 $attributes = Convert::ToIteration($reference, $attributes);
                 $reference = null;
             }
@@ -443,7 +458,7 @@ $attachments"]);
      */
     public static function Heading($content, $reference = null, ...$attributes){
         if(!is_null($reference))
-            if(is_array($reference) && count($attributes)==0){
+            if(is_array($reference) && count($attributes) === 0){
                 $attributes = Convert::ToIteration($reference, $attributes);
                 $reference = null;
             }
@@ -461,7 +476,7 @@ $attachments"]);
      */
     public static function SubHeading($content, $reference = null, ...$attributes){
         if(!is_null($reference))
-            if(is_array($reference) && count($attributes)==0){
+            if(is_array($reference) && count($attributes) === 0){
                 $attributes = Convert::ToIteration($reference, $attributes);
                 $reference = null;
             }
@@ -479,7 +494,7 @@ $attachments"]);
      */
     public static function InternalHeading($content, $reference = null, ...$attributes){
         if(!is_null($reference))
-            if(is_array($reference) && count($attributes)==0){
+            if(is_array($reference) && count($attributes) === 0){
                 $attributes = Convert::ToIteration($reference, $attributes);
                 $reference = null;
             }
@@ -498,7 +513,7 @@ $attachments"]);
      */
     public static function Paragraph($content, $reference = null, ...$attributes){
         if(!is_null($reference))
-            if(is_array($reference) && count($attributes)==0){
+            if(is_array($reference) && count($attributes) === 0){
                 $attributes = Convert::ToIteration($reference, $attributes);
                 $reference = null;
             }
@@ -516,7 +531,7 @@ $attachments"]);
      */
     public static function Span($content, $reference = null, ...$attributes){
         if(!is_null($reference))
-            if(is_array($reference) && count($attributes)==0){
+            if(is_array($reference) && count($attributes) === 0){
                 $attributes = Convert::ToIteration($reference, $attributes);
                 $reference = null;
             }
@@ -524,6 +539,15 @@ $attachments"]);
                 self::Element(__($content),"span",["class"=> "span" ], $attributes)
                 , $reference);
         return self::Element(__($content),"span",["class"=> "span" ], $attributes);
+    }
+    /**
+     * The <SPAN> HTML Tag
+     * @param mixed $content The in tag tooltip
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Tooltip($content, ...$attributes){
+        return self::Element(__($content),"span",["class"=> "tooltip" ], $attributes);
     }
 
     /**
@@ -535,8 +559,11 @@ $attachments"]);
      * @return string
      */
     public static function Link($content, $reference = null, ...$attributes){
-        if(!isValid($reference)) $reference = $content;
-        elseif(is_array($reference) && count($attributes)==0){
+        if(!isValid($reference)) {
+            $reference = $content;
+            $content = null;
+        }
+        elseif(is_array($reference) && count($attributes) === 0){
             $attributes = Convert::ToIteration($reference, $attributes);
             $reference = $content;
             $content = null;

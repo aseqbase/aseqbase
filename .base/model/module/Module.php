@@ -164,8 +164,8 @@ class Module extends \Base{
      */
 	public $AllowTranslate = true;
 
-	public $OnceEchoStyle = false;
-	public $OnceEchoScript = false;
+	public $OneTimeStyle = false;
+	public $OneTimeScript = false;
 
 	public function __construct(){
         parent::__construct();
@@ -176,17 +176,33 @@ class Module extends \Base{
      * @param string|null The specific TagName, set null for default
      */
 	public function EchoOpenTag($tag=null){
+        echo $this->GetOpenTag($tag);
+    }
+	/**
+     * Get the Open tag of the element
+     * @param string|null The specific TagName, set null for default
+     */
+	public function GetOpenTag($tag=null){
 		$st = null;
 		if(isValid($this->Style)) $st = $this->Style->Get();
-		if(isValid($tag??$this->Tag)) echo join("",["<",($tag??$this->Tag??"div")," ",$this->GetDefaultAttributes(), isValid($st)?" style=\"{$st}\"":"",">"]);
-		elseif(isValid($st)) echo "<style>.{$this->Name}{ $st }</style>";
+		if(isValid($tag??$this->Tag)) return join("",["<",($tag??$this->Tag??"div")," ",$this->GetDefaultAttributes(), isValid($st)?" style=\"{$st}\"":"",">"]);
+		elseif(isValid($st)) return "<style>.{$this->Name}{ $st }</style>";
+        return null;
     }
 	/**
      * Echo the Close tag of the element
      * @param string|null The specific TagName, set null for default
-	 */
+     */
 	public function EchoCloseTag($tag=null){
-		if(isValid($tag??$this->Tag)) echo "</".($tag??$this->Tag??"div").">";
+		echo $this->GetCloseTag($tag);
+	}
+	/**
+     * Get the Close tag of the element
+     * @param string|null The specific TagName, set null for default
+     */
+	public function GetCloseTag($tag=null){
+		if(isValid($tag??$this->Tag)) return "</".($tag??$this->Tag??"div").">";
+        return null;
 	}
 
 	/**
@@ -216,131 +232,212 @@ class Module extends \Base{
 
 	/**
      * Echo the default module Styles
-	 */
+     */
 	public function EchoStyle(){
-        return true;
+        echo $this->GetStyle();
+    }
+	/**
+     * Get the default module Styles
+     */
+	public function GetStyle(){
+        return null;
     }
 
 	/**
      * Echo the default module Scripts
      */
 	public function EchoScript(){
-        return true;
+        echo $this->GetScript();
+    }
+	/**
+     * Get the default module Scripts
+     */
+	public function GetScript(){
+        return null;
+    }
+
+	public function EchoTitle($attrs = null){
+		echo $b = $this->GetTitle($attrs);
+        return $b != "";
+    }
+	public function GetTitle($attrs = null){
+		return Convert::ToString(function()use($attrs){
+			if(isValid($this->Title)){
+				yield (isValid($this->TitleTag)?"<".$this->TitleTag." $attrs>":"");
+				if(is_string($this->Title))
+					yield __($this->Title);
+				elseif(is_callable($this->Title))
+					($this->Title)($attrs);
+				else yield $this->Title;
+				yield (isValid($this->TitleTag)?"</".$this->TitleTag.">":"");
+			}
+        });
+    }
+	public function EchoDescription($attrs = null){
+		echo $b = $this->GetDescription($attrs);
+        return $b != "";
+    }
+	public function GetDescription($attrs = null){
+		return Convert::ToString(function()use($attrs){
+			if(isValid($this->Description)){
+				yield (isValid($this->DescriptionTag)?"<".$this->DescriptionTag." $attrs>":"");
+				if(is_string($this->Description))
+					yield __($this->Description);
+				elseif(is_callable($this->Description))
+					($this->Description)($attrs);
+				else yield $this->Description;
+				yield (isValid($this->DescriptionTag)?"</".$this->DescriptionTag.">":"");
+			}
+        });
+    }
+	public function EchoContent($attrs = null){
+		echo $b = $this->GetContent($attrs);
+        return $b != "";
+    }
+    public function GetContent($attrs = null){
+		return Convert::ToString(function()use($attrs){
+            if(isValid($this->Content)){
+                yield (isValid($this->ContentTag)?"<".$this->ContentTag." $attrs>":"");
+                if(is_string($this->Content))
+                    yield __($this->Content);
+                elseif(is_callable($this->Content))
+                    ($this->Content)($attrs);
+                else yield $this->Content;
+                yield (isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
+            }
+            yield Convert::ToString($this->Children);
+        });
+    }
+
+	public function ToString(){
+		return $this->Capturable?$this->Capture():$this->Draw();
     }
 
 	/**
-	 * Echo all the HTML document and elements of the Module
-	 */
-	public function Echo(){
-		$this->EchoTitle();
-		$this->EchoDescription();
-		$this->EchoContent();
-        return true;
+     * Get all the HTML document and elements of the Module
+     * @return string
+     */
+	public function Get(){
+		return join("",[$this->GetTitle(),$this->GetDescription(),$this->GetContent()]);
 	}
 
-	public function EchoTitle($attrs = null){
-		if(isValid($this->Title)){
-			echo (isValid($this->TitleTag)?"<".$this->TitleTag." $attrs>":"");
-			if(is_string($this->Title))
-				echo __($this->Title);
-			elseif(is_callable($this->Title))
-				($this->Title)($attrs);
-			else echo $this->Title;
-			echo (isValid($this->TitleTag)?"</".$this->TitleTag.">":"");
-            return true;
-        }
-        return false;
+	/**
+     * Capture and return whole the Document contains Elements, Styles, Scripts, etc. completely.
+     * @return string
+     */
+    public function Capture(){
+		return Convert::ToString(function(){
+            $translate = \_::$CONFIG->AllowTranslate;
+            $analyze = \_::$CONFIG->AllowTextAnalyzing;
+            \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
+            \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
+            //$this->PreDraw();
+            if($this->OneTimeStyle !== null){
+                $this->OneTimeStyle = $this->OneTimeStyle?null:$this->OneTimeStyle;
+                if($this->AllowDefaultStyles) yield $this->GetStyle();
+                if(!isEmpty($this->Styles))
+                    yield join(PHP_EOL,["<style>",Convert::ToString($this->Styles),"</style>"]);
+            }
+            yield $this->GetOpenTag();
+            yield $this->Get();
+            yield $this->GetCloseTag();
+            if($this->OneTimeScript !== null){
+                $this->OneTimeScript = $this->OneTimeScript?null:$this->OneTimeScript;
+                if(!isEmpty($this->Scripts))
+                    yield join(PHP_EOL,["<script>", Convert::ToString($this->Scripts),"</script>"]);
+                if($this->AllowDefaultScripts) yield $this->GetScript();
+            }
+            //$this->PostDraw();
+            \_::$CONFIG->AllowTranslate = $translate;
+            \_::$CONFIG->AllowTextAnalyzing = $analyze;
+        });
     }
-	public function EchoDescription($attrs = null){
-		if(isValid($this->Description)){
-			echo (isValid($this->DescriptionTag)?"<".$this->DescriptionTag." $attrs>":"");
-			if(is_string($this->Description))
-				echo __($this->Description);
-			elseif(is_callable($this->Description))
-				($this->Description)($attrs);
-			else echo $this->Description;
-			echo (isValid($this->DescriptionTag)?"</".$this->DescriptionTag.">":"");
-            return true;
-        }
-        return false;
+	/**
+     * Capture and return whole the Document contains Elements except Styles and Scripts.
+     * @return string
+     */
+    public function ReCapture(){
+		return Convert::ToString(function(){
+            $translate = \_::$CONFIG->AllowTranslate;
+            $analyze = \_::$CONFIG->AllowTextAnalyzing;
+            \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
+            \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
+            //$this->PreDraw();
+            yield $this->GetOpenTag();
+            yield $this->Get();
+            yield $this->GetCloseTag();
+            //$this->PostDraw();
+            \_::$CONFIG->AllowTranslate = $translate;
+            \_::$CONFIG->AllowTextAnalyzing = $analyze;
+        });
     }
-	public function EchoContent($attrs = null){
-		$b = false;
-		if(isValid($this->Content)){
-			echo (isValid($this->ContentTag)?"<".$this->ContentTag." $attrs>":"");
-			if(is_string($this->Content))
-				echo __($this->Content);
-			elseif(is_callable($this->Content))
-				($this->Content)($attrs);
-			else echo $this->Content;
-            echo (isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
-            $b = true;
+
+	/**
+     * Echo all the HTML document and elements of the Module
+     * @return bool
+     */
+	public function Echo(){
+        $b = true;
+        if($this->Capturable) echo $this->Get();
+        else{
+            $b = $this->EchoTitle() && $b;
+            $b = $this->EchoDescription() && $b;
+            $b = $this->EchoContent() && $b;
         }
-        echo parent::ToString();
         return $b;
-    }
-
-    public function ToString(){ return $this->Draw(); }
-
-    //public function ToStrings(){
-    //    if(isValid($this->Title))
-    //        yield (isValid($this->TitleTag)?"<".$this->TitleTag.">":"")
-    //            .__(Convert::ToString($this->Title))
-    //            .(isValid($this->TitleTag)?"</".$this->TitleTag.">":"");
-    //    if(isValid($this->Description))
-    //        yield (isValid($this->DescriptionTag)?"<".$this->DescriptionTag.">":"")
-    //            .__(Convert::ToString($this->Description))
-    //            .(isValid($this->DescriptionTag)?"</".$this->DescriptionTag.">":"");
-    //    if(isValid($this->Content))
-    //        yield (isValid($this->ContentTag)?"<".$this->ContentTag.">":"")
-    //            .__(Convert::ToString($this->Content))
-    //            .(isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
-    //    yield from parent::ToStrings();
-    //}
+	}
 
 	/**
      * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
      */
 	public function Draw(){
-		$translate = \_::$CONFIG->AllowTranslate;
-		$analyze = \_::$CONFIG->AllowTextAnalyzing;
-		\_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
-		\_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-		$this->PreDraw();
-		if($this->OnceEchoStyle !== null){
-			$this->OnceEchoStyle = $this->OnceEchoStyle?null:$this->OnceEchoStyle;
-            if($this->AllowDefaultStyles) $this->EchoStyle();
-            if(!isEmpty($this->Styles))
-				echo join(PHP_EOL,["<style>",Convert::ToString($this->Styles),"</style>"]);
+        if($this->Capturable) echo $this->Capture();
+        else{
+            $translate = \_::$CONFIG->AllowTranslate;
+            $analyze = \_::$CONFIG->AllowTextAnalyzing;
+            \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
+            \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
+            $this->PreDraw();
+            if($this->OneTimeStyle !== null){
+                $this->OneTimeStyle = $this->OneTimeStyle?null:$this->OneTimeStyle;
+                if($this->AllowDefaultStyles) $this->EchoStyle();
+                if(!isEmpty($this->Styles))
+                    echo join(PHP_EOL,["<style>",Convert::ToString($this->Styles),"</style>"]);
+            }
+            $this->EchoOpenTag();
+            $this->Echo();
+            $this->EchoCloseTag();
+            if($this->OneTimeScript !== null){
+                $this->OneTimeScript = $this->OneTimeScript?null:$this->OneTimeScript;
+                if(!isEmpty($this->Scripts))
+                    echo join(PHP_EOL,["<script>", Convert::ToString($this->Scripts),"</script>"]);
+                if($this->AllowDefaultScripts) $this->EchoScript();
+            }
+            $this->PostDraw();
+            \_::$CONFIG->AllowTranslate = $translate;
+            \_::$CONFIG->AllowTextAnalyzing = $analyze;
         }
-		$this->EchoOpenTag();
-		$this->Echo();
-		$this->EchoCloseTag();
-		if($this->OnceEchoScript !== null){
-			$this->OnceEchoScript = $this->OnceEchoScript?null:$this->OnceEchoScript;
-            if(!isEmpty($this->Scripts))
-				echo join(PHP_EOL,["<script>", Convert::ToString($this->Scripts),"</script>"]);
-            if($this->AllowDefaultScripts) $this->EchoScript();
-        }
-		$this->PostDraw();
-		\_::$CONFIG->AllowTranslate = $translate;
-		\_::$CONFIG->AllowTextAnalyzing = $analyze;
+        return "";
 	}
 	/**
      * Echo whole the Document contains Elements except Styles and Scripts.
      */
 	public function ReDraw(){
-		$translate = \_::$CONFIG->AllowTranslate;
-		$analyze = \_::$CONFIG->AllowTextAnalyzing;
-		\_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
-		\_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-		$this->PreDraw();
-		$this->EchoOpenTag();
-		$this->Echo();
-		$this->EchoCloseTag();
-		$this->PostDraw();
-		\_::$CONFIG->AllowTranslate = $translate;
-		\_::$CONFIG->AllowTextAnalyzing = $analyze;
+        if($this->Capturable) echo $this->ReCapture();
+        else{
+            $translate = \_::$CONFIG->AllowTranslate;
+            $analyze = \_::$CONFIG->AllowTextAnalyzing;
+            \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
+            \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
+            $this->PreDraw();
+            $this->EchoOpenTag();
+            $this->Echo();
+            $this->EchoCloseTag();
+            $this->PostDraw();
+            \_::$CONFIG->AllowTranslate = $translate;
+            \_::$CONFIG->AllowTextAnalyzing = $analyze;
+        }
+        return "";
 	}
 
 	/**

@@ -304,25 +304,34 @@
 	 * @return bool The client has accessibility bigger than $minaccess or not
 	 * @return int|mixed The user accessibility group
 	 */
-	function ACCESS($minaccess = 0, bool $assign = true, bool|string|int|null $die = true):mixed{
+	function ACCESS($minaccess = 0, bool|string $assign = true, bool|string|int|null $die = true):mixed{
 		if(isValid(\_::$CONFIG->StatusMode)) {
-			if($assign) VIEW(\_::$CONFIG->StatusMode,$_REQUEST)??VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_REQUEST);
-            if($die !== false) die($die);
+			if($assign){
+				if(is_string($assign)) go($assign);
+				else VIEW(\_::$CONFIG->StatusMode,$_REQUEST)??VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_REQUEST);
+            }
+			if($die !== false) die($die);
 			return false;
-		}
+        }
 		elseif(isValid(\_::$CONFIG->AccessMode)) {
 			$ip = getClientIP();
 			$cip = false;
 			foreach(\_::$CONFIG->AccessPatterns as $pat) if($cip = preg_match($pat, $ip)) break;
 			if((\_::$CONFIG->AccessMode > 0 && !$cip) || (\_::$CONFIG->AccessMode < 0 && $cip)){
-				if($assign) VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_REQUEST)??VIEW("401",$_REQUEST);
-                if($die !== false) die($die);
+				if($assign){
+                    if(is_string($assign)) go($assign);
+                    else VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_REQUEST)??VIEW("401",$_REQUEST);
+                }
+				if($die !== false) die($die);
 				return false;
 			}
 		}
 		$b = getAccess($minaccess);
 		if($b !== false) return $b;
-		if($assign) go(\MiMFa\Library\User::$InHandlerPath);
+		if($assign){
+            if(is_string($assign)) go($assign);
+            else go(\MiMFa\Library\User::$InHandlerPath);
+        }
         if($die !== false) die($die);
 		return $b;
 	}
@@ -981,13 +990,25 @@
      * @param array<string> $formats
      * @return string|bool
      */
-	function isFormat(string|null $path, string ...$formats){
+	function isFormat(string|null $path, string|array ...$formats){
 		$p = getPath(strtolower($path));
 		foreach ($formats as $format)
-			if(endsWith($p, strtolower($format))) return $format;
+			if(is_countable($format)){
+                foreach ($format as $forma)
+					if($forma = isFormat($p, $forma)) return $forma;
+			} elseif(endsWith($p, strtolower($format))) return $format;
 		return false;
-	}
+    }
 
+	/**
+     * Check if the string is a relative or absolute file URL
+     * @param null|string $url The url string
+     * @return bool
+     */
+	function isFile(string|null $url, string ...$formats):bool{
+		if(count($formats) == 0) array_push($formats, \_::$CONFIG->AcceptableFileFormats, \_::$CONFIG->AcceptableDocumentFormats, \_::$CONFIG->AcceptableImageFormats, \_::$CONFIG->AcceptableAudioFormats, \_::$CONFIG->AcceptableVideoFormats);
+		return isUrl($url) && isFormat($url, $formats);
+	}
 	/**
 	 * Check if the string is a relative or absolute URL
 	 * @param null|string $url The url string

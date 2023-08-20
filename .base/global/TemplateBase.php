@@ -106,9 +106,21 @@
 						if(!isEmpty(data)) $(selector).append(typeof(data) == 'object'?data.statusText:data);
 					};
 
+					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
 					actionPath = actionPath??location.href;
 					timeout = timeout??30000;
-					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
+					contentType = false;
+					switch(typeof(requestData)){
+						case 'object':
+							if(!requestData instanceof(FormData)){
+								contentType = 'application/json; charset=utf-8';
+								requestData = JSON.stringify(requestData);
+							}
+						break;
+						default:
+							contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+						break;
+					}
 
 					return $.ajax({
 						type: methodName,
@@ -136,12 +148,12 @@
 						},
 						async: true,
 						cache: false,
-						contentType: false,
+						contentType: contentType,
 						processData: false,
 						timeout: timeout
 					});
 				};
-				const getData = function( actionPath = null, requestData = null, selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null) {
+				const getData = function(actionPath = null, requestData = null, selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null) {
 						return transitData('GET', actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
 				};
 				const postData = function(actionPath = null, requestData = null, selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null) {

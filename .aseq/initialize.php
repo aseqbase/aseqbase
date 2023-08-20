@@ -1,6 +1,10 @@
 <?php
+/*
+ * Change the value, to the current subdomains sequence (like [my-subdomain-name])
+ * or if this file is in the root address, leave null for that
+ */
 $dirs = explode("/", __DIR__);
-$GLOBALS["ASEQ"] = end($dirs);
+$GLOBALS["ASEQ"] = end($dirs);//join(".", array_slice($dirs,3));/*Change it to null if the file is in the root directory*/
 $GLOBALS["BASE"] = ".base";
 
 $GLOBALS["NEST"] = !empty($GLOBALS["ASEQ"])?preg_match_all("/(?<=\S|\s)\.(?=\S|\s)/",$ASEQ)+1:0;

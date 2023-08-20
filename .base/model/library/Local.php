@@ -210,9 +210,9 @@ class Local{
 	}
 
 
-    public static function GetForceImage($path="/file/image/image.png", $probableFormat = [".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg"]){
+    public static function GetForceImage($path="/file/image/image.png", array $extensions = null){
 		$filepath = self::GetPath(preg_replace("/\.[^\.\\/\\\]+$/","",$path));
-		foreach ($probableFormat as $format)
+		foreach ($extensions??\_::$CONFIG->AcceptableImageFormats as $format)
             if(file_exists(self::GetUrl("$filepath$format"))) return self::GetUrl("$filepath$format");
         return $filepath;
 	}
@@ -233,7 +233,7 @@ class Local{
      * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file url, else return null
 	 */
-	public static function UploadFile($fileobject, $destdir=null, $minSize=10000, $maxSize=500000000, $extensions=[]){
+	public static function UploadFile($fileobject, $destdir=null, $minSize=10000, $maxSize=500000000, array $extensions){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
 		if(!isValid($destdir)) $destdir = \_::$PUBLIC_DIR;
@@ -244,7 +244,7 @@ class Local{
 
 		// Allow certain file formats
 		$allow = true;
-		foreach($extensions as $ext) if($allow = $fileType === $ext || ".".$fileType === $ext) break;
+		foreach($extensions??\_::$CONFIG->AcceptableFileFormats as $ext) if($allow = $fileType === $ext || ".".$fileType === $ext) break;
 		if(!$allow) throw new \Exception("The file format is not acceptable!");
 
 		// Check file size
@@ -265,13 +265,13 @@ class Local{
      * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
      * @return string Return the uploaded image url, else return null
      */
-	public static function UploadImage($fileobject, $destdir, $minSize=10000, $maxSize=500000000,$extensions=[".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg"]){
+	public static function UploadImage($fileobject, $destdir, $minSize=10000, $maxSize=500000000,array $extensions=null){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
 
 		// Check if image file is an actual image or fake image
 		if(getimagesize($fileobject["tmp_name"]) === false) throw new \Exception("The image file is not an actual image!");
-		return self::UploadFile($fileobject, $destdir,$minSize, $maxSize, $extensions);
+		return self::UploadFile($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableImageFormats);
 	}
 }
 
