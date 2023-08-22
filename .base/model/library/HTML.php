@@ -22,7 +22,7 @@ class HTML
      * @param array|string|null $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Element($content = null, $tagName = null, ...$attributes) {
+    public static function Element($content = null, array|string|null $tagName = null, ...$attributes) {
         $isSingle = !is_null($content) && is_string($content) && is_array($tagName);
         if ($isSingle) {
             $attributes = $tagName;

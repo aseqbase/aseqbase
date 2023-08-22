@@ -153,15 +153,15 @@ class Player extends Module{
 	}
 	public function ToElements($source){
 		yield "<div class=\"content\">";
-		if(isValid($this->Source))
-			if(is_array($this->Source))
+		if(isValid($source))
+			if(is_array($source))
 				foreach ($source as $value)
 				    yield from self::ToElements($value);
-			elseif(isFormat($this->Source,".mpg",".mpeg", ".mp4",".avi",".mkv",".mov",".wmv",".flv",".webm"))
+			elseif(isFormat($source,".mpg",".mpeg", ".mp4",".avi",".mkv",".mov",".wmv",".flv",".webm"))
 				yield HTML::Video(null,$source, "controls");
-			elseif(isFormat($this->Source,".wav",".mp3",".aac",".amr",".ogg",".flac",".wma",".m4a"))
+			elseif(isFormat($source,".wav",".mp3",".aac",".amr",".ogg",".flac",".wma",".m4a"))
 				yield HTML::Audio($source, "controls");
-			elseif(isFormat($this->Source,".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg", ".webp"))
+			elseif(isFormat($source,".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg", ".webp"))
 				yield HTML::Image($source);
 			else yield HTML::Embed($source);
 		yield "</div>";

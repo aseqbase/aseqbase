@@ -2,7 +2,13 @@
 namespace MiMFa\Module;
 use MiMFa\Library\User;
 use MiMFa\Library\HTML;
+use MiMFa\Library\Convert;
 class UserMenu extends Module{
+	/**
+     * This object is convertable to string and able to embedd anywhere or not
+     * @var bool|null
+     */
+	public $Capturable = true;
 	public $Items = null;
 	public $AllowLabels = false;
 	public $AllowAnimate = true;
@@ -15,30 +21,29 @@ class UserMenu extends Module{
 		$this->Path = User::$InHandlerPath;
     }
 
-	public function EchoStyle(){
-		parent::EchoStyle();?>
-		<style>
-			.<?php echo $this->Name; ?>{
+	public function GetStyle(){
+		return parent::GetStyle().HTML::Style("
+			.{$this->Name}{
 				aspect-ratio: 1;
 			}
-			.<?php echo $this->Name; ?> .menu{
+			.{$this->Name} .menu{
 				aspect-ratio: 1;
 				max-height: inherit;
 				padding: 3px;
 				display: flex;
 				align-items: center;
 			}
-			.<?php echo $this->Name; ?> .menu>*{
+			.{$this->Name} .menu>*{
                 padding: 0px var(--Size-0);
 				aspect-ratio: 1;
 				border-radius: 100%;
 				align-items: center;
 			}
-			.<?php echo $this->Name; ?> .menu>i{
+			.{$this->Name} .menu>i{
 				display: flex;
 			}
 
-			.<?php echo $this->Name; ?> .submenu{
+			.{$this->Name} .submenu{
 				display: none;
 				position: absolute;
 				top: calc(100% - var(--Size-0)/2);
@@ -46,7 +51,7 @@ class UserMenu extends Module{
 				right: 0;
 				color: var(--ForeColor-2);
 				background-color: var(--BackColor-1);
-				min-width: 160px;
+				min-width: 300px;
 				max-width: 90vw;
 				max-height: 70vh;
 				width: max-content;
@@ -56,29 +61,27 @@ class UserMenu extends Module{
 				overflow-y: auto;
 				text-align: initial;
 				z-index: 1;
-            	<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+            	".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> .submenu .bio>*{
+			.{$this->Name} .submenu .bio>*{
             	font-size: 80%;
 				opacity: 0.8;
 				width: min-content;
 				min-width: 100%;
 				padding: 5px var(--Size-1);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("word-wrap","break-word"); ?>
+				".\MiMFa\Library\Style::UniversalProperty("word-wrap","break-word")."
 			}
-			.<?php echo $this->Name; ?> .submenu .btn{
+			.{$this->Name} .submenu .btn{
             	width: 100%;
             	text-align: initial;
             	padding: 5px var(--Size-1);
 			}
-			.<?php echo $this->Name; ?>:hover .submenu{
+			.{$this->Name}:hover .submenu{
             	display: grid;
 			}
-		</style>
-		<?php
+		");
 	}
-	public function Echo(){
-		parent::Echo();
+	public function Get(){
 		if($this->Items == null){
 			$acc = getAccess();
 			if($acc < \_::$CONFIG->UserAccess)
@@ -89,7 +92,7 @@ class UserMenu extends Module{
 			else
 				$this->Items = array(
 					array("Name"=>getValid(\_::$INFO->User,"Name","Profile"), "Path"=>User::$ViewHandlerPath),
-					array("Name"=>getValid(\_::$INFO->User,"Bio","New User")),
+					array("Name"=>Convert::ToExcerpt(getValid(\_::$INFO->User,"Bio", null)??getValid(\_::$INFO->User->GetValue("Bio"), null, "New User..."))),
 					array("Name"=>"Dashboard", "Path"=>User::$DashboardHandlerPath),
 					array("Name"=>"Edit Profile", "Path"=>User::$EditHandlerPath),
 					array("Name"=>"Sign Out", "Path"=>User::$OutHandlerPath)
@@ -97,8 +100,8 @@ class UserMenu extends Module{
         }
 		$count = count($this->Items);
 		if($count > 0){
-            echo HTML::Icon(getValid(\_::$INFO->User,"Image","user"), $this->Path,["class"=>"menu"]);
-			echo HTML::Division(function(){
+            return HTML::Icon(getValid(\_::$INFO->User,"Image","user"), $this->Path,["class"=>"menu"]).
+				HTML::Division(function(){
 				foreach($this->Items as $item)
                     if(isValid($item,'Path'))
 						yield HTML::Link(
@@ -112,8 +115,9 @@ class UserMenu extends Module{
 							null,
 							["class"=>"bio"],
 							getValid($item,"Attributes"));
-            },["class"=>"submenu"]);
+            },["class"=>"submenu"]).$this->GetContent();
 		}
+		return parent::Get();
 	}
 }
 ?>

@@ -22,10 +22,14 @@ class Local{
      * @return mixed
      */
 	public static function GetUrl($path){
-		if(!isValid($path) || isAbsoluteUrl($path)) return $path;
-		if(startsWith($path, \_::$DIR)) return \_::$ROOT.substr($path,strlen(\_::$DIR));
-		if(startsWith($path, \_::$BASE_DIR)) return \_::$BASE_ROOT.substr($path,strlen(\_::$BASE_DIR));
-		if(!startsWith($path, "/")) $path = "/".\_::$DIRECTION."/".$path;
+		if((!isValid($path)) || isAbsoluteUrl($path)) return $path;
+		if(startsWith($path, \_::$DIR)) return \_::$ROOT.substr($path, strlen(\_::$DIR));
+		if(startsWith($path, \_::$BASE_DIR)) return \_::$BASE_ROOT.substr($path, strlen(\_::$BASE_DIR));
+		if(!startsWith($path, "/")){
+			$dirs = explode("/", \_::$DIRECTION);
+			$dirs = implode("/", array_slice($dirs, 0, count($dirs) - 1));
+			if(strlen($dirs) !== 0) $path = "$dirs/$path";
+        }
 		$p = ltrim(getRelative($path), "/\\");
 		if(file_exists(\_::$DIR.$p)) return \_::$ROOT.$p;
 		if(count(\_::$SEQUENCES) > 0){

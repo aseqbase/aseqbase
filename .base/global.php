@@ -1015,7 +1015,7 @@
 	 * @return bool
 	 */
 	function isUrl(string|null $url):bool{
-		return !empty($url) && preg_match("/^(\w+\:[\/]*)?(\/?[^\/\{\}\|^\[\]\"`\s]){1,}$/",$url);
+		return (!empty($url)) && preg_match("/^(\w+\:[\/]*)?(\/?[^\/\{\}\|^\[\]\"`\r\n\t\f]){1,}$/",$url);
 	}
 	/**
 	 * Check if the string is only a relative URL
@@ -1023,7 +1023,7 @@
 	 * @return bool
 	 */
 	function isRelativeUrl(string|null $url):bool{
-		return !empty($url) && preg_match("/^(\/?[^\/\{\}\|^\[\]\"`\s]){1,}$/",$url);
+		return (!empty($url)) && preg_match("/^(\/?[^\/\{\}\|\^\[\]\"\`\r\n\t\f]){1,}$/",$url);
 	}
 	/**
 	 * Check if the string is only an absolute URL
@@ -1031,7 +1031,7 @@
      * @return bool
      */
 	function isAbsoluteUrl(string|null $url):bool{
-		return !empty($url) && preg_match("/^\w+\:[\/]*(\/?[^\/\{\}\|^\[\]\"`\s]){1,}$/",$url);
+		return (!empty($url)) && preg_match("/^\w+\:\/*(\/?[^\/\{\}\|^\[\]\"\`\r\n\t\f]){1,}$/",$url);
 	}
 
 	/**

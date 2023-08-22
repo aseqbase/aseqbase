@@ -317,7 +317,8 @@ class Field extends Module{
                         if(isFile($this->Value)) $type = "file";
 						else $type = "url";
                     }
-                    elseif(strlen($this->Value)>100||count(explode("\r\n\t\f\0",$this->Value))>1) $type = "strings";
+                    elseif(strlen($this->Value)>100 || count(explode("\r\n\t\f\0",$this->Value))>1)
+						$type = "strings";
                     else $type = "string";
                 }else $type = strtolower(gettype($this->Value));
             }

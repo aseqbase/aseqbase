@@ -134,14 +134,28 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return $person;
 	}
 	public function Get($signature = null, $password = null){
-		$person = $this->Find($signature, $password);
-		return getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","*","`ID`=:ID",[":ID"=>$person["ID"]]),0);
+        if(is_null($id =$this->ID) || !is_null($signature)) $id = $this->Find($signature, $password)["ID"];
+		return getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","*","`ID`=:ID",[":ID"=>$id]),0);
     }
 	public function Set($fieldsDictionary, $signature = null, $password = null){
-		$person = $this->Find($signature, $password);
-		if(getValid($fieldsDictionary, "Email", getValid($person,"Email"))!=getValid($person,"Email"))
+        $id = $this->ID;
+        $email = $this->Email;
+		if(!is_null($signature) || is_null($id) || is_null($email)) {
+			$person = $this->Find($signature, $password);
+            $id = $person["ID"];
+            $email = $person["Email"];
+        }
+		if(getValid($fieldsDictionary, "Email", $email)!=$email)
 			$fieldsDictionary["Status"] = self::$InitialStatus;
-		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='{$person["ID"]}'",$fieldsDictionary);
+		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='$id'",$fieldsDictionary);
+    }
+	public function GetValue($key, $signature = null, $password = null){
+        if(is_null($id =$this->ID) || !is_null($signature)) $id = $this->Find($signature, $password)["ID"];
+		return DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."User",$key,"`ID`=:ID",[":ID"=>$id]);
+    }
+	public function SetValue($key, $value, $signature = null, $password = null){
+        if(is_null($id =$this->ID) || !is_null($signature)) $id = $this->Find($signature, $password)["ID"];
+		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='$id'",[$key => $value]);
     }
 
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){
@@ -189,14 +203,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return !self::Access(\_::$CONFIG->UserAccess);
 	}
 
-	public function ResetPassword($signature, $password){
-		$password = $this->CheckPassword($password);
-		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User",
-			"`Signature`=:Signature",
-			[
-				":Signature"=>$signature,
-				":Password"=> $password
-			]);
+	public function ResetPassword($signature = null, $password = null){
+		return $this->SetValue("Password", $this->CheckPassword($password), $signature);
     }
 	public function CheckPassword($password){
 		if(preg_match(self::$PasswordPattern, $password)) return sha1($password);

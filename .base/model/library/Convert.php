@@ -13,13 +13,13 @@ class Convert{
      * @param string $text
      * @return string
      */
-	public static function ToExcerpt($text,$from = 0,$maxlength = 100,$excerptedSign = "...", $reverse = false){
+	public static function ToExcerpt($text, $from = 0, $maxlength = 100, $excerptedSign = "...", $reverse = false){
         if (!isValid($text)) return $text;
         $text = trim(self::ToText($text));
 		$len = strlen($text);
-        if ($len - $from <= $maxlength) return $text;
-        if($reverse) return $excerptedSign.substr($text, max(0,$len - $from - ($maxlength - strlen($excerptedSign))));
-        else return substr($text,$from, $maxlength - strlen($excerptedSign)).$excerptedSign;
+        if ($len <= $maxlength) return $text;
+        if($reverse) return $excerptedSign.substr($text, max(0,$len - $from - $maxlength), max(0,$maxlength - strlen($excerptedSign))).($from>strlen($excerptedSign)?$excerptedSign:"");
+        else return ($from>strlen($excerptedSign)?$excerptedSign:"").substr($text,$from, $maxlength - strlen($excerptedSign)).$excerptedSign;
 	}
 
 	/**
