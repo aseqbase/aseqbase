@@ -29,17 +29,18 @@ class UserMenu extends Module{
 			.{$this->Name} .menu{
 				aspect-ratio: 1;
 				max-height: inherit;
-				padding: 3px;
+				padding: 0px;
 				display: flex;
 				align-items: center;
 			}
 			.{$this->Name} .menu>*{
-                padding: 0px var(--Size-0);
+                padding: calc(var(--Size-0) * 0.75);
 				aspect-ratio: 1;
 				border-radius: 100%;
 				align-items: center;
 			}
 			.{$this->Name} .menu>i{
+                padding: calc(var(--Size-0) * 0.25);
 				display: flex;
 			}
 
