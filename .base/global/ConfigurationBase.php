@@ -239,6 +239,18 @@ abstract class ConfigurationBase extends Base {
 	public $RestrictionViewName = "restriction";
 
 	/**
+     * The minimum file size available to uploud
+     * @var int
+     * @category Security
+     */
+    public $MinimumFileSize = 1000;
+	/**
+     * The minimum file size available to uploud
+     * @var int
+     * @category Security
+     */
+    public $MaximumFileSize = 50000000;
+	/**
      * Acceptable image formats
      * @var array<string>
      * @category Security

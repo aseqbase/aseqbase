@@ -295,7 +295,7 @@ $attachments"]);
         if(!isValid($source)) return null;
         if(isIdentifier($source))
             return self::Element("", "i", [ "class"=>"media fa fa-".strtolower($source)], $attributes);
-        else return self::Element(__($content??""),"div", [ "style"=> "background-image: url('$source'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
+        else return self::Element(__($content??"", styling:false),"div", [ "style"=> "background-image: url('$source'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
     }
     /**
      * The <IFRAME> HTML Tag
@@ -410,7 +410,7 @@ $attachments"]);
      * @return string
      */
     public static function Center($content, ...$attributes){
-        return self::Element(__($content),"center",["class"=> "center" ], $attributes);
+        return self::Element(__($content, styling:false),"center",["class"=> "center" ], $attributes);
     }
 
     /**
@@ -536,9 +536,9 @@ $attachments"]);
                 $reference = null;
             }
             else return self::Link(
-                self::Element(__($content),"span",["class"=> "span" ], $attributes)
+                self::Element(__($content, styling:false),"span",["class"=> "span" ], $attributes)
                 , $reference);
-        return self::Element(__($content),"span",["class"=> "span" ], $attributes);
+        return self::Element(__($content, styling:false),"span",["class"=> "span" ], $attributes);
     }
     /**
      * The <SPAN> HTML Tag
@@ -547,7 +547,7 @@ $attachments"]);
      * @return string
      */
     public static function Tooltip($content, ...$attributes){
-        return self::Element(__($content),"span",["class"=> "tooltip" ], $attributes);
+        return self::Element(__($content, styling:false),"span",["class"=> "tooltip" ], $attributes);
     }
 
     /**
@@ -569,7 +569,7 @@ $attachments"]);
             $content = null;
         }
         if(!isValid($content)) $content = getDomain($reference);
-        return self::Element(__($content), "a", [ "href"=> $reference, "class"=> "link" ], $attributes);
+        return self::Element(__($content, styling:false), "a", [ "href"=> $reference, "class"=> "link" ], $attributes);
     }
     /**
      * The <BUTTON> or <A> HTML Tag
@@ -580,8 +580,8 @@ $attachments"]);
      */
     public static function Button($content, $reference = null, ...$attributes){
         if(isUrl($reference))
-            return self::Link($content, $reference,["class"=> "button btn" ], $attributes);
-        return self::Element(__($content),"button",["class"=> "button btn", "onclick"=>$reference], $attributes);
+            return self::Link(self::Element(__($content),"button",["class"=> "btn"], $attributes), $reference,["class"=> "button"], $attributes);
+        return self::Element(__($content, styling:false),"button",["class"=> "button btn", "onclick"=>$reference], $attributes);
     }
     /**
      * The <BUTTON> or <A> HTML Tag

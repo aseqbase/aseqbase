@@ -85,23 +85,18 @@ class General extends Template{
 					text-align: justify;
 				}
 
-				a {
+                :is(a, .button, .btn), :is(a, .button, .btn):is(:visited, :active) {
 					text-decoration: none;
 					color:var(--ForeColor-1);
 				}
-				a:visited {
-					color:var(--ForeColor-1);
+				:is(a, .button, .btn):deactive {
+					<?php echo \MiMFa\Library\Style::UniversalProperty("filter","grayscale(100)"); ?>;
 				}
-				a:hover {
+				:is(a, .button, .btn):hover {
+                	text-decoration: none;
 					color:var(--ForeColor-0);
 				}
 
-				a:active {
-					color:var(--ForeColor-1);
-				}
-				a:deactive {
-					<?php echo \MiMFa\Library\Style::UniversalProperty("filter","grayscale(100)"); ?>;
-				}
 				.btn, .btn:visited{
 					display: inline-grid;
 					align-items: center;

@@ -237,7 +237,7 @@ class Local{
      * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file url, else return null
 	 */
-	public static function UploadFile($fileobject, $destdir=null, $minSize=10000, $maxSize=500000000, array $extensions){
+	public static function UploadFile($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
 		if(!isValid($destdir)) $destdir = \_::$PUBLIC_DIR;
@@ -252,6 +252,8 @@ class Local{
 		if(!$allow) throw new \Exception("The file format is not acceptable!");
 
 		// Check file size
+		$minSize = $minSize??\_::$CONFIG->MinimumFileSize;
+		$maxSize = $maxSize??\_::$CONFIG->MaximumFileSize;
 		if($fileobject["size"]<$minSize) throw new \Exception("The file size is very small!");
 		elseif($fileobject["size"]>$maxSize) throw new \Exception("The file size is very big!");
 
@@ -269,7 +271,7 @@ class Local{
      * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
      * @return string Return the uploaded image url, else return null
      */
-	public static function UploadImage($fileobject, $destdir, $minSize=10000, $maxSize=500000000,array $extensions=null){
+	public static function UploadImage($fileobject, $destdir, $minSize=null, $maxSize=null,array $extensions=null){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
 
