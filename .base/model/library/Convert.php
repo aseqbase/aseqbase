@@ -51,7 +51,7 @@ class Convert{
 	 * @param mixed $value
 	 * @return string
 	 */
-	public static function ToString($value, $separator = PHP_EOL, $spacer = "\t", $assignFormat = "{0}:{\t{1}}"){
+	public static function ToString($value, $separator = PHP_EOL, $spacer = ":", $assignFormat = "{0}:{\t{1}},"){
 		if(!is_null($value)){
 			if(is_string($value)) return $value;
 			if(is_subclass_of($value,"\Base")) return $value->ToString();
@@ -72,7 +72,7 @@ class Convert{
                             else $sp = "'";
                         }
                         else $sp ='"';
-                        array_push($texts, "$key:$sp$item$sp");
+                        array_push($texts, "$key$spacer$sp$item$sp");
                     }
                 }
                 return join($separator,$texts);
@@ -88,8 +88,9 @@ class Convert{
      * @param string $text
      * @return string
      */
-	public static function ToName($text){
-        return preg_replace ('/\W/', "", ucwords($text??""));
+	public static function ToName($text, $normalize = false, $invalid = '/\W/'){
+        if(!($normalize || preg_match($invalid, $text))) return $text;
+        return preg_replace($invalid, "", ucwords($text??""));
 	}
 	/**
      * Convert a text to normal Title

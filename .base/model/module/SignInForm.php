@@ -5,18 +5,13 @@ use MiMFa\Library\Convert;
 use MiMFa\Library\User;
 MODULE("Form");
 class SignInForm extends Form{
+	public $Capturable = true;
 	public $Action = null;
 	public $Title = "Sign In";
 	public $Image = "sign-in";
 	public $SubmitLabel = "Sign In";
-	public $SignatureLabel = "
-		<span class='input-group-text bg-white px-4 border-md border-right-0'>
-			<i class='fa fa-sign-in text-muted'></i>
-		</span>";
-	public $PasswordLabel = "
-		<span class='input-group-text bg-white px-4 border-md border-right-0'>
-			<i class='fa fa-lock text-muted'></i>
-		</span>";
+	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
+	public $PasswordLabel = "<i class='fa fa-lock'></i>";
 	public $SignaturePlaceHolder = "Email/Phone/UserName";
 	public $PasswordPlaceHolder = "Password";
 	public $SignUpLabel = "Do not have an account?";
@@ -35,117 +30,81 @@ class SignInForm extends Form{
 		$this->SuccessPath = \_::$PATH;
 	}
 
-	public function EchoStyle(){
-		parent::EchoStyle();?>
-		<style>
-			.<?php echo $this->Name ?> .btn-facebook {
+	public function GetStyle(){
+		if($this->HasDecoration) return parent::GetStyle().HTML::Style("
+			.{$this->Name} .btn-facebook {
 				background-color: #405D9D55 !important;
 			}
 
-			.<?php echo $this->Name ?> .btn-twitter {
+			.{$this->Name} .btn-twitter {
 				background-color: #42AEEC55 !important;
 			}
 
-			.<?php echo $this->Name ?> .btn-linkedin {
+			.{$this->Name} .btn-linkedin {
 				background-color: #0e86a855 !important;
 			}
-		
-			.<?php echo $this->Name ?> .btn-facebook:hover {
+
+			.{$this->Name} .btn-facebook:hover {
 				background-color: #405D9D !important;
 			}
 
-			.<?php echo $this->Name ?> .btn-twitter:hover {
+			.{$this->Name} .btn-twitter:hover {
 				background-color: #42AEEC !important;
 			}
 
-			.<?php echo $this->Name ?> .btn-linkedin:hover {
+			.{$this->Name} .btn-linkedin:hover {
 				background-color: #0e86a8 !important;
 			}
-			.<?php echo $this->Name ?> div.welcome {
+			.{$this->Name} div.welcome {
 				text-align: center;
 			}
-			.<?php echo $this->Name ?> div.welcome img.welcome {
+			.{$this->Name} div.welcome img.welcome {
 				width: 50%;
 				max-width: 300px;
 				border-radius: 100%;
 				margin: var(--Size-1);
 			}
-			.<?php echo $this->Name ?> div.welcome p.welcome {
+			.{$this->Name} div.welcome p.welcome {
 				text-align: center;
 			}
-			
-		</style>
-		<?php
+		");
+		else return parent::GetStyle();
 	}
 
-	public function Echo(){
+	public function Get(){
 		if(getAccess(\_::$CONFIG->UserAccess) && !$this->MultipleSignIn){
-			$this->EchoHeader();
-			PART($this->WelcomePart);
-        } else parent::Echo();
+			return $this->GetHeader().PART($this->WelcomePart, print:false);
+        } else return parent::Get();
 	}
-	public function EchoHeader(){
+	public function GetHeader(){
         if(getAccess(\_::$CONFIG->UserAccess))
-			echo __(Convert::FromDynamicString($this->WelcomeFormat));
+			return __(Convert::FromDynamicString($this->WelcomeFormat));
     }
-	public function EchoFields(){
-        if($this->HasInternalMethod):?>
-			<div class="row">
-				<!-- Signature Address -->
-				<div class="input-group col-lg-12 mb-4">
-                    <label for="Signature" class="input-group-prepend">
-                        <?php echo $this->SignatureLabel; ?>
-                    </label>
-                    <input id="Signature" name="Signature" type="text" autocomplete="username"
-                        placeholder="<?php echo __($this->SignaturePlaceHolder);?>"
-                        aria-label="<?php echo __($this->SignaturePlaceHolder);?>"
-                        class="form-control bg-white border-left-0 border-md" />
-				</div>
-			</div>
-			<div class="row">
-				<!-- Password -->
-				<div class="input-group col-lg-12 mb-4">
-					<label for="Password" class="input-group-prepend">
-						<?php echo $this->PasswordLabel; ?>
-					</label>
-                    <input id="Password" name="Password" type="password" placeholder="<?php echo __($this->PasswordPlaceHolder);?>" aria-label="<?php echo __($this->PasswordPlaceHolder);?>" class="form-control bg-white border-left-0 border-md" />
-				</div>
-			</div>
-		<?php endif;
-		if($this->HasExternalMethod):?>
-			<!-- Divider Text -->
-			<div class="form-group col-lg-12 mx-auto d-flex align-items-center my-4">
-				<div class="border-bottom w-100 ml-5"></div>
-				<span class="px-2 small text-muted font-weight-bold text-muted"><?php echo __("OR"); ?></span>
-				<div class="border-bottom w-100 mr-5"></div>
-			</div>
-			<!-- Social Login -->
-			<div class="form-group col-lg-12 mx-auto">
-				<a href="#" class="btn btn-block py-2 btn-facebook">
-					<i class="fa fa-facebook-f mr-2"></i>
-					<span class="font-weight-bold"><?php echo __("Continue with Facebook");?></span>
-				</a>
-				<a href="#" class="btn btn-block py-2 btn-twitter">
-					<i class="fa fa-twitter mr-2"></i>
-					<span class="font-weight-bold"><?php echo __("Continue with Twitter");?></span>
-				</a>
-				<a href="#" class="btn btn-block py-2 btn-linkedin">
-					<i class="fa fa-linkedin mr-2"></i>
-					<span class="font-weight-bold"><?php echo __("Continue with LinkedIn");?></span>
-				</a>
-			</div>
-		<?php endif;
+	public function GetFields(){
+        if($this->HasInternalMethod){
+			yield HTML::Rack(
+				HTML::LargeSlot(
+					HTML::Label($this->SignatureLabel, "Signature", ["class"=>"prepend"]).
+					HTML::ValueInput("Signature", ["placeholder"=> $this->SignaturePlaceHolder])
+				, ["class"=>"field col", "autocomplete"=>"username"])
+			);
+			yield HTML::Rack(
+				HTML::LargeSlot(
+					HTML::Label($this->PasswordLabel, "Password", ["class"=>"prepend"]).
+					HTML::SecretInput("Password", ["placeholder"=> $this->PasswordPlaceHolder])
+				, ["class"=>"field col", "autocomplete"=>"password"])
+			);
+		}
     }
-	public function EchoFooter(){
-        ?>
-		<div class="col-lg-12 mx-auto align-items-center my-4">
-			<a class="text-muted font-weight-bold d-block" href="<?php echo User::$UpHandlerPath; ?>"><?php echo __($this->SignUpLabel);?></a>
-			<a class="text-muted font-weight-bold d-block" href="<?php echo User::$RecoverHandlerPath; ?>"><?php echo __($this->RememberLabel);?></a>
-		</div>
-		<?php
+	public function GetFooter(){
+        return parent::GetFooter().HTML::LargeSlot(
+			HTML::Link($this->SignUpLabel, User::$UpHandlerPath)
+			, ["class"=>"col-lg-12"]).HTML::LargeSlot(
+			HTML::Link($this->RememberLabel, User::$RecoverHandlerPath)
+			, ["class"=>"col-lg-12"]);
     }
 
-	public function Action(){
+	public function GetAction(){
 		$_req = $_REQUEST;
 		switch(strtolower($this->Method)){
             case "get":
@@ -161,15 +120,15 @@ class SignInForm extends Form{
 						\_::$INFO->User->SignInOrSignUp(getValid($_req,"Signature"), getValid($_req,"Password")):
 						\_::$INFO->User->SignIn(getValid($_req,"Signature"), getValid($_req,"Password"));
 				if($res === true)
-                	echo HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', you have logged in successfully");
+                	return HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', you have logged in successfully");
 				elseif($res === false)
-					echo HTML::Error("UserName or Password is not correct!");
+					return HTML::Error("UserName or Password is not correct!");
 				else
-					echo HTML::Error($res);
+					return HTML::Error($res);
 			}
-			else echo HTML::Warning("Please fill all fields correctly!");
-		} catch(\Exception $ex) { echo HTML::Error($ex); }
-		else echo HTML::Warning("You are logged in!");
+			else return HTML::Warning("Please fill all fields correctly!");
+		} catch(\Exception $ex) { return HTML::Error($ex); }
+		else return HTML::Warning("You are logged in!");
     }
 }
 ?>

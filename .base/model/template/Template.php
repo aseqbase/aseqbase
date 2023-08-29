@@ -90,15 +90,16 @@ class Template extends \Base{
 	}
 
 	public function DrawInitial(){
-        REGION("initial");?>
-		<title>
-            <?php
-            $title = $this->WindowTitle??[\_::$DIRECTION];
-            echo __(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$INFO->Name]]:$title),styling:false); ?>
-		</title>
-		<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??\_::$INFO->LogoPath); ?>" />
-	<?php
+        REGION("initial");
+        $title = $this->WindowTitle??[\_::$DIRECTION];
+        echo HTML::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$INFO->Name]]:$title));
+		echo HTML::Logo(getFullUrl($this->WindowLogo??\_::$INFO->LogoPath));
         echo HTML::Style("
+        head,style,script,link,meta,title{
+            display: none !important;
+            visible: hidden !important;
+            opacity: 0 !important;
+        }
         .tooltip {
             font-family: inherit;
             font-size: var(--Size-0);
@@ -115,11 +116,12 @@ class Template extends \Base{
             transition: var(--Transition-0);
             z-index: -999;
         }
-        *:hover>.tooltip {
+        :not(html,head,body,style,script,link,meta,title):hover>.tooltip {
             opacity: 1;
             transition: var(--Transition-1) 2s;
             z-index: 999;
-        }");
+        }
+        ");
     }
 	public function DrawMain(){
         REGION("main");

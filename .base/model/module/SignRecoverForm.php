@@ -3,22 +3,14 @@ namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 MODULE("Form");
 class SignRecoverForm extends Form{
+	public $Capturable = true;
 	public $Action = null;
 	public $Title = "Account Recovery";
 	public $Image = "undo-alt";
 	public $SubmitLabel = "Submit";
-	public $SignatureLabel = "
-		<span class='input-group-text bg-white px-4 border-md border-right-0'>
-			<i class='fa fa-sign-in text-muted'></i>
-		</span>";
-	public $PasswordLabel = "
-		<span class='input-group-text bg-white px-4 border-md border-right-0'>
-			<i class='fa fa-lock text-muted'></i>
-		</span>";
-	public $PasswordConfirmationLabel = "
-		<span class='input-group-text bg-white px-4 border-md border-right-0'>
-			<i class='fa fa-lock text-muted'></i>
-		</span>";
+	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
+	public $PasswordLabel = "<i class='fa fa-lock'></i>";
+	public $PasswordConfirmationLabel = "<i class='fa fa-lock'></i>";
 	public $SignaturePlaceHolder = "Email/Phone";
 	public $PasswordPlaceHolder = "Password";
 	public $PasswordConfirmationPlaceHolder = "Confirm Password";
@@ -29,62 +21,46 @@ class SignRecoverForm extends Form{
 		$this->SuccessPath = \MiMFa\Library\User::$InHandlerPath;
 	}
 
-	public function EchoFields(){
-		if(isValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey)):
-			echo '<input type="hidden" name="'.\MiMFa\Library\User::$RecoveryRequestKey.'" value="'.getValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey).'">';
-?>
-			<div class="row">
-				<!-- Password -->
-				<div class="input-group col-lg-12 mb-4">
-                    <label for="Password" class="input-group-prepend">
-                        <?php echo $this->PasswordLabel; ?>
-                    </label>
-                    <input id="Password" name="Password" type="password" placeholder="<?php echo __($this->PasswordPlaceHolder);?>" aria-label="<?php echo __($this->PasswordPlaceHolder);?>" class="form-control bg-white border-left-0 border-md" />
-				</div>
-
-				<!-- PasswordConfirmation -->
-				<div class="input-group col-lg-12 mb-4">
-					<label for="PasswordConfirmation" class="input-group-prepend">
-						<?php echo $this->PasswordConfirmationLabel; ?>
-					</label>
-                    <input id="PasswordConfirmation" name="PasswordConfirmation" type="password" placeholder="<?php echo __($this->PasswordConfirmationPlaceHolder);?>" aria-label="<?php echo __($this->PasswordConfirmationPlaceHolder);?>" class="form-control bg-white border-left-0 border-md" />
-				</div>
-			</div>
-			<?php
-		else:?>
-			<div class="row">
-				<!-- Signature Address -->
-				<div class="input-group col-lg-12 mb-4">
-					<label for="Signature" class="input-group-prepend">
-						<?php echo $this->SignatureLabel; ?>
-					</label>
-                    <input id="Signature" name="Signature" type="text" autocomplete="username"
-                        placeholder="<?php echo __($this->SignaturePlaceHolder);?>"
-                        aria-label="<?php echo __($this->SignaturePlaceHolder);?>"
-                        class="form-control bg-white border-left-0 border-md" />
-				</div>
-			</div>
-		<?php endif;
+	public function GetFields(){
+		if(isValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey)){
+			yield HTML::HiddenInput(\MiMFa\Library\User::$RecoveryRequestKey, getValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey));
+			yield HTML::Rack(
+				HTML::LargeSlot(
+					HTML::Label($this->PasswordLabel, "Password", ["class"=>"prepend"]).
+					HTML::SecretInput("Password", ["placeholder"=> $this->PasswordPlaceHolder])
+				, ["class"=>"field", "autocomplete"=>"password"])
+			);
+			yield HTML::Rack(
+				HTML::LargeSlot(
+					HTML::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=>"prepend"]).
+					HTML::SecretInput("PasswordConfirmation", ["placeholder"=> $this->PasswordConfirmationPlaceHolder])
+				, ["class"=>"field", "autocomplete"=>"password"])
+			);
+        }else{
+			yield HTML::Rack(
+				HTML::LargeSlot(
+					HTML::Label($this->SignatureLabel, "Signature", ["class"=>"prepend"]).
+					HTML::ValueInput("Signature", ["placeholder"=> $this->SignaturePlaceHolder])
+				, ["class"=>"field", "autocomplete"=>"username"])
+			);
+		}
     }
-	
-	public function EchoScript(){
-		?>
-		<script>
+
+	public function GetScript(){
+        return HTML::Script("
 			$(function () {
-                $(".<?php echo $this->Name ?> form").submit(function(e) {
-					if ($(".<?php echo $this->Name ?> form #PasswordConfirmation").val() == $(".<?php echo $this->Name ?> form #Password").val()) return true;
-					$(".<?php echo $this->Name ?> form result").remove();
-					$(".<?php echo $this->Name ?> form").append(Html.error("New password and confirm password does not match!"));
+                $('.{$this->Name} form').submit(function(e) {
+					if ($('.{$this->Name} form #PasswordConfirmation').val() == $('.{$this->Name} form #Password').val()) return true;
+					$('.{$this->Name} form result').remove();
+					$('.{$this->Name} form').append(Html.error('New password and confirm password does not match!'));
 					e.preventDefault();
 					return false;
                 });
 			});
-		</script>
-		<?php
-		parent::EchoScript();
+		").parent::GetScript();
     }
 
-	public function Action(){
+	public function GetAction(){
 		$_req = $_REQUEST;
 		switch(strtolower($this->Method)){
             case "get":
@@ -98,24 +74,24 @@ class SignRecoverForm extends Form{
 			if(isValid($_req,"Password") && isValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey)){
 				$res = \_::$INFO->User->ReceiveRecoveryLink();
 				if($res === true)
-                	echo HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', your password changed successfully!");
+                	return HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', your password changed successfully!");
 				elseif($res === false)
-					echo HTML::Error("There a problem is occured!");
+					return HTML::Error("There a problem is occured!");
 				else
-					echo HTML::Error($res);
+					return HTML::Error($res);
 			}
 			elseif(isValid($_req,"Signature")){
 				\_::$INFO->User->Find(getValid($_req,"Signature"));
 				$res = \_::$INFO->User->SendRecoveryEmail();
 				if($res === true)
-                	echo HTML::Success("Dear user, the reset password sent to your email successfully!");
+                	return HTML::Success("Dear user, the reset password sent to your email successfully!");
 				elseif($res === false)
-					echo HTML::Error("There a problem is occured!");
+					return HTML::Error("There a problem is occured!");
 				else
-					echo HTML::Error($res);
+					return HTML::Error($res);
 			}
-			else echo HTML::Warning("Please fill fields correctly!");
-		} catch(\Exception $ex) { echo HTML::Error($ex); }
+			else return HTML::Warning("Please fill fields correctly!");
+		} catch(\Exception $ex) { return HTML::Error($ex); }
     }
 }
 ?>

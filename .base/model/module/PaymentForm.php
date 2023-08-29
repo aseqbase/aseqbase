@@ -3,6 +3,7 @@
 MODULE("Form");
 MODULE("QRCodeBox");
 class PaymentForm extends Form{
+	public $Capturable = true;
 	public $ExternalLink = true;
 	/**
 	 * The value of payment
@@ -34,25 +35,18 @@ class PaymentForm extends Form{
 		$this->Path = $source;
     }
 
-	public function EchoStyle(){
-		parent::EchoStyle();?>
-		<style>
-		</style>
-		<?php
-	}
-
-	public function EchoFields(){
+	public function GetFields(){
         MODULE("Field");
 		$mod = new Field();
-		($mod->Set("float","Value", $this->Value, $this->Unit." ".$this->Network, null, [...(is_null($this->MaximumValue)?[]:["maximum"=>$this->MaximumValue]),...(is_null($this->MinimumValue)?[]:["minimum"=>$this->MinimumValue])], true, !is_null($this->Value)))->Draw();
-		($mod->Set("text","Transaction", $this->Transaction, null, null, null, true, !is_null($this->Transaction)))->ReDraw();
+        yield ($mod->Set("float","Value", $this->Value, $this->Unit." ".$this->Network, null, [...(is_null($this->MaximumValue)?[]:["maximum"=>$this->MaximumValue]),...(is_null($this->MinimumValue)?[]:["minimum"=>$this->MinimumValue])], true, !is_null($this->Value)))->Capture();
+		yield ($mod->Set("text","Transaction", $this->Transaction, null, null, null, true, !is_null($this->Transaction)))->ReCapture();
 	}
-	public function EchoContent($attr = null){
-		parent::EchoContent();
+	public function GetContent($attr = null){
 		if($this->ExternalLink && $this->QRCodeBox != null && isValid($this->Path)){
 			$this->QRCodeBox->Content = $this->Path;
-			$this->QRCodeBox->Draw();
+			return parent::GetContent().$this->QRCodeBox->Capture();
 		}
+		else return parent::GetContent();
     }
 }
 ?>

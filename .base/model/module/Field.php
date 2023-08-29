@@ -5,6 +5,7 @@ use MiMFa\Library\Style;
 use MiMFa\Library\HTML;
 class Field extends Module{
 	public $Capturable = true;
+	public $Class = "field";
 	public $Template = null;
 	/**
      * The key name of the field
@@ -110,12 +111,38 @@ class Field extends Module{
 			case 'h':
 			case 'horizontal':
 				return $this->GetHorizontalStyle();
+			case 'b':
+			case 'both':
+				return $this->GetBothStyle();
 			default:
 				return $this->GetDefaultStyle();
 		}
 	}
-
 	public function GetDefaultStyle(){
+		return HTML::Style("
+			.{$this->Name}{
+				".Style::DoProperty("min-width",$this->MinWidth)."
+				".Style::DoProperty("min-height", $this->MinHeight)."
+				".Style::DoProperty("max-width", $this->MaxWidth)."
+				".Style::DoProperty("max-height", $this->MaxHeight)."
+				".Style::DoProperty("width", $this->Width)."
+				".Style::DoProperty("height", $this->Height)."
+				font-size: var(--Size-1);
+				text-align: start;
+				display: contents !important;
+			}
+			.{$this->Name} .input{
+				".Style::DoProperty("color", $this->ForeColor)."
+				".Style::DoProperty("background-color", $this->BackColor)."
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name}:hover .input{
+				".Style::DoProperty("border-color", $this->BorderColor)."
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+		");
+    }
+	public function GetBothStyle(){
 		return HTML::Style("
 			.{$this->Name}{
 				".Style::DoProperty("min-width",$this->MinWidth)."
@@ -139,7 +166,7 @@ class Field extends Module{
 				z-index: 1;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} .field{
+			.{$this->Name} .input{
 				".Style::DoProperty("color", $this->ForeColor)."
 				".Style::DoProperty("background-color", $this->BackColor)."
 				display: table-cell;
@@ -159,7 +186,7 @@ class Field extends Module{
 				opacity: 0.5;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name}:hover .field{
+			.{$this->Name}:hover .input{
 				".Style::DoProperty("border-color", $this->BorderColor)."
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
@@ -199,7 +226,7 @@ class Field extends Module{
 				z-index: 1;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} .field{
+			.{$this->Name} .input{
 				".Style::DoProperty("color", $this->ForeColor)."
 				".Style::DoProperty("background-color", $this->BackColor)."
 				display: table-cell;
@@ -225,7 +252,7 @@ class Field extends Module{
 				".Style::DoProperty("border-color", $this->BorderColor)."
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name}:hover .field{
+			.{$this->Name}:hover .input{
 				".Style::DoProperty("border-color", $this->BorderColor)."
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
@@ -264,7 +291,7 @@ class Field extends Module{
 				z-index: 1;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} .field{
+			.{$this->Name} .input{
 				".Style::DoProperty("color", $this->ForeColor)."
 				".Style::DoProperty("background-color", $this->BackColor)."
 				font-size: 100%;
@@ -289,7 +316,7 @@ class Field extends Module{
 				".Style::DoProperty("border-color", $this->BorderColor)."
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name}:hover .field{
+			.{$this->Name}:hover .input{
 				font-size: 125%;
 				".Style::DoProperty("border-color", $this->BorderColor)."
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
@@ -307,9 +334,6 @@ class Field extends Module{
             yield $this->GetContent();
             $id = $this->Key.getID();
             if(isValid($this->Title)) yield "<label for='$id' class='title'>".__($this->Title, styling:false)."</label>";
-            $placeHolder = __($this->PlaceHolder??$this->Title, styling:false);
-            $placeHolderAttr = isValid($placeHolder)?"placeholder='$placeHolder'":"";
-            $attrs = Convert::ToString($this->Attributes, " ");
             if(is_null($this->Type)){
                 if(isEmpty($this->Value)) $type = "text";
                 elseif(is_string($this->Value)){
@@ -321,12 +345,28 @@ class Field extends Module{
 						$type = "strings";
                     else $type = "string";
                 }else $type = strtolower(gettype($this->Value));
-            }
-            else $type = strtolower($this->Type);
+            } elseif(is_object($this->Type)){
+                $type = getValid($this->Type,"Type","string");
+                $this->Key = getValid($this->Type,"Key",$this->Key);
+                $this->Value = getValid($this->Type,"Value",$this->Value);
+                $this->Title = getValid($this->Type,"Title",$this->Title);
+                $this->Description = getValid($this->Type,"Description",$this->Description);
+                $this->PlaceHolder = getValid($this->Type,"PlaceHolder",$this->PlaceHolder);
+                $this->Options = getValid($this->Type,"Options",$this->Options);
+                $this->Attributes = getValid($this->Type,"Attributes",$this->Attributes);
+            } elseif(is_countable($this->Type)){
+                if(is_null($this->Options)) $this->Options = $this->Type;
+                $type = "select";
+            } else $type = strtolower($this->Type);
+            $placeHolder = __($this->PlaceHolder??$this->Title, styling:false);
+            $placeHolderAttr = isValid($placeHolder)?"placeholder='$placeHolder'":"";
+            $attrs = Convert::ToString($this->Attributes, " ");
+
             switch ($type) {
                 case 'label':
+                case 'key':
                 case 'span':
-                    yield "<label id='$id' name='$this->Key' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".Convert::ToString($this->Value)."</label>";
+                    yield "<label id='$id' name='$this->Key' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".Convert::ToString($this->Value)."</label>";
                     break;
                 case 'object':
                 case 'array':
@@ -335,19 +375,20 @@ class Field extends Module{
                 case 'strings':
                 case 'multiline':
                 case 'textarea':
-                    yield "<textarea id='$id' name='$this->Key' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".Convert::ToString($this->Value)."</textarea>";
+                    yield "<textarea id='$id' name='$this->Key' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".Convert::ToString($this->Value)."</textarea>";
                     break;
                 case 'line':
                 case 'text':
+                case 'value':
                 case 'string':
                 case 'singleline':
-                    yield "<input id='$id' name='$this->Key' type='text' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='text' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'enum':
                 case 'dropdown':
                 case 'combobox':
                 case 'select':
-                    yield "<select id='$id' name='$this->Key' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<select id='$id' name='$this->Key' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     if(isValid($this->Options))
                         foreach($this->Options as $key=>$value)
                             yield "<option value='$key'".($key==$this->Value?" selected":"").">$value</option>";
@@ -356,35 +397,40 @@ class Field extends Module{
                 case 'radio':
                 case 'radiobox':
                 case 'radiobutton':
-                    yield "<input id='$id' name='$this->Key' type='radio' checked='".Convert::ToString($this->Value)."' value='$placeHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='radio'".($this->Value?" checked":"")." value='$placeHolder' class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'bool':
                 case 'boolean':
                 case 'check':
                 case 'checkbox':
                 case 'checkbutton':
-                    yield "<input id='$id' name='$this->Key' type='checkbox' checked='".Convert::ToString($this->Value)."' value='$placeHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='checkbox'".($this->Value?" checked":"")." value='$placeHolder' class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'int':
                 case 'integer':
                 case 'short':
                 case 'long':
                 case 'number':
-                    yield "<input id='$id' name='$this->Key' type='number' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='number' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    break;
+                case 'range':
+					$min = is_array($this->Options)?min($this->Options):0;
+					$max = is_array($this->Options)?max($this->Options):100;
+                    yield "<input id='$id' name='$this->Key' type='range' value='".Convert::ToString($this->Value)."' min='$min' max='$max' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'float':
                 case 'double':
                 case 'decimal':
-                    yield "<input id='$id' name='$this->Key' type='number' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='number' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'phone':
                 case 'tel':
                 case 'telephone':
-                    yield "<input id='$id' name='$this->Key' type='tel' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='tel' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'url':
                 case 'path':
-                    yield "<input id='$id' name='$this->Key' type='url' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='url' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'doc':
                 case 'document':
@@ -418,6 +464,7 @@ class Field extends Module{
 												document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
 												document.getElementById('$id').click();\"></div>";
                         yield $p->Capture();
+						$attrs = "style='display:none;' ".$attrs;
                     }
                     $others = "";
                     $accept = "";
@@ -447,7 +494,7 @@ class Field extends Module{
                                 $others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-                    yield "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>"
+                    yield "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>"
                     .$others;
                     break;
                 case 'docs':
@@ -482,6 +529,7 @@ class Field extends Module{
 												document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
 												document.getElementById('$id').click();\"></div>";
                         yield $p->Capture();
+						$attrs = "style='display:none;' ".$attrs;
                     }
                     $others = "";
                     $accept = "";
@@ -511,20 +559,20 @@ class Field extends Module{
                                 $others = is_null($p)?"":HTML::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-                    yield "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." multiple $attrs>"
+                    yield "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'$accept".($this->Lock?" disabled":"").($this->Required?" required":"")." multiple $attrs>"
                     .$others;
                     break;
                 case "dir":
                 case "directory":
                 case "folder":
-                    yield "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." webkitdirectory multiple $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='file' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." webkitdirectory multiple $attrs>";
                     break;
                 case 'imagesubmit':
                 case 'imgsubmit':
-                    yield "<input id='$id' name='$this->Key' type='image' src='".Convert::ToString($this->Value)."' value='$placeHolder' class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='image' src='".Convert::ToString($this->Value)."' value='$placeHolder' class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 default:
-                    yield "<input id='$id' name='$this->Key' type='$type' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='field'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    yield "<input id='$id' name='$this->Key' type='$type' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
             }
             if(isValid($this->Description)) yield "<label for='$id' class='description'>".__($this->Description)."</label>";

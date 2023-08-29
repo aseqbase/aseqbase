@@ -43,9 +43,10 @@ class Player extends Module{
 		return HTML::Style("
 			.{$this->Name}>.controls{
 				opacity: 0;
+				display: inline-flex;
 				position: absolute;
-				top: 3px;
-				right: 13px;
+				top: auto;
+				right: auto;
 				font-size: var(--Size-1);
 				color: var(--ForeColor-3);
 				z-index: 1;
@@ -53,6 +54,7 @@ class Player extends Module{
 				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name}>.controls>.button {
+				aspect-ratio: 1;
 				text-align: center;
 				display: inline;
 				padding: 1vh;
@@ -117,7 +119,7 @@ class Player extends Module{
 				".($this->AllowZoom?"cursor: grab;":"")."
 				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name}>.content>* {
+			.{$this->Name}>.content>:not(html,head,body,style,script,link,meta,title) {
 				min-width: auto;
 				width: auto;
 				height: 100%;

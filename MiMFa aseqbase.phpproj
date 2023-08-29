@@ -2,4 +2,21 @@
   <ItemGroup>
     <Content Remove="*.tmp" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="ums\LICENSE">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="ums\private.php">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="ums\public.php">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="ums\static.php">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="ums\Web.config">
+      <SubType>Code</SubType>
+    </Content>
+  </ItemGroup>
 </Project>

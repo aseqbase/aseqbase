@@ -83,30 +83,40 @@
 					methodName = 'POST',
 					actionPath = null,
 					requestData = null,
-					selector = 'form',
-					successFunc = null,
-					errorfunc = null,
-					beforeFunc = null,
+					selector = 'body :nth-child(1)',
+					successHandler = null,
+					errorHandler = null,
+					readyHandler = null,
 					processHandler = null,
 					timeout = null) {
 
-					successFunc = successFunc??function(data, selector){
+					successHandler = successHandler??function(data, selector){
 						$(selector + ' .result').remove();
-						$(selector).append(Html.success((data !=null) && typeof(data) == 'object'?data.statusText:data??'".__("The form submitted successfully!")."'));
 						if(isEmpty(data)) load();
+						else {
+							data = (data !=null && typeof(data) == 'object')?data.statusText:data??'".__("The form submitted successfully!")."';
+							if(isSet(data) && !isEmpty(data)) $(selector).prepend(Html.success(data));
+						}
 					};
-					errorfunc = errorfunc??function(data, selector){
+					errorHandler = errorHandler??function(data, selector){
 						$(selector + ' .result').remove();
-						$(selector).append(Html.error((data !=null) && typeof(data) == 'object'?data.statusText:data??'".__("There a problem occured!")."'));
+						if(isEmpty(data)) load();
+						else {
+							data = (data !=null && typeof(data) == 'object')?data.statusText:data??'".__("There a problem occured!")."';
+							if(isSet(data) && !isEmpty(data)) $(selector).prepend(Html.error(data));
+						}
 					};
-					beforeFunc = beforeFunc??function(data, selector){
+					readyHandler = readyHandler??function(data, selector){
 						$(selector + ' .result').remove();
 					};
 					processHandler = processHandler??function(data, selector){
-						if(!isEmpty(data)) $(selector).append(typeof(data) == 'object'?data.statusText:data);
+						if(!isEmpty(data)){
+							data = typeof(data) == 'object'?data.statusText:data;
+							if(isSet(data) && !isEmpty(data)) $(selector).prepend(data);
+						}
 					};
 
-					const btns = selector+' :is(button:is([type=submit], [type=reset]), input:is([type=button], [type=submit], [type=reset]))';
+					const btns = selector+' :is(button, .btn, .icon, input:is([type=button], [type=submit], [type=image], [type=reset]))';
 					actionPath = actionPath??location.href;
 					timeout = timeout??30000;
 					contentType = false;
@@ -132,17 +142,17 @@
 							return myXhr;
 						},
 						success: function (data) {
-							successFunc(data,selector);
+							successHandler(data,selector);
 							$(btns).removeClass('hide');
 							$(selector).css('opacity','1');
 						},
 						error: function (data) {
-							errorfunc(data,selector);
+							errorHandler(data,selector);
 							$(btns).removeClass('hide');
 							$(selector).css('opacity','1');
 						},
 						beforeSend: function (data) {
-							beforeFunc(data,selector);
+							readyHandler(data,selector);
 							$(btns).addClass('hide');
 							$(selector).css('opacity','.5');
 						},
@@ -153,20 +163,20 @@
 						timeout: timeout
 					});
 				};
-				const getData = function(actionPath = null, requestData = null, selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null) {
-						return transitData('GET', actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
+				const getData = function(actionPath = null, requestData = null, selector = 'body :nth-child(1)', successHandler = null, errorHandler = null, readyHandler = null, processHandler = null, timeout = null) {
+						return transitData('GET', actionPath, requestData, selector, successHandler, errorHandler, readyHandler, processHandler, timeout);
 				};
-				const postData = function(actionPath = null, requestData = null, selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null) {
-						return transitData('POST', actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
+				const postData = function(actionPath = null, requestData = null, selector = 'body :nth-child(1)', successHandler = null, errorHandler = null, readyHandler = null, processHandler = null, timeout = null) {
+						return transitData('POST', actionPath, requestData, selector, successHandler, errorHandler, readyHandler, processHandler, timeout);
 				};
-				const submitForm = function(selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null){
+				const submitForm = function(selector = 'form', successHandler = null, errorHandler = null, readyHandler = null, processHandler = null, timeout = null){
 					const actionPath = $(selector).attr('action');
 					const methodName = $(selector).attr('method');
 					const requestData = new FormData(selector);
 
-					return transitData(methodName, actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
+					return transitData(methodName, actionPath, requestData, selector, successHandler, errorHandler, readyHandler, processHandler, timeout);
 				};
-				const handleForm = function(selector = 'form', successFunc = null, errorfunc = null, beforeFunc = null, processHandler = null, timeout = null){
+				const handleForm = function(selector = 'form', successHandler = null, errorHandler = null, readyHandler = null, processHandler = null, timeout = null){
 					$(selector).submit(function(e) {
 						e.preventDefault();
 
@@ -175,7 +185,7 @@
 						const methodName = form.attr('method');
 						const requestData = new FormData(this);
 
-						return transitData(methodName, actionPath, requestData, selector, successFunc, errorfunc, beforeFunc, processHandler, timeout);
+						return transitData(methodName, actionPath, requestData, selector, successHandler, errorHandler, readyHandler, processHandler, timeout);
 					});
 				};
 			</script>

@@ -348,11 +348,54 @@
 		else return \_::$INFO->User->Access($minaccess);
 	}
 
-/**
-	 * Print output on the client side
-	 * @param mixed $output The data that is ready to print
-	 * @return mixed Printed data
-	 */
+	/**
+     * Print only this output on the client side
+     * @param mixed $value The data that is ready to print
+     * @return mixed Printed data
+     */
+	function SEND($value = null){
+        ob_clean();
+		print $value;
+        die;
+	}
+	/**
+     * Receive requests from the client side
+	 * @param mixed $key The key of the received value
+	 * @param array|string|null $source The the received data source $_GET/$POST/$_FILES (by default it is $_REQUEST)
+     * @return mixed The value
+     */
+	function RECEIVE($key = null, array|string|null $source = null, $default = null){
+		if(is_null($source)) $source = $_REQUEST;
+		if(is_string($source))
+			switch (trim(strtolower($source)))
+            {
+                case "public":
+                case "get":
+					$source = $_GET;
+					break;
+                case "private":
+                case "post":
+					$source = $_POST;
+					break;
+                case "file":
+                case "files":
+					$source = $_FILES;
+					break;
+            	default:
+					$source = $_REQUEST;
+					break;
+            }
+
+
+		if(is_null($key)) return count($source)>0?$source:$default;
+		else return getValid($source, $key, $default);
+	}
+
+	/**
+     * Print output on the client side
+     * @param mixed $output The data that is ready to print
+     * @return mixed Printed data
+     */
 	function SET($output = null){
 		print $output;
 		return $output;
@@ -621,6 +664,29 @@
     }
 	function share($urlOrText = null, $path = null){
         echo "<script>window.open('sms://$path?body='+".(isValid($urlOrText)?"'$urlOrText'":"location.href").", '$target');</script>";
+    }
+
+	/**
+     * Do a loop action by a callable function on a countable element
+     * @param mixed $array
+     * @param callable $action The loop action
+     * @param array $array_find_keys
+     */
+	function loop($array, callable $action)
+	{
+		return iterator_to_array(iteration($array, $action));
+	}
+	/**
+     * Do a loop action by a callable function on a countable element
+     * @param mixed $array
+     * @param callable $action The loop action
+     * @param array $array_find_keys
+     */
+	function iteration($array, callable $action)
+	{
+		$i = 0;
+		foreach ($array as $key=>$value)
+            yield $action($key, $value, $i++);
     }
 
 	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/\<\S+[\w\W]*\>/i")
@@ -933,7 +999,7 @@
 	}
 	function isValid($obj, string|null $item = null):bool{
 		if($item === null) return isset($obj) && !is_null($obj) && (!is_string($obj) || !(trim($obj) == "" || trim($obj,"'\"") == ""));
-		elseif(is_array($obj)) return isValid($obj) && isValid($item) && !empty($obj[$item]) && isValid($obj[$item]);
+		elseif(is_array($obj)) return isValid($obj) && isValid($item) && isset($obj[$item]) && isValid($obj[$item]);
 		else return isValid($obj) && isset($obj->$item) && isValid($obj->$item);
 	}
 	function getValid($obj, string|null $item = null, $defultValue = null){
@@ -1015,7 +1081,7 @@
 	 * @return bool
 	 */
 	function isUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^(\w+\:[\/]*)?(\/?[^\/\{\}\|^\[\]\"`\r\n\t\f]){1,}$/",$url);
+		return (!empty($url)) && preg_match("/^(\w+\:\/*)?(\/[^\/\{\}\|\^\[\]\"\`\r\n\t\f]+)+$/",$url);
 	}
 	/**
 	 * Check if the string is only a relative URL
@@ -1023,7 +1089,7 @@
 	 * @return bool
 	 */
 	function isRelativeUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^(\/?[^\/\{\}\|\^\[\]\"\`\r\n\t\f]){1,}$/",$url);
+		return (!empty($url)) && preg_match("/^(\/?[^\/\{\}\|\^\[\]\"\`\r\n\t\f]+)+$/",$url);
 	}
 	/**
 	 * Check if the string is only an absolute URL
@@ -1031,7 +1097,7 @@
      * @return bool
      */
 	function isAbsoluteUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^\w+\:\/*(\/?[^\/\{\}\|^\[\]\"\`\r\n\t\f]){1,}$/",$url);
+		return (!empty($url)) && preg_match("/^\w+\:\/*(\/[^\/\{\}\|\^\[\]\"\`\r\n\t\f]+)+$/",$url);
 	}
 
 	/**

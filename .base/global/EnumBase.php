@@ -1,23 +1,23 @@
 <?php
-enum ScreenSize: string{
-    case xxlg = "xxlg";
-	case xxlg_range = "xxlg-range";
-	case xlg = "xlg";
-	case xlg_range = "xlg-range";
-	case lg = "lg";
-	case lg_range = "lg-range";
-	case md = "md";
-	case md_range = "md-range";
-	case sm = "sm";
-	case sm_range = "sm-range";
-	case xsm = "xsm";
-	case xsm_range = "xsm-range";
-	case xxsm = "xxsm";
-	case xxsm_range = "xxsm-range";
+enum ScreenSize: string {
+    case XXLarg = "xxlg";
+	case XXLargRange = "xxlg-range";
+	case XLarg = "xlg";
+	case XLargRange = "xlg-range";
+	case Larg = "lg";
+	case LargRange = "lg-range";
+	case Medium = "md";
+	case MediumRange = "md-range";
+	case Small = "sm";
+	case SmallRange = "sm-range";
+	case XSmall = "xsm";
+	case XSmallRange = "xsm-range";
+	case XXSmall = "xxsm";
+	case XXSmallRange = "xxsm-range";
 }
 
 enum HTTPMethods: string {
-    case GET = 'get';
-    case POST = 'post';
+    case Get = 'get';
+    case Post = 'post';
 }
 ?>

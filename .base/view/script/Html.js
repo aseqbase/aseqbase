@@ -488,6 +488,16 @@ Html.parameters = (arr) => {
                     arr + "";
 }
 
+Html.handle = (data, selector = "body :nth-child(1)", reload = false) => {
+    if (data.includes('result')) {
+        $(selector+` .result`).remove();
+        $(selector).prepend(data);
+        if (reload) load();
+    }
+    else {
+        $(selector).append(data);
+    }
+}
 
 Html.reset = () => {
     Html.usedHeadItems = [];

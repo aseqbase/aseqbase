@@ -131,22 +131,22 @@ class Module extends \Base{
      */
 	public $Scripts = null;
 	/**
-     * Show this module when the screen size is one of the options below:
+     * Show this module when the screen size is one of the options \ScreenSize
      * @var \ScreenSize|string
 	 */
 	public $ShowFromScreenSize = null;
 	/**
-     * Hide this module when the screen size is one of the options below:
+     * Hide this module when the screen size is one of the options \ScreenSize
      * @var \ScreenSize|string
      */
 	public $HideFromScreenSize = null;
 	/**
-     * Visible this module when the screen size is one of the options below:
+     * Visible this module when the screen size is one of the options \ScreenSize
      * @var \ScreenSize|string
      */
 	public $VisibleFromScreenSize = null;
 	/**
-     * Invisible this module when the screen size is one of the options below:
+     * Invisible this module when the screen size is one of the options \ScreenSize
      * @var \ScreenSize|string
      */
 	public $InvisibleFromScreenSize = null;

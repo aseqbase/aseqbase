@@ -28,19 +28,20 @@ class UserMenu extends Module{
 			}
 			.{$this->Name} .menu{
 				aspect-ratio: 1;
-				max-height: inherit;
-				padding: 0px;
-				display: flex;
+				max-height: 30vmin;
+				padding: calc(var(--Size-0) / 2);
+				border-radius: 100%;
+				display: inline-flex;
 				align-items: center;
 			}
-			.{$this->Name} .menu>*{
-                padding: calc(var(--Size-0) * 0.75);
+			.{$this->Name} .menu>:not(html,head,body,style,script,link,meta,title){
+                padding: var(--Size-0);
 				aspect-ratio: 1;
 				border-radius: 100%;
 				align-items: center;
 			}
 			.{$this->Name} .menu>i{
-                padding: calc(var(--Size-0) * 0.25);
+                padding: calc(var(--Size-0) / 2);
 				display: flex;
 			}
 
@@ -53,6 +54,7 @@ class UserMenu extends Module{
 				color: var(--ForeColor-2);
 				background-color: var(--BackColor-1);
 				min-width: 300px;
+				min-width: min(210px, 100%);
 				max-width: 90vw;
 				max-height: 70vh;
 				width: max-content;
@@ -64,7 +66,7 @@ class UserMenu extends Module{
 				z-index: 1;
             	".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} .submenu .bio>*{
+			.{$this->Name} .submenu .bio>:not(html,head,body,style,script,link,meta,title){
             	font-size: 80%;
 				opacity: 0.8;
 				width: min-content;
@@ -72,7 +74,7 @@ class UserMenu extends Module{
 				padding: 5px var(--Size-1);
 				".\MiMFa\Library\Style::UniversalProperty("word-wrap","break-word")."
 			}
-			.{$this->Name} .submenu .btn{
+			.{$this->Name} .submenu .link{
             	width: 100%;
             	text-align: initial;
             	padding: 5px var(--Size-1);

@@ -217,7 +217,7 @@ class MainMenu extends Module{
 				background-color: var(--BackColor-1);
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
-			.<?php echo $this->Name; ?> form *{
+			.<?php echo $this->Name; ?> form :not(html,head,body,style,script,link,meta,title){
 				padding: 0px;
 				margin: 0px;
 				display: inline-block;
@@ -227,13 +227,13 @@ class MainMenu extends Module{
 				border: none;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
-			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) * {
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
 				font-weight: bold;
 				outline: none;
 				border: none;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
-			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) :is(button, button *)  {
+			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
 				color: var(--BackColor-2);
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}

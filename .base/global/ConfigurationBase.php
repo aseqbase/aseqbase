@@ -53,6 +53,12 @@ abstract class ConfigurationBase extends Base {
         "/^sign(\/|\?|$)/i"=>"sign",
         "/^category(\/|\?|$)/i"=>"category"
     );
+    /**
+     * The requested view key to handle the virtual pathes
+     * @var array<string,string>
+     * @category General
+     */
+	public $ViewHandlerKey = "view";
 
 
 	/**

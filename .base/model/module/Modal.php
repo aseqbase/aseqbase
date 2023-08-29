@@ -136,9 +136,9 @@ class Modal extends Player{
 		return "<div class=\"content\" ".($this->AllowZoom?("onclick=\"".$this->ModalFocusScript()."\" ondblclick=\"".$this->ZoomScript()."\""):("ondblclick=\"".$this->ModalFocusScript()."\"")).">".$content."</div>";
 	}
 	public function GetControls(){
-		yield from parent::GetControls();
-		if($this->AllowFocus) yield'<div class="fa fa-info button" onclick="'.$this->ModalInfoScript().'"></div>';
 		if($this->AllowClose) yield '<div class="fa fa-close button" onclick="'.$this->HideScript().'"></div>';
+		if($this->AllowFocus) yield'<div class="fa fa-info button" onclick="'.$this->ModalInfoScript().'"></div>';
+		yield from parent::GetControls();
 	}
 	public function GetButtons($buttonsContent){
 		return "<div class=\"buttons\">".$buttonsContent."</div>";

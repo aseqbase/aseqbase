@@ -18,7 +18,7 @@ if(ACCESS(\_::$CONFIG->UserAccess)){
             ]));
         $form->Image = $user["Image"];
         $form->BackLabel = "More";
-        $form->BackLink = User::$DashboardHandlerPath;
+        $form->BackPath = User::$DashboardHandlerPath;
         $form->SubmitLabel = null;
         $form->ResetLabel = null;
         $form->AddChild(new \MiMFa\Module\Field("label","Email", $user["Email"], lock:true));
