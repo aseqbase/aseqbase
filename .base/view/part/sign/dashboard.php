@@ -10,6 +10,6 @@ if(ACCESS(\_::$CONFIG->UserAccess))
                 HTML::Button("Reset Password", User::$RecoverHandlerPath),
                 HTML::Button("Sign Out", User::$OutHandlerPath)
             ]
-        ])
+        ]),["class"=>"page"]
     );
 ?>
