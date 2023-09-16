@@ -712,7 +712,7 @@ $attachments"]);
                 elseif(strlen($value)>100 || count(explode("\r\n\t\f",$value))>1)
                     $type = "strings";
                 else $type = "string";
-            }else $type = strtolower(gettype($value));
+            } else $type = strtolower(gettype($value));
         } elseif(is_object($type)){
             $type = getValid($type,"Type","string");
             $key = getValid($type,"Key",$key);
@@ -928,7 +928,7 @@ $attachments"]);
      */
     public static function TextInput($key, $value = null, ...$attributes){
         $Id = Convert::ToName($key);
-        return self::Element($value, "textarea", [  "id"=>"$Id", "name"=> $Id, "placeholder"=> $key, "class"=>"input textinput" ], $attributes);
+        return self::Element($value??"", "textarea", [  "id"=>"$Id", "name"=> $Id, "placeholder"=> $key, "class"=>"input textinput" ], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1117,8 +1117,8 @@ $attachments"]);
         return self::Element(
             is_countable($options)?iterator_to_array((function()use($options, $value){
                 foreach ($options as $k=>$v)
-                    if($k == $value) yield self::Element($v,"option",["value"=>$k, "selected"=>"true"]);
-                    else yield self::Element($v,"option",["value"=>$k]);
+                    if($k == $value) yield self::Element($v??"","option",["value"=>$k, "selected"=>"true"]);
+                    else yield self::Element($v??"","option",["value"=>$k]);
             })()):Convert::ToString($options)
             ,"select", [ "id"=>"$Id", "name"=> $Id, "placeholder"=> $key, "class"=>"input selectinput" ], $attributes);
     }

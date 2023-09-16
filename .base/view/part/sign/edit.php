@@ -70,6 +70,7 @@ $('input[type=file]').val(null);
             $form->Image = "edit";
             $form->Id = "EditProfile";
             $form->Method = "POST";
+            $form->Template = "both";
             $form->Timeout = 60000;
             $form->SubmitLabel = "Update";
             $form->ResetLabel = "Reset";

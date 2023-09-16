@@ -375,5 +375,29 @@ abstract class ConfigurationBase extends Base {
 	public function GetLatestVersionPath():string|null{
 		return GET($this->LatestVersionSourcePath);
     }
+	public function GetAcceptableFormats(string $type = null){
+        switch (strtolower($type??""))
+        {
+            case "image":
+            case "images":
+		        return $this->AcceptableImageFormats;
+            case "video":
+            case "videos":
+		        return $this->AcceptableVideoFormats;
+            case "audio":
+            case "audios":
+		        return $this->AcceptableAudioFormats;
+            case "doc":
+            case "docs":
+            case "document":
+            case "documents":
+		        return $this->AcceptableDocumentFormats;
+            case "file":
+            case "files":
+		        return $this->AcceptableFileFormats;
+        	default:
+		        return [...$this->AcceptableImageFormats, ...$this->AcceptableAudioFormats, ...$this->AcceptableVideoFormats, ...$this->AcceptableDocumentFormats, ...$this->AcceptableFileFormats];
+        }
+    }
 }
 ?>

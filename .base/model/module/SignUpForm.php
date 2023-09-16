@@ -49,7 +49,7 @@ class SignUpForm extends Form{
 
 	public function __construct(){
         parent::__construct();
-		$this->Action = \MiMFa\Library\User::$UpHandlerPath;
+		$this->Action = User::$UpHandlerPath;
 		$this->InitialStatus = User::$InitialStatus;
 		$this->SendActivationEmail = User::$InitialStatus < User::$ActiveStatus;
 	}

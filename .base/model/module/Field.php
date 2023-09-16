@@ -119,28 +119,7 @@ class Field extends Module{
 		}
 	}
 	public function GetDefaultStyle(){
-		return HTML::Style("
-			.{$this->Name}{
-				".Style::DoProperty("min-width",$this->MinWidth)."
-				".Style::DoProperty("min-height", $this->MinHeight)."
-				".Style::DoProperty("max-width", $this->MaxWidth)."
-				".Style::DoProperty("max-height", $this->MaxHeight)."
-				".Style::DoProperty("width", $this->Width)."
-				".Style::DoProperty("height", $this->Height)."
-				font-size: var(--Size-1);
-				text-align: start;
-				display: contents !important;
-			}
-			.{$this->Name} .input{
-				".Style::DoProperty("color", $this->ForeColor)."
-				".Style::DoProperty("background-color", $this->BackColor)."
-				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
-			}
-			.{$this->Name}:hover .input{
-				".Style::DoProperty("border-color", $this->BorderColor)."
-				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
-			}
-		");
+		return "";
     }
 	public function GetBothStyle(){
 		return HTML::Style("

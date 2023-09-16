@@ -229,6 +229,15 @@ class Local{
 		return $_FILES[$inputName];
 	}
 	/**
+     * Check if the fileobject is not null or empty
+     * @param mixed $fileobject Posted file key name or object
+	 * @return mixed
+	 */
+	public static function IsFileObject($fileobject){
+		if(is_string($fileobject)) $fileobject = $_FILES[$fileobject];
+		return !isEmpty($fileobject) && !isEmpty($fileobject["name"]);
+	}
+	/**
 	 * Upload File
 	 * @param mixed $fileobject A file object or posted file key name
      * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
@@ -237,7 +246,7 @@ class Local{
      * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file url, else return null
 	 */
-	public static function UploadFile($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions){
+	public static function Upload($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
 		if(!isValid($destdir)) $destdir = \_::$PUBLIC_DIR;
@@ -248,7 +257,7 @@ class Local{
 
 		// Allow certain file formats
 		$allow = true;
-		foreach($extensions??\_::$CONFIG->AcceptableFileFormats as $ext) if($allow = $fileType === $ext || ".".$fileType === $ext) break;
+		foreach($extensions??\_::$CONFIG->GetAcceptableFormats() as $ext) if($allow = $fileType === $ext || ".".$fileType === $ext) break;
 		if(!$allow) throw new \Exception("The file format is not acceptable!");
 
 		// Check file size
@@ -263,6 +272,21 @@ class Local{
         return self::GetUrl($filepath);
 	}
 	/**
+	 * Upload File
+	 * @param mixed $fileobject A file object or posted file key name
+     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $minSize Minimum file size in byte
+     * @param mixed $maxSize Maximum file size in byte
+     * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
+	 * @return string Return the uploaded file url, else return null
+	 */
+	public static function UploadFile($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
+		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+
+		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableFileFormats);
+	}
+	/**
      * Upload Image
      * @param mixed $fileobject An image object or posted file key name
      * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
@@ -271,13 +295,58 @@ class Local{
      * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
      * @return string Return the uploaded image url, else return null
      */
-	public static function UploadImage($fileobject, $destdir, $minSize=null, $maxSize=null,array $extensions=null){
+	public static function UploadImage($fileobject, $destdir=null, $minSize=null, $maxSize=null,array $extensions=null){
 		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
 		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
 
 		// Check if image file is an actual image or fake image
 		if(getimagesize($fileobject["tmp_name"]) === false) throw new \Exception("The image file is not an actual image!");
-		return self::UploadFile($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableImageFormats);
+		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableImageFormats);
+	}
+	/**
+	 * Upload audio
+	 * @param mixed $fileobject A file object or posted file key name
+     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $minSize Minimum file size in byte
+     * @param mixed $maxSize Maximum file size in byte
+     * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
+	 * @return string Return the uploaded file url, else return null
+	 */
+	public static function UploadAudio($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
+		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+
+		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableAudioFormats);
+	}
+	/**
+	 * Upload video
+	 * @param mixed $fileobject A file object or posted file key name
+     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $minSize Minimum file size in byte
+     * @param mixed $maxSize Maximum file size in byte
+     * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
+	 * @return string Return the uploaded file url, else return null
+	 */
+	public static function UploadVideo($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
+		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+
+		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableVideoFormats);
+	}
+	/**
+	 * Upload document
+	 * @param mixed $fileobject A file object or posted file key name
+     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $minSize Minimum file size in byte
+     * @param mixed $maxSize Maximum file size in byte
+     * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
+	 * @return string Return the uploaded file url, else return null
+	 */
+	public static function UploadDocument($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
+		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+
+		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableDocumentFormats);
 	}
 }
 

@@ -86,6 +86,14 @@ class General extends Template{
 					text-align: justify;
 				}
 
+				:is(.button, .icon, .btn), :is(.button, .icon, .btn):is(:visited, :active){
+					border: var(--Border-1) transparent;
+					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
+				}
+				:is(.button, .icon, .btn):is(:hover, :focus){
+					border-color: var(--ForeColor-2);
+					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
+				}
                 :is(a.btn, .btn), :is(a.btn, .btn):is(:visited, :active) {
 					text-decoration: none;
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
@@ -197,7 +205,6 @@ class General extends Template{
 					color: var(--ForeColor-4);
 					border-color: var(--ForeColor-4);
 				}
-
 				:is(a, .button, .icon, .btn):deactive {
 					".\MiMFa\Library\Style::UniversalProperty("filter","grayscale(100)")."
 				}

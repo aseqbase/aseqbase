@@ -665,6 +665,9 @@
 	function share($urlOrText = null, $path = null){
         echo "<script>window.open('sms://$path?body='+".(isValid($urlOrText)?"'$urlOrText'":"location.href").", '$target');</script>";
     }
+	function alert($text){
+        echo "<script>alert(`$text`);</script>";
+    }
 
 	/**
      * Do a loop action by a callable function on a countable element
@@ -995,7 +998,7 @@
 	}
 
 	function isEmpty($obj):bool{
-		return !isset($obj) || is_null($obj) || (is_string($obj) && trim($obj.""," \n\r\t\v\0\f'\"") == "") || (is_array($obj) && count($obj) === 0);
+		return !isset($obj) || is_null($obj) || (is_string($obj) && (trim($obj.""," \n\r\t\v\f'\"") == "")) || (is_array($obj) && count($obj) === 0);
 	}
 	function isValid($obj, string|null $item = null):bool{
 		if($item === null) return isset($obj) && !is_null($obj) && (!is_string($obj) || !(trim($obj) == "" || trim($obj,"'\"") == ""));

@@ -33,6 +33,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $RecoveryRequestKey = "rk";
 	public static $ActiveRequestKey = "ak";
 
+	public static $PasswordSecure = true;
 	public static $PasswordPattern = "/([\w\W]+){8,64}/";
 	public static $PasswordTips = "The password should be more than eigh and less than 64 alphabetic and numeric characters.";
 
@@ -109,7 +110,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function Find($signature = null, $password = null, $hashPassword = true){
 		$signature = $signature??$this->Signature??Session::GetSecure("Signature")??$this->TemporarySignature;
 		if(isValid($password)) {
-			if($hashPassword) $password = $this->CheckPassword($password);
+			if($hashPassword) $password = $this->EncryptPassword($password);
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
 						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Password`, `Status`",
 						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
@@ -207,8 +208,16 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return $this->SetValue("Password", $this->CheckPassword($password), $signature);
     }
 	public function CheckPassword($password){
-		if(preg_match(self::$PasswordPattern, $password)) return sha1($password);
+		if(preg_match(self::$PasswordPattern, $password)) return self::EncryptPassword($password);
         throw new \ErrorException(self::$PasswordTips);
+    }
+	public function EncryptPassword($password){
+		if(self::$PasswordSecure) return sha1($password); //More safe method
+		else return $password;
+    }
+	public function DecryptPassword($password){
+		if(self::$PasswordSecure) return null;
+		else return $password;
     }
 
 	public function ManageRequests(){
