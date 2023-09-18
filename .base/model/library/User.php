@@ -98,14 +98,32 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
     /**
      * Check if the user has access to the page or not
-     * @param int|null $minaccess The minimum accessibility for the user, pass null to give the user access
+     * @param int|array|null $acceptableAccess The minimum accessibility for the user, pass null to give the user access
      * @return int|mixed The user accessibility group
      */
-	public function Access($minaccess=null){
-		if(is_null($minaccess)) return $this->Access??\_::$CONFIG->GuestAccess;
-		if(is_integer($minaccess)) return $this->Access >= $minaccess;
-		return in_array($minaccess, $this->Accesses);
-	}
+	public function Access($acceptableAccess=null){
+		$acc = self::CheckAccess($this->Access, $acceptableAccess);
+		if($acc || count($this->Accesses) === 0) return $acc;
+		foreach ($this->Accesses as $key=>$value)
+        if($key = self::CheckAccess($value, $acceptableAccess))
+			return $key;
+        return $acc;
+    }
+    /**
+     * Check if the user has access to the page or not
+     * @param int|null $access The user access code, pass null to give the user access
+     * @param int|array|null $acceptableAccess The minimum accessibility for the user, pass null to give the user access
+     * @return int|mixed The user accessibility group
+     */
+	public static function CheckAccess($access=null, $acceptableAccess=null){
+		if(is_null($access)) $access = \_::$CONFIG->GuestAccess;
+		if(is_null($acceptableAccess)) return $access;
+		if(is_integer($acceptableAccess)) return $acceptableAccess > 0? ($access > 0? $access <= $acceptableAccess:false) : ($access >= $acceptableAccess);
+		if(is_array($acceptableAccess) && count($acceptableAccess) > 0)
+			if(isset($acceptableAccess["min"])) return ($acceptableAccess["min"] <= $access) && ($acceptableAccess["max"] >= $access);
+			else return in_array($access, $acceptableAccess);
+		return null;
+    }
 
 	public function Find($signature = null, $password = null, $hashPassword = true){
 		$signature = $signature??$this->Signature??Session::GetSecure("Signature")??$this->TemporarySignature;

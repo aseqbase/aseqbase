@@ -308,7 +308,7 @@
 		if(isValid(\_::$CONFIG->StatusMode)) {
 			if($assign){
 				if(is_string($assign)) go($assign);
-				else VIEW(\_::$CONFIG->StatusMode,$_REQUEST)??VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_REQUEST);
+				else VIEW(\_::$CONFIG->StatusMode,variables:$_REQUEST)??VIEW(\_::$CONFIG->RestrictionViewName??"restriction",variables:$_REQUEST);
             }
 			if($die !== false) die($die);
 			return false;
@@ -320,7 +320,7 @@
 			if((\_::$CONFIG->AccessMode > 0 && !$cip) || (\_::$CONFIG->AccessMode < 0 && $cip)){
 				if($assign){
                     if(is_string($assign)) go($assign);
-                    else VIEW(\_::$CONFIG->RestrictionViewName??"restriction",$_REQUEST)??VIEW("401",$_REQUEST);
+                    else VIEW(\_::$CONFIG->RestrictionViewName??"restriction",variables:$_REQUEST)??VIEW("401",variables:$_REQUEST);
                 }
 				if($die !== false) die($die);
 				return false;
@@ -337,14 +337,11 @@
 	}
 	/**
 	 * Check if the user has access to the page or not
-	 * @param int|null $minaccess The minimum accessibility for the user, pass null to give the user access
-	 * @return int|bool The user accessibility group
+     * @param int|array|null $acceptableAccess The minimum accessibility for the user, pass null to give the user access
+	 * @return int|bool|null The user accessibility group
 	 */
 	function getAccess($minaccess = null):mixed{
-		if(is_null(\_::$INFO->User))
-            if(is_null($minaccess)) return \_::$CONFIG->GuestAccess;
-            elseif(is_integer($minaccess)) return \_::$CONFIG->GuestAccess >= $minaccess;
-			else return \_::$CONFIG->GuestAccess;
+		if(is_null(\_::$INFO->User)) return \MiMFa\Library\User::CheckAccess(null, $minaccess);
 		else return \_::$INFO->User->Access($minaccess);
 	}
 
@@ -415,7 +412,7 @@
 		return $input;
 	}
 
-	function INCLUDING(string $filePath, array $variables = array(), bool $print = true){
+	function INCLUDING(string $filePath, bool $print = true, array $variables = []){
 		global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT;
 		if(file_exists($filePath)){
 			//if(count($variables) > 0) $filePath = rtrim($filePath,"/")."?". http_build_query($variables);
@@ -429,7 +426,7 @@
 		}
 		return null;
 	}
-	function REQUIRING(string $filePath, array $variables = array(), bool $print = true){
+	function REQUIRING(string $filePath, bool $print = true, array $variables = []){
 		global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT;
 		if(file_exists($filePath)){
 			//if(count($variables) > 0) extract($variables);
@@ -443,25 +440,25 @@
 		return null;
 	}
 
-	function USING(string $dir, string|null $name = null, array $variables = array(), bool $print = true, string|null $extension = ".php"){
+	function USING(string $dir, string|null $name = null, bool $print = true, array $variables = [], string|null $extension = ".php"){
 		$extension = $extension??\_::$EXTENSION;
 		try{ applyPrepends($dir, $name);
 			if(empty($name))
-				if(isFormat($dir, $extension)) return INCLUDING($dir, $variables, $print);
-				else return INCLUDING($dir.$extension, $variables, $print);
-			elseif(isFormat($name, $extension)) return INCLUDING($dir.$name, $variables, $print);
-			else return INCLUDING($dir.$name.$extension, $variables, $print);
+				if(isFormat($dir, $extension)) return INCLUDING($dir, $print, $variables);
+				else return INCLUDING($dir.$extension, $print, $variables);
+			elseif(isFormat($name, $extension)) return INCLUDING($dir.$name, $print, $variables);
+			else return INCLUDING($dir.$name.$extension, $print, $variables);
         } finally{ applyAppends($dir, $name); }
 	}
-	function forceUSING(string $nodeDir, string $baseDir, string $name, array $variables = array(), bool $print = true){
-		if(($seq = USING($nodeDir,$name, $variables, $print)) !== null) return $seq;
+	function forceUSING(string $nodeDir, string $baseDir, string $name, bool $print = true, array $variables = []){
+		if(($seq = USING($nodeDir,$name, $print, $variables)) !== null) return $seq;
 		if(count(\_::$SEQUENCES) > 0){
 			$dir = substr($nodeDir, strlen(\_::$DIR));
 			foreach(\_::$SEQUENCES as $aseq=>$root)
-				if(($seq = USING($aseq.$dir,$name, $variables, $print)) !== null)
+				if(($seq = USING($aseq.$dir,$name, $print, $variables)) !== null)
 					return $seq;
 		}
-		if(($seq = USING($baseDir,$name, $variables, $print)) !== null) return $seq;
+		if(($seq = USING($baseDir,$name, $print, $variables)) !== null) return $seq;
 		return null;
 	}
 	/**
@@ -520,9 +517,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function RUN(string|null $name, array $variables = array(), bool $print = true){
+	function RUN(string|null $name, bool $print = true, array $variables = []){
 		try{ applyPrepends("RUN", $name);
-			return forceUSING(\_::$DIR, \_::$BASE_DIR, $name, $variables, $print);
+			return forceUSING(\_::$DIR, \_::$BASE_DIR, $name, $print, $variables);
         } finally{ applyAppends("RUN", $name); }
 	}
 	/**
@@ -532,9 +529,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function MODEL(string $name, array $variables = array(), bool $print = true){
+	function MODEL(string $name, bool $print = true, array $variables = []){
 		try{ applyPrepends("MODEL", $name);
-			return forceUSING(\_::$MODEL_DIR, \_::$BASE_MODEL_DIR, $name, $variables, $print);
+			return forceUSING(\_::$MODEL_DIR, \_::$BASE_MODEL_DIR, $name, $print, $variables);
         } finally{ applyAppends("MODEL", $name); }
 	}
 	/**
@@ -544,9 +541,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function LIBRARY(string $Name, array $variables = array(), bool $print = true){
+	function LIBRARY(string $Name, bool $print = true, array $variables = []){
 		try{ applyPrepends("LIBRARY", $Name);
-			return forceUSING(\_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $Name, $variables, $print);
+			return forceUSING(\_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $Name, $print, $variables);
         } finally{ applyAppends("LIBRARY", $Name); }
 	}
 	/**
@@ -556,9 +553,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function COMPONENT(string $Name, array $variables = array(), bool $print = true){
+	function COMPONENT(string $Name, bool $print = true, array $variables = []){
 		try{ applyPrepends("COMPONENT", $Name);
-			return forceUSING(\_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $Name, $variables, $print);
+			return forceUSING(\_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $Name, $print, $variables);
         } finally{ applyAppends("COMPONENT", $Name); }
 	}
 	/**
@@ -568,9 +565,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function MODULE(string $Name, array $variables = array(), bool $print = true){
+	function MODULE(string $Name, bool $print = true, array $variables = []){
 		try{ applyPrepends("MODULE", $Name);
-			return forceUSING(\_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $Name, $variables, $print);
+			return forceUSING(\_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $Name, $print, $variables);
         } finally{ applyAppends("MODULE", $Name); }
 	}
 	/**
@@ -580,9 +577,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function TEMPLATE(string $Name, array $variables = array(), bool $print = true){
+	function TEMPLATE(string $Name, bool $print = true, array $variables = []){
 		try{ applyPrepends("TEMPLATE", $Name);
-			return forceUSING(\_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $Name, $variables, $print);
+			return forceUSING(\_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $Name, $print, $variables);
         } finally{ applyAppends("TEMPLATE", $Name); }
 	}
 	/**
@@ -592,9 +589,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function VIEW(string $name, array $variables = array(), bool $print = true){
+	function VIEW(string $name, bool $print = true, array $variables = []){
 		try{ applyPrepends("VIEW", $name);
-			$output = executeCommands(forceUSING(\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, $variables, false));
+			$output = executeCommands(forceUSING(\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, false, $variables));
 			if($print) return SET(\_::$CONFIG->AllowReduceSize?ReduceSize($output):$output);
 			else return \_::$CONFIG->AllowReduceSize?ReduceSize($output):$output;
         } finally{ applyAppends("VIEW", $name); }
@@ -606,9 +603,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function PAGE(string $name, array $variables = array(), bool $print = true){
+	function PAGE(string $name, bool $print = true, array $variables = []){
 		try{ applyPrepends("PAGE", $name);
-			return forceUSING(\_::$PAGE_DIR, \_::$BASE_PAGE_DIR, $name, $variables, $print);
+			return forceUSING(\_::$PAGE_DIR, \_::$BASE_PAGE_DIR, $name, $print, $variables);
         } finally{ applyAppends("PAGE", $name); }
 	}
 	/**
@@ -618,9 +615,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function REGION(string $name, array $variables = array(), bool $print = true){
+	function REGION(string $name, bool $print = true, array $variables = []){
 		try{ applyPrepends("REGION", $name);
-			return forceUSING(\_::$REGION_DIR, \_::$BASE_REGION_DIR, $name, $variables, $print);
+			return forceUSING(\_::$REGION_DIR, \_::$BASE_REGION_DIR, $name, $print, $variables);
         } finally{ applyAppends("REGION", $name); }
 	}
 	/**
@@ -630,9 +627,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function PART(string $name, array $variables = array(), bool $print = true){
+	function PART(string $name, bool $print = true, array $variables = []){
 		try{ applyPrepends("PART", $name);
-			return forceUSING(\_::$PART_DIR, \_::$BASE_PART_DIR, $name, $variables, $print);
+			return forceUSING(\_::$PART_DIR, \_::$BASE_PART_DIR, $name, $print, $variables);
         } finally{ applyAppends("PART", $name); }
 	}
 

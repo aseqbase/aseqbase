@@ -355,7 +355,25 @@ $attachments"]);
             $ls[] = self::Embed(null, $item, $atts, $attributes);
         return Convert::ToString($ls);
     }
-
+    
+    /**
+     * The <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Page($content, ...$attributes){
+        return self::Element(__($content),"div",["class"=> "page" ], $attributes);
+    }
+    /**
+     * The <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Part($content, ...$attributes){
+        return self::Element(__($content),"div",["class"=> "part" ], $attributes);
+    }
     /**
      * The Container <DIV> HTML Tag
      * @param mixed $content The content of the Tag
@@ -812,6 +830,15 @@ $attachments"]);
             case "month":
                 $content = self::MonthInput($title, $value, $attributes);
                 break;
+            case "hidden":
+            case "hide":
+                $content = self::HiddenInput($title, $value, $attributes);
+                break;
+            case "secret":
+            case "pass":
+            case "password":
+                $content = self::SecretInput($title, $value, $attributes);
+                break;
             case 'doc':
             case 'document':
             case 'image':
@@ -1072,7 +1099,8 @@ $attachments"]);
      * @return string
      */
     public static function RangeInput($key, $value = null, $min=0, $max=100, ...$attributes){
-        return self::Input($key, $value, "range", [ "min"=>$min, "max"=>$max, "class"=>"rangeinput"], $attributes);
+        return self::Input($key, $value, "range", [ "min"=>$min, "max"=>$max, "class"=>"rangeinput", "oninput"=>"this.nextElementSibling.value = this.value"], $attributes).
+            self::Element($value??"","output", ["class"=>"tooltip"]);
     }
     /**
      * The <INPUT> HTML Tag

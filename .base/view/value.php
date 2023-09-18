@@ -1,3 +1,3 @@
 <?php
-PAGE(NormalizePath(\_::$DIRECTION), $_REQUEST);
+PAGE(NormalizePath(\_::$DIRECTION), variables:$_REQUEST);
 ?>

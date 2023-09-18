@@ -190,23 +190,23 @@ abstract class ConfigurationBase extends Base {
      */
     public $GuestAccess = 0;
 	/**
-     * The first group the registered user will be on
+     * The lowest group that registered user will be on
      * @var int
      * @category Security
      */
-    public $UserAccess = 1;
+    public $UserAccess = 1000000000;
 	/**
-     * The minimum group of administrators
+     * The lowest group of administrators
      * @var int
      * @category Security
      */
-    public $AdminAccess = 5;
+    public $AdminAccess = 10;
 	/**
-     * The maximum group of administrators
+     * The highest group of administrators
      * @var int
      * @category Security
      */
-    public $SuperAccess = 9;
+    public $SuperAccess = 1;
 	/**
      * Minimum accessibility needs to visit the website
      * @var int

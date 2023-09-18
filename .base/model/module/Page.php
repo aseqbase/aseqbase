@@ -228,7 +228,7 @@ class Page extends Module{
 	public function Echo(){
 		$item = $this->Item;
 		$p_access = getValid($item,'Access');
-		if(!ACCESS($p_access, die:false)) return;
+		if(!ACCESS($p_access, die:false)) return false;
 		MODULE("Image");
 		$img = new Image();
 		$img->Class = "image";

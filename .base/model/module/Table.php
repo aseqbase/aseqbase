@@ -25,20 +25,20 @@ class Table extends Module{
      */
 	public $Items = null;
 	/**
-     * An array of column Keys that not show in the table
-     * @var null|array<mixed>
-     */
-	public $ExcludeColumnKeys = null;
-	/**
-     * An array of column Keys that not show in the table
-     * @var null|array<mixed>
-     */
-	public $IncludeColumnKeys = null;
-	/**
      * The database table key column name, to get items automatically
      * @var null|string
      */
 	public $ColumnKey = "ID";
+	/**
+     * An array of column Keys which should show in the table
+     * @var null|array<mixed>
+     */
+	public $ExcludeColumnKeys = null;
+	/**
+     * An array of column Keys which should not show in the table
+     * @var null|array<mixed>
+     */
+	public $IncludeColumnKeys = null;
 	/**
      * To use the column keys as the column labels
      * @var null Auto detection
@@ -58,20 +58,20 @@ class Table extends Module{
 	 */
 	public $StartColumnNumber = null;
 	/**
-     * An array of row Keys that not show in the table
-     * @var null|array<mixed>
-     */
-	public $ExcludeRowKeys = null;
-	/**
      * The database table key row name or index, to get items automatically
      * @var null|string
      */
-	public $RowKey = "ID";
+	public $RowKey = -1;
 	/**
-     * An array of row IDs or row Indexes that not show in the table
+     * An array of row IDs or Indexes which should show in the table
      * @var null|array<mixed>
      */
 	public $IncludeRowKeys = null;
+	/**
+     * An array of row IDs or Indexes which should not show in the table
+     * @var null|array<mixed>
+     */
+	public $ExcludeRowKeys = null;
 	/**
 	 * To use the row keys as the row labels
      * @var null Auto detection
@@ -102,9 +102,10 @@ class Table extends Module{
 	public $UpdateAction = null;
 	public $UpdateMethod = "post";
 	public $UpdateEncType = "multipart/form-data";
-	public $ModifyAccess = 1;
-	public $RemoveAccess = 1;
-	public $AddAccess = 1;
+	public $UpdateAccess = 0;
+	public $ModifyAccess = 0;
+	public $RemoveAccess = 0;
+	public $AddAccess = 0;
 	public $AllowOptions = true;
 	public $Options = "{
 					paging: true,
@@ -171,7 +172,7 @@ class Table extends Module{
 	}
 
 	public function Get(){
-		$isu = $this->Updatable;
+		$isu = $this->Updatable && getAccess($this->UpdateAccess);
 		if(isValid($this->Table) && isValid($this->ColumnKey)){
             if($isu){
                 MODULE("Modal");

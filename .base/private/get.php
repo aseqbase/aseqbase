@@ -1,15 +1,15 @@
 <?php
 $requests = $_POST;
 if(($source = getValid($requests,"view")) != null){
-    $doc = VIEW($source = NormalizePath($source), array(), false);
+    $doc = VIEW($source = NormalizePath($source), print:false);
 } elseif(($source = getValid($requests,"page")) != null){
-    $doc = PAGE($source = NormalizePath($source), array(), false);
+    $doc = PAGE($source = NormalizePath($source), print:false);
 } elseif(($source = getValid($requests,"part")) != null){
-    $doc = PART($source = NormalizePath($source), array(), false);
+    $doc = PART($source = NormalizePath($source), print:false);
 } elseif(($source = getValid($requests,"region")) != null){
-    $doc = REGION($source = NormalizePath($source), array(), false);
+    $doc = REGION($source = NormalizePath($source), print:false);
 } elseif(($source = getValid($requests,"virtual")) != null){
-    $doc = VIRTUAL($source = NormalizePath($source), array(), false);
+    $doc = VIRTUAL($source = NormalizePath($source), print:false);
 
 if(isValid($doc)){
     //if(($query = getValid($requests,"query")) != null){
