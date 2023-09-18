@@ -114,6 +114,7 @@ class BarMenu extends Module{
 			)
 		);
 	}
+
 	public function Get(){
 		return Convert::ToString(function(){
             yield parent::Get();
@@ -121,17 +122,8 @@ class BarMenu extends Module{
             if($count > 0){
                 $size = 100 / $count;
                 $msize = 100 - $size * ($count-1);
-                for($i = 0; $i < $count; $i++){
-					$acc = getValid($this->Items[$i],"Access", \_::$CONFIG->GuestAccess);
-					$uacc = getAccess();
-					if(is_countable($acc))
-						foreach ($acc as $value){
-                            if($acc = $uacc == $value)
-								break;
-                        }
-					else $acc = getAccess($acc);
-					if($acc)
-                    {
+                for($i = 0; $i < $count; $i++)
+					if(getAccess(getValid($this->Items[$i],"Access",\_::$CONFIG->VisitAccess))) {
                         $m = $count/2;
                         $cls = "";
                         $ism = false;
@@ -161,7 +153,6 @@ class BarMenu extends Module{
 								</div>
 							</a>";
                     }
-                }
             }
         });
 	}

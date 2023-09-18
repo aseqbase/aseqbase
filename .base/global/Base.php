@@ -95,6 +95,14 @@ class Base{
 	public function Capture(){
 		return $this->Get();
     }
+	/**
+     * Get in the Capture function before everything.
+     */
+	public function PreCapture(){ return null; }
+	/**
+     * Get in the Capture function after everything.
+     */
+	public function PostCapture(){ return null; }
 
 
 	public function ToString(){

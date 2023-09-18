@@ -289,6 +289,7 @@ class MainMenu extends Module{
 	}
 
 	protected function CreateItem($item, $ind = 1){
+		if(!getAccess(getValid($item,"Access",\_::$CONFIG->VisitAccess))) return null;
 		$path = getValid($item,"Path",null)??getValid($item,"Link");
 		$act = (endsWith($_SERVER['REQUEST_URI'],$path)?'active':'');
 		$ret = "";

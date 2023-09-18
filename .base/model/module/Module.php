@@ -326,12 +326,12 @@ class Module extends \Base{
      * @return string
      */
     public function Capture(){
-		return Convert::ToString(function(){
+        if($this->Capturable) return Convert::ToString(function(){
             $translate = \_::$CONFIG->AllowTranslate;
             $analyze = \_::$CONFIG->AllowTextAnalyzing;
             \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
             \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-            //$this->PreDraw();
+            yield $this->PreCapture();
             if($this->OneTimeStyle !== null){
                 $this->OneTimeStyle = $this->OneTimeStyle?null:$this->OneTimeStyle;
                 if($this->AllowDefaultStyles) yield $this->GetStyle();
@@ -347,29 +347,39 @@ class Module extends \Base{
                     yield join(PHP_EOL,["<script>", Convert::ToString($this->Scripts),"</script>"]);
                 if($this->AllowDefaultScripts) yield $this->GetScript();
             }
-            //$this->PostDraw();
+            yield $this->PostCapture();
             \_::$CONFIG->AllowTranslate = $translate;
             \_::$CONFIG->AllowTextAnalyzing = $analyze;
         });
+        else {
+            ob_start();
+			$this->Draw();
+			return ob_get_clean();
+        }
     }
 	/**
      * Capture and return whole the Document contains Elements except Styles and Scripts.
      * @return string
      */
     public function ReCapture(){
-		return Convert::ToString(function(){
+		if($this->Capturable) return Convert::ToString(function(){
             $translate = \_::$CONFIG->AllowTranslate;
             $analyze = \_::$CONFIG->AllowTextAnalyzing;
             \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
             \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-            //$this->PreDraw();
+            yield $this->PreCapture();
             yield $this->GetOpenTag();
             yield $this->Get();
             yield $this->GetCloseTag();
-            //$this->PostDraw();
+            yield $this->PostCapture();
             \_::$CONFIG->AllowTranslate = $translate;
             \_::$CONFIG->AllowTextAnalyzing = $analyze;
         });
+        else {
+            ob_start();
+			$this->ReDraw();
+			return ob_get_clean();
+        }
     }
 
 	/**
@@ -440,12 +450,4 @@ class Module extends \Base{
         return "";
 	}
 
-	/**
-     * Echo in the Draw function before everything.
-     */
-	public function PreDraw(){ }
-	/**
-     * Echo in the Draw function after everything.
-     */
-	public function PostDraw(){ }
 }?>

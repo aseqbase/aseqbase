@@ -203,7 +203,7 @@ $attachments"]);
         return $srci;
     }
     public static function Script($content, $source = null, ...$attributes){
-        $srci = self::Element($content, "script", is_null($source) ? null:[ "src"=> $source ], $attributes);
+        $srci = self::Element($content, "script", is_null($source) ? ["type"=>"text/javascript"]:[ "src"=> $source ], $attributes);
         //array_push(self::$Sources, $srci);
         return $srci;
     }
@@ -375,6 +375,33 @@ $attachments"]);
         return self::Element(__($content),"div",["class"=> "part" ], $attributes);
     }
     /**
+     * The <HEADER> HTML Tag
+     * @param mixed $content The content of the header Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Header($content, ...$attributes){
+        return self::Element(__($content),"header",["class"=> "header" ], $attributes);
+    }
+    /**
+     * The <CONTENT> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Content($content, ...$attributes){
+        return self::Element(__($content),"div",["class"=> "content" ], $attributes);
+    }
+    /**
+     * The <FOOTER> HTML Tag
+     * @param mixed $content The content of the footer Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Footer($content, ...$attributes){
+        return self::Element(__($content),"footer",["class"=> "footer" ], $attributes);
+    }
+    /**
      * The Container <DIV> HTML Tag
      * @param mixed $content The content of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
@@ -489,6 +516,44 @@ $attachments"]);
      */
     public static function Center($content, ...$attributes){
         return self::Element(__($content, styling:false),"center",["class"=> "center" ], $attributes);
+    }
+    
+    /**
+     * The Ordered List <OL> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function List($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::Item($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"ol",["class"=> "list" ], $attributes);
+    }
+    /**
+     * The Unordered List <UL> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Items($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::Item($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"ul",["class"=> "items" ], $attributes);
+    }
+    /**
+     * The List Item <LI> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Item($content, ...$attributes){
+        return self::Element(__($content),"li",["class"=> "item" ], $attributes);
     }
 
     /**
@@ -654,7 +719,7 @@ $attachments"]);
      * @return string
      */
     public static function Link($content, $reference = null, ...$attributes){
-        if(!isValid($reference)) {
+        if(is_null($reference)) {
             $reference = $content;
             $content = null;
         }
@@ -731,18 +796,20 @@ $attachments"]);
                     $type = "strings";
                 else $type = "string";
             } else $type = strtolower(gettype($value));
-        } elseif(is_object($type)){
-            $type = getValid($type,"Type","string");
-            $key = getValid($type,"Key",$key);
-            $value = getValid($type,"Value",$value);
-            $title = getValid($type,"Title",$title);
-            $description = getValid($type,"Description",$description);
-            $options = getValid($type,"Options",$options);
-            $attributes = getValid($type,"Attributes",$attributes);
+        } elseif(is_object($type) || ($type instanceof \stdClass)){
+            $type = getValid($type, "Type", "string");
+            $key = getValid($type, "Key", $key);
+            $value = getValid($type, "Value", $value);
+            $title = getValid($type, "Title", $title);
+            $description = getValid($type, "Description", $description);
+            $options = getValid($type, "Options", $options);
+            $attributes = getValid($type, "Attributes", $attributes);
         } elseif(is_countable($type)){
             if(is_null($options)) $options = $type;
             $type = "select";
         } else $type = strtolower($type);
+        $titleTag = (is_null($title)?"":self::Label($title, $key, ["class"=> "title"]));
+        $descriptionTag = (is_null($description)?"":self::Label($description, $key, ["class"=> "description"]));
         $key = $key??Convert::ToName($title);
         switch ($type)
         {
@@ -832,6 +899,7 @@ $attachments"]);
                 break;
             case "hidden":
             case "hide":
+                $titleTag = $descriptionTag = null;
                 $content = self::HiddenInput($title, $value, $attributes);
                 break;
             case "secret":
@@ -886,9 +954,7 @@ $attachments"]);
         }
 
         return self::Element(
-            (is_null($title)?"":self::Label($title, $key, ["class"=> "title"])).
-            $content.
-            (is_null($description)?"":self::Label($description, $key, ["class"=> "description"]))
+            $titleTag.$content.$descriptionTag
             ,"div", ["class"=> "field"]);
     }
     /**

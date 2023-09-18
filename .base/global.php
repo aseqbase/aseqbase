@@ -719,12 +719,12 @@
 
 	function startsWith(string|null $haystack, string|null ...$needles):bool {
 		foreach ($needles as $needle)
-            if(substr_compare($haystack, $needle, 0, strlen($needle)) === 0) return $needle||true;
+            if(!is_null($needle) && substr_compare($haystack, $needle, 0, strlen($needle)) === 0) return $needle||true;
 		return false;
 	}
 	function endsWith(string|null $haystack, string|null ...$needles):bool {
 		foreach ($needles as $needle)
-            if(substr_compare($haystack, $needle, -strlen($needle)) === 0) return $needle||true;
+            if(!is_null($needle) && substr_compare($haystack, $needle, -strlen($needle)) === 0) return $needle||true;
 		return false;
 	}
 
