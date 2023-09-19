@@ -44,7 +44,7 @@ class Math
         $arr = [];
         foreach(Convert::ToIteration(func_get_args()) as $key=>$val)
         {
-            $ind = array_find_key($arr, function($k,$v) { return $k == $val;});
+            $ind = array_find_key($arr, function($k,$v)use($val) { return $k == $val;});
             if($ind) $arr[$val]=1;
             else $arr[$ind] += 1;
         }

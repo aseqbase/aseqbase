@@ -1242,7 +1242,7 @@ $attachments"]);
      */
     public static function Column($content, ...$attributes){
         return self::Element(
-            is_countable($content)?join(PHP_EOL, iterator_to_array((function() use($content, $head, $colHeads){
+            is_countable($content)?join(PHP_EOL, iterator_to_array((function() use($content){
                 yield self::Row($content, true);
             })())):__($content, styling:false),
             "thead",["class"=> "column"], $attributes);

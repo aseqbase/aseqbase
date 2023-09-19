@@ -660,7 +660,7 @@
         echo "<script>window.open(".(isValid($url)?"'".\MiMFa\Library\Local::GetUrl($url)."'":"location.href").", '$target');</script>";
     }
 	function share($urlOrText = null, $path = null){
-        echo "<script>window.open('sms://$path?body='+".(isValid($urlOrText)?"'$urlOrText'":"location.href").", '$target');</script>";
+        echo "<script>window.open('sms://$path?body='+".(isValid($urlOrText)?"'$urlOrText'":"location.href").", '_blank');</script>";
     }
 	function alert($text){
         echo "<script>alert(`$text`);</script>";
