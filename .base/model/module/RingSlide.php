@@ -1,5 +1,10 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\User;
+use MiMFa\Library\HTML;
+use MiMFa\Library\Convert;
 class RingSlide extends Module{
+	public $Capturable = true;
 	public $Name = "RingSlide";
 	public $Class = "row";
 	public $Image = null;
@@ -7,46 +12,58 @@ class RingSlide extends Module{
 	public $AllowChangeColor = true;
 	public $CenterSize = 150;
 	public $ButtonsSize = 100;
+	public $Path = null;
+	
+	/**
+     * Create the module
+     * @param array|string|null $source The module source
+     */
+	public function __construct($items =  null, $path = null){
+        parent::__construct();
+        $this->Set($items, $path);
+    }
+	public function Set($items =  null, $path = null){
+		$this->Path = $path??(\_::$CONFIG->AllowSigning?User::$InHandlerPath:null);
+		$this->Items = $items;
+    }
 
-	public function EchoStyle(){
-		parent::EchoStyle();
-		?>
-		<style>
-			.<?php echo $this->Name; ?> .tabs{
+	public function GetStyle(){
+		return parent::GetStyle().HTML::Style("
+			.{$this->Name} .tabs{
 				max-width: 100%;
 				margin-top: 15Vmin;
 			}
 
-			.<?php echo $this->Name; ?> .tab{
+			.{$this->Name} .tab{
 				padding: 0px 5vmax;
 				text-align: center;
 				display:none;
 			}
-			.<?php echo $this->Name; ?> .tab.active{
+			.{$this->Name} .tab.active{
 				display:block;
 			}
 
-			.<?php echo $this->Name; ?> .tab .btn:hover{
+			.{$this->Name} .tab .btn:hover{
 				font-weight: bold;
 			}
 
-			.<?php echo $this->Name; ?> .sign{
+			.{$this->Name} .sign{
 				text-align: center;
 			}
-			.<?php echo $this->Name; ?> .sign .btn{
-				font-size: <?php echo \_::$TEMPLATE->Size(2) ?>;
-				color: <?php echo \_::$TEMPLATE->ForeColor(2) ?>;
+			.{$this->Name} .sign .btn{
+				font-size: var(--Size-2);
+				color: var(--ForeColor-2);
 				border-color: transparent;
 				margin: 0px 5px;
 			}
-			.<?php echo $this->Name; ?> .sign .btn:hover{
-				background-color: <?php echo \_::$TEMPLATE->BackColor(2) ?>;
-				font-size: <?php echo \_::$TEMPLATE->Size(2) ?>;
-				color: <?php echo \_::$TEMPLATE->ForeColor(2) ?>;
-				border-color: <?php echo \_::$TEMPLATE->ForeColor(2) ?>;
-				border-radius: <?php echo \_::$TEMPLATE->Radius(2) ?>;
+			.{$this->Name} .sign .btn:hover{
+				background-color: var(--BackColor-2);
+				font-size: var(--Size-2);
+				color: var(--ForeColor-2);
+				border-color: var(--ForeColor-2);
+				border-radius: var(--Radius-2);
 			}
-			.<?php echo $this->Name; ?> .menu {
+			.{$this->Name} .menu {
 				min-height: 60vh;
 				display: -webkit-box;
 				display: -webkit-flex;
@@ -60,35 +77,35 @@ class RingSlide extends Module{
 				-webkit-align-items: center;
 					-ms-flex-align: center;
 						align-items: center;
-				line-height: <?php echo $this->ButtonsSize; ?>px;
+				line-height: {$this->ButtonsSize}px;
 				text-align: center;
 				border:none;
 			}
 
-			.<?php echo $this->Name; ?> .menu>.center {
-				width: <?php echo $this->CenterSize; ?>px;
-				height: <?php echo $this->CenterSize; ?>px;
+			.{$this->Name} .menu>.center {
+				width: {$this->CenterSize}px;
+				height: {$this->CenterSize}px;
 				border-radius: 50%;
 				position: relative;
-				box-shadow: 0px 0px 20px <?php echo \_::$TEMPLATE->BackColor(2) ?>;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2)); ?>
+				box-shadow: 0px 0px 20px var(--BackColor-2);
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
 			}
 		
-			.<?php echo $this->Name; ?> .menu>.center:hover {
-				box-shadow: 0px 0px 50px <?php echo \_::$TEMPLATE->BackColor(2) ?>;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2)); ?>
+			.{$this->Name} .menu>.center:hover {
+				box-shadow: 0px 0px 50px var(--BackColor-2);
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
 			}
 			
-			.<?php echo $this->Name; ?> .menu>.center:before {
+			.{$this->Name} .menu>.center:before {
 				position: absolute;
-				content: "";
-				width: <?php echo $this->CenterSize; ?>px;
-				height: <?php echo $this->CenterSize; ?>px;
+				content: '';
+				width: {$this->CenterSize}px;
+				height: {$this->CenterSize}px;
 				font-weight: bold;
 				font-size: 180%;
 				left: 0px;
 				top: 0px;
-				background-image: <?php echo "url('".((\_::$INFO->User??$this)->Image??$this->Image)."')" ?>;
+				background-image: url('".((\_::$INFO->User??$this)->Image??$this->Image)."');
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: contain;
@@ -96,10 +113,10 @@ class RingSlide extends Module{
 				border-radius: 100%;
 				cursor: pointer;
 				box-shadow: 0px 0px 20px var(--BackColor-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2)); ?>
+				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
 			}
 
-			.<?php echo $this->Name; ?> .menu>.center>a{
+			.{$this->Name} .menu>.center>a{
 				background-color: var(--BackColor-2);
 				color: var(--ForeColor-2);
 				position: absolute;
@@ -108,92 +125,79 @@ class RingSlide extends Module{
 				border: var(--Border-1) var(--BackColor-2);
 				border-radius: 100%;
 				box-shadow: var(--Shadow-3);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2)); ?>
+				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
 			}
 
-			.<?php echo $this->Name; ?> .menu>.center>a:hover {
+			.{$this->Name} .menu>.center>a:hover {
 				box-shadow: var(--Shadow-4);
 				border:  var(--Border-1) var(--BackColor-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2)); ?>
+				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
 			}
 
-			.<?php echo $this->Name; ?> .menu>.center>a>.button{
-				line-height: <?php echo $this->ButtonsSize; ?>px;
-				width: <?php echo $this->ButtonsSize; ?>px;
-				height: <?php echo $this->ButtonsSize; ?>px;
+			.{$this->Name} .menu>.center>a>.button{
+				line-height: {$this->ButtonsSize}px;
+				width: {$this->ButtonsSize}px;
+				height: {$this->ButtonsSize}px;
+				border-radius: 100%;
 			}
-			.<?php echo $this->Name; ?> .menu>.center>a>.button>.image{
-				background-position: center;
-				background-repeat: no-repeat;
-				background-size: 50% 50%;
-				width: <?php echo $this->ButtonsSize; ?>px;
-				height: <?php echo $this->ButtonsSize; ?>px;
-                                                                        				<?php if($this->AllowChangeColor) echo \MiMFa\Library\Style::DropColor(\_::$TEMPLATE->ForeColor(2)); ?>
+			.{$this->Name} .menu>.center>a>.button>.media{
+				background-size: 50% 50% !important;
+				width: {$this->ButtonsSize}px;
+				height: {$this->ButtonsSize}px;
+                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor(\_::$TEMPLATE->ForeColor(2)):"")."
 			}
-			.<?php echo $this->Name; ?> .menu>.center>a:hover>.button>.image {
+			.{$this->Name} .menu>.center>a:hover>.button>.media {
 				background-size: 60% 60%;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2)); ?>
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
 			}
-		</style>
-		<?php
+		");
 	}
 
-	public function Echo(){
-		parent::Echo();
+	public function Get(){
+		parent::Get();
 		$count = count($this->Items);
-		if($count > 0){
-		?>
-			<div class="col-md-5" data-aos="zoom-out" data-aos-duration="1000" >
-				<div class="menu">
-					<div class="center">
-						<?php for($i = 0; $i < $count; $i++){ ?>
-							<a data-target=".tab" data-toggle='tab' href="#tab<?php echo $i; ?>">
-								<div class="button">
-									<div class="image" style="background-image: url('<?php echo $this->Items[$i]['Image']; ?>');">
-									</div>
-								</div>
-							</a>
-						<?php } ?>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-7" data-aos="zoom-in" data-aos-duration="1500" >
-				<div class="tabs">
-					<?php for($i = 0; $i < $count; $i++){ ?>
-					<div class="tab fade <?php echo $i===0?'active show':''; ?>" id="tab<?php echo $i; ?>">
-						<h1 class="title"><?php echo $this->Items[$i]['Name']; ?></h1>
-						<div class="description">
-							<?php echo $this->Items[$i]['Description']; ?>
-                            <?php echo getValid($this->Items[$i],"Button")??getValid($this->Items[$i],"More"); ?>
-						</div>
-					</div>
-					<?php } ?>
-				</div>
-			</div>
-		<?php
-		}
+		if($count > 0)
+			return Convert::ToString(function() use($count){
+				$tags = "";
+				for($i = 0; $i < $count; $i++)
+					$tags .= HTML::Link(
+						HTML::Division(
+							HTML::Media("", getValid($this->Items[$i],'Image'))
+						,["class"=>"button"])
+					, "#tab$i", ["data-target"=>".tab", "data-toggle"=>'tab']);
+				yield HTML::Division(HTML::Division(HTML::Division($tags,["class"=>"center"]),["class"=>"menu"]),["class"=>"col-md-5", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]);
+				$tags = "";
+				for($i = 0; $i < $count; $i++) 
+					$tags .= HTML::Division(
+						HTML::ExternalHeading(getValid($this->Items[$i],'Name'), null, ["class"=>"title"]).
+						HTML::Division(
+							getValid($this->Items[$i], 'Description').
+							(getValid($this->Items[$i], "Button")??getValid($this->Items[$i],"More"))
+						, ["class"=>"description"])
+					, ["class"=>"tab fade".($i===0?' active show':''), "id"=>"tab$i"]);
+				yield HTML::Division(HTML::Division($tags,["class"=>"tabs"]),["class"=>"col-md", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]);
+			});
+		else return null;
 	}
 	
-	public function EchoScript(){
-		parent::EchoScript();
-		if(count($this->Items) > 0){
-		?>
-		<script>
+	public function GetScript(){
+		return parent::GetScript().(count($this->Items) > 0? HTML::Script("
 			$(document).ready(function(){
-				const bselector = '.<?php echo $this->Name; ?> .menu>.center>a';
+				".(isValid($this->Path)?"$('.{$this->Name} .menu>.center:before').click(function () { load('{$this->Path}'); });":"")."
+				const bselector = '.{$this->Name} .menu>.center>a';
 				$(bselector).click(function(evt){
-					const xn = $(this).attr("href");
-					const tar = $(this).attr("data-target");
-					const x = xn.replace("#", "");
+					const xn = $(this).attr('href');
+					const tar = $(this).attr('data-target');
+					const x = xn.replace('#', '');
 					$(tar).each(function(){
-						const y = $(this).attr("id");
-						if (x == y) $(this).addClass("active show");
-						else $(this).removeClass("active show");
+						const y = $(this).attr('id');
+						if (x == y) $(this).addClass('active show');
+						else $(this).removeClass('active show');
 					});
 					$(bselector).each(function(){
-						const y = $(this).attr("href");
-						if (xn == y) $(this).addClass("active");
-						else $(this).removeClass("active");
+						const y = $(this).attr('href');
+						if (xn == y) $(this).addClass('active');
+						else $(this).removeClass('active');
 					});
 					evt.preventDefault();
 				});
@@ -201,9 +205,9 @@ class RingSlide extends Module{
 				const buttons = Array.from(document.querySelectorAll(bselector));
 				const count = buttons.length;
 				const increase = Math.PI * 2 / buttons.length;
-				const ratio = (<?php echo $this->CenterSize; ?>/<?php echo $this->ButtonsSize; ?> - 1)/2;
-				const radius = <?php echo $this->CenterSize; ?>-<?php echo $this->ButtonsSize; ?>*ratio;
-				const addition = <?php echo $this->ButtonsSize; ?>*ratio;
+				const ratio = ({$this->CenterSize} / {$this->ButtonsSize} - 1)/2;
+				const radius = {$this->CenterSize} - {$this->ButtonsSize} * ratio;
+				const addition = {$this->ButtonsSize} * ratio;
 				let angle = 0;
 
 				function move(e) {
@@ -230,9 +234,7 @@ class RingSlide extends Module{
 				});
 
 			});
-		</script>
-		<?php
-		}
-	}
+			"):"");
+    }
 }
 ?>

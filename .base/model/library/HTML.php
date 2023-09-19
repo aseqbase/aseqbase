@@ -1,6 +1,5 @@
 <?php
 namespace MiMFa\Library;
-use MongoDB\BSON\Type;
 /**
  * A simple library to create default and standard HTML tags
  *@copyright All rights are reserved for MiMFa Development Group
@@ -313,7 +312,7 @@ $attachments"]);
         if(!isValid($source)) return null;
         if(isIdentifier($source))
             return self::Element("", "i", [ "class"=>"media fa fa-".strtolower($source)], $attributes);
-        else return self::Element(__($content??"", styling:false),"div", [ "style"=> "background-image: url('$source'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
+        else return self::Element(__($content??"", styling:false),"div", [ "style"=> "background-image: url('".Local::GetUrl($source)."'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
     }
     /**
      * The <IFRAME> HTML Tag
