@@ -88,10 +88,30 @@ class Convert{
      * @param string $text
      * @return string
      */
-	public static function ToName($text, $normalize = false, $invalid = '/\W/'){
+	public static function ToKey($text, $normalize = false, $invalid = '/\W/'){
         if(!($normalize || preg_match($invalid, $text))) return $text;
         return preg_replace($invalid, "", ucwords($text??""));
 	}
+	/**
+     * Convert everything to a suitable value format in string
+     * @param mixed $value
+     * @return string
+     */
+	public static function ToValue($value, ...$types){
+		if(!is_null($value)){
+			if(is_string($value) && (count($types) == 0 || in_array("string", $types))) return '"'.str_replace("\"","\\\"",$value).'"';
+			if((is_countable($value) || is_iterable($value))){
+				$texts = array();
+				foreach ($value as $key => $val)
+					if(is_numeric($key)) array_push($texts, self::ToValue($val));
+					else array_push($texts, self::ToValue($key)."=>".self::ToValue($val));
+                return join(", ",$texts);
+            }
+            return $value."";
+        }
+		return "";
+    }
+
 	/**
      * Convert a text to normal Title
      * @param string[] $texts Parts of title

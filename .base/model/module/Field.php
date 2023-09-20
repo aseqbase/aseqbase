@@ -92,7 +92,7 @@ class Field extends Module{
 				$value = $type;
         } else $this->Type = null;
 		$this->Title = $title;
-		$this->Key = $key??Convert::ToName($this->Title);
+		$this->Key = $key??Convert::ToKey($this->Title);
 		$this->Value = $value;
 		$this->Description = $description;
 		$this->Options = $options;

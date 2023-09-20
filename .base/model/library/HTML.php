@@ -354,7 +354,7 @@ $attachments"]);
             $ls[] = self::Embed(null, $item, $atts, $attributes);
         return Convert::ToString($ls);
     }
-    
+
     /**
      * The <DIV> HTML Tag
      * @param mixed $content The content of the Tag
@@ -516,7 +516,7 @@ $attachments"]);
     public static function Center($content, ...$attributes){
         return self::Element(__($content, styling:false),"center",["class"=> "center" ], $attributes);
     }
-    
+
     /**
      * The Ordered List <OL> HTML Tag
      * @param mixed $content The content of the Tag
@@ -809,7 +809,7 @@ $attachments"]);
         } else $type = strtolower($type);
         $titleTag = (is_null($title)?"":self::Label($title, $key, ["class"=> "title"]));
         $descriptionTag = (is_null($description)?"":self::Label($description, $key, ["class"=> "description"]));
-        $key = $key??Convert::ToName($title);
+        $key = $key??Convert::ToKey($title);
         switch ($type)
         {
             case 'label':
@@ -968,7 +968,7 @@ $attachments"]);
             $attributes = Convert::ToIteration($value);
             $value = null;
         }
-        $Id = Convert::ToName($key);
+        $Id = Convert::ToKey($key);
         return self::Element(__($value??$key, styling:false), "button", [ "id"=>"$Id", "name"=> $Id, "class"=> "button submitbutton", "type"=>"submit"], $attributes);
     }
     /**
@@ -983,7 +983,7 @@ $attachments"]);
             $attributes = Convert::ToIteration($value);
             $value = null;
         }
-        $Id = Convert::ToName($key);
+        $Id = Convert::ToKey($key);
         return self::Element(__($value??$key, styling:false), "button", [ "id"=>"$Id", "name"=> $Id, "class"=> "button resetbutton", "type"=>"reset"], $attributes);
     }
     /**
@@ -998,7 +998,7 @@ $attachments"]);
             $attributes = Convert::ToIteration($type);
             $type = "text";
         }
-        $Id = Convert::ToName($key);
+        $Id = Convert::ToKey($key);
         return self::Element("input", [ "id"=>"$Id", "name"=> $Id, "placeholder"=> $key, "type"=> $type, "value"=> $value, "class"=>"input" ], $attributes);
     }
     /**
@@ -1019,7 +1019,7 @@ $attachments"]);
      * @return string
      */
     public static function TextInput($key, $value = null, ...$attributes){
-        $Id = Convert::ToName($key);
+        $Id = Convert::ToKey($key);
         return self::Element($value??"", "textarea", [  "id"=>"$Id", "name"=> $Id, "placeholder"=> $key, "class"=>"input textinput" ], $attributes);
     }
     /**
@@ -1206,7 +1206,7 @@ $attachments"]);
      * @return string
      */
     public static function SelectInput($key, $value = null, $options = [], ...$attributes){
-        $Id = Convert::ToName($key);
+        $Id = Convert::ToKey($key);
         return self::Element(
             is_countable($options)?iterator_to_array((function()use($options, $value){
                 foreach ($options as $k=>$v)
