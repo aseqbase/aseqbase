@@ -382,8 +382,6 @@
 					$source = $_REQUEST;
 					break;
             }
-
-
 		if(is_null($key)) return count($source)>0?$source:$default;
 		else return getValid($source, $key, $default);
 	}

@@ -25,7 +25,7 @@ class Form extends Module{
 	public $AllowHeader = true;
 	public $AllowContent = true;
 	public $AllowFooter = true;
-	
+
 	public $FieldsForeColor = "var(--ForeColor-1)";
 	public $FieldsBackColor = "var(--BackColor-1)";
 	public $FieldsBorderColor = "var(--ForeColor-5)";
@@ -127,6 +127,11 @@ class Form extends Module{
 				case 'b':
 				case 'both':
 					return $style . $this->GetFieldsBothStyle();
+				case 's':
+				case 'special':
+				case 't':
+				case 'table':
+					return $style . $this->GetFieldsTableStyle();
 				default:
 					return $style . $this->GetFieldsDefaultStyle();
 			}
@@ -144,6 +149,7 @@ class Form extends Module{
 					".Style::DoProperty("height", $this->FieldsHeight)."
 					display: flex;
 					padding: 0px var(--Size-0) var(--Size-0);
+					padding: 3px 0px;
 				}
 
 				.{$this->Name} .field .title{
@@ -179,14 +185,12 @@ class Form extends Module{
 					display: inline-flex;
 					width: 100%;
 					max-width: -webkit-fill-available;
-					border-left: 0px;
-					border: none;
 					padding-top: 0px;
 					padding-bottom: 0px;
+					border: none;
+					border-bottom: var(--Border-1);
 					border-color: transparent;
-					border-top: none;
-					".Style::DoProperty("border-bottom", \_::$TEMPLATE->Border(1))."
-					".Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0))."
+					border-radius: var(--Radius-0);
 					".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 				}
 				.{$this->Name} .field .input::placeholder {
@@ -201,6 +205,7 @@ class Form extends Module{
 				}
 				.{$this->Name} .field label.description{
 					font-size: 75%;
+					line-height: 100%;
 					opacity: 0.5;
 					text-align: initial;
 					display: block;
@@ -232,8 +237,8 @@ class Form extends Module{
 				position: relative;
 				text-align: initial;
 				vertical-align: top;
-				margin-right: -1px;
-				padding: 0px var(--Size-0);
+				margin: 5px;
+				padding: 5px var(--Size-0);
 				z-index: 1;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
@@ -244,15 +249,17 @@ class Form extends Module{
 				font-size: 125%;
 				width: 100%;
 				border-radius: 3px;
-				".Style::DoProperty("border", \_::$TEMPLATE->Border(1))."
+				border: var(--Border-1);
 				border-color: transparent;
-				".Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0))."
+				border-radius: var(--Radius-0);
+				margin: 5px;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .field label.description{
 				text-align: initial;
 				display: block;
 				font-size: 75%;
+				line-height: 100%;
 				padding: 5px 2px;
 				opacity: 0.5;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
@@ -280,6 +287,7 @@ class Form extends Module{
 				font-size: var(--Size-1);
 				text-align: start;
 				display: table-row;
+				padding: 3px 0px;
 			}
 			.{$this->Name} .field label.title{
 				width: fit-content;
@@ -304,9 +312,9 @@ class Form extends Module{
 				outline: none;
 				border: none;
 				padding: 3px;
-				".Style::DoProperty("border-bottom", \_::$TEMPLATE->Border(1))."
+				border-bottom: var(--Border-1);
 				border-color: transparent;
-				".Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0))."
+				border-radius: var(--Radius-0);
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .field label.description{
@@ -314,6 +322,7 @@ class Form extends Module{
 				vertical-align: middle;
 				display: table-cell;
 				font-size: 75%;
+				line-height: 100%;
 				padding: 3px;
 				opacity: 0;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
@@ -356,7 +365,7 @@ class Form extends Module{
 				margin-bottom: -1px;
 				padding: 2px var(--Size-0);
 				border-radius: 3px 3px 0px 0px;
-				".Style::DoProperty("border", \_::$TEMPLATE->Border(1))."
+				border: var(--Border-1);
 				border-color: transparent;
 				border-bottom: 0px solid;
 				z-index: 1;
@@ -368,16 +377,17 @@ class Form extends Module{
 				font-size: 100%;
 				width: 100%;
 				border-radius: 0px 3px 3px 3px;
-				".Style::DoProperty("border", \_::$TEMPLATE->Border(1))."
+				border: var(--Border-1);
 				border-color: transparent;
 				padding: 2px var(--Size-0);
-				".Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(0))."
+				border-radius: var(--Radius-0);
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .field label.description{
 				text-align: initial;
 				display: block;
 				font-size: 50%;
+				line-height: 100%;
 				margin-top: -1px;
 				padding: 2px var(--Size-0);
 				opacity: 0;
@@ -397,6 +407,72 @@ class Form extends Module{
 			.{$this->Name} .field:hover label.description{
 				font-size: 75%;
 				opacity: 0.75;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+		");
+	}
+	public function GetFieldsTableStyle(){
+		return HTML::Style("
+			.{$this->Name} .field{
+				".Style::DoProperty("min-width",$this->FieldsMinWidth)."
+				".Style::DoProperty("min-height", $this->FieldsMinHeight)."
+				".Style::DoProperty("max-width", $this->FieldsMaxWidth)."
+				".Style::DoProperty("max-height", $this->FieldsMaxHeight)."
+				".Style::DoProperty("width", $this->FieldsWidth)."
+				".Style::DoProperty("height", $this->FieldsHeight)."
+				font-size: var(--Size-1);
+				text-align: start;
+				display: table-row;
+			}
+			.{$this->Name} .field label.title{
+				width: fit-content;
+				display: table-cell;
+				position: relative;
+				text-align: initial;
+				vertical-align: top;
+				margin-right: -1px;
+				padding: 5px var(--Size-0);
+			    margin: 5px;
+				z-index: 1;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name} .field .input{
+				".Style::DoProperty("color", $this->FieldsForeColor)."
+				".Style::DoProperty("background-color", $this->FieldsBackColor)."
+				display: table-cell;
+				font-size: 125%;
+				width: 100%;
+			    margin: 5px;
+				border: none;
+				border-color: transparent;
+				border-bottom: var(--Border-1);
+				border-radius: var(--Radius-0);
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name} .field label.description{
+				opacity: 0;
+				display: none;
+				font-size: 0%;
+				line-height: 100%;
+				text-align: initial;
+				border-radius: 3px;
+				border: var(--Border-1) var(--BackColor-2);
+				background-color: var(--ForeColor-2);
+				color: var(--BackColor-2);
+				position: absolute;
+				padding: calc(var(--Size-0) / 2);
+				z-index: 1;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name} .field:hover .input{
+				outline: none;
+				".Style::DoProperty("border-color", $this->FieldsBorderColor)."
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name} .field:hover label.description{
+				opacity: 1;
+				display: block;
+				font-size: 75%;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 		");

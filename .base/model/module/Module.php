@@ -310,7 +310,7 @@ class Module extends \Base{
     }
 
 	public function ToString(){
-		return $this->Capturable?$this->Capture():$this->Draw();
+		return $this->Capture();
     }
 
 	/**
