@@ -98,6 +98,7 @@ class Table extends Module{
 	public $BorderSize = 1;
 	public $DataCompression = 50;
 	public $SevereSecure = true;
+	public $CryptPassword = true;
 	public $Updatable = false;
 	public $UpdateAction = null;
 	public $UpdateMethod = "post";
@@ -258,6 +259,8 @@ class Table extends Module{
             }
             return join(PHP_EOL, $cells);
         }
+		elseif($isu && getAccess($this->AddAccess))
+			return HTML::Center(HTML::Button("Add your first item ".HTML::Image("plus"),"{$this->Modal->Name}_Create();"));
 		return parent::Get();
 	}
 
@@ -341,7 +344,7 @@ class Table extends Module{
 											switch($type){
 												case "pass":
 												case "password":
-													$cell = \_::$INFO->User->DecryptPassword($cell);
+													if($this->CryptPassword) $cell = \_::$INFO->User->DecryptPassword($cell);
 													break;
 												case "file":
 												case "files":
@@ -418,7 +421,7 @@ class Table extends Module{
 									case "pass":
 									case "password":
 										if(isEmpty($v)) unset($vals[$k]);
-										else $vals[$k] = \_::$INFO->User->EncryptPassword($v);
+										elseif($this->CryptPassword) $vals[$k] = \_::$INFO->User->EncryptPassword($v);
 										break;
 								}
                             }
@@ -439,7 +442,6 @@ class Table extends Module{
 									return HTML::Success("The information updated successfully!");
 								return HTML::Error("Could not update data!");
                         }
-						return HTML::Error("It is not a valid request!");
                 }
             }
         }

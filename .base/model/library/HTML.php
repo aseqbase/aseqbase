@@ -836,6 +836,9 @@ $attachments"]);
             case 'textarea':
                 $content = self::TextInput($title, $value, $attributes);
                 break;
+            case 'content':
+                $content = self::ContentInput($title, $value, $attributes);
+                break;
             case 'line':
             case 'value':
             case 'string':
@@ -1033,6 +1036,17 @@ $attachments"]);
     public static function TextInput($key, $value = null, ...$attributes){
         $Id = Convert::ToKey($key);
         return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input textinput" ], $attributes);
+    }
+    /**
+     * The <TEXTAREA> HTML Tag
+     * @param mixed $content The tag name or placeholder
+     * @param mixed $reference The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function ContentInput($key, $value = null, ...$attributes){
+        $Id = Convert::ToKey($key);
+        return self::Element($value??"", "textarea", [ "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input contentinput" ], $attributes);
     }
     /**
      * The <TEXTAREA> HTML Tag
@@ -1294,6 +1308,7 @@ $attachments"]);
         $Id = Convert::ToKey($key);
         return self::Element(
             is_countable($options)?iterator_to_array((function()use($options, $value){
+                yield self::Element("","option");
                 foreach ($options as $k=>$v)
                     if($k == $value) yield self::Element($v??"","option",["value"=>$k, "selected"=>"true"]);
                     else yield self::Element($v??"","option",["value"=>$k]);

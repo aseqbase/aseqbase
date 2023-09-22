@@ -558,7 +558,14 @@ class Field extends Module{
 					yield HTML::Input($this->Key, $placeHolder, "image", ["id"=>$id, "name"=>$this->Key, "src"=>$this->Value], $attrs);
                     break;
                 default:
-					yield HTML::Input($this->Key, $this->Value, $type, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
+					yield HTML::Field(
+						type:$this->Type,
+						title:null,
+						description:null,
+						key:$this->Key,
+						value:$this->Value,
+						options:$this->Options,
+						attributes:[["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs]);
                     break;
             }
             if(isValid($this->Description)) yield HTML::Label($this->Description, $id, ["class"=>"description"]);

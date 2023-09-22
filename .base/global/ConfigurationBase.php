@@ -41,6 +41,7 @@ abstract class ConfigurationBase extends Base {
     /**
      * An array of all patterns=>handler view names to handle the virtual pathes
      * Empty array causing to pass all patterns to the ViewName or DefaultViewName or "main" view
+     * @internal
      * @var array<string,string>
      * @category General
      */
@@ -63,6 +64,7 @@ abstract class ConfigurationBase extends Base {
 
 	/**
      * Source to get the version of latest aseqbase release
+     * @field path
      * @var string
      * @category Update
      */
@@ -70,6 +72,7 @@ abstract class ConfigurationBase extends Base {
 
 	/**
      * Source to get the latest version of aseqbase path
+     * @field path
      * @var string
      * @category Update
      */
@@ -77,7 +80,7 @@ abstract class ConfigurationBase extends Base {
 
 	/**
 	 * Allow cache data for increasing loading speed
-	 * @var bool
+     * @var bool
      * @category Optimization
      */
 	public $AllowCache = true;
@@ -119,6 +122,7 @@ abstract class ConfigurationBase extends Base {
 
 	/**
      * A special key for yhis website, be sure to change this
+     * @field password
      * @var string
      * @category Security
      */
@@ -221,13 +225,15 @@ abstract class ConfigurationBase extends Base {
 	public $StatusMode = null;
 	/**
      * The accessibility mode: 1 for whitelisted IPs, -1 for blacklisted IPs
-	 * @var mixed
+     * @field short
+     * @var mixed
      * @category Security
      */
 	public $AccessMode = null;
 	/**
 	 * Patterns to detect IPs
-	 * @var array<string>
+     * @field array
+     * @var array<string>
      * @category Security
      */
 	public $AccessPatterns = array();
@@ -258,30 +264,35 @@ abstract class ConfigurationBase extends Base {
     public $MaximumFileSize = 50000000;
 	/**
      * Acceptable image formats
+     * @field array
      * @var array<string>
      * @category Security
      */
     public $AcceptableImageFormats = [".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg"];
 	/**
      * Acceptable audio formats
+     * @field array
      * @var array<string>
      * @category Security
      */
     public $AcceptableAudioFormats = [".wav",".mp3",".aac",".amr",".ogg",".flac",".wma",".m4a"];
 	/**
      * Acceptable video formats
+     * @field array
      * @var array<string>
      * @category Security
      */
     public $AcceptableVideoFormats = [".mpg",".mpeg", ".mp4",".avi",".mkv",".mov",".wmv",".flv",".webm"];
 	/**
      * Acceptable document formats
+     * @field array
      * @var array<string>
      * @category Security
      */
     public $AcceptableDocumentFormats = [".txt", ".rtf", ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".sls", ".slx", ".csv", ".tsv"];
 	/**
      * Acceptable document formats
+     * @field array
      * @var array<string>
      * @category Security
      */
@@ -289,24 +300,28 @@ abstract class ConfigurationBase extends Base {
 
 	/**
      * 0: Not show Errors; 1: To show Errors
-	 * @var int|null
+     * @field short
+     * @var int|null
      * @category Debug
      */
 	public $DisplayError = null;
 	/**
      * 0: Not show startup Errors; 1: To show startup Errors
+     * @field short
      * @var int|null
      * @category Debug
      */
 	public $DisplayStartupError = null;
 	/**
      * E_ error flags
+     * @field short
      * @var int|null
      * @category Debug
 	 */
 	public $ReportError = null;
 	/**
      * Database Errors
+     * @field short
      * @var int|null
      * @category Debug
 	 */
@@ -332,12 +347,14 @@ abstract class ConfigurationBase extends Base {
 	public $DataBaseHost = 'localhost';
     /**
      * The database UserName
+     * @field password
      * @var string
      * @category DataBase
      */
 	public $DataBaseUser = null;
     /**
      * The database Password
+     * @field password
      * @var string
      * @category DataBase
      */
