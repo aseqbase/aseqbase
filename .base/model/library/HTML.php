@@ -42,7 +42,7 @@ class HTML
                 foreach($isSingle?$attributes:Convert::ToIteration($attributes) as $key=>$value)
                     if(isEmpty($key) || is_integer($key))
                         if(isEmpty($value)) continue;
-                    else $attrdic[$value] = null;
+                        else $attrdic[$value] = null;
                     else {
                         $key = trim(strtolower($key));
                         if($key == "id") $id = $value;
@@ -819,15 +819,15 @@ $attachments"]);
             case 'description':
                 $content = self::Label($title, $value, $attributes);
                 break;
-            case 'object':
-                $content = self::TextInput($title, Convert::ToString($value), $attributes);
-                break;
             case 'collection'://A collection of Base based objects
 
+            case 'object':
+                $content = self::ObjectInput($title, Convert::ToString($value), $attributes);
+                break;
             case 'countable':
             case 'iterable':
             case 'array':
-                $content = self::TextInput($title, Convert::ToString($value), $attributes);
+                $content = self::ArrayInput($title, Convert::ToString($value), $attributes);
                 break;
             case 'lines':
             case 'texts':
@@ -1043,7 +1043,29 @@ $attachments"]);
      */
     public static function ScriptInput($key, $value = null, ...$attributes){
         $Id = Convert::ToKey($key);
-        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input textinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
+        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input scriptinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
+    }
+    /**
+     * The <TEXTAREA> HTML Tag
+     * @param mixed $content The tag name or placeholder
+     * @param mixed $reference The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function ObjectInput($key, $value = null, ...$attributes){
+        $Id = Convert::ToKey($key);
+        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input objectinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
+    }
+    /**
+     * The <TEXTAREA> HTML Tag
+     * @param mixed $content The tag name or placeholder
+     * @param mixed $reference The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function ArrayInput($key, $value = null, ...$attributes){
+        $Id = Convert::ToKey($key);
+        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input arrayinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1053,8 +1075,8 @@ $attachments"]);
      * @return string
      */
     public static function CheckInput($key, $value = null, ...$attributes){
-        if($value) return self::Input($key, $key, "radio", ["class"=>"radioinput", "checked"=>"checked"], $attributes);
-        else return self::Input($key, $key, "radio", ["class"=>"radioinput"], $attributes);
+        if($value) return self::Input($key, $key, "checkbox", ["class"=>"checkinput", "checked"=>"checked"], $attributes);
+        else return self::Input($key, $key, "checkbox", ["class"=>"checkinput"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1134,6 +1156,16 @@ $attachments"]);
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
+    public static function PathInput($key, $value = null, ...$attributes){
+        return self::Input($key, $value, "text", ["class"=>"pathinput", "pattern"=>'[^\<\>\^\`\{\|\}\r\n\t\f\v]*'], $attributes);
+    }
+    /**
+     * The <INPUT> HTML Tag
+     * @param mixed $content The tag name or placeholder
+     * @param mixed $reference The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
     public static function UrlInput($key, $value = null, ...$attributes){
         return self::Input($key, $value, "url", ["class"=>"urlinput"], $attributes);
     }
@@ -1156,6 +1188,26 @@ $attachments"]);
      */
     public static function FileInput($key, $value = null, ...$attributes){
         return self::Input($key, $value, "file", ["class"=>"fileinput"], $attributes);
+    }
+    /**
+     * The <INPUT> HTML Tag
+     * @param mixed $content The tag name or placeholder
+     * @param mixed $reference The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function FilesInput($key, $value = null, ...$attributes){
+        return self::Input($key, $value, "file", ["class"=>"fileinput", "multiple"=>null], $attributes);
+    }
+    /**
+     * The <INPUT> HTML Tag
+     * @param mixed $content The tag name or placeholder
+     * @param mixed $reference The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function DirectoryInput($key, $value = null, ...$attributes){
+        return self::Input($key, $value, "file", ["class"=>"fileinput", "webkitdirectory", "multiple"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1199,6 +1251,16 @@ $attachments"]);
      */
     public static function NumberInput($key, $value = null, ...$attributes){
         return self::Input($key, $value, "number", ["class"=>"numberinput"], $attributes);
+    }
+    /**
+     * The <INPUT> HTML Tag
+     * @param mixed $content The tag name or placeholder
+     * @param mixed $reference The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function FloatInput($key, $value = null, ...$attributes){
+        return self::Input($key, $value, "number", ["class"=>"floatinput", "pattern"=>"\d*.?\d*"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag

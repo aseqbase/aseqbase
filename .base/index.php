@@ -1,5 +1,6 @@
 <?php //MiMFa aseqbase	http://aseqbase.ir
 require_once(__DIR__."/initialize.php");
+RUN("customize");
 if("/".\_::$DIRECTION == MiMFa\Library\User::$InHandlerPath ||
 	ACCESS(\_::$CONFIG->VisitAccess, assign:true, die:true)){
 	if(isValid(\_::$REQUEST))

@@ -6,8 +6,8 @@ class Main extends General{
 	public $AllowSideMenu = true;
 	public $AllowBarMenu = true;
 
-	public function DrawMain(){
-		parent::DrawMain();
+	public function DrawHeader(){
+		parent::DrawHeader();
 		if($this->AllowTopMenu) PART("main-menu");
 		if($this->AllowSideMenu) PART("side-menu");
     }

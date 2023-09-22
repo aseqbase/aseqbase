@@ -1,4 +1,3 @@
-
 <footer>
     <?php
     use MiMFa\Library\Style;
