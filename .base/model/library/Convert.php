@@ -127,7 +127,7 @@ class Convert{
 	public static function ToTitle(){
         $ls=[];
         foreach (self::ToIteration(func_get_args()) as $text)
-            if(!is_null($text)) $ls[] = ucwords(preg_replace('/\W/', " ", $text));
+            if(!is_null($text)) $ls[] = ucwords(trim(preg_replace('/((?<=[^A-Z\s])[A-Z][^A-Z\s]+)/', " $1", preg_replace('/\W/', " ", $text))));
         return join(" - ", array_unique($ls));
 	}
 
