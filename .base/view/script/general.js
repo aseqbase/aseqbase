@@ -66,9 +66,8 @@ const isArray = function (obj, dim = 1) {
 };
 
 const apply = function (func, args, maxArgsNum = 1) {
-	let ct;
 	if (isArray(args))
-		if ((ct = count(args)) > maxArgsNum)
+		if (count(args) > maxArgsNum)
 			return each(args, item => apply(func, item, maxArgsNum));
 		else return func.apply(null, args);
 	else return func(args);
@@ -102,16 +101,6 @@ const array = function (arr) {
 
 const each = function (arr, func = (o, i) => o) {
 	if (isArray(arr))
-		// if(array.isarray(arr))
-		// if(arr.length === 0) return [];
-		// else return array.from(
-		// (function* (){
-		// let i = 0;
-		// for(let item of arr)
-		// yield func(item, i++);
-		// })()
-		// );
-		// else 
 		return Array.from(
 			(function* () {
 				let i = 0;
@@ -290,7 +279,7 @@ const isVisible = (element, partiallyVisible = true) => {
 };
 const isFocused = (element) => document.activeElement === element;
 
-const scrollTo = function (selector = "body :nth-child(1)", time = 1000) {
+const scrollTo = function(selector = "body :nth-child(1)", time = 1000) {
 	$('html, body').animate({
 		scrollTop: parseInt($(selector).offset().top)
 	}, time);

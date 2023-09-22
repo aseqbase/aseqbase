@@ -55,7 +55,7 @@ abstract class ConfigurationBase extends Base {
     );
     /**
      * The requested view key to handle the virtual pathes
-     * @var array<string,string>
+     * @var string
      * @category General
      */
 	public $ViewHandlerKey = "view";

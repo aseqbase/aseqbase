@@ -1,38 +1,38 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\HTML;
 class PrePage extends Module{
+	public $Capturable = true;
 	public $Class = "container";
 	public $Image = null;
 	public $TitleTag = "h1";
 
-	public function EchoStyle(){
-		parent::EchoStyle();?>
-		<style>
-			.<?php echo $this->Name; ?> .description{
-				font-size: <?php echo \_::$TEMPLATE->Size(1); ?>;
+	public function GetStyle(){
+		return parent::GetStyle().HTML::Style("
+			.{$this->Name} .description{
+				font-size: var(--Size-1);
 				text-align: justify;
 				padding: 3vmax 3vmax;
 			}
-			.<?php echo $this->Name; ?> .image{
+			.{$this->Name} .media{
 				background-size: cover;
 				background-position: center;
 				background-repeat: no-repeat;
-				font-size: <?php echo \_::$TEMPLATE->Size(1); ?>;
+				font-size: var(--Size-1);
 			}
-		</style>
-		<?php
+		");
 	}
 
-	public function Echo(){
-		$this->EchoTitle();
-		?>
-		<div class="row">
-			<?php $this->EchoDescription("class='col-md description'");
-			if(isValid($this->Image)){ ?>
-				<div class="blackwhite col-md-4 image" style="background-image: url('<?php echo $this->Image; ?>')"></div>
-			<?php } ?>
-		</div>
-		<?php 
-		$this->EchoContent("class='content'");
+	public function Get(){
+		return $this->GetTitle().HTML::Rack(
+			$this->GetDescription("class='col-md description'").
+			HTML::Media("",$this->Image,["class"=>"blackwhite col-md-4"])
+		).$this->GetContent("class='content'");
 	}
+
+	public function Capture(){
+        if(RECEIVE(\_::$CONFIG->ViewHandlerKey,"GET","page") !== "page") return null;
+        return parent::Capture();
+    }
 }
 ?>

@@ -7,12 +7,12 @@ if(ACCESS(\_::$CONFIG->UserAccess)){
         unset($_REQUEST["submit"]);
         $imgchange = false;
         if(isValid($_FILES,"Image")){
-            if(isValid($_FILES["Image"], "size")){
+            if(isValid($_FILES["Image"], "size") && Local::IsFileObject($_FILES["Image"])){
                 echo HTML::Result("Trying to change the profile picture!");
                 if(isValid(\_::$INFO->User->TemporaryImage) && !Local::DeleteFile(\_::$INFO->User->TemporaryImage))
                     echo HTML::Error("Could not delete your previous picture!");
                 else {
-                    $img = Local::UploadImage(getValid($_FILES,"Image"),\_::$PUBLIC_DIR."images/");
+                    $img = Local::UploadImage($_FILES["Image"],\_::$PUBLIC_DIR."images/");
                     if(!is_null($img)) {
                         $_REQUEST["Image"] = $img;
                         $imgchange = true;

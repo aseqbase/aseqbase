@@ -22,6 +22,7 @@ class Form extends Module{
 	public $SuccessPath = null;
 	public $ErrorPath = null;
 	public $HasDecoration = true;
+	public $ResponseView = null;
 	public $AllowHeader = true;
 	public $AllowContent = true;
 	public $AllowFooter = true;
@@ -42,6 +43,10 @@ class Form extends Module{
 	public function __construct($title = "Form", $action =  null, $method = "POST", mixed $children = [], $description = null){
         parent::__construct();
 		$this->Set($title, $action, $method, $children, $description);
+		if(!is_null($this->ResponseView)){
+            unset($_GET[\_::$CONFIG->ViewHandlerKey]);
+            unset($_REQUEST[\_::$CONFIG->ViewHandlerKey]);
+        }
     }
 	/**
      * Set the main properties of module
@@ -482,6 +487,7 @@ class Form extends Module{
 	public function Get(){
 		$name = $this->Name."_Form";
 		$src = $this->Action??$this->Path??\_::$PATH;
+		$src .=	(is_null($this->ResponseView)?null:((strpos($src,"?")?"&":"?").\_::$CONFIG->ViewHandlerKey."=".$this->ResponseView));
 		if(isValid($src))
 			if($this->HasDecoration)
 				return HTML::Container(

@@ -26,15 +26,21 @@
  *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
  */
 class Base{
+	/**
+	 * The main name of the object
+	 * @var string|null
+	 */
 	public $Name = null;
 	/**
      * Additional Children of the object
-     * @var array<Base>|array<callable>|array<string>|Base|callable|string
+     * @field collection
+     * @var array<string|Base|callable>|Base|callable|string
      * @medium
      */
 	public $Children = null;
 	/**
      * This object is convertable to string and able to embedd anywhere or not
+     * @internal
      * @var bool|null
      */
 	public $Capturable = null;

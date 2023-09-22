@@ -98,18 +98,25 @@ class Convert{
      * @return string
      */
 	public static function ToValue($value, ...$types){
-		if(!is_null($value)){
-			if(is_string($value) && (count($types) == 0 || in_array("string", $types))) return '"'.str_replace("\"","\\\"",$value).'"';
-			if((is_countable($value) || is_iterable($value))){
-				$texts = array();
-				foreach ($value as $key => $val)
-					if(is_numeric($key)) array_push($texts, self::ToValue($val));
-					else array_push($texts, self::ToValue($key)."=>".self::ToValue($val));
-                return join(", ",$texts);
-            }
-            return $value."";
+		if(is_null($value) || $value == "") return "null";
+        else {
+			if(is_string($value) && (count($types) === 0 || in_array("string", $types) || in_array("mixed", $types))) return self::ToStringValue($value);
+			if(is_countable($value) || is_iterable($value)) return self::ToArrayValue($value);
+            return trim($value."");
         }
-		return "";
+    }
+	public static function ToStringValue($value, $quote = '"'){
+        return $quote.preg_replace('/(?<=^|[^\\\\])'.$quote.'/',"\\".$quote,$value).$quote;
+    }
+	public static function ToArrayValue($value, $indention = "\n\t"){
+		$texts = array();
+		foreach ($value as $key => $val)
+			if(is_numeric($key))
+                if(is_countable($val) || is_iterable($val)) array_push($texts, self::ToArrayValue($val, $indention."\t"));
+                else array_push($texts, self::ToValue($val));
+            elseif(is_countable($val) || is_iterable($val)) array_push($texts, self::ToValue($key)."=>".self::ToArrayValue($val, $indention."\t"));
+                else  array_push($texts, self::ToValue($key)."=>".self::ToValue($val));
+        return "[".$indention."\t".join(", ", $texts).$indention."]";
     }
 
 	/**

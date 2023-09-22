@@ -320,7 +320,7 @@ class Field extends Module{
                         if(isFile($this->Value)) $type = "file";
 						else $type = "url";
                     }
-                    elseif(strlen($this->Value)>100 || count(explode("\r\n\t\f\0",$this->Value))>1)
+                    elseif(strlen($this->Value)>100 || count(explode("\r\n\t\f",$this->Value))>1)
 						$type = "strings";
                     else $type = "string";
                 }else $type = strtolower(gettype($this->Value));
@@ -345,16 +345,32 @@ class Field extends Module{
                 case 'label':
                 case 'key':
                 case 'span':
-                    yield "<label id='$id' name='$this->Key' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".Convert::ToString($this->Value)."</label>";
+                case 'title':
+                case 'description':
+					yield HTML::Label($this->Value,);
+                    yield "<label id='$id' name='$this->Key' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs></label>";
                     break;
                 case 'object':
+                    yield "<textarea id='$id' name='$this->Key' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".
+						Convert::ToString($this->Value)
+						."</textarea>";
+                    break;
+                case 'collection':
+                case 'countable':
+                case 'iterable':
                 case 'array':
+                    yield "<textarea id='$id' name='$this->Key' $placeHolderAttr class='input' style='font-size: 75%; overflow-x:scroll; word-wrap: unset;'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".
+						Convert::ToString($this->Value)
+						."</textarea>";
+                    break;
                 case 'lines':
                 case 'texts':
                 case 'strings':
                 case 'multiline':
                 case 'textarea':
-                    yield "<textarea id='$id' name='$this->Key' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>".Convert::ToString($this->Value)."</textarea>";
+                    yield "<textarea id='$id' name='$this->Key' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>"
+						.Convert::ToString($this->Value)
+						."</textarea>";
                     break;
                 case 'line':
                 case 'text':
@@ -408,8 +424,10 @@ class Field extends Module{
                     yield "<input id='$id' name='$this->Key' type='tel' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'url':
-                case 'path':
                     yield "<input id='$id' name='$this->Key' type='url' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
+                    break;
+                case 'path':
+                    yield "<input id='$id' name='$this->Key' type='text' value='".Convert::ToString($this->Value)."' $placeHolderAttr class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." $attrs>";
                     break;
                 case 'doc':
                 case 'document':

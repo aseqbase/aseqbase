@@ -341,7 +341,7 @@
 	 * @return int|bool|null The user accessibility group
 	 */
 	function getAccess($minaccess = null):mixed{
-		if(is_null(\_::$INFO->User)) return \MiMFa\Library\User::CheckAccess(null, $minaccess);
+		if(is_null(\_::$INFO) || is_null(\_::$INFO->User)) return \MiMFa\Library\User::CheckAccess(null, $minaccess);
 		else return \_::$INFO->User->Access($minaccess);
 	}
 
@@ -668,7 +668,7 @@
      * Do a loop action by a callable function on a countable element
      * @param mixed $array
      * @param callable $action The loop action
-     * @param array $array_find_keys
+     * @param array|iterable $array_find_keys
      */
 	function loop($array, callable $action)
 	{
@@ -678,13 +678,29 @@
      * Do a loop action by a callable function on a countable element
      * @param mixed $array
      * @param callable $action The loop action
-     * @param array $array_find_keys
+     * @param array|iterable $array_find_keys
      */
 	function iteration($array, callable $action)
 	{
 		$i = 0;
 		foreach ($array as $key=>$value)
             yield $action($key, $value, $i++);
+    }
+	/**
+	 * Returns the value of the first array element.
+	 * @param array|object|null $array
+	 * @return mixed
+	 */
+	function first($array){
+		return reset($array);
+    }
+	/**
+     * Returns the value of the last array element.
+     * @param array|object|null $array
+     * @return mixed
+     */
+	function last($array){
+		return end($array);
     }
 
 	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/\<\S+[\w\W]*\>/i")

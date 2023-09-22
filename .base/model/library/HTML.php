@@ -815,10 +815,20 @@ $attachments"]);
             case 'label':
             case 'key':
             case 'span':
+            case 'title':
+            case 'description':
                 $content = self::Label($title, $value, $attributes);
                 break;
             case 'object':
+                $content = self::TextInput($title, Convert::ToString($value), $attributes);
+                break;
+            case 'collection'://A collection of Base based objects
+
+            case 'countable':
+            case 'iterable':
             case 'array':
+                $content = self::TextInput($title, Convert::ToString($value), $attributes);
+                break;
             case 'lines':
             case 'texts':
             case 'strings':
@@ -878,8 +888,10 @@ $attachments"]);
                 $content = self::TelInput($title, $value, $attributes);
                 break;
             case 'url':
-            case 'path':
                 $content = self::UrlInput($title, $value, $attributes);
+                break;
+            case 'path':
+                $content = self::ValueInput($title, $value, $attributes);
                 break;
             case "datetime":
                 $content = self::DateTimeInput($title, $value, $attributes);
@@ -945,7 +957,7 @@ $attachments"]);
             case 'html':
             case 'css':
             case 'codes':
-                $content = self::TextInput($title, $value, $attributes);
+                $content = self::ScriptInput($title, $value, $attributes);
                 break;
         	default:
                 $content = self::Input($title, $value, $type, $attributes);
@@ -1020,7 +1032,18 @@ $attachments"]);
      */
     public static function TextInput($key, $value = null, ...$attributes){
         $Id = Convert::ToKey($key);
-        return self::Element($value??"", "textarea", [  "id"=>"$Id", "name"=> $Id, "placeholder"=> $key, "class"=>"input textinput" ], $attributes);
+        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input textinput" ], $attributes);
+    }
+    /**
+     * The <TEXTAREA> HTML Tag
+     * @param mixed $content The tag name or placeholder
+     * @param mixed $reference The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function ScriptInput($key, $value = null, ...$attributes){
+        $Id = Convert::ToKey($key);
+        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input textinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
