@@ -3,7 +3,6 @@ namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
-use UI\Area;
 use MiMFa\Library\Local;
 /**
  * To show a table of items
@@ -13,6 +12,7 @@ use MiMFa\Library\Local;
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules/Table See the Documentation
  */
 class Table extends Module{
+	public $Tag = "table";
 	public $Capturable = true;
 	/**
      * The database table name, to get items automatically
@@ -95,20 +95,37 @@ class Table extends Module{
      * @var array Auto detection
      */
 	public $CellTypes = [];
+	/**
+     * An array of all key=>value columns in data to use for each cell values
+     * @var array Auto detection
+     */
+	public $CellValues = [];
 	public $BorderSize = 1;
 	public $DataCompression = 50;
 	public $SevereSecure = true;
 	public $CryptPassword = true;
+
+	public $Controlable = true;
 	public $Updatable = false;
 	public $UpdateAction = null;
 	public $UpdateMethod = "post";
 	public $UpdateEncType = "multipart/form-data";
 	public $UpdateAccess = 0;
+	public $ViewAccess = 0;
+	public $ViewCondition = null;
 	public $ModifyAccess = 0;
+	public $ModifyCondition = null;
 	public $RemoveAccess = 0;
+	public $RemoveCondition = null;
 	public $AddAccess = 0;
+	public $AddCondition = null;
+	public $SelectQuery = null;
+	public $SelectParameters = null;
+	public $SelectCondition = null;
+	public $AllowLabelTranslation = true;
+	public $AllowDataTranslation = false;
 	public $AllowOptions = true;
-	public $Options = "{
+	public $Options = "
 					paging: true,
 					searching: true,
 					ordering:  true,
@@ -119,11 +136,10 @@ class Table extends Module{
 					autoWidth: false,
 					fixedHeader: true,
 					responsive: true
-	}";
+	";
 	public $TextWrap = false;
 	public $MediaWidth = "50px";
 	public $MediaHeight = "50px";
-	public $Tag = "table";
 	public $Modal = null;
 
 	/**
@@ -153,15 +169,22 @@ class Table extends Module{
 		.{$this->Name} tr th{
 			font-weight: bold;
 		}
-		.{$this->Name} tr td{
+		.{$this->Name} tr :is(td,th){
 			".Style::DoProperty("text-wrap",($this->TextWrap===true?"pretty":($this->TextWrap===false?"nowrap":$this->TextWrap)))."
 		}
-		.{$this->Name} tr td .media{
+		.{$this->Name} tr :is(td,th) .media:not(.icon){
 			".Style::DoProperty("width",$this->MediaWidth)."
 			".Style::DoProperty("height",$this->MediaHeight)."
 			display: inline-grid;
 			align-items: center;
 			text-align: center;
+		}
+		.{$this->Name} .media.icon{
+			cursor: pointer;
+		}
+		.{$this->Name} .media.icon:hover{
+			border-color: transparent;
+			".Style::UniversalProperty("filter","drop-shadow(var(--Shadow-2))")."
 		}
 		.{$this->Name} .field {
 			width: 100%;
@@ -172,28 +195,59 @@ class Table extends Module{
 		");
 	}
 
+	public function Capture(){
+		if(
+			isValid($this->Table)
+			&& isValid($this->ColumnKey)
+			&& $this->Controlable
+			&& $this->Updatable
+			&& getAccess($this->UpdateAccess)
+		){
+            MODULE("Modal");
+            if(is_null($this->Modal)) $this->Modal = new Modal();
+            $this->Modal->Name = "FormModal";
+            $res = $this->Action();
+            if(!isEmpty($res)) return $res;
+            $this->Modal->AllowDownload =
+            $this->Modal->AllowFocus =
+            $this->Modal->AllowShare =
+            $this->Modal->AllowZoom =
+                false;
+            $this->Modal->Style = new Style();
+            $this->Modal->Style->TextAlign = "initial";
+            $this->Modal->Style->BackgroundColor = "var(--BackColor-0)";
+            $this->Modal->Style->Color = "var(--ForeColor-0)";
+            $this->Modal->Draw();
+			return parent::Capture();
+        }
+		return parent::Capture();
+    }
+
 	public function Get(){
-		$isu = $this->Updatable && getAccess($this->UpdateAccess);
+		$isc = $this->Controlable;
+		$isu = $isc && $this->Updatable && getAccess($this->UpdateAccess);
 		if(isValid($this->Table) && isValid($this->ColumnKey)){
-            if($isu){
-                MODULE("Modal");
-                if(is_null($this->Modal)) $this->Modal = new Modal();
-                $this->Modal->Name = "FormModal";
-                $this->Action();
-                $this->Modal->AllowDownload =
-                $this->Modal->AllowFocus =
-                $this->Modal->AllowShare =
-                $this->Modal->AllowZoom =
-					false;
-                $this->Modal->Style = new Style();
-				$this->Modal->Style->TextAlign = "initial";
-				$this->Modal->Style->BackgroundColor = "var(--BackColor-0)";
-				$this->Modal->Style->Color = "var(--ForeColor-0)";
-                $this->Modal->Draw();
-            }
-            $this->Items = \MiMFa\Library\DataBase::DoSelect($this->Table,
-					isEmpty($this->IncludeColumnKeys)?"*":("`".join("`, `",$this->IncludeColumnKeys)."`"),
-					isEmpty($this->IncludeRowKeys)?null:("{$this->ColumnKey} IN('".join("', '",$this->IncludeRowKeys)."')"),
+            //if($isu){
+            //    MODULE("Modal");
+            //    if(is_null($this->Modal)) $this->Modal = new Modal();
+            //    $this->Modal->Name = "FormModal";
+            //    $res = $this->Action();
+            //    if(!isEmpty($res)) return $res;
+            //    $this->Modal->AllowDownload =
+            //    $this->Modal->AllowFocus =
+            //    $this->Modal->AllowShare =
+            //    $this->Modal->AllowZoom =
+            //        false;
+            //    $this->Modal->Style = new Style();
+            //    $this->Modal->Style->TextAlign = "initial";
+            //    $this->Modal->Style->BackgroundColor = "var(--BackColor-0)";
+            //    $this->Modal->Style->Color = "var(--ForeColor-0)";
+            //    $this->Modal->Draw();
+            //}
+            $this->Items = isValid($this->SelectQuery)?\MiMFa\Library\DataBase::TrySelect($this->SelectQuery, $this->SelectParameters, $this->Items):
+				\MiMFa\Library\DataBase::DoSelect($this->Table,
+					isEmpty($this->IncludeColumnKeys)?"*":(in_array($this->ColumnKey, $this->IncludeColumnKeys)?$this->IncludeColumnKeys:[$this->ColumnKey, ...$this->IncludeColumnKeys]),
+					[$this->SelectCondition, isEmpty($this->IncludeRowKeys)?null:("{$this->ColumnKey} IN('".join("', '",$this->IncludeRowKeys)."')")],
 					[], $this->Items
 				);
         } else $isu = false;
@@ -217,12 +271,17 @@ class Table extends Module{
 		$hrn = !is_null($this->StartRowNumber);
 		$scn = $this->StartColumnNumber;
 		$hcn = !is_null($scn);
+		$uck = "";
+		if($isu){
+			$uck = HTML::Division(getAccess($this->AddAccess)? HTML::Icon("plus","{$this->Modal->Name}_Create();") : HTML::Image("tasks"));
+			if($ick) array_unshift($icks, $uck);
+        }
 		$strow = "<tr>";
 		$etrow = "</tr>";
 		if(is_countable($this->Items) && count($this->Items) > 0){
             $cells = [];
             foreach ($this->Items as $rkey=>$row){
-				$rowid = getValid($row,$this->ColumnKey, null);
+				$rowid = getValid($row, $this->ColumnKey, null);
                 if(
 					(!$irk || in_array($rkey, $irks)) &&
 					(!$erk || !in_array($rkey, $erks)) &&
@@ -230,12 +289,13 @@ class Table extends Module{
 				){
                     $isrk = ($rkey === $this->RowKey) || in_array($rkey,$clks) || ($hasid && $rowid === $rkey);
                     if($rkls) array_unshift($row,is_integer($rkey)?($hrn?$rkey+$srn:""):$rkey);
-					if($isu && !is_null($rowid)){
-                        $row = [
-							...[(getAccess($this->AddAccess)? HTML::Icon("plus","{$this->Modal->Name}_Create();") : HTML::Image(null,"tasks"))=>HTML::Division([
-									...(getAccess($this->ModifyAccess)? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
-									...(getAccess($this->RemoveAccess)? [HTML::Icon("trash","{$this->Modal->Name}_Delete(`$rowid`);")] : [])
-								])],
+					if($isc){
+                        $row = is_null($rowid)?[$uck=>$uck,...$row]:[
+							$uck=>HTML::Division([
+									...(getAccess($this->ViewAccess)? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);")] : []),
+									...($isu && getAccess($this->ModifyAccess)? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
+									...($isu &&getAccess($this->RemoveAccess)? [HTML::Icon("trash","{$this->Modal->Name}_Delete(`$rowid`);")] : [])
+								]),
 							...$row
 							];
                     }
@@ -267,9 +327,18 @@ class Table extends Module{
 	public function GetScript(){
 		if($this->AllowOptions)
 			return HTML::Script("$(document).ready(()=>{
-					$('.{$this->Name}').DataTable(".Convert::ToString($this->Options).");
+					$('.{$this->Name}').DataTable({".(Convert::ToString($this->Options).
+						($this->Controlable?", 'columnDefs': [{ 'targets': 0, 'orderable': false }]":"")
+					)."});
 				});".
 				(is_null($this->Modal)?"":("
+					function {$this->Modal->Name}_View(key){
+						postData(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=view&{$this->ColumnKey}='+key, `.{$this->Name}`,
+							(data,selector)=>{
+								{$this->Modal->ShowScript("null","null","data")}
+							}
+						);
+					}
 					function {$this->Modal->Name}_Create(){
 						postData(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=create&{$this->ColumnKey}=_table_add', `.{$this->Name}`,
 							(data,selector)=>{
@@ -285,7 +354,7 @@ class Table extends Module{
 						);
 					}
 					function {$this->Modal->Name}_Delete(key){
-						".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this record?", styling:false)."`))":"")."
+						".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?", styling:false)."`))":"")."
 							postData(null, `".\_::$CONFIG->ViewHandlerKey."=value&action=delete&{$this->ColumnKey}=`+key, `.{$this->Name}`,
 							(data,selector)=>{
 								load();
@@ -297,26 +366,27 @@ class Table extends Module{
     }
 
 	public function GetCell($cel, $key, $isHead = false){
-		$cel = Convert::ToString($cel);
-        //if($this->Updatable && !$isHead && $key > 1){
+		if($isHead){
+            $cel = Convert::ToString($cel);
+			if(isFile($cel)) return "<th>".HTML::Media($cel)."</th>";
+			else return "<th>".__($cel, translation:$this->AllowLabelTranslation, styling:false)."</th>";
+        }
+		//if($this->Updatable && !$isHead && $key > 1){
         //    $cel = new Field(key:$key, value: $cel, lock: true, type:getValid($this->CellTypes,$key, null));
         //    $cel->MinWidth = $this->MediaWidth;
         //    $cel->MaxHeight = $this->MediaHeight;
         //    return "<td>".Convert::ToString($cel)."</td>";
         //}
-        if(isFile($cel)){
-            if($isHead) return "<th>".HTML::Media($cel)."</th>";
-            else return "<td>".HTML::Media($cel)."</td>";
-        }
-        if($isHead) return "<th>".__($cel, translation:true, styling:false)."</th>";
-		$cel = __($cel, translation:false, styling:false);
+		$celv = getValid($this->CellValues, $key);
+		$cel = Convert::ToString(Convert::By($celv, $key, $cel)??$cel);
+        if(isFile($cel)) return "<td>".HTML::Media($cel)."</td>";
+		$cel = __($cel, translation:$this->AllowDataTranslation, styling:false);
         if(!$this->TextWrap && !startsWith($key,"<")) return "<td>".Convert::ToExcerpt($cel, 0, $this->DataCompression, "...".HTML::Tooltip($cel))."</td>";
         return "<td>$cel</td>";
     }
 
 	public function Action(){
-		$res = $this->GetAction();
-		if(!isEmpty($res)) SEND($res);
+		return $this->GetAction();
     }
 	public function GetAction(){
         if(RECEIVE(null, $this->UpdateMethod)){
@@ -327,13 +397,77 @@ class Table extends Module{
 			if(!is_null($key)){
 				$method = RECEIVE("action", $this->UpdateMethod);
                 switch ($method) {
+                    case "view":
+                        if(!getAccess($this->ViewAccess)) return HTML::Error("You have not access to see datails!");
+						MODULE("Form");
+						$row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ViewCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$key]);
+						if(count($row) > 0) $row = $row[0];
+						else return HTML::Error("You can not see this item!");
+                        $form = new Form(
+							title:getValid($row,"Title",null)??getValid($row,"Name",null),
+							description:getValid($row,"Description",null),
+							action:'#',
+							method:"",
+							children:(function() use($row){
+                                yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
+                                foreach ($row as $k=>$cell){
+                                    if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $cell);
+                                    else {
+										$type = getValid($this->CellTypes, $k, "");
+										if(is_string($type)){
+											$type = strtolower($type);
+											switch($type){
+												case "pass":
+												case "password":
+													$type = false;
+													break;
+												case "file":
+												case "files":
+												case "doc":
+												case "docs":
+												case "document":
+												case "documents":
+												case "image":
+												case "images":
+												case "video":
+												case "videos":
+												case "audio":
+												case "audios":
+													$type = false;
+													break;
+											}
+                                        }
+										if($type !== false) yield HTML::Field(
+											type:(isEmpty($type)?null:$type),
+											key:$k,
+											value:$cell,
+											attributes:["disabled"]
+										);
+                                    }
+                                }
+							})());
+						$form->Image = getValid($row,"Image","eye");
+						$form->Template = "h";
+						$form->SubmitLabel = null;
+						$form->ResetLabel = null;
+						$form->CancelLabel = "Cancel";
+						$form->CancelPath = $this->Modal->HideScript();
+						$form->SuccessPath = \_::$PATH;
+						$form->BackLabel = null;
+						//$form->AllowHeader = false;
+						return $form->Capture();
                     case "modify":
                         if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
 						MODULE("Form");
-						$row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", "`{$this->ColumnKey}`=:{$this->ColumnKey}", [":{$this->ColumnKey}"=>$key])[0];
+						$row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$key]);
+						if(count($row) > 0) $row = $row[0];
+						else return HTML::Error("You can not modify this item!");
                         $form = new Form(
-							getValid($row,"Name",null)??getValid($row,"Title",null), $this->UpdateAction, $this->UpdateMethod,
-							(function() use($row){
+							title:getValid($row,"Title",null)??getValid($row,"Name",null),
+							description:getValid($row,"Description",null),
+							action:$this->UpdateAction,
+							method:$this->UpdateMethod,
+							children:(function() use($row){
                                 yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
                                 foreach ($row as $k=>$cell){
                                     if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $cell);
@@ -362,11 +496,16 @@ class Table extends Module{
 													break;
 											}
                                         }
-										if($type !== false) yield HTML::Field(isEmpty($type)?null:$type, $k, $cell);
+										if($type !== false) yield HTML::Field(
+											type:(isEmpty($type)?null:$type),
+											key:$k,
+											value:$cell
+										);
                                     }
                                 }
-							})(), getValid($row,"Description",null));
+							})());
 						$form->Image = getValid($row,"Image","edit");
+						$form->Template = "b";
 						$form->CancelLabel = "Cancel";
 						$form->CancelPath = $this->Modal->HideScript();
 						$form->SuccessPath = \_::$PATH;
@@ -378,19 +517,23 @@ class Table extends Module{
 						MODULE("Form");
 						$row = \MiMFa\Library\DataBase::TrySelect("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$this->Table}'");
                         $form = new Form(
-							"Add {$this->Title}", $this->UpdateAction, $this->UpdateMethod,
-							(function() use($row, $key){
+							title:"Add {$this->Title}",
+							description:getValid($row,"Description",null),
+							action:$this->UpdateAction,
+							method:$this->UpdateMethod,
+							children:(function() use($row, $key){
                                 yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
                                 foreach ($row as $value){
 									$k = $value["COLUMN_NAME"];
                                     if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $key);
                                     else {
 										$type = getValid($this->CellTypes, $k, $value["DATA_TYPE"]);
-										if($type !== false) yield HTML::Field(isEmpty($type)?null:$type, $k);
+										if($type !== false) yield HTML::Field(type:isEmpty($type)?null:$type, key:$k);
 									}
                                 }
-							})(), getValid($row,"Description",null));
+							})());
 						$form->Image = getValid($row,"Image","plus");
+						$form->Template = "b";
 						$form->CancelLabel = "Cancel";
 						$form->CancelPath = $this->Modal->HideScript();
 						$form->SuccessPath = \_::$PATH;
@@ -399,9 +542,9 @@ class Table extends Module{
 						return $form->Capture();
                     case "delete":
                         if(!getAccess($this->RemoveAccess)) return HTML::Error("You have not access to delete!");
-                        if(\MiMFa\Library\DataBase::DoDelete($this->Table, "`{$this->ColumnKey}`=:{$this->ColumnKey}", [":{$this->ColumnKey}"=>$key]))
-							return HTML::Success("The record removed successfully!");
-						return HTML::Error("Could not remove data!");
+                        if(\MiMFa\Library\DataBase::DoDelete($this->Table, [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$key]))
+							return HTML::Success("The items removed successfully!");
+						return HTML::Error("You can not remove this item!");
                     default:
 						$vals = RECEIVE(null, $this->UpdateMethod);
 						try{
@@ -433,14 +576,14 @@ class Table extends Module{
 								unset($vals[$this->ColumnKey]);
 								foreach ($vals as $k=>$v)
 									if(isEmpty($v)) unset($vals[$k]);
-								if(\MiMFa\Library\DataBase::DoInsert($this->Table, null, $vals))
+								if(\MiMFa\Library\DataBase::DoInsert($this->Table, $this->AddCondition, $vals))
 									return HTML::Success("The information added successfully!");
-								return HTML::Error("Could not add data!");
+								return HTML::Error("You can not add this item!");
                             default:
 								if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
-								if(\MiMFa\Library\DataBase::DoUpdate($this->Table, "`{$this->ColumnKey}`=:{$this->ColumnKey}", $vals))
+								if(\MiMFa\Library\DataBase::DoUpdate($this->Table,  [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], $vals))
 									return HTML::Success("The information updated successfully!");
-								return HTML::Error("Could not update data!");
+								return HTML::Error("You can not update this item!");
                         }
                 }
             }

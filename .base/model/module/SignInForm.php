@@ -16,7 +16,7 @@ class SignInForm extends Form{
 	public $PasswordPlaceHolder = "Password";
 	public $SignUpLabel = "Do not have an account?";
 	public $RememberLabel = "Forgot your password?";
-	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="$IMAGE"><br><p class="welcome">Hello dear $NAME,<br>You are signed in now!</p></div>';
+	public $WelcomeFormat = '<div class="welcome result success"><br><p class="welcome">Hello dear $NAME,<br>You are signed in now!</p></div>';
 	public $WelcomePart = null;
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
@@ -31,7 +31,7 @@ class SignInForm extends Form{
 	}
 
 	public function GetStyle(){
-		if($this->HasDecoration) return parent::GetStyle().HTML::Style("
+		if($this->HasDecoration) return ((getAccess(\_::$CONFIG->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).HTML::Style("
 			.{$this->Name} .btn-facebook {
 				background-color: #405D9D55 !important;
 			}
@@ -57,12 +57,6 @@ class SignInForm extends Form{
 			}
 			.{$this->Name} div.welcome {
 				text-align: center;
-			}
-			.{$this->Name} div.welcome img.welcome {
-				width: 50%;
-				max-width: 300px;
-				border-radius: 100%;
-				margin: var(--Size-1);
 			}
 			.{$this->Name} div.welcome p.welcome {
 				text-align: center;

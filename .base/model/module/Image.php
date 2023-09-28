@@ -1,5 +1,8 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\HTML;
 class Image extends Module{
+	public $Capturable = true;
 	public $Source = null;
 	public $Image = null;
 	public $Tag = null;
@@ -53,33 +56,33 @@ class Image extends Module{
 		return $this;
     }
 
-	public function EchoStyle(){
-		parent::EchoStyle();
-?>
-		<style>
-		.<?php echo $this->Name; ?>{
-			min-width:  <?php echo $this->MinWidth; ?>;
-			min-height:  <?php echo $this->MinHeight; ?>;
-			max-width:  <?php echo $this->MaxWidth; ?>;
-			max-height:  <?php echo $this->MaxHeight; ?>;
-			width:  <?php echo $this->Width; ?>;
-			height: <?php echo $this->Height; ?>;
+	public function GetStyle(){
+		return parent::GetStyle().HTML::Style("
+		.{$this->Name}{
+			min-width:  {$this->MinWidth};
+			min-height:  {$this->MinHeight};
+			max-width:  {$this->MaxWidth};
+			max-height:  {$this->MaxHeight};
+			width:  {$this->Width};
+			height: {$this->Height};
 			background-position: center;
 			background-repeat: no-repeat;
 			background-size: contain;
 		}
-		</style>
-		<?php 
+		");
 	}
 
-	public function Echo(){
-		parent::Echo();
+	public function Get(){
 		$src = $this->Source??$this->Image;
-		if(isValid($src)) 
-			if($this->AllowOriginal)
-				if(isFormat($src,".svg")) echo "<embed ".$this->GetDefaultAttributes()." src=\"".$src."\"></embed>";
-				else echo "<img ".$this->GetDefaultAttributes()." src=\"$src\"/>";
-			else echo "<div ".$this->GetDefaultAttributes()." style=\"background-image: url('$src');\"></div>";
+		return parent::Get().
+			(
+				isValid($src)? (
+					$this->AllowOriginal? (
+							isFormat($src,".svg")? "<embed ".$this->GetDefaultAttributes()." src=\"".$src."\"></embed>"
+								:"<img ".$this->GetDefaultAttributes()." src=\"$src\"/>"
+					) :"<div ".$this->GetDefaultAttributes()." style=\"background-image: url('$src');\"></div>"
+				) :null
+			);
 	}
 }
 ?>

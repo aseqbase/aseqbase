@@ -29,7 +29,7 @@ class Form extends Module{
 
 	public $FieldsForeColor = "var(--ForeColor-1)";
 	public $FieldsBackColor = "var(--BackColor-1)";
-	public $FieldsBorderColor = "var(--ForeColor-5)";
+	public $FieldsBorderColor = "var(--ForeColor-4)";
 	public $FieldsHeight = "auto";
 	public $FieldsWidth = "100%";
 	public $FieldsMinHeight = "10px";
@@ -104,6 +104,10 @@ class Form extends Module{
 					color: var(--ForeColor-0);
 				}
 
+				.{$this->Name} .content .title {
+					white-space: nowrap;
+				}
+
 				.{$this->Name} .button {
 					background-color: inherit;
 					color: inherit;
@@ -165,8 +169,6 @@ class Form extends Module{
 					position: relative;
 					text-align: initial;
 					vertical-align: top;
-					margin-top: var(--Size-0);
-					margin-bottom: 0px;
 					padding: 0px var(--Size-0);
 					z-index: 1;
 					".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
@@ -253,9 +255,9 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
-				border-radius: 3px;
-				border: var(--Border-1);
-				border-color: transparent;
+				border: none;
+				border-bottom: var(--Border-1);
+				".Style::DoProperty("border-color", $this->FieldsBorderColor)."
 				border-radius: var(--Radius-0);
 				margin: 5px;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
@@ -270,8 +272,7 @@ class Form extends Module{
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .field:hover .input{
-				outline: none;
-				".Style::DoProperty("border-color", $this->FieldsBorderColor)."
+				".Style::DoProperty("outline-color", $this->FieldsBorderColor)."
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .field:hover label.description{

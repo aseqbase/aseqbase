@@ -65,6 +65,12 @@ const isArray = function (obj, dim = 1) {
 	return false;
 };
 
+const isIterable = function (obj) {
+	// checks for null and undefined
+	if (obj == null) return false;
+	return typeof obj[Symbol.iterator] === 'function';
+}
+
 const apply = function (func, args, maxArgsNum = 1) {
 	if (isArray(args))
 		if (count(args) > maxArgsNum)

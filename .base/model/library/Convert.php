@@ -9,6 +9,19 @@ namespace MiMFa\Library;
 */
 class Convert{
 	/**
+     * Convert everything through the costum converter
+     */
+	public static function By($converter, ...$args){
+        if(is_null($converter)) return null;
+		if(is_countable($converter) || is_iterable($converter))
+            return iterator_to_array((function() use($converter, $args){
+                foreach ($converter as $c) yield self::By($c, ...$args);
+            })());
+        if(is_callable($converter) || $converter instanceof \Closure) return $converter(...$args);
+        return $converter;
+	}
+
+	/**
      * Get an Excerpt text of a bigger one
      * @param string $text
      * @return string
@@ -77,19 +90,28 @@ class Convert{
                 }
                 return join($separator,$texts);
             }
-			if(is_callable($value)) return self::ToString($value(), $separator, $spacer);
+			if(is_callable($value) || $value instanceof \Closure) return self::ToString($value(), $separator, $spacer);
             return $value."";
         }
 		return "";
     }
 
 	/**
-     * Convert a text to normal Name
+     * Convert a text to an Identifier
      * @param string $text
      * @return string
      */
-	public static function ToKey($text, $normalize = false, $invalid = '/\W/'){
-        if(!($normalize || preg_match($invalid, $text))) return $text;
+	public static function ToId($text){
+        return self::ToKey($text, true, '/[^A-Za-z0-9\_\-\$]/');
+	}
+	/**
+     * Convert a text to a Key Name
+     * @param string $text
+     * @return string
+     */
+	public static function ToKey($text, $normalize = false, $invalid = '/[^\w\[\]\_\-\$]/'){
+        if(is_null($text)) return "_".getId();
+        if(!$normalize && !preg_match($invalid, $text)) return $text;
         return preg_replace($invalid, "", ucwords($text??""));
 	}
 	/**
@@ -116,7 +138,7 @@ class Convert{
                 else array_push($texts, self::ToValue($val));
             elseif(is_countable($val) || is_iterable($val)) array_push($texts, self::ToValue($key)."=>".self::ToArrayValue($val, $indention."\t"));
                 else  array_push($texts, self::ToValue($key)."=>".self::ToValue($val));
-        return "[".$indention."\t".join(", ", $texts).$indention."]";
+        return "{$indention}[{$indention}\t".join(", ", $texts)."{$indention}]";
     }
 
 	/**
@@ -127,7 +149,7 @@ class Convert{
 	public static function ToTitle(){
         $ls=[];
         foreach (self::ToIteration(func_get_args()) as $text)
-            if(!is_null($text)) $ls[] = ucwords(trim(preg_replace('/((?<=[^A-Z\s])[A-Z][^A-Z\s]+)/', " $1", preg_replace('/\W/', " ", $text))));
+            if(!is_null($text)) $ls[] = ucwords(trim(preg_replace('/(?<=[^A-Z\s])([A-Z])/', " $1", preg_replace('/\W/', " ", $text))));
         return join(" - ", array_unique($ls));
 	}
 
@@ -182,7 +204,7 @@ class Convert{
                 $person = \_::$INFO->User->Get(getValid($additionalKeys,'$SIGNATURE'));
                 if(!isset($additionalKeys['$SIGNATURE'])) $additionalKeys['$SIGNATURE'] = getValid($person,"Signature")??\_::$INFO->User->TemporarySignature;
                 if(!isset($additionalKeys['$NAME'])) $additionalKeys['$NAME'] = getValid($person,"Name")??\_::$INFO->User->TemporaryName;
-                $email =  getValid($person,"Email")??\_::$INFO->User->TemporaryEmail;
+                $email = getValid($person,"Email")??\_::$INFO->User->TemporaryEmail;
                 if(!isset($additionalKeys['$EMAILLINK'])) $additionalKeys['$EMAILLINK'] = HTML::Link($email, "mailto:$email");
                 if(!isset($additionalKeys['$EMAIL'])) $additionalKeys['$EMAIL'] = $email;
                 if(!isset($additionalKeys['$IMAGE'])) $additionalKeys['$IMAGE'] = getValid($person,"Image")??\_::$INFO->User->TemporaryImage;

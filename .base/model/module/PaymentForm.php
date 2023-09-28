@@ -38,8 +38,30 @@ class PaymentForm extends Form{
 	public function GetFields(){
         MODULE("Field");
 		$mod = new Field();
-        yield ($mod->Set("float","Value", $this->Value, $this->Unit." ".$this->Network, null, [...(is_null($this->MaximumValue)?[]:["maximum"=>$this->MaximumValue]),...(is_null($this->MinimumValue)?[]:["minimum"=>$this->MinimumValue])], true, !is_null($this->Value)))->Capture();
-		yield ($mod->Set("text","Transaction", $this->Transaction, null, null, null, true, !is_null($this->Transaction)))->ReCapture();
+        yield (
+			$mod->Set(
+					type:"float",
+					key:"Value",
+					value:$this->Value,
+					description:$this->Unit." ".$this->Network,
+					options:null,
+					attributes:[...(is_null($this->MaximumValue)?[]:["maximum"=>$this->MaximumValue]),...(is_null($this->MinimumValue)?[]:["minimum"=>$this->MinimumValue])],
+					required:true,
+					lock:!is_null($this->Value)
+				)
+			)->Capture();
+		yield (
+			$mod->Set(
+				type:"text",
+				key:"Transaction", 
+				value:$this->Transaction,
+				description:null,
+				options:null, 
+				attributes:null,
+				required:true,
+				lock:!is_null($this->Transaction)
+			)
+		)->ReCapture();
 	}
 	public function GetContent($attr = null){
 		if($this->ExternalLink && $this->QRCodeBox != null && isValid($this->Path)){

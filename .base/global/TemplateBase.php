@@ -31,8 +31,8 @@
 		//4:	Input BackColor
 		//5:	Button BackColor
 		public $ColorPalette = array("#dd2222","#22dd22","#2222dd","#dddd22","#22dddd","#dd22dd");
-		public $ForeColorPalette = array("#010203","#010203","#010203","#010203","#fdfeff","#fdfeff");
-		public $BackColorPalette = array("#fafcfd","#fdfeff","#fdfeff","#fafcfd","#3aa3e9","#3aa3e9");
+		public $ForeColorPalette = array("#030405","#010203","#010203","#040506","#3aa3e9","#fdfeff");
+		public $BackColorPalette = array("#fcfdfe","#fafbfc","#fafbfc","#fafcfd","#fdfeff","#3aa3e9");
 		public $FontPalette = array("'dubai light', sans-serif","'dubai', sans-serif","'dubai', sans-serif","'Tahoma', sans-serif","'Tahoma', sans-serif","'Times new Romance', sans-serif");
 		public $SizePalette = array("2.3vh","2.4vh","2.6vh","3vh","3.6vh","4.4vh","5.4vh");
 		public $ShadowPalette = array("none","4px 7px 20px #00000005","4px 7px 20px #00000015","4px 7px 20px #00000030","5px 10px 25px #00000030","5px 10px 25px #00000050","5px 10px 50px #00000050");

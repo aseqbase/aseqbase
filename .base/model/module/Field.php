@@ -9,12 +9,12 @@ class Field extends Module{
 	public $Template = null;
 	/**
      * The key name of the field
-     * @var string|null
+     * @var mixed
      */
 	public $Key = null;
 	/**
      * Can be a datatype or an input type
-     * @var object|string|null
+     * @var object|string|array|callable|\Closure|\stdClass|null
      */
 	public $Type = "text";
 	/**
@@ -69,9 +69,10 @@ class Field extends Module{
      * @param bool|null $lock Indicate the field be static or changable
      * @return Field
      */
-	public function __construct($type = null, $title = null, $value = null, $description = null, $options = null, $attributes = null, $required = null, $lock = null, $key = null){
+	public function __construct($type = null, $key = null, $value = null, $description = null, $options = null, $attributes = null, $required = null, $lock = null, $title = null){
         parent::__construct();
-		$this->Set($type, $title, $value, $description, $options,  $attributes, $required, $lock, $key);
+		$this->Set($type, $key, $value, $description, $options,  $attributes, $required, $lock, $title);
+		$this->Tag = null;
     }
 	/**
 	 * Change the inputs tool
@@ -84,15 +85,15 @@ class Field extends Module{
      * @param bool|null $lock Indicate the field be static or changable
 	 * @return Field
 	 */
-	public function Set($type = null, $title = null, $value = null, $description = null, $options = null, $attributes = null, $required = null, $lock = null, $key = null){
+	public function Set($type = null, $key = null, $value = null, $description = null, $options = null, $attributes = null, $required = null, $lock = null, $title = null){
 		if(!is_null($type)){
 			if(is_string($type)) $this->Type = $type;
 			else $this->Type = gettype($type);
-			if(is_null($value) && is_null($title))
+			if(is_null($value) && is_null($key))
 				$value = $type;
         } else $this->Type = null;
-		$this->Title = $title;
-		$this->Key = $key??Convert::ToKey($this->Title);
+		$this->Title = $title??Convert::ToTitle(Convert::ToString($key));
+		$this->Key = $key??Convert::ToKey(Convert::ToString($title));
 		$this->Value = $value;
 		$this->Description = $description;
 		$this->Options = $options;
@@ -310,120 +311,25 @@ class Field extends Module{
 
 	public function Get(){
 		return Convert::ToString(function(){
-            yield $this->GetContent();
-            $id = $this->Key.getID();
-            if(isValid($this->Title)) yield HTML::Label($this->Title, $id, ["class"=>"title"]);
-            if(is_null($this->Type)){
-                if(isEmpty($this->Value)) $type = "text";
-                elseif(is_string($this->Value)){
-                    if(isUrl($this->Value)) {
-                        if(isFile($this->Value)) $type = "file";
-						else $type = "url";
-                    }
-                    elseif(strlen($this->Value)>100 || count(explode("\r\n\t\f\v",$this->Value))>1)
-						$type = "strings";
-                    else $type = "string";
-                }else $type = strtolower(gettype($this->Value));
-            } elseif(is_object($this->Type)){
-                $type = getValid($this->Type,"Type","string");
-                $this->Key = getValid($this->Type,"Key",$this->Key);
-                $this->Value = getValid($this->Type,"Value",$this->Value);
-                $this->Title = getValid($this->Type,"Title",$this->Title);
-                $this->Description = getValid($this->Type,"Description",$this->Description);
-                $this->PlaceHolder = getValid($this->Type,"PlaceHolder",$this->PlaceHolder);
-                $this->Options = getValid($this->Type,"Options",$this->Options);
-                $this->Attributes = getValid($this->Type,"Attributes",$this->Attributes);
-            } elseif(is_countable($this->Type)){
-                if(is_null($this->Options)) $this->Options = $this->Type;
-                $type = "select";
-            } else $type = strtolower($this->Type);
+			$type = HTML::InputDetector($this->Type, $this->Value);
             $placeHolder = __($this->PlaceHolder??$this->Title, styling:false);
             $placeHolderAttr = isValid($placeHolder)?"placeholder='$placeHolder'":"";
             $attrs = "class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." ".Convert::ToString($this->Attributes, " ");
-
-            switch ($type) {
-                case 'label':
-                case 'key':
-                case 'span':
-                case 'title':
-                case 'description':
-					yield HTML::Label($this->Value, $this->Options, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'collection':
-                case 'object':
-					yield HTML::ObjectInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'countable':
-                case 'iterable':
-                case 'array':
-					yield HTML::ArrayInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'lines':
-                case 'texts':
-                case 'strings':
-                case 'multiline':
-                case 'textarea':
-					yield HTML::TextInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'line':
-                case 'text':
-                case 'value':
-                case 'string':
-                case 'singleline':
-					yield HTML::ValueInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'enum':
-                case 'dropdown':
-                case 'combobox':
-                case 'select':
-					yield HTML::SelectInput($this->Key, $this->Value, $this->Options, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'radio':
-                case 'radiobox':
-                case 'radiobutton':
-					yield HTML::RadioInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key, "value"=>$placeHolder], $attrs);
-                    break;
-                case 'bool':
-                case 'boolean':
-                case 'check':
-                case 'checkbox':
-                case 'checkbutton':
-					yield HTML::CheckInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key, "value"=>$placeHolder], $attrs);
-                    break;
-                case 'int':
-                case 'integer':
-                case 'short':
-                case 'long':
-                case 'number':
-					yield HTML::NumberInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'range':
-					$min = is_array($this->Options)?min($this->Options):0;
-					$max = is_array($this->Options)?max($this->Options):100;
-					yield HTML::RangeInput($this->Key, $this->Value, $min, $max, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'float':
-                case 'double':
-                case 'decimal':
-					yield HTML::FloatInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'phone':
-                case 'tel':
-                case 'telephone':
-					yield HTML::TelInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'url':
-					yield HTML::UrlInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'path':
-					yield HTML::PathInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
+			$startTag = "<div class=\"field\">";
+            $id = $this->Key.getID();
+            if(isValid($this->Title)) $startTag .= HTML::Label($this->Title, $id, ["class"=>"title"]);
+			$endTag = "";
+            if(isValid($this->Description)) $endTag .= HTML::Label($this->Description, $id, ["class"=>"description"]);
+			$endTag .= "</div>";
+			yield $this->GetContent();
+			switch ($type) {
                 case 'doc':
                 case 'document':
                 case 'image':
                 case 'audio':
                 case 'video':
                 case 'file':
+					yield $startTag;
                     $p = null;
                     if(isValid($this->Value)){
                         MODULE("Player");
@@ -482,6 +388,7 @@ class Field extends Module{
                         }
 					yield HTML::FileInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $accept, $attrs)
 						.$others;
+					yield $endTag;
                     break;
                 case 'docs':
                 case 'documents':
@@ -489,6 +396,7 @@ class Field extends Module{
                 case 'audios':
                 case 'videos':
                 case 'files':
+					yield $startTag;
                     $p = "";
                     if(isValid($this->Value)){
                         MODULE("Player");
@@ -547,28 +455,19 @@ class Field extends Module{
                         }
 					yield HTML::FilesInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $accept, $attrs)
 						.$others;
-                    break;
-                case "dir":
-                case "directory":
-                case "folder":
-					yield HTML::DirectoryInput($this->Key, $this->Value, ["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs);
-                    break;
-                case 'imagesubmit':
-                case 'imgsubmit':
-					yield HTML::Input($this->Key, $placeHolder, "image", ["id"=>$id, "name"=>$this->Key, "src"=>$this->Value], $attrs);
+					yield $endTag;
                     break;
                 default:
 					yield HTML::Field(
 						type:$this->Type,
-						title:null,
-						description:null,
 						key:$this->Key,
 						value:$this->Value,
+						title:$this->Title,
+						description:$this->Description,
 						options:$this->Options,
-						attributes:[["id"=>$id, "name"=>$this->Key], $placeHolderAttr, $attrs]);
+						attributes:[$placeHolderAttr, $attrs]);
                     break;
             }
-            if(isValid($this->Description)) yield HTML::Label($this->Description, $id, ["class"=>"description"]);
         });
     }
 }

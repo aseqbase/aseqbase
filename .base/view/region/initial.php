@@ -19,6 +19,7 @@
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/reset.css'); ?>'>
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/general.css'); ?>'>
 		<script src='<?php echo forceFullUrl('/view/script/general.js'); ?>'></script>
+		<script src='<?php echo forceFullUrl('/view/script/Live.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Math.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Array.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Html.js'); ?>'></script>

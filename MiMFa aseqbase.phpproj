@@ -1,4 +1,7 @@
 <Project Sdk="Devsense.Php.Sdk">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>c0035e99-b651-460b-ad78-f8fc4e6b6ae5</ProjectGuid>
+  </PropertyGroup>
   <ItemGroup>
     <Content Remove="*.tmp" />
   </ItemGroup>
@@ -13,6 +16,9 @@
       <SubType>Code</SubType>
     </Content>
     <Content Update="ums\static.php">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="ums\view\part\table\index.html">
       <SubType>Code</SubType>
     </Content>
     <Content Update="ums\Web.config">

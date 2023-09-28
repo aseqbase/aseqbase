@@ -301,7 +301,7 @@ class Local{
 
 		// Check if image file is an actual image or fake image
 		if(getimagesize($fileobject["tmp_name"]) === false) throw new \Exception("The image file is not an actual image!");
-		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableImageFormats);
+		return self::Upload($fileobject, $destdir, $minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableImageFormats);
 	}
 	/**
 	 * Upload audio

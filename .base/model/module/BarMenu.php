@@ -9,7 +9,7 @@ class BarMenu extends Module{
 	public $AllowAnimate = true;
 	public $AllowMiddle = true;
 	public $AllowChangeColor = true;
-	public $ShowFromScreenSize = "sm";
+	public $VisibleFromScreenSize = "sm";
 	public $Height = 40;
 
 	public function GetStyle(){
@@ -27,6 +27,8 @@ class BarMenu extends Module{
 				right: 0px;
 				box-shadow: -5px 0px 20px #00000025;
 				border: none;
+				display: table;
+				line-height: 100%;
 				z-index: 999999;
 			}
 
@@ -35,12 +37,10 @@ class BarMenu extends Module{
 				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
-			.{$this->Name}:after {
-				content: '';
-				clear: both;
-				display: table;
+			.{$this->Name}>a {
+				text-align: center;
+				display: table-cell;
 			}
-
 			.{$this->Name}>a>.button {
 				background-color: ".\_::$TEMPLATE->BackColor(2)."dd;
 				background-image: var(--Url-Overlay-0);
@@ -49,8 +49,8 @@ class BarMenu extends Module{
 				background-size: cover;
 				color: var(--ForeColor-2);
 				height: {$this->Height}px;
-				cursor: pointer; /* Pointer/hand icon */
-				float: left; /* Float the buttons side by side */
+				display: inline-table;
+				cursor: pointer;
 			}
 
 			.{$this->Name}>a>.button:hover{
@@ -94,6 +94,10 @@ class BarMenu extends Module{
 					height: ".($this->Height*1.25)."px;
 					border-radius: 100% 100% 0px 0px;
 					box-shadow: var(--Shadow-1);
+					border-left: none !important;
+					border-right: none !important;
+					border-bottom: none !important;
+					outline: none !important;
 				}
 				.{$this->Name}>a>.button.middle:hover{
 					box-shadow:var(--Shadow-2);

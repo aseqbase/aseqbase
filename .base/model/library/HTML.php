@@ -187,15 +187,30 @@ $attachments"]);
         //array_push(self::$Sources, $srci);
         return $srci;
     }
+    /**
+     * The <META> HTML Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
     public static function Description($content, ...$attributes){
         $srci = self::Meta("abstract",$content, $attributes);
         $srci .= self::Meta("description",$content, $attributes);
         $srci .= self::Meta("twitter:description",$content, $attributes);
         return $srci;
     }
+    /**
+     * The <META> HTML Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
     public static function Keywords($content, ...$attributes){
         return self::Meta("keywords", is_array($content)?join(", ", $content):$content, $attributes);
     }
+    /**
+     * The <META> HTML Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
     public static function Meta($name, $content, ...$attributes){
         $srci = self::Element("meta", ["name"=>$name, "content"=>$content], $attributes);
         //array_push(self::$Sources, $srci);
@@ -312,7 +327,7 @@ $attachments"]);
         if(!isValid($source)) return null;
         if(isIdentifier($source))
             return self::Element("", "i", [ "class"=>"media fa fa-".strtolower($source)], $attributes);
-        else return self::Element(__($content??"", styling:false),"div", [ "style"=> "background-image: url('".Local::GetUrl($source)."'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
+        else return self::Element(__($content??"", styling:false), "div", [ "style"=> "background-image: url('".Local::GetUrl($source)."'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
     }
     /**
      * The <IFRAME> HTML Tag
@@ -727,7 +742,7 @@ $attachments"]);
             $reference = $content;
             $content = null;
         }
-        if(!isValid($content)) $content = getDomain($reference);
+        if(is_null($content)) $content = getDomain($reference);
         return self::Element(__($content, styling:false), "a", [ "href"=> $reference, "class"=> "link" ], $attributes);
     }
     /**
@@ -766,68 +781,91 @@ $attachments"]);
      */
     public static function Form($content, $reference = null, ...$attributes){
         if(!isValid($content)) $content = self::SubmitButton();
+        elseif(is_array($content) || is_iterable($content)) $content = join(PHP_EOL,loop($content,function($k, $f){return call_user_func_array("self::Field", $f); }));
         return self::Element(__($content, styling:false), "form",isValid($reference)?["action"=> $reference]:[], [ "enctype"=>"multipart/form-data", "method"=>"get", "class"=> "form" ], $attributes);
     }
     /**
      * The <LABEL> and any input HTML Tag
-	 * @param object|string|null $type Can be a datatype or an input type
-	 * @param string|null $title The label text of the field
+     * @param object|string|array|callable|\Closure|\stdClass|null $type Can be a datatype or an input type
+     * @param mixed $key The default key and the name of the field
      * @param mixed $value The default value of the field
      * @param mixed $description The more detaled text about the field
-     * @param array|string|null $options The other options of the field
+     * @param array|iterable|bool|string|null $options The other options of the field
      * @param array|string|null $attributes Other important attributes of the field
-     * @param string|null $key The default key and the name of the field
+     * @param mixed $title The label text of the field
      * @return string
      */
-    public static function Field($type = null, $title = null, $value = null, $description = null, $options = null, $attributes = [], $key = null){
+    public static function Field($type = null, $key = null, $value = null, $description = null, $options = null, $attributes = [], $title = null, $scope = true){
         if(is_array($description) && count($attributes) === 0){
             $attributes = Convert::ToIteration($description);
             $description = null;
         }
-        if(is_null($type)){
-            if(isEmpty($value)) $type = "text";
-            elseif(is_string($value)){
-                if(isUrl($value)) {
-                    if(isFile($value)) $type = "file";
-                    else $type = "url";
-                }
-                elseif(strlen($value)>100 || count(explode("\r\n\t\f",$value))>1)
-                    $type = "strings";
-                else $type = "string";
-            } else $type = strtolower(gettype($value));
-        } elseif(is_object($type) || ($type instanceof \stdClass)){
-            $type = getValid($type, "Type", "string");
+        if(is_null($type))
+            $type = self::InputDetector($type, $value);
+        if(is_callable($type) || ($type instanceof \Closure))
+            return self::Field(
+                type:$type($type, $value),
+                key:$key,
+                value:$value,
+                description:$description,
+                options:$options,
+                attributes:$attributes,
+                title:$title,
+                scope:$scope
+            );
+        elseif(is_object($type) || ($type instanceof \stdClass)){
             $key = getValid($type, "Key", $key);
             $value = getValid($type, "Value", $value);
             $title = getValid($type, "Title", $title);
             $description = getValid($type, "Description", $description);
             $options = getValid($type, "Options", $options);
+            $scope = getValid($type, "Scope", $scope);
             $attributes = getValid($type, "Attributes", $attributes);
-        } elseif(is_countable($type)){
-            if(is_null($options)) $options = $type;
-            $type = "select";
-        } else $type = strtolower($type);
-        $titleTag = (is_null($title)?"":self::Label($title, $key, ["class"=> "title"]));
-        $descriptionTag = (is_null($description)?"":self::Label($description, $key, ["class"=> "description"]));
-        $key = $key??Convert::ToKey($title);
+            $type = self::InputDetector(getValid($type, "Type", null), $value);
+        } elseif(is_countable($type)) {
+            if(is_null($options)) {
+                $options = $type;
+                $type = "select";
+            } else {
+                $key = getValid($type, "key", $key);
+                $value = getValid($type, "value", $value);
+                $title = getValid($type, "title", $title);
+                $description = getValid($type, "description", $description);
+                $options = getValid($type, "options", $options);
+                $attributes = getValid($type, "attributes", $attributes);
+                $type = self::InputDetector(getValid($type, "type", null), $value);
+            }
+        } else $type = self::InputDetector($type, $value);
+        $titleOrKey = $title??Convert::ToTitle(Convert::ToString($key));
+        $key = Convert::ToKey(Convert::ToString($key??$title));
+        $id = Convert::ToId($key).getID();
+        $attributes = [["id"=>$id,"name"=>$key], ...$attributes];
+        $titleTag = ($title===false || !isValid($titleOrKey)?"":self::Label($titleOrKey, $id, ["class"=> "title"]));
+        $descriptionTag = ($description===false || !isValid($description)?"":self::Label($description, $id, ["class"=> "description"]));
         switch ($type)
         {
+            case 'span':
+                $content = self::Span($value??$titleOrKey, null, $attributes);
+                break;
+        	case "disable":
+        	case "disabled":
+                $content = self::DisabledInput($title, $value, $attributes);
+                break;
             case 'label':
             case 'key':
-            case 'span':
             case 'title':
             case 'description':
-                $content = self::Label($title, $value, $attributes);
+                $content = self::Label($value??$titleOrKey, $id, $attributes);
                 break;
-            case 'collection'://A collection of Base based objects
-
             case 'object':
                 $content = self::ObjectInput($title, Convert::ToString($value), $attributes);
                 break;
+            case 'collection'://A collection of Base based objects
+
             case 'countable':
             case 'iterable':
             case 'array':
-                $content = self::ArrayInput($title, Convert::ToString($value), $attributes);
+                $content = self::ArrayInput($title, $value, $options, $attributes);
                 break;
             case 'lines':
             case 'texts':
@@ -883,7 +921,7 @@ $attachments"]);
             case 'decimal':
                 $min = is_array($options)?min($options):-999999999;
                 $max = is_array($options)?max($options):999999999;
-                $content = self::NumberInput($title, $value, ["min"=>$min, "max"=>$max], $attributes);
+                $content = self::FloatInput($title, $value, ["min"=>$min, "max"=>$max], $attributes);
                 break;
             case 'phone':
             case 'tel':
@@ -893,6 +931,8 @@ $attachments"]);
             case 'url':
                 $content = self::UrlInput($title, $value, $attributes);
                 break;
+            case 'map':
+            case 'location':
             case 'path':
                 $content = self::ValueInput($title, $value, $attributes);
                 break;
@@ -966,15 +1006,13 @@ $attachments"]);
                 $content = self::Input($title, $value, $type, $attributes);
                 break;
         }
-
-        return self::Element(
-            $titleTag.$content.$descriptionTag
-            ,"div", ["class"=> "field"]);
+        if($scope) return self::Element($titleTag.$content.$descriptionTag,"div", ["class"=> "field"]);
+        else return $titleTag.$content.$descriptionTag;
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -983,13 +1021,12 @@ $attachments"]);
             $attributes = Convert::ToIteration($value);
             $value = null;
         }
-        $Id = Convert::ToKey($key);
-        return self::Element(__($value??$key, styling:false), "button", [ "id"=>"$Id", "name"=> $Id, "class"=> "button submitbutton", "type"=>"submit"], $attributes);
+        return self::Element(__($value??$key, styling:false), "button", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "class"=> "button submitbutton", "type"=>"submit"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -998,13 +1035,36 @@ $attachments"]);
             $attributes = Convert::ToIteration($value);
             $value = null;
         }
-        $Id = Convert::ToKey($key);
-        return self::Element(__($value??$key, styling:false), "button", [ "id"=>"$Id", "name"=> $Id, "class"=> "button resetbutton", "type"=>"reset"], $attributes);
+        return self::Element(__($value??$key, styling:false), "button", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "class"=> "button resetbutton", "type"=>"reset"], $attributes);
+    }
+    /**
+     * Detect the type of inputed value
+     * @param mixed $type The suggestion type of value
+     * @param mixed $value The sample value
+     * @return string
+     */
+    public static function InputDetector($type = null, $value = null){
+        if(is_null($type))
+            if(isEmpty($value)) return "text";
+            elseif(is_string($value))
+                if(isUrl($value))
+                    if(isFile($value)) return "file";
+                    else return "url";
+                elseif(strlen($value)>100 || count(explode("\r\n\t\f\v",$value))>1)
+                    return "textarea";
+                else return "text";
+            else return strtolower(gettype($value));
+        elseif(is_callable($type) || ($type instanceof \Closure))
+            return self::InputDetector($type($type, $value), $value);
+        elseif(is_object($type) || ($type instanceof \stdClass))
+            return self::InputDetector(getValid($type, "Type", null), $value);
+        elseif(is_countable($type)) return "select";
+        else return strtolower($type);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1013,13 +1073,12 @@ $attachments"]);
             $attributes = Convert::ToIteration($type);
             $type = "text";
         }
-        $Id = Convert::ToKey($key);
-        return self::Element("input", [ "id"=>"$Id", "name"=> $Id, "placeholder"=> $key, "type"=> $type, "value"=> $value, "class"=>"input" ], $attributes);
+        return self::Element("input", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> Convert::ToTitle($key), "type"=> $type, "value"=> $value, "class"=>"input" ], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1028,63 +1087,103 @@ $attachments"]);
     }
     /**
      * The <TEXTAREA> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
     public static function TextInput($key, $value = null, ...$attributes){
-        $Id = Convert::ToKey($key);
-        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input textinput" ], $attributes);
+        return self::Element($value??"", "textarea", [  "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> Convert::ToTitle($key), "class"=>"input textinput" ], $attributes);
     }
     /**
      * The <TEXTAREA> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
     public static function ContentInput($key, $value = null, ...$attributes){
-        $Id = Convert::ToKey($key);
-        return self::Element($value??"", "textarea", [ "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input contentinput" ], $attributes);
+        return self::TextInput($key, $value, [ "class"=>"contentinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
     }
     /**
      * The <TEXTAREA> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
     public static function ScriptInput($key, $value = null, ...$attributes){
-        $Id = Convert::ToKey($key);
-        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input scriptinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
+        return self::TextInput($key, $value, [ "class"=>"scriptinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
     }
     /**
      * The <TEXTAREA> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
     public static function ObjectInput($key, $value = null, ...$attributes){
-        $Id = Convert::ToKey($key);
-        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input objectinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
+        return self::TextInput($key, $value, [ "class"=>"objectinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
     }
     /**
-     * The <TEXTAREA> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * A <DIV> HTML Tag contains an array of Inputs
+     * @param mixed $key The tag name, id, or placeholder
+     * @param array|iterable|null $value The tag default value
+     * @param array|object $options The other options, default are: ["add"=>true, "remove"=>true, "separator"=>"|"]
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
-    public static function ArrayInput($key, $value = null, ...$attributes){
-        $Id = Convert::ToKey($key);
-        return self::Element($value??"", "textarea", [  "id"=>$Id, "name"=>$Id, "placeholder"=> $key, "class"=>"input arrayinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
+    public static function ArrayInput($key, $value = null, $options = ["type"=>null,"add"=>true,"remove"=>true,"separator"=>"|"], ...$attributes){
+        if(is_null($value))
+            if(is_array($key)) {
+                $value = $key;
+                $key = "_".getId();
+            } else return null;
+        $key = Convert::ToKey($key);
+        return self::Division(function() use($key, $value, $options, $attributes){
+            $sample = null;
+            $rem = getValid($options, "remove", true);
+            $sep = getValid($options, "separator", "|");
+            $type = getValid($options, "type", null);
+            $options = getValid($options, "options", null);
+            if(is_string($value)) $value = explode($sep, trim($value, $sep));
+            foreach ($value as $k=>$item){
+                if(is_null($sample)) $sample = $item;
+                $Id = Convert::ToId($key).getId();
+                yield self::Field(
+                    type:$type,
+                    scope:!$rem,
+                    key:$key,
+                    value:$item,
+                    title:false,
+                    description:false,
+                    options:$options,
+                    attributes:[["id"=>$Id, "name"=>(is_numeric($k)?"{$key}[]":$k)], ($rem?["ondblclick"=>"this.remove();"]:null), ...$attributes]);
+            }
+            if(getValid($options, "add", true))
+            {
+                $id = Convert::ToId($key)."_add_".getId();
+                $oc = "
+                        let tag = document.getElementById(`$id`).cloneNode();
+                        tag.id = `$key".getId()."`;
+                        tag.name = `{$key}[]`;
+                        ".($rem?"tag.ondblclick = function(){ this.remove(); };":"")."
+                        this.parentElement.appendChild(tag);";
+                yield self::Field(
+                    type:self::InputDetector($type, $sample),
+                    key:(is_numeric($k)?"{$key}[]":$k),
+                    value:null,
+                    title:false,
+                    description:self::Icon("plus", $oc),
+                    options:$options,
+                    attributes:[["name"=>"", "id"=>$id, "onchange"=>$oc], ...$attributes]);
+            }
+        },["id"=>$key, "class"=>"arrayinput"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1094,8 +1193,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1105,8 +1204,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1115,8 +1214,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1125,8 +1224,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1135,8 +1234,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1145,8 +1244,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1155,8 +1254,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1165,8 +1264,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1175,8 +1274,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1185,8 +1284,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1195,8 +1294,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1205,8 +1304,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1215,8 +1314,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1225,8 +1324,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1235,8 +1334,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1245,8 +1344,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param int $min The minimum value
      * @param int $max The maximum value
      * @param mixed $attributes The custom attributes of the Tag
@@ -1258,8 +1357,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1268,18 +1367,18 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
     public static function FloatInput($key, $value = null, ...$attributes){
-        return self::Input($key, $value, "number", ["class"=>"floatinput", "pattern"=>"\d*.?\d*"], $attributes);
+        return self::Input($key, $value, "number", ["class"=>"floatinput", "step"=>"0.01"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name or placeholder
-     * @param mixed $reference The tag default value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1288,8 +1387,8 @@ $attachments"]);
     }
     /**
      * The <INPUT> HTML Tag
-     * @param mixed $content The tag name
-     * @param mixed $reference The tag value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -1297,23 +1396,32 @@ $attachments"]);
         return self::Input($key, $value, "hidden", ["class"=>"hiddeninput"], $attributes);
     }
     /**
+     * A Disabled <INPUT> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function DisabledInput($key, $value = null, ...$attributes){
+        return self::Input($key, $value, "text", ["class"=>"disabledinput", "disabled"=>"disabled"], $attributes);
+    }
+    /**
      * The <SELECT> HTML Tag
-     * @param mixed $content The tag name
-     * @param mixed $reference The tag value
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
      * @param mixed $options The tag value
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
     public static function SelectInput($key, $value = null, $options = [], ...$attributes){
-        $Id = Convert::ToKey($key);
         return self::Element(
-            is_countable($options)?iterator_to_array((function()use($options, $value){
-                yield self::Element("","option");
+            is_countable($options)?iterator_to_array((function()use($options, $value, $attributes){
+                if(!preg_find('/\srequired?\b/i', Convert::ToString($attributes))) yield self::Element("","option");
                 foreach ($options as $k=>$v)
                     if($k == $value) yield self::Element($v??"","option",["value"=>$k, "selected"=>"true"]);
                     else yield self::Element($v??"","option",["value"=>$k]);
             })()):Convert::ToString($options)
-            ,"select", [ "id"=>"$Id", "name"=> $Id, "placeholder"=> $key, "class"=>"input selectinput" ], $attributes);
+            ,"select", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> Convert::ToTitle($key), "class"=>"input selectinput" ], $attributes);
     }
 
 

@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Library;
+<?php
+namespace MiMFa\Library;
 /**
  * A simple library to connect the database and run the most uses SQL queries
  *@copyright All rights are reserved for MiMFa Development Group
@@ -7,6 +8,51 @@
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#database See the Library Documentation
  */
 class DataBase {
+	public static function TablesToQuery($tablesName)
+	{
+		if(is_null($tablesName)) return null;
+		if(is_string($tablesName))
+			if(preg_find('/[\*\=\+\-\\\\\/\`"\'\(\)\[\]\{\}\,\.]|(^\d+$)/',$tablesName)) return $tablesName;
+			else return "`$tablesName`";
+		elseif(is_array($tablesName) || is_iterable($tablesName))
+			return join(", ", array_filter(loop($tablesName,
+					function($k,$v){return self::TablesToQuery($v);}),
+					function($v){ return !is_null($v); }
+				)
+			);
+		elseif(is_callable($tablesName)) return self::TablesToQuery($tablesName($tablesName));
+        return null;
+	}
+	public static function ColumnsToQuery($columns = "*")
+	{
+		if(is_null($columns)) return null;
+        if(is_string($columns))
+			if(preg_find('/[\*\=\+\-\\\\\/\`"\'\(\)\[\]\{\}\,\.]|(^\d+$)/',$columns)) return $columns;
+			else return "`$columns`";
+		elseif(is_array($columns) || is_iterable($columns))
+            return join(", ", array_filter(loop($columns,
+                                function($k,$v){return self::ColumnsToQuery($v);}),
+                                function($v){ return !is_null($v); }
+                            )
+                        );
+		elseif(is_callable($columns)) return self::ColumnsToQuery($columns($columns));
+        return null;
+	}
+	public static function ConditionsToQuery($conditions=null)
+	{
+		if(is_null($conditions)) return null;
+		if(is_string($conditions))
+			return startsWith(strtolower(trim($conditions)),"where")?$conditions:"WHERE $conditions";
+		elseif(is_array($conditions) || is_iterable($conditions))
+            return join(" AND ", array_filter(loop($conditions,
+                                function($k,$v){return self::ConditionsToQuery($v);}),
+                                function($v){ return !is_null($v); }
+                            )
+                        );
+		elseif(is_callable($conditions)) return self::ConditionsToQuery($conditions($conditions));
+        return null;
+	}
+
 	public static function Connection()
 	{
 		$conn = new \PDO(\_::$CONFIG->DataBaseType.":host=".\_::$CONFIG->DataBaseHost.";dbname=".\_::$CONFIG->DataBaseName, \_::$CONFIG->DataBaseUser, \_::$CONFIG->DataBasePassword);
@@ -33,10 +79,13 @@ class DataBase {
         }
         catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
 	}
-	public static function DoSelectValue($tableName, $columns = "ID", $condition=null, $params=[], $defaultValue = null)
+	public static function DoSelectValue($tableName, $columns = "`ID`", $condition=null, $params=[], $defaultValue = null)
 	{
-		$query = "SELECT ".$columns." FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition"));
-		return self::TrySelectValue($query,$params,$defaultValue);
+		return self::TrySelectValue(self::MakeSelectValueQuery($tableName, $columns, $condition),$params,$defaultValue);
+	}
+	public static function MakeSelectValueQuery($tableName, $columns = "`ID`", $condition=null)
+	{
+		return "SELECT ".self::ColumnsToQuery($columns??"`ID`")." FROM ".self::TablesToQuery($tableName)." ".self::ConditionsToQuery($condition);
 	}
 
 	public static function Select($query, $params=[]){
@@ -54,9 +103,12 @@ class DataBase {
 	}
 	public static function DoSelect($tableName, $columns = "*", $condition=null, $params=[], $defaultValue = array())
 	{
-		$query = "SELECT ".($columns??"*")." FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition"));
-		$result = self::TrySelect($query,$params,$defaultValue);
+		$result = self::TrySelect(self::MakeSelectQuery($tableName, $columns, $condition),$params,$defaultValue);
 		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
+	}
+	public static function MakeSelectQuery($tableName, $columns = "*", $condition=null)
+	{
+		return "SELECT ".self::ColumnsToQuery($columns??"*")." FROM ".self::TablesToQuery($tableName)." ".self::ConditionsToQuery($condition);
 	}
 
 	public static function SelectPairs($query, $params=[]){
@@ -74,9 +126,12 @@ class DataBase {
 	}
 	public static function DoSelectPairs($tableName, $key = "`ID`", $value = "`Name`", $condition=null, $params=[], $defaultValue = array())
 	{
-		$query = "SELECT $key, $value FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition"));
-		$result = self::TrySelectPairs($query,$params,$defaultValue);
+		$result = self::TrySelectPairs(self::MakeSelectPairsQuery($tableName, $key, $value, $condition),$params,$defaultValue);
 		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
+	}
+	public static function MakeSelectPairsQuery($tableName, $key = "`ID`", $value = "`Name`", $condition=null)
+	{
+		return "SELECT ".self::ColumnsToQuery([$key??"`ID`", $value??"`Name`"])." FROM ".self::TablesToQuery($tableName)." ".self::ConditionsToQuery($condition);
 	}
 
 	public static function Insert($query,$params=[]){
@@ -92,7 +147,12 @@ class DataBase {
         }catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
 	}
 	public static function DoInsert($tableName, $condition=null, $params=[], $defaultValue = false){
-		$vals = array();
+
+		return self::TryInsert(self::MakeInsertQuery($tableName, $condition, $params),$params,$defaultValue);
+	}
+	public static function MakeInsertQuery($tableName, $condition, &$params)
+	{
+        $vals = array();
 		$sets = array();
 		$args = array();
 		foreach($params as $key => $value){
@@ -101,9 +161,8 @@ class DataBase {
 			$vals[] = ":$k";
 			$args[":$k"] = $value;
         }
-
-		$query = "INSERT INTO `$tableName` (".implode(", ",$sets).") VALUES (".implode(", ",$vals).")".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition"));
-		return self::TryInsert($query,$args,$defaultValue);
+		$params = $args;
+		return "INSERT INTO ".self::TablesToQuery($tableName)." (".implode(", ",$sets).") VALUES (".implode(", ",$vals).") ".self::ConditionsToQuery($condition);
 	}
 
 	public static function Replace($query, $params=[]){
@@ -119,7 +178,11 @@ class DataBase {
         }catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
 	}
 	public static function DoReplace($tableName, $condition=null, $params=[], $defaultValue = false){
-		$vals = array();
+		return self::TryReplace(self::MakeReplaceQuery($tableName, $condition, $params),$params, $defaultValue);
+	}
+	public static function MakeReplaceQuery($tableName, $condition, &$params)
+	{
+        $vals = array();
 		$sets = array();
 		$args = array();
 		foreach($params as $key => $value){
@@ -128,9 +191,8 @@ class DataBase {
 			$vals[] = ":$k";
 			$args[":$k"] = $value;
         }
-
-		$query = "REPLACE INTO `$tableName` (".implode(", ",$sets).") VALUES (".implode(", ",$vals).")".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition"));
-		return self::TryReplace($query, $args, $defaultValue);
+		$params = $args;
+		return "REPLACE INTO ".self::TablesToQuery($tableName)." (".implode(", ",$sets).") VALUES (".implode(", ",$vals).") ".self::ConditionsToQuery($condition);
 	}
 
 	public static function Update($query, $params=[]){
@@ -146,15 +208,19 @@ class DataBase {
         }catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
 	}
 	public static function DoUpdate($tableName, $condition=null, $params=[], $defaultValue = false){
-		$sets = array();
+		return self::TryUpdate(self::MakeUpdateQuery($tableName, $condition, $params), $params, $defaultValue);
+	}
+	public static function MakeUpdateQuery($tableName, $condition, &$params)
+	{
+        $sets = array();
 		$args = array();
 		foreach($params as $key => $value){
 			$k = ltrim($key,":");
 			$sets[] = "`$k`=:$k";
 			$args[":$k"] = $value;
         }
-		$query = "UPDATE `$tableName` SET ".implode(", ",$sets).(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition"));
-		return self::TryUpdate($query, $args, $defaultValue);
+		$params = $args;
+		return "UPDATE ".self::TablesToQuery($tableName)." SET ".implode(", ",$sets)." ".self::ConditionsToQuery($condition);
 	}
 
 	public static function Delete($query, $params=[]){
@@ -170,42 +236,39 @@ class DataBase {
         }catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
 	}
 	public static function DoDelete($tableName, $condition=null, $params=[], $defaultValue = false){
-		$query = "DELETE FROM `$tableName`".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition"));
-        return self::TryDelete($query, $params,$defaultValue);
+        return self::TryDelete(self::MakeDeleteQuery($tableName, $condition), $params,$defaultValue);
+	}
+	public static function MakeDeleteQuery($tableName, $condition=null)
+	{
+		return "DELETE FROM ".self::TablesToQuery($tableName)." ".self::ConditionsToQuery($condition);
 	}
 
-	public static function GetCount($tableName, $col = "`ID`",$condition =null, $params=[])
+	public static function GetCount($tableName, $column = "`ID`",$condition =null, $params=[])
 	{
-		$query = "SELECT COUNT(".$col.") FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition")).";";
-		return self::TrySelectValue($query, $params);
+		return self::TrySelectValue(self::MakeSelectValueQuery($tableName, "COUNT($column)", $condition), $params);
 	}
-	public static function GetSum($tableName, $col = "`ID`",$condition =null, $params=[])
+	public static function GetSum($tableName, $column = "`ID`",$condition =null, $params=[])
 	{
-		$query = "SELECT SUM(".$col.") FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition")).";";
-		return self::TrySelectValue($query, $params);
+		return self::TrySelectValue(self::MakeSelectValueQuery($tableName, "SUM($column)", $condition), $params);
 	}
-	public static function GetAverage($tableName, $col = "`ID`", $condition =null, $params=[])
+	public static function GetAverage($tableName, $column = "`ID`", $condition =null, $params=[])
 	{
-		$query = "SELECT AVG(".$col.") FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition")).";";
-		return self::TrySelectValue($query, $params);
+		return self::TrySelectValue(self::MakeSelectValueQuery($tableName, "AVG($column)", $condition), $params);
 	}
-	public static function GetMax($tableName, $col = "`ID`", $condition =null, $params=[])
+	public static function GetMax($tableName, $column = "`ID`", $condition =null, $params=[])
 	{
-		$query = "SELECT MAX(".$col.") FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition")).";";
-		return self::TrySelectValue($query, $params);
+		return self::TrySelectValue(self::MakeSelectValueQuery($tableName, "MAX($column)", $condition), $params);
 	}
-	public static function GetMin($tableName, $col = "`ID`", $condition =null, $params=[])
+	public static function GetMin($tableName, $column = "`ID`", $condition =null, $params=[])
 	{
-		$query = "SELECT MIN(".$col.") FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition")).";";
-		return self::TrySelectValue($query, $params);
+		return self::TrySelectValue(self::MakeSelectValueQuery($tableName, "MIN($column)", $condition), $params);
 	}
 
-	public static function Exists($tableName, $col = null, $condition =null, $params=[])
+	public static function Exists($tableName, $column = null, $condition =null, $params=[])
 	{
-		$query = "SELECT ".(is_null($col)?"1":$col)." FROM `$tableName` ".(is_null($condition)?"":(startsWith(strtolower(trim($condition)),"where")?" $condition":" WHERE $condition")).";";
 		$result = null;
 		try{
-			$result =  self::SelectValue($query,$params);
+            $result = self::SelectValue(self::MakeSelectValueQuery($tableName, is_null($column)?"1":$column, $condition), $params);
         } catch(\Exception $ex){ }
 		return !is_null($result);
 	}
@@ -223,8 +286,7 @@ class DataBase {
 				echo HTML::Error($ex);
 				break;
         	default:
-				echo HTML::Error($ex);
-				break;
+				throw $ex;
         }
     }
 }
@@ -245,55 +307,83 @@ class DataTable {
 	{
 		return DataBase::DoSelectValue($this->TableName, $columns, $condition, $params, $defaultValue);
 	}
+	public function MakeSelectValueQuery($columns = "*", $condition=null)
+	{
+		return DataBase::MakeSelectValueQuery($this->TableName, $columns, $condition);
+	}
 
 	public function DoSelect($columns = "*", $condition=null, $params=[], $defaultValue = array())
 	{
 		return DataBase::DoSelect($this->TableName, $columns, $condition, $params, $defaultValue);
+	}
+    public function MakeSelectQuery($columns = "*", $condition=null)
+	{
+		return DataBase::MakeSelectQuery($this->TableName, $columns, $condition);
 	}
 
 	public function DoSelectPairs($key = "`ID`", $value = "`Name`", $condition=null, $params=[], $defaultValue = array())
 	{
 		return DataBase::DoSelectPairs($this->TableName, $key, $value, $condition, $params, $defaultValue);
 	}
+    public function MakeSelectPairsQuery($key = "`ID`", $value = "`Name`", $condition=null)
+	{
+		return DataBase::MakeSelectPairsQuery($this->TableName, $key, $value, $condition);
+	}
 
-	public function DoInsert($tableName, $condition=null, $params=[], $defaultValue = false){
+	public function DoInsert($condition=null, $params=[], $defaultValue = false){
         return DataBase::DoInsert($this->TableName, $condition, $params, $defaultValue);
 	}
+    public function MakeInsertQuery($condition, &$params)
+	{
+		return DataBase::MakeInsertQuery($this->TableName, $condition, $params);
+	}
 
-	public function DoReplace($tableName, $condition=null, $params=[], $defaultValue = false){
+	public function DoReplace($condition=null, $params=[], $defaultValue = false){
         return DataBase::DoReplace($this->TableName, $condition, $params, $defaultValue);
 	}
+    public function MakeReplaceQuery($condition, &$params)
+	{
+		return DataBase::MakeReplaceQuery($this->TableName, $condition, $params);
+	}
 
-	public function DoUpdate($tableName, $condition=null, $params=[], $defaultValue = false){
+	public function DoUpdate($condition=null, $params=[], $defaultValue = false){
         return DataBase::DoUpdate($this->TableName, $condition, $params, $defaultValue);
 	}
-
-	public function DoDelete($tableName, $condition=null, $params=[], $defaultValue = false){
-        return DataBase::DoDelete($this->TableName, $condition, $params, $defaultValue);
+    public function MakeUpdateQuery($condition, &$params)
+	{
+		return DataBase::MakeUpdateQuery($this->TableName, $condition, $params);
 	}
 
-	public function GetCount($tableName, $col = "`ID`",$condition =null, $params=[])
+	public function DoDelete($condition=null, $params=[], $defaultValue = false){
+        return DataBase::DoDelete($this->TableName, $condition, $params, $defaultValue);
+	}
+    public function MakeDeleteQuery($condition=null)
+	{
+		return DataBase::MakeDeleteQuery($this->TableName, $condition);
+	}
+
+	public function GetCount($col = "`ID`",$condition =null, $params=[])
 	{
         return DataBase::GetCount($this->TableName, $col, $condition, $params);
 	}
-	public function GetSum($tableName, $col = "`ID`",$condition =null, $params=[])
+	public function GetSum($col = "`ID`",$condition =null, $params=[])
 	{
         return DataBase::GetSum($this->TableName, $col, $condition, $params);
 	}
-	public function GetAverage($tableName, $col = "`ID`",$condition =null, $params=[])
+	public function GetAverage($col = "`ID`",$condition =null, $params=[])
 	{
         return DataBase::GetAverage($this->TableName, $col, $condition, $params);
 	}
-	public function GetMax($tableName, $col = "`ID`",$condition =null, $params=[])
+	public function GetMax($col = "`ID`",$condition =null, $params=[])
 	{
         return DataBase::GetMax($this->TableName, $col, $condition, $params);
 	}
-	public function GetMin($tableName, $col = "`ID`",$condition =null, $params=[])
+	public function GetMin($col = "`ID`",$condition =null, $params=[])
 	{
         return DataBase::GetMin($this->TableName, $col, $condition, $params);
 	}
 
-	public function Exists($tableName, $col = null, $condition =null, $params=[])
+	public function Exists($col = null, $condition =null, $params=[])
 	{
         return DataBase::Exists($this->TableName, $col, $condition, $params);
 	}

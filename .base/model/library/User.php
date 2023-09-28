@@ -50,8 +50,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $DeactiveStatus = -1;
 
 
-	protected $ID = null;
-	protected $GroupID = null;
+	public $ID = null;
+	public $GroupID = null;
 	protected $Access = 0;
 	protected $Accesses = array();
 
@@ -79,11 +79,12 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return $this->Profile = getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","*","`ID`=:ID",[":ID"=>$this->ID]),0);
 	}
 	public function Refresh(){
+		$signature = Session::GetData("Signature");
 		$this->Signature = Session::GetSecure("Signature");
 		$this->Password = Session::GetSecure("Password");
 		$person = null;
 		try{
-            if(isValid($this->Signature) && isValid($this->Password))
+            if($signature === $this->Signature && isValid($this->Signature) && isValid($this->Password))
                 $person = $this->Find($this->Signature, $this->Password, false);
             Session::SetSecure("Signature", $this->Signature = getValid($person,"Signature"));
             Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
@@ -127,6 +128,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 	public function Find($signature = null, $password = null, $hashPassword = true){
 		$signature = $signature??$this->Signature??Session::GetSecure("Signature")??$this->TemporarySignature;
+		if(!isValid($signature)){
+            $this->SignOut($signature);
+            return [];
+        }
 		if(isValid($password)) {
 			if($hashPassword) $password = $this->EncryptPassword($password);
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
@@ -134,16 +139,28 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
 						[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature,":Password"=> $password]
 					);
-            if(is_null($person)) throw new \ErrorException("There a problem is occured!");
-            if(count($person) < 1) throw new \ErrorException("The username or password is incorrect!");
+            if(is_null($person)){
+				$this->SignOut($signature);
+				throw new \ErrorException("There a problem is occured!");
+            }
+            if(count($person) < 1){
+				$this->SignOut($signature);
+				throw new \ErrorException("The username or password is incorrect!");
+            }
         } else {
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
 						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Password`, `Status`",
 						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact))",
 						[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature]
 					);
-            if(is_null($person)) throw new \ErrorException("There a problem is occured!");
-            if(count($person) < 1) throw new \ErrorException("The username is incorrect!");
+            if(is_null($person)){
+				$this->SignOut($signature);
+				throw new \ErrorException("There a problem is occured!");
+            }
+            if(count($person) < 1){
+				$this->SignOut($signature);
+				throw new \ErrorException("The username is incorrect!");
+            }
         }
 		$person = $person[0];
 		$this->TemporarySignature = getValid($person,"Signature");
@@ -153,28 +170,29 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return $person;
 	}
 	public function Get($signature = null, $password = null){
-        if(is_null($id =$this->ID) || !is_null($signature)) $id = $this->Find($signature, $password)["ID"];
-		return getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","*","`ID`=:ID",[":ID"=>$id]),0);
+        if(is_null($id =$this->ID) || !is_null($signature)) $id = getValid($this->Find($signature, $password), "ID");
+		return is_null($id)?null:getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","*","`ID`=:ID",[":ID"=>$id]),0);
     }
 	public function Set($fieldsDictionary, $signature = null, $password = null){
         $id = $this->ID;
         $email = $this->Email;
 		if(!is_null($signature) || is_null($id) || is_null($email)) {
 			$person = $this->Find($signature, $password);
-            $id = $person["ID"];
-            $email = $person["Email"];
+            $id = getValid($person,"ID");
+            $email = getValid($person,"Email");
         }
+		if(is_null($id)) return null;
 		if(getValid($fieldsDictionary, "Email", $email)!=$email)
 			$fieldsDictionary["Status"] = self::$InitialStatus;
 		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='$id'",$fieldsDictionary);
     }
 	public function GetValue($key, $signature = null, $password = null){
-        if(is_null($id =$this->ID) || !is_null($signature)) $id = $this->Find($signature, $password)["ID"];
-		return DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."User",$key,"`ID`=:ID",[":ID"=>$id]);
+        if(is_null($id = $this->ID) || !is_null($signature)) $id = getValid($this->Find($signature, $password), "ID");
+		return is_null($id)?null:DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."User",$key,"`ID`=:ID",[":ID"=>$id]);
     }
 	public function SetValue($key, $value, $signature = null, $password = null){
-        if(is_null($id =$this->ID) || !is_null($signature)) $id = $this->Find($signature, $password)["ID"];
-		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='$id'",[$key => $value]);
+        if(is_null($id =$this->ID) || !is_null($signature)) $id = getValid($this->Find($signature, $password), "ID");
+		return is_null($id)?null:DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='$id'",[$key => $value]);
     }
 
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){
@@ -196,14 +214,15 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SignIn($signature, $password){
 		if(!isValid($password)) return false;
 		$person = $this->Find($signature, $password);
-		$status = getValid($person,"Status",self::$InitialStatus);
+		$status = getValid($person,"Status", self::$InitialStatus);
 		if($status === false || ((int)$status) < self::$ActiveStatus)
 			throw new \ErrorException(
 				"This account is not active yet!<br>".
-				"<a href='".\MiMFa\Library\User::$ActiveHandlerPath."?signature=$signature'>".__("Try to send the activation email again!")."</a>"
+				"<a href='".self::$ActiveHandlerPath."?signature=$signature'>".__("Try to send the activation email again!")."</a>"
 			);
+		Session::SetData("Signature", $this->Signature = getValid($person,"Signature"));
 		Session::SetSecure("Password", $this->Password = getValid($person,"Password"));
-		Session::SetSecure("Signature", $this->Signature = getValid($person,"Signature"));
+		Session::SetSecure("Signature", $this->Signature);
 		Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
 		Session::SetSecure("GroupID",$this->GroupID = getValid($person,"GroupID"));
 		Session::SetSecure("Image",$this->Image = getValid($person,"Image"));
@@ -216,9 +235,11 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return $this->SignIn($signature??$email, $password)??
 			$this->SignUp($signature, $password, $email);
 	}
-	public function SignOut(){
-		Session::Restart();
-		$this->Load();
+	public function SignOut($signature = null){
+		if($signature === null || $signature === $this->Signature){
+            Session::Restart();
+            $this->Load();
+        } else Session::ForgetData($signature);
 		return !self::Access(\_::$CONFIG->UserAccess);
 	}
 

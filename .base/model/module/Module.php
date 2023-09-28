@@ -218,7 +218,7 @@ class Module extends \Base{
 				(isValid($this->ShowFromScreenSize)?" ".$this->ShowFromScreenSize."-show":"").
 				(isValid($this->HideFromScreenSize)?" ".$this->HideFromScreenSize."-hide":"")
 			).
-			(isValid($this->Attributes)?" ".Convert::ToString($this->Attributes," "):"");
+			(isValid($this->Attributes)?" ".Convert::ToString($this->Attributes," ","=","{0}={1} "):"");
 	}
 	/**
      * Create a standard Attribute and its value for a tag

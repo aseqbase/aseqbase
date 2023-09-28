@@ -1,4 +1,6 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\HTML;
 /**
  * The main and basic module to implement any other collection module
  *@copyright All rights are reserved for MiMFa Development Group
@@ -7,7 +9,8 @@
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Collection extends Module{
-	public $Class = "container-fluid";
+	public $Capturable = true;
+	public $Class = "container";
 	/**
      * An array of items, which contains a Key-Value based array of features
      * @var null|array<array<enum-string,mixed>>
@@ -54,13 +57,10 @@ class Collection extends Module{
      */
 	public $AllowAnimation = true;
 
-
-	public function EchoStyle(){
-		parent::EchoStyle();
-?>
-		<style>
-			.<?php echo $this->Name; ?> .items .item{
-				background-color: var(--BackColor-0); ?>99;
+	public function GetStyle(){
+		return parent::GetStyle().HTML::Style("
+			.{$this->Name} .items .item{
+				background-color: var(--BackColor-0);
 				color: var(--ForeColor-0);
 				font-size: var(--Size-1);
 				text-align: center;
@@ -69,16 +69,16 @@ class Collection extends Module{
 				border: var(--Border-1) var(--ForeColor-4);
 				border-radius: var(--Radius-1);
 				box-shadow: var(--Shadow-1);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
-			.<?php echo $this->Name; ?> .items .item:hover{
+			.{$this->Name} .items .item:hover{
 				background-color: var(--BackColor-1);
 				color: var(--ForeColor-1);
 				border-radius: var(--Radius-2);
 				box-shadow: var(--Shadow-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
-			.<?php echo $this->Name; ?> .items .item .image{
+			.{$this->Name} .items .item .image{
 				margin: 2vmax;
 				overflow: hidden;
 				height: 5vmax;
@@ -86,67 +86,67 @@ class Collection extends Module{
 				width: 100%;
 				max-width: 100%;
 			}
-			.<?php echo $this->Name; ?> .items .item .image img{
+			.{$this->Name} .items .item .image img{
 				width: auto !important;
 				width:  100%;
 				max-width: 100%;
 			}
-			.<?php echo $this->Name; ?> .items .item .description{
+			.{$this->Name} .items .item .description{
 				background-color: var(--BackColor-0);
 				color: var(--ForeColor-0);
 				text-align: left;
 				padding: 2vmin 2vmax;
 				margin-bottom: 0px;
 			}
-			.<?php echo $this->Name; ?> .items .item .fa{
+			.{$this->Name} .items .item .fa{
 				padding: 20px;
 				margin-bottom: 3vh;
 				border: var(--Border-0) var(--ForeColor-0);
 				border-radius: 50%;
 			}
-			.<?php echo $this->Name; ?> .items .item .btn{
+			.{$this->Name} .items .item .btn{
 				margin: 2vmax 5px;
 			}
-		</style>
-		<?php
+		");
 	}
-	public function Echo(){
-		parent::Echo();
-		MODULE("Image");
-		$img = new Image();
-		$img->Class = "image";
-		$img->EchoStyle();
+	public function Get(){
+		return parent::Get().join(PHP_EOL, iterator_to_array((function(){
+            MODULE("Image");
+            $img = new Image();
+            $img->Class = "image";
+            yield $img->GetStyle();
 
-		$i = 0;
-		foreach($this->Items as $item) {
-			if($i % $this->MaximumColumns === 0)  echo "<div class='row items'>";
-			$p_image = getValid($item,'Image', $this->DefaultImage);
-			$p_name = __(getValid($item,'Title')??getValid($item,'Name', $this->DefaultTitle),true,false);
-			$p_description = __(getValid($item,'Description', $this->DefaultDescription));
-			$p_link = getValid($item,'Link')??getValid($item,'Path', $this->DefaultLink);
-			$p_buttons = getValid($item,'Buttons', $this->DefaultButtons);
-			$img->Source = $p_image;
-			?>
-			<div class="item col-sm" <?php if($this->AllowAnimation) echo "data-aos='fade-up'";?>>
-				<?php $img->ReDraw(); ?>
-				<h4>
-					<?php echo $p_name; ?>
-				</h4>
-				<div class="description">
-					<?php echo $p_description; ?>
-				</div>
-				<?php echo $p_buttons;
-				if(isValid($p_link)){ ?>
-				<a class="btn" target="blank" href="<?php echo $p_link; ?>">
-					<?php echo __($this->MoreButtonLabel); ?>
-				</a>
-				<?php }; ?>
-			</div>
-			<?php
-			if(++$i % $this->MaximumColumns === 0) echo "</div>";
-		}
-		if($i % $this->MaximumColumns !== 0) echo "</div>";
+            $i = 0;
+            foreach($this->Items as $item) {
+                if($i % $this->MaximumColumns === 0)  yield "<div class='row items'>";
+				if(is_string($item)) yield $item;
+				else if(getAccess(getValid($item,'Access', \_::$CONFIG->VisitAccess))){
+                    $p_image = getValid($item,'Image', $this->DefaultImage);
+                    $p_name = __(getValid($item,'Title')??getValid($item,'Name', $this->DefaultTitle),true,false);
+                    $p_description = getValid($item,'Description', $this->DefaultDescription);
+                    $p_description = is_null($p_description)?null:__($p_description);
+                    $p_link = getValid($item,'Link')??getValid($item,'Path', $this->DefaultLink);
+                    $p_buttons = getValid($item,'Buttons', $this->DefaultButtons);
+                    $img->Source = $p_image;
+					if(is_null($p_description))
+                        yield HTML::Button(
+                            $img->ReCapture().
+                            HTML::SubHeading($p_name).
+                            $p_buttons,
+                            $p_link,
+                            ["class"=>"item col-sm"], $this->AllowAnimation? "data-aos='fade-up'":null);
+					else yield HTML::Division(
+                            $img->ReCapture().
+                            HTML::SubHeading($p_name).
+                            HTML::Division($p_description, ["class"=>"description"]).
+                            $p_buttons.
+                            (isValid($p_link)? HTML::Button($this->MoreButtonLabel, $p_link, ["target"=>"blank"]):""),
+                            ["class"=>"item col-sm"], $this->AllowAnimation? "data-aos='fade-up'":null);
+                }
+				if(++$i % $this->MaximumColumns === 0) yield "</div>";
+            }
+            if($i % $this->MaximumColumns !== 0) yield "</div>";
+        })()));
 	}
-
 }
 ?>
