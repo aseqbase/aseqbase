@@ -117,7 +117,7 @@ class Collection extends Module{
             yield $img->GetStyle();
 
             $i = 0;
-            foreach($this->Items as $item) {
+            foreach($this->Items??[] as $item) {
                 if($i % $this->MaximumColumns === 0)  yield "<div class='row items'>";
 				if(is_string($item)) yield $item;
 				else if(getAccess(getValid($item,'Access', \_::$CONFIG->VisitAccess))){

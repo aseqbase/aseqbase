@@ -9,8 +9,8 @@ if(($source = getValid($requests,"view")) != null){
 } elseif(($source = getValid($requests,"region")) != null){
     $doc = REGION($source = NormalizePath($source), print:false);
 } elseif(($source = getValid($requests,"virtual")) != null){
-    $doc = VIRTUAL($source = NormalizePath($source), print:false);
-
+    $doc = VIRTUAL($source = NormalizePath($source));
+}
 if(isValid($doc)){
     //if(($query = getValid($requests,"query")) != null){
     //    //Select slice of $doc

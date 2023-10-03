@@ -170,7 +170,6 @@ class Form extends Module{
 					text-align: initial;
 					vertical-align: top;
 					padding: 0px var(--Size-0);
-					z-index: 1;
 					".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 				}
 				.{$this->Name} .field .prepend{
@@ -246,7 +245,6 @@ class Form extends Module{
 				vertical-align: top;
 				margin: 5px;
 				padding: 5px var(--Size-0);
-				z-index: 1;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .field .input{
@@ -304,7 +302,6 @@ class Form extends Module{
 				margin-right: -1px;
 				padding: 3px var(--Size-1);
 				border-radius: 3px 0px 0px 3px;
-				z-index: 1;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .field .input{
@@ -439,7 +436,6 @@ class Form extends Module{
 				margin-right: -1px;
 				padding: 5px var(--Size-0);
 			    margin: 5px;
-				z-index: 1;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .field .input{

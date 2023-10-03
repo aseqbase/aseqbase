@@ -13,7 +13,7 @@ class RingSlide extends Module{
 	public $CenterSize = 150;
 	public $ButtonsSize = 100;
 	public $Path = null;
-	
+
 	/**
      * Create the module
      * @param array|string|null $source The module source
@@ -90,12 +90,12 @@ class RingSlide extends Module{
 				box-shadow: 0px 0px 20px var(--BackColor-2);
 				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
 			}
-		
+
 			.{$this->Name} .menu>.center:hover {
 				box-shadow: 0px 0px 50px var(--BackColor-2);
 				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
 			}
-			
+
 			.{$this->Name} .menu>.center:before {
 				position: absolute;
 				content: '';
@@ -158,28 +158,30 @@ class RingSlide extends Module{
 		$count = count($this->Items);
 		if($count > 0)
 			return Convert::ToString(function() use($count){
+				$btns = "";
 				$tags = "";
 				for($i = 0; $i < $count; $i++)
-					$tags .= HTML::Link(
-						HTML::Division(
-							HTML::Media("", getValid($this->Items[$i],'Image'))
-						,["class"=>"button"])
-					, "#tab$i", ["data-target"=>".tab", "data-toggle"=>'tab']);
-				yield HTML::Division(HTML::Division(HTML::Division($tags,["class"=>"center"]),["class"=>"menu"]),["class"=>"col-md-5", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]);
-				$tags = "";
-				for($i = 0; $i < $count; $i++) 
-					$tags .= HTML::Division(
-						HTML::ExternalHeading(getValid($this->Items[$i],'Name'), null, ["class"=>"title"]).
-						HTML::Division(
-							getValid($this->Items[$i], 'Description').
-							(getValid($this->Items[$i], "Button")??getValid($this->Items[$i],"More"))
-						, ["class"=>"description"])
-					, ["class"=>"tab fade".($i===0?' active show':''), "id"=>"tab$i"]);
+					if(getAccess(getValid($this->Items[$i],"Access",\_::$CONFIG->VisitAccess))) {
+						$btns .= HTML::Link(
+							HTML::Division(
+								HTML::Media("", getValid($this->Items[$i],'Image'))
+							,["class"=>"button"])
+						, "#tab$i", ["data-target"=>".tab", "data-toggle"=>'tab']);
+
+						$tags .= HTML::Division(
+							HTML::ExternalHeading(getValid($this->Items[$i],'Name'), null, ["class"=>"title"]).
+							HTML::Division(
+								getValid($this->Items[$i], 'Description').
+								(getValid($this->Items[$i], "Button")??getValid($this->Items[$i],"More"))
+							, ["class"=>"description"])
+						, ["class"=>"tab fade".($i===0?' active show':''), "id"=>"tab$i"]);
+					}
+				yield HTML::Division(HTML::Division(HTML::Division($btns,["class"=>"center"]),["class"=>"menu"]),["class"=>"col-md-5", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]);
 				yield HTML::Division(HTML::Division($tags,["class"=>"tabs"]),["class"=>"col-md", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]);
 			});
 		else return null;
 	}
-	
+
 	public function GetScript(){
 		return parent::GetScript().(count($this->Items) > 0? HTML::Script("
 			$(document).ready(function(){
@@ -226,7 +228,7 @@ class RingSlide extends Module{
 					}
 					turn();
 				}
-				
+
 				buttons.forEach((button, i) => {
 					button.style.top = (addition + Math.sin(Math.PI / 2 + i * increase) * radius) + 'px';
 					button.style.left = (addition + Math.cos(Math.PI / 2 + i * increase) * radius) + 'px';

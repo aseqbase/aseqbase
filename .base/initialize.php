@@ -8,4 +8,6 @@ require_once(__DIR__."/global.php");
 COMPONENT("Component");
 TEMPLATE("Template");
 MODULE("Module");
+
+RUN("customize");
 ?>

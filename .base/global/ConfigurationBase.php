@@ -52,7 +52,8 @@ abstract class ConfigurationBase extends Base {
         "/^search(\/|\?|$)/i"=>"search",
         "/^tag(\/|\?|$)/i"=>"tag",
         "/^sign(\/|\?|$)/i"=>"sign",
-        "/^category(\/|\?|$)/i"=>"category"
+        "/^category(\/|\?|$)/i"=>"category",
+        "/^(public|private)(\/|\?|$)/i"=>"run"
     );
     /**
      * The requested view key to handle the virtual pathes
@@ -339,6 +340,12 @@ abstract class ConfigurationBase extends Base {
      * @category DataBase
      */
 	public $DataBaseType = 'mysql';
+    /**
+     * Checking and somewhere changing and/or normalizing the values before set on database
+     * @var bool
+     * @category DataBase
+     */
+	public $DataBaseValueNormalization = true;
     /**
      * The database HostName
      * @var string

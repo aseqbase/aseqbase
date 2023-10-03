@@ -31,8 +31,8 @@ class PrePage extends Module{
 	}
 
 	public function Capture(){
-        if(RECEIVE(\_::$CONFIG->ViewHandlerKey,"GET","page") !== "page") return null;
-        return parent::Capture();
+        if(RECEIVE(\_::$CONFIG->ViewHandlerKey,null,"page") !== "page") return null;
+        else return parent::Capture();
     }
 }
 ?>

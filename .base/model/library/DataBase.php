@@ -8,7 +8,7 @@ namespace MiMFa\Library;
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#database See the Library Documentation
  */
 class DataBase {
-	public static function TablesToQuery($tablesName)
+	public static function TableNameNormalization($tablesName)
 	{
 		if(is_null($tablesName)) return null;
 		if(is_string($tablesName))
@@ -16,14 +16,14 @@ class DataBase {
 			else return "`$tablesName`";
 		elseif(is_array($tablesName) || is_iterable($tablesName))
 			return join(", ", array_filter(loop($tablesName,
-					function($k,$v){return self::TablesToQuery($v);}),
+					function($k,$v){return self::TableNameNormalization($v);}),
 					function($v){ return !is_null($v); }
 				)
 			);
-		elseif(is_callable($tablesName)) return self::TablesToQuery($tablesName($tablesName));
+		elseif(is_callable($tablesName)) return self::TableNameNormalization($tablesName($tablesName));
         return null;
 	}
-	public static function ColumnsToQuery($columns = "*")
+	public static function ColumnNameNormalization($columns = "*")
 	{
 		if(is_null($columns)) return null;
         if(is_string($columns))
@@ -31,25 +31,38 @@ class DataBase {
 			else return "`$columns`";
 		elseif(is_array($columns) || is_iterable($columns))
             return join(", ", array_filter(loop($columns,
-                                function($k,$v){return self::ColumnsToQuery($v);}),
+                                function($k,$v){return self::ColumnNameNormalization($v);}),
                                 function($v){ return !is_null($v); }
                             )
                         );
-		elseif(is_callable($columns)) return self::ColumnsToQuery($columns($columns));
+		elseif(is_callable($columns)) return self::ColumnNameNormalization($columns($columns));
         return null;
 	}
-	public static function ConditionsToQuery($conditions=null)
+	public static function ConditionNormalization($conditions=null)
 	{
 		if(is_null($conditions)) return null;
 		if(is_string($conditions))
 			return startsWith(strtolower(trim($conditions)),"where")?$conditions:"WHERE $conditions";
 		elseif(is_array($conditions) || is_iterable($conditions))
             return join(" AND ", array_filter(loop($conditions,
-                                function($k,$v){return self::ConditionsToQuery($v);}),
+                                function($k,$v){return self::ConditionNormalization($v);}),
                                 function($v){ return !is_null($v); }
                             )
                         );
-		elseif(is_callable($conditions)) return self::ConditionsToQuery($conditions($conditions));
+		elseif(is_callable($conditions)) return self::ConditionNormalization($conditions($conditions));
+        return null;
+	}
+	public static function ParametersNormalization($params = [])
+	{
+		if(!\_::$CONFIG->DataBaseValueNormalization) return $params;
+		if(is_null($params)) return [];
+		if(is_string($params)) return json_decode($params);
+		elseif(is_array($params) || is_iterable($params)){
+			foreach ($params as $key=>$value)
+				if(is_null($value)) $params[$key] = "NULL";
+            return $params;
+        }
+		elseif(is_callable($params)) return self::ParametersNormalization($params($params));
         return null;
 	}
 
@@ -60,8 +73,8 @@ class DataBase {
 		return $conn;
 	}
 
-	public static function Query($query,$params=[]){
-		foreach($params as $key => $val)
+	public static function Query($query, $params=[]){
+		foreach(self::ParametersNormalization($params) as $key => $val)
 			$query = str_replace("$key","'$val'",$query);
 		return $query;
 	}
@@ -69,7 +82,7 @@ class DataBase {
 	public static function SelectValue($query, $params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
-		$stmt->execute($params);
+		$stmt->execute(self::ParametersNormalization($params));
 		return $stmt->fetchColumn();
 	}
 	public static function TrySelectValue($query, $params=[], $defaultValue = null)
@@ -85,13 +98,13 @@ class DataBase {
 	}
 	public static function MakeSelectValueQuery($tableName, $columns = "`ID`", $condition=null)
 	{
-		return "SELECT ".self::ColumnsToQuery($columns??"`ID`")." FROM ".self::TablesToQuery($tableName)." ".self::ConditionsToQuery($condition);
+		return "SELECT ".self::ColumnNameNormalization($columns??"`ID`")." FROM ".self::TableNameNormalization($tableName)." ".self::ConditionNormalization($condition);
 	}
 
 	public static function Select($query, $params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
-		$stmt->execute($params);
+		$stmt->execute(self::ParametersNormalization($params));
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 		return $stmt->fetchAll();
 	}
@@ -108,7 +121,7 @@ class DataBase {
 	}
 	public static function MakeSelectQuery($tableName, $columns = "*", $condition=null)
 	{
-		return "SELECT ".self::ColumnsToQuery($columns??"*")." FROM ".self::TablesToQuery($tableName)." ".self::ConditionsToQuery($condition);
+		return "SELECT ".self::ColumnNameNormalization($columns??"*")." FROM ".self::TableNameNormalization($tableName)." ".self::ConditionNormalization($condition);
 	}
 
 	public static function SelectPairs($query, $params=[]){
@@ -131,13 +144,13 @@ class DataBase {
 	}
 	public static function MakeSelectPairsQuery($tableName, $key = "`ID`", $value = "`Name`", $condition=null)
 	{
-		return "SELECT ".self::ColumnsToQuery([$key??"`ID`", $value??"`Name`"])." FROM ".self::TablesToQuery($tableName)." ".self::ConditionsToQuery($condition);
+		return "SELECT ".self::ColumnNameNormalization([$key??"`ID`", $value??"`Name`"])." FROM ".self::TableNameNormalization($tableName)." ".self::ConditionNormalization($condition);
 	}
 
 	public static function Insert($query,$params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
-		$isdone = $stmt->execute($params);
+		$isdone = $stmt->execute(self::ParametersNormalization($params));
 		return $isdone;
 	}
 	public static function TryInsert($query,$params=[], $defaultValue = false)
@@ -155,20 +168,20 @@ class DataBase {
         $vals = array();
 		$sets = array();
 		$args = array();
-		foreach($params as $key => $value){
+		foreach(self::ParametersNormalization($params) as $key => $value){
 			$k = ltrim($key,":");
 			$sets[] = "`$k`";
 			$vals[] = ":$k";
 			$args[":$k"] = $value;
         }
 		$params = $args;
-		return "INSERT INTO ".self::TablesToQuery($tableName)." (".implode(", ",$sets).") VALUES (".implode(", ",$vals).") ".self::ConditionsToQuery($condition);
+		return "INSERT INTO ".self::TableNameNormalization($tableName)." (".implode(", ",$sets).") VALUES (".implode(", ",$vals).") ".self::ConditionNormalization($condition);
 	}
 
 	public static function Replace($query, $params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
-		$isdone = $stmt->execute($params);
+		$isdone = $stmt->execute(self::ParametersNormalization($params));
 		return $isdone;
 	}
 	public static function TryReplace($query, $params=[], $defaultValue = false)
@@ -185,20 +198,20 @@ class DataBase {
         $vals = array();
 		$sets = array();
 		$args = array();
-		foreach($params as $key => $value){
+		foreach(self::ParametersNormalization($params) as $key => $value){
 			$k = ltrim($key,":");
 			$sets[] = "`$k`";
 			$vals[] = ":$k";
 			$args[":$k"] = $value;
         }
 		$params = $args;
-		return "REPLACE INTO ".self::TablesToQuery($tableName)." (".implode(", ",$sets).") VALUES (".implode(", ",$vals).") ".self::ConditionsToQuery($condition);
+		return "REPLACE INTO ".self::TableNameNormalization($tableName)." (".implode(", ",$sets).") VALUES (".implode(", ",$vals).") ".self::ConditionNormalization($condition);
 	}
 
 	public static function Update($query, $params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
-		$isdone = $stmt->execute($params);
+		$isdone = $stmt->execute(self::ParametersNormalization($params));
 		return $isdone;
 	}
 	public static function TryUpdate($query, $params=[], $defaultValue = false)
@@ -214,19 +227,19 @@ class DataBase {
 	{
         $sets = array();
 		$args = array();
-		foreach($params as $key => $value){
+		foreach(self::ParametersNormalization($params) as $key => $value){
 			$k = ltrim($key,":");
 			$sets[] = "`$k`=:$k";
 			$args[":$k"] = $value;
         }
 		$params = $args;
-		return "UPDATE ".self::TablesToQuery($tableName)." SET ".implode(", ",$sets)." ".self::ConditionsToQuery($condition);
+		return "UPDATE ".self::TableNameNormalization($tableName)." SET ".implode(", ",$sets)." ".self::ConditionNormalization($condition);
 	}
 
 	public static function Delete($query, $params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
-		$isdone = $stmt->execute($params);
+		$isdone = $stmt->execute(self::ParametersNormalization($params));
 		return $isdone;
 	}
 	public static function TryDelete($query, $params=[], $defaultValue = false)
@@ -240,7 +253,7 @@ class DataBase {
 	}
 	public static function MakeDeleteQuery($tableName, $condition=null)
 	{
-		return "DELETE FROM ".self::TablesToQuery($tableName)." ".self::ConditionsToQuery($condition);
+		return "DELETE FROM ".self::TableNameNormalization($tableName)." ".self::ConditionNormalization($condition);
 	}
 
 	public static function GetCount($tableName, $column = "`ID`",$condition =null, $params=[])

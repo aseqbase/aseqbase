@@ -124,23 +124,26 @@ class Table extends Module{
 	public $SelectCondition = null;
 	public $AllowLabelTranslation = true;
 	public $AllowDataTranslation = false;
-	public $AllowOptions = true;
-	public $Options = "
-					paging: true,
-					searching: true,
-					ordering:  true,
-					select: true,
-					scrollX: true,
-					scrollY: true,
-					scrollCollapse: false,
-					autoWidth: false,
-					fixedHeader: true,
-					responsive: true
-	";
 	public $TextWrap = false;
 	public $MediaWidth = "50px";
 	public $MediaHeight = "50px";
 	public $Modal = null;
+	public $HasDecoration = true;
+	public $Options = "
+					select: true
+	";
+	public $AllowPaging= true;
+	public $AllowSearching= true;
+	public $AllowOrdering=  true;
+	public $AllowProcessing= true;
+	public $AllowServerSide= false;
+	public $AllowScrollX= true;
+	public $AllowScrollY= true;
+	public $AllowScrollCollapse= false;
+	public $AllowAutoWidth= false;
+	public $AllowAutoHeight= null;
+	public $AllowFixedHeader= true;
+	public $AllowResponsive= true;
 
 	/**
      * Create the module
@@ -290,7 +293,7 @@ class Table extends Module{
                     $isrk = ($rkey === $this->RowKey) || in_array($rkey,$clks) || ($hasid && $rowid === $rkey);
                     if($rkls) array_unshift($row,is_integer($rkey)?($hrn?$rkey+$srn:""):$rkey);
 					if($isc){
-                        $row = is_null($rowid)?[$uck=>$uck,...$row]:[
+                        $row = is_null($rowid)?[$uck=>"",...$row]:[
 							$uck=>HTML::Division([
 									...(getAccess($this->ViewAccess)? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);")] : []),
 									...($isu && getAccess($this->ModifyAccess)? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
@@ -303,16 +306,16 @@ class Table extends Module{
                         $cells[] = "<thead><tr>";
                         foreach($row as $ckey=>$cel)
                             if((!$ick || in_array($ckey, $icks)) && (!$eck || !in_array($ckey, $ecks)))
-								$cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true);
+								$cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
                         $cells[] = "</tr></thead>";
 						$isrk = false;
                     }
                     $cells[] = $strow;
                     foreach($row as $ckey=>$cel)
                         if((!$ick || in_array($ckey, $icks)) && (!$eck || !in_array($ckey, $ecks))){
-                            if($isrk) $cells[] = $this->GetCell(is_integer($rkey)?($hrn?$rkey+$srn:""):$cel, $ckey, true);
-							elseif(in_array($ckey, $rlks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true);
-                            else $cells[] = $this->GetCell($cel, $ckey, false);
+                            if($isrk) $cells[] = $this->GetCell(is_integer($rkey)?($hrn?$rkey+$srn:""):$cel, $ckey, true, $row);
+							elseif(in_array($ckey, $rlks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true, $row);
+                            else $cells[] = $this->GetCell($cel, $ckey, false, $row);
                         }
                     $cells[] = $etrow;
                 }
@@ -325,47 +328,62 @@ class Table extends Module{
 	}
 
 	public function GetScript(){
-		if($this->AllowOptions)
-			return HTML::Script("$(document).ready(()=>{
-					$('.{$this->Name}').DataTable({".(Convert::ToString($this->Options).
-						($this->Controlable?", 'columnDefs': [{ 'targets': 0, 'orderable': false }]":"")
-					)."});
-				});".
-				(is_null($this->Modal)?"":("
-					function {$this->Modal->Name}_View(key){
-						postData(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=view&{$this->ColumnKey}='+key, `.{$this->Name}`,
-							(data,selector)=>{
-								{$this->Modal->ShowScript("null","null","data")}
-							}
-						);
-					}
-					function {$this->Modal->Name}_Create(){
-						postData(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=create&{$this->ColumnKey}=_table_add', `.{$this->Name}`,
-							(data,selector)=>{
-								{$this->Modal->ShowScript("null","null","data")}
-							}
-						);
-					}
-					function {$this->Modal->Name}_Modify(key){
-						postData(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=modify&{$this->ColumnKey}='+key, `.{$this->Name}`,
-							(data,selector)=>{
-								{$this->Modal->ShowScript("null","null","data")}
-							}
-						);
-					}
-					function {$this->Modal->Name}_Delete(key){
-						".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?", styling:false)."`))":"")."
-							postData(null, `".\_::$CONFIG->ViewHandlerKey."=value&action=delete&{$this->ColumnKey}=`+key, `.{$this->Name}`,
-							(data,selector)=>{
-								load();
-							});
-					}"
-				))
-			);
-		return parent::GetScript();
+		return HTML::Script("$(document).ready(()=>{".
+			(!$this->HasDecoration?"":
+				"$('.{$this->Name}').DataTable({".
+					join(", ",[
+						...(is_null($this->AllowPaging)?[]:["paging: ".($this->AllowPaging?"true":"false")]),
+						...(is_null($this->AllowSearching)?[]:["searching: ".($this->AllowSearching?"true":"false")]),
+						...(is_null($this->AllowOrdering)?[]:["ordering: ".($this->AllowOrdering?"true":"false")]),
+						...(is_null($this->AllowProcessing)?[]:["processing: ".($this->AllowProcessing?"true":"false")]),
+						...(is_null($this->AllowServerSide)?[]:["serverSide: ".($this->AllowServerSide?"true":"false")]),
+						...(is_null($this->AllowScrollX)?[]:["scrollX: ".($this->AllowScrollX?"true":"false")]),
+						...(is_null($this->AllowScrollY)?[]:["scrollY: ".($this->AllowScrollY?"true":"false")]),
+						...(is_null($this->AllowScrollCollapse)?[]:["scrollCollapse: ".($this->AllowScrollCollapse?"true":"false")]),
+						...(is_null($this->AllowAutoWidth)?[]:["autoWidth: ".($this->AllowAutoWidth?"true":"false")]),
+						...(is_null($this->AllowAutoHeight)?[]:["autoHeight: ".($this->AllowAutoHeight?"true":"false")]),
+						...(is_null($this->AllowFixedHeader)?[]:["fixedHeader: ".($this->AllowFixedHeader?"true":"false")]),
+						...(is_null($this->AllowResponsive)?[]:["responsive: ".($this->AllowResponsive?"true":"false")]),
+						...(isEmpty($this->Options)?[]:[Convert::ToString($this->Options)]),
+						...($this->Controlable?["'columnDefs': [{ 'targets': 0, 'orderable': false }]"]:[])
+					]).
+				"});
+			});").($this->Controlable?
+			(is_null($this->Modal)?"":("
+				function {$this->Modal->Name}_View(key){
+					postData(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=view&{$this->ColumnKey}='+key, `.{$this->Name}`,
+						(data,selector)=>{
+							{$this->Modal->ShowScript("null","null","data")}
+						}
+					);
+				}".($this->Updatable?(getAccess($this->AddAccess)?"
+				function {$this->Modal->Name}_Create(){
+					postData(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=create&{$this->ColumnKey}=_table_add', `.{$this->Name}`,
+						(data,selector)=>{
+							{$this->Modal->ShowScript("null","null","data")}
+						}
+					);
+				}":"").(getAccess($this->ModifyAccess)?"
+				function {$this->Modal->Name}_Modify(key){
+					postData(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=modify&{$this->ColumnKey}='+key, `.{$this->Name}`,
+						(data,selector)=>{
+							{$this->Modal->ShowScript("null","null","data")}
+						}
+					);
+				}":"").(getAccess($this->RemoveAccess)?"
+				function {$this->Modal->Name}_Delete(key){
+					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?", styling:false)."`))":"")."
+						postData(null, `".\_::$CONFIG->ViewHandlerKey."=value&action=delete&{$this->ColumnKey}=`+key, `.{$this->Name}`,
+						(data,selector)=>{
+							load();
+						});
+				}":""):"")
+			)):"")
+		);
     }
 
-	public function GetCell($cel, $key, $isHead = false){
+	public function GetCell($cel, $key, $isHead = false, $row = []){
+        if(!$isHead || $cel !== $key) $cel = Convert::ToString(Convert::By(getValid($this->CellValues, $key), $cel, $key, $row)??$cel);
 		if($isHead){
             $cel = Convert::ToString($cel);
 			if(isFile($cel)) return "<th>".HTML::Media($cel)."</th>";
@@ -377,11 +395,9 @@ class Table extends Module{
         //    $cel->MaxHeight = $this->MediaHeight;
         //    return "<td>".Convert::ToString($cel)."</td>";
         //}
-		$celv = getValid($this->CellValues, $key);
-		$cel = Convert::ToString(Convert::By($celv, $key, $cel)??$cel);
         if(isFile($cel)) return "<td>".HTML::Media($cel)."</td>";
 		$cel = __($cel, translation:$this->AllowDataTranslation, styling:false);
-        if(!$this->TextWrap && !startsWith($key,"<")) return "<td>".Convert::ToExcerpt($cel, 0, $this->DataCompression, "...".HTML::Tooltip($cel))."</td>";
+        if(!$this->TextWrap && !startsWith($cel,"<")) return "<td>".Convert::ToExcerpt($cel, 0, $this->DataCompression, "...".HTML::Tooltip($cel))."</td>";
         return "<td>$cel</td>";
     }
 
@@ -548,7 +564,7 @@ class Table extends Module{
                     default:
 						$vals = RECEIVE(null, $this->UpdateMethod);
 						try{
-							foreach (RECEIVE(null, $_FILES) as $k=>$v)
+							foreach (RECEIVE(null, $_FILES)??[] as $k=>$v)
 								if(Local::IsFileObject($_FILES[$k])){
 									$type = getValid($this->CellTypes, $k, "");
 									if(is_string($type)) $type = \_::$CONFIG->GetAcceptableFormats($type);

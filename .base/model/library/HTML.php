@@ -13,6 +13,7 @@ class HTML
     public static $MaxFloatDecimals = 2;
     public static $MaxValueLength = 10;
     public static $NewLine = "<br/>";
+    public static $HorizontalBreak = "<hr/>";
 
     /**
      * Create standard html element
@@ -23,7 +24,7 @@ class HTML
      * @return string
      */
     public static function Element($content = null, array|string|null $tagName = null, ...$attributes) {
-        $isSingle = !is_null($content) && is_string($content) && is_array($tagName);
+        $isSingle = (!is_null($content)) && is_string($content) && is_array($tagName);
         if ($isSingle) {
             $attributes = Convert::ToIteration($tagName, $attributes);
             $tagName = $content;
@@ -103,8 +104,7 @@ class HTML
                             break;
                     }
                 if(count($scripts) > 0) $attachments .= self::Script($scripts);
-            }
-            else $attrs = Convert::ToString($attributes);
+            } else $attrs = Convert::ToString($attributes);
         }
 
         if ($isSingle) return "<$tagName$attrs data-single/>
@@ -736,8 +736,7 @@ $attachments"]);
         if(is_null($reference)) {
             $reference = $content;
             $content = null;
-        }
-        elseif(is_array($reference) && count($attributes) === 0){
+        } elseif(is_array($reference) && count($attributes) === 0){
             $attributes = Convert::ToIteration($reference);
             $reference = $content;
             $content = null;
@@ -1416,9 +1415,12 @@ $attachments"]);
     public static function SelectInput($key, $value = null, $options = [], ...$attributes){
         return self::Element(
             is_countable($options)?iterator_to_array((function()use($options, $value, $attributes){
-                if(!preg_find('/\srequired?\b/i', Convert::ToString($attributes))) yield self::Element("","option");
+                if(!preg_find('/\srequired?\b/i', Convert::ToString($attributes)))
+                    $options = [""=>"",...$options];
+                $f = false;
                 foreach ($options as $k=>$v)
-                    if($k == $value) yield self::Element($v??"","option",["value"=>$k, "selected"=>"true"]);
+                    if(!$f && ($f = ($k == $value && (!isEmpty($value) || $k === $value))))
+                        yield self::Element($v??"","option",["value"=>$k, "selected"=>"true"]);
                     else yield self::Element($v??"","option",["value"=>$k]);
             })()):Convert::ToString($options)
             ,"select", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> Convert::ToTitle($key), "class"=>"input selectinput" ], $attributes);

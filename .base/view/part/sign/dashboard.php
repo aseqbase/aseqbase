@@ -8,6 +8,9 @@ if(ACCESS(\_::$CONFIG->UserAccess))
 				margin: var(--Size-1);
 				margin-bottom: var(--Size-5);
 			}
+			.page header.header.introduction *{
+				text-align: center;
+			}
 			.page header.header.introduction .media {
 				aspect-ratio: 1;
 				width: 50%;
@@ -15,11 +18,16 @@ if(ACCESS(\_::$CONFIG->UserAccess))
 				border-radius: 100%;
 				display: inline-flex;
 			}
+			.page .container {
+				gap: var(--Size-2);
+			}
 	").
 	HTML::Center(
 		HTML::Header(
 			HTML::Media(\_::$INFO->User->Image).
-			HTML::ExternalHeading(\_::$INFO->User->Name)
+			HTML::ExternalHeading(\_::$INFO->User->Name).
+			HTML::Paragraph(\_::$INFO->User->GetValue("Bio")).
+            HTML::$HorizontalBreak
 		,["class"=>"introduction"]).
         HTML::Container([
             [

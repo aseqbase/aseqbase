@@ -672,7 +672,7 @@
 	/**
      * Do a loop action by a callable function on a countable element
      * @param mixed $array
-     * @param callable $action The loop action
+     * @param callable $action The loop action $action($key, $value, $i++)
      * @param array|iterable $array_find_keys
  * @return array
      */
@@ -683,7 +683,7 @@
 	/**
      * Do a loop action by a callable function on a countable element
      * @param mixed $array
-     * @param callable $action The loop action
+     * @param callable $action The loop action $action($key, $value, $i++)
      * @param array|iterable $array_find_keys
      * @return iterable
      */
