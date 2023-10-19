@@ -53,6 +53,8 @@ abstract class ConfigurationBase extends Base {
         "/^tag(\/|\?|$)/i"=>"tag",
         "/^sign(\/|\?|$)/i"=>"sign",
         "/^category(\/|\?|$)/i"=>"category",
+        "/^user(\/|\?|$)/i"=>"user",
+        "/^usergroup(\/|\?|$)/i"=>"usergroup",
         "/^(public|private)(\/|\?|$)/i"=>"run"
     );
     /**

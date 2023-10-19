@@ -240,9 +240,10 @@ class SideMenu extends Module{
 				if($count > 0){
 					$menuTags = "";
 					$ll = 999999999;
-					for($i = 0; $i < $count; $i++)
-						if(getAccess(getValid($this->Items[$i],"Access",\_::$CONFIG->VisitAccess))) {
-							$sl = getValid($this->Items[$i],'Layer',1);
+					$i = 0;
+					foreach ($this->Items as $item){
+						if(getAccess(getValid($item,"Access",\_::$CONFIG->VisitAccess))) {
+							$sl = getValid($item,'Layer',1);
 							if($sl <= $ll) {
 								if($sl <= $ll && $i !== 0) $menuTags .= "</div>";
 								$menuTags .= "<div class='row'>";
@@ -251,12 +252,14 @@ class SideMenu extends Module{
 							$menuTags .= HTML::Item(
 								HTML::Link(
 									HTML::Division(
-										__(getValid($this->Items[$i],'Name')??getValid($this->Items[$i],'Title'),true,false)
+										__(getValid($item,'Name')??getValid($item,'Title'),true,false)
 										, ["class"=>"box"]
-									), (getValid($this->Items[$i],'Path')??getValid($this->Items[$i],'Link'))??"", getValid($this->Items[$i],'Attributes')
-								), ["class"=>"col-sm ".((endsWith(\_::$URL, getValid($this->Items[$i],'Path')??getValid($this->Items[$i],'Link')??"")?'active':''))]
+									), (getValid($item,'Path')??getValid($item,'Link'))??"", getValid($item,'Attributes')
+								), ["class"=>"col-sm ".((endsWith(\_::$URL, getValid($item,'Path')??getValid($item,'Link')??"")?'active':''))]
 							);
                         }
+						$i++;
+                    }
 					$menuTags .= "</div>";
 					yield HTML::Container(
 						(isValid($this->Content)? HTML::Content(__($this->Content,true,false)):"").
@@ -269,7 +272,7 @@ class SideMenu extends Module{
 			yield $module->Capture();
         });
 	}
-	
+
 	public function PostCapture(){
 		return parent::PostCapture().
 			($this->AllowSignButton?

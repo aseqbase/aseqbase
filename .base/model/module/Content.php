@@ -4,7 +4,7 @@ class Content extends Module{
 	public $AllowDescription = true;
 	public $AllowImage = true;
 	public $Content = null;
-	public $Tag = "content";
+	public $Tag = "main";
 	public $Attributes = " onclick='viewSideMenu(false)'";
 
 

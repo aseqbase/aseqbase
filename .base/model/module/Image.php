@@ -73,7 +73,7 @@ class Image extends Module{
 	}
 
 	public function Get(){
-		$src = $this->Source??$this->Image;
+		$src = \MiMFa\Library\Local::GetUrl($this->Source??$this->Image);
 		return parent::Get().
 			(
 				isValid($src)? (

@@ -10,6 +10,7 @@ namespace MiMFa\Library;
 class HTML
 {
     //public static $Sources = [];
+    public static $ManageAttributes = true;
     public static $MaxFloatDecimals = 2;
     public static $MaxValueLength = 10;
     public static $NewLine = "<br/>";
@@ -51,6 +52,8 @@ class HTML
                             switch ($key)
                             {
                                 case "style":
+                                    $attrdic[$key] .= PHP_EOL.$value;
+                                    break;
                                 case "class":
                                     $attrdic[$key] .= " $value";
                                     break;
@@ -58,6 +61,7 @@ class HTML
                                 case "ondblclick":
                                 case "onchange":
                                 case "onload":
+                                case "oninput":
                                 case "onmouseover":
                                 case "onmouseout":
                                     $attrdic[$key] .= PHP_EOL.$value;
@@ -68,27 +72,44 @@ class HTML
                             }
                         else $attrdic[$key] = $value;
                     }
+                //Standardization
+                foreach($attrdic as $key=>$value)
+                    switch ($key)
+                    {
+                        case "max":
+                            $attrdic["onchange"] = getValid($attrdic,"onchange").PHP_EOL."if(this.value > $value) this.value = $value;";
+                            break;
+                        case "min":
+                            $attrdic["onchange"] = getValid($attrdic,"onchange").PHP_EOL."if(this.value < $value) this.value = $value;";
+                            break;
+                    }
+                //Integration
                 foreach($attrdic as $key=>$value)
                     switch ($key)
                     {
                         case "style":
-                            if(!isValid($id)){
-                                $id = "_".getId(true);
-                                $attrs .= " id='$id'";
-                            }
-                            $attachments .= self::Style("#$id{{$value}}");
+                            if(self::$ManageAttributes){
+                                if(!isValid($id)){
+                                    $id = "_".getId(true);
+                                    $attrs .= " id='$id'";
+                                }
+                                $attachments .= self::Style("#$id{{$value}}");
+                            } else $attrs .= " ".self::Attribute($key, $value);
                             break;
                         case "onclick":
                         case "ondblclick":
                         case "onchange":
                         case "onload":
+                        case "oninput":
                         case "onmouseover":
                         case "onmouseout":
-                            if(!isValid($id)){
-                                $id = "_".getId(true);
-                                $attrs .= " id='$id'";
-                            }
-                            $scripts[] = "document.getElementById('$id').$key = function(e){{$value}};";
+                            if(self::$ManageAttributes){
+                                if(!isValid($id)){
+                                    $id = "_".getId(true);
+                                    $attrs .= " id='$id'";
+                                }
+                                $scripts[] = "document.getElementById('$id').$key = function(e){{$value}};";
+                            } else $attrs .= " ".self::Attribute($key, $value);
                             break;
                         case "alt":
                         case "content":
@@ -217,7 +238,7 @@ $attachments"]);
         return $srci;
     }
     public static function Script($content, $source = null, ...$attributes){
-        $srci = self::Element($content, "script", is_null($source) ? ["type"=>"text/javascript"]:[ "src"=> $source ], $attributes);
+        $srci = self::Element($content??"", "script", is_null($source) ? ["type"=>"text/javascript"]:[ "src"=> $source ], $attributes);
         //array_push(self::$Sources, $srci);
         return $srci;
     }
@@ -398,13 +419,13 @@ $attachments"]);
         return self::Element(__($content),"header",["class"=> "header" ], $attributes);
     }
     /**
-     * The <CONTENT> HTML Tag
+     * The <MAIN> HTML Tag
      * @param mixed $content The content of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
     public static function Content($content, ...$attributes){
-        return self::Element(__($content),"div",["class"=> "content" ], $attributes);
+        return self::Element(__($content),"main",["class"=> "content" ], $attributes);
     }
     /**
      * The <FOOTER> HTML Tag
@@ -430,6 +451,48 @@ $attachments"]);
         return self::Element(__($content),"div",["class"=> "container" ], $attributes);
     }
     /**
+     * The Container <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function LargeContainer($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::LargeRack($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "container large-container" ], $attributes);
+    }
+    /**
+     * The Container <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function MediumContainer($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::MediumRack($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "container medium-container" ], $attributes);
+    }
+    /**
+     * The Container <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function SmallContainer($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::SmallRack($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "container small-container" ], $attributes);
+    }
+    /**
      * The Main Partitioner <DIV> HTML Tag
      * @param mixed $content The content of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
@@ -444,6 +507,48 @@ $attachments"]);
         return self::Element(__($content),"div",["class"=> "frame container-fluid" ], $attributes);
     }
     /**
+     * The Main Partitioner <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function LargeFrame($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::LargeRack($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "frame large-frame container-fluid" ], $attributes);
+    }
+    /**
+     * The Main Partitioner <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function MediumFrame($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::MediumRack($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "frame medium-frame container-fluid" ], $attributes);
+    }
+    /**
+     * The Main Partitioner <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function SmallFrame($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::SmallRack($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "frame small-frame container-fluid" ], $attributes);
+    }
+    /**
      * The Row Partitioner <DIV> HTML Tag
      * @param mixed $content The content of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
@@ -456,6 +561,48 @@ $attachments"]);
             $content = $res;
         }
         return self::Element(__($content),"div",["class"=> "rack row" ], $attributes);
+    }
+    /**
+     * The Row Partitioner <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function LargeRack($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::LargeSlot($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "rack large-rack row" ], $attributes);
+    }
+    /**
+     * The Row Partitioner <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function MediumRack($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::MediumSlot($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "rack medium-rack row" ], $attributes);
+    }
+    /**
+     * The Row Partitioner <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function SmallRack($content, ...$attributes){
+        if(is_countable($content)){
+            $res = [];
+            foreach ($content as $item) $res[] = self::SmallSlot($item);
+            $content = $res;
+        }
+        return self::Element(__($content),"div",["class"=> "rack small-rack row" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -483,7 +630,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "slot col-lg" ], $attributes);
+        return self::Element(__($content),"div",["class"=> "slot large-slot col-lg" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -497,7 +644,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "slot col-md" ], $attributes);
+        return self::Element(__($content),"div",["class"=> "slot medium-slot col-md" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -511,7 +658,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "slot col-sm" ], $attributes);
+        return self::Element(__($content),"div",["class"=> "slot small-slot col-sm" ], $attributes);
     }
     /**
      * The <DIV> HTML Tag
@@ -752,9 +899,9 @@ $attachments"]);
      * @return string
      */
     public static function Button($content, $reference = null, ...$attributes){
-        if(isUrl($reference))
-            return self::Link(__($content), $reference,["class"=> "btn button"], $attributes);
-        return self::Element(__($content, styling:false),"button",["class"=> "btn button", "type"=>"button", "onclick"=>$reference], $attributes);
+        if(isScript($reference) || !isUrl($reference))
+            return self::Element(__($content, styling:false), "button",["class"=> "btn button", "type"=>"button", "onclick"=>$reference], $attributes);
+        return self::Link($content, $reference, ["class"=> "btn button"], $attributes);
     }
     /**
      * The <BUTTON> or <A> HTML Tag
@@ -765,9 +912,9 @@ $attachments"]);
      */
     public static function Icon($content, $reference = null, ...$attributes){
         if(!isValid($content)) return null;
-        if(isUrl($reference))
-            return self::Link(self::Media("", $content), $reference, ["class"=> "icon"], $attributes);
-        return self::Media("", $content, ["class"=> "icon", "onclick"=>$reference], $attributes);
+        if(isScript($reference) || !isUrl($reference))
+            return self::Media("", $content, ["class"=> "icon", "onclick"=>$reference], $attributes);
+        return self::Link(self::Media("", $content), $reference, ["class"=> "icon"], $attributes);
 
     }
 
@@ -780,7 +927,11 @@ $attachments"]);
      */
     public static function Form($content, $reference = null, ...$attributes){
         if(!isValid($content)) $content = self::SubmitButton();
-        elseif(is_array($content) || is_iterable($content)) $content = join(PHP_EOL,loop($content,function($k, $f){return call_user_func_array("self::Field", $f); }));
+        elseif(is_array($content) || is_iterable($content))
+            $content = join(PHP_EOL, loop($content, function($k, $f){
+                if(is_integer($k)) return call_user_func("self::Field", $f);
+                else return call_user_func("self::Field", null, $k, $f);
+            }));
         return self::Element(__($content, styling:false), "form",isValid($reference)?["action"=> $reference]:[], [ "enctype"=>"multipart/form-data", "method"=>"get", "class"=> "form" ], $attributes);
     }
     /**
@@ -819,7 +970,7 @@ $attachments"]);
             $description = getValid($type, "Description", $description);
             $options = getValid($type, "Options", $options);
             $scope = getValid($type, "Scope", $scope);
-            $attributes = getValid($type, "Attributes", $attributes);
+            $attributes = [...$attributes, ...(isValid($type, "Attributes")?[getValid($type, "Attributes")]:[])];
             $type = self::InputDetector(getValid($type, "Type", null), $value);
         } elseif(is_countable($type)) {
             if(is_null($options)) {
@@ -831,7 +982,8 @@ $attachments"]);
                 $title = getValid($type, "title", $title);
                 $description = getValid($type, "description", $description);
                 $options = getValid($type, "options", $options);
-                $attributes = getValid($type, "attributes", $attributes);
+                $scope = getValid($type, "scope", $scope);
+                $attributes = [...$attributes, ...(isValid($type, "Attributes")?[getValid($type, "Attributes")]:[])];
                 $type = self::InputDetector(getValid($type, "type", null), $value);
             }
         } else $type = self::InputDetector($type, $value);
@@ -845,6 +997,14 @@ $attachments"]);
         {
             case 'span':
                 $content = self::Span($value??$titleOrKey, null, $attributes);
+                break;
+            case 'div':
+            case 'division':
+                $content = self::Division($value??$titleOrKey, null, $attributes);
+                break;
+            case 'p':
+            case 'paragraph':
+                $content = self::Paragraph($value??$titleOrKey, null, $attributes);
                 break;
         	case "disable":
         	case "disabled":
@@ -892,14 +1052,14 @@ $attachments"]);
             case 'radio':
             case 'radiobox':
             case 'radiobutton':
-                $content = self::RadioInput($title, $value, $attributes);
+                $content = self::RadioInput($titleOrKey, $value, $attributes);
                 break;
             case 'bool':
             case 'boolean':
             case 'check':
             case 'checkbox':
             case 'checkbutton':
-                $content = self::CheckInput($title, $value, $attributes);
+                $content = self::CheckInput($titleOrKey, $value, $attributes);
                 break;
             case 'int':
             case 'integer':
@@ -1128,24 +1288,29 @@ $attachments"]);
      * A <DIV> HTML Tag contains an array of Inputs
      * @param mixed $key The tag name, id, or placeholder
      * @param array|iterable|null $value The tag default value
-     * @param array|object $options The other options, default are: ["add"=>true, "remove"=>true, "separator"=>"|"]
+     * @param array|object $options The other options, default are: ["add"=>true, "remove"=>true]
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
-    public static function ArrayInput($key, $value = null, $options = ["type"=>null,"add"=>true,"remove"=>true,"separator"=>"|"], ...$attributes){
+    public static function ArrayInput($key, $value = null, $options = ["type"=>null,"add"=>true,"remove"=>true], ...$attributes){
         if(is_null($value))
             if(is_array($key)) {
                 $value = $key;
                 $key = "_".getId();
-            } else return null;
+            } else $value = [];
         $key = Convert::ToKey($key);
         return self::Division(function() use($key, $value, $options, $attributes){
             $sample = null;
+            $add = getValid($options, "add", true);
+            //$edit = getValid($options, "edit", true);
             $rem = getValid($options, "remove", true);
-            $sep = getValid($options, "separator", "|");
-            $type = getValid($options, "type", null);
+            $sep = getValid($options, "separator", null);
+            $type = self::InputDetector(getValid($options, "type", null), getValid($options, "value", null));
+            $key = getValid($options, "key", $key);
+            $attrs = getValid($options, "attributes", []);
             $options = getValid($options, "options", null);
-            if(is_string($value)) $value = explode($sep, trim($value, $sep));
+            if(isEmpty($value)) $value = [];
+            elseif(is_string($value)) $value = is_null($sep)&&startsWith($value,"[","{")?json_decode($value):explode($sep??"|", trim($value, $sep??"|"));
             foreach ($value as $k=>$item){
                 if(is_null($sample)) $sample = $item;
                 $Id = Convert::ToId($key).getId();
@@ -1157,25 +1322,27 @@ $attachments"]);
                     title:false,
                     description:false,
                     options:$options,
-                    attributes:[["id"=>$Id, "name"=>(is_numeric($k)?"{$key}[]":$k)], ($rem?["ondblclick"=>"this.remove();"]:null), ...$attributes]);
+                    attributes:[($rem?["ondblclick"=>"this.remove();"]:null), ...$attributes, ["id"=>$Id, "name"=>(is_numeric($k)?"{$key}[]":"{$key}[$k]")], ...$attrs]);
             }
-            if(getValid($options, "add", true))
+            if($add)
             {
                 $id = Convert::ToId($key)."_add_".getId();
                 $oc = "
-                        let tag = document.getElementById(`$id`).cloneNode();
+                        let tag = document.getElementById(`$id`).cloneNode(true);
                         tag.id = `$key".getId()."`;
                         tag.name = `{$key}[]`;
+                        tag.setAttribute(`class`,`input`);
+                        tag.setAttribute(`style`,``);
                         ".($rem?"tag.ondblclick = function(){ this.remove(); };":"")."
                         this.parentElement.appendChild(tag);";
                 yield self::Field(
                     type:self::InputDetector($type, $sample),
-                    key:(is_numeric($k)?"{$key}[]":$k),
+                    key:$key,
                     value:null,
                     title:false,
                     description:self::Icon("plus", $oc),
                     options:$options,
-                    attributes:[["name"=>"", "id"=>$id, "onchange"=>$oc], ...$attributes]);
+                    attributes:[...$attributes, "onchange"=>$oc, "id"=>$id, "name"=>"","style"=>"display: none;", ...$attrs]);
             }
         },["id"=>$key, "class"=>"arrayinput"]);
     }
@@ -1187,8 +1354,11 @@ $attachments"]);
      * @return string
      */
     public static function CheckInput($key, $value = null, ...$attributes){
-        if($value) return self::Input($key, $key, "checkbox", ["class"=>"checkinput", "checked"=>"checked"], $attributes);
-        else return self::Input($key, $key, "checkbox", ["class"=>"checkinput"], $attributes);
+        $id = "checkinput_".getId(true);
+        if($value) return self::Input(null, null, "checkbox", ["class"=>"checkinput", "checked"=>"checked", "name"=>null, "onchange"=>"document.getElementById('$id').value = this.checked?1:0;"]).
+            self::HiddenInput($key, "1", ["class"=>"checkinput"], $attributes, ["id"=>$id]);
+        else return self::Input(null, null, "checkbox", ["class"=>"checkinput", "name"=>null, "onchange"=>"document.getElementById('$id').value = this.checked?1:0;"]).
+            self::HiddenInput($key, "0", ["class"=>"checkinput"], $attributes, ["id"=>$id]);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1362,7 +1532,7 @@ $attachments"]);
      * @return string
      */
     public static function NumberInput($key, $value = null, ...$attributes){
-        return self::Input($key, $value, "number", ["class"=>"numberinput"], $attributes);
+        return self::Input($key, $value, "number", ["class"=>"numberinput", "inputmode"=>"numeric"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1372,7 +1542,7 @@ $attachments"]);
      * @return string
      */
     public static function FloatInput($key, $value = null, ...$attributes){
-        return self::Input($key, $value, "number", ["class"=>"floatinput", "step"=>"0.01"], $attributes);
+        return self::Input($key, $value, "number", ["class"=>"floatinput", "step"=>"0.001", "inputmode"=>"numeric"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1414,15 +1584,17 @@ $attachments"]);
      */
     public static function SelectInput($key, $value = null, $options = [], ...$attributes){
         return self::Element(
-            is_countable($options)?iterator_to_array((function()use($options, $value, $attributes){
-                if(!preg_find('/\srequired?\b/i', Convert::ToString($attributes)))
-                    $options = [""=>"",...$options];
+            is_iterable($options) || is_array($options)?iterator_to_array((function()use($options, $value, $attributes){
+                $value = Convert::ToString($value);
                 $f = false;
+                if($f = isEmpty($value))
+                    yield self::Element("","option",["value"=>"", "selected"=>"true"]);
+                else yield self::Element("","option",["value"=>""]);
                 foreach ($options as $k=>$v)
-                    if(!$f && ($f = ($k == $value && (!isEmpty($value) || $k === $value))))
+                    if(!$f && ($f = ($k == $value)))
                         yield self::Element($v??"","option",["value"=>$k, "selected"=>"true"]);
                     else yield self::Element($v??"","option",["value"=>$k]);
-            })()):Convert::ToString($options)
+            })()):Convert::ToString($options, assignFormat:"<option value='{0}'>{1}</option>\r\n")
             ,"select", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> Convert::ToTitle($key), "class"=>"input selectinput" ], $attributes);
     }
 
@@ -1478,6 +1650,155 @@ $attachments"]);
      */
     public static function Cell($content, $head = false, ...$attributes){
         return self::Element(__($content, styling:false), $head?"th":"td",["class"=> "cell"], $attributes);
+    }
+
+    public static function Chart($type = "column", $content = null, $title = null, $description = null, $axisXTitle = "X", $axisYTitle = "Y", $attributes = [], $options = null, $color = null, $foreColor = null, $backColor = null, $font = "defaultFont", $height = "400px", $width = null, $axisXBegin = null, $axisYBegin = null, $axisXInterval = null, $axisYInterval = null) {
+        if ($content === null) {
+            $content = $type;
+            $type = "column";
+        }
+        if ($content === null) return null;
+        $isen = is_array($content);
+        $isobj = is_object($content);
+        $datachart = null;
+        $id = "Chart".getId();
+        if (!$isen && !$isobj) $datachart = $content;
+        else {
+            if (!$isen && $isobj) {
+                $rows = between($content["matrix"], $content["table"], $content["rows"], $content["columns"]);
+                if (isEmpty($rows)) $datachart = Convert::ToString($content);
+                else{
+                    $arr = [];
+                    $l = between($content["labels"], $content["label"], -1);
+                    $xs = between($content["axisX"], $content["xs"], $content["x"], []);
+                    $ys = between($content["axisY"], $content["ys"], $content["y"], []);
+                    $ct = 0;
+                    if ($l > -1)
+                        if (count($xs) > 0)
+                            if (count($ys) > 0)
+                                foreach ($rows as $row){
+                                    $arr[] = getValid($row, $l);
+                                    $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function($i) use($row){return floatval(getValid($row, $i));});
+                                    $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function($i) use($row){return floatval(getValid($row, $i));});
+                                }
+                            else
+                                foreach ($rows as $row){
+                                    $arr[] = getValid($row, $l);
+                                        $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function($i) use($row){return floatval(getValid($row, $i));});
+                                        $arr[] = $ct++;
+                                }
+                        else if (count($ys) > 0)
+                            foreach ($rows as $row){
+                                $arr[] = getValid($row, $l);
+                                $arr[] = $ct++;
+                                $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function($i) use($row){return floatval(getValid($row, $i));});
+                            }
+                        else
+                            foreach ($rows as $row)
+                                $arr[] = getValid($row, $l);
+                    else if (count($xs) > 0)
+                        if (count($ys) > 0)
+                            foreach ($rows as $row){
+                                $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function($i) use($row){return floatval(getValid($row, $i));});
+                                $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function($i) use($row){return floatval(getValid($row, $i));});
+                            }
+                        else
+                            foreach ($rows as $row){
+                                $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function($i) use($row){return floatval(getValid($row, $i));});
+                                $arr[] = $ct++;
+                            }
+                    else if (count($ys) > 0)
+                            foreach ($rows as $row){
+                                $arr[] = $ct++;
+                                $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function($i) use($row){return floatval(getValid($row, $i));});
+                            }
+                    $content = $arr;
+                }
+            }
+            $arr = array();
+            $isten = is_array($type);
+            if ($isen && count($content) < 3)
+                $arr = loop($content, function($i, $cnt) use($type, $isten){ return join("", ["{", "type: `", $isten ? $type[$i] : $type, "`", ", dataPoints: [", Script::Points($cnt), "]}"]); });
+            else if ($isten)
+                $arr = loop($type, function($i, $ty) use($content, $isen){ return join("", ["{", strpos($ty, ":") ? $ty : "type: `" + $ty + "`", ", dataPoints: [", Script::Points($isen ? $content[$i] : $content), "]}"]);});
+            else $arr[] = join("", ["{type: `$type`, ",($color==null?"":"color: `$color`, "),"dataPoints: [", Script::Points($content), "]}"]);
+
+            $datachart = "[".join(",", $arr)."]";
+        }
+        $axisXTitle = __($axisXTitle, styling:false);
+        $axisYTitle = __($axisYTitle, styling:false);
+        $title = __($title, styling:false);
+        $description = __($description, styling:false);
+        return self::Style(".canvasjs-chart-credit{display:none !important;}").
+            self::Division(
+               self::Heading($title).
+               self::Script(null, getFullUrl("/view/script/canvasjs.min.js")).
+               self::Script("
+                    window.addEventListener(`load`, function()
+                        {
+                            var chart = new CanvasJS.Chart(`$id`, {
+                                theme: `light2`,
+							    zoomEnabled: true,
+                                ".($backColor?"backgroundColor:`$backColor`,":"")."
+                                ".($height?"height:".intval($height).",":"").($width?"width:intval($width),":"")."
+							    legend: {
+								    horizontalAlign: `center`,
+								    verticalAlign: `top`,
+                                    ".($foreColor?"fontColor:`$foreColor`,":"")."
+		                            fontFamily: `".($font??"defaultFont")."`
+							    },
+                                axisX:{
+                                    title: `$axisXTitle`,
+                                    crosshair: {
+                                        enabled: true
+                                    },
+                                    ".($axisXBegin?"minimum:$axisXBegin,":"")."
+                                    ".($axisXInterval?"interval:$axisXInterval,":"")."
+		                            labelTextAlign: `".Translate::$Direction."`,
+                                    ".($foreColor?"fontColor:`$foreColor`,":"")."
+                                    ".($foreColor?"titleFontColor:`$foreColor`,":"")."
+                                    ".($foreColor?"labelFontColor:`$foreColor`,":"")."
+		                            labelFontFamily: `".($font??"defaultFont")."`,
+		                            titleFontFamily: `".($font??"defaultFont")."`
+                                },
+                                axisY:{
+                                    title: `$axisYTitle`,
+                                    crosshair: {
+                                        enabled: true
+                                    },
+                                    ".($axisYBegin?"minimum:$axisYBegin,":"")."
+                                    ".($axisYInterval?"interval:$axisYInterval,":"")."
+		                            labelTextAlign: `".Translate::$Direction."`,
+                                    ".($foreColor?"fontColor:`$foreColor`,":"")."
+                                    ".($foreColor?"titleFontColor:`$foreColor`,":"")."
+                                    ".($foreColor?"labelFontColor:`$foreColor`,":"")."
+		                            labelFontFamily: `".($font??"defaultFont")."`,
+		                            titleFontFamily: `".($font??"defaultFont")."`
+                                },
+                                toolTip: {
+                                    shared: true,
+		                            fontFamily: `defaultFont`
+                                },
+                                title:{
+                                    text: `$title`,
+                                    ".($foreColor?"fontColor:`$foreColor`,":"")."
+                                    verticalAlign: `top`,
+                                    horizontalAlign: `center`,
+		                            fontFamily: `".($font??"defaultFont")."`
+                                },
+                                subtitles:{
+                                    text: `$description`,
+                                    ".($foreColor?"fontColor:`$foreColor`,":"")."
+                                    verticalAlign: `bottom`,
+                                    horizontalAlign: `center`,
+		                            fontFamily: `".($font??"defaultFont")."`
+                                },
+                                data: $datachart".($options == null ? "" : ",
+                                ".$options)."
+                            });
+                            chart.render();
+                        });"),
+                        ["id"=> $id, "style"=>($height?"height:$height;":"").($width?"width:$width;":""), "class"=>"chart" ], $attributes);
     }
 }
 ?>

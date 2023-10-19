@@ -12,7 +12,8 @@
 		public $DarkMode = null;
 
 		public $BasePack = "
-			<script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>
+			<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+			<script>window.jQuery || document.write(`<script src='https://code.jquery.com/jquery-3.6.0.min.js'><\/script>`)</script>
 			<link rel='stylesheet' href='https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css'>
 			<script src='https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js'></script>
 			<script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js'></script>
@@ -21,6 +22,7 @@
 			<script src='https://kit.fontawesome.com/e557f8d9f4.js' crossorigin='anonymous'></script>
 			<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css'>
 			<script src='https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js' crossorigin='anonymous'></script>
+			<script src='https://unpkg.com/jalaali-js/dist/jalaali.min.js'></script>
 		";
 		public $CustomPack = "";
 
@@ -30,7 +32,7 @@
 		//3:	BackColor
 		//4:	Input BackColor
 		//5:	Button BackColor
-		public $ColorPalette = array("#dd2222","#22dd22","#2222dd","#dddd22","#22dddd","#dd22dd");
+		public $ColorPalette = array("#dd2222","#22dd22","#2222dd","#ccbb22","#22dddd","#dd22dd");
 		public $ForeColorPalette = array("#030405","#010203","#010203","#040506","#3aa3e9","#fdfeff");
 		public $BackColorPalette = array("#fcfdfe","#fafbfc","#fafbfc","#fafcfd","#fdfeff","#3aa3e9");
 		public $FontPalette = array("'dubai light', sans-serif","'dubai', sans-serif","'dubai', sans-serif","'Tahoma', sans-serif","'Tahoma', sans-serif","'Times new Romance', sans-serif");

@@ -136,8 +136,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			if($hashPassword) $password = $this->EncryptPassword($password);
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
 						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Password`, `Status`",
-						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
-						[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature,":Password"=> $password]
+						"(`ID`=:ID OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
+						[":ID"=>$signature,":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature,":Password"=> $password]
 					);
             if(is_null($person)){
 				$this->SignOut($signature);
@@ -150,8 +150,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
         } else {
 			$person = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User",
 						"`Signature`, `ID`, `GroupID`, `Image`, `Name`, `Email`, `Password`, `Status`",
-						"(`Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact))",
-						[":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature]
+						"(`ID`=:ID OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact))",
+						[":ID"=>$signature,":Signature"=>$signature,":Email"=>$signature,":Contact"=>$signature]
 					);
             if(is_null($person)){
 				$this->SignOut($signature);

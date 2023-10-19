@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="<?php echo \MiMFa\Library\Translate::$Language; ?>" dir="<?php echo \MiMFa\Library\Translate::$Direction; ?>">
 	<head>
 		<meta charset="<?php echo \_::$CONFIG->Encoding; ?>">
 		<!--[if lt IE 9]>
@@ -19,7 +19,7 @@
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/reset.css'); ?>'>
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/general.css'); ?>'>
 		<script src='<?php echo forceFullUrl('/view/script/general.js'); ?>'></script>
-		<script src='<?php echo forceFullUrl('/view/script/Live.js'); ?>'></script>
+		<!--<script src='<?php echo forceFullUrl('/view/script/Live.js'); ?>'></script>-->
 		<script src='<?php echo forceFullUrl('/view/script/Math.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Array.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Html.js'); ?>'></script>

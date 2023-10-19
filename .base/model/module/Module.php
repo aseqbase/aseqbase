@@ -166,6 +166,8 @@ class Module extends \Base{
 
 	public $OneTimeStyle = false;
 	public $OneTimeScript = false;
+	public $Drawn = false;
+	public $Captured = false;
 
 	public function __construct(){
         parent::__construct();
@@ -318,6 +320,7 @@ class Module extends \Base{
      * @return string
      */
 	public function Get(){
+        $this->Captured = true;
 		return join("",[$this->GetTitle(),$this->GetDescription(),$this->GetContent()]);
 	}
 
@@ -326,6 +329,7 @@ class Module extends \Base{
      * @return string
      */
     public function Capture(){
+        $this->Captured = true;
         if($this->Capturable) return Convert::ToString(function(){
             $translate = \_::$CONFIG->AllowTranslate;
             $analyze = \_::$CONFIG->AllowTextAnalyzing;
@@ -362,6 +366,7 @@ class Module extends \Base{
      * @return string
      */
     public function ReCapture(){
+        $this->Captured = true;
 		if($this->Capturable) return Convert::ToString(function(){
             $translate = \_::$CONFIG->AllowTranslate;
             $analyze = \_::$CONFIG->AllowTextAnalyzing;
@@ -382,19 +387,27 @@ class Module extends \Base{
         }
     }
 
+    public function Render($print = true, $force = false){
+        if($print)
+            if($this->Drawn) return $this->ReDraw();
+            else return $this->Draw();
+        elseif($this->Captured) return $this->ReCapture();
+        else return $this->Capture();
+    }
+
 	/**
      * Echo all the HTML document and elements of the Module
      * @return bool
      */
 	public function Echo(){
-        $b = true;
+        $this->Drawn = true;
         if($this->Capturable) echo $this->Get();
         else{
-            $b = $this->EchoTitle() && $b;
-            $b = $this->EchoDescription() && $b;
-            $b = $this->EchoContent() && $b;
+            $this->Drawn = $this->EchoTitle() && $this->Drawn;
+            $this->Drawn = $this->EchoDescription() && $this->Drawn;
+            $this->Drawn = $this->EchoContent() && $this->Drawn;
         }
-        return $b;
+        return $this->Drawn;
 	}
 
 	/**
@@ -427,7 +440,7 @@ class Module extends \Base{
             \_::$CONFIG->AllowTranslate = $translate;
             \_::$CONFIG->AllowTextAnalyzing = $analyze;
         }
-        return "";
+        return $this->Drawn = true;
 	}
 	/**
      * Echo whole the Document contains Elements except Styles and Scripts.
@@ -447,7 +460,7 @@ class Module extends \Base{
             \_::$CONFIG->AllowTranslate = $translate;
             \_::$CONFIG->AllowTextAnalyzing = $analyze;
         }
-        return "";
+        return $this->Drawn = true;
 	}
 
 }?>

@@ -11,6 +11,7 @@ class Form extends Module{
 	public $Image = null;
 	public $Title = "Form";
 	public $SubmitLabel = "Submit";
+	public $Buttons = null;
 	public $ResetLabel = "Reset";
 	public $CancelLabel = null;
 	public $CancelPath = "/";
@@ -40,9 +41,9 @@ class Form extends Module{
 	/**
      * Create the module
      */
-	public function __construct($title = "Form", $action =  null, $method = "POST", mixed $children = [], $description = null){
+	public function __construct($title = "Form", $action =  null, $method = "POST", mixed $children = [], $description = null, $image = null){
         parent::__construct();
-		$this->Set($title, $action, $method, $children, $description);
+		$this->Set($title, $action, $method, $children, $description, $image);
 		if(!is_null($this->ResponseView)){
             unset($_GET[\_::$CONFIG->ViewHandlerKey]);
             unset($_REQUEST[\_::$CONFIG->ViewHandlerKey]);
@@ -51,13 +52,21 @@ class Form extends Module{
 	/**
      * Set the main properties of module
 	 */
-	public function Set($title = null, $action =  null, $method = "POST", mixed $children = [], $description = null){
+	public function Set($title = null, $action =  null, $method = "POST", mixed $children = [], $description = null, $image = null){
 		$this->Title = $title;
 		$this->Description = $description;
+		$this->Image = $image;
 		$this->Action = $action;
 		$this->Method = $method;
-		if(is_array($children) && count($children)>0 && !array_key_exists(0,$children))
-			$this->Children = iteration($children, function($k,$v){ return HTML::Field(null, $k, $v); });
+		if(is_array($children) && count($children)>0)
+			if($this->Method) $this->Children = iteration($children, function($k,$v){
+				if(is_integer($k)) return $v;
+				else return HTML::Field(null, $k, $v);
+            });
+			else $this->Children = iteration($children, function($k,$v){
+				if(is_integer($k)) return $v;
+				else return HTML::Field(null, $k, $v, attributes:["disabled"]);
+            });
 		else $this->Children = $children;
 		return $this;
     }
@@ -494,7 +503,7 @@ class Form extends Module{
 							$this->GetHeader().
 							$this->GetTitle().
 							$this->GetDescription().
-							(isValid($this->BackLabel)? HTML::Link($this->BackLabel, $this->BackPath):"")
+							(isValid($this->BackLabel)? HTML::Button($this->BackLabel, $this->BackPath):"")
 						,["class"=>"header"]):"").
 						HTML::LargeSlot(
 							HTML::Form(
@@ -513,7 +522,7 @@ class Form extends Module{
 						$this->GetHeader().
 						$this->GetTitle().
 						$this->GetDescription().
-						(isValid($this->BackLabel)? HTML::Link($this->BackLabel, $this->BackPath):"")
+						(isValid($this->BackLabel)? HTML::Button($this->BackLabel, $this->BackPath):"")
 					:"").
 					HTML::Form(
                         ($this->AllowContent?$this->GetContent():"").
@@ -530,6 +539,7 @@ class Form extends Module{
 
     }
 	public function GetButtons(){
+		if(isValid($this->Buttons)) yield $this->Buttons;
 		yield (isValid($this->SubmitLabel)?HTML::SubmitButton($this->SubmitLabel, ["name"=>"submit", "class"=>"col-md"]):"");
 		yield (isValid($this->ResetLabel)?HTML::ResetButton($this->ResetLabel, ["name"=>"reset", "class"=>"col-md-4"]):"");
 		yield (isValid($this->CancelLabel)?HTML::Button($this->CancelLabel, $this->CancelPath, ["name"=>"cancel", "class"=>"col-lg-3"]):"");

@@ -62,19 +62,19 @@
 
 		/**
 		 * Full part of the current url
-		 * Example: "https://www.mimfa.net/Category/mimfa/service/web?p=3&l=10#serp"
+		 * Example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php?p=3&l=10#serp"
 		 * @var string|null
 		 */
 		public static string|null $URL = null;
 		/**
 		 * The path part of the current url
-		 * Example: "https://www.mimfa.net/Category/mimfa/service/web"
+		 * Example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php"
 		 * @var string|null
 		 */
 		public static string|null $PATH = null;
 		/**
          * The host part of the current url
-         * Example: "https://www.mimfa.net"
+         * Example: "https://www.mimfa.net:5056"
          * @var string|null
          */
 		public static string|null $HOST = null;
@@ -92,16 +92,22 @@
 		public static string|null $DOMAIN = null;
 		/**
 		 * The request part of the current url
-		 * Example: "/Category/mimfa/service/web?p=3&l=10#serp"
+		 * Example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
 		 * @var string|null
 		 */
 		public static string|null $REQUEST = null;
 		/**
 		 * The direction part of the current url from the root
-		 * Example: "Category/mimfa/service/web"
+		 * Example: "Category/mimfa/service/web.php"
 		 * @var string|null
 		 */
 		public static string|null $DIRECTION = null;
+		/**
+         * The last part of the current direction url
+         * Example: "web.php"
+         * @var string|null
+         */
+		public static string|null $PAGE = null;
 		/**
 		 * The query part of the current url
 		 * Example: "p=3&l=10"
@@ -109,11 +115,11 @@
 		 */
 		public static string|null $QUERY = null;
 		/**
-		 * The anchor part of the current url
+		 * The fragment or anchor part of the current url
 		 * Example: "serp"
 		 * @var string|null
 		 */
-		public static string|null $ANCHOR = null;
+		public static string|null $FRAGMENT = null;
 		/**
 		 * The default email account
 		 * Example: "do-not-reply@mimfa.net"
@@ -215,8 +221,9 @@
 	_::$PATH = getPath();
 	_::$REQUEST = getRequest();
 	_::$DIRECTION = getDirection();
+	_::$PAGE = getPage();
 	_::$QUERY = getQuery();
-	_::$ANCHOR = getAnchor();
+	_::$FRAGMENT = getFragment();
 	_::$EMAIL = getEmail();
 
 	_::$BASE_ROOT = $GLOBALS["BASE_ROOT"];
@@ -275,6 +282,7 @@
 	LIBRARY("Contact");
 	LIBRARY("User");
 	LIBRARY("HTML");
+	LIBRARY("Script");
 
 	RUN("global/ConfigurationBase");
 	RUN("Configuration");
@@ -346,6 +354,15 @@
 	}
 
 	/**
+     * Print only this output on the client side then reload the page
+     * @param mixed $value The data that is ready to print
+     * @return mixed Printed data
+     */
+	function FLIP($value = null){
+        ob_clean();
+		die($value."<script>window.location.assign(location.href);</script>");
+	}
+	/**
      * Print only this output on the client side
      * @param mixed $value The data that is ready to print
      * @return mixed Printed data
@@ -384,6 +401,42 @@
             }
 		if(is_null($key)) return count($source)>0?$source:$default;
 		else return getValid($source, $key, $default);
+	}
+	/**
+     * Receive requests from the client side then remove it
+	 * @param mixed $key The key of the received value
+	 * @param array|string|null $source The the received data source $_GET/$POST/$_FILES (by default it is $_REQUEST)
+     * @return mixed The value
+     */
+	function GRAB($key = null, array|string|null $source = null, $default = null){
+		$val = RECEIVE($key, $source, $default);
+		if(is_null($key)){
+            if(is_string($source))
+                switch (trim(strtolower($source)))
+                {
+                    case "public":
+                    case "get":
+                        $_GET = [];
+                        break;
+                    case "private":
+                    case "post":
+                        $_POST = [];
+                        break;
+                    case "file":
+                    case "files":
+                        $_FILES = [];
+                        break;
+                    default:
+                        $_REQUEST = [];
+                        break;
+                }
+        } else {
+            unset($_POST[$key]);
+            unset($_GET[$key]);
+            unset($_REQUEST[$key]);
+            unset($_FILES[$key]);
+        }
+		return $val;
 	}
 
 	/**
@@ -663,17 +716,16 @@
         echo "<script>window.open(".(isValid($url)?"'".\MiMFa\Library\Local::GetUrl($url)."'":"location.href").", '$target');</script>";
     }
 	function share($urlOrText = null, $path = null){
-        echo "<script>window.open('sms://$path?body='+".(isValid($urlOrText)?"'$urlOrText'":"location.href").", '_blank');</script>";
+        echo "<script>window.open('sms://$path?body='+".(isValid($urlOrText)?"'".__($urlOrText, styling:false)."'":"location.href").", '_blank');</script>";
     }
-	function alert($text){
-        echo "<script>alert(`$text`);</script>";
+	function alert($message){
+        echo "<script>alert(`".__($message, styling:false)."`);</script>";
     }
 
 	/**
      * Do a loop action by a callable function on a countable element
      * @param mixed $array
-     * @param callable $action The loop action $action($key, $value, $i++)
-     * @param array|iterable $array_find_keys
+     * @param callable $action The loop action $action($key, $value, $index)
  * @return array
      */
 	function loop($array, callable $action)
@@ -683,19 +735,20 @@
 	/**
      * Do a loop action by a callable function on a countable element
      * @param mixed $array
-     * @param callable $action The loop action $action($key, $value, $i++)
-     * @param array|iterable $array_find_keys
+     * @param callable $action The loop action $action($key, $value, $index)
      * @return iterable
      */
 	function iteration($array, callable $action)
 	{
 		$i = 0;
-		foreach ($array as $key=>$value)
+		if(!is_iterable($array))
+            yield $action($i, $array, $i);
+		else foreach ($array as $key=>$value)
             yield $action($key, $value, $i++);
     }
 	/**
 	 * Returns the value of the first array element.
-	 * @param array|object|null $array
+	 * @param array|object|iterable|Generator|null $array
 	 * @return mixed
 	 */
 	function first($array){
@@ -703,7 +756,7 @@
     }
 	/**
      * Returns the value of the last array element.
-     * @param array|object|null $array
+     * @param array|object|iterable|Generator|null $array
      * @return mixed
      */
 	function last($array){
@@ -796,7 +849,7 @@
 
 	/**
 	* Get the full part of a url pointed to catch status
-	* Example: "https://www.mimfa.net/Category/mimfa/service/web?p=3&l=10#serp"
+	* Example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp"
 	* @return string|null
 	*/
 	function getFullUrl(string|null $path = null, bool $optimize = true):string|null{
@@ -805,7 +858,7 @@
 	}
 	/**
      * Get the full part of a url
-     * Example: "https://www.mimfa.net/Category/mimfa/service/web?p=3&l=10#serp"
+     * Example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp"
      * @return string|null
      */
 	function getUrl(string|null $path = null):string|null{
@@ -818,11 +871,11 @@
 						"://".$_SERVER["HTTP_HOST"].(getValid($_SERVER,'PHP_SELF')?? $_SERVER["REQUEST_URI"])
 					).($_SERVER['QUERY_STRING']?"?".$_SERVER['QUERY_STRING']:"")
 				);
-		return preg_replace("/^[\/\\\]/",rtrim(GetHost(),"/\\")."$1",$path);
+		return preg_replace("/^([\/\\\])/",rtrim(GetHost(),"/\\")."$1",$path);
 	}
 	/**
 	* Get the host part of a url
-	* Example: "https://www.mimfa.net"
+	* Example: "https://www.mimfa.net:5046"
 	* @return string|null
 	*/
 	function getHost(string|null $path = null):string|null{
@@ -836,7 +889,7 @@
 	* @return string|null
 	*/
 	function getSite(string|null $path = null):string|null{
-		return PREG_replace("/^\w+:\/*/","", getHost($path));
+		return PREG_replace("/(^\w+:\/*)|(\:\d+$)/","", getHost($path));
 	}
 	/**
 	* Get the domain name part of a url
@@ -844,11 +897,11 @@
 	* @return string|null
 	*/
 	function getDomain(string|null $path = null):string|null{
-		return PREG_replace("/^\w+:\/*(www\.)?/","", getHost($path));
+		return PREG_replace("/(^\w+:\/*(www\.)?)|(\:\d+$)/","", getHost($path));
 	}
 	/**
 	* Get the path part of a url
-	* Example: "https://www.mimfa.net/Category/mimfa/service/web"
+	* Example: "https://www.mimfa.net/Category/mimfa/service/web.php"
 	* @return string|null
 	*/
 	function getPath(string|null $path = null):string|null{
@@ -856,7 +909,7 @@
 	}
 	/**
 	* Get the request part of a url
-	* Example: "/Category/mimfa/service/web?p=3&l=10#serp"
+	* Example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
 	* @return string|null
 	*/
 	function getRequest(string|null $path = null):string|null{
@@ -865,24 +918,32 @@
 		return PREG_Replace("/(^\w+:\/*[^\/]+)/","", $path);
 	}
 	/**
-	* Get the direction part of a url from the root
-	* Example: "Category/mimfa/service/web"
-	* @return string|null
-	*/
-	function getDirection(string|null $path = null):string|null{
-		if($path == null) $path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
-		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
-		return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/","", $path);
-	}
-	/**
 	* Get the relative address from a url
-	* Example: "Category/mimfa/service/web?p=3&l=10#serp"
+	* Example: "Category/mimfa/service/web.php?p=3&l=10#serp"
 	* @return string|null
 	*/
 	function getRelative(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();
 		if(startsWith($path,\_::$BASE_DIR)) return substr($path, strlen(\_::$BASE_DIR));
 		return PREG_Replace("/^\w+:\/*[^\/]+/","", $path);
+	}
+	/**
+     * Get the direction part of a url from the root
+     * Example: "Category/mimfa/service/web.php"
+     * @return string|null
+     */
+	function getDirection(string|null $path = null):string|null{
+		if($path == null) $path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
+		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
+		return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/","", $path);
+	}
+	/**
+     * Get the last part of a direction url
+     * Example: "web.php"
+     * @return string|null
+     */
+	function getPage(string|null $path = null):string|null{
+		return last(explode("/", getDirection($path)));
 	}
 	/**
 	* Get the query part of a url
@@ -893,11 +954,11 @@
 		return PREG_Find("/((?<=\?)[^#]*($|#))/", $path??getUrl());
 	}
 	/**
-	* Get the anchor part of a url
+	* Get the fragment or anchor part of a url
 	* Example: "serp"
 	* @return string|null
 	*/
-	function getAnchor(string|null $path = null):string|null{
+	function getFragment(string|null $path = null):string|null{
 		return PREG_Find("/((?<=#)[^\?]*($|\?))/", $path??getUrl());
 	}
 	/**
@@ -1016,7 +1077,7 @@
 	}
 
 	function isEmpty($obj):bool{
-		return !isset($obj) || is_null($obj) || (is_string($obj) && (trim($obj.""," \n\r\t\v\f'\"") == "")) || (is_array($obj) && count($obj) === 0);
+		return !isset($obj) || is_null($obj) || (is_string($obj) && (trim($obj.""," \n\r\t\v\f'\"") === "")) || (is_array($obj) && count($obj) === 0);
 	}
 	function isValid($obj, string|null $item = null):bool{
 		if($item === null) return isset($obj) && !is_null($obj) && (!is_string($obj) || !(trim($obj) == "" || trim($obj,"'\"") == ""));
@@ -1102,7 +1163,7 @@
 	 * @return bool
 	 */
 	function isUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^(\w+\:\/*)?(\/[^\/\{\}\|\^\[\]\"\`\r\n\t\f]+)+$/",$url);
+		return (!empty($url)) && preg_match("/^([A-z0-9\-]+\:)?(\/([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+$/",$url);
 	}
 	/**
 	 * Check if the string is only a relative URL
@@ -1110,7 +1171,7 @@
 	 * @return bool
 	 */
 	function isRelativeUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^(\/?[^\/\{\}\|\^\[\]\"\`\r\n\t\f]+)+$/",$url);
+		return (!empty($url)) && preg_match("/^(\/([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+$/",$url);
 	}
 	/**
 	 * Check if the string is only an absolute URL
@@ -1118,7 +1179,15 @@
      * @return bool
      */
 	function isAbsoluteUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^\w+\:\/*(\/[^\/\{\}\|\^\[\]\"\`\r\n\t\f]+)+$/",$url);
+		return (!empty($url)) && preg_match("/^[A-z0-9\-]+\:\/*(\/[^\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/",$url);
+	}
+	/**
+     * Check if the string is script or not
+	 * @param null|string $script The url string
+     * @return bool
+     */
+	function isScript(string|null $script):bool{
+		return (!empty($script)) && preg_match("/[\{\}\|\^\[\]\"\`\r\n\t\f]|(^\s*[\w\$][\w\d\$\_]+\s*\([\s\S]*\)\s*;?\s*$)/",$script);
 	}
 
 	/**
@@ -1317,7 +1386,7 @@
 		echo "<br>REQUEST: "._::$REQUEST;
 		echo "<br>DIRECTION: "._::$DIRECTION;
 		echo "<br>QUERY: "._::$QUERY;
-		echo "<br>ANCHOR: "._::$ANCHOR;
+		echo "<br>FRAGMENT: "._::$FRAGMENT;
 		echo "<br>EMAIL: "._::$EMAIL;
 	}
 	function test_Access($func,$res=null){

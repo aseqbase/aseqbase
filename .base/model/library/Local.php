@@ -80,7 +80,7 @@ class Local{
      * @return string
      */
     public static function NewUniquePath(string $dir, string $fileName = "new", string $format = "", bool $random = true):string{
-		do $path = "$dir$fileName".getId($random).$format;
+		do $path = $dir.Convert::ToExcerpt(Convert::ToKey($fileName, true,'/[^A-Za-z0-9\_ \(\)]/'),0,50,"")."-".getId($random).$format;
         while(file_exists($path));
         return $path;
     }

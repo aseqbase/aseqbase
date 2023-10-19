@@ -20,7 +20,7 @@ class DataBase {
 					function($v){ return !is_null($v); }
 				)
 			);
-		elseif(is_callable($tablesName)) return self::TableNameNormalization($tablesName($tablesName));
+		elseif(is_callable($tablesName) || $tablesName instanceof \Closure) return self::TableNameNormalization($tablesName($tablesName));
         return null;
 	}
 	public static function ColumnNameNormalization($columns = "*")
@@ -30,12 +30,14 @@ class DataBase {
 			if(preg_find('/[\*\=\+\-\\\\\/\`"\'\(\)\[\]\{\}\,\.]|(^\d+$)/',$columns)) return $columns;
 			else return "`$columns`";
 		elseif(is_array($columns) || is_iterable($columns))
-            return join(", ", array_filter(loop($columns,
-                                function($k,$v){return self::ColumnNameNormalization($v);}),
+            return join(", ", array_filter(
+								loop($columns,
+									function($k,$v){return self::ColumnNameNormalization($v);}
+								),
                                 function($v){ return !is_null($v); }
                             )
                         );
-		elseif(is_callable($columns)) return self::ColumnNameNormalization($columns($columns));
+		elseif(is_callable($columns) || $columns instanceof \Closure) return self::ColumnNameNormalization($columns($columns));
         return null;
 	}
 	public static function ConditionNormalization($conditions=null)
@@ -49,21 +51,29 @@ class DataBase {
                                 function($v){ return !is_null($v); }
                             )
                         );
-		elseif(is_callable($conditions)) return self::ConditionNormalization($conditions($conditions));
+		elseif(is_callable($conditions) || $conditions instanceof \Closure) return self::ConditionNormalization($conditions($conditions));
         return null;
 	}
 	public static function ParametersNormalization($params = [])
 	{
 		if(!\_::$CONFIG->DataBaseValueNormalization) return $params;
-		if(is_null($params)) return [];
+		if(isEmpty($params)) return null;
 		if(is_string($params)) return json_decode($params);
 		elseif(is_array($params) || is_iterable($params)){
-			foreach ($params as $key=>$value)
-				if(is_null($value)) $params[$key] = "NULL";
+			foreach ($params as $key=>$value) $params[$key] = self::ParameterNormalization($key, $params[$key]);
             return $params;
         }
-		elseif(is_callable($params)) return self::ParametersNormalization($params($params));
+		elseif(is_callable($params) || $params instanceof \Closure) return self::ParametersNormalization($params($params));
         return null;
+	}
+	public static function ParameterNormalization($key, $value)
+	{
+		if(is_null($value)) return "NULL";
+		elseif(is_array($value) || is_iterable($value) || is_object($value)) return json_encode($value);
+		elseif(is_callable($value) || $value instanceof \Closure)
+			return self::ParameterNormalization($key, $value($key, $value));
+		elseif(is_numeric($value)) return floatval($value);
+        else return $value;
 	}
 
 	public static function Connection()
@@ -127,8 +137,8 @@ class DataBase {
 	public static function SelectPairs($query, $params=[]){
 		$res = [];
 		$k = $v = null;
-		foreach (self::Select($query,$params) as $row)
-			$res[$row[$k=$k??array_key_first($row)]]= $row[$v=$v??array_key_last($row)];
+		foreach (self::Select($query, $params) as $i=>$row)
+			$res[count($row)<2?$i:$row[$k=$k??array_key_first($row)]] = $row[$v=$v??array_key_last($row)];
 		return $res;
 	}
 	public static function TrySelectPairs($query, $params=[], $defaultValue = array())
