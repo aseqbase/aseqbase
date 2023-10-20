@@ -37,8 +37,8 @@ class Script
             ]);
         else{
             return join("", [
-                "{x:`$index`, y:",
-                self::Numbers($row),
+                "{x:", self::Numbers($index),
+                ",y:", self::Numbers($row),
                 "}"
             ]);
         }

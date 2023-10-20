@@ -928,11 +928,12 @@ $attachments"]);
     public static function Form($content, $reference = null, ...$attributes){
         if(!isValid($content)) $content = self::SubmitButton();
         elseif(is_array($content) || is_iterable($content))
-            $content = join(PHP_EOL, loop($content, function($k, $f){
+            $content = function()use($content){ return join(PHP_EOL, loop($content, function($k, $f){
                 if(is_integer($k)) return call_user_func("self::Field", $f);
                 else return call_user_func("self::Field", null, $k, $f);
-            }));
-        return self::Element(__($content, styling:false), "form",isValid($reference)?["action"=> $reference]:[], [ "enctype"=>"multipart/form-data", "method"=>"get", "class"=> "form" ], $attributes);
+            }));};
+        else $content = __($content, styling:false);
+        return self::Element($content, "form", isValid($reference)?["action"=> $reference]:[], [ "enctype"=>"multipart/form-data", "method"=>"get", "class"=> "form" ], $attributes);
     }
     /**
      * The <LABEL> and any input HTML Tag

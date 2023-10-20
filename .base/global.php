@@ -359,7 +359,7 @@
      * @return mixed Printed data
      */
 	function FLIP($value = null){
-        ob_clean();
+        //ob_clean();
 		die($value."<script>window.location.assign(location.href);</script>");
 	}
 	/**
@@ -368,9 +368,8 @@
      * @return mixed Printed data
      */
 	function SEND($value = null){
-        ob_clean();
-		print $value;
-        die;
+        //ob_clean();
+		die($value."");
 	}
 	/**
      * Receive requests from the client side
@@ -728,9 +727,9 @@
      * @param callable $action The loop action $action($key, $value, $index)
  * @return array
      */
-	function loop($array, callable $action)
+	function loop($array, callable $action, $nullValues = false)
 	{
-		return iterator_to_array(iteration($array, $action));
+		return iterator_to_array(iteration($array, $action, $nullValues));
 	}
 	/**
      * Do a loop action by a callable function on a countable element
@@ -738,13 +737,16 @@
      * @param callable $action The loop action $action($key, $value, $index)
      * @return iterable
      */
-	function iteration($array, callable $action)
+	function iteration($array, callable $action, $nullValues = false)
 	{
 		$i = 0;
-		if(!is_iterable($array))
-            yield $action($i, $array, $i);
+		if(!is_iterable($array)){
+            if(($res = $action($i, $array, $i)) !== null || $nullValues)
+				yield $res;
+        }
 		else foreach ($array as $key=>$value)
-            yield $action($key, $value, $i++);
+            if(($res = $action($key, $value, $i++)) !== null || $nullValues)
+				yield $res;
     }
 	/**
 	 * Returns the value of the first array element.
