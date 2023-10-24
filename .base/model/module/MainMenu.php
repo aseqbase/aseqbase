@@ -28,9 +28,9 @@ class MainMenu extends Module{
     }
 
 	public function EchoStyle(){
-		$rtl = \MiMFa\Library\Translate::$Direction == "RTL";
+		$rtl = (\MiMFa\Library\Translate::$Direction??\_::$CONFIG->DefaultDirection) == "RTL";
 		parent::EchoStyle();
-		?>
+?>
 		<style>
 			.<?php echo $this->Name; ?> {
 				margin: 0;

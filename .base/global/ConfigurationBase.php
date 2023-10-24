@@ -122,6 +122,18 @@ abstract class ConfigurationBase extends Base {
      * @category Optimization
      */
 	public $AllowTranslate = false;
+	/**
+     * Default language to translate all text by internal algorithms
+     * @var string
+     * @category Optimization
+     */
+	public $DefaultLanguage = null;
+    /**
+     * The website default Direction
+     * @var string
+     * @category General
+     */
+    public $DefaultDirection = null;
 
 	/**
      * A special key for yhis website, be sure to change this
@@ -335,7 +347,7 @@ abstract class ConfigurationBase extends Base {
      * @var string
      * @category DataBase
      */
-	public $DataBaseEncoding = "utf-8";
+	public $DataBaseEncoding = "utf8";
     /**
      * The database Type
      * @var string
@@ -389,6 +401,12 @@ abstract class ConfigurationBase extends Base {
 
 	public function __construct(){
         if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"])."_";
+        if($this->AllowTranslate){
+            \MIMFa\Library\Translate::$Language = $this->DefaultLanguage;
+            \MIMFa\Library\Translate::$Direction = $this->DefaultDirection;
+            \MIMFa\Library\Translate::$Encoding = $this->Encoding;
+            \MIMFa\Library\Translate::Initialize();
+        }
     }
 
 

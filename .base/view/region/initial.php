@@ -2,6 +2,7 @@
 <html lang="<?php echo \MiMFa\Library\Translate::$Language; ?>" dir="<?php echo \MiMFa\Library\Translate::$Direction; ?>">
 	<head>
 		<meta charset="<?php echo \_::$CONFIG->Encoding; ?>">
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo \_::$CONFIG->Encoding; ?>" />
 		<!--[if lt IE 9]>
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
 		<![endif]-->

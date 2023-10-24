@@ -215,8 +215,8 @@ class Session
     *    Stores datas in the session.
     *    Example: $instance->foo = 'bar';
     *    
-    *    @param    name    Name of the datas.
-    *    @param    value    Your datas.
+    *    @param    $name    Name of the datas.
+    *    @param    $value    Your datas.
     *    @return    void
     **/
     public function __set( $name , $value )
@@ -224,11 +224,11 @@ class Session
         $_SESSION[$name] = $value;
     }
     /**
-    *    Gets datas from the session.
-    *    Example: echo $instance->foo;
+    * Gets datas from the session.
+    * Example: echo $instance->foo;
     *    
-    *    @param    name    Name of the datas to get.
-    *    @return    mixed    Datas stored in session.
+    * @param    $name    Name of the datas to get.
+    * @return    mixed    Datas stored in session.
     **/
     public function __get( $name )
     {

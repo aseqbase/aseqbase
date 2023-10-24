@@ -79,9 +79,9 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return $this->Profile = getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."User","*","`ID`=:ID",[":ID"=>$this->ID]),0);
 	}
 	public function Refresh(){
-		$signature = Session::GetData("Signature");
 		$this->Signature = Session::GetSecure("Signature");
 		$this->Password = Session::GetSecure("Password");
+		$signature = Session::GetData("Signature_".$this->Signature);
 		$person = null;
 		try{
             if($signature === $this->Signature && isValid($this->Signature) && isValid($this->Password))
@@ -220,15 +220,15 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				"This account is not active yet!<br>".
 				"<a href='".self::$ActiveHandlerPath."?signature=$signature'>".__("Try to send the activation email again!")."</a>"
 			);
-		Session::SetData("Signature", $this->Signature = getValid($person,"Signature"));
-		Session::SetSecure("Password", $this->Password = getValid($person,"Password"));
+		Session::SetData("Signature_".($this->Signature = getValid($person,"Signature")), $this->Signature = getValid($person,"Signature"));
 		Session::SetSecure("Signature", $this->Signature);
-		Session::SetSecure("ID",$this->ID = getValid($person,"ID"));
-		Session::SetSecure("GroupID",$this->GroupID = getValid($person,"GroupID"));
-		Session::SetSecure("Image",$this->Image = getValid($person,"Image"));
-		Session::SetSecure("Name",$this->Name = getValid($person,"Name"));
-		Session::SetSecure("Email",$this->Email = getValid($person,"Email"));
-		Session::SetSecure("Access",$this->Access = DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID`=".$this->GroupID));
+		Session::SetSecure("Password", $this->Password = getValid($person,"Password"));
+		Session::SetSecure("ID", $this->ID = getValid($person,"ID"));
+		Session::SetSecure("GroupID", $this->GroupID = getValid($person,"GroupID"));
+		Session::SetSecure("Image", $this->Image = getValid($person,"Image"));
+		Session::SetSecure("Name", $this->Name = getValid($person,"Name"));
+		Session::SetSecure("Email", $this->Email = getValid($person,"Email"));
+		Session::SetSecure("Access", $this->Access = DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup","`Access`","`ID`=".$this->GroupID));
 		return true;
 	}
 	public function SignInOrSignUp($signature, $password, $email = null){
@@ -237,7 +237,15 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 	public function SignOut($signature = null){
 		if($signature === null || $signature === $this->Signature){
-            Session::Restart();
+			Session::ForgetData("Signature");
+            Session::ForgetSecure("Password");
+            Session::ForgetSecure("Signature");
+            Session::ForgetSecure("ID");
+            Session::ForgetSecure("GroupID");
+            Session::ForgetSecure("Image");
+            Session::ForgetSecure("Name");
+            Session::ForgetSecure("Email");
+            Session::ForgetSecure("Access");
             $this->Load();
         } else Session::ForgetData($signature);
 		return !self::Access(\_::$CONFIG->UserAccess);

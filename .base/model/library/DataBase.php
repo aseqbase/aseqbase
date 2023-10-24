@@ -20,7 +20,8 @@ class DataBase {
 					function($v){ return !is_null($v); }
 				)
 			);
-		elseif(is_callable($tablesName) || $tablesName instanceof \Closure) return self::TableNameNormalization($tablesName($tablesName));
+		elseif(!is_string($tablesName) && (is_callable($tablesName) || $tablesName instanceof \Closure))
+		return self::TableNameNormalization($tablesName($tablesName));
         return null;
 	}
 	public static function ColumnNameNormalization($columns = "*")
@@ -37,7 +38,8 @@ class DataBase {
                                 function($v){ return !is_null($v); }
                             )
                         );
-		elseif(is_callable($columns) || $columns instanceof \Closure) return self::ColumnNameNormalization($columns($columns));
+		elseif(!is_string($columns) && (is_callable($columns) || $columns instanceof \Closure))
+				return self::ColumnNameNormalization($columns($columns));
         return null;
 	}
 	public static function ConditionNormalization($conditions=null)
@@ -51,7 +53,8 @@ class DataBase {
                                 function($v){ return !is_null($v); }
                             )
                         );
-		elseif(is_callable($conditions) || $conditions instanceof \Closure) return self::ConditionNormalization($conditions($conditions));
+		elseif(!is_string($conditions) && (is_callable($conditions) || $conditions instanceof \Closure))
+			return self::ConditionNormalization($conditions($conditions));
         return null;
 	}
 	public static function ParametersNormalization($params = [])
@@ -63,14 +66,16 @@ class DataBase {
 			foreach ($params as $key=>$value) $params[$key] = self::ParameterNormalization($key, $params[$key]);
             return $params;
         }
-		elseif(is_callable($params) || $params instanceof \Closure) return self::ParametersNormalization($params($params));
+		elseif(!is_string($params) && (is_callable($params) || $params instanceof \Closure))
+			return self::ParametersNormalization($params($params));
         return null;
 	}
 	public static function ParameterNormalization($key, $value)
 	{
 		if(is_null($value)) return "NULL";
-		elseif(is_array($value) || is_iterable($value) || is_object($value)) return json_encode($value);
-		elseif(is_callable($value) || $value instanceof \Closure)
+		elseif(is_array($value) || is_iterable($value) || is_object($value))
+			return json_encode($value);
+		elseif(!is_string($value) && (is_callable($value) || $value instanceof \Closure))
 			return self::ParameterNormalization($key, $value($key, $value));
 		elseif(is_numeric($value)) return floatval($value);
         else return $value;

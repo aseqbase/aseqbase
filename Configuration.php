@@ -8,7 +8,7 @@ class Configuration extends ConfigurationBase {
 
 	public $AllowCache = false;
 
-	public $DataBaseEncoding = "utf-8";
+	public $DataBaseEncoding = "utf8";
 	public $DataBaseType = 'mysql';
 	public $DataBaseHost = 'localhost';
 	public $DataBaseUser = null;

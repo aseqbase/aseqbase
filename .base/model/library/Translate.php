@@ -16,16 +16,18 @@ class Translate
 	public static $Direction = "LTR";
 	public static $CodeStart = "<";
 	public static $CodeEnd = ">";
+	public static $ValidPattern = "/[A-z]+/";
+	public static $InvalidPattern = "/^(\s+)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?(\/([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+)$/";
 
 	/**
      * Change the Default Language of translator
      * Default language is EN
 	 * @param string $lang
 	 */
-	public static function Initialize(string $lang, string $direction = "LTR", string $encoding = "UTF-8"){
-		self::$Language = strtoupper($lang);
-		self::$Direction = strtoupper($direction);
-		self::$Encoding = strtoupper($encoding);
+	public static function Initialize(string $lang = null, string $direction = null, string $encoding = null){
+		Session::SetCookie("Lang", self::$Language = strtoupper($lang??GRAB("lang", "get")??Session::GetCookie("Lang")??self::$Language));
+		Session::SetCookie("Direction", self::$Direction = strtoupper($direction??GRAB("direction", "get")??Session::GetCookie("Direction")??self::$Direction));
+		Session::SetCookie("Encoding", self::$Encoding = strtoupper($encoding??GRAB("encoding", "get")??Session::GetCookie("Encoding")??self::$Encoding));
 	}
 
 	/**
@@ -43,7 +45,7 @@ class Translate
 				$data->$lang = $data["x"];
 				$args[":KeyCode$i"]= $rows[$i]["KeyCode"];
 				$args[":ValueOptions$i"]= json_encode($data);
-				$query .= "UPDATE ".self::$TableName." SET ValueOptions=:ValueOptions$i WHERE KeyCode=:KeyCode$i;";
+				$query .= "UPDATE ".self::$TableName." SET `ValueOptions`=:ValueOptions$i WHERE `KeyCode`=:KeyCode$i;";
 			}
         }
 		DataBase::Update($query,$args);
@@ -51,12 +53,17 @@ class Translate
 	}
 
 	public static function Get($text,$params=[]){
+		if(
+			is_null($text) ||
+			!preg_match(self::$ValidPattern, $text) ||
+			preg_match(self::$InvalidPattern, $text)
+			) return $text;
 		$dic = array();
 		$text = Code($text, $dic, self::$CodeStart, self::$CodeEnd);
 		$code = self::CreateCode($text);
-		$col = DataBase::Select("SELECT ValueOptions FROM ".self::$TableName." WHERE KeyCode=:KeyCode",[":KeyCode"=>$code]);
+		$col = DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE `KeyCode`=:KeyCode",[":KeyCode"=>$code]);
 		if(count($col)==0)
-			DataBase::Insert("INSERT INTO ".self::$TableName." (KeyCode,ValueOptions) VALUES(:KeyCode,:ValueOptions)",
+			DataBase::Insert("INSERT INTO ".self::$TableName." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode, :ValueOptions)",
 				[":KeyCode"=>$code,":ValueOptions"=>json_encode(array('x'=>$text))]);
 		else {
 			$data = json_decode($col[0]["ValueOptions"]);
@@ -67,28 +74,31 @@ class Translate
 	}
 
 	public static function Set($text,$val=null){
+		if(
+			is_null($text) ||
+			!preg_match(self::$ValidPattern, $text) ||
+			preg_match(self::$InvalidPattern, $text)
+			) return false;
 		$dic = array();
 		$text = Code($text, $dic, self::$CodeStart, self::$CodeEnd);
 		$code = self::CreateCode($text);
-		$col = DataBase::Select("SELECT ValueOptions FROM ".self::$TableName." WHERE KeyCode=:KeyCode",[":KeyCode"=>$code]);
-		if(count($col)> 0) $data = $col[0]["ValueOptions"];
+		$col = DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE `KeyCode`=:KeyCode",[":KeyCode"=>$code]);
+		if(count($col) > 0) $data = $col[0]["ValueOptions"];
 		$data = json_encode(array('x'=>$text));
-		if(!is_null($val))$data->{self::$Language} = Code($val, $dic, self::$CodeStart, self::$CodeEnd);
+		if(!is_null($val)) $data->{self::$Language} = Code($val, $dic, self::$CodeStart, self::$CodeEnd);
 		$args = [":KeyCode"=>$code,":ValueOptions"=>$data];
-		return DataBase::Insert("REPLACE INTO ".self::$TableName." (KeyCode,ValueOptions) VALUES(:KeyCode,:ValueOptions)",$args);
+		return DataBase::Replace("REPLACE INTO ".self::$TableName." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode,:ValueOptions)", $args);
 	}
 
 	public static function CreateCode($text){
 		if($text===null) return "Null";
 		$key =
 				str_replace(
-					array("\r","\n","\t","|",":",";","`","'",'"', ")","(","*","&","^","%", "#","@","!","~",".",",","/","\\","}","]","{","["),
+					array("\r","\n","\t"),
 					" ",
-					str_replace(array(" ","-"),".",
 						str_replace(array("   ","  ","   ")," ",
-							strtolower(trim($text))
+							trim($text)
 						)
-					)
 				);
 		if(strlen($key)>160) $key = md5($key);
 		return $key;

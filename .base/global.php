@@ -765,7 +765,7 @@
 		return end($array);
     }
 
-	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/\<\S+[\w\W]*\>/i")
+	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/(\<\S+[\w\W]*\>)|(([\"'])\S+[\w\W]*\3)|(\d*\.?\d+)/i")
 	{
 		if(!is_array($dic)) $dic = array();
 		return preg_replace_callback($pattern,function($a) use(&$dic,$startCode, $endCode){
@@ -1190,6 +1190,14 @@
      */
 	function isScript(string|null $script):bool{
 		return (!empty($script)) && preg_match("/[\{\}\|\^\[\]\"\`\r\n\t\f]|(^\s*[\w\$][\w\d\$\_]+\s*\([\s\S]*\)\s*;?\s*$)/",$script);
+	}
+	/**
+     * Check if the string is a relative or absolute URL
+     * @param null|string $url The url string
+     * @return bool
+     */
+	function isEmail(string|null $email):bool{
+		return (!empty($url)) && preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/",$url);
 	}
 
 	/**

@@ -1,4 +1,4 @@
-<footer>
+﻿<footer>
     <?php
     use MiMFa\Library\Style;
     use MiMFa\Library\HTML;
@@ -6,6 +6,25 @@
     $module = new \MiMFa\Module\Shortcuts();
     $module->Items = \_::$INFO->Contacts;
     $module->Draw();
+    if(\_::$CONFIG->AllowTranslate){
+        MODULE("Translator");
+        $module = new MiMFa\Module\Translator();
+        $module->Items = array(
+                "EN"=>array(
+                    "Title"=>"English",
+                    "Image"=>"https://flagcdn.com/16x12/gb.png",
+                    "Direction"=>"LTR",
+                    "Encoding"=>"UTF-8"
+                ),
+                "FA"=>array(
+                    "Title"=>"فارسی",
+                    "Image"=>"https://flagcdn.com/16x12/ir.png",
+                    "Direction"=>"RTL",
+                    "Encoding"=>"UTF-8"
+                )
+            );
+        echo HTML::Center($module->Capture());
+    }
     MODULE("TemplateButton");
     $module = new MiMFa\Module\TemplateButton();
     //$module->DarkLabel = "Dark Mode";

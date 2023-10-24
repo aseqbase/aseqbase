@@ -2,6 +2,7 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
+use MiMFa\Library\Translate;
 MODULE("SearchForm");
 MODULE("UserMenu");
 MODULE("TemplateButton");
@@ -10,7 +11,7 @@ class SideMenu extends Module{
 	public $Image = null;
 	public $Items = null;
 	public $Shortcuts = null;
-	public $Direction = "ltr";
+	public $Direction = "LTR";
 	public SearchForm|null $SearchForm = null;
 	public UserMenu|null $UserMenu = null;
 	public TemplateButton|null $TemplateButton = null;
@@ -28,11 +29,13 @@ class SideMenu extends Module{
 			$this->UserMenu = new UserMenu();
 			$this->UserMenu->Path = null;
         }$this->TemplateButton = new TemplateButton();
+		$this->Direction = Translate::$Direction??\_::$CONFIG->DefaultDirection;
     }
 
 	public function GetStyle(){
-		$dir = $this->Direction=="rtl"?"right":"left";
-		$sdir = $this->Direction=="rtl"?"left":"right";
+		$this->Direction = strtoupper($this->Direction);
+		$dir = $this->Direction=="RTL"?"right":"left";
+		$sdir = $this->Direction=="RTL"?"left":"right";
 		return parent::GetStyle().HTML::Style("
 			.{$this->Name}{
 				background-color:  var(--ForeColor-2);

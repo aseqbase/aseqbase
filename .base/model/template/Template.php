@@ -91,14 +91,23 @@ class Template extends \Base{
 
 	public function DrawInitial(){
         REGION("initial");
-        $title = $this->WindowTitle??[\_::$DIRECTION];
+        $title = $this->WindowTitle??[preg_replace("/\.[A-z]+$/","",\_::$DIRECTION)];
         echo HTML::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$INFO->Name]]:$title));
 		echo HTML::Logo(getFullUrl($this->WindowLogo??\_::$INFO->LogoPath));
         echo HTML::Style("
-        head,style,script,link,meta,title{
+        head, style, script, link, meta, title{
             display: none !important;
             visible: hidden !important;
             opacity: 0 !important;
+        }
+        html, body{
+            text-align: unset;
+        }
+        * {
+            direction: ".(\MIMFa\Library\Translate::$Direction??\_::$CONFIG->DefaultDirection).";
+        }
+        td, th, tr, table {
+            text-align: -webkit-auto;
         }
         .tooltip {
             font-family: inherit;
