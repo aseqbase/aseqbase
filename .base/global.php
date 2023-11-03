@@ -358,9 +358,10 @@
      * @param mixed $value The data that is ready to print
      * @return mixed Printed data
      */
-	function FLIP($value = null){
-        //ob_clean();
-		die($value."<script>window.location.assign(location.href);</script>");
+	function FLIP($value = null, $url = null){
+        ob_clean();
+		flush();
+		die($value."<script>window.location.assign(`".(isValid($url)?"`".\MiMFa\Library\Local::GetUrl($url)."`":"location.href")."`);</script>");
 	}
 	/**
      * Print only this output on the client side
@@ -368,7 +369,8 @@
      * @return mixed Printed data
      */
 	function SEND($value = null){
-        //ob_clean();
+        ob_clean();
+		flush();
 		die($value."");
 	}
 	/**
@@ -695,10 +697,10 @@
 	 * @param bool $styling Do style and strongify the keywords
 	 * @return string|null
 	 */
-	function __(mixed $textOrObject, bool $translation = true, bool $styling = true):string|null {
+	function __(mixed $textOrObject, bool $translation = true, bool $styling = true) :string|null {
 		$textOrObject = \MiMFa\Library\Convert::ToString($textOrObject);
-		if($styling && \_::$CONFIG->AllowTextAnalyzing) $textOrObject = \MiMFa\Library\Style::DoStrong($textOrObject);
 		if($translation && \_::$CONFIG->AllowTranslate) $textOrObject = \MiMFa\Library\Translate::Get($textOrObject);
+		if($styling && \_::$CONFIG->AllowTextAnalyzing) $textOrObject = \MiMFa\Library\Style::DoStrong($textOrObject);
 		return $textOrObject;
 	}
 
@@ -709,7 +711,7 @@
         load(\_::$URL);
     }
 	function load($url = null){
-        echo "<script>window.location.assign(".(isValid($url)?"'".\MiMFa\Library\Local::GetUrl($url)."'":"location.href").");</script>";
+        echo "<script>window.location.assign(".(isValid($url)?"`".\MiMFa\Library\Local::GetUrl($url)."`":"location.href").");</script>";
     }
 	function open($url = null, $target = "_blank"){
         echo "<script>window.open(".(isValid($url)?"'".\MiMFa\Library\Local::GetUrl($url)."'":"location.href").", '$target');</script>";
@@ -765,7 +767,7 @@
 		return end($array);
     }
 
-	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/(\<\S+[\w\W]*\>)|(([\"'])\S+[\w\W]*\3)|(\d*\.?\d+)/i")
+	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/(\<\S+[\w\W]*\>)|(([\"'])\S+[\w\W]*\\3)|(\d*\.?\d+)/iU")
 	{
 		if(!is_array($dic)) $dic = array();
 		return preg_replace_callback($pattern,function($a) use(&$dic,$startCode, $endCode){
@@ -1165,7 +1167,7 @@
 	 * @return bool
 	 */
 	function isUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^([A-z0-9\-]+\:)?(\/([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+$/",$url);
+		return (!empty($url)) && preg_match("/^([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+$/",$url);
 	}
 	/**
 	 * Check if the string is only a relative URL
@@ -1173,7 +1175,7 @@
 	 * @return bool
 	 */
 	function isRelativeUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^(\/([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+$/",$url);
+		return (!empty($url)) && preg_match("/^([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+$/",$url);
 	}
 	/**
 	 * Check if the string is only an absolute URL
@@ -1181,7 +1183,7 @@
      * @return bool
      */
 	function isAbsoluteUrl(string|null $url):bool{
-		return (!empty($url)) && preg_match("/^[A-z0-9\-]+\:\/*(\/[^\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/",$url);
+		return (!empty($url)) && preg_match("/^[A-z0-9\-]+\:\/*([\/\?\#][^\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/",$url);
 	}
 	/**
      * Check if the string is script or not
@@ -1306,7 +1308,7 @@
 	 * @return mixed
 	 */
 	function preg_find($pattern,string|null $text,string|null $def = null):string|null{
-		$matches = preg_find_All($pattern, $text);
+		preg_match($pattern, $text, $matches);
 		return isset($matches[0])?$matches[0]:$def;
 	}
 	/**

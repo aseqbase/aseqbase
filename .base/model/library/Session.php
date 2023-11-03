@@ -12,7 +12,7 @@ require_once "DataBase.php";
 class Session
 {
 	public static $Time = 86400;
-	public static $Separator = "¶";
+	public static $Separator = "\\";
 
 	public static function Start(){
         self::StartSecure();

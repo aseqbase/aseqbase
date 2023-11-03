@@ -280,7 +280,7 @@ class General extends Template{
 					margin-right: auto;
 					border-collapse: separate;
 				}
-				.interactive-table  td{
+				.interactive-table td{
 					padding: 10px;
 				}
 				.interactive-table tr{

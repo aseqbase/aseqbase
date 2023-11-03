@@ -323,7 +323,9 @@ $attachments"]);
             $content = null;
         }
         if(!isValid($source)) return null;
-        if(isIdentifier($source))
+        if(startsWith($source, "fa ", "fa-"))
+            return self::Element("", "i", [ "class"=>"image ".strtolower($source)], $attributes);
+        elseif(isIdentifier($source))
             return self::Element("", "i", [ "class"=>"image fa fa-".strtolower($source)], $attributes);
         else return self::Element("img", [ "src"=> $source, "alt"=>$content, "class"=> "image" ], $attributes);
     }
@@ -398,7 +400,7 @@ $attachments"]);
      * @return string
      */
     public static function Page($content, ...$attributes){
-        return self::Element(__($content),"div",["class"=> "page" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "page" ], $attributes);
     }
     /**
      * The <DIV> HTML Tag
@@ -407,7 +409,7 @@ $attachments"]);
      * @return string
      */
     public static function Part($content, ...$attributes){
-        return self::Element(__($content),"div",["class"=> "part" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "part" ], $attributes);
     }
     /**
      * The <HEADER> HTML Tag
@@ -416,7 +418,7 @@ $attachments"]);
      * @return string
      */
     public static function Header($content, ...$attributes){
-        return self::Element(__($content),"header",["class"=> "header" ], $attributes);
+        return self::Element(__($content, styling:false),"header",["class"=> "header" ], $attributes);
     }
     /**
      * The <MAIN> HTML Tag
@@ -425,7 +427,7 @@ $attachments"]);
      * @return string
      */
     public static function Content($content, ...$attributes){
-        return self::Element(__($content),"main",["class"=> "content" ], $attributes);
+        return self::Element(__($content, styling:false),"main",["class"=> "content" ], $attributes);
     }
     /**
      * The <FOOTER> HTML Tag
@@ -434,7 +436,7 @@ $attachments"]);
      * @return string
      */
     public static function Footer($content, ...$attributes){
-        return self::Element(__($content),"footer",["class"=> "footer" ], $attributes);
+        return self::Element(__($content, styling:false),"footer",["class"=> "footer" ], $attributes);
     }
     /**
      * The Container <DIV> HTML Tag
@@ -448,7 +450,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Rack($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "container" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "container" ], $attributes);
     }
     /**
      * The Container <DIV> HTML Tag
@@ -462,7 +464,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::LargeRack($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "container large-container" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "container large-container" ], $attributes);
     }
     /**
      * The Container <DIV> HTML Tag
@@ -476,7 +478,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::MediumRack($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "container medium-container" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "container medium-container" ], $attributes);
     }
     /**
      * The Container <DIV> HTML Tag
@@ -490,7 +492,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::SmallRack($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "container small-container" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "container small-container" ], $attributes);
     }
     /**
      * The Main Partitioner <DIV> HTML Tag
@@ -504,7 +506,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Rack($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "frame container-fluid" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "frame container-fluid" ], $attributes);
     }
     /**
      * The Main Partitioner <DIV> HTML Tag
@@ -518,7 +520,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::LargeRack($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "frame large-frame container-fluid" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "frame large-frame container-fluid" ], $attributes);
     }
     /**
      * The Main Partitioner <DIV> HTML Tag
@@ -532,7 +534,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::MediumRack($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "frame medium-frame container-fluid" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "frame medium-frame container-fluid" ], $attributes);
     }
     /**
      * The Main Partitioner <DIV> HTML Tag
@@ -546,7 +548,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::SmallRack($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "frame small-frame container-fluid" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "frame small-frame container-fluid" ], $attributes);
     }
     /**
      * The Row Partitioner <DIV> HTML Tag
@@ -560,7 +562,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "rack row" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "rack row" ], $attributes);
     }
     /**
      * The Row Partitioner <DIV> HTML Tag
@@ -574,7 +576,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::LargeSlot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "rack large-rack row" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "rack large-rack row" ], $attributes);
     }
     /**
      * The Row Partitioner <DIV> HTML Tag
@@ -588,7 +590,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::MediumSlot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "rack medium-rack row" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "rack medium-rack row" ], $attributes);
     }
     /**
      * The Row Partitioner <DIV> HTML Tag
@@ -602,7 +604,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::SmallSlot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "rack small-rack row" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "rack small-rack row" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -616,7 +618,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "slot col" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "slot col" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -630,7 +632,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "slot large-slot col-lg" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "slot large-slot col-lg" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -644,7 +646,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "slot medium-slot col-md" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "slot medium-slot col-md" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -658,7 +660,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content),"div",["class"=> "slot small-slot col-sm" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "slot small-slot col-sm" ], $attributes);
     }
     /**
      * The <DIV> HTML Tag
@@ -667,7 +669,7 @@ $attachments"]);
      * @return string
      */
     public static function Division($content, ...$attributes){
-        return self::Element(__($content),"div",["class"=> "division" ], $attributes);
+        return self::Element(__($content, styling:false),"div",["class"=> "division" ], $attributes);
     }
     /**
      * The <CENTER> HTML Tag
@@ -691,7 +693,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Item($item);
             $content = $res;
         }
-        return self::Element(__($content),"ol",["class"=> "list" ], $attributes);
+        return self::Element(__($content, styling:false),"ol",["class"=> "list" ], $attributes);
     }
     /**
      * The Unordered List <UL> HTML Tag
@@ -705,7 +707,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Item($item);
             $content = $res;
         }
-        return self::Element(__($content),"ul",["class"=> "items" ], $attributes);
+        return self::Element(__($content, styling:false),"ul",["class"=> "items" ], $attributes);
     }
     /**
      * The List Item <LI> HTML Tag
@@ -714,7 +716,7 @@ $attachments"]);
      * @return string
      */
     public static function Item($content, ...$attributes){
-        return self::Element(__($content),"li",["class"=> "item" ], $attributes);
+        return self::Element(__($content, styling:false),"li",["class"=> "item" ], $attributes);
     }
 
     /**
@@ -731,9 +733,9 @@ $attachments"]);
                 $reference = null;
             }
             else return self::Link(
-                self::Element(__($content),"h1",["class"=> "externalheading" ], $attributes)
+                self::Element(__($content, styling:false),"h1",["class"=> "externalheading" ], $attributes)
                 , $reference);
-        return self::Element(__($content),"h1",["class"=> "externalheading" ], $attributes);
+        return self::Element(__($content, styling:false),"h1",["class"=> "externalheading" ], $attributes);
     }
     /**
      * The <H2> HTML Tag
@@ -749,9 +751,9 @@ $attachments"]);
                 $reference = null;
             }
             else return self::Link(
-                self::Element(__($content),"h2",["class"=> "superheading" ], $attributes)
+                self::Element(__($content, styling:false),"h2",["class"=> "superheading" ], $attributes)
                 , $reference);
-        return self::Element(__($content),"h2",["class"=> "superheading" ], $attributes);
+        return self::Element(__($content, styling:false),"h2",["class"=> "superheading" ], $attributes);
     }
     /**
      * The <H3> HTML Tag
@@ -767,9 +769,9 @@ $attachments"]);
                 $reference = null;
             }
             else return self::Link(
-                self::Element(__($content),"h3",["class"=> "heading" ], $attributes)
+                self::Element(__($content, styling:false),"h3",["class"=> "heading" ], $attributes)
                 , $reference);
-        return self::Element(__($content),"h3",["class"=> "heading" ], $attributes);
+        return self::Element(__($content, styling:false),"h3",["class"=> "heading" ], $attributes);
     }
     /**
      * The <H4> HTML Tag
@@ -785,9 +787,9 @@ $attachments"]);
                 $reference = null;
             }
             else return self::Link(
-                self::Element(__($content),"h4",["class"=> "subheading" ], $attributes)
+                self::Element(__($content, styling:false),"h4",["class"=> "subheading" ], $attributes)
                 , $reference);
-        return self::Element(__($content),"h4",["class"=> "subheading" ], $attributes);
+        return self::Element(__($content, styling:false),"h4",["class"=> "subheading" ], $attributes);
     }
     /**
      * The <H5> HTML Tag
@@ -803,9 +805,9 @@ $attachments"]);
                 $reference = null;
             }
             else return self::Link(
-                self::Element(__($content),"h5",["class"=> "internalheading" ], $attributes)
+                self::Element(__($content, styling:false),"h5",["class"=> "internalheading" ], $attributes)
                 , $reference);
-        return self::Element(__($content),"h5",["class"=> "internalheading" ], $attributes);
+        return self::Element(__($content, styling:false),"h5",["class"=> "internalheading" ], $attributes);
     }
 
     /**
@@ -822,9 +824,9 @@ $attachments"]);
                 $reference = null;
             }
             else return self::Link(
-                self::Element(__($content),"p",["class"=> "paragraph" ], $attributes)
+                self::Element(__($content, styling:false),"p",["class"=> "paragraph" ], $attributes)
                 , $reference);
-            return self::Element(__($content),"p",["class"=> "paragraph" ], $attributes);
+        return self::Element(__($content, styling:false),"p",["class"=> "paragraph" ], $attributes);
     }
     /**
      * The <SPAN> HTML Tag
@@ -879,11 +881,11 @@ $attachments"]);
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Link($content, $reference = null, ...$attributes){
+    public static function Link($content, $reference = null, ...$attributes) {
         if(is_null($reference)) {
             $reference = $content;
             $content = null;
-        } elseif(is_array($reference) && count($attributes) === 0){
+        } elseif(is_array($reference) && count($attributes) === 0) {
             $attributes = Convert::ToIteration($reference);
             $reference = $content;
             $content = null;
@@ -1233,7 +1235,7 @@ $attachments"]);
             $attributes = Convert::ToIteration($type);
             $type = "text";
         }
-        return self::Element("input", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> Convert::ToTitle($key), "type"=> $type, "value"=> $value, "class"=>"input" ], $attributes);
+        return self::Element("input", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> __(Convert::ToTitle($key), styling:false), "type"=> $type, "value"=> $value, "class"=>"input" ], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1253,7 +1255,7 @@ $attachments"]);
      * @return string
      */
     public static function TextInput($key, $value = null, ...$attributes){
-        return self::Element($value??"", "textarea", [  "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> Convert::ToTitle($key), "class"=>"input textinput" ], $attributes);
+        return self::Element($value??"", "textarea", [  "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=>  __(Convert::ToTitle($key), styling:false), "class"=>"input textinput" ], $attributes);
     }
     /**
      * The <TEXTAREA> HTML Tag
@@ -1593,10 +1595,10 @@ $attachments"]);
                 else yield self::Element("","option",["value"=>""]);
                 foreach ($options as $k=>$v)
                     if(!$f && ($f = ($k == $value)))
-                        yield self::Element($v??"","option",["value"=>$k, "selected"=>"true"]);
-                    else yield self::Element($v??"","option",["value"=>$k]);
+                        yield self::Element(__($v??"", styling:false),"option",["value"=>$k, "selected"=>"true"]);
+                    else yield self::Element(__($v??"", styling:false),"option",["value"=>$k]);
             })()):Convert::ToString($options, assignFormat:"<option value='{0}'>{1}</option>\r\n")
-            ,"select", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=> Convert::ToTitle($key), "class"=>"input selectinput" ], $attributes);
+            ,"select", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=>  __(Convert::ToTitle($key), styling:false), "class"=>"input selectinput" ], $attributes);
     }
 
 

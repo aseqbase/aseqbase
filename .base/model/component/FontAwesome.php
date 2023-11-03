@@ -1,10 +1,19 @@
-<?php namespace MiMFa\Component;
+<?php
+namespace MiMFa\Component;
 class FontAwesome extends Component{
-	public $DefaultRoot = "body";
-	
+    public $DefaultRoot = "body";
+    public $Version = "6.4.2";
+
 	public function __construct(){
 		parent::__construct();
-		append("REGION", "initial","<script src='https://kit.fontawesome.com/e557f8d9f4.js' crossorigin='anonymous'></script>");
+		append("REGION", "initial", "<script src='https://kit.fontawesome.com/e557f8d9f4.js' crossorigin='anonymous'></script>");
+        //append("REGION", "initial", "
+        //    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/css/all.min.css' integrity='sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==' crossorigin='anonymous' referrerpolicy='no-referrer' />
+        //    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/css/fontawesome.min.css' integrity='sha512-siarrzI1u3pCqFG2LEzi87McrBmq6Tp7juVsdmGY1Dr8Saw+ZBAzDzrGwX3vgxX1NkioYNCFOVC0GpDPss10zQ==' crossorigin='anonymous' referrerpolicy='no-referrer' />
+        //    <script src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/js/all.min.js' integrity='sha512-uKQ39gEGiyUJl4AI6L+ekBdGKpGw4xJ55+xyJG7YFlJokPNYegn9KwQ3P8A7aFQAUtUsAQHep+d/lrGqrbPIDQ==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
+        //    <script src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/js/fontawesome.min.js' integrity='sha512-64O4TSvYybbO2u06YzKDmZfLj/Tcr9+oorWhxzE3yDnmBRf7wvDgQweCzUf5pm2xYTgHMMyk5tW8kWU92JENng==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
+        //    <script src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/js/conflict-detection.min.js' integrity='sha512-tOK04OMrEtOhHdTJSiClQ6wlAHB4BizsjbKbt8KRLLfN1xeCl84CdOW0B++kTNYPp+VDlgJg+jrWX6FuCDx7kg==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
+        //    ");
 	}
 
 	public function Echo(){
@@ -14,7 +23,7 @@ class FontAwesome extends Component{
 
 	public function EchoStyle($root=null){
 		$root = $root??$this->DefaultRoot;
-		?>
+?>
 		<style>
 			<?php echo $root; ?> .fa {
 			padding: 20px;

@@ -106,8 +106,20 @@ class Template extends \Base{
         * {
             direction: ".(\MIMFa\Library\Translate::$Direction??\_::$CONFIG->DefaultDirection).";
         }
-        td, th, tr, table {
+        table.dataTable tbody :is(td, tr) {
             text-align: -webkit-auto;
+        }
+        table.dataTable thead :is(th, tr) {
+            text-align: center;
+        }
+        table.dataTable tbody tr.odd {
+            background-color: #8881 !important;
+        }
+        table.dataTable tbody tr:not(.odd, .even):hover {
+            background-color: #8883;
+        }
+        table.dataTable tbody tr:is(.odd, .even):hover {
+            background-color: #8882 !important;
         }
         .tooltip {
             font-family: inherit;
@@ -122,13 +134,50 @@ class Template extends \Base{
             border-radius: var(--Radius-1);
             box-shadow: var(--Shadow-4);
             padding: 9px 9px;
-            transition: var(--Transition-0);
             z-index: -999;
+            transition: var(--Transition-0);
         }
         :not(html,head,body,style,script,link,meta,title):hover>.tooltip {
             opacity: 1;
-            transition: var(--Transition-1) 2s;
             z-index: 999;
+            transition: var(--Transition-1) 2s;
+        }
+
+        :is(.button, .btn, .icon).Error{
+            background-color: var(--Color-0);
+            color: var(--ForeColor-2);
+            transition: var(--Transition-1);
+        }
+        :is(.button, .btn, .icon).Success{
+            background-color: var(--Color-1);
+            color: var(--ForeColor-2);
+            transition: var(--Transition-1);
+        }
+        :is(.button, .btn, .icon).Message{
+            background-color: var(--Color-2);
+            color: var(--ForeColor-2);
+            transition: var(--Transition-1);
+        }
+        :is(.button, .btn, .icon).Warning{
+            background-color: var(--Color-3);
+            color: var(--ForeColor-2);
+            transition: var(--Transition-1);
+        }
+        :is(.button, .btn, .icon).Error:hover{
+            background-color: ".\_::$TEMPLATE->Color(0)."88;
+            transition: var(--Transition-1);
+        }
+        :is(.button, .btn, .icon).Success:hover{
+            background-color: ".\_::$TEMPLATE->Color(1)."88;
+            transition: var(--Transition-1);
+        }
+        :is(.button, .btn, .icon).Message:hover{
+            background-color: ".\_::$TEMPLATE->Color(2)."88;
+            transition: var(--Transition-1);
+        }
+        :is(.button, .btn, .icon).Warning:hover{
+            background-color: ".\_::$TEMPLATE->Color(3)."88;
+            transition: var(--Transition-1);
         }
         ");
     }

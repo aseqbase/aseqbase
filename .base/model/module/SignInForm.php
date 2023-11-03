@@ -16,7 +16,7 @@ class SignInForm extends Form{
 	public $PasswordPlaceHolder = "Password";
 	public $SignUpLabel = "Do not have an account?";
 	public $RememberLabel = "Forgot your password?";
-	public $WelcomeFormat = '<div class="welcome result success"><br><p class="welcome">Hello dear $NAME,<br>You are signed in now!</p></div>';
+	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
 	public $WelcomePart = null;
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
@@ -71,7 +71,7 @@ class SignInForm extends Form{
         } else return parent::Get();
 	}
 	public function GetHeader(){
-        if(getAccess(\_::$CONFIG->UserAccess))
+        if(getAccess(\_::$CONFIG->UserAccess) && !isEmpty($this->WelcomeFormat))
 			return __(Convert::FromDynamicString($this->WelcomeFormat));
     }
 	public function GetFields(){
@@ -91,10 +91,12 @@ class SignInForm extends Form{
 		}
     }
 	public function GetFooter(){
-        return parent::GetFooter().HTML::LargeSlot(
-			HTML::Link($this->SignUpLabel, User::$UpHandlerPath)
-			, ["class"=>"col-lg-12"]).HTML::LargeSlot(
-			HTML::Link($this->RememberLabel, User::$RecoverHandlerPath)
+        return parent::GetFooter()
+			.HTML::LargeSlot(
+				HTML::Link($this->SignUpLabel, User::$UpHandlerPath)
+			, ["class"=>"col-lg-12"])
+			.HTML::LargeSlot(
+				HTML::Link($this->RememberLabel, User::$RecoverHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 

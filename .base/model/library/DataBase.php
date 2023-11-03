@@ -83,7 +83,7 @@ class DataBase {
 
 	public static function Connection()
 	{
-		$conn = new \PDO(\_::$CONFIG->DataBaseType.":host=".\_::$CONFIG->DataBaseHost.";dbname=".\_::$CONFIG->DataBaseName, \_::$CONFIG->DataBaseUser, \_::$CONFIG->DataBasePassword);
+		$conn = new \PDO(\_::$CONFIG->DataBaseType.":host=".\_::$CONFIG->DataBaseHost.";dbname=".\_::$CONFIG->DataBaseName.";charset=".preg_replace("/\W/","",\_::$CONFIG->DataBaseEncoding), \_::$CONFIG->DataBaseUser, \_::$CONFIG->DataBasePassword);
 		$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		return $conn;
 	}

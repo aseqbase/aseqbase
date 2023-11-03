@@ -115,31 +115,31 @@ class Local{
 		$dir = trim($destPath,"/");
 		return unlink($dir);
 	}
-	public static function MoveDirectory($source_dir, $dest_dir, $recursive = true){
-		if(self::CopyDirectory($source_dir, $dest_dir, $recursive))
-			return self::DeleteDirectory($source_dir);
+	public static function MoveDirectory($sourceDir, $destDir, $recursive = true){
+		if(self::CopyDirectory($sourceDir, $destDir, $recursive))
+			return self::DeleteDirectory($sourceDir);
 		return false;
     }
-	public static function CopyDirectory($source_dir, $dest_dir, $recursive = true):bool{
+	public static function CopyDirectory($sourceDir, $destDir, $recursive = true):bool{
 		set_time_limit (24 * 60 * 60);
 		$b = true;
-		$source_paths = scandir($source_dir);
+		$sourcePaths = scandir($sourceDir);
         if($recursive)
-			foreach ($source_paths as $source)
+			foreach ($sourcePaths as $source)
             {
                 $bn = basename($source);
                 if(is_dir($source)){
-                    self::CreateDirectory($dest_dir . $bn);
-                    $b = self::CopyDirectory($source, $dest_dir . $bn) && $b;
-                } else $b = self::CopyFile($source, $dest_dir . $bn) && $b;
+                    self::CreateDirectory($destDir . $bn);
+                    $b = self::CopyDirectory($source, $destDir . $bn) && $b;
+                } else $b = self::CopyFile($source, $destDir . $bn) && $b;
             }
 		return $b;
     }
-	public static function CopyDirectories($source_dirs, $dest_dirs, $recursive = true):bool{
+	public static function CopyDirectories($sourceDirs, $destDirs, $recursive = true):bool{
 		set_time_limit (24 * 60 * 60);
 		$b = true;
-        foreach ($source_dirs as $s_dir)
-            foreach ($dest_dirs as $d_dir)
+        foreach ($sourceDirs as $s_dir)
+            foreach ($destDirs as $d_dir)
                 $b = self::CopyDirectory($s_dir, $d_dir, $recursive) && $b;
 		return $b;
     }
@@ -166,19 +166,19 @@ class Local{
 		$path = self::GetPath($path);
 		return (!file_exists($path)) || unlink($path);
 	}
-	public static function MoveFile($source_path, $dest_path):bool{
-		if(self::CopyFile($source_path, $dest_path))
-			return self::DeleteFile($source_path);
+	public static function MoveFile($sourcePath, $destPath):bool{
+		if(self::CopyFile($sourcePath, $destPath))
+			return self::DeleteFile($sourcePath);
 		return false;
     }
-	public static function CopyFile($source_path, $dest_path):bool{
+	public static function CopyFile($sourcePath, $destPath):bool{
 		set_time_limit (24 * 60 * 60);
 		$b = false;
-		$source_path = self::GetPath($source_path);
-		$dest_path = self::GetPath($dest_path);
-        $s_file = fopen ($source_path, "rb");
+		$sourcePath = self::GetPath($sourcePath);
+		$destPath = self::GetPath($destPath);
+        $s_file = fopen ($sourcePath, "rb");
         if ($s_file) {
-            $d_file = fopen ($dest_path, "wb");
+            $d_file = fopen ($destPath, "wb");
             if ($d_file)
             {
                 while(!feof($s_file)) {
@@ -197,11 +197,11 @@ class Local{
 
 		return $b;
     }
-	public static function CopyFiles($source_paths, $dest_paths):bool{
+	public static function CopyFiles($sourcePaths, $destPaths):bool{
 		set_time_limit (24 * 60 * 60);
 		$b = true;
-        foreach ($source_paths as $s_path)
-            foreach ($dest_paths as $d_path)
+        foreach ($sourcePaths as $s_path)
+            foreach ($destPaths as $d_path)
                 $b = self::CopyFile($s_path, $d_path) && $b;
 		return $b;
     }
@@ -230,30 +230,31 @@ class Local{
 	}
 	/**
      * Check if the fileobject is not null or empty
-     * @param mixed $fileobject Posted file key name or object
+     * @param mixed $fileObject Posted file key name or object
 	 * @return mixed
 	 */
-	public static function IsFileObject($fileobject){
-		if(is_string($fileobject)) $fileobject = $_FILES[$fileobject];
-		return !isEmpty($fileobject) && !isEmpty($fileobject["name"]);
+	public static function IsFileObject($fileObject){
+		if(is_string($fileObject)) $fileObject = $_FILES[$fileObject];
+		return !isEmpty($fileObject) && !isEmpty($fileObject["name"]);
 	}
+
 	/**
 	 * Upload File
-	 * @param mixed $fileobject A file object or posted file key name
-     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $fileObject A file object or posted file key name
+     * @param mixed $destDir Leave null if you want to use PUBLIC_DIR as the destination
 	 * @param mixed $minSize Minimum file size in byte
      * @param mixed $maxSize Maximum file size in byte
      * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file url, else return null
 	 */
-	public static function Upload($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
-		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
-		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
-		if(!isValid($destdir)) $destdir = \_::$PUBLIC_DIR;
+	public static function Upload($fileObject, $destDir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileObject)) $fileObject = self::GetFileObject($fileObject);
+		if(is_null($fileObject) || empty($fileObject) || isEmpty($fileObject["name"])) throw new \Exception("There is not any file!");
+		if(!isValid($destDir)) $destDir = \_::$PUBLIC_DIR;
 
-		$fileType = strtolower(pathinfo($fileobject["name"], PATHINFO_EXTENSION));
-		$dir = self::CreateDirectory(trim($destdir,"/"));
-		$fileName = strtolower(pathinfo($fileobject["name"], PATHINFO_FILENAME))."_";
+		$fileType = strtolower(pathinfo($fileObject["name"], PATHINFO_EXTENSION));
+		$dir = self::CreateDirectory(trim($destDir,"/"));
+		$fileName = strtolower(pathinfo($fileObject["name"], PATHINFO_FILENAME))."_";
 
 		// Allow certain file formats
 		$allow = true;
@@ -263,91 +264,114 @@ class Local{
 		// Check file size
 		$minSize = $minSize??\_::$CONFIG->MinimumFileSize;
 		$maxSize = $maxSize??\_::$CONFIG->MaximumFileSize;
-		if($fileobject["size"]<$minSize) throw new \Exception("The file size is very small!");
-		elseif($fileobject["size"]>$maxSize) throw new \Exception("The file size is very big!");
+		if($fileObject["size"]<$minSize) throw new \Exception("The file size is very small!");
+		elseif($fileObject["size"]>$maxSize) throw new \Exception("The file size is very big!");
 
 		$filepath = self::NewUniquePath($dir,$fileName,".$fileType");
-		if(!move_uploaded_file($fileobject["tmp_name"], $filepath))
+		if(!move_uploaded_file($fileObject["tmp_name"], $filepath))
             throw new \Exception("Sorry, there was an error uploading your file.");
         return self::GetUrl($filepath);
 	}
 	/**
 	 * Upload File
-	 * @param mixed $fileobject A file object or posted file key name
-     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $fileObject A file object or posted file key name
+     * @param mixed $destDir Leave null if you want to use PUBLIC_DIR as the destination
 	 * @param mixed $minSize Minimum file size in byte
      * @param mixed $maxSize Maximum file size in byte
      * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file url, else return null
 	 */
-	public static function UploadFile($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
-		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
-		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+	public static function UploadFile($fileObject, $destDir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileObject)) $fileObject = self::GetFileObject($fileObject);
+		if(is_null($fileObject) || empty($fileObject) || isEmpty($fileObject["name"])) throw new \Exception("There is not any file!");
 
-		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableFileFormats);
+		return self::Upload($fileObject, $destDir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableFileFormats);
 	}
 	/**
      * Upload Image
-     * @param mixed $fileobject An image object or posted file key name
-     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+     * @param mixed $fileObject An image object or posted file key name
+     * @param mixed $destDir Leave null if you want to use PUBLIC_DIR as the destination
      * @param mixed $minSize Minimum image size in byte
      * @param mixed $maxSize Maximum image size in byte
      * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
      * @return string Return the uploaded image url, else return null
      */
-	public static function UploadImage($fileobject, $destdir=null, $minSize=null, $maxSize=null,array $extensions=null){
-		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
-		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+	public static function UploadImage($fileObject, $destDir=null, $minSize=null, $maxSize=null,array $extensions=null){
+		if(is_string($fileObject)) $fileObject = self::GetFileObject($fileObject);
+		if(is_null($fileObject) || empty($fileObject) || isEmpty($fileObject["name"])) throw new \Exception("There is not any file!");
 
 		// Check if image file is an actual image or fake image
-		if(getimagesize($fileobject["tmp_name"]) === false) throw new \Exception("The image file is not an actual image!");
-		return self::Upload($fileobject, $destdir, $minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableImageFormats);
+		if(getimagesize($fileObject["tmp_name"]) === false) throw new \Exception("The image file is not an actual image!");
+		return self::Upload($fileObject, $destDir, $minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableImageFormats);
 	}
 	/**
 	 * Upload audio
-	 * @param mixed $fileobject A file object or posted file key name
-     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $fileObject A file object or posted file key name
+     * @param mixed $destDir Leave null if you want to use PUBLIC_DIR as the destination
 	 * @param mixed $minSize Minimum file size in byte
      * @param mixed $maxSize Maximum file size in byte
      * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file url, else return null
 	 */
-	public static function UploadAudio($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
-		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
-		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+	public static function UploadAudio($fileObject, $destDir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileObject)) $fileObject = self::GetFileObject($fileObject);
+		if(is_null($fileObject) || empty($fileObject) || isEmpty($fileObject["name"])) throw new \Exception("There is not any file!");
 
-		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableAudioFormats);
+		return self::Upload($fileObject, $destDir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableAudioFormats);
 	}
 	/**
 	 * Upload video
-	 * @param mixed $fileobject A file object or posted file key name
-     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $fileObject A file object or posted file key name
+     * @param mixed $destDir Leave null if you want to use PUBLIC_DIR as the destination
 	 * @param mixed $minSize Minimum file size in byte
      * @param mixed $maxSize Maximum file size in byte
      * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file url, else return null
 	 */
-	public static function UploadVideo($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
-		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
-		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+	public static function UploadVideo($fileObject, $destDir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileObject)) $fileObject = self::GetFileObject($fileObject);
+		if(is_null($fileObject) || empty($fileObject) || isEmpty($fileObject["name"])) throw new \Exception("There is not any file!");
 
-		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableVideoFormats);
+		return self::Upload($fileObject, $destDir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableVideoFormats);
 	}
 	/**
 	 * Upload document
-	 * @param mixed $fileobject A file object or posted file key name
-     * @param mixed $destdir Leave null if you want to use PUBLIC_DIR as the destination
+	 * @param mixed $fileObject A file object or posted file key name
+     * @param mixed $destDir Leave null if you want to use PUBLIC_DIR as the destination
 	 * @param mixed $minSize Minimum file size in byte
      * @param mixed $maxSize Maximum file size in byte
      * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file url, else return null
 	 */
-	public static function UploadDocument($fileobject, $destdir=null, $minSize=null, $maxSize=null, array $extensions=null){
-		if(is_string($fileobject)) $fileobject = self::GetFileObject($fileobject);
-		if(is_null($fileobject) || empty($fileobject) || isEmpty($fileobject["name"])) throw new \Exception("There is not any file!");
+	public static function UploadDocument($fileObject, $destDir=null, $minSize=null, $maxSize=null, array $extensions=null){
+		if(is_string($fileObject)) $fileObject = self::GetFileObject($fileObject);
+		if(is_null($fileObject) || empty($fileObject) || isEmpty($fileObject["name"])) throw new \Exception("There is not any file!");
 
-		return self::Upload($fileobject, $destdir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableDocumentFormats);
+		return self::Upload($fileObject, $destDir,$minSize, $maxSize, $extensions??\_::$CONFIG->AcceptableDocumentFormats);
 	}
+	/**
+	 * Send somthing to download
+	 * @param mixed $content
+	 * @param mixed $fileName
+	 * @param mixed $contentType
+	 */
+	public static function Download($content, $fileName = "Export.txt",  $contentType = "text/plain"){
+        ini_set('mbstring.internal_encoding',\_::$CONFIG->Encoding);
+        ini_set('mbstring.http_input','auto');
+        ini_set('mbstring.http_output',\_::$CONFIG->Encoding);
+        ini_set('mbstring.detect_order','auto');
+        ini_set('default_charset',\_::$CONFIG->Encoding);
+
+        header("Content-Disposition: attachment; filename=\"$fileName\"");
+        header("Content-Type: application/force-download");
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header("Content-Type: $contentType; charset=".\_::$CONFIG->Encoding);
+        ob_clean();
+        flush();
+        SEND($content);
+    }
 }
 
 ?>

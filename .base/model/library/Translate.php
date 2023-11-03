@@ -16,8 +16,9 @@ class Translate
 	public static $Direction = "LTR";
 	public static $CodeStart = "<";
 	public static $CodeEnd = ">";
+	public static $CodePattern = "/(\<\S+[\w\W]*\>)|(([\"'`])\S+[\w\W]*\\3)|(\d*\.?\d+)/iU";
 	public static $ValidPattern = "/[A-z]+/";
-	public static $InvalidPattern = "/^(\s+)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?(\/([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+)$/";
+	public static $InvalidPattern = "/^(\s+)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+)$/";
 
 	/**
      * Change the Default Language of translator
@@ -52,14 +53,14 @@ class Translate
 		self::$Language = $lang;
 	}
 
-	public static function Get($text,$params=[]){
+	public static function Get($text, $replacements=[], $lang = null){
 		if(
 			is_null($text) ||
 			!preg_match(self::$ValidPattern, $text) ||
 			preg_match(self::$InvalidPattern, $text)
 			) return $text;
 		$dic = array();
-		$text = Code($text, $dic, self::$CodeStart, self::$CodeEnd);
+		$text = Code($text, $dic, self::$CodeStart, self::$CodeEnd, self::$CodePattern);
 		$code = self::CreateCode($text);
 		$col = DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE `KeyCode`=:KeyCode",[":KeyCode"=>$code]);
 		if(count($col)==0)
@@ -67,28 +68,58 @@ class Translate
 				[":KeyCode"=>$code,":ValueOptions"=>json_encode(array('x'=>$text))]);
 		else {
 			$data = json_decode($col[0]["ValueOptions"]);
-			$text = isset($data->{self::$Language})? $data->{self::$Language} : $data->x;
+			$text = isset($data->{$lang??self::$Language})? $data->{$lang??self::$Language} : $data->x;
 		}
-		foreach($params as $key=>$val) $text = str_replace($key,$val,$text);
+		foreach($replacements as $key=>$val) $text = str_replace($key,$val,$text);
 		return Decode($text, $dic);
 	}
 
-	public static function Set($text,$val=null){
+	public static function GetAll($condition = null, $params=[]){
+		$rows = DataBase::DoSelect(self::$TableName, "*", $condition, $params);
+		foreach ($rows as $value){
+			$row = [];
+			$row["KEY"]=$value["KeyCode"];
+			foreach(json_decode($value["ValueOptions"]) as $k => $v)
+				$row[$k]=$v;
+			yield $row;
+		}
+    }
+
+	public static function Set($text,$val=null, $lang = null) {
 		if(
 			is_null($text) ||
 			!preg_match(self::$ValidPattern, $text) ||
 			preg_match(self::$InvalidPattern, $text)
 			) return false;
 		$dic = array();
-		$text = Code($text, $dic, self::$CodeStart, self::$CodeEnd);
+		$text = Code($text, $dic, self::$CodeStart, self::$CodeEnd, self::$CodePattern);
 		$code = self::CreateCode($text);
 		$col = DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE `KeyCode`=:KeyCode",[":KeyCode"=>$code]);
 		if(count($col) > 0) $data = $col[0]["ValueOptions"];
 		$data = json_encode(array('x'=>$text));
-		if(!is_null($val)) $data->{self::$Language} = Code($val, $dic, self::$CodeStart, self::$CodeEnd);
+		if(!is_null($val)) $data->{$lang??self::$Language} = Code($val, $dic, self::$CodeStart, self::$CodeEnd, self::$CodePattern);
 		$args = [":KeyCode"=>$code,":ValueOptions"=>$data];
 		return DataBase::Replace("REPLACE INTO ".self::$TableName." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode,:ValueOptions)", $args);
 	}
+
+	public static function SetAll($values) {
+		$queries = [];
+		$args = [];
+		foreach ($values as $i=>$value){
+            $queries[] = "REPLACE INTO ".self::$TableName." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode$i,:ValueOptions$i);";
+			$args[":KeyCode$i"] = $value["KEY"];
+			$vals = [];
+			foreach ($value as $key=>$val)
+				if($key !== "KEY" && !isEmpty($key))
+					$vals[$key] = $val;
+			$args[":ValueOptions$i"] = json_encode($vals);
+        }
+        return DataBase::Replace(join(PHP_EOL, $queries), $args);
+	}
+
+	public static function ClearAll($condition = null, $params=[]) {
+		return DataBase::DoDelete(self::$TableName, $condition, $params);
+    }
 
 	public static function CreateCode($text){
 		if($text===null) return "Null";

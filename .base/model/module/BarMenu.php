@@ -123,21 +123,26 @@ class BarMenu extends Module{
 
 	public function Get(){
 		return Convert::ToString(function(){
+            $rtl = \MiMFa\Library\Translate::$Direction == "RTL";
             yield parent::Get();
-            $count = count($this->Items);
+            $count = 0;
+            foreach ($this->Items as $item)
+                if(getAccess(getValid($item,"Access",\_::$CONFIG->VisitAccess)))
+					$count++;
             if($count > 0){
                 $size = 100 / $count;
                 $msize = 100 - $size * ($count-1);
-                for($i = 0; $i < $count; $i++)
-					if(getAccess(getValid($this->Items[$i],"Access",\_::$CONFIG->VisitAccess))) {
-                        $m = $count/2;
+				$i = 1;
+                foreach ($this->Items as $item)
+					if(getAccess(getValid($item,"Access",\_::$CONFIG->VisitAccess))) {
+                        $m = $count/floatval(2.0);
                         $cls = "";
                         $ism = false;
-                        if((($i+1) <= $m) && (($i+2) >= $m)) $cls = "left";
-                        elseif($ism =(($i <= $m) && (($i+1) >= $m))) $cls = "middle";
-                        elseif((($i-1) <= $m) && ($i >= $m)) $cls = "right";
-                        elseif($i == 0) $cls = "first";
-                        elseif($i == $count - 1) $cls = "last";
+                        if($i === 1) $cls = $rtl?"last":"first";
+                        elseif($i === $count) $cls = $rtl?"first":"last";
+                        elseif(($i <= $m) && (($i+1) >= $m)) $cls = $rtl?"right":"left";
+                        elseif((($i-1) >= $m) && ($i >= $m)) $cls = $rtl?"left":"right";
+                        elseif($ism =((($i-1) <= $m) && (($i+1) >= $m))) $cls = "middle";
                         //yield HTML::Link(
                         //    HTML::Division(
                         //        HTML::Image(
@@ -151,13 +156,14 @@ class BarMenu extends Module{
                         //    , getValid($this->Items[$i],'Path')??getValid($this->Items[$i],'Link'), getValid($this->Items[$i],"Attributes")
                         //);
                         yield
-                            "<a ".getValid($this->Items[$i],"Attributes")." ".(isValid($this->Items[$i],'Path')?"href='".$this->Items[$i]['Path']."'":"").">
+                            "<a ".getValid($item,"Attributes")." ".(isValid($item,'Path')?"href='".$item['Path']."'":"").">
 								<div class='button $cls' style='width:".($ism?$msize:$size)."vw;'>
-									<div style=\"background-image: url('{$this->Items[$i]['Image']}')\">
-										<span>".__($this->Items[$i]['Name'])."</span>
+									<div style=\"background-image: url('{$item['Image']}')\">
+										<span>".__($item['Name'])."</span>
 									</div>
 								</div>
 							</a>";
+						$i++;
                     }
             }
         });
