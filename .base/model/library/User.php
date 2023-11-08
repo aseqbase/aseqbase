@@ -188,11 +188,11 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
     }
 	public function GetValue($key, $signature = null, $password = null){
         if(is_null($id = $this->ID) || !is_null($signature)) $id = getValid($this->Find($signature, $password), "ID");
-		return is_null($id)?null:DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."User",$key,"`ID`=:ID",[":ID"=>$id]);
+		return is_null($id)?null:DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."User",$key,"`ID`=$id");
     }
 	public function SetValue($key, $value, $signature = null, $password = null){
         if(is_null($id =$this->ID) || !is_null($signature)) $id = getValid($this->Find($signature, $password), "ID");
-		return is_null($id)?null:DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`='$id'",[$key => $value]);
+		return is_null($id)?null:DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`=$id",[$key => $value]);
     }
 
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){

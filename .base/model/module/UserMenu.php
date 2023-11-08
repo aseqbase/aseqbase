@@ -107,13 +107,13 @@ class UserMenu extends Module{
 				foreach($this->Items as $item)
                     if(isValid($item,'Path'))
 						yield HTML::Link(
-							HTML::Division(getValid($item,'Name'),["style"=>(isValid($item,'Image')?("background-image: url('".$item['Image']."')"):"")]),
+							HTML::Division(__(getBetween($item,"Name", "Title"), styling:false),["style"=>(isValid($item,'Image')?("background-image: url('".$item['Image']."')"):"")]),
 							getValid($item,'Path'),
 							["class"=>"btn btn-primary"],
 							getValid($item,"Attributes"));
 					else
 						yield HTML::Span(
-							HTML::Division(getValid($item,'Name'),["style"=>(isValid($item,'Image')?("background-image: url('".$item['Image']."')"):"")]),
+							HTML::Division(__(getBetween($item,"Name", "Title"), styling:false),["style"=>(isValid($item,'Image')?("background-image: url('".$item['Image']."')"):"")]),
 							null,
 							["class"=>"bio"],
 							getValid($item,"Attributes"));

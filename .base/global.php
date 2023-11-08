@@ -1116,6 +1116,11 @@
 			else return $func($obj[$item]);
 		else $defultValue;
 	}
+	function getBetween($obj, ...$items){
+		foreach ($items as $value)
+			if(($value = getValid($obj, $value, null)) !== null) return $value;
+		return null;
+	}
 	function between(...$options){
 		foreach ($options as $value)
 			if(isValid($value)) return $value;

@@ -1545,7 +1545,7 @@ $attachments"]);
      * @return string
      */
     public static function FloatInput($key, $value = null, ...$attributes){
-        return self::Input($key, $value, "number", ["class"=>"floatinput", "step"=>"".(1/pow(10,self::$MaxDecimalPrecision)), "inputmode"=>"numeric"], $attributes);
+        return self::Input($key, $value?round($value, self::$MaxDecimalPrecision):$value, "number", ["class"=>"floatinput", "step"=>"".(1/pow(10,self::$MaxDecimalPrecision)), "inputmode"=>"numeric"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
