@@ -18,7 +18,7 @@ class Translate
 	public static $CodeEnd = ">";
 	public static $CodePattern = "/(\<\S+[\w\W]*\>)|(([\"'`])\S+[\w\W]*\\3)|(\d*\.?\d+)/iU";
 	public static $ValidPattern = "/[A-z]+/";
-	public static $InvalidPattern = "/^(\s+)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+)$/";
+	public static $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
 
 	/**
      * Change the Default Language of translator

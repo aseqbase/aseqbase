@@ -96,16 +96,18 @@
 						$(selector + ' .result').remove();
 						if(isEmpty(data)) load();
 						else {
-							data = (data !=null && typeof(data) == 'object')?data.statusText:data??'".__("The form submitted successfully!")."';
-							if(isSet(data) && !isEmpty(data)) $(selector).prepend(Html.success(data));
+							data = ((typeof(data) == 'object')?data.statusText:data)??'".__("The form submitted successfully!")."';
+							if(!isEmpty(data))
+								$(selector).prepend(Html.success(data));
 						}
 					};
 					errorHandler = errorHandler??function(data, selector){
 						$(selector + ' .result').remove();
 						if(isEmpty(data)) load();
 						else {
-							data = (data !=null && typeof(data) == 'object')?data.statusText:data??'".__("There a problem occured!")."';
-							if(isSet(data) && !isEmpty(data)) $(selector).prepend(Html.error(data));
+							data = ((typeof(data) == 'object')?data.statusText:data)??'".__("There a problem occured!")."';
+							if(!isEmpty(data))
+								$(selector).prepend(Html.error(data));
 						}
 					};
 					readyHandler = readyHandler??function(data, selector){
@@ -114,7 +116,7 @@
 					processHandler = processHandler??function(data, selector){
 						if(!isEmpty(data)){
 							data = typeof(data) == 'object'?data.statusText:data;
-							if(isSet(data) && !isEmpty(data)) $(selector).prepend(data);
+							if(!isEmpty(data)) $(selector).prepend(data);
 						}
 					};
 

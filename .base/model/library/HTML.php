@@ -11,7 +11,7 @@ class HTML
 {
     //public static $Sources = [];
     public static $ManageAttributes = true;
-    public static $MaxFloatDecimals = 2;
+    public static $MaxDecimalPrecision = 2;
     public static $MaxValueLength = 10;
     public static $NewLine = "<br/>";
     public static $HorizontalBreak = "<hr/>";
@@ -400,7 +400,7 @@ $attachments"]);
      * @return string
      */
     public static function Page($content, ...$attributes){
-        return self::Element(__($content, styling:false),"div",["class"=> "page" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "page" ], $attributes);
     }
     /**
      * The <DIV> HTML Tag
@@ -409,7 +409,7 @@ $attachments"]);
      * @return string
      */
     public static function Part($content, ...$attributes){
-        return self::Element(__($content, styling:false),"div",["class"=> "part" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "part" ], $attributes);
     }
     /**
      * The <HEADER> HTML Tag
@@ -418,7 +418,7 @@ $attachments"]);
      * @return string
      */
     public static function Header($content, ...$attributes){
-        return self::Element(__($content, styling:false),"header",["class"=> "header" ], $attributes);
+        return self::Element(Convert::ToString($content),"header",["class"=> "header" ], $attributes);
     }
     /**
      * The <MAIN> HTML Tag
@@ -427,7 +427,7 @@ $attachments"]);
      * @return string
      */
     public static function Content($content, ...$attributes){
-        return self::Element(__($content, styling:false),"main",["class"=> "content" ], $attributes);
+        return self::Element(Convert::ToString($content),"main",["class"=> "content" ], $attributes);
     }
     /**
      * The <FOOTER> HTML Tag
@@ -436,7 +436,7 @@ $attachments"]);
      * @return string
      */
     public static function Footer($content, ...$attributes){
-        return self::Element(__($content, styling:false),"footer",["class"=> "footer" ], $attributes);
+        return self::Element(Convert::ToString($content),"footer",["class"=> "footer" ], $attributes);
     }
     /**
      * The Container <DIV> HTML Tag
@@ -450,7 +450,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Rack($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "container" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "container" ], $attributes);
     }
     /**
      * The Container <DIV> HTML Tag
@@ -464,7 +464,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::LargeRack($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "container large-container" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "container large-container" ], $attributes);
     }
     /**
      * The Container <DIV> HTML Tag
@@ -478,7 +478,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::MediumRack($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "container medium-container" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "container medium-container" ], $attributes);
     }
     /**
      * The Container <DIV> HTML Tag
@@ -492,7 +492,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::SmallRack($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "container small-container" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "container small-container" ], $attributes);
     }
     /**
      * The Main Partitioner <DIV> HTML Tag
@@ -506,7 +506,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Rack($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "frame container-fluid" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "frame container-fluid" ], $attributes);
     }
     /**
      * The Main Partitioner <DIV> HTML Tag
@@ -520,7 +520,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::LargeRack($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "frame large-frame container-fluid" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "frame large-frame container-fluid" ], $attributes);
     }
     /**
      * The Main Partitioner <DIV> HTML Tag
@@ -534,7 +534,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::MediumRack($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "frame medium-frame container-fluid" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "frame medium-frame container-fluid" ], $attributes);
     }
     /**
      * The Main Partitioner <DIV> HTML Tag
@@ -548,7 +548,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::SmallRack($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "frame small-frame container-fluid" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "frame small-frame container-fluid" ], $attributes);
     }
     /**
      * The Row Partitioner <DIV> HTML Tag
@@ -562,7 +562,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "rack row" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "rack row" ], $attributes);
     }
     /**
      * The Row Partitioner <DIV> HTML Tag
@@ -576,7 +576,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::LargeSlot($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "rack large-rack row" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "rack large-rack row" ], $attributes);
     }
     /**
      * The Row Partitioner <DIV> HTML Tag
@@ -590,7 +590,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::MediumSlot($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "rack medium-rack row" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "rack medium-rack row" ], $attributes);
     }
     /**
      * The Row Partitioner <DIV> HTML Tag
@@ -604,7 +604,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::SmallSlot($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "rack small-rack row" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "rack small-rack row" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -618,7 +618,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "slot col" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "slot col" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -632,7 +632,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "slot large-slot col-lg" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "slot large-slot col-lg" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -646,7 +646,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "slot medium-slot col-md" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "slot medium-slot col-md" ], $attributes);
     }
     /**
      * The Column Partitioner <DIV> HTML Tag
@@ -660,7 +660,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"div",["class"=> "slot small-slot col-sm" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "slot small-slot col-sm" ], $attributes);
     }
     /**
      * The <DIV> HTML Tag
@@ -669,7 +669,7 @@ $attachments"]);
      * @return string
      */
     public static function Division($content, ...$attributes){
-        return self::Element(__($content, styling:false),"div",["class"=> "division" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "division" ], $attributes);
     }
     /**
      * The <CENTER> HTML Tag
@@ -678,7 +678,7 @@ $attachments"]);
      * @return string
      */
     public static function Center($content, ...$attributes){
-        return self::Element(__($content, styling:false),"center",["class"=> "center" ], $attributes);
+        return self::Element(Convert::ToString($content),"center",["class"=> "center" ], $attributes);
     }
 
     /**
@@ -693,7 +693,7 @@ $attachments"]);
             foreach ($content as $item) $res[] = self::Item($item);
             $content = $res;
         }
-        return self::Element(__($content, styling:false),"ol",["class"=> "list" ], $attributes);
+        return self::Element(Convert::ToString($content),"ol",["class"=> "list" ], $attributes);
     }
     /**
      * The Unordered List <UL> HTML Tag
@@ -934,7 +934,7 @@ $attachments"]);
                 if(is_integer($k)) return call_user_func("self::Field", $f);
                 else return call_user_func("self::Field", null, $k, $f);
             }));};
-        else $content = __($content, styling:false);
+        else $content = Convert::ToString($content);
         return self::Element($content, "form", isValid($reference)?["action"=> $reference]:[], [ "enctype"=>"multipart/form-data", "method"=>"get", "class"=> "form" ], $attributes);
     }
     /**
@@ -992,7 +992,7 @@ $attachments"]);
         } else $type = self::InputDetector($type, $value);
         $titleOrKey = $title??Convert::ToTitle(Convert::ToString($key));
         $key = Convert::ToKey(Convert::ToString($key??$title));
-        $id = Convert::ToId($key).getID();
+        $id = getValid($attributes, "id")??Convert::ToId($key).getID();
         $attributes = [["id"=>$id,"name"=>$key], ...$attributes];
         $titleTag = ($title===false || !isValid($titleOrKey)?"":self::Label($titleOrKey, $id, ["class"=> "title"]));
         $descriptionTag = ($description===false || !isValid($description)?"":self::Label($description, $id, ["class"=> "description"]));
@@ -1545,7 +1545,7 @@ $attachments"]);
      * @return string
      */
     public static function FloatInput($key, $value = null, ...$attributes){
-        return self::Input($key, $value, "number", ["class"=>"floatinput", "step"=>"0.001", "inputmode"=>"numeric"], $attributes);
+        return self::Input($key, $value, "number", ["class"=>"floatinput", "step"=>"".(1/pow(10,self::$MaxDecimalPrecision)), "inputmode"=>"numeric"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1616,7 +1616,7 @@ $attachments"]);
                         yield self::Column($v);
                     else yield self::Row($v, false, $colHeads);
                 }
-            })())):__($content, styling:false),
+            })())):Convert::ToString($content),
             "table",["class"=> "table"], $attributes);
     }
     /**
@@ -1642,7 +1642,7 @@ $attachments"]);
         return self::Element(
             is_countable($content)?join(PHP_EOL, iterator_to_array((function() use($content, $head, $colHeads){
                 foreach ($content as $k=>$v) yield self::Cell($v, $head?$head:in_array($k, $colHeads));
-            })())):__($content, styling:false),
+            })())):Convert::ToString($content),
             "tr",["class"=> "row"], $attributes);
     }
     /**

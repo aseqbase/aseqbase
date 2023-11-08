@@ -361,7 +361,7 @@
 	function FLIP($value = null, $url = null){
         ob_clean();
 		flush();
-		die($value."<script>window.location.assign(`".(isValid($url)?"`".\MiMFa\Library\Local::GetUrl($url)."`":"location.href")."`);</script>");
+		die($value."<script>window.location.assign(".(isValid($url)?"`".\MiMFa\Library\Local::GetUrl($url)."`":"location.href").");</script>");
 	}
 	/**
      * Print only this output on the client side
@@ -755,16 +755,30 @@
 	 * @param array|object|iterable|Generator|null $array
 	 * @return mixed
 	 */
-	function first($array){
-		return reset($array);
+	function first($array, $default = null){
+		if(is_array($array)) return count($array)>0?$array[array_key_first($array)]:$default;
+		if(is_iterable($array)) {
+			foreach ($array as $value) return $value;
+            return $default;
+        }
+		$res = reset($array);
+		if($res === false) return $default;
+        return $res;
     }
 	/**
      * Returns the value of the last array element.
      * @param array|object|iterable|Generator|null $array
      * @return mixed
      */
-	function last($array){
-		return end($array);
+	function last($array, $default = null){
+		if(is_array($array)) return count($array)>0?$array[array_key_last($array)]:$default;
+		if(is_iterable($array)) {
+			foreach ($array as $value) $default = $value;
+            return $default;
+        }
+		$res = end($array);
+		if($res === false) return $default;
+        return $res;
     }
 
 	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/(\<\S+[\w\W]*\>)|(([\"'])\S+[\w\W]*\\3)|(\d*\.?\d+)/iU")
@@ -797,7 +811,8 @@
 
 	function startsWith(string|null $haystack, string|null ...$needles):bool {
 		foreach ($needles as $needle)
-            if(!is_null($needle) && substr_compare($haystack, $needle, 0, strlen($needle)) === 0) return $needle||true;
+            if(!is_null($needle) && substr_compare($haystack, $needle, 0, strlen($needle)) === 0)
+				return $needle||true;
 		return false;
 	}
 	function endsWith(string|null $haystack, string|null ...$needles):bool {
