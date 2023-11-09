@@ -140,7 +140,7 @@ class MainMenu extends Module{
 				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 				overflow-x: hidden;
 				overflow-y: auto;
-				z-index: 1;
+				z-index: 99;
 				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
 			}
 			.<?php echo $this->Name; ?> ul.Sub-Items>li {

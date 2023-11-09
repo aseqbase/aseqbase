@@ -149,6 +149,7 @@ class Table extends Module{
 	public $AllowFixedColumns= false;
 	public $AllowFixedRows= true;
 	public $AllowResponsive= true;
+	public $AllowEntriesInfo= true;
 
 	/**
      * Create the module
@@ -357,6 +358,12 @@ class Table extends Module{
 						...(is_null($this->AllowFixedColumns)?[]:["fixedColumns: ".($this->AllowFixedColumns?"true":"false")]),
 						...(is_null($this->AllowFixedRows)?[]:["fixedRows: ".($this->AllowFixedRows?"true":"false")]),
 						...(is_null($this->AllowResponsive)?[]:["responsive: ".($this->AllowResponsive?"true":"false")]),
+						...(is_null($this->AllowEntriesInfo)?[]:["info: ".($this->AllowEntriesInfo?"true":"false")]),
+                        //...[
+                        //    "sInfo: \"".__("Showing _FROM_ to _TO_ of _TOTAL_ entries", styling:false)."\"",
+                        //    "sSearch: \"".__("Search", styling:false)."\"",
+                        //    "sLengthMenu: \"".__("Display _MENU_ items per page", styling:false)."\""
+                        //],
 						...(isEmpty($this->Options)?[]:[Convert::ToString($this->Options)]),
 						...($this->Controlable?["'columnDefs': [{ 'targets': 0, 'orderable': false }]"]:[])
 					]).
