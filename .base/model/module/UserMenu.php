@@ -63,7 +63,7 @@ class UserMenu extends Module{
 				overflow-x: hidden;
 				overflow-y: auto;
 				text-align: initial;
-				z-index: 1;
+				z-index: 9;
             	".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} .submenu .bio>:not(html,head,body,style,script,link,meta,title){

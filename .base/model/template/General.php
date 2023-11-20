@@ -85,9 +85,6 @@ class General extends Template{
 				p{
 					text-align: justify;
 				}
-				i.icon{
-					aspect-ratio: 1;
-				}
 				:is(.button, .icon, .btn), :is(.button, .icon, .btn):is(:visited, :active){
 					border: var(--Border-1) transparent;
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
