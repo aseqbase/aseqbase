@@ -372,7 +372,7 @@ abstract class ConfigurationBase extends Base {
      * @var string
      * @category DataBase
      */
-	public $DataBaseUser = null;
+	public $DataBaseUser = 'root';
     /**
      * The database Password
      * @field password
@@ -400,13 +400,7 @@ abstract class ConfigurationBase extends Base {
 	public $DataBaseAddNameToPrefix = true;
 
 	public function __construct(){
-        if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"])."_";
-        if($this->AllowTranslate){
-            \MIMFa\Library\Translate::$Language = $this->DefaultLanguage;
-            \MIMFa\Library\Translate::$Direction = $this->DefaultDirection;
-            \MIMFa\Library\Translate::$Encoding = $this->Encoding;
-            \MIMFa\Library\Translate::Initialize();
-        }
+        if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"]??"qb")."_";
     }
 
 

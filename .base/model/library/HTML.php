@@ -114,6 +114,7 @@ class HTML
                         case "alt":
                         case "content":
                         case "text":
+                        case "placeholder":
                             $attrs .= " ".self::Attribute($key, __($value, styling:false));
                             break;
                         case "href":

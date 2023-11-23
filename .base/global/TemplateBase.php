@@ -325,10 +325,11 @@
 
 		public function IsDark($color = null):bool|null{
 			if(!isValid($color)) return $this->IsDark($this->BackColor(0)) === false;
-			list($r, $g, $b) = sscanf($color, "#%02x%02x%02x");
-			$sc = $r+$g+$b;
-			if($sc<127) return true;
-			elseif($sc>382) return false;
+			$l = strlen($color);
+			$rgba = preg_find_all($l>6?'/\w\w/':'/\w/', $color);
+            $sc = hexdec(getValid($rgba, 0, 0))+hexdec(getValid($rgba, 1, 0))+hexdec(getValid($rgba, 2, 0));
+            if($sc<127) return true;
+            elseif($sc>382) return false;
 			return null;
 		}
 	}

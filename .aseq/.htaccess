@@ -1,7 +1,7 @@
 ##
-# @package    MiMFa aseqbase
+# @package    MiMFa
 # @copyright  Copyright (C) 2005 - 2023 Open Source Matters. All rights reserved.
-# @license    GNU General Public License version 3 or later; see LICENSE.txt
+# @license    GNU General Public License version 2 or later; see LICENSE.txt
 ##
 #
 #Alternate default index pages
@@ -44,3 +44,10 @@ RewriteCond %{REQUEST_FILENAME} !-d
 # Redirect all virtual paths to the main index.php
 RewriteRule ^ /index.php [L]
 ## End - MiMFa! core SEF Section.
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php81” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php81 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit

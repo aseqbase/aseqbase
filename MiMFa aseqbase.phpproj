@@ -6,23 +6,35 @@
     <Content Remove="*.tmp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="ums\LICENSE">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Update="ums\private.php">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Update="ums\public.php">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Update="ums\static.php">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Update="ums\view\part\table\index.html">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Update="ums\Web.config">
-      <SubType>Code</SubType>
-    </Content>
+    <None Include="gms\.git\COMMIT_EDITMSG" />
+    <None Include="gms\.git\config" />
+    <None Include="gms\.git\description" />
+    <None Include="gms\.git\FETCH_HEAD" />
+    <None Include="gms\.git\HEAD" />
+    <None Include="gms\.git\index" />
+    <None Include="gms\.git\info\exclude" />
+    <None Include="gms\.git\logs\HEAD" />
+    <None Include="gms\.git\logs\refs\heads\main" />
+    <None Include="gms\.git\logs\refs\remotes\origin\HEAD" />
+    <None Include="gms\.git\logs\refs\remotes\origin\main" />
+    <None Include="gms\.git\objects\2c\b0864e05e8d24cf130ad3f64538ed4ea9402bf" />
+    <None Include="gms\.git\objects\44\c698062dbf9f8b1091a0918d6f6e7ac7e4bc63" />
+    <None Include="gms\.git\objects\57\28c1b0c80f2cf4a43d6f1ce5bea003c0a254dc" />
+    <None Include="gms\.git\objects\65\522c8de9c54ac1da2df310d3cc3979c398f9b7" />
+    <None Include="gms\.git\objects\6f\28990442e96c2b8036c3b0e5f105af121cde2e" />
+    <None Include="gms\.git\objects\7f\fc4f1cdf326a325ad9d96a2e0ff24bb5eb9f97" />
+    <None Include="gms\.git\objects\95\5a5bb8f92a18dadf328a0e07ed80d13dd3bd96" />
+    <None Include="gms\.git\objects\a2\c1d78d8f0526bde13a294b8f19b45a085cdfdf" />
+    <None Include="gms\.git\objects\a3\f7b691740dea01ecf6afb6f1454e9c2124327c" />
+    <None Include="gms\.git\objects\ab\0121531bb15c382ab62051bb993f5fc37adf3c" />
+    <None Include="gms\.git\objects\b5\5fa97908c809f7281c9b4c988cda5887e360d2" />
+    <None Include="gms\.git\objects\b6\7d639762857351b48334b2fa18d600478b1d5b" />
+    <None Include="gms\.git\objects\bd\bdbd978ab6028ef13029165adb0b2f9f29bca6" />
+    <None Include="gms\.git\objects\d8\e0fd40af4f054120cd1a6d8b2a74dd15ad7546" />
+    <None Include="gms\.git\packed-refs" />
+    <None Include="gms\.git\refs\heads\main" />
+    <None Include="gms\.git\refs\remotes\origin\HEAD" />
+    <None Include="gms\.git\refs\remotes\origin\main" />
+    <None Include="gms\LICENSE" />
   </ItemGroup>
 </Project>

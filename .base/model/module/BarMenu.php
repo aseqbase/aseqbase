@@ -67,7 +67,7 @@ class BarMenu extends Module{
 				background-repeat: no-repeat;
 				background-size: auto 60%;
 				color: var(--ForeColor-2);".
-				(($this->AllowChangeColor)? \MiMFa\Library\Style::DropColor(\_::$TEMPLATE->ForeColor(2)):"").
+				(($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter():"").
 				\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name}>a>.button:hover>div{

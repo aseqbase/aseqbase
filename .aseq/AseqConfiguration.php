@@ -28,7 +28,7 @@ class AseqConfiguration extends ConfigurationBase {
 	public $DataBaseEncoding = "utf8";
 	public $DataBaseType = 'mysql';
 	public $DataBaseHost = 'localhost';
-	public $DataBaseUser = null;
+	public $DataBaseUser = 'root';
 	public $DataBasePassword = null;
 	public $DataBaseName = 'localhost';
 	public $DataBasePrefix = 'aseq_';

@@ -290,6 +290,12 @@
 	ini_set('display_errors', \_::$CONFIG->DisplayError);
 	ini_set('display_startup_errors', \_::$CONFIG->DisplayStartupError);
 	error_reporting(\_::$CONFIG->ReportError);
+    if(\_::$CONFIG->AllowTranslate){
+        \MIMFa\Library\Translate::$Language = \_::$CONFIG->DefaultLanguage;
+        \MIMFa\Library\Translate::$Direction = \_::$CONFIG->DefaultDirection;
+        \MIMFa\Library\Translate::$Encoding = \_::$CONFIG->Encoding;
+        \MIMFa\Library\Translate::Initialize();
+    }
 
 	RUN("global/InformationBase");
 	RUN("Information");
@@ -510,7 +516,8 @@
 		if(count(\_::$SEQUENCES) > 0){
 			$dir = substr($nodeDir, strlen(\_::$DIR));
 			foreach(\_::$SEQUENCES as $aseq=>$root){
-				if($seqInd >= $fromSeq && $seqInd <= $toSeq && ($seq = USING($aseq.$dir, $name, $print, $variables)) !== null)
+				if($seqInd > $toSeq) return null;
+				if($seqInd >= $fromSeq && ($seq = USING($aseq.$dir, $name, $print, $variables)) !== null)
 					return $seq;
                 $seqInd++;
             }

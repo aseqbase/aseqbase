@@ -34,7 +34,7 @@ class Session
 		self::FlushID();
 	}
 
-	public static function GetDataBaseName(){ 
+	public static function GetDataBaseName(){
 		return \_::$CONFIG->DataBasePrefix."Session";
     }
 
@@ -172,7 +172,7 @@ class Session
 				unset($_SESSION[$key]);
 	}
 
-	
+
 	protected static function ToKey($key){
 		return substr(self::GetID().self::$Separator.$key,0,65);
     }
@@ -202,7 +202,13 @@ class Session
 	public static function Decrypt($cipher){
 		if(is_null($cipher)) return null;
 		if(empty($cipher)) return $cipher;
-		return HashCrypt::Decrypt($cipher,\_::$CONFIG->SecretKey, true);
+		try{
+            return HashCrypt::Decrypt($cipher,\_::$CONFIG->SecretKey, true);
+        }
+        catch (Exception $exception)
+        {
+			return null;
+        }
     }
 
 	public function __construct() {
@@ -214,7 +220,7 @@ class Session
     /**
     *    Stores datas in the session.
     *    Example: $instance->foo = 'bar';
-    *    
+    *
     *    @param    $name    Name of the datas.
     *    @param    $value    Your datas.
     *    @return    void
@@ -226,7 +232,7 @@ class Session
     /**
     * Gets datas from the session.
     * Example: echo $instance->foo;
-    *    
+    *
     * @param    $name    Name of the datas to get.
     * @return    mixed    Datas stored in session.
     **/
@@ -247,7 +253,7 @@ class Session
     }
     /**
     *    Destroys the current session.
-    *    
+    *
     *    @return    bool    TRUE is session has been deleted, else FALSE.
     **/
     public function destroy()

@@ -15,7 +15,7 @@ class SignUpForm extends Form{
 	public $LastNameLabel = "<i class='fa fa-user'></i>";
 	public $EmailLabel = "<i class='fa fa-envelope'></i>";
 	public $ContactLabel = "<i class='fa fa-phone-square'></i>";
-	public $RouteLabel = "<i class='fa fa-route'></i>";
+	public $RouteLabel = null;//"<i class='fa fa-route'></i>";
 	public $PasswordLabel = "<i class='fa fa-lock'></i>";
 	public $PasswordConfirmationLabel = "<i class='fa fa-lock'></i>";
 	public $SignaturePlaceHolder = "UserName";
@@ -28,6 +28,7 @@ class SignUpForm extends Form{
 	public $RoutePlaceHolder = "Introduction Method";
 	public $SignInLabel = "Do you have an account?";
 	public $WelcomeFormat = '<div class="welcome result success"><img class="welcome" src="$IMAGE"><p class="welcome">Hello $NAME,<br>You are signed in now, also there you can sign with another account!</p></div>';
+	public $ContactCountryCode = null;
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
@@ -109,30 +110,31 @@ class SignUpForm extends Form{
 		yield parent::GetFields();
         if($this->HasInternalMethod){
 			yield HTML::Rack(
-				HTML::LargeSlot(
+				(isValid($this->FirstNameLabel)?HTML::LargeSlot(
 					HTML::Label($this->FirstNameLabel, "FirstName", ["class"=>"prepend"]).
 					HTML::ValueInput("FirstName", ["placeholder"=> $this->FirstNamePlaceHolder])
-				, ["class"=>"field"]).
-				HTML::LargeSlot(
+				, ["class"=>"field"]):"").
+				(isValid($this->LastNameLabel)?HTML::LargeSlot(
 					HTML::Label($this->LastNameLabel, "LastName", ["class"=>"prepend"]).
 					HTML::ValueInput("LastName", ["placeholder"=> $this->LastNamePlaceHolder])
-				, ["class"=>"field"])
+				, ["class"=>"field"]):"")
 			);
-			yield HTML::Rack(
+			if(isValid($this->EmailLabel)) yield HTML::Rack(
 				HTML::LargeSlot(
 					HTML::Label($this->EmailLabel, "Email", ["class"=>"prepend"]).
 					HTML::EmailInput("Email", ["placeholder"=> $this->EmailPlaceHolder])
 				, ["class"=>"field"])
 			);
-			yield HTML::Rack(
+			if(isValid($this->ContactLabel)) yield HTML::Rack(
 				HTML::LargeSlot(
 					HTML::Label($this->ContactLabel, "Phone", ["class"=>"prepend"]).
-					HTML::SelectInput("CountryCode", "+1",
-						function(){for ($i = 0; $i < 100; $i++) yield "<option value='+$i'>+$i</option>";}).
+					(isValid($this->ContactCountryCode)?HTML::SelectInput("CountryCode", "+1",
+						function(){for ($i = 0; $i < 100; $i++) yield "<option value='+$i'".($this->ContactCountryCode==$i?" selected":"").">+$i</option>";})
+					:"").
 					HTML::TelInput("Phone", ["placeholder"=> $this->ContactPlaceHolder])
 				, ["class"=>"field"])
 			);
-			yield HTML::Rack(
+			if(isValid($this->RouteLabel)) yield HTML::Rack(
 				HTML::LargeSlot(
 					HTML::Label($this->RouteLabel, "Route", ["class"=>"prepend"]).
 					HTML::SelectInput("Route", "None",[
@@ -146,13 +148,13 @@ class SignUpForm extends Form{
 					])
 				, ["class"=>"field"])
 			);
-			yield HTML::Rack(
+			if(isValid($this->SignatureLabel)) yield HTML::Rack(
 				HTML::LargeSlot(
 					HTML::Label($this->SignatureLabel, "UserName", ["class"=>"prepend"]).
 					HTML::ValueInput("UserName", ["placeholder"=> $this->SignaturePlaceHolder])
 				, ["class"=>"field", "autocomplete"=>"username"])
 			);
-			yield HTML::Rack(
+			if(isValid($this->PasswordLabel)) yield HTML::Rack(
 				HTML::LargeSlot(
 					HTML::Label($this->PasswordLabel, "Password", ["class"=>"prepend"]).
 					HTML::SecretInput("Password", ["placeholder"=> $this->PasswordPlaceHolder])
@@ -206,7 +208,7 @@ class SignUpForm extends Form{
 					null,
 					getValid($_req,"FirstName"),
 					getValid($_req,"LastName"),
-					getValid($_req,"CountryCode").getValid($_req,"Phone"),
+					getValid($_req,"CountryCode", "0").getValid($_req,"Phone"),
 					$this->GroupID,
 					$this->InitialStatus
 				))
@@ -219,7 +221,6 @@ class SignUpForm extends Form{
 			else return HTML::Warning("Please fill all required fields correctly!");
 		} catch(\Exception $ex) { return HTML::Error($ex); }
 		else return HTML::Warning("You are logged in!");
-		return null;
     }
 }
 ?>

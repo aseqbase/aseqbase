@@ -183,5 +183,15 @@ class Style extends \ArrayObject{
 													drop-shadow(0 0 0 $color)
 		");
 	}
+
+	public static function ToggleFilter(){
+		return \_::$TEMPLATE->DarkMode? self::LightFilter():self::DarkFilter();
+	}
+	public static function DarkFilter(){
+		return self::UniversalProperty("filter","brightness(-1000%) opacity(1) grayscale(100%)");
+	}
+	public static function LightFilter(){
+		return self::UniversalProperty("filter","brightness(1000%) opacity(1) grayscale(100%)");
+	}
 }
 ?>
