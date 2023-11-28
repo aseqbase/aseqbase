@@ -1,5 +1,6 @@
 <?php
 namespace MiMFa\Module;
+use MiMFa\Library\Convert;
 use MiMFa\Library\HTML;
 MODULE("Collection");
 /**
@@ -155,7 +156,7 @@ class Gallery extends Collection{
             $viewer->Name = $this->Name."_".$viewer->Name;
 
             $i = 0;
-            foreach($this->Items??[] as $item) {
+            foreach(Convert::ToItems($this->Items) as $item) {
                 if($i % $this->MaximumColumns === 0)  yield "<div class='row'>";
                 $p_image = getValid($item,'Image', $this->DefaultImage);
                 $p_name = getValid($item,'Name')??getValid($item,'Title', $this->DefaultTitle);
