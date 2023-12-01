@@ -847,6 +847,60 @@ $attachments"]);
                 , $reference);
         return self::Element(__($content, styling:false),"span",["class"=> "span" ], $attributes);
     }
+    /**
+     * The <STRONG> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Strong($content, $reference = null, ...$attributes){
+        if(!is_null($reference))
+            if(is_array($reference) && count($attributes) === 0){
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            }
+            else return self::Link(
+                self::Element(__($content, styling:false),"strong",["class"=> "strong" ], $attributes)
+                , $reference);
+        return self::Element(__($content, styling:false),"strong",["class"=> "strong" ], $attributes);
+    }
+    /**
+     * The <BIG> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Big($content, $reference = null, ...$attributes){
+        if(!is_null($reference))
+            if(is_array($reference) && count($attributes) === 0){
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            }
+            else return self::Link(
+                self::Element(__($content, styling:false),"big",["class"=> "big" ], $attributes)
+                , $reference);
+        return self::Element(__($content, styling:false),"big",["class"=> "big" ], $attributes);
+    }
+    /**
+     * The <SMALL> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Small($content, $reference = null, ...$attributes){
+        if(!is_null($reference))
+            if(is_array($reference) && count($attributes) === 0){
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            }
+            else return self::Link(
+                self::Element(__($content, styling:false),"small",["class"=> "small" ], $attributes)
+                , $reference);
+        return self::Element(__($content, styling:false),"small",["class"=> "small" ], $attributes);
+    }
 
     /**
      * The <LABEL> HTML Tag

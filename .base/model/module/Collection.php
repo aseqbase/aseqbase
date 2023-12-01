@@ -60,12 +60,15 @@ class Collection extends Module{
 
 	public function GetStyle(){
 		return parent::GetStyle().HTML::Style("
+			.{$this->Name} .items{
+				gap: 3vmax;
+				margin-bottom: 3vmax;
+			}
 			.{$this->Name} .items .item{
 				background-color: var(--BackColor-0);
 				color: var(--ForeColor-0);
 				font-size: var(--Size-1);
 				text-align: center;
-				margin: 3vh;
     			padding: 0px;
 				border: var(--Border-1) var(--ForeColor-4);
 				border-radius: var(--Radius-1);
@@ -110,6 +113,7 @@ class Collection extends Module{
 			}
 		");
 	}
+
 	public function Get(){
 		return parent::Get().join(PHP_EOL, iterator_to_array((function(){
             MODULE("Image");

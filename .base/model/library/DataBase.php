@@ -72,7 +72,7 @@ class DataBase {
 	}
 	public static function ParameterNormalization($key, $value)
 	{
-		if(is_null($value)) return "NULL";
+		if(is_null($value)) return null;
 		elseif(is_array($value) || is_iterable($value) || is_object($value))
 			return json_encode($value);
 		elseif(!is_string($value) && (is_callable($value) || $value instanceof \Closure))

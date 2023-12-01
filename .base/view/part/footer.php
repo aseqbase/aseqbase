@@ -1,4 +1,4 @@
-﻿<footer>
+<footer>
     <?php
     use MiMFa\Library\Style;
     use MiMFa\Library\HTML;

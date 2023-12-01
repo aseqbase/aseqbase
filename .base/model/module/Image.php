@@ -73,14 +73,17 @@ class Image extends Module{
 	}
 
 	public function Get(){
-		$src = \MiMFa\Library\Local::GetUrl($this->Source??$this->Image);
+		$src = $this->Source??$this->Image??$this->Content;
 		return parent::Get().
 			(
 				isValid($src)? (
-					$this->AllowOriginal? (
-							isFormat($src,".svg")? "<embed ".$this->GetDefaultAttributes()." src=\"".$src."\"></embed>"
-								:"<img ".$this->GetDefaultAttributes()." src=\"$src\"/>"
-					) :"<div ".$this->GetDefaultAttributes()." style=\"background-image: url('$src');\"></div>"
+					preg_match('/^\s*<\w+/', $src)? preg_replace("/(^\s*<\w+)/", "$1 ".$this->GetDefaultAttributes(), $src):
+					(
+						$this->AllowOriginal? (
+								isFormat($src,".svg")? "<embed ".$this->GetDefaultAttributes()." src=\"".\MiMFa\Library\Local::GetUrl($src)."\"></embed>"
+									:"<img ".$this->GetDefaultAttributes()." src=\"".\MiMFa\Library\Local::GetUrl($src)."\"/>"
+						) :"<div ".$this->GetDefaultAttributes()." style=\"background-image: url('".\MiMFa\Library\Local::GetUrl($src)."');\"></div>"
+					)
 				) :null
 			);
 	}

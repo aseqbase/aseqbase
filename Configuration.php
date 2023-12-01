@@ -7,13 +7,14 @@ class Configuration extends ConfigurationBase {
 	public $ReportError = E_ALL;
 
 	public $AllowCache = false;
+	//public $AllowTranslate = false;
 
-	public $DataBaseEncoding = "utf8";
-	public $DataBaseType = 'mysql';
-	public $DataBaseHost = 'localhost';
-	public $DataBaseUser = null;
-	public $DataBasePassword = null;
-	public $DataBaseName = 'localhost';
-	public $DataBasePrefix = 'qb_';
+    //public $DataBaseEncoding = "utf8";
+    //public $DataBaseType = 'mysql';
+    //public $DataBaseHost = 'localhost';
+    //public $DataBaseUser = 'root';
+    //public $DataBasePassword = null;
+    //public $DataBaseName = 'localhost';
+    //public $DataBasePrefix = 'qb_';
 }
 ?>

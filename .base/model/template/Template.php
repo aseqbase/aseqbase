@@ -106,21 +106,6 @@ class Template extends \Base{
         * {
             direction: ".(\MIMFa\Library\Translate::$Direction??\_::$CONFIG->DefaultDirection).";
         }
-        table.dataTable tbody :is(td, tr) {
-            text-align: -webkit-auto;
-        }
-        table.dataTable thead :is(th, tr) {
-            text-align: center;
-        }
-        table.dataTable tbody tr.odd {
-            background-color: #8881 !important;
-        }
-        table.dataTable tbody tr:not(.odd, .even):hover {
-            background-color: #8883;
-        }
-        table.dataTable tbody tr:is(.odd, .even):hover {
-            background-color: #8882 !important;
-        }
         .tooltip {
             font-family: inherit;
             font-size: var(--Size-0);

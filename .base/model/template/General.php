@@ -65,6 +65,7 @@ class General extends Template{
 				}
 				h1{
 					font-size: var(--Size-5);
+					margin-bottom: var(--Size-4);
 				}
 				h2{
 					font-size: var(--Size-4);

@@ -171,20 +171,15 @@ class Convert{
 	}
 
 	/**
-     * Get items of all input arrays into the items array
-     * @param mixed $arguments
+     * Get items from an input value
+     * @param mixed $values
      */
-	public static function ToItems(...$arguments){
-        foreach (self::ToIteration($arguments) as $value)
-		    if(!is_null($value)){
-			    if(is_string($value)) yield $value;
-			    if(is_subclass_of($value,"\Base")) yield $value->ToString();
-			    if(is_countable($value) || is_iterable($value))
-				    foreach ($value as $val) yield $val;
-			    if(is_callable($value) || $value instanceof \Closure)
-                    yield from self::ToItems($value());
-                yield $value;
-            }
+	public static function ToItems($values, $splitPattern = "/\r?\n\r?/"){
+		if(is_null($values)) return [];
+		elseif(is_string($values)) return preg_split($splitPattern, $values);
+		elseif(is_subclass_of($values,"\Base")) return $values->Children;
+		elseif(is_callable($values) || $values instanceof \Closure) return $values();
+        else return $values;
     }
 	/**
      * Get items of all input arrays into a generator array

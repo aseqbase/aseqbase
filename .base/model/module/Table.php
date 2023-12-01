@@ -126,8 +126,8 @@ class Table extends Module{
 	public $AllowLabelTranslation = true;
 	public $AllowDataTranslation = false;
 	public $TextWrap = false;
-	public $MediaWidth = "50px";
-	public $MediaHeight = "50px";
+	public $MediaWidth = "var(--Size-5)";
+	public $MediaHeight = "var(--Size-5)";
 	public $Modal = null;
 	public $HasDecoration = true;
 	public $Options = "
@@ -269,6 +269,7 @@ class Table extends Module{
 		$rlks = $this->RowLabelsKeys;
 		$rkls = $this->RowKeysAsLabels;
 		$ckls = $this->ColumnKeysAsLabels;
+        $ckl = $this->RowKey < 0;
 		$icks = $this->IncludeColumnKeys;
 		$ecks = $this->ExcludeColumnKeys;
 		$ick = !isEmpty($icks);
@@ -312,21 +313,40 @@ class Table extends Module{
 							...$row
 							];
                     }
-					if($ckls && $isrk){
+					if($ckls && ($isrk || $ckl)){
+                        $ckl  = false;
                         $cells[] = "<thead><tr>";
-                        foreach($row as $ckey=>$cel)
-                            if((!$ick || in_array($ckey, $icks)) && (!$eck || !in_array($ckey, $ecks)))
-								$cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                        if($ick){
+                            foreach($icks as $ckey)
+                                if(!$eck || !in_array($ckey, $ecks))
+								    $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                        }
+                        else{
+                            foreach($row as $ckey=>$cel)
+                                if(!$eck || !in_array($ckey, $ecks))
+								    $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                        }
                         $cells[] = "</tr></thead>";
 						$isrk = false;
                     }
                     $cells[] = $strow;
-                    foreach($row as $ckey=>$cel)
-                        if((!$ick || in_array($ckey, $icks)) && (!$eck || !in_array($ckey, $ecks))){
-                            if($isrk) $cells[] = $this->GetCell(is_integer($rkey)?($hrn?$rkey+$srn:""):$cel, $ckey, true, $row);
-							elseif(in_array($ckey, $rlks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true, $row);
-                            else $cells[] = $this->GetCell($cel, $ckey, false, $row);
-                        }
+                    if($ick){
+                        foreach($icks as $ckey)
+                            if(!$eck || !in_array($ckey, $ecks)){
+                                $cel = isset($row[$ckey])? $row[$ckey]:null;
+                                if($isrk) $cells[] = $this->GetCell(is_integer($rkey)?($hrn?$rkey+$srn:""):$cel, $ckey, true, $row);
+							    elseif(in_array($ckey, $rlks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true, $row);
+                                else $cells[] = $this->GetCell($cel, $ckey, false, $row);
+                            }
+                    }
+                    else{
+                        foreach($row as $ckey=>$cel)
+                            if(!$eck || !in_array($ckey, $ecks)){
+                                if($isrk) $cells[] = $this->GetCell(is_integer($rkey)?($hrn?$rkey+$srn:""):$cel, $ckey, true, $row);
+                                elseif(in_array($ckey, $rlks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true, $row);
+                                else $cells[] = $this->GetCell($cel, $ckey, false, $row);
+                            }
+                    }
                     $cells[] = $etrow;
                 }
             }
