@@ -190,7 +190,7 @@ abstract class InformationBase extends Base{
 	public $Services = null;
 
 	/**
-     * The main members and personals of the website
+     * The main members and personnel of the website
      * @field array
      * @var array
 	 */

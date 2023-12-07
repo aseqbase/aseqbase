@@ -450,207 +450,238 @@ class Table extends Module{
         else return null;
     }
 	public function DoAction($value, $action = "view"){
-        if(!is_null($value)) {
-            switch ($action) {
-                case "view":
-                    if(!getAccess($this->ViewAccess)) return HTML::Error("You have not access to see datails!");
-                    MODULE("Form");
-                    $row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ViewCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]);
-                    if(count($row) > 0) $row = $row[0];
-                    else return HTML::Error("You can not see this item!");
-                    $form = new Form(
-                        title:getValid($row,"Title",null)??getValid($row,"Name",null),
-                        description:getValid($row,"Description",null),
-                        action:'#',
-                        method:"",
-                        children:(function() use($row){
-                            yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
-                            foreach ($row as $k=>$cell){
-                                if($k != $this->ColumnKey) {
-                                    $type = getValid($this->CellTypes, $k, "");
-                                    if(is_string($type)){
-                                        $type = strtolower($type);
-                                        switch($type){
-                                            case "pass":
-                                            case "password":
-                                                $type = false;
-                                                break;
-                                            case "file":
-                                            case "files":
-                                            case "doc":
-                                            case "docs":
-                                            case "document":
-                                            case "documents":
-                                            case "image":
-                                            case "images":
-                                            case "video":
-                                            case "videos":
-                                            case "audio":
-                                            case "audios":
-                                                $type = false;
-                                                break;
-                                        }
-                                    }
-                                    if($type !== false && !isEmpty($cell)) yield HTML::Field(
-                                        type:(isEmpty($type)?null:$type),
-                                        key:$k,
-                                        value:$cell,
-                                        description:false,
-                                        attributes:["disabled"]
-                                    );
-                                }
-                            }
-                        })());
-                    $form->Image = getValid($row,"Image","eye");
-                    $form->Template = "b";
-                    $form->SubmitLabel = null;
-                    $form->ResetLabel = null;
-                    if($this->Modal) {
-                        $form->CancelLabel = "Cancel";
-                        $form->CancelPath = $this->Modal->HideScript();
-                    } else $form->CancelLabel = null;
-                    $form->SuccessPath = \_::$PATH;
-                    $form->BackLabel = null;
-                    //$form->AllowHeader = false;
-                    return $form->Capture();
-                case "modify":
-                    if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
-                    MODULE("Form");
-                    $row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]);
-                    if(count($row) > 0) $row = $row[0];
-                    else return HTML::Error("You can not modify this item!");
-                    $form = new Form(
-                        title:getValid($row,"Title",null)??getValid($row,"Name",null),
-                        description:getValid($row,"Description",null),
-                        action:$this->UpdateAction,
-                        method:$this->UpdateMethod,
-                        children:(function() use($row){
-                            yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
-                            foreach ($row as $k=>$cell){
-                                if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $cell);
-                                else {
-                                    $type = getValid($this->CellTypes, $k, "");
-                                    if(is_string($type)){
-                                        $type = strtolower($type);
-                                        switch($type){
-                                            case "pass":
-                                            case "password":
-                                                if($this->CryptPassword) $cell = \_::$INFO->User->DecryptPassword($cell);
-                                                break;
-                                            case "file":
-                                            case "files":
-                                            case "doc":
-                                            case "docs":
-                                            case "document":
-                                            case "documents":
-                                            case "image":
-                                            case "images":
-                                            case "video":
-                                            case "videos":
-                                            case "audio":
-                                            case "audios":
-                                                $cell = null;
-                                                break;
-                                        }
-                                    }
-                                    if($type !== false) yield HTML::Field(
-                                        type:(isEmpty($type)?null:$type),
-                                        key:$k,
-                                        value:$cell
-                                    );
-                                }
-                            }
-                        })());
-                    $form->Image = getValid($row,"Image","edit");
-                    $form->Template = "b";
-                    $form->CancelLabel = "Cancel";
-                    if($this->Modal){
-                        $form->CancelPath = $this->Modal->HideScript();
-                        $form->CancelLabel = "Cancel";
-                    } else $form->CancelLabel = null;
-                    $form->SuccessPath = \_::$PATH;
-                    $form->BackLabel = null;
-                    //$form->AllowHeader = false;
-                    return $form->Capture();
-                case "create":
-                    if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to add!");
-                    MODULE("Form");
-                    $row = \MiMFa\Library\DataBase::TrySelect("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$this->Table}'");
-                    $form = new Form(
-                        title:"Add {$this->Title}",
-                        description:getValid($row,"Description",null),
-                        action:$this->UpdateAction,
-                        method:$this->UpdateMethod,
-                        children:(function() use($row, $value){
-                            yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
-                            foreach ($row as $val){
-                                $k = $val["COLUMN_NAME"];
-                                if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $value);
-                                else {
-                                    $type = getValid($this->CellTypes, $k, $val["DATA_TYPE"]);
-                                    if($type !== false) yield HTML::Field(type:isEmpty($type)?null:$type, key:$k);
-                                }
-                            }
-                        })());
-                    $form->Image = getValid($row,"Image","plus");
-                    $form->Template = "b";
-                    $form->CancelLabel = "Cancel";
-                    if($this->Modal){
-                        $form->CancelPath = $this->Modal->HideScript();
-                        $form->CancelLabel = "Cancel";
-                    } else $form->CancelLabel = null;
-                    $form->SuccessPath = \_::$PATH;
-                    $form->BackLabel = null;
-                    //$form->AllowHeader = false;
-                    return $form->Capture();
-                case "delete":
-                    if(!getAccess($this->RemoveAccess)) return HTML::Error("You have not access to delete!");
-                    if(\MiMFa\Library\DataBase::DoDelete($this->Table, [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]))
-                        return HTML::Success("The items removed successfully!");
-                    return HTML::Error("You can not remove this item!");
-                default:
-                    $vals = RECEIVE(null, $this->UpdateMethod);
-                    try{
-                        foreach (RECEIVE(null, $_FILES)??[] as $k=>$v)
-                            if(Local::IsFileObject($_FILES[$k])){
-                                $type = getValid($this->CellTypes, $k, "");
-                                if(is_string($type)) $type = \_::$CONFIG->GetAcceptableFormats($type);
-                                else $type = \_::$CONFIG->GetAcceptableFormats();
-                                $vals[$k] = Local::UploadFile($_FILES[$k], extensions:$type);
-                            }
-                            else unset($vals[$k]);
-                    }catch(\Exception $ex){ return HTML::Error($ex); }
-                    foreach ($vals as $k=>$v){
+        switch ($action) {
+            case "view":
+                return $this->ShowViewForm($value);
+            case "modify":
+                return $this->ShowModifyForm($value);
+            case "create":
+                return $this->ShowAddForm($value);
+            case "delete":
+                return $this->DoRemoveAction($value);
+            default:
+                switch ($value) {
+                    case "_table_add":
+                        return $this->DoAddAction($value);
+                    default:
+                        return $this->DoModifyAction($value);
+                }
+        }
+    }
+
+	public function ShowViewForm($value){
+        if(is_null($value)) return null;
+        if(!getAccess($this->ViewAccess)) return HTML::Error("You have not access to see datails!");
+        MODULE("Form");
+        $row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ViewCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]);
+        if(count($row) > 0) $row = $row[0];
+        else return HTML::Error("You can not see this item!");
+        $form = new Form(
+            title:getValid($row,"Title",null)??getValid($row,"Name",null),
+            description:getValid($row,"Description",null),
+            action:'#',
+            method:"",
+            children:(function() use($row){
+                yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
+                foreach ($row as $k=>$cell){
+                    if($k != $this->ColumnKey) {
                         $type = getValid($this->CellTypes, $k, "");
                         if(is_string($type)){
-                            switch(strtolower($type)){
+                            $type = strtolower($type);
+                            switch($type){
                                 case "pass":
                                 case "password":
-                                    if(isEmpty($v)) unset($vals[$k]);
-                                    elseif($this->CryptPassword) $vals[$k] = \_::$INFO->User->EncryptPassword($v);
+                                    $type = false;
+                                    break;
+                                case "file":
+                                case "files":
+                                case "doc":
+                                case "docs":
+                                case "document":
+                                case "documents":
+                                case "image":
+                                case "images":
+                                case "video":
+                                case "videos":
+                                case "audio":
+                                case "audios":
+                                    $type = false;
                                     break;
                             }
                         }
-                        else if($type === false) unset($vals[$k]);
+                        if($type !== false && !isEmpty($cell)) yield HTML::Field(
+                            type:(isEmpty($type)?null:$type),
+                            key:$k,
+                            value:$cell,
+                            description:false,
+                            attributes:["disabled"]
+                        );
                     }
-                    switch ($value) {
-                        case "_table_add":
-                            if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to modify!");
-                            unset($vals[$this->ColumnKey]);
-                            foreach ($vals as $k=>$v)
-                                if(isEmpty($v)) unset($vals[$k]);
-                            if(\MiMFa\Library\DataBase::DoInsert($this->Table, $this->AddCondition, $vals))
-                                return HTML::Success("The information added successfully!");
-                            return HTML::Error("You can not add this item!");
-                        default:
-                            if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
-                            if(\MiMFa\Library\DataBase::DoUpdate($this->Table, [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], $vals))
-                                return HTML::Success("The information updated successfully!");
-                            return HTML::Error("You can not update this item!");
+                }
+            })());
+        $form->Image = getValid($row,"Image","eye");
+        $form->Template = "b";
+        $form->SubmitLabel = null;
+        $form->ResetLabel = null;
+        if($this->Modal) {
+            $form->CancelLabel = "Cancel";
+            $form->CancelPath = $this->Modal->HideScript();
+        } else $form->CancelLabel = null;
+        $form->SuccessPath = \_::$PATH;
+        $form->BackLabel = null;
+        //$form->AllowHeader = false;
+        return $form->Capture();
+    }
+
+	public function ShowModifyForm($value){
+        if(is_null($value)) return null;
+        if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
+        MODULE("Form");
+        $row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]);
+        if(count($row) > 0) $row = $row[0];
+        else return HTML::Error("You can not modify this item!");
+        $form = new Form(
+            title:getValid($row,"Title",null)??getValid($row,"Name",null),
+            description:getValid($row,"Description",null),
+            action:$this->UpdateAction,
+            method:$this->UpdateMethod,
+            children:(function() use($row){
+                yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
+                foreach ($row as $k=>$cell){
+                    if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $cell);
+                    else {
+                        $type = getValid($this->CellTypes, $k, "");
+                        if(is_string($type)){
+                            $type = strtolower($type);
+                            switch($type){
+                                case "pass":
+                                case "password":
+                                    if($this->CryptPassword) $cell = \_::$INFO->User->DecryptPassword($cell);
+                                    break;
+                                case "file":
+                                case "files":
+                                case "doc":
+                                case "docs":
+                                case "document":
+                                case "documents":
+                                case "image":
+                                case "images":
+                                case "video":
+                                case "videos":
+                                case "audio":
+                                case "audios":
+                                    $cell = null;
+                                    break;
+                            }
+                        }
+                        if($type !== false) yield HTML::Field(
+                            type:(isEmpty($type)?null:$type),
+                            key:$k,
+                            value:$cell
+                        );
                     }
+                }
+            })());
+        $form->Image = getValid($row,"Image","edit");
+        $form->Template = "b";
+        $form->CancelLabel = "Cancel";
+        if($this->Modal){
+            $form->CancelPath = $this->Modal->HideScript();
+            $form->CancelLabel = "Cancel";
+        } else $form->CancelLabel = null;
+        $form->SuccessPath = \_::$PATH;
+        $form->BackLabel = null;
+        //$form->AllowHeader = false;
+        return $form->Capture();
+    }
+	public function DoModifyAction($value){
+        if(is_null($value)) return null;
+        $vals = $this->GetFormValues();
+        if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
+        if(\MiMFa\Library\DataBase::DoUpdate($this->Table, [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], $vals))
+            return HTML::Success("The information updated successfully!");
+        return HTML::Error("You can not update this item!");
+    }
+
+	public function ShowAddForm($value){
+        if(is_null($value)) return null;
+        if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to add!");
+        MODULE("Form");
+        $row = \MiMFa\Library\DataBase::TrySelect("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$this->Table}'");
+        $form = new Form(
+            title:"Add {$this->Title}",
+            description:getValid($row,"Description",null),
+            action:$this->UpdateAction,
+            method:$this->UpdateMethod,
+            children:(function() use($row, $value){
+                yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
+                foreach ($row as $val){
+                    $k = $val["COLUMN_NAME"];
+                    if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $value);
+                    else {
+                        $type = getValid($this->CellTypes, $k, $val["DATA_TYPE"]);
+                        if($type !== false) yield HTML::Field(type:isEmpty($type)?null:$type, key:$k);
+                    }
+                }
+            })());
+        $form->Image = getValid($row,"Image","plus");
+        $form->Template = "b";
+        $form->CancelLabel = "Cancel";
+        if($this->Modal){
+            $form->CancelPath = $this->Modal->HideScript();
+            $form->CancelLabel = "Cancel";
+        } else $form->CancelLabel = null;
+        $form->SuccessPath = \_::$PATH;
+        $form->BackLabel = null;
+        //$form->AllowHeader = false;
+        return $form->Capture();
+    }
+	public function DoAddAction($value){
+        if(is_null($value)) return null;
+        $vals = $this->GetFormValues();
+        if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to modify!");
+        unset($vals[$this->ColumnKey]);
+        foreach ($vals as $k=>$v)
+            if(isEmpty($v)) unset($vals[$k]);
+        if(\MiMFa\Library\DataBase::DoInsert($this->Table, $this->AddCondition, $vals))
+            return HTML::Success("The information added successfully!");
+        return HTML::Error("You can not add this item!");
+    }
+
+	public function DoRemoveAction($value){
+        if(is_null($value)) return null;
+        if(!getAccess($this->RemoveAccess)) return HTML::Error("You have not access to delete!");
+        if(\MiMFa\Library\DataBase::DoDelete($this->Table, [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]))
+            return HTML::Success("The items removed successfully!");
+        return HTML::Error("You can not remove this item!");
+    }
+
+	public function GetFormValues(){
+        $vals = RECEIVE(null, $this->UpdateMethod);
+        try{
+            foreach (RECEIVE(null, $_FILES)??[] as $k=>$v)
+                if(Local::IsFileObject($_FILES[$k])){
+                    $type = getValid($this->CellTypes, $k, "");
+                    if(is_string($type)) $type = \_::$CONFIG->GetAcceptableFormats($type);
+                    else $type = \_::$CONFIG->GetAcceptableFormats();
+                    $vals[$k] = Local::UploadFile($_FILES[$k], extensions:$type);
+                }
+                else unset($vals[$k]);
+        }catch(\Exception $ex){ return HTML::Error($ex); }
+        foreach ($vals as $k=>$v){
+            $type = getValid($this->CellTypes, $k, "");
+            if(is_string($type)){
+                switch(strtolower($type)){
+                    case "pass":
+                    case "password":
+                        if(isEmpty($v)) unset($vals[$k]);
+                        elseif($this->CryptPassword) $vals[$k] = \_::$INFO->User->EncryptPassword($v);
+                        break;
+                }
             }
+            else if($type === false) unset($vals[$k]);
         }
-		return null;
+        return $vals;
     }
 }
 ?>

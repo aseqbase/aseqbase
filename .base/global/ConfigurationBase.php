@@ -13,6 +13,24 @@ abstract class ConfigurationBase extends Base {
      * @category General
      */
     public $Encoding = "utf-8";
+    /**
+     * The Date Time Zone
+     * @var string
+     * @category General
+     */
+    public $DateTimeZone = "UTC";
+    /**
+     * The Date Time Format
+     * @var string
+     * @category General
+     */
+    public $DateTimeFormat = "Y-m-d H:i:s";
+    /**
+     * Current Date Time
+     * @var string
+     * @category General
+     */
+    public $CurrentDateTime = "now";
 	/**
      * A key to use for sending the requested virtual path of website
      * @var string
@@ -257,7 +275,7 @@ abstract class ConfigurationBase extends Base {
      * @var string
      * @category Security
      */
-	public $RestrictionContent = "Unfortunately you have no access to the site now!<br>Please try a few minute later...";
+	public $RestrictionContent = "Unfortunately, you have no access to the site now!<br>Please try a few minutes later...";
     /**
      * The default view name to show when restriction
      * @var string
@@ -436,6 +454,12 @@ abstract class ConfigurationBase extends Base {
         	default:
 		        return [...$this->AcceptableImageFormats, ...$this->AcceptableAudioFormats, ...$this->AcceptableVideoFormats, ...$this->AcceptableDocumentFormats, ...$this->AcceptableFileFormats];
         }
+    }
+    public function GetDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
+        return new DateTime($dateTime??$this->CurrentDateTime, $dateTimeZone??new DateTimeZone($this->DateTimeZone));
+    }
+    public function GetFormattedDateTime(string|null $dateTimeFormat = null, string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
+        return $this->GetDateTime($dateTime, $dateTimeZone)->format($dateTimeFormat??$this->DateTimeFormat);
     }
 }
 ?>

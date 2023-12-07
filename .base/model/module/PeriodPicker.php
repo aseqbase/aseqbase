@@ -15,14 +15,14 @@ class PeriodPicker extends Module{
 	public function __construct($setDefault = false, $fromTime = "yesterday", $toTime = "now"){
         parent::__construct();
         if($setDefault){
-            if(!isset($_GET[$this->FromTimeRequest]) && isValid($fromTime)) $_REQUEST[$this->FromTimeRequest] = $_GET[$this->FromTimeRequest] = (new \DateTime($fromTime))->format('Y-m-d H:i:s');
-            if(!isset($_GET[$this->ToTimeRequest]) && isValid($toTime)) $_REQUEST[$this->ToTimeRequest] = $_GET[$this->ToTimeRequest] = (new \DateTime($toTime))->format('Y-m-d H:i:s');
+            if(!isset($_GET[$this->FromTimeRequest]) && isValid($fromTime)) $_REQUEST[$this->FromTimeRequest] = $_GET[$this->FromTimeRequest] = (\_::$CONFIG->GetDateTime($fromTime))->format('Y-m-d H:i:s');
+            if(!isset($_GET[$this->ToTimeRequest]) && isValid($toTime)) $_REQUEST[$this->ToTimeRequest] = $_GET[$this->ToTimeRequest] = (\_::$CONFIG->GetDateTime($toTime))->format('Y-m-d H:i:s');
         }
         $fromID = $this->Name."_".$this->FromTimeRequest;
         $toID = $this->Name."_".$this->ToTimeRequest;
         $this->Children = [
-                HTML::Field(type:"DateTime", title: $this->FromTimeLable, value: RECEIVE($this->FromTimeRequest, "GET", (new \DateTime($fromTime))->format('Y-m-d 00:00:00')), key: $this->FromTimeRequest, attributes:["id"=>$fromID]).
-                HTML::Field(type:"DateTime", title: $this->ToTimeLable,  value: RECEIVE($this->ToTimeRequest, "GET", (new \DateTime($toTime))->format('Y-m-d 23:59:59')), key: $this->ToTimeRequest, attributes:["id"=>$toID]).
+                HTML::Field(type:"DateTime", title: $this->FromTimeLable, value: RECEIVE($this->FromTimeRequest, "GET", (\_::$CONFIG->GetDateTime($fromTime))->format('Y-m-d 00:00:00')), key: $this->FromTimeRequest, attributes:["id"=>$fromID]).
+                HTML::Field(type:"DateTime", title: $this->ToTimeLable,  value: RECEIVE($this->ToTimeRequest, "GET", (\_::$CONFIG->GetDateTime($toTime))->format('Y-m-d 23:59:59')), key: $this->ToTimeRequest, attributes:["id"=>$toID]).
                 HTML::Button("Show", "load(`".\_::$PATH."?{$this->FromTimeRequest}=`+(document.getElementById(`$fromID`).value+'').replace('T',' ')+`&{$this->ToTimeRequest}=`+(document.getElementById(`$toID`).value+'').replace('T',' '))")
             ];
     }
