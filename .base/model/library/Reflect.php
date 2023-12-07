@@ -80,24 +80,27 @@ class Reflect{
         $uc = 0;
         foreach (array_reverse($objectOrReflection->getArrayCopy()) as $name => $prop)
             if($prop === null || $prop->Value === $prop->DefaultValue || $prop->Value === self::$DefaultSign ){
-                $start = preg_find('/^[\w\W]+(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]*\s+?)(?=\$'.$name.'[^;]*(?:(?:("|\')[\W\w]*\1[^;]*)|(?:[^;"\']*))*;)/', $content);
+                $start = preg_find('/^[\w\W]+(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]*\s+?)\$'.$name.'[^;]*(?:(?:("|\')[\W\w]*\1[^;]*)|(?:[^;"\']*);)/', $content);
                 if(!is_null($start) && strlen($start) > 8)
-                    $content = strrev(preg_replace('/^;(?:(?:("|\')[\W\w]*\1)|(?:\/(\/|(\*+))[\W\w]*\2)|[^;"\'])+(?=;)/', "", strrev($start))).
+                    $content = strrev(preg_replace('/^;(?:(?:("|\')[\W\w]*\1)|(?:\/\/.*\r?\n?\r?)|(?:\/\*[\W\w]*\*\/)|[^\};"\'])+(?=\}|;)/', "", strrev($start))).
                         substr($content, strlen($start));
                 $uc++;
             }
             else {
                 $start = preg_find('/^[\w\W]+(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]*\s+?)(?=\$'.$name.'\W)/', $content);
                 if(!is_null($start) && strlen($start) > 8) {
-                    $content = $start.preg_replace('/^\$'.$name.'[^;]*(?:(?:("|\')[\W\w]*\1)|(?:\/(\/|(\*+))[\W\w]*\2)|[^;"\'])*;(?:(?:("|\')[\W\w]*\1)|(?:\/(\/|(\*+))[\W\w]*\2)|[^;"\'])*;/',
-                        "$".$name." = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??getValid($prop->Vars, 0)??$prop->Var).";",
-                        substr($content, strlen($start)));
+                    $content = $start.
+                        ("$".$name." = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??getValid($prop->Vars, 0)??$prop->Var).";").
+                        preg_replace('/^\s*\$'.$name.'\s*\=?(?:(?:(\"|\')[\W\w]*\1)|(?:\/\/.*\r?\n\r?)|(?:\/\*[\W\w]*\*\/)|[^;"\']|\s)*;/U',
+                            "",
+                            substr($content, strlen($start))
+                        );
                     $uc++;
                 }
                 else {
-                    $start = preg_find('/^[\w\W]+(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{\s*)/m', $content);
+                    $start = preg_find('/^[\w\W]+\s*class[\s\:]+([^\{]+)*\{\s*/', $content);
                     if(!is_null($start) && strlen($start) > 8){
-                        $indention = preg_find('/\s*$/',$start);
+                        $indention = preg_find('/\s*$/', $start);
                         $content = $start.
                             (isEmpty($prop->Comment)?null:($prop->Comment.$indention)).
                             //"//$prop->Type;$prop->Var:".implode("|", $prop->Vars).$indention.
@@ -105,7 +108,8 @@ class Reflect{
                             //(count($prop->Vars)<1?null:(implode("|", $prop->Vars)." ")).
                             (is_null($prop->Name)?null:("$".$prop->Name)).
                             (is_null($prop->Value)?null:(" = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??getValid($prop->Vars, 0)??$prop->Var))).
-                            ";".PHP_EOL.$indention.substr($content, strlen($start));
+                            ";".PHP_EOL.
+                            $indention.substr($content, strlen($start));
                         $uc++;
                     } else {
                         var_dump($content);
