@@ -16,7 +16,7 @@ class Session
 
 	public static function Start(){
         self::StartSecure();
-		if(is_null(self::GetID())){
+		if(is_null(self::GetID()) && !is_null(\_::$CONFIG)){
 			self::SetID(\_::$CONFIG->PublicPrefix);
             self::Set("IP", getClientIP());
 			return true;
@@ -205,7 +205,7 @@ class Session
 		try{
             return HashCrypt::Decrypt($cipher,\_::$CONFIG->SecretKey, true);
         }
-        catch (Exception $exception)
+        catch (\Exception $exception)
         {
 			return null;
         }
@@ -272,5 +272,4 @@ class Session
     }
 }
 
-Session::Start();
 ?>

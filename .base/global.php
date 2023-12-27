@@ -290,6 +290,7 @@
 	ini_set('display_errors', \_::$CONFIG->DisplayError);
 	ini_set('display_startup_errors', \_::$CONFIG->DisplayStartupError);
 	error_reporting(\_::$CONFIG->ReportError);
+    \MiMFa\Library\Session::Start();
     if(\_::$CONFIG->AllowTranslate){
         \MIMFa\Library\Translate::$Language = \_::$CONFIG->DefaultLanguage;
         \MIMFa\Library\Translate::$Direction = \_::$CONFIG->DefaultDirection;
@@ -1221,7 +1222,7 @@
 		return (!empty($script))
 			&& !preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/",$script)
 			&& !preg_match("/^[A-z0-9\-]+\:\/*([\/\?\#][^\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/",$script)
-			&& preg_match("/[\{\}\|\^\[\]\"\`\;\r\n\t\f]|(^\s*[\w\$][\w\d\$\_]+\s*\([\s\S]*\)\s*;?\s*$)/",$script);
+			&& preg_match("/[\{\}\|\^\[\]\"\`\;\r\n\t\f]|((^\s*[\w\$][\w\d\$\_\.]+\s*\([\s\S]*\)\s*)+;?\s*$)/",$script);
 	}
 	/**
      * Check if the string is a relative or absolute URL

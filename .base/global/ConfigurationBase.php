@@ -20,6 +20,12 @@ abstract class ConfigurationBase extends Base {
      */
     public $DateTimeZone = "UTC";
     /**
+     * The Date Time Locale
+     * @var string
+     * @category General
+     */
+    public $DateTimeLocale = "en-US";
+    /**
      * The Date Time Format
      * @var string
      * @category General
@@ -31,6 +37,13 @@ abstract class ConfigurationBase extends Base {
      * @category General
      */
     public $CurrentDateTime = "now";
+    /**
+     * Date Time Stamp Seconds Offset (TSO)
+     * @var int
+     * @category General
+     */
+    public $TimeStampOffset = 0;
+
 	/**
      * A key to use for sending the requested virtual path of website
      * @var string
@@ -460,6 +473,20 @@ abstract class ConfigurationBase extends Base {
     }
     public function GetFormattedDateTime(string|null $dateTimeFormat = null, string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
         return $this->GetDateTime($dateTime, $dateTimeZone)->format($dateTimeFormat??$this->DateTimeFormat);
+    }
+    public function ToShownDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
+        return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp()+$this->TimeStampOffset);
+    }
+    public function FromShownDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
+        return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp()-$this->TimeStampOffset);
+    }
+    public function ToShownFormattedDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null){
+        return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp()+$this->TimeStampOffset)
+            ->format($dateTimeFormat??$this->DateTimeFormat);
+    }
+    public function FromShownFormattedDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null){
+        return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp()-$this->TimeStampOffset)
+            ->format($dateTimeFormat??$this->DateTimeFormat);
     }
 }
 ?>

@@ -33,6 +33,18 @@ class HTML
         }
         elseif($content===null) return null;
         $tagName = trim(strtolower($tagName));
+        $allowMA = true;
+        switch ($tagName)
+        {
+            case "label":
+            case "thead":
+            case "tbody":
+            case "tr":
+            case "th":
+            case "td":
+                $allowMA = false;
+                break;
+        }
 
         $attrs = "";
         $attachments = "";
@@ -47,6 +59,7 @@ class HTML
                         else $attrdic[$value] = null;
                     else {
                         $key = trim(strtolower($key));
+                        //Detection
                         if($key == "id") $id = $value;
                         if(isset($attrdic[$key]))
                             switch ($key)
@@ -88,7 +101,7 @@ class HTML
                     switch ($key)
                     {
                         case "style":
-                            if(self::$ManageAttributes){
+                            if(self::$ManageAttributes && $allowMA){
                                 if(!isValid($id)){
                                     $id = "_".getId(true);
                                     $attrs .= " id='$id'";
@@ -103,7 +116,7 @@ class HTML
                         case "oninput":
                         case "onmouseover":
                         case "onmouseout":
-                            if(self::$ManageAttributes){
+                            if(self::$ManageAttributes && $allowMA){
                                 if(!isValid($id)){
                                     $id = "_".getId(true);
                                     $attrs .= " id='$id'";
@@ -143,7 +156,7 @@ $attachments"]);
                     $value = str_replace("'","`",$value);
                     $sp ="'";
                 }
-            else $sp = "'";
+                else $sp = "'";
             else $sp ='"';
             return "$key=$sp$value$sp";
         }
@@ -281,7 +294,7 @@ $attachments"]);
         $srcs = [];
         if(is_array($source)) foreach ($source as $key=>$value)
                 if(is_integer($key)) $srcs[] = self::Element("source", ["src"=> $value]);
-            else $srcs[] = self::Element("source", ["src"=> $value,"type"=> $key ]);
+                else $srcs[] = self::Element("source", ["src"=> $value,"type"=> $key ]);
         else $srcs[] = self::Element("source", ["src"=> $source ]);
         return self::Element(join(PHP_EOL, $srcs).__($content, styling:false), "video", ["class"=> "video"], $attributes);
     }
@@ -300,8 +313,8 @@ $attachments"]);
         if(!isValid($source)) return null;
         $srcs = [];
         if(is_array($source)) foreach ($source as $key=>$value)
-            if(is_integer($key)) $srcs[] = self::Element("source", ["src"=> $value ]);
-            else $srcs[] = self::Element("source", ["src"=> $value,"type"=> $key ]);
+                if(is_integer($key)) $srcs[] = self::Element("source", ["src"=> $value ]);
+                else $srcs[] = self::Element("source", ["src"=> $value,"type"=> $key ]);
         else $srcs[] = self::Element("source", ["src"=> $source ]);
         return self::Element(join(PHP_EOL, $srcs).__($content, styling:false), "audio", ["class"=> "audio"], $attributes);
     }
@@ -392,6 +405,284 @@ $attachments"]);
         foreach($sources as $item)
             $ls[] = self::Embed(null, $item, $atts, $attributes);
         return Convert::ToString($ls);
+    }
+    /**
+     * The Calendar HTML Tag
+     * @param mixed $content The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function Calendar($content = null, ...$attributes){
+        if(!isValid($content)) $content = \_::$CONFIG->ToShownDateTime();
+        $dt = \_::$CONFIG->ToShownDateTime($content);
+        $content = \_::$CONFIG->ToShownFormattedDateTime($content);
+        $uniq = "_".getId(true);
+        $head = true;
+        $update = "{$uniq}_Click();";
+        $weekDays = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"];
+        return
+            self::Style("
+                .$uniq{
+                    text-align: center;
+                    display: flex;
+                    align-content: stretch;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    flex-direction: column-reverse;
+                    justify-content: space-evenly;
+                }
+                .$uniq .clickable{
+                    cursor: pointer;
+                    border-radius: var(--Radius-0);
+                }
+                .$uniq .clickable:hover{
+                    outline: 1px solid var(--Color-3);
+                }
+                .$uniq .deactived{
+                    cursor: default;
+                    opacity: 0.5;
+                }
+                .$uniq .selected{
+                    cursor: pointer;
+                    background-color: var(--ForeColor-2);
+                    color: var(--BackColor-2);
+                }
+                .$uniq .Grid$uniq.shown{
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+                }
+                .$uniq .Select$uniq.shown{
+                    position: absolute;
+                    min-height: max-content;
+                    background-color: var(--BackColor-1);
+                    color: var(--ForeColor-1);
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+                }
+                .$uniq .Grid$uniq.hidden{
+                    opacity: 0.5;
+                    position: relative;
+                    z-index: -1;
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+                }
+                .$uniq .Select$uniq.hidden{
+                    display: none;
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+                }
+
+                .$uniq .Grid$uniq{
+                    width: 100%;
+                }
+                .$uniq .Grid$uniq th{
+                    padding-bottom: 5px;
+                    opacity: 0.8;
+                }
+                .$uniq .Select$uniq{
+                }
+                .$uniq .Select$uniq :is(#OptionsBefore$uniq, #OptionsAfter$uniq){
+                    cursor: pointer;
+                    text-align: center;
+                    display: block;
+                    width: 100%;
+                }
+            ").
+            self::Script("
+            function {$uniq}_Click(day = null){
+                $uniq = document.querySelector('.$uniq');
+                $uniq.setAttribute('value',
+                    document.querySelector('.$uniq .Y$uniq').innerText+'-'+
+                    document.querySelector('.$uniq .M$uniq').innerText+'-'+
+                    (day??document.querySelector('.$uniq .D$uniq')).innerText+' '+
+                    document.querySelector('.$uniq .h$uniq').innerText+':'+
+                    document.querySelector('.$uniq .m$uniq').innerText+':'+
+                    document.querySelector('.$uniq .s$uniq').innerText);
+                if(day == null){
+                    gdt = new Date(new Date($uniq.getAttribute('value')).getTime() - (".(\_::$CONFIG->TimeStampOffset*1000)."));
+                    dt = new Date($uniq.getAttribute('value'));
+                    cd = dt.getDate();
+                    sd = 1;
+                    ed = new Date(gdt.getFullYear(), gdt.getMonth()+1, 0).getDate();
+                    sw = (new Date(dt.getFullYear(), dt.getMonth(), sd).getDay()+1)%7;
+                    if(".(\_::$CONFIG->DateTimeZone == "UTC"?"false":"true").")
+                        switch(dt.getMonth() + 1){
+                            case 1:
+                            case 2:
+                                ed = 31;
+                                sw -= 3;
+                            break;
+                            case 3:
+                            case 4:
+                                ed = 31;
+                            break;
+                            case 5:
+                            case 6:
+                                ed = 31;
+                                sw += 1;
+                            break;
+                            case 7:
+                                ed = 30;
+                                sw += 2;
+                            break;
+                            case 8:
+                                ed = 30;
+                                sw += 1;
+                            break;
+                            case 9:
+                            case 10:
+                                ed = 30;
+                            break;
+                            case 11:
+                                ed = 30;
+                                sw -= 1;
+                            break;
+                            case 12:
+                                ed = 29;
+                                sw -= 1;
+                            break;
+                        }
+                    if(sw < 0) sw += 7;
+                    let w = 0;
+                    for(item of document.querySelectorAll('.$uniq .Week$uniq td'))
+                        if(w++ >= sw && sd <= ed) {
+                            item.innerText = sd;
+                            item.setAttribute('class','clickable');
+                            if(sd == cd) item.setAttribute('class','clickable D$uniq selected');
+                            sd++;
+                        } else {
+                            item.innerText = '';
+                            item.setAttribute('class','');
+                        }
+                } else {
+                    for(item of document.querySelectorAll('.$uniq td.clickable'))
+                        item.setAttribute('class','clickable');
+                    day.setAttribute('class','clickable D$uniq selected');
+                }
+                $uniq.dispatchEvent(new Event('change'));
+            }
+            function {$uniq}_ShowOptions(destSelector, current, min = 0, max = 9999){
+                dv = parseInt(document.querySelector(destSelector).innerText);
+                c = Math.abs(current);
+                rc = 7;
+                pc = 42;
+                if(c > 9999999) {
+                    rc = 1;
+                    pc = 3;
+                }
+                else if(c > 999999) {
+                    rc = 1;
+                    pc = 6;
+                }
+                else if(c > 99999) {
+                    rc = 2;
+                    pc = 12;
+                }
+                else if(c > 9999) {
+                    rc = 3;
+                    pc = 18;
+                }
+                else if(c > 999) {
+                    rc = 4;
+                    pc = 24;
+                }
+                else if(c > 99) {
+                    rc = 5;
+                    pc = 30;
+                }
+                else {
+                    let nc = Math.abs(max - min) + 1;
+                    for(let i = 6; i > 0; i--)
+                        if(nc%i == 0) {
+                            rc = i;
+                            pc = Math.min(nc, i * 6);
+                            break;
+                        }
+                }
+                mn = Math.max(min, current - pc + 1);
+                mx = Math.min(max, mn + pc - 1);
+                obefore = document.querySelector('.$uniq .Select$uniq #OptionsBefore$uniq');
+                oafter = document.querySelector('.$uniq .Select$uniq #OptionsAfter$uniq');
+                if(mn <= min) {
+                    obefore.setAttribute('class','fa fa-angle-up deactived');
+                    obefore.setAttribute('onclick','');
+                }
+                else {
+                    obefore.setAttribute('class','fa fa-angle-up clickable');
+                    obefore.setAttribute('onclick','{$uniq}_ShowOptions(`'+destSelector+'`, '+ (current - pc) +', '+ min +', '+ max +')');
+                }
+                if(mx >= max) {
+                    oafter.setAttribute('class','fa fa-angle-down deactived');
+                    oafter.setAttribute('onclick','');
+                }
+                else {
+                    oafter.setAttribute('class','fa fa-angle-down clickable');
+                    oafter.setAttribute('onclick','{$uniq}_ShowOptions(`'+destSelector+'`, '+ (current + pc) +', '+ min +', '+ max +')');
+                }
+                opts = `<div class='row'>`;
+                for(let i = 0; mn <= mx; i++) {
+                    if(i%rc==0 && i != 0) opts += `</div><div class='row'>`;
+                    opts += `<div class='col-sm clickable`+(dv == mn?' selected':'')+`' onclick=\"{$uniq}_SelectOption(this, document.querySelector(\``+destSelector+`\`))\">`+(mn++)+`</div>`;
+                }
+                opts += `</div>`;
+                document.querySelector('.$uniq .Select$uniq .Options$uniq').innerHTML = opts;
+                document.querySelector('.$uniq .Grid$uniq').setAttribute('class','Grid$uniq hidden');
+                document.querySelector('.$uniq .Select$uniq').setAttribute('class','Select$uniq shown');
+            }
+            function {$uniq}_SelectOption(newElement, oldElement){
+                oldElement.innerText = newElement.innerText;
+                document.querySelector('.$uniq .Select$uniq').setAttribute('class','Select$uniq hidden');
+                document.querySelector('.$uniq .Grid$uniq').setAttribute('class','Grid$uniq shown');
+                $update
+            }").
+            self::Division(
+                self::SmallFrame(
+                    [
+                        [self::Media(" ", "angle-up", ["id"=>"OptionsBefore$uniq"])],
+                        [self::SmallFrame("", ["class"=>"Options$uniq"])],
+                        [self::Media(" ", "angle-down", ["id"=>"OptionsAfter$uniq"])]
+                    ]
+                ,["class"=>"Select$uniq hidden"]).
+                "<table class='Grid$uniq shown'>".
+                    "<tr>".
+                        self::Cell($dt->format("Y"), $head, ["class"=>"Y$uniq clickable", "colspan"=>"3", "onclick"=>"{$uniq}_ShowOptions('.$uniq .Y$uniq', parseInt(this.innerText), 0, 9999)"]).
+                        self::cell("/").
+                        self::cell($dt->format("m"), $head, ["class"=>"M$uniq clickable", "colspan"=>"3", "onclick"=>"{$uniq}_ShowOptions('.$uniq .M$uniq', parseInt(this.innerText), 1, 12)"]).
+                    "</tr>".
+                    "<tr>".join(PHP_EOL, [
+                        self::Cell($weekDays[0], true),
+                        self::Cell($weekDays[1], true),
+                        self::Cell($weekDays[2], true),
+                        self::Cell($weekDays[3], true),
+                        self::Cell($weekDays[4], true),
+                        self::Cell($weekDays[5], true),
+                        self::Cell($weekDays[6], true)
+                    ])."</tr>".
+                    join(PHP_EOL,
+                        iterator_to_array((function()use($uniq, $dt, $update, $weekDays){
+                            $week = [];
+                            $cd = intval($dt->format("d"));
+                            $sw = (intval($dt->setDate(intval($dt->format("Y")),intval($dt->format("m")), 1)->format("w"))+1)%7;
+                            $ed = intval($dt->format("t"));
+                            $d = -$sw;
+                            for ($i = 1; $i <= 49; $i++) {
+                                if(++$d > 0 && $d<=$ed)
+                                    $cel = self::Cell($d, false, ["class"=>"clickable".($cd==$d?" D$uniq selected":""), "onclick"=>"{$uniq}_Click(this);"]);
+                                else $cel = self::Cell("", false);
+                                if(count($week) == 7) {
+                                    yield "<tr class='Week$uniq'>".join(PHP_EOL, $week)."</tr>";
+                                    $week = [$cel];
+                                } else $week[] = $cel;
+                            }
+                        })())
+                    ).
+                "<tr>".
+                    self::Cell(self::Media("", "clock")).
+                    self::Cell($dt->format("H"), $head, ["class"=>"h$uniq clickable", "colspan"=>"1", "onclick"=>"{$uniq}_ShowOptions('.$uniq .h$uniq', parseInt(this.innerText), 0, 23)"]).
+                    self::Cell(":").
+                    self::Cell($dt->format("i"), $head, ["class"=>"m$uniq clickable", "colspan"=>"1", "onclick"=>"{$uniq}_ShowOptions('.$uniq .m$uniq', parseInt(this.innerText), 0, 59)"]).
+                    self::Cell(":").
+                    self::Cell($dt->format("s"), $head, ["class"=>"s$uniq clickable", "colspan"=>"1", "onclick"=>"{$uniq}_ShowOptions('.$uniq .s$uniq', parseInt(this.innerText), 0, 59)"]).
+                    self::Cell("").
+                "</tr>".
+            "</table>"
+            , ["class"=>"calendar $uniq", "value"=>$content], $attributes);
     }
 
     /**
@@ -985,10 +1276,12 @@ $attachments"]);
     public static function Form($content, $reference = null, ...$attributes){
         if(!isValid($content)) $content = self::SubmitButton();
         elseif(is_array($content) || is_iterable($content))
-            $content = function()use($content){ return join(PHP_EOL, loop($content, function($k, $f){
-                if(is_integer($k)) return call_user_func("self::Field", $f);
-                else return call_user_func("self::Field", null, $k, $f);
-            }));};
+            $content = function()use($content){
+                return join(PHP_EOL, loop($content, function($k, $f){
+if(is_integer($k)) return call_user_func("self::Field", $f);
+else return call_user_func("self::Field", null, $k, $f);
+}));
+            };
         else $content = Convert::ToString($content);
         return self::Element($content, "form", isValid($reference)?["action"=> $reference]:[], [ "enctype"=>"multipart/form-data", "method"=>"get", "class"=> "form" ], $attributes);
     }
@@ -1152,6 +1445,11 @@ $attachments"]);
             case 'location':
             case 'path':
                 $content = self::ValueInput($title, $value, $attributes);
+                break;
+            case "calendar":
+            case "calendarinput":
+            case "cal":
+                $content = self::CalendarInput($title, $value, $attributes);
                 break;
             case "datetime":
                 $content = self::DateTimeInput($title, $value, $attributes);
@@ -1438,6 +1736,21 @@ $attachments"]);
      */
     public static function ColorInput($key, $value = null, ...$attributes){
         return self::Input($key, $value, "color", ["class"=>"colorinput"], $attributes);
+    }
+    /**
+     * The Calendar <INPUT> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function CalendarInput($key, $value = null, ...$attributes){
+        $id = Convert::ToId($key);
+        return self::Calendar($value, ["class"=>"calendarinput", "for"=>$id, "onchange"=>"
+            dt = new Date(new Date(this.getAttribute('value')).getTime() - (".(\_::$CONFIG->TimeStampOffset*1000)."));
+            document.querySelector('input#$id').value = dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+' '+dt.getHours()+':'+dt.getMinutes()+':'+dt.getSeconds();
+            "], $attributes).
+            self::Input($key, $value, "datetime-local", ["class"=>"calendarinput", "id"=>$id]);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1743,7 +2056,7 @@ $attachments"]);
                                 foreach ($rows as $row){
                                     $arr[] = getValid($row, $l);
                                         $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function($i) use($row){return floatval(getValid($row, $i));});
-                                        $arr[] = $ct++;
+                                    $arr[] = $ct++;
                                 }
                         else if (count($ys) > 0)
                             foreach ($rows as $row){
@@ -1766,10 +2079,10 @@ $attachments"]);
                                 $arr[] = $ct++;
                             }
                     else if (count($ys) > 0)
-                            foreach ($rows as $row){
-                                $arr[] = $ct++;
-                                $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function($i) use($row){return floatval(getValid($row, $i));});
-                            }
+                        foreach ($rows as $row){
+                            $arr[] = $ct++;
+                            $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function($i) use($row){return floatval(getValid($row, $i));});
+                        }
                     $content = $arr;
                 }
             }

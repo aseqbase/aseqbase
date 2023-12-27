@@ -379,11 +379,31 @@ class Table extends Module{
 						...(is_null($this->AllowFixedRows)?[]:["fixedRows: ".($this->AllowFixedRows?"true":"false")]),
 						...(is_null($this->AllowResponsive)?[]:["responsive: ".($this->AllowResponsive?"true":"false")]),
 						...(is_null($this->AllowEntriesInfo)?[]:["info: ".($this->AllowEntriesInfo?"true":"false")]),
-                        //...[
-                        //    "sInfo: \"".__("Showing _FROM_ to _TO_ of _TOTAL_ entries", styling:false)."\"",
-                        //    "sSearch: \"".__("Search", styling:false)."\"",
-                        //    "sLengthMenu: \"".__("Display _MENU_ items per page", styling:false)."\""
-                        //],
+                        ...["language: {".
+                                "decimal: \"".__("", styling:false)."\",".
+                                "emptyTable: \"".__("No items available", styling:false)."\",".
+                                "info: \"".__("Showing _START_ to _END_ of _TOTAL_ entries", styling:false)."\",".
+                                "infoEmpty: \"".__("", styling:false)."\",".
+                                "infoFiltered: \"".__("(filtered from _MAX_ total entries)", styling:false)."\",".
+                                "infoPostFix: \"".__("", styling:false)."\",".
+                                "thousands: \"".__(",", styling:false)."\",".
+                                "lengthMenu: \"".__("Display _MENU_ items per page", styling:false)."\",".
+                                "loadingRecords: \"".__("Loading...", styling:false)."\",".
+                                "processing: \"".__("", styling:false)."\",".
+                                "search: \"".__("Search: ", styling:false)."\",".
+                                "zeroRecords: \"".__("No matching items found", styling:false)."\",".
+                                "paginate: {".
+                                    "first: \"".__("First", styling:false)."\",".
+                                    "last: \"".__("Last", styling:false)."\",".
+                                    "next: \"".__("Next", styling:false)."\",".
+                                    "previous: \"".__("Previous", styling:false)."\"".
+                                "},".
+                                "aria: {".
+                                    "sortAscending: \"".__(": activate to sort column ascending", styling:false)."\",".
+                                    "sortDescending: \"".__(": activate to sort column descending", styling:false)."\"".
+                                "}".
+                            "}"
+                        ],
 						...(isEmpty($this->Options)?[]:[Convert::ToString($this->Options)]),
 						...($this->Controlable?["'columnDefs': [{ 'targets': 0, 'orderable': false }]"]:[])
 					]).
