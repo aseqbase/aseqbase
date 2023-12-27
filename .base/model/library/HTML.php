@@ -413,9 +413,8 @@ $attachments"]);
      * @return string
      */
     public static function Calendar($content = null, ...$attributes){
-        if(!isValid($content)) $content = \_::$CONFIG->ToShownDateTime();
+        if(!isValid($content)) $content = \_::$CONFIG->GetDateTime();
         $dt = \_::$CONFIG->ToShownDateTime($content);
-        $content = \_::$CONFIG->ToShownFormattedDateTime($content);
         $uniq = "_".getId(true);
         $head = true;
         $update = "{$uniq}_Click();";
@@ -434,9 +433,11 @@ $attachments"]);
                 .$uniq .clickable{
                     cursor: pointer;
                     border-radius: var(--Radius-0);
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
                 }
                 .$uniq .clickable:hover{
-                    outline: 1px solid var(--Color-3);
+                    outline: var(--Border-2) var(--Color-3);
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
                 }
                 .$uniq .deactived{
                     cursor: default;
@@ -469,6 +470,7 @@ $attachments"]);
                 }
 
                 .$uniq .Grid$uniq{
+                    direction: ltr;
                     width: 100%;
                 }
                 .$uniq .Grid$uniq th{
@@ -476,6 +478,7 @@ $attachments"]);
                     opacity: 0.8;
                 }
                 .$uniq .Select$uniq{
+                    direction: ltr;
                 }
                 .$uniq .Select$uniq :is(#OptionsBefore$uniq, #OptionsAfter$uniq){
                     cursor: pointer;
@@ -486,17 +489,17 @@ $attachments"]);
             ").
             self::Script("
             function {$uniq}_Click(day = null){
-                $uniq = document.querySelector('.$uniq');
-                $uniq.setAttribute('value',
-                    document.querySelector('.$uniq .Y$uniq').innerText+'-'+
+                fdt = document.querySelector('.$uniq .Y$uniq').innerText+'-'+
                     document.querySelector('.$uniq .M$uniq').innerText+'-'+
                     (day??document.querySelector('.$uniq .D$uniq')).innerText+' '+
                     document.querySelector('.$uniq .h$uniq').innerText+':'+
                     document.querySelector('.$uniq .m$uniq').innerText+':'+
-                    document.querySelector('.$uniq .s$uniq').innerText);
+                    document.querySelector('.$uniq .s$uniq').innerText;
+                gdt = new Date(new Date(fdt).getTime() - (".(\_::$CONFIG->TimeStampOffset*1000)."));
+                $uniq = document.querySelector('.$uniq');
+                $uniq.setAttribute('value', gdt.getTime());
                 if(day == null){
-                    gdt = new Date(new Date($uniq.getAttribute('value')).getTime() - (".(\_::$CONFIG->TimeStampOffset*1000)."));
-                    dt = new Date($uniq.getAttribute('value'));
+                    dt = new Date(gdt.getTime() + (".(\_::$CONFIG->TimeStampOffset*1000)."));
                     cd = dt.getDate();
                     sd = 1;
                     ed = new Date(gdt.getFullYear(), gdt.getMonth()+1, 0).getDate();
@@ -641,9 +644,10 @@ $attachments"]);
                 ,["class"=>"Select$uniq hidden"]).
                 "<table class='Grid$uniq shown'>".
                     "<tr>".
+                        self::Cell(self::Media("", "calendar")).
                         self::Cell($dt->format("Y"), $head, ["class"=>"Y$uniq clickable", "colspan"=>"3", "onclick"=>"{$uniq}_ShowOptions('.$uniq .Y$uniq', parseInt(this.innerText), 0, 9999)"]).
                         self::cell("/").
-                        self::cell($dt->format("m"), $head, ["class"=>"M$uniq clickable", "colspan"=>"3", "onclick"=>"{$uniq}_ShowOptions('.$uniq .M$uniq', parseInt(this.innerText), 1, 12)"]).
+                        self::cell($dt->format("m"), $head, ["class"=>"M$uniq clickable", "colspan"=>"2", "onclick"=>"{$uniq}_ShowOptions('.$uniq .M$uniq', parseInt(this.innerText), 1, 12)"]).
                     "</tr>".
                     "<tr>".join(PHP_EOL, [
                         self::Cell($weekDays[0], true),
@@ -682,7 +686,7 @@ $attachments"]);
                     self::Cell("").
                 "</tr>".
             "</table>"
-            , ["class"=>"calendar $uniq", "value"=>$content], $attributes);
+            , ["class"=>"calendar $uniq", "value"=>\_::$CONFIG->GetDateTime($content)->format('Uv')/*Get the miliseconds of the Time*/], $attributes);
     }
 
     /**
@@ -1747,8 +1751,8 @@ else return call_user_func("self::Field", null, $k, $f);
     public static function CalendarInput($key, $value = null, ...$attributes){
         $id = Convert::ToId($key);
         return self::Calendar($value, ["class"=>"calendarinput", "for"=>$id, "onchange"=>"
-            dt = new Date(new Date(this.getAttribute('value')).getTime() - (".(\_::$CONFIG->TimeStampOffset*1000)."));
-            document.querySelector('input#$id').value = dt.getFullYear()+'-'+(dt.getMonth()+1)+'-'+dt.getDate()+' '+dt.getHours()+':'+dt.getMinutes()+':'+dt.getSeconds();
+            dt = new Date(parseInt(this.getAttribute('value')));
+            document.querySelector('input#$id').value = dt.getFullYear()+'-'+(dt.getMonth()<9?'0':'')+(dt.getMonth()+1)+'-'+(dt.getDate()<10?'0':'')+dt.getDate()+' '+(dt.getHours()<10?'0':'')+dt.getHours()+':'+(dt.getMinutes()<10?'0':'')+dt.getMinutes()+':'+(dt.getSeconds()<10?'0':'')+dt.getSeconds();
             "], $attributes).
             self::Input($key, $value, "datetime-local", ["class"=>"calendarinput", "id"=>$id]);
     }
