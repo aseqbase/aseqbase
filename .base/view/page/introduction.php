@@ -1,17 +1,17 @@
 <div class="page page-introduction">
-<?php
+    <?php
 MODULE("PrePage");
 $module = new MiMFa\Module\PrePage();
 $module->Title = "Introduction";
 $module->Draw();
-COMPONENT("FontAwesome");
-$module = new MiMFa\Component\FontAwesome();
+COMPONENT("Icons");
+$module = new MiMFa\Component\Icons();
 $module->EchoStyle(".caselist");
 MODULE("Image");
 $module = new MiMFa\Module\Image();
 $module->MinHeight = "6vh";
 $module->EchoStyle();
-?>
+    ?>
     <style>
         .caselist .fa{
 		    width: 100%;

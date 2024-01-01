@@ -69,6 +69,7 @@ class UserMenu extends Module{
 			.{$this->Name} .submenu .bio>:not(html,head,body,style,script,link,meta,title){
             	font-size: 80%;
 				opacity: 0.8;
+				color: var(--ForeColor-1);
 				width: min-content;
 				min-width: 100%;
 				padding: 5px var(--Size-1);

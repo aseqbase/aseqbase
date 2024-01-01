@@ -26,10 +26,10 @@ class Query{
             foreach ($sources as $source)
                 foreach ($source($query,$groupDirection, $type) as $record)
                     foreach ($record as $name=>$value)
-                    if(preg_match($q,$value)){
-                        yield $record;
-                        break;
-                    }
+                        if(preg_match($q, $value)){
+                            yield $record;
+                            break;
+                        }
         }
         else yield from self::SearchContents($query,$groupDirection, $type);
 	}
@@ -76,10 +76,10 @@ class Query{
     }
 
 	public static function NormalizeForSearch(string|null $query){
-        return preg_replace("/\W+/","|",$query);
+        return "/".trim(preg_replace("/[\s\-\{\}\/\?\.\,\<\>\'\"\&\*\(\)\!\@\#\$\~\`\+\=\:\;]+/","|",$query), "|")."/i";
     }
 	public static function NormalizeForDataBaseSearch(string|null $query){
-        return "REGEXP '".self::NormalizeForSearch($query)."'";
+        return "REGEXP '".trim(preg_replace("/[\s\-\{\}\/\?\.\,\<\>\'\"\&\*\(\)\!\@\#\$\~\`\+\=\:\;]+/","|",$query), "|")."'";
     }
 }
 ?>

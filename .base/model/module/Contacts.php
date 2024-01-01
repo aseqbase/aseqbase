@@ -42,18 +42,18 @@ class Contacts extends Module{
 				} ?>
 			}
 		</style>
-		<?php 
+		<?php
 	}
 	public function Echo(){
 			parent::Echo();
-			COMPONENT("FontAwesome");
-			$comp = new \MiMFa\Component\FontAwesome();
+			COMPONENT("Icons");
+			$comp = new \MiMFa\Component\Icons();
 			$comp->EchoStyle(".shortcuts-list");
 			$comp->EchoTechnologyStyle(".shortcuts-list");
 
 			$count = count($this->Items);
 			if($count > 0){
-				?>
+?>
 				<div class="row">
 					<ul class="contacts col-lg-4">
 						<?php for($i = 0; $i < $count; $i++){

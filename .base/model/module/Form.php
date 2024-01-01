@@ -84,6 +84,10 @@ class Form extends Module{
 					padding-top: var(--Size-0);
 					padding-bottom: var(--Size-0);
 				}
+				.{$this->Name} form .fields {
+					display: table;
+					width: 100%;
+				}
 				.{$this->Name} .header {
 					position: sticky;
 					top: 0px;
@@ -507,12 +511,14 @@ class Form extends Module{
 						,["class"=>"header"]):"").
 						HTML::LargeSlot(
 							HTML::Form(
-								($this->AllowContent?$this->GetContent():"").
-								Convert::ToString($this->GetFields()).
+								HTML::Rack(
+									($this->AllowContent?$this->GetContent():"").
+									Convert::ToString($this->GetFields()),
+								[ "class"=>"group fields"]).
 								HTML::Rack(Convert::ToString($this->GetButtons()),[ "class"=>"group buttons"])
 							,$src, ["id"=>$name, "name"=>$name, "enctype"=>$this->EncType, "method"=>$this->Method]).
 							($this->AllowFooter?$this->GetFooter():"")
-						,["class"=>"content"])
+						,["class"=>"col-lg-8 content"])
 					)
 					,["class"=>"page"]);
             else

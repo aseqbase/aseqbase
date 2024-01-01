@@ -16,7 +16,8 @@ class Translate
 	public static $Direction = "LTR";
 	public static $CodeStart = "<";
 	public static $CodeEnd = ">";
-	public static $CodePattern = "/(\<\S+[\w\W]*\>)|(([\"'`])\S+[\w\W]*\\3)|(\d*\.?\d+)/iU";
+	public static $CodeLimit = 160;
+	public static $CodePattern = "/(\<\S+[\w\W]*\>)|(([\"'`])\S+[\w\W]*\\3)|(\d*\.?\d+)/U";
 	public static $ValidPattern = "/[A-z]+/";
 	public static $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
 
@@ -131,7 +132,7 @@ class Translate
 							trim($text)
 						)
 				);
-		if(strlen($key)>160) $key = md5($key);
+		if(strlen($key)>self::$CodeLimit) $key = md5($key);
 		return $key;
 	}
 }

@@ -148,10 +148,10 @@ class Base{
 	/**
      * Echo in the Draw function before everything.
      */
-	public function PreDraw(){ }
+	public function PreDraw(){ echo $this->PreCapture(); }
 	/**
      * Echo in the Draw function after everything.
      */
-	public function PostDraw(){ }
+	public function PostDraw(){ echo $this->PostCapture();  }
 }
 ?>

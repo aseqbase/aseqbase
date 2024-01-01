@@ -304,7 +304,7 @@ class PostCollection extends Collection{
 			    $p_showimage = $this->ShowImage || getValid($p_meta,"ShowImage",false);
 			    $p_showtitle = $this->ShowTitle || getValid($p_meta,"ShowTitle",false);
                 $p_showmeta = $this->ShowMetaData || getValid($p_meta,"ShowMeta",false);
-                $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? $this->Root.($p_name??$p_id):null;
+                $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->Root.($p_name??$p_id)):null;
                 $p_path = getValid($item,'Path', $this->DefaultPath);
                 if($this->ShowRoute) $rout->SetValue($p_inselflink);
 			    $hasl = isValid($p_inselflink);

@@ -530,7 +530,7 @@ class Table extends Module{
                             }
                         }
                         if($type !== false && !isEmpty($cell)) yield HTML::Field(
-                            type:(isEmpty($type)?null:$type),
+                            type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k, $row)),
                             key:$k,
                             value:$cell,
                             description:false,
@@ -595,7 +595,7 @@ class Table extends Module{
                             }
                         }
                         if($type !== false) yield HTML::Field(
-                            type:(isEmpty($type)?null:$type),
+                            type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k, $row)),
                             key:$k,
                             value:$cell
                         );
@@ -627,7 +627,7 @@ class Table extends Module{
         if(is_null($value)) return null;
         if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to add!");
         MODULE("Form");
-        $row = \MiMFa\Library\DataBase::TrySelect("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$this->Table}'");
+        $row = \MiMFa\Library\DataBase::TrySelect("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$this->Table}'");
         $form = new Form(
             title:"Add {$this->Title}",
             description:getValid($row,"Description",null),
@@ -640,7 +640,7 @@ class Table extends Module{
                     if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $value);
                     else {
                         $type = getValid($this->CellTypes, $k, $val["DATA_TYPE"]);
-                        if($type !== false) yield HTML::Field(type:isEmpty($type)?null:$type, key:$k);
+                        if($type !== false) yield HTML::Field(type:isEmpty($type)?null:Convert::By($type, $type, $val["COLUMN_DEFAULT"], $k, $row), key:$k);
                     }
                 }
             })());

@@ -76,7 +76,7 @@ class Modal extends Player{
 			isValid($this->BackgroundShadow)?"
 			.{$this->Name}-background-screen {
 				background-color: {$this->BackgroundShadow};
-				z-index:0;
+				z-index:1;
 			}
 			":"")
 			);
@@ -144,8 +144,8 @@ class Modal extends Player{
 		return "<div class=\"buttons\">".$buttonsContent."</div>";
 	}
 
-	public function PreDraw(){
-		if(isValid($this->BackgroundShadow)) echo "<div class=\"background-screen ".$this->Name."-background-screen hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
+	public function PreCapture(){
+		if(isValid($this->BackgroundShadow)) return "<div class=\"background-screen ".$this->Name."-background-screen hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
 	}
 
 	public function ButtonsScript($buttonsContent){

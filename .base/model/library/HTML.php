@@ -416,7 +416,6 @@ $attachments"]);
         if(!isValid($content)) $content = \_::$CONFIG->GetDateTime();
         $dt = \_::$CONFIG->ToShownDateTime($content);
         $uniq = "_".getId(true);
-        $head = true;
         $update = "{$uniq}_Click();";
         $weekDays = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"];
         return
@@ -424,20 +423,14 @@ $attachments"]);
                 .$uniq{
                     text-align: center;
                     display: flex;
-                    align-content: stretch;
-                    align-items: center;
+                    align-content: space-around;
+                    justify-content: space-around;
+                    align-items: stretch;
                     flex-wrap: wrap;
-                    flex-direction: column-reverse;
-                    justify-content: space-evenly;
+                    flex-direction: row-reverse;
                 }
-                .$uniq .clickable{
-                    cursor: pointer;
-                    border-radius: var(--Radius-0);
-				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
-                }
-                .$uniq .clickable:hover{
-                    outline: var(--Border-2) var(--Color-3);
-				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+                .$uniq *{
+                    direction: ltr;
                 }
                 .$uniq .deactived{
                     cursor: default;
@@ -448,37 +441,54 @@ $attachments"]);
                     background-color: var(--ForeColor-2);
                     color: var(--BackColor-2);
                 }
-                .$uniq .Grid$uniq.shown{
+                .$uniq :is(span.clickable, .media).media{
+                    cursor: pointer;
+                    color: var(--ForeColor-1);
 				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
                 }
-                .$uniq .Select$uniq.shown{
+                .$uniq :is(span.clickable, .media):hover{
+                    color: var(--ForeColor-2);
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+                }
+                .$uniq :is(div, i, td).clickable{
+                    cursor: pointer;
+                    border-radius: var(--Radius-0);
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+                }
+                .$uniq :is(div, i, td).clickable:hover{
+                    outline: var(--Border-1) var(--Color-3);
+				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+                }
+
+                .$uniq :is(.Grid$uniq, .Select$uniq).shown{
                     position: absolute;
                     min-height: max-content;
                     background-color: var(--BackColor-1);
                     color: var(--ForeColor-1);
+                    z-index: 999;
 				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
                 }
-                .$uniq .Grid$uniq.hidden{
-                    opacity: 0.5;
-                    position: relative;
-                    z-index: -1;
+                .$uniq .Grid$uniq.shown{
+                    display: flex;
+                    align-content: space-around;
+                    justify-content: space-around;
+                    align-items: stretch;
+                    flex-wrap: wrap;
+                    flex-direction: row;
 				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
                 }
-                .$uniq .Select$uniq.hidden{
+
+                .$uniq :is(.Grid$uniq, .Select$uniq).hidden{
                     display: none;
 				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
                 }
 
-                .$uniq .Grid$uniq{
-                    direction: ltr;
-                    width: 100%;
-                }
                 .$uniq .Grid$uniq th{
                     padding-bottom: 5px;
                     opacity: 0.8;
                 }
-                .$uniq .Select$uniq{
-                    direction: ltr;
+                .$uniq .Grid$uniq td{
+                    padding: 1px 3px;
                 }
                 .$uniq .Select$uniq :is(#OptionsBefore$uniq, #OptionsAfter$uniq){
                     cursor: pointer;
@@ -489,17 +499,18 @@ $attachments"]);
             ").
             self::Script("
             function {$uniq}_Click(day = null){
-                fdt = document.querySelector('.$uniq .Y$uniq').innerText+'-'+
+                const tso = ".(\_::$CONFIG->TimeStampOffset*1000).";
+                dt = new Date(
+                    document.querySelector('.$uniq .Y$uniq').innerText+'-'+
                     document.querySelector('.$uniq .M$uniq').innerText+'-'+
                     (day??document.querySelector('.$uniq .D$uniq')).innerText+' '+
                     document.querySelector('.$uniq .h$uniq').innerText+':'+
                     document.querySelector('.$uniq .m$uniq').innerText+':'+
-                    document.querySelector('.$uniq .s$uniq').innerText;
-                gdt = new Date(new Date(fdt).getTime() - (".(\_::$CONFIG->TimeStampOffset*1000)."));
+                    document.querySelector('.$uniq .s$uniq').innerText+' UTC');
+                gdt = new Date(dt.getTime() - tso);
                 $uniq = document.querySelector('.$uniq');
                 $uniq.setAttribute('value', gdt.getTime());
-                if(day == null){
-                    dt = new Date(gdt.getTime() + (".(\_::$CONFIG->TimeStampOffset*1000)."));
+                if(day == null) {
                     cd = dt.getDate();
                     sd = 1;
                     ed = new Date(gdt.getFullYear(), gdt.getMonth()+1, 0).getDate();
@@ -557,6 +568,8 @@ $attachments"]);
                     for(item of document.querySelectorAll('.$uniq td.clickable'))
                         item.setAttribute('class','clickable');
                     day.setAttribute('class','clickable D$uniq selected');
+                    document.querySelector('.$uniq span.D$uniq').innerText = day.innerText;
+                    {$uniq}_ToggleWeek(false);
                 }
                 $uniq.dispatchEvent(new Event('change'));
             }
@@ -631,10 +644,24 @@ $attachments"]);
             function {$uniq}_SelectOption(newElement, oldElement){
                 oldElement.innerText = newElement.innerText;
                 document.querySelector('.$uniq .Select$uniq').setAttribute('class','Select$uniq hidden');
-                document.querySelector('.$uniq .Grid$uniq').setAttribute('class','Grid$uniq shown');
                 $update
-            }").
+            }
+            ShowWeeks = false;
+            function {$uniq}_ToggleWeek(show = null){
+                if(show == null) show = !ShowWeeks;
+                ShowWeeks = show;
+                document.querySelector('.$uniq .Grid$uniq').setAttribute('class','Grid$uniq '+(show?'shown':'hidden'));
+            }
+            ").
             self::Division(
+                self::Division([
+                    self::Span(self::Media("", "calendar", ["onclick"=>"{$uniq}_ToggleWeek();"])).
+                    self::Span($dt->format("Y"), ["class"=>"Y$uniq clickable", "onclick"=>"{$uniq}_ShowOptions('.$uniq .Y$uniq', parseInt(this.innerText), 0, 9999)"]).
+                    self::Span("/").
+                    self::Span($dt->format("m"), ["class"=>"M$uniq clickable", "onclick"=>"{$uniq}_ShowOptions('.$uniq .M$uniq', parseInt(this.innerText), 1, 12)"]).
+                    self::Span("/").
+                    self::Span($dt->format("d"), ["class"=>"D$uniq clickable", "onclick"=>"{$uniq}_ToggleWeek(true);"])
+                ]).
                 self::SmallFrame(
                     [
                         [self::Media(" ", "angle-up", ["id"=>"OptionsBefore$uniq"])],
@@ -642,13 +669,7 @@ $attachments"]);
                         [self::Media(" ", "angle-down", ["id"=>"OptionsAfter$uniq"])]
                     ]
                 ,["class"=>"Select$uniq hidden"]).
-                "<table class='Grid$uniq shown'>".
-                    "<tr>".
-                        self::Cell(self::Media("", "calendar")).
-                        self::Cell($dt->format("Y"), $head, ["class"=>"Y$uniq clickable", "colspan"=>"3", "onclick"=>"{$uniq}_ShowOptions('.$uniq .Y$uniq', parseInt(this.innerText), 0, 9999)"]).
-                        self::cell("/").
-                        self::cell($dt->format("m"), $head, ["class"=>"M$uniq clickable", "colspan"=>"2", "onclick"=>"{$uniq}_ShowOptions('.$uniq .M$uniq', parseInt(this.innerText), 1, 12)"]).
-                    "</tr>".
+                "<table class='Grid$uniq hidden'>".
                     "<tr>".join(PHP_EOL, [
                         self::Cell($weekDays[0], true),
                         self::Cell($weekDays[1], true),
@@ -676,16 +697,15 @@ $attachments"]);
                             }
                         })())
                     ).
-                "<tr>".
-                    self::Cell(self::Media("", "clock")).
-                    self::Cell($dt->format("H"), $head, ["class"=>"h$uniq clickable", "colspan"=>"1", "onclick"=>"{$uniq}_ShowOptions('.$uniq .h$uniq', parseInt(this.innerText), 0, 23)"]).
-                    self::Cell(":").
-                    self::Cell($dt->format("i"), $head, ["class"=>"m$uniq clickable", "colspan"=>"1", "onclick"=>"{$uniq}_ShowOptions('.$uniq .m$uniq', parseInt(this.innerText), 0, 59)"]).
-                    self::Cell(":").
-                    self::Cell($dt->format("s"), $head, ["class"=>"s$uniq clickable", "colspan"=>"1", "onclick"=>"{$uniq}_ShowOptions('.$uniq .s$uniq', parseInt(this.innerText), 0, 59)"]).
-                    self::Cell("").
-                "</tr>".
-            "</table>"
+                "</table> &nbsp; ".
+                self::Division([
+                    self::Span(self::Media("", "clock", ["onclick"=>"{$uniq}_ToggleWeek();"])).
+                    self::Span($dt->format("H"), ["class"=>"h$uniq clickable", "onclick"=>"{$uniq}_ShowOptions('.$uniq .h$uniq', parseInt(this.innerText), 0, 23)"]).
+                    self::Span(":").
+                    self::Span($dt->format("i"), ["class"=>"m$uniq clickable", "onclick"=>"{$uniq}_ShowOptions('.$uniq .m$uniq', parseInt(this.innerText), 0, 59)"]).
+                    self::Span(":").
+                    self::Span($dt->format("s"), ["class"=>"s$uniq clickable","onclick"=>"{$uniq}_ShowOptions('.$uniq .s$uniq', parseInt(this.innerText), 0, 59)"])
+                ])
             , ["class"=>"calendar $uniq", "value"=>\_::$CONFIG->GetDateTime($content)->format('Uv')/*Get the miliseconds of the Time*/], $attributes);
     }
 
@@ -1305,6 +1325,7 @@ else return call_user_func("self::Field", null, $k, $f);
             $attributes = Convert::ToIteration($description);
             $description = null;
         }
+        if($type === false) return null;
         if(is_null($type))
             $type = self::InputDetector($type, $value);
         if(is_callable($type) || ($type instanceof \Closure))
@@ -1350,6 +1371,11 @@ else return call_user_func("self::Field", null, $k, $f);
         $descriptionTag = ($description===false || !isValid($description)?"":self::Label($description, $id, ["class"=> "description"]));
         switch ($type)
         {
+            case null:
+            case false:
+            case 'null':
+            case 'false':
+                return null;
             case 'span':
                 $content = self::Span($value??$titleOrKey, null, $attributes);
                 break;
@@ -1563,6 +1589,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @return string
      */
     public static function InputDetector($type = null, $value = null){
+        if($type === false) return null;
         if(is_null($type))
             if(isEmpty($value)) return "text";
             elseif(is_string($value))
@@ -1750,11 +1777,31 @@ else return call_user_func("self::Field", null, $k, $f);
      */
     public static function CalendarInput($key, $value = null, ...$attributes){
         $id = Convert::ToId($key);
-        return self::Calendar($value, ["class"=>"calendarinput", "for"=>$id, "onchange"=>"
-            dt = new Date(parseInt(this.getAttribute('value')));
-            document.querySelector('input#$id').value = dt.getFullYear()+'-'+(dt.getMonth()<9?'0':'')+(dt.getMonth()+1)+'-'+(dt.getDate()<10?'0':'')+dt.getDate()+' '+(dt.getHours()<10?'0':'')+dt.getHours()+':'+(dt.getMinutes()<10?'0':'')+dt.getMinutes()+':'+(dt.getSeconds()<10?'0':'')+dt.getSeconds();
-            "], $attributes).
-            self::Input($key, $value, "datetime-local", ["class"=>"calendarinput", "id"=>$id]);
+        $name = $key;
+        $attrs = [];
+        foreach (Convert::ToIteration(...$attributes) as $k=>$v) {
+            switch(strtolower(trim($k))){
+                case "name":
+                    $name = $v;
+                    break;
+                case "id":
+                    $id = $v;
+                    break;
+                default:
+                    $attrs[$k] = $v;
+                    break;
+            }
+        }
+        return self::Calendar($value, [
+            "class"=>"calendarinput",
+            "for"=>$id, "onchange"=>"
+                dt = new Date(parseInt(this.getAttribute('value')));
+                let inp = document.querySelector('input#$id');
+                val = dt.getFullYear()+'-'+(dt.getMonth()<9?'0':'')+(dt.getMonth()+1)+'-'+(dt.getDate()<10?'0':'')+dt.getDate()+' '+(dt.getHours()<10?'0':'')+dt.getHours()+':'+(dt.getMinutes()<10?'0':'')+dt.getMinutes()+':'+(dt.getSeconds()<10?'0':'')+dt.getSeconds();
+                inp.setAttribute('value', val);
+                inp.value = val;
+            "], $attrs).
+            self::Input($key, $value, "datetime-local", ["class"=>"calendarinput", "id"=>$id, "name"=>$name, "style"=>"display: none;"]);
     }
     /**
      * The <INPUT> HTML Tag

@@ -468,23 +468,24 @@ abstract class ConfigurationBase extends Base {
 		        return [...$this->AcceptableImageFormats, ...$this->AcceptableAudioFormats, ...$this->AcceptableVideoFormats, ...$this->AcceptableDocumentFormats, ...$this->AcceptableFileFormats];
         }
     }
-    public function GetDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
-        return new DateTime($dateTime??$this->CurrentDateTime, $dateTimeZone??new DateTimeZone($this->DateTimeZone));
+  
+    public function GetDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null){
+        return (is_string($dateTime) || is_null($dateTime))?new DateTime($dateTime??$this->CurrentDateTime, $dateTimeZone??new DateTimeZone($this->DateTimeZone)):$dateTime;
     }
-    public function GetFormattedDateTime(string|null $dateTimeFormat = null, string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
+    public function GetFormattedDateTime(string|null $dateTimeFormat = null, $dateTime = null, DateTimeZone|null $dateTimeZone = null){
         return $this->GetDateTime($dateTime, $dateTimeZone)->format($dateTimeFormat??$this->DateTimeFormat);
     }
-    public function ToShownDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
+    public function ToShownDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null){
         return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp()+$this->TimeStampOffset);
     }
-    public function FromShownDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null){
+    public function FromShownDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null){
         return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp()-$this->TimeStampOffset);
     }
-    public function ToShownFormattedDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null){
+    public function ToShownFormattedDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null){
         return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp()+$this->TimeStampOffset)
             ->format($dateTimeFormat??$this->DateTimeFormat);
     }
-    public function FromShownFormattedDateTime(string|null $dateTime = null, DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null){
+    public function FromShownFormattedDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null){
         return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp()-$this->TimeStampOffset)
             ->format($dateTimeFormat??$this->DateTimeFormat);
     }

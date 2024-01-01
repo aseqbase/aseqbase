@@ -29,8 +29,8 @@ class Shortcuts extends Module{
 		return parent::Get().Convert::ToString(function(){
 			$count = count($this->Items);
 			if($count > 0){
-				COMPONENT("FontAwesome");
-				$comp = new \MiMFa\Component\FontAwesome();
+				COMPONENT("Icons");
+				$comp = new \MiMFa\Component\Icons();
 				$comp->EchoStyle(".".$this->Name);
 				$comp->EchoTechnologyStyle(".".$this->Name);
 				for($i = 0; $i < $count; $i++){
