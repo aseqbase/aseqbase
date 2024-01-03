@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Module;
 MODULE("IFrame");
-class EmbededMedia extends IFrame{
+class MediaFrame extends IFrame{
 	public $Source = null;
 	public $Image = null;
 	public $AllowFullScreen = "allowfullscreen";
