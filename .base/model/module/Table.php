@@ -130,10 +130,7 @@ class Table extends Module{
 	public $MediaHeight = "var(--Size-5)";
 	public $Modal = null;
 	public $HasDecoration = true;
-	public $Options = "
-                    deferRender: false,
-					select: true
-	";
+	public $Options = ["deferRender: false", "select: true"];
 	public $AllowCache= true;
 	public $AllowPaging= true;
 	public $AllowSearching= true;
@@ -404,8 +401,8 @@ class Table extends Module{
                                 "}".
                             "}"
                         ],
-						...(isEmpty($this->Options)?[]:[Convert::ToString($this->Options)]),
-						...($this->Controlable?["'columnDefs': [{ 'targets': 0, 'orderable': false }]"]:[])
+						...($this->Controlable?["'columnDefs': [{ 'targets': 0, 'orderable': false }]"]:[]),
+						...(isEmpty($this->Options)?[]:(is_array($this->Options)?$this->Options:[Convert::ToString($this->Options)]))
 					]).
 				"});
 			});").($this->Controlable?

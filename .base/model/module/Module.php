@@ -112,7 +112,7 @@ class Module extends \Base{
      * The Module Style
      * @var Style
      */
-	public null|Style $Style = null;
+	public null|string|Style $Style = null;
 	/**
      * To custom Styles
      * @var string
@@ -186,7 +186,7 @@ class Module extends \Base{
      */
 	public function GetOpenTag($tag=null){
 		$st = null;
-		if(isValid($this->Style)) $st = $this->Style->Get();
+		if(isValid($this->Style)) $st = is_string($this->Style)?$this->Style:$this->Style->Get();
 		if(isValid($tag??$this->Tag)) return join("",["<",($tag??$this->Tag??"div")," ",$this->GetDefaultAttributes(), isValid($st)?" style=\"{$st}\"":"",">"]);
 		elseif(isValid($st)) return "<style>.{$this->Name}{ $st }</style>";
         return null;
