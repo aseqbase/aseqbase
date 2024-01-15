@@ -15,7 +15,7 @@ class Convert{
         if(is_null($converter)) return null;
 		if(is_countable($converter) || is_iterable($converter))
             return iterator_to_array((function() use($converter, $args){
-                foreach ($converter as $c) yield self::By($c, ...$args);
+                foreach ($converter as $k=>$c) yield $k => self::By($c, ...$args);
             })());
         if(is_callable($converter) || $converter instanceof \Closure) return $converter(...$args);
         return $converter;

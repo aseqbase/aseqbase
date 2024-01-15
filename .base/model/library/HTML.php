@@ -1321,13 +1321,12 @@ else return call_user_func("self::Field", null, $k, $f);
      * @return string
      */
     public static function Field($type = null, $key = null, $value = null, $description = null, $options = null, $attributes = [], $title = null, $scope = true){
-        if(is_array($description) && count($attributes) === 0){
+        if(is_array($description) && count($attributes) === 0) {
             $attributes = Convert::ToIteration($description);
             $description = null;
         }
         if($type === false) return null;
-        if(is_null($type))
-            $type = self::InputDetector($type, $value);
+        if(is_null($type)) $type = self::InputDetector($type, $value);
         if(is_callable($type) || ($type instanceof \Closure))
             return self::Field(
                 type:$type($type, $value),
@@ -1964,7 +1963,8 @@ else return call_user_func("self::Field", null, $k, $f);
      * @return string
      */
     public static function FloatInput($key, $value = null, ...$attributes){
-        return self::Input($key, $value?round($value, self::$MaxDecimalPrecision):$value, "number", ["class"=>"floatinput", "step"=>"".(1/pow(10,self::$MaxDecimalPrecision)), "inputmode"=>"numeric"], $attributes);
+        return self::Input($key, $value, "number", ["class"=>"floatinput", "step"=>"".(1/pow(10,self::$MaxDecimalPrecision)), "inputmode"=>"numeric"], $attributes);
+        //return self::Input($key, isset($attributes["step"])?$value:round($value, self::$MaxDecimalPrecision), "number", ["class"=>"floatinput", "step"=>"".(1/pow(10,self::$MaxDecimalPrecision)), "inputmode"=>"numeric"], $attributes);
     }
     /**
      * The <INPUT> HTML Tag
@@ -2006,17 +2006,19 @@ else return call_user_func("self::Field", null, $k, $f);
      */
     public static function SelectInput($key, $value = null, $options = [], ...$attributes){
         return self::Element(
-            is_iterable($options) || is_array($options)?iterator_to_array((function()use($options, $value, $attributes){
-                $value = Convert::ToString($value);
-                $f = false;
-                if($f = isEmpty($value))
-                    yield self::Element("","option",["value"=>"", "selected"=>"true"]);
-                else yield self::Element("","option",["value"=>""]);
-                foreach ($options as $k=>$v)
-                    if(!$f && ($f = ($k == $value)))
-                        yield self::Element(__($v??"", styling:false),"option",["value"=>$k, "selected"=>"true"]);
-                    else yield self::Element(__($v??"", styling:false),"option",["value"=>$k]);
-            })()):Convert::ToString($options, assignFormat:"<option value='{0}'>{1}</option>\r\n")
+            is_iterable($options) || is_array($options)?
+                iterator_to_array((function() use($options, $value){
+                    $value = Convert::ToString($value);
+                    $f = false;
+                    if($f = isEmpty($value))
+                        yield self::Element("","option",["value"=>"", "selected"=>"true"]);
+                    else yield self::Element("","option",["value"=>""]);
+                    foreach ($options as $k=>$v)
+                        if(!$f && ($f = ($k == $value)))
+                            yield self::Element(__($v??"", styling:false),"option",["value"=>$k, "selected"=>"true"]);
+                        else yield self::Element(__($v??"", styling:false),"option",["value"=>$k]);
+                })())
+            : Convert::ToString($options, assignFormat:"<option value='{0}'>{1}</option>\r\n")
             ,"select", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "placeholder"=>  __(Convert::ToTitle($key), styling:false), "class"=>"input selectinput" ], $attributes);
     }
 

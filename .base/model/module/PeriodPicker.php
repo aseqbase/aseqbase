@@ -12,7 +12,7 @@ class PeriodPicker extends Module{
      * Create the module
      * @param string|null $source The module source
      */
-	public function __construct($setDefault = false, $fromTime = "yesterday", $toTime = "now"){
+	public function __construct($setDefault = false, $fromTime = "today 00:00:00", $toTime = "today 23:59:59"){
         parent::__construct();
         if($setDefault){
             if(!isset($_GET[$this->FromTimeRequest]) && isValid($fromTime)) $_REQUEST[$this->FromTimeRequest] = $_GET[$this->FromTimeRequest] = \_::$CONFIG->GetDateTime($fromTime)->format('Y-m-d H:i:s');
@@ -21,8 +21,8 @@ class PeriodPicker extends Module{
         $fromID = $this->Name."_".$this->FromTimeRequest;
         $toID = $this->Name."_".$this->ToTimeRequest;
         $this->Children = [
-                HTML::Field(type:"Calendar", title: $this->FromTimeLable, value: RECEIVE($this->FromTimeRequest, "GET", \_::$CONFIG->GetDateTime($fromTime)->format('Y-m-d 00:00:00')), key: $this->FromTimeRequest, attributes:["id"=>$fromID]).
-                HTML::Field(type:"Calendar", title: $this->ToTimeLable,  value: RECEIVE($this->ToTimeRequest, "GET", \_::$CONFIG->GetDateTime($toTime)->format('Y-m-d 23:59:59')), key: $this->ToTimeRequest, attributes:["id"=>$toID]).
+                HTML::Field(type:"Calendar", title: $this->FromTimeLable, value: RECEIVE($this->FromTimeRequest, "GET", \_::$CONFIG->GetFormattedDateTime($fromTime)), key: $this->FromTimeRequest, attributes:["id"=>$fromID]).
+                HTML::Field(type:"Calendar", title: $this->ToTimeLable,  value: RECEIVE($this->ToTimeRequest, "GET", \_::$CONFIG->GetFormattedDateTime($toTime)), key: $this->ToTimeRequest, attributes:["id"=>$toID]).
                 HTML::Button("Show", "load(`".\_::$PATH."?{$this->FromTimeRequest}=`+(document.getElementById(`$fromID`).value+'').replace('T',' ')+`&{$this->ToTimeRequest}=`+(document.getElementById(`$toID`).value+'').replace('T',' '))")
             ];
     }
