@@ -544,7 +544,8 @@ class Table extends Module{
             $form->CancelLabel = "Cancel";
             $form->CancelPath = $this->Modal->HideScript();
         } else $form->CancelLabel = null;
-        $form->SuccessPath = \_::$PATH;
+        $form->SuccessPath = \_::$URL;
+        $form->BackPath = \_::$URL;
         $form->BackLabel = null;
         //$form->AllowHeader = false;
         return $form->Capture();
@@ -606,7 +607,8 @@ class Table extends Module{
             $form->CancelPath = $this->Modal->HideScript();
             $form->CancelLabel = "Cancel";
         } else $form->CancelLabel = null;
-        $form->SuccessPath = \_::$PATH;
+        $form->SuccessPath = \_::$URL;
+        $form->BackPath = \_::$URL;
         $form->BackLabel = null;
         //$form->AllowHeader = false;
         return $form->Capture();
@@ -648,7 +650,8 @@ class Table extends Module{
             $form->CancelPath = $this->Modal->HideScript();
             $form->CancelLabel = "Cancel";
         } else $form->CancelLabel = null;
-        $form->SuccessPath = \_::$PATH;
+        $form->SuccessPath = \_::$URL;
+        $form->BackPath = \_::$URL;
         $form->BackLabel = null;
         //$form->AllowHeader = false;
         return $form->Capture();
