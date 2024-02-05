@@ -45,7 +45,7 @@ class MainMenu extends Module{
 				left:0;
 				right:0;
 				z-index: 999;
-				<?php }?>
+            	<?php }?>
 				box-shadow: var(--Shadow-2);
 			}
 			.<?php echo $this->Name; ?>-margin{

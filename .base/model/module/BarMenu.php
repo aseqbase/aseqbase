@@ -15,7 +15,6 @@ class BarMenu extends Module{
 	public function GetStyle(){
 		return parent::GetStyle().HTML::Style("
 			.{$this->Name}{
-				background-color: var(--BackColor-2);
 				color: var(--ForeColor-2);
 				text-transform: uppercase;
 				text-align: center;
@@ -29,7 +28,6 @@ class BarMenu extends Module{
 				right: 0px;
 				box-shadow: -5px 0px 20px #00000025;
 				border: none;
-				display: table;
 				line-height: 100%;
 				z-index: 999999;
 			}

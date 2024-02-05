@@ -1,8 +1,6 @@
 	</head>
-	<body>
-	<?php /*"<body
-		oncontextmenu="return false;" 
-		unselectable="on"
-		onselectstart="return false;" 
-		onmousedown="return false;">*/ ?>
+	<?php echo "<body".
+		(\_::$CONFIG->AllowContextMenu?"":" oncontextmenu='return false;'").
+		(\_::$CONFIG->AllowSelecting?"":" unselectable='on' onselectstart='return false;' onmousedown='return false;''").
+		">"; ?>
 	<?php echo \_::$TEMPLATE->GetMain(); ?>

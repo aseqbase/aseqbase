@@ -214,13 +214,18 @@ class Module extends \Base{
 	public function GetDefaultAttributes(){
 		return
 			$this->GetAttribute("id",$this->Id).
-			$this->GetAttribute(" class",$this->Name.' '.$this->Class.
-				(isValid($this->VisibleFromScreenSize)?" ".$this->VisibleFromScreenSize."-visible":"").
+			$this->GetAttribute(" class",$this->Name.' '.$this->Class.$this->GetScreenClass()).
+			(isValid($this->Attributes)?" ".Convert::ToString($this->Attributes," ","=","{0}={1} "):"");
+	}
+    /**
+     * Get the default module Screen Attributes
+     * @return string
+     */
+	public function GetScreenClass(){
+		return (isValid($this->VisibleFromScreenSize)?" ".$this->VisibleFromScreenSize."-visible":"").
 				(isValid($this->InvisibleFromScreenSize)?" ".$this->InvisibleFromScreenSize."-invisible":"").
 				(isValid($this->ShowFromScreenSize)?" ".$this->ShowFromScreenSize."-show":"").
-				(isValid($this->HideFromScreenSize)?" ".$this->HideFromScreenSize."-hide":"")
-			).
-			(isValid($this->Attributes)?" ".Convert::ToString($this->Attributes," ","=","{0}={1} "):"");
+				(isValid($this->HideFromScreenSize)?" ".$this->HideFromScreenSize."-hide":"");
 	}
 	/**
      * Create a standard Attribute and its value for a tag

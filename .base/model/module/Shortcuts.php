@@ -27,8 +27,8 @@ class Shortcuts extends Module{
 
 	public function Get(){
 		return parent::Get().Convert::ToString(function(){
-			$count = count($this->Items);
-			if($count > 0){
+			if(!isEmpty($this->Items)){
+				$count = count($this->Items);
 				COMPONENT("Icons");
 				$comp = new \MiMFa\Component\Icons();
 				$comp->EchoStyle(".".$this->Name);

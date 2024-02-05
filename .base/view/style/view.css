@@ -20,7 +20,7 @@
 .xxlg-show, .xxlg-range-show, .xxlg-block, .xxlg-range-block {
   display: none !important; }
 
-@media screen and (max-width: 99999px) {
+@media screen and (min-width: 1201px) {
   .xxlg-visible {
     visibility: visible !important; }
     .xxlg-show {
@@ -143,37 +143,39 @@
     .md-range-hide {
       display: none !important; } }
 
-.xxsm-invisible, .xxsm-range-invisible {
+.sm-invisible, .sm-range-invisible {
   visibility: visible !important; }
 
-.xxsm-visible, .xxsm-range-visible {
+.sm-visible, .sm-range-visible {
   visibility: hidden !important; }
 
-.xxsm-show, .xxsm-range-show, .xxsm-block, .xxsm-range-block {
+.sm-show, .sm-range-show, .sm-block, .sm-range-block {
   display: none !important; }
 
-@media screen and (max-width: 360px) {
-  .xxsm-visible {
+@media screen and (max-width: 576px) {
+  .sm-visible {
     visibility: visible !important; }
-    .xxsm-show {
+    .sm-show {
       display: inherit !important; }
-    .xxsm-block {
+    .sm-block {
       display: block !important; }
-    .xxsm-invisible {
+    .sm-invisible {
       visibility: hidden !important; }
-    .xxsm-hide {
+    .sm-hide {
       display: none !important; } }
 
-@media screen and (min-width: 10px) and (max-width: 360px) {
-  .xxsm-range-visible {
+@media screen and (min-width: 481px) and (max-width: 576px) {
+  .sm-range-visible {
     visibility: visible !important; }
-    .xxsm-range-show {
+    .sm-range-show {
       display: inherit !important; }
-    .xxsm-range-block {
+    .sm-range-block {
       display: block !important; }
-    .xxsm-range-invisible {
+    .sm-range-invisible {
       visibility: hidden !important; }
-    .xxsm-range-hide {
+    .sm-range-visible {
+      visibility: visible !important; }
+    .sm-range-hide {
       display: none !important; } }
 
 .xsm-invisible, .xsm-range-invisible {
@@ -209,37 +211,35 @@
     .xsm-range-hide {
       display: none !important; } }
 
-.sm-invisible, .sm-range-invisible {
+.xxsm-invisible, .xxsm-range-invisible {
   visibility: visible !important; }
 
-.sm-visible, .sm-range-visible {
+.xxsm-visible, .xxsm-range-visible {
   visibility: hidden !important; }
 
-.sm-show, .sm-range-show, .sm-block, .sm-range-block {
+.xxsm-show, .xxsm-range-show, .xxsm-block, .xxsm-range-block {
   display: none !important; }
 
-@media screen and (max-width: 576px) {
-  .sm-visible {
+@media screen and (max-width: 360px) {
+  .xxsm-visible {
     visibility: visible !important; }
-    .sm-show {
+    .xxsm-show {
       display: inherit !important; }
-    .sm-block {
+    .xxsm-block {
       display: block !important; }
-    .sm-invisible {
+    .xxsm-invisible {
       visibility: hidden !important; }
-    .sm-hide {
+    .xxsm-hide {
       display: none !important; } }
 
-@media screen and (min-width: 481px) and (max-width: 576px) {
-  .sm-range-visible {
+@media screen and (min-width: 10px) and (max-width: 360px) {
+  .xxsm-range-visible {
     visibility: visible !important; }
-    .sm-range-show {
+    .xxsm-range-show {
       display: inherit !important; }
-    .sm-range-block {
+    .xxsm-range-block {
       display: block !important; }
-    .sm-range-invisible {
+    .xxsm-range-invisible {
       visibility: hidden !important; }
-    .sm-range-visible {
-      visibility: visible !important; }
-    .sm-range-hide {
+    .xxsm-range-hide {
       display: none !important; } }

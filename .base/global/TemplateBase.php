@@ -48,7 +48,7 @@
 		public function ForeColor(int $ind = 0) { $ind %= count($this->ForeColorPalette); return $this->ForeColorPalette[$ind];}
 		public function BackColor(int $ind = 0) { $ind %= count($this->BackColorPalette); return $this->BackColorPalette[$ind];}
 		public function Font(int $ind = 0) { $ind %= count($this->FontPalette); return $this->FontPalette[$ind];}
-		public function Size(int $ind = 0) { $ind %= count($this->SizePalette); return $this->SizePalette[$ind];}
+		public function Size(int $ind = 0) { return $this->SizePalette[$ind >= count($this->SizePalette)?count($this->SizePalette)-1:max(0,$ind)];}
 		public function Shadow(int $ind = 0) { $ind %= count($this->ShadowPalette); return $this->ShadowPalette[$ind];}
 		public function Border(int $ind = 0) { $ind %= count($this->BorderPalette); return $this->BorderPalette[$ind];}
 		public function Radius(int $ind = 0) { $ind %= count($this->RadiusPalette); return $this->RadiusPalette[$ind];}

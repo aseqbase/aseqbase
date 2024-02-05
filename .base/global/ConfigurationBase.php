@@ -228,6 +228,18 @@ abstract class ConfigurationBase extends Base {
      */
 	public $AllowSigning = true;
 	/**
+     * Allow Selecting on Page
+     * @var bool
+     * @category Security
+     */
+	public $AllowSelecting = true;
+	/**
+     * Allow ContextMenu on Page
+     * @var bool
+     * @category Security
+     */
+	public $AllowContextMenu = true;
+	/**
      * The minimum group of banned user
      * @var int
      * @category Security
@@ -468,7 +480,7 @@ abstract class ConfigurationBase extends Base {
 		        return [...$this->AcceptableImageFormats, ...$this->AcceptableAudioFormats, ...$this->AcceptableVideoFormats, ...$this->AcceptableDocumentFormats, ...$this->AcceptableFileFormats];
         }
     }
-  
+
     public function GetDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null){
         return (is_string($dateTime) || is_null($dateTime))?new DateTime($dateTime??$this->CurrentDateTime, $dateTimeZone??new DateTimeZone($this->DateTimeZone)):$dateTime;
     }
