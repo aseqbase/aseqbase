@@ -8,6 +8,7 @@ class BarMenu extends Module{
 	public $AllowLabels = false;
 	public $AllowAnimate = true;
 	public $AllowMiddle = true;
+	public $AllowSides = false;
 	public $AllowChangeColor = true;
 	public $VisibleFromScreenSize = "sm";
 	public $Height = 40;
@@ -108,14 +109,14 @@ class BarMenu extends Module{
 				}
 				.{$this->Name}>a>.button.left{
 					border-radius: 0px 35% 0px 0px;
-				}
+				}":""
+			).($this->AllowSides?"
 				.{$this->Name}>a>.button.first{
 					border-radius: 50% 0px 0px 0px;
 				}
 				.{$this->Name}>a>.button.last{
 					border-radius: 0px 50% 0px 0px;
-				}":""
-			)
+				}":"")
 		);
 	}
 

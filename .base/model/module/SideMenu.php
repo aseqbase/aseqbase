@@ -315,6 +315,7 @@ class SideMenu extends Module{
 				display: inherit;
 				width: 100%;
 				opacity: 1;
+				padding-$sdir: var(--Size-5);
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
 			$notactiveselector>:not(.container, .header), $notactiveselector .header .division{
