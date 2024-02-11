@@ -389,7 +389,7 @@ class SideMenu extends Module{
 			yield "<div class='footer'>";
 			yield $module->Capture();
 
-			if(!$this->AllowHide) yield HTML::Icon("map-pin","$('.{$this->Name}').toggleClass('active')", ["class"=>"btn pin-button"]);
+			if(!$this->AllowHide && !isEmpty($module->Items)) yield HTML::Icon("map-pin","$('.{$this->Name}').toggleClass('active')", ["class"=>"btn pin-button"]);
 			yield "</div>";
         });
 	}

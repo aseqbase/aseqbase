@@ -1339,8 +1339,8 @@
 	 * @return mixed
 	 */
 	function preg_find($pattern,string|null $text,string|null $def = null):string|null{
-		preg_match($pattern, $text, $matches);
-		return isset($matches[0])?$matches[0]:$def;
+		preg_match_all($pattern, $text, $matches);
+		return isset($matches[0][0])?$matches[0][0]:$def;
 	}
 	/**
 	 * Regular Expression Find all matches by pattern
@@ -1349,8 +1349,8 @@
 	 * @return array|null
 	 */
 	function preg_find_all($pattern, string|null $text):array|null{
-		preg_match($pattern, $text, $matches);
-		return $matches;
+		preg_match_all($pattern, $text, $matches);
+		return $matches[0];
 	}
 
 	/**
@@ -1381,7 +1381,7 @@
      */
 	function array_find_key($array, callable $searching)
 	{
-		return array_key_first(array_filter($array, $searching, ARRAY_FILTER_USE_BOTH));
+		return array_key_first(array_filter($array, function($k,$v)use($searching){ return $searching($v, $k);}, ARRAY_FILTER_USE_BOTH));
 	}
 	/**
      * Find everythings are match from an array by a callable function
@@ -1391,7 +1391,7 @@
      */
 	function array_find_keys($array, callable $searching)
 	{
-		return array_filter($array, $searching, ARRAY_FILTER_USE_BOTH);
+		return array_filter($array, function($k,$v)use($searching){ return $searching($v, $k);}, ARRAY_FILTER_USE_BOTH);
 	}
 
 	//Test Region

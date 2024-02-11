@@ -27,6 +27,8 @@ class Form extends Module{
 	public $AllowHeader = true;
 	public $AllowContent = true;
 	public $AllowFooter = true;
+    public $Class = "container";
+	public $ContentClass = "col-lg-6";
 
 	public $FieldsForeColor = "var(--ForeColor-1)";
 	public $FieldsBackColor = "var(--BackColor-1)";
@@ -124,6 +126,8 @@ class Form extends Module{
 				.{$this->Name} .button {
 					background-color: inherit;
 					color: inherit;
+					min-width: max-content;
+					max-width: 90vw;
 					padding: calc(var(--Size-0) / 2) var(--Size-1);
 				}
 				.{$this->Name} .submitbutton {
@@ -203,6 +207,8 @@ class Form extends Module{
 					font-size: 125%;
 					display: inline-flex;
 					width: 100%;
+					min-width: max-content;
+					max-width: 90vw;
 					max-width: -webkit-fill-available;
 					padding-top: 0px;
 					padding-bottom: 0px;
@@ -266,6 +272,8 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
+				min-width: max-content;
+				max-width: 90vw;
 				border: none;
 				border-bottom: var(--Border-1);
 				".Style::DoProperty("border-color", $this->FieldsBorderColor)."
@@ -323,6 +331,8 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
+				min-width: max-content;
+				max-width: 90vw;
 				height: 100%;
 				border-radius: 0px 3px 3px 0px;
 				outline: none;
@@ -392,6 +402,8 @@ class Form extends Module{
 				".Style::DoProperty("background-color", $this->FieldsBackColor)."
 				font-size: 100%;
 				width: 100%;
+				min-width: max-content;
+				max-width: 90vw;
 				border-radius: 0px 3px 3px 3px;
 				border: var(--Border-1);
 				border-color: transparent;
@@ -457,6 +469,8 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
+				min-width: max-content;
+				max-width: 90vw;
 			    margin: 5px;
 				border: none;
 				border-color: transparent;
@@ -500,7 +514,7 @@ class Form extends Module{
 		$src .=	(is_null($this->ResponseView)?null:((strpos($src,"?")?"&":"?").\_::$CONFIG->ViewHandlerKey."=".$this->ResponseView));
 		if(isValid($src))
 			if($this->HasDecoration)
-				return HTML::Container(
+				return
 					HTML::Rack(
 						($this->AllowHeader?HTML::LargeSlot(
 							HTML::Media(null, $this->Image,["class"=>"image"]).
@@ -518,9 +532,8 @@ class Form extends Module{
 								HTML::Rack(Convert::ToString($this->GetButtons()),[ "class"=>"group buttons"])
 							,$src, ["id"=>$name, "name"=>$name, "enctype"=>$this->EncType, "method"=>$this->Method]).
 							($this->AllowFooter?$this->GetFooter():"")
-						,["class"=>"col-lg-8 content"])
-					)
-					,["class"=>"page"]);
+						,["class"=>"{$this->ContentClass} content"])
+					);
             else
                 return
 					($this->AllowHeader?

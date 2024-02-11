@@ -4,6 +4,7 @@ use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
 use MiMFa\Library\Local;
+MODULE("Navigation");
 /**
  * To show a table of items
  *@copyright All rights are reserved for MiMFa Development Group
@@ -14,6 +15,11 @@ use MiMFa\Library\Local;
 class Table extends Module{
 	public $Tag = "table";
 	public $Capturable = true;
+
+	public Navigation|null $NavigationBar = null;
+	public $TopNavigation= true;
+	public $BottomNavigation= false;
+
 	/**
      * The database table name, to get items automatically
      * @var null|string
@@ -105,6 +111,11 @@ class Table extends Module{
 	public $SevereSecure = true;
 	public $CryptPassword = true;
 
+	public $EvenOddColumns = true;
+	public $EvenOddRows = true;
+	public $HoverableRows = true;
+	public $HoverableCells = true;
+
 	public $IsAction = false;
 	public $Controlable = true;
 	public $Updatable = false;
@@ -123,15 +134,16 @@ class Table extends Module{
 	public $SelectQuery = null;
 	public $SelectParameters = null;
 	public $SelectCondition = null;
-	public $AllowLabelTranslation = true;
-	public $AllowDataTranslation = false;
 	public $TextWrap = false;
 	public $MediaWidth = "var(--Size-5)";
 	public $MediaHeight = "var(--Size-5)";
 	public $Modal = null;
 	public $HasDecoration = true;
 	public $Options = ["deferRender: false", "select: true"];
-	public $AllowCache= true;
+
+	public $AllowLabelTranslation = true;
+	public $AllowDataTranslation = false;
+    public $AllowCache= true;
 	public $AllowPaging= true;
 	public $AllowSearching= true;
 	public $AllowOrdering=  true;
@@ -203,7 +215,45 @@ class Table extends Module{
 		.{$this->Name} .input {
 			width: 100%;
 		}
-		");
+        table.dataTable.{$this->Name} tbody :is(td, tr) {
+            text-align: -webkit-auto;
+        }
+        table.dataTable.{$this->Name} thead :is(th, tr) {
+            text-align: center;
+        }
+		".($this->EvenOddColumns?"
+            table.dataTable.{$this->Name} tbody tr.even :is(td, th):nth-child(odd) {
+                background-color: #88888817 !important;
+            }
+            table.dataTable.{$this->Name} tbody tr.odd :is(td, th):nth-child(odd) {
+                background-color: #88888815 !important;
+            }
+		":"").($this->EvenOddRows?"
+            table.dataTable.{$this->Name} tbody tr.odd {
+                background-color: #8881 !important;
+            }
+		":"").($this->HoverableRows?"
+            table.dataTable.{$this->Name} tbody tr:not(.odd, .even):hover {
+                background-color: #8883;
+            }
+            table.dataTable.{$this->Name} tbody tr:is(.odd, .even):hover {
+                background-color: #8882 !important;
+				".Style::UniversalProperty("transition", "var(--Transition-1)")."
+            }
+		":"").($this->HoverableCells?"
+            table.dataTable.{$this->Name} tbody tr:is(.odd, .even) td:hover {
+                background-color: transparent !important;
+                outline: 1px solid var(--Color-3);
+                border-radius: var(--Radius-1);
+				".Style::UniversalProperty("transition", "var(--Transition-1)")."
+            }
+            table.dataTable.{$this->Name} tbody tr:is(.odd, .even) th:hover {
+                background-color: transparent !important;
+                outline: 1px solid var(--Color-1);
+                border-radius: var(--Radius-1);
+				".Style::UniversalProperty("transition", "var(--Transition-1)")."
+            }
+        ":""));
 	}
 
     public function CreateModal(){
@@ -254,13 +304,29 @@ class Table extends Module{
             if($this->IsAction || !isEmpty($res)) return $res;
         }
 		if(isValid($this->Table) && isValid($this->ColumnKey)){
-            $this->Items = isValid($this->SelectQuery)?\MiMFa\Library\DataBase::TrySelect($this->SelectQuery, $this->SelectParameters, $this->Items):
-				\MiMFa\Library\DataBase::DoSelect($this->Table,
+            if($this->AllowServerSide){
+                $this->NavigationBar = isValid($this->SelectQuery)?new Navigation($this->SelectQuery, queryParameters:$this->SelectParameters, defaultItems:$this->Items):
+				new Navigation(\MiMFa\Library\DataBase::MakeSelectQuery($this->Table,
 					isEmpty($this->IncludeColumnKeys)?"*":(in_array($this->ColumnKey, $this->IncludeColumnKeys)?$this->IncludeColumnKeys:[$this->ColumnKey, ...$this->IncludeColumnKeys]),
-					[$this->SelectCondition, isEmpty($this->IncludeRowKeys)?null:("{$this->ColumnKey} IN('".join("', '",$this->IncludeRowKeys)."')")],
-					[], $this->Items
-				);
-        } else $isu = false;
+					[$this->SelectCondition, isEmpty($this->IncludeRowKeys)?null:("{$this->ColumnKey} IN('".join("', '",$this->IncludeRowKeys)."')")]),defaultItems:$this->Items);
+                $this->Items = $this->NavigationBar->GetItems();
+            }
+            else {
+                $this->NavigationBar = isValid($this->SelectQuery)?\MiMFa\Library\DataBase::TrySelect($this->SelectQuery, $this->SelectParameters, $this->Items):
+                    \MiMFa\Library\DataBase::DoSelect($this->Table,
+                    isEmpty($this->IncludeColumnKeys)?"*":(in_array($this->ColumnKey, $this->IncludeColumnKeys)?$this->IncludeColumnKeys:[$this->ColumnKey, ...$this->IncludeColumnKeys]),
+                    [$this->SelectCondition, isEmpty($this->IncludeRowKeys)?null:("{$this->ColumnKey} IN('".join("', '",$this->IncludeRowKeys)."')")],
+                    [], $this->Items
+                );
+                $this->Items = $this->NavigationBar->GetItems();
+            }
+        } else {
+            if($this->AllowServerSide) {
+                $this->NavigationBar = new Navigation($this->Items);
+                $this->Items = $this->NavigationBar->GetItems();
+            }
+            $isu = false;
+        }
 		$hasid = is_countable($this->Items) && !is_null($hasid = array_key_first($this->Items)) && isValid($this->Items[$hasid],$this->ColumnKey);
 		$clks = $this->ColumnLabelsKeys;
 		$rlks = $this->RowLabelsKeys;
@@ -289,7 +355,7 @@ class Table extends Module{
         }
 		$strow = "<tr>";
 		$etrow = "</tr>";
-		if(is_countable($this->Items) && count($this->Items) > 0){
+		if(is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey=>$row){
 				$rowid = getValid($row, $this->ColumnKey, null);
@@ -347,25 +413,31 @@ class Table extends Module{
                     $cells[] = $etrow;
                 }
             }
-            return join(PHP_EOL, $cells);
+            return (!$this->TopNavigation||is_null($this->NavigationBar)?"":$this->NavigationBar->Capture()).join(PHP_EOL, $cells);
         }
 		elseif($isu && getAccess($this->AddAccess))
 			return HTML::Center(HTML::Button("Add your first item ".HTML::Image("plus"),"{$this->Modal->Name}_Create();"));
 		return parent::Get();
 	}
 
+    public function PostCapture(){
+        if(!$this->BottomNavigation || is_null($this->NavigationBar)) return parent::PostCapture();
+        else  return parent::PostCapture().($this->TopNavigation?$this->NavigationBar->ReCapture():$this->NavigationBar->Capture());
+    }
+
 	public function GetScript(){
         $updateMethod = strtolower($this->UpdateMethod);
+        $localPaging = is_null($this->NavigationBar);
 		return HTML::Script("$(document).ready(()=>{".
 			(!$this->HasDecoration?"":
 				"$('.{$this->Name}').DataTable({".
 					join(", ",[
 						...(is_null($this->AllowCache)?[]:["stateSave: ".($this->AllowCache?"true":"false")]),
-						...(is_null($this->AllowPaging)?[]:["paging: ".($this->AllowPaging?"true":"false")]),
+						...(is_null($this->AllowPaging)?[]:["paging: ".($this->AllowPaging?($localPaging?"true":"false"):"false")]),
 						...(is_null($this->AllowSearching)?[]:["searching: ".($this->AllowSearching?"true":"false")]),
 						...(is_null($this->AllowOrdering)?[]:["ordering: ".($this->AllowOrdering?"true":"false")]),
 						...(is_null($this->AllowProcessing)?[]:["processing: ".($this->AllowProcessing?"true":"false")]),
-						...(is_null($this->AllowServerSide)?[]:["serverSide: ".($this->AllowServerSide?"true":"false")]),
+						...(is_null($this->AllowServerSide)?[]:["serverSide: ".($this->AllowServerSide?($localPaging?"true":"false"):"false")]),
 						...(is_null($this->AllowScrollX)?[]:["scrollX: ".($this->AllowScrollX?"true":"false")]),
 						...(is_null($this->AllowScrollY)?[]:["scrollY: ".($this->AllowScrollY?"true":"false")]),
 						...(is_null($this->AllowScrollCollapse)?[]:["scrollCollapse: ".($this->AllowScrollCollapse?"true":"false")]),
@@ -375,7 +447,7 @@ class Table extends Module{
 						...(is_null($this->AllowFixedColumns)?[]:["fixedColumns: ".($this->AllowFixedColumns?"true":"false")]),
 						...(is_null($this->AllowFixedRows)?[]:["fixedRows: ".($this->AllowFixedRows?"true":"false")]),
 						...(is_null($this->AllowResponsive)?[]:["responsive: ".($this->AllowResponsive?"true":"false")]),
-						...(is_null($this->AllowEntriesInfo)?[]:["info: ".($this->AllowEntriesInfo?"true":"false")]),
+						...(is_null($this->AllowEntriesInfo)?[]:["info: ".($this->AllowEntriesInfo?($localPaging?"true":"false"):"false")]),
                         ...["language: {".
                                 "decimal: \"".__("", styling:false)."\",".
                                 "emptyTable: \"".__("No items available", styling:false)."\",".
@@ -501,43 +573,42 @@ class Table extends Module{
             children:(function() use($row){
                 yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
                 foreach ($row as $k=>$cell){
-                    if($k != $this->ColumnKey) {
-                        $type = getValid($this->CellTypes, $k, "");
-                        if(is_string($type)){
-                            $type = strtolower($type);
-                            switch($type){
-                                case "pass":
-                                case "password":
-                                    $type = false;
-                                    break;
-                                case "file":
-                                case "files":
-                                case "doc":
-                                case "docs":
-                                case "document":
-                                case "documents":
-                                case "image":
-                                case "images":
-                                case "video":
-                                case "videos":
-                                case "audio":
-                                case "audios":
-                                    $type = false;
-                                    break;
-                            }
+                    $type = getValid($this->CellTypes, $k, "");
+                    if(is_string($type)){
+                        $type = strtolower($type);
+                        switch($type){
+                            case "pass":
+                            case "password":
+                                $type = false;
+                                break;
+                            case "file":
+                            case "files":
+                            case "doc":
+                            case "docs":
+                            case "document":
+                            case "documents":
+                            case "image":
+                            case "images":
+                            case "video":
+                            case "videos":
+                            case "audio":
+                            case "audios":
+                                $type = false;
+                                break;
                         }
-                        if($type !== false && !isEmpty($cell)) yield HTML::Field(
-                            type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k, $row)),
-                            key:$k,
-                            value:$cell,
-                            description:false,
-                            attributes:["disabled"]
-                        );
                     }
+                    if($type !== false && !isEmpty($cell)) yield HTML::Field(
+                        type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k, $row)),
+                        key:$k,
+                        value:$cell,
+                        description:false,
+                        attributes:["disabled"]
+                    );
                 }
             })());
         $form->Image = getValid($row,"Image","eye");
         $form->Template = "b";
+        $form->Class = "container-fluid";
         $form->SubmitLabel = null;
         $form->ResetLabel = null;
         if($this->Modal) {
@@ -555,53 +626,32 @@ class Table extends Module{
         if(is_null($value)) return null;
         if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
         MODULE("Form");
-        $row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]);
-        if(count($row) > 0) $row = $row[0];
+        $record = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]);
+        if(count($record) > 0) $record = $record[0];
         else return HTML::Error("You can not modify this item!");
         $form = new Form(
-            title:getValid($row,"Title",null)??getValid($row,"Name",null),
-            description:getValid($row,"Description",null),
+            title:getValid($record,"Title",null)??getValid($record,"Name",null),
+            description:getValid($record,"Description",null),
             action:$this->UpdateAction,
             method:$this->UpdateMethod,
-            children:(function() use($row){
+            children:(function() use($record, $value){
                 yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
-                foreach ($row as $k=>$cell){
-                    if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $cell);
-                    else {
-                        $type = getValid($this->CellTypes, $k, "");
-                        if(is_string($type)){
-                            $type = strtolower($type);
-                            switch($type){
-                                case "pass":
-                                case "password":
-                                    if($this->CryptPassword) $cell = \_::$INFO->User->DecryptPassword($cell);
-                                    break;
-                                case "file":
-                                case "files":
-                                case "doc":
-                                case "docs":
-                                case "document":
-                                case "documents":
-                                case "image":
-                                case "images":
-                                case "video":
-                                case "videos":
-                                case "audio":
-                                case "audios":
-                                    $cell = null;
-                                    break;
-                            }
+                $schemas = \MiMFa\Library\DataBase::TrySelect(
+                    "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME='{$this->Table}'");
+                foreach ($record as $key=>$val)
+                    foreach ($schemas as $schema)
+                        if($schema["COLUMN_NAME"] == $key)
+                        {
+                            $res = $this->PrepareDataToShow($key, $val, $record, $schema);
+                            if(!isEmpty($res)) yield $res;
+                            break;
                         }
-                        if($type !== false) yield HTML::Field(
-                            type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k, $row)),
-                            key:$k,
-                            value:$cell
-                        );
-                    }
-                }
             })());
-        $form->Image = getValid($row,"Image","edit");
+        $form->Image = getValid($record,"Image","edit");
         $form->Template = "b";
+        $form->Class = "container-fluid";
         $form->CancelLabel = "Cancel";
         if($this->Modal){
             $form->CancelPath = $this->Modal->HideScript();
@@ -626,25 +676,29 @@ class Table extends Module{
         if(is_null($value)) return null;
         if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to add!");
         MODULE("Form");
-        $row = \MiMFa\Library\DataBase::TrySelect("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{$this->Table}'");
+        $record = [];
         $form = new Form(
             title:"Add {$this->Title}",
-            description:getValid($row,"Description",null),
+            description:$this->Description,
             action:$this->UpdateAction,
             method:$this->UpdateMethod,
-            children:(function() use($row, $value){
+            children:(function() use($record, $value){
                 yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
-                foreach ($row as $val){
-                    $k = $val["COLUMN_NAME"];
-                    if($k == $this->ColumnKey) yield HTML::HiddenInput($k, $value);
-                    else {
-                        $type = getValid($this->CellTypes, $k, $val["DATA_TYPE"]);
-                        if($type !== false) yield HTML::Field(type:isEmpty($type)?null:Convert::By($type, $type, $val["COLUMN_DEFAULT"], $k, $row), key:$k);
-                    }
+                $schemas = \MiMFa\Library\DataBase::TrySelect(
+                    "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME='{$this->Table}'");
+                foreach ($schemas as $schema) $record[$schema["COLUMN_NAME"]] = null;
+                foreach ($schemas as $schema){
+                    $key = $schema["COLUMN_NAME"];
+                    $val = $key == $this->ColumnKey? $value:null;
+                    $res = $this->PrepareDataToShow($key, $val, $record, $schema);
+                    if(!isEmpty($res)) yield $res;
                 }
             })());
-        $form->Image = getValid($row,"Image","plus");
+        $form->Image = getValid($record,"Image","plus");
         $form->Template = "b";
+        $form->Class = "container-fluid";
         $form->CancelLabel = "Cancel";
         if($this->Modal){
             $form->CancelPath = $this->Modal->HideScript();
@@ -674,6 +728,66 @@ class Table extends Module{
         if(\MiMFa\Library\DataBase::DoDelete($this->Table, [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]))
             return HTML::Success("The items removed successfully!");
         return HTML::Error("You can not remove this item!");
+    }
+
+	public function PrepareDataToShow(&$key, &$value, &$record, $schema){
+        $type = getValid($this->CellTypes, $key, $schema["DATA_TYPE"]);
+        $options = null;
+        if(is_null($value))
+            switch (strtolower($schema["COLUMN_DEFAULT"]??""))
+            {
+            	case "null":
+            	case "current_timestamp()":
+                    $value = null;
+                    break;
+            	default:
+                    $value = $schema["COLUMN_DEFAULT"];
+                    break;
+            }
+        if($key == $this->ColumnKey && str_contains($schema["EXTRA"] ,'auto_increment'))
+            return HTML::HiddenInput($key, $value);
+        else {
+            if(is_string($type))
+                switch (strtolower($type))
+                {
+                    case "pass":
+                    case "password":
+                        if($this->CryptPassword) $value = \_::$INFO->User->DecryptPassword($value);
+                        break;
+                    case "file":
+                    case "files":
+                    case "doc":
+                    case "docs":
+                    case "document":
+                    case "documents":
+                    case "image":
+                    case "images":
+                    case "video":
+                    case "videos":
+                    case "audio":
+                    case "audios":
+                        $value = null;
+                        break;
+                    case "type":
+                    case "types":
+                    case "enum":
+                    case "enums":
+                        $options = [];
+                        foreach (preg_find_all('/(?<=(\'|\"))[^\'\"\,]+(?=\1)/', $schema["COLUMN_TYPE"]) as $key2=>$val2){
+                            $options[$val2]=$val2;
+                        }
+                        break;
+                }
+            if($type !== false)
+                return HTML::Field(
+                        type:isEmpty($type)?null:Convert::By($type, $type, $value, $key, $record),
+                        key:$key,
+                        value:$value,
+                        options:$options,
+                        attributes:$schema["IS_NULLABLE"]=="NO"&&is_null($schema["COLUMN_DEFAULT"])?["required"]:[]
+                    );
+            return null;
+        }
     }
 
 	public function GetFormValues(){

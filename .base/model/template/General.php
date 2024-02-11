@@ -209,6 +209,22 @@ class General extends Template{
 					".\MiMFa\Library\Style::UniversalProperty("filter","grayscale(100)")."
 				}
 
+				input[type='range'].rangeinput {
+					height: calc(var(--Size-0) / 2);
+					outline: none;
+					-webkit-appearance: none;
+					border: var(--Border-1) var(--ForeColor-2);
+					border-radius: var(--Radius-1);
+				}
+				input[type='range'].rangeinput::-webkit-slider-thumb {
+					width: var(--Size-1);
+					height: var(--Size-1);
+					cursor: ew-resize;
+					-webkit-appearance: none;
+					background-color: var(--BackColor-2);
+					border-radius: var(--Radius-5);
+				}
+
 				.side-image{
 					background-position: center;
 					background-repeat: no-repeat;
@@ -295,6 +311,17 @@ class General extends Template{
 					box-shadow: var(--Shadow-2);
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
 				}
+		");
+		echo HTML::Script("
+			for(const slider of document.querySelectorAll('input[type='range'].rangeinput')){
+				const min = slider.min
+				const max = slider.max
+				const value = slider.value
+				slider.style.background = `linear-gradient(to right, var(--ForeColor-1) 0%, var(--ForeColor-1) \${(value-min)/(max-min)*100}%, var(--BackColor-1) \${(value-min)/(max-min)*100}%, var(--BackColor-1) 100%)`
+				slider.oninput = function() {
+					this.style.background = `linear-gradient(to right, var(--ForeColor-1) 0%, var(--ForeColor-1) \${(this.value-this.min)/(this.max-this.min)*100}%, var(--BackColor-1) \${(this.value-this.min)/(this.max-this.min)*100}%, var(--BackColor-1) 100%)`
+				};
+			}
 		");
 	}
 	public function DrawMain(){

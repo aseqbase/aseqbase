@@ -11,8 +11,16 @@ require_once "DataBase.php";
 class Translate
 {
 	public static $TableName = "Translate_Lexicon";
+	/**
+     * A short version of language name (EN|SP|...)
+     * @var string
+     */
 	public static $Language = "EN";
 	public static $Encoding = "UTF-8";
+	/**
+	 * The language default direction (LTR|RTL)
+	 * @var string
+	 */
 	public static $Direction = "LTR";
 	public static $CodeStart = "<";
 	public static $CodeEnd = ">";

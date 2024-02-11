@@ -13,6 +13,7 @@ class Convert{
      */
 	public static function By($converter, ...$args){
         if(is_null($converter)) return null;
+        if(is_string($converter)) return $converter;
 		if(is_countable($converter) || is_iterable($converter))
             return iterator_to_array((function() use($converter, $args){
                 foreach ($converter as $k=>$c) yield $k => self::By($c, ...$args);

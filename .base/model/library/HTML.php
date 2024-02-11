@@ -1326,6 +1326,7 @@ else return call_user_func("self::Field", null, $k, $f);
             $description = null;
         }
         if($type === false) return null;
+        $prepend = $append = null;
         if(is_null($type)) $type = self::InputDetector($type, $value);
         if(is_callable($type) || ($type instanceof \Closure))
             return self::Field(
@@ -1339,27 +1340,31 @@ else return call_user_func("self::Field", null, $k, $f);
                 scope:$scope
             );
         elseif(is_object($type) || ($type instanceof \stdClass)){
-            $key = getValid($type, "Key", $key);
-            $value = getValid($type, "Value", $value);
-            $title = getValid($type, "Title", $title);
-            $description = getValid($type, "Description", $description);
-            $options = getValid($type, "Options", $options);
-            $scope = getValid($type, "Scope", $scope);
-            $attributes = [...$attributes, ...(isValid($type, "Attributes")?[getValid($type, "Attributes")]:[])];
-            $type = self::InputDetector(getValid($type, "Type", null), $value);
+            $key = getBetween($type, "Key", "key")??$key;
+            $value = getBetween($type, "Value", "value")??$value;
+            $title = getBetween($type, "Title", "title")??$title;
+            $description = getBetween($type, "Description", "description")??$description;
+            $options = getBetween($type, "Options", "options")??$options;
+            $scope = getBetween($type, "Scope", "scope")??$scope;
+            $prepend = getBetween($type, "Prepend", "prepend")??$prepend;
+            $append = getBetween($type, "Append", "append")??$append;
+            $attributes = [...$attributes, ...(getBetween($type, "Attributes", "attributes")?[getBetween($type, "Attributes", "attributes")]:[])];
+            $type = self::InputDetector(getBetween($type, "Type", "type"), $value);
         } elseif(is_countable($type)) {
             if(is_null($options)) {
                 $options = $type;
                 $type = "select";
             } else {
-                $key = getValid($type, "key", $key);
-                $value = getValid($type, "value", $value);
-                $title = getValid($type, "title", $title);
-                $description = getValid($type, "description", $description);
-                $options = getValid($type, "options", $options);
-                $scope = getValid($type, "scope", $scope);
-                $attributes = [...$attributes, ...(isValid($type, "Attributes")?[getValid($type, "Attributes")]:[])];
-                $type = self::InputDetector(getValid($type, "type", null), $value);
+                $key = getBetween($type, "key", "Key")??$key;
+                $value = getBetween($type, "value", "Value")??$value;
+                $title = getBetween($type, "title", "Title")??$title;
+                $description = getBetween($type, "description", "Description")??$description;
+                $options = getBetween($type, "options", "Options")??$options;
+                $scope = getBetween($type, "scope", "Scope")??$scope;
+                $prepend = getBetween($type, "prepend", "Prepend")??$prepend;
+                $append = getBetween($type, "append", "Append")??$append;
+                $attributes = [...$attributes, ...(getBetween($type, "attributes", "Attributes")?[getBetween($type, "attributes", "Attributes")]:[])];
+                $type = self::InputDetector(getBetween($type, "type", "Type"), $value);
             }
         } else $type = self::InputDetector($type, $value);
         $titleOrKey = $title??Convert::ToTitle(Convert::ToString($key));
@@ -1423,7 +1428,10 @@ else return call_user_func("self::Field", null, $k, $f);
         	case "text":
                 $content = self::ValueInput($title, $value, $attributes);
                 break;
+            case 'type':
+            case 'types':
             case 'enum':
+            case 'enums':
             case 'dropdown':
             case 'combobox':
             case 'select':
@@ -1551,7 +1559,7 @@ else return call_user_func("self::Field", null, $k, $f);
                 break;
         }
         if($scope) return self::Element($titleTag.$content.$descriptionTag,"div", ["class"=> "field"]);
-        else return $titleTag.$content.$descriptionTag;
+        else return join("",[$titleTag,Convert::By($prepend, $type, $value),$content,Convert::By($append, $type, $value),$descriptionTag]);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1648,7 +1656,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @return string
      */
     public static function ContentInput($key, $value = null, ...$attributes){
-        return self::TextInput($key, $value, [ "class"=>"contentinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
+        return self::TextInput($key, $value, [ "class"=>"contentinput", "rows"=>"20", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
     }
     /**
      * The <TEXTAREA> HTML Tag
@@ -1942,8 +1950,9 @@ else return call_user_func("self::Field", null, $k, $f);
      * @return string
      */
     public static function RangeInput($key, $value = null, $min=0, $max=100, ...$attributes){
-        return self::Input($key, $value, "range", [ "min"=>$min, "max"=>$max, "class"=>"rangeinput", "oninput"=>"this.nextElementSibling.value = this.value"], $attributes).
-            self::Element($value??"","output", ["class"=>"tooltip"]);
+        $id = "_".getId();
+        return self::Input($key, $value, "range", [ "min"=>$min, "max"=>$max, "class"=>"rangeinput", "oninput"=>"document.getElementById('$id').value = this.value;"], $attributes).
+            self::Element($value??"","output", ["class"=>"tooltip", "id"=>$id]);
     }
     /**
      * The <INPUT> HTML Tag
@@ -2051,7 +2060,7 @@ else return call_user_func("self::Field", null, $k, $f);
             is_countable($content)?join(PHP_EOL, iterator_to_array((function() use($content){
                 yield self::Row($content, true);
             })())):__($content, styling:false),
-            "thead",["class"=> "column"], $attributes);
+            "thead",["class"=> "table-column"], $attributes);
     }
     /**
      * The <TR> HTML Tag
@@ -2064,7 +2073,7 @@ else return call_user_func("self::Field", null, $k, $f);
             is_countable($content)?join(PHP_EOL, iterator_to_array((function() use($content, $head, $colHeads){
                 foreach ($content as $k=>$v) yield self::Cell($v, $head?$head:in_array($k, $colHeads));
             })())):Convert::ToString($content),
-            "tr",["class"=> "row"], $attributes);
+            "tr",["class"=> "table-row"], $attributes);
     }
     /**
      * The <TD> or <TH> HTML Tag
@@ -2073,7 +2082,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @return string
      */
     public static function Cell($content, $head = false, ...$attributes){
-        return self::Element(__($content, styling:false), $head?"th":"td",["class"=> "cell"], $attributes);
+        return self::Element(__($content, styling:false), $head?"th":"td",["class"=> "table-cell"], $attributes);
     }
 
     public static function Chart($type = "column", $content = null, $title = null, $description = null, $axisXTitle = "X", $axisYTitle = "Y", $attributes = [], $options = null, $color = null, $foreColor = null, $backColor = null, $font = "defaultFont", $height = "400px", $width = null, $axisXBegin = null, $axisYBegin = null, $axisXInterval = null, $axisYInterval = null) {

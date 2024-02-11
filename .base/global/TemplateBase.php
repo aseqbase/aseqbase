@@ -44,17 +44,20 @@
 		public $OverlayPalette = array("/file/overlay/glass.png","/file/overlay/cotton.png","/file/overlay/cloud.png","/file/overlay/wings.svg","/file/overlay/sands.png","/file/overlay/dirty.png");
 		public $PatternPalette = array("/file/pattern/main.svg","/file/pattern/doddle.png","/file/pattern/doddle-fantasy.png","/file/pattern/triangle.png","/file/pattern/slicksline.png","/file/pattern/doddle-mess.png");
 
-		public function Color(int $ind = 0) { $ind %= count($this->ColorPalette); return $this->ColorPalette[$ind];}
-		public function ForeColor(int $ind = 0) { $ind %= count($this->ForeColorPalette); return $this->ForeColorPalette[$ind];}
-		public function BackColor(int $ind = 0) { $ind %= count($this->BackColorPalette); return $this->BackColorPalette[$ind];}
-		public function Font(int $ind = 0) { $ind %= count($this->FontPalette); return $this->FontPalette[$ind];}
-		public function Size(int $ind = 0) { return $this->SizePalette[$ind >= count($this->SizePalette)?count($this->SizePalette)-1:max(0,$ind)];}
-		public function Shadow(int $ind = 0) { $ind %= count($this->ShadowPalette); return $this->ShadowPalette[$ind];}
-		public function Border(int $ind = 0) { $ind %= count($this->BorderPalette); return $this->BorderPalette[$ind];}
-		public function Radius(int $ind = 0) { $ind %= count($this->RadiusPalette); return $this->RadiusPalette[$ind];}
-		public function Transition(int $ind = 0) { $ind %= count($this->TransitionPalette); return $this->TransitionPalette[$ind];}
-		public function Overlay(int $ind = 0) { $ind %= count($this->OverlayPalette); return \MiMFa\Library\Local::GetUrl($this->OverlayPalette[$ind]);}
-		public function Pattern(int $ind = 0) { $ind %= count($this->PatternPalette); return \MiMFa\Library\Local::GetUrl($this->PatternPalette[$ind]);}
+		public static function LoopPalette($palette, int $ind = 0) { $ind %= count($palette); return $palette[$ind];}
+		public static function LimitPalette($palette, int $ind = 0) { return $palette[$ind >= count($palette)?count($palette)-1:max(0,$ind)];}
+
+		public function Color(int $ind = 0) { return self::LoopPalette($this->ColorPalette,$ind);}
+		public function ForeColor(int $ind = 0) { return self::LoopPalette($this->ForeColorPalette,$ind);}
+		public function BackColor(int $ind = 0) { return self::LoopPalette($this->BackColorPalette,$ind);}
+		public function Font(int $ind = 0) { return self::LoopPalette($this->FontPalette,$ind);}
+		public function Size(int $ind = 0) { return self::LimitPalette($this->SizePalette,$ind);}
+		public function Shadow(int $ind = 0) { return self::LimitPalette($this->ShadowPalette,$ind);}
+		public function Border(int $ind = 0) { return self::LimitPalette($this->BorderPalette,$ind);}
+		public function Radius(int $ind = 0) { return self::LimitPalette($this->RadiusPalette,$ind);}
+		public function Transition(int $ind = 0) { return self::LimitPalette($this->TransitionPalette,$ind);}
+		public function Overlay(int $ind = 0) { return \MiMFa\Library\Local::GetUrl(self::LoopPalette($this->OverlayPalette,$ind));}
+		public function Pattern(int $ind = 0) { return \MiMFa\Library\Local::GetUrl(self::LoopPalette($this->PatternPalette,$ind));}
 
 		public function __construct(){
 			if($this->IsDark($this->BackColor(0))===true) $this->DarkMode = true;

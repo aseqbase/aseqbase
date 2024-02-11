@@ -226,4 +226,33 @@
     <None Include="gms\.git\refs\remotes\origin\main" />
     <None Include="gms\LICENSE" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="erp\view\page\home.php">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="erp\view\page\index.html">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="erp\view\page\tutorial.php">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="erp\view\part\index.html">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="erp\view\part\report\index.html">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="erp\view\part\report\goods.php">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="erp\view\goods.php">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="ms\LICENSE">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Update="ms\README.md">
+      <SubType>Code</SubType>
+    </Content>
+  </ItemGroup>
 </Project>

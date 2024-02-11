@@ -169,7 +169,7 @@ class RingSlide extends Module{
 						, "#tab$i", ["data-target"=>".tab", "data-toggle"=>'tab']);
 
 						$tags .= HTML::Division(
-							HTML::ExternalHeading(getValid($this->Items[$i],'Name'), null, ["class"=>"title"]).
+							HTML::ExternalHeading(getValid($this->Items[$i],'Name'), getBetween($this->Items[$i],'Path','Link'), ["class"=>"title"]).
 							HTML::Division(
 								getValid($this->Items[$i], 'Description').
 								(getValid($this->Items[$i], "Button")??getValid($this->Items[$i],"More"))
