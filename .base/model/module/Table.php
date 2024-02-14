@@ -53,10 +53,10 @@ class Table extends Module{
      */
 	public $ColumnKeysAsLabels = true;
 	/**
-     * The row keys in data to use for column labels
+     * The column keys in data to use for row labels
      * @var array Auto detection
      */
-	public $ColumnLabelsKeys = [0];
+	public $ColumnsKeys = [0];
 	/**
      * Add numbering to the table columns
 	 * The first number of columns
@@ -86,10 +86,10 @@ class Table extends Module{
 	 */
 	public $RowKeysAsLabels = false;
 	/**
-     * The column keys in data to use for row labels
+     * The row keys in data to use for column labels
      * @var array Auto detection
      */
-	public $RowLabelsKeys = [0];
+	public $RowsKeys = [0];
 	/**
      * Add numbering to the table rows, leave null to dont it
      * The first number of rows
@@ -107,6 +107,20 @@ class Table extends Module{
      */
 	public $CellValues = [];
 	public $BorderSize = 1;
+
+    public $Header = true;
+    public $HeaderCallback = null;
+    public $Footer = false;
+    public $FooterCallback = "function (footer, data, start, end, display) {
+                                if(footer == null) return;
+                                let api = this.api();
+                                let intVal = (val) => isEmpty(val)? 0 : typeof val === 'string' ? parseFloat(val.match(/(^\d+\.?\d*$)|((?<=\>)\s*\d+\.?\d*\s*(?=\<))/gmi)) * 1 : typeof val === 'number' ? val : 0;
+                                let getTotal = (i) => api.column(i).data().reduce((a, b) => intVal(a)+intVal(b) , 0);
+                                let setTotal = (i, total) => api.column(i).footer().innerHTML = isHollow(total)||total==0?'':total+'';
+                                let c = 0;
+                                for(const node of footer.children) setTotal(c, getTotal(c++));
+                            }";
+
 	public $DataCompression = 50;
 	public $SevereSecure = true;
 	public $CryptPassword = true;
@@ -134,6 +148,7 @@ class Table extends Module{
 	public $SelectQuery = null;
 	public $SelectParameters = null;
 	public $SelectCondition = null;
+	public $RowNumbersBegin = 1;
 	public $TextWrap = false;
 	public $MediaWidth = "var(--Size-5)";
 	public $MediaHeight = "var(--Size-5)";
@@ -253,6 +268,9 @@ class Table extends Module{
                 border-radius: var(--Radius-1);
 				".Style::UniversalProperty("transition", "var(--Transition-1)")."
             }
+            table.dataTable.{$this->Name} tfoot :is(th, td) {
+                text-align: center;
+            }
         ":""));
 	}
 
@@ -328,8 +346,8 @@ class Table extends Module{
             $isu = false;
         }
 		$hasid = is_countable($this->Items) && !is_null($hasid = array_key_first($this->Items)) && isValid($this->Items[$hasid],$this->ColumnKey);
-		$clks = $this->ColumnLabelsKeys;
-		$rlks = $this->RowLabelsKeys;
+		$rks = $this->RowsKeys;
+		$cks = $this->ColumnsKeys;
 		$rkls = $this->RowKeysAsLabels;
 		$ckls = $this->ColumnKeysAsLabels;
         $ckl = $this->RowKey < 0;
@@ -349,6 +367,10 @@ class Table extends Module{
 		$scn = $this->StartColumnNumber;
 		$hcn = !is_null($scn);
 		$uck = "";
+        $rowCount = $this->RowNumbersBegin;
+        $colCount = $ick?count($icks):0;
+        $inum = !is_null($rowCount);
+        $isc = $isc || $inum;
 		if($isu){
 			$uck = HTML::Division(getAccess($this->AddAccess)? HTML::Icon("plus","{$this->Modal->Name}_Create();") : HTML::Image("tasks"));
 			if($ick) array_unshift($icks, $uck);
@@ -364,55 +386,70 @@ class Table extends Module{
 					(!$erk || !in_array($rkey, $erks)) &&
 					(!$hasid || (in_array($rowid, $irids) || !in_array($rowid, $erids)))
 				){
-                    $isrk = ($rkey === $this->RowKey) || in_array($rkey,$clks) || ($hasid && $rowid === $rkey);
+                    $isrk = ($rkey === $this->RowKey) || in_array($rkey,$rks) || ($hasid && $rowid === $rkey);
                     if($rkls) array_unshift($row,is_integer($rkey)?($hrn?$rkey+$srn:""):$rkey);
 					if($isc){
-                        $row = is_null($rowid)?[$uck=>"",...$row]:[
-							$uck=>HTML::Division([
+                        $row = is_null($rowid)?
+                            [$uck=>$inum?HTML::Span($rowCount++):"",...$row]:
+                            [$uck=>HTML::Division([
+                                    ...($inum?[HTML::Span($rowCount++)]:[]),
 									...(getAccess($this->ViewAccess)? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);")] : []),
 									...($isu && getAccess($this->ModifyAccess)? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
 									...($isu &&getAccess($this->RemoveAccess)? [HTML::Icon("trash","{$this->Modal->Name}_Delete(`$rowid`);")] : [])
 								]),
-							...$row
-							];
+							...$row];
                     }
-					if($ckls && ($isrk || $ckl)){
-                        $ckl  = false;
-                        $cells[] = "<thead><tr>";
-                        if($ick){
-                            foreach($icks as $ckey)
-                                if(!$eck || !in_array($ckey, $ecks))
-								    $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
-                        }
-                        else{
-                            foreach($row as $ckey=>$cel)
-                                if(!$eck || !in_array($ckey, $ecks))
-								    $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
-                        }
-                        $cells[] = "</tr></thead>";
-						$isrk = false;
-                    }
+					if($ckls && ($isrk || $ckl))
+                        if($this->Header)
+                            if(is_bool($this->Header)) {
+                                $ckl  = false;
+                                $cells[] = "<thead><tr>";
+                                if($ick){
+                                    foreach($icks as $ckey)
+                                        if(!$eck || !in_array($ckey, $ecks))
+                                            $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                                }
+                                else{
+                                    foreach($row as $ckey=>$cel)
+                                        if(!$eck || !in_array($ckey, $ecks))
+                                            $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                                }
+                                $cells[] = "</tr></thead>";
+                                $isrk = false;
+                            }
+                            else $cells[] = Convert::ToString($this->Header);
                     $cells[] = $strow;
-                    if($ick){
+                    if($ick) {
+                        $colCount = max($colCount,count($icks));
                         foreach($icks as $ckey)
                             if(!$eck || !in_array($ckey, $ecks)){
                                 $cel = isset($row[$ckey])? $row[$ckey]:null;
                                 if($isrk) $cells[] = $this->GetCell(is_integer($rkey)?($hrn?$rkey+$srn:""):$cel, $ckey, true, $row);
-							    elseif(in_array($ckey, $rlks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true, $row);
+							    elseif(in_array($ckey, $cks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true, $row);
                                 else $cells[] = $this->GetCell($cel, $ckey, false, $row);
                             }
                     }
-                    else{
+                    else {
+                        $colCount = max($colCount,count($row));
                         foreach($row as $ckey=>$cel)
                             if(!$eck || !in_array($ckey, $ecks)){
                                 if($isrk) $cells[] = $this->GetCell(is_integer($rkey)?($hrn?$rkey+$srn:""):$cel, $ckey, true, $row);
-                                elseif(in_array($ckey, $rlks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true, $row);
+                                elseif(in_array($ckey, $cks)) $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$cel, $ckey, true, $row);
                                 else $cells[] = $this->GetCell($cel, $ckey, false, $row);
                             }
                     }
                     $cells[] = $etrow;
                 }
             }
+            $cells[] = $etrow;
+            if($this->Footer)
+                if(is_bool($this->Footer)) {
+                    $cells[] = "<tfoot><tr>";
+                    for($i = 0; $i < $colCount; $i++)
+                        $cells[] = HTML::Cell("", $ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false);
+                    $cells[] = "</tr></tfoot>";
+                }
+                else $cells[] = Convert::ToString($this->Footer);
             return (!$this->TopNavigation||is_null($this->NavigationBar)?"":$this->NavigationBar->Capture()).join(PHP_EOL, $cells);
         }
 		elseif($isu && getAccess($this->AddAccess))
@@ -448,6 +485,8 @@ class Table extends Module{
 						...(is_null($this->AllowFixedRows)?[]:["fixedRows: ".($this->AllowFixedRows?"true":"false")]),
 						...(is_null($this->AllowResponsive)?[]:["responsive: ".($this->AllowResponsive?"true":"false")]),
 						...(is_null($this->AllowEntriesInfo)?[]:["info: ".($this->AllowEntriesInfo?($localPaging?"true":"false"):"false")]),
+                        ...($this->HeaderCallback?["headerCallback: {$this->HeaderCallback}"]:[]),
+                        ...($this->FooterCallback?["footerCallback: {$this->FooterCallback}"]:[]),
                         ...["language: {".
                                 "decimal: \"".__("", styling:false)."\",".
                                 "emptyTable: \"".__("No items available", styling:false)."\",".
@@ -473,7 +512,7 @@ class Table extends Module{
                                 "}".
                             "}"
                         ],
-						...($this->Controlable?["'columnDefs': [{ 'targets': 0, 'orderable': false }]"]:[]),
+						...($this->Controlable?["'columnDefs': [{ 'targets': 0, 'orderable': false }],order:[]"]:[]),
 						...(isEmpty($this->Options)?[]:(is_array($this->Options)?$this->Options:[Convert::ToString($this->Options)]))
 					]).
 				"});

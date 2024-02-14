@@ -313,7 +313,7 @@ class General extends Template{
 				}
 		");
 		echo HTML::Script("
-			for(const slider of document.querySelectorAll('input[type='range'].rangeinput')){
+			for(const slider of document.querySelectorAll(`input[type='range'].rangeinput`)){
 				const min = slider.min
 				const max = slider.max
 				const value = slider.value

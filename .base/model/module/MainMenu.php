@@ -3,7 +3,11 @@ namespace MiMFa\Module;
 MODULE("SearchForm");
 MODULE("UserMenu");
 MODULE("TemplateButton");
+use MiMFa\Library\HTML;
+use MiMFa\Library\Style;
+use MiMFa\Library\Convert;
 class MainMenu extends Module{
+	public $Capturable = true;
 	public $Class = "row";
 	public $Image = null;
 	public $Items = null;
@@ -27,53 +31,51 @@ class MainMenu extends Module{
 		$this->TemplateButton = new TemplateButton();
     }
 
-	public function EchoStyle(){
+	public function GetStyle(){
 		$rtl = (\MiMFa\Library\Translate::$Direction??\_::$CONFIG->DefaultDirection) == "RTL";
-		parent::EchoStyle();
-?>
-		<style>
-			.<?php echo $this->Name; ?> {
+		return parent::GetStyle().HTML::Style("
+			.{$this->Name} {
 				margin: 0;
 				padding: 0;
 				display: flex;
 				overflow: hidden;
-				background-color: <?php echo \_::$TEMPLATE->BackColor(2).($this->AllowFixed?"ee":""); ?>;
+				background-color: ".\_::$TEMPLATE->BackColor(2).($this->AllowFixed?"ee":"").";
 				color: var(--ForeColor-2);
-				<?php if($this->AllowFixed){?>
+				".($this->AllowFixed?"
 				position:fixed;
 				top:0;
 				left:0;
 				right:0;
 				z-index: 999;
-            	<?php }?>
+            	":"")."
 				box-shadow: var(--Shadow-2);
 			}
-			.<?php echo $this->Name; ?>-margin{
-				<?php if($this->AllowFixed){?>
+			".($this->AllowFixed?"
+			.{$this->Name}-margin{
 				height: 75px;
 				background: transparent;
-				<?php }?>
 			}
-			
-			.<?php echo $this->Name; ?> .header{
+			":"")."
+
+			.{$this->Name} .header{
 				margin: 0;
 				width: fit-content;
 				padding: 5px 10px;
 				display: inline-table;
 			}
-			.<?php echo $this->Name; ?> .header,.<?php echo $this->Name; ?> .header a,.<?php echo $this->Name; ?> .header a:visited{
+			.{$this->Name} :is(.header, .header a, .header a:visited){
 				color: var(--ForeColor-2);
 			}
-			.<?php echo $this->Name; ?> .header .title{
+			.{$this->Name} .header .title{
 				font-size: var(--Size-2);
 				padding: 0px 10px;
-				<?php if(isValid($this->Description)) echo "line-height: var(--Size-2);"; ?>
+				".(isValid($this->Description)?"line-height: var(--Size-2);":"")."
 			}
-			.<?php echo $this->Name; ?> .header .description{
+			.{$this->Name} .header .description{
 				font-size: var(--Size-0);
 				padding: 0px 10px;
 			}
-			.<?php echo $this->Name; ?> .header .image{
+			.{$this->Name} .header .image{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: 80% auto;
@@ -83,52 +85,59 @@ class MainMenu extends Module{
 				font-size: var(--Size-0);
 			}
 
-			.<?php echo $this->Name; ?> li .fa{
+			.{$this->Name} li .fa{
 				font-size: var(--Size-2);
 			}
 
-			.<?php echo $this->Name; ?> ul.Items {
+			.{$this->Name} ul:not(.sub-items) {
+				list-style: none;
 				list-style-type: none;
 				margin: 0;
 				padding: 0;
-				overflow: hidden;
+				/*overflow: hidden;*/
 				display: inline-table;
-				<?php if($this->SearchForm != null): ?>
+				".($this->SearchForm != null?"
 				min-width: fit-content;
 				max-width: 70% !important;
-				<?php endif; ?>
+				":"")."
 			}
 
-			.<?php echo $this->Name; ?> ul.Items>li {
+			.{$this->Name} ul:not(.sub-items)>li {
+				background-color: transparent;
+				color: inherit;
 				display: inline-block;
 			}
-			.<?php echo $this->Name; ?> ul.Items>li.active{
+			.{$this->Name} ul:not(.sub-items)>li.active{
 				border-top: var(--Border-2) var(--BackColor-2);
-				border-radius: <?php echo \_::$TEMPLATE->Radius(2); ?> <?php echo \_::$TEMPLATE->Radius(2); ?> 0px 0px;
-				color:  <?php echo \_::$TEMPLATE->ForeColor(0)."88"; ?>;
+				border-radius: var(--Radius-2) var(--Radius-2) 0px 0px;
+				color: ".\_::$TEMPLATE->ForeColor(0)."88;
 				background-color: var(--BackColor-0);
 				box-shadow: var(--Shadow-2);
 			}
-			.<?php echo $this->Name; ?> ul.Items>li>a, .<?php echo $this->Name; ?> ul.Items>li>a:visited{
+			.{$this->Name} ul:not(.sub-items)>li>:is(.button, .button:visited){
+				background-color: transparent;
+				color: var(--ForeColor-2);
+				border: none;
+				font-size: inherit;
+				border-radius: none;
 				text-decoration: none;
 				padding: 14px 16px;
 				display: block;
-				color: var(--ForeColor-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> ul.Items>li:hover>a, .<?php echo $this->Name; ?> ul.Items>li:hover>a:visited {
+			.{$this->Name} ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
 				font-weight: bold;
 				background-color: var(--BackColor-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> ul.Items>li.active>a, .<?php echo $this->Name; ?> ul.Items>li.active>a:visited{
-				color:  <?php echo \_::$TEMPLATE->ForeColor(0)."88"; ?>;
+			.{$this->Name} ul:not(.sub-items)>li.active>:is(.button, .button:visited){
+				color: ".\_::$TEMPLATE->ForeColor(0)."88;
 			}
-			.<?php echo $this->Name; ?> ul.Items>li.active:hover>a, .<?php echo $this->Name; ?> ul.Items>li.active:hover>a:visited{
+			.{$this->Name} ul:not(.sub-items)>li.active:hover>:is(.button, .button:visited){
 				color: var(--ForeColor-0);
 			}
 
-			.<?php echo $this->Name; ?> ul.Sub-Items {
+			.{$this->Name} ul.sub-items {
 				display: none;
 				position: absolute;
 				color: var(--ForeColor-2);
@@ -141,64 +150,63 @@ class MainMenu extends Module{
 				overflow-x: hidden;
 				overflow-y: auto;
 				z-index: 99;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> ul.Sub-Items>li {
+			.{$this->Name} ul.sub-items>li {
 				display: block;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> ul.Sub-Items>li.active{
+			.{$this->Name} ul.sub-items>li.active{
 				color: var(--ForeColor-2);
 				background-color: var(--BackColor-2);
 				box-shadow: var(--Shadow-2);
 			}
-			.<?php echo $this->Name; ?> ul.Sub-Items>li>a, .<?php echo $this->Name; ?> ul.Sub-Items>li>a:visited{
+			.{$this->Name} ul.sub-items>li>:is(.button, .button:visited){
 				text-decoration: none;
 				padding: 12px 16px;
 				display: block;
 				color: var(--ForeColor-1);
 			}
-			.<?php echo $this->Name; ?> ul.Sub-Items>li:hover>a, .<?php echo $this->Name; ?> ul.Sub-Items>li:hover>a:visited{
+			.{$this->Name} ul.sub-items>li:hover>:is(.button, .button:visited){
 				font-weight: bold;
 				color: var(--ForeColor-2);
 				background-color: var(--BackColor-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> ul.Sub-Items>li.active a, .<?php echo $this->Name; ?> ul.Sub-Items>li.active a:visited{
+			.{$this->Name} ul.sub-items>li.active>:is(.button, .button:visited){
 				color: var(--ForeColor-2);
 			}
 
-			.<?php echo $this->Name; ?> ul.Items>li.DropDown:hover>a,.<?php echo $this->Name; ?> ul.Items>li.DropDown:hover>a:visited {
+			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
 				color: var(--ForeColor-1);
 				background-color: var(--BackColor-1);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> ul.Items>.DropDown:hover>ul.Sub-Items {
+			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
 				display: block;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> ul.Sub-Items>.DropDown:hover>ul.Sub-Items {
+			.{$this->Name} ul.sub-items>li.dropdown:hover>ul.sub-items {
 				display: contents;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			
 
-			.<?php echo $this->Name; ?> .other{
+		".($this->HasOthers?"
+			.{$this->Name} .other{
 				text-align: end;
 				width: fit-content;
 				position: absolute;
 				clear: both;
 				display: flex;
 				align-items: center;
-				<?php echo $rtl?"left":"right" ?>: var(--Size-2);
+				".($rtl?"left":"right").": var(--Size-2);
 			}
-			
-			.<?php echo $this->Name; ?> .other>div{
+			.{$this->Name} .other>div{
 				width: fit-content;
 				display: inline-flex;
 			}
-			
-			.<?php echo $this->Name; ?> form{
+
+			.{$this->Name} form{
 				text-decoration: none;
 				padding: 4px 10px;
 				margin: 10px;
@@ -209,15 +217,15 @@ class MainMenu extends Module{
 				border-radius: var(--Radius-3);
 				box-shadow: var(--Shadow-1);
 				overflow: hidden;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) {
+			.{$this->Name} form:is(:hover, :active, :focus) {
 				font-weight: bold;
 				color: var(--ForeColor-1);
 				background-color: var(--BackColor-1);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> form :not(html,head,body,style,script,link,meta,title){
+			.{$this->Name} form :not(html,head,body,style,script,link,meta,title){
 				padding: 0px;
 				margin: 0px;
 				display: inline-block;
@@ -225,109 +233,94 @@ class MainMenu extends Module{
 				background-color: transparent;
 				outline: none;
 				border: none;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
+			.{$this->Name} form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
 				font-weight: bold;
 				outline: none;
 				border: none;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
+			.{$this->Name} form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
 				color: var(--BackColor-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> form input[type="search"]{
+			.{$this->Name} form input[type='search']{
 				max-width: 100%;
 				width: 80%;
 				width: 0px;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> form:is(:hover, :active, :focus) input[type="search"], .<?php echo $this->Name; ?> form input[type="search"]:is(:hover, :active, :focus){
+			.{$this->Name} form:is(:hover, :active, :focus) input[type='search'], .{$this->Name} form input[type='search']:is(:hover, :active, :focus){
 				color: var(--ForeColor-1);
 				width: 200px;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
-			}
-		</style>
-		<?php
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}"
+			:"")
+		);
 	}
 
-	public function Echo(){
-		if($this->HasBranding): ?>
-			<div class="header td row" >
-					<?php if(isValid($this->Image)) echo "<div class='td image' rowspan='2' style='background-image: url(\"".$this->Image."\");'></div>"; ?>
-				<div class="td">
-					<?php if(isValid($this->Description)) echo "<div class='td description'>".__($this->Description,true,false)."</div>"; ?>
-					<?php if(isValid($this->Title)) echo "<div class='td title'><a href='/'>".__($this->Title,true,false)."</a></div>"; ?>
-				</div>
-			</div>
-		<?php endif;
-		if($this->HasItems):
-			$count = count($this->Items);
-			if($count > 0){
-				echo "<ul class='Items td ".(isValid($this->ShowItemsScreenSize)?$this->ShowItemsScreenSize.'-show':'').' '.(isValid($this->HideItemsScreenSize)?$this->HideItemsScreenSize.'-hide':'')."'>";
-				foreach($this->Items as $item){
-					 echo $this->CreateItem($item,1);
-				}
-				echo "</ul>";
-			}
-		endif;
-		if($this->HasOthers):
-		echo "<div class='other ".((isValid($this->ShowOthersScreenSize)?$this->ShowOthersScreenSize.'-show':'').' '.(isValid($this->HideOthersScreenSize)?$this->HideOthersScreenSize.'-hide':''))."'>";
-			if($this->SearchForm != null) $this->SearchForm->Draw();
-			if($this->UserMenu != null) $this->UserMenu->Draw();
-			if($this->TemplateButton != null) $this->TemplateButton->Draw();
-			if(isValid($this->Content)) echo $this->Content;
-            echo "</div>";
-		endif;
-	}
-	public function PostDraw(){
-		parent::PostDraw();
-		if($this->AllowFixed){?>
-			<div class="<?php echo $this->Name; ?>-margin"></div>
-		<?php }
+	public function Get(){
+		return Convert::ToString(function(){
+			if($this->HasBranding)
+				yield HTML::Rack(
+					(isValid($this->Image)? HTML::Media($this->Image,['class'=>'image']):"").
+					HTML::Division(
+						(isValid($this->Description)? HTML::Division(__($this->Description,true,false),['class'=>'description']):"").
+						(isValid($this->Title)? HTML::Division(__($this->Title,true,false),['class'=>'title']):"")
+					)
+				,["class"=>"header"]);
+			if($this->HasItems)
+				if(count($this->Items) > 0)
+					yield HTML::Items(function(){
+						foreach($this->Items as $item)
+							yield $this->CreateItem($item, 1);
+					}
+					,["class"=>(isValid($this->ShowItemsScreenSize)?$this->ShowItemsScreenSize.'-show':'').' '.(isValid($this->HideItemsScreenSize)?$this->HideItemsScreenSize.'-hide':'')]);
+			if($this->HasOthers){
+				yield "<div class='other ".(isValid($this->ShowOthersScreenSize)?$this->ShowOthersScreenSize.'-show':'').' '.(isValid($this->HideOthersScreenSize)?$this->HideOthersScreenSize.'-hide':'')."'>";
+				if($this->SearchForm != null) yield $this->SearchForm->Capture();
+				if($this->UserMenu != null) yield $this->UserMenu->Capture();
+				if($this->TemplateButton != null) yield $this->TemplateButton->Capture();
+				if(isValid($this->Content)) yield $this->Content;
+				yield "</div>";
+            }
+        });
 	}
 
 	protected function CreateItem($item, $ind = 1){
 		if(!getAccess(getValid($item,"Access",\_::$CONFIG->VisitAccess))) return null;
-		$path = getValid($item,"Path",null)??getValid($item,"Link");
-		$act = (endsWith($_SERVER['REQUEST_URI'],$path)?'active':'');
-		$ret = "";
+		$path = getBetween($item,"Path","Link");
+		$act = endsWith($_SERVER['REQUEST_URI'],$path)?'active':'';
 		$ind++;
-		if(isValid($item, "Items")) {
-			$ret .= "<li class='DropDown $act'>
-				<a ".(isValid($item,"Attributes")?$item['Attributes']:"")." href='$path'>
-					<div class='box'>".(isValid($item,"Name")?__($item['Name'],true,false):"")."</div>
-				</a>";
-			$count = count($item["Items"]);
-			if($count > 0){
-				$ret .= "<ul class='Sub-Items Sub-Items-$ind'>";
-				foreach($item["Items"] as $itm){
-					$ret .= $this->CreateItem($itm, $ind);
-				}
-				$ret .= "</ul>";
-			}
-			$ret .= "</li>";
-		} else  {
-			$ret .= "<li class='$act'>
-				<a ".(isValid($item,"Attributes")?$item['Attributes']:"")." href='$path'>
-					<div class='box'>".(isValid($item,"Name")?__($item['Name'],true,false):(isValid($item,"Title")?__($item['Title'],true,false):""))."</div>
-				</a>
-			</li>";
-		}
-		return $ret;
+		$count = isValid($item, "Items")?count($item["Items"]):0;
+		return HTML::Item(
+			HTML::Button(
+				HTML::Division(__(getBetween($item,"Title","Name"),true,false),["class"=>"box"]),
+				$path, getValid($item,"Attributes")
+			).
+			($count > 0?
+				HTML::Items(function() use($item, $ind){
+                    foreach($item["Items"] as $itm)
+                        yield $this->CreateItem($itm, $ind);
+                }
+				,["class"=>"sub-items sub-items-$ind"])
+			:"")
+		,["class"=>$count > 0?"dropdown $act":$act]);
 	}
 
-	public function EchoScript(){
-		parent::EchoScript();?>
-		<script type="text/javascript">
+	public function PostCapture(){
+		return parent::PostCapture().($this->AllowFixed?"<div class='{$this->Name}-margin'></div>":"");
+	}
+
+	public function GetScript(){
+		return parent::GetScript().HTML::Script("
 			function ViewSideMenu(show){
-				if(show === undefined) $('.<?php echo $this->Name; ?>').toggleClass('active');
-				else if(show) $('.<?php echo $this->Name; ?>').addClass('active');
-				else $('.<?php echo $this->Name; ?>').removeClass('active');
+				if(show === undefined) $('.{$this->Name}').toggleClass('active');
+				else if(show) $('.{$this->Name}').addClass('active');
+				else $('.{$this->Name}').removeClass('active');
 			}
-		</script>
-		<?php
+		");
 	}
 }
 ?>

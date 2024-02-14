@@ -447,6 +447,7 @@ $attachments"]);
 				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
                 }
                 .$uniq :is(span.clickable, .media):hover{
+                    cursor: pointer;
                     color: var(--ForeColor-2);
 				    ".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
                 }
@@ -2038,7 +2039,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Table($content, $rowHeads = [0], $colHeads = [0], ...$attributes){
+    public static function Table($content = "", $rowHeads = [0], $colHeads = [0], ...$attributes){
         return self::Element(
             is_countable($content)?join(PHP_EOL, iterator_to_array((function() use($content, $rowHeads, $colHeads){
                 foreach ($content as $k=>$v) {
@@ -2055,7 +2056,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Column($content, ...$attributes){
+    public static function Column($content = "", ...$attributes){
         return self::Element(
             is_countable($content)?join(PHP_EOL, iterator_to_array((function() use($content){
                 yield self::Row($content, true);
@@ -2068,7 +2069,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Row($content, $head = false, $colHeads = [0], ...$attributes){
+    public static function Row($content = "", $head = false, $colHeads = [0], ...$attributes){
         return self::Element(
             is_countable($content)?join(PHP_EOL, iterator_to_array((function() use($content, $head, $colHeads){
                 foreach ($content as $k=>$v) yield self::Cell($v, $head?$head:in_array($k, $colHeads));
@@ -2081,7 +2082,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Cell($content, $head = false, ...$attributes){
+    public static function Cell($content = "", $head = false, ...$attributes){
         return self::Element(__($content, styling:false), $head?"th":"td",["class"=> "table-cell"], $attributes);
     }
 

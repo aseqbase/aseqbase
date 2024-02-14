@@ -6,7 +6,7 @@ MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."UserGroup");
 PART("dbfilters.php");
 $mod->SelectQuery = Units_Create_Select_Query();
-$mod->RowLabelsKeys = ["Title"];
+$mod->ColumnsKeys = ["Title"];
 $mod->ExcludeColumnKeys = ["ID", "UnitName", "MetaData"];
 $mod->Updatable = true;
 $mod->AllowServerSide = true;
