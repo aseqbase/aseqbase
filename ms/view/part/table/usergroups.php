@@ -6,24 +6,22 @@ MODULE("Table");
 $mod = new Table(\_::$CONFIG->DataBasePrefix."UserGroup");
 PART("dbfilters.php");
 $mod->SelectQuery = Units_Create_Select_Query();
-$mod->ColumnsKeys = ["Title"];
-$mod->ExcludeColumnKeys = ["ID", "UnitName", "MetaData"];
+$mod->KeyColumns = ["Title"];
+$mod->ExcludeColumns = ["ID", "UnitName", "MetaData"];
 $mod->Updatable = true;
 $mod->AllowServerSide = true;
 $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-$mod->CellTypes = [
+$mod->CellsTypes = [
     "ID"=>"number",
+    "Name"=>"string",
+    "Title"=>"string",
+    "Image"=>"image",
+    "Description"=>"strings",
     "TargetIDs"=>function($t, $v){
         $std = new stdClass();
         $std->Title="Destination Units";
         $std->Type="array";
         $std->Options = ["type"=>"select", "key"=>"TargetIDs", "options"=> DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."UserGroup", "ID", "Title")];
-        return $std;
-    },
-    "Access"=>function(){
-        $std = new stdClass();
-        $std->Type="number";
-        $std->Attributes=["min"=>\_::$CONFIG->BanAccess,"max"=>\_::$CONFIG->UserAccess];
         return $std;
     },
     "WeightUpTolerance"=>function(){
@@ -72,6 +70,12 @@ $mod->CellTypes = [
         $std->Description="This unit is effective on timing and working or not!";
         return $std;
     },
+    "Access"=>function(){
+        $std = new stdClass();
+        $std->Type="number";
+        $std->Attributes=["min"=>\_::$CONFIG->BanAccess,"max"=>\_::$CONFIG->UserAccess];
+        return $std;
+    },
     "Status"=>[-1=>"Blocked",0=>"Undifined",1=>"Activated"],
     "MetaData"=> getAccess(\_::$CONFIG->AdminAccess)?function(){
         $std = new stdClass();
@@ -79,7 +83,7 @@ $mod->CellTypes = [
         return $std;
     }:false
     ];
-$mod->CellValues = [
+$mod->CellsValues = [
     "Title"=>function($v, $k, $r){ return \_::$INFO->GetUnitValue($v, $k, $r);},
     "CreateTime"=>function($v, $k, $r){ return \_::$CONFIG->ToShownFormattedDateTime($v);},
     "UpdateTime"=>function($v, $k, $r){ return \_::$CONFIG->ToShownFormattedDateTime($v);}

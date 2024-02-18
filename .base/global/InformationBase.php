@@ -157,7 +157,7 @@ abstract class InformationBase extends Base{
      * @field array
      * @var array
 	 */
-	public $KeyWords = array("MiMFa","Minimal Member Factory");
+	public $KeyWords = array("MiMFa","Minimal Members Factory");
 
 	/**
      * The main menu to show on the most pages

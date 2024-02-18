@@ -13,16 +13,16 @@ else
         ACCESS(\_::$CONFIG->UserAccess);
         MODULE("Table");
         $mod = new Table(\_::$CONFIG->DataBasePrefix."User");
-        $mod->ColumnKey = "Signature";
+        $mod->KeyColumn = "Signature";
         $table1 = \_::$CONFIG->DataBasePrefix."UserGroup";
         $mod->SelectQuery = "
-            SELECT A.{$mod->ColumnKey}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
+            SELECT A.{$mod->KeyColumn}, B.Title AS 'Group', A.Image, A.Name, A.Bio, A.Signature, A.Email, A.Status, A.CreateTime
             FROM {$mod->Table} AS A
             LEFT OUTER JOIN $table1 AS B ON A.GroupID=B.ID;
         ";
         $mod->Updatable = false;
         $access = $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-        $mod->CellTypes = [
+        $mod->CellsTypes = [
             "ID"=>false,
             "FirstName"=>$access,
             "MiddleName"=>$access,

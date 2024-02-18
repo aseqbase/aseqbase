@@ -10,37 +10,37 @@ abstract class ConfigurationBase extends Base {
     /**
      * The website Encoding
      * @var string
-     * @category General
+     * @category Language
      */
     public $Encoding = "utf-8";
     /**
      * The Date Time Zone
      * @var string
-     * @category General
+     * @category Time
      */
     public $DateTimeZone = "UTC";
     /**
      * The Date Time Locale
      * @var string
-     * @category General
+     * @category Time
      */
     public $DateTimeLocale = "en-US";
     /**
      * The Date Time Format
      * @var string
-     * @category General
+     * @category Time
      */
     public $DateTimeFormat = "Y-m-d H:i:s";
     /**
      * Current Date Time
      * @var string
-     * @category General
+     * @category Time
      */
     public $CurrentDateTime = "now";
     /**
      * Date Time Stamp Seconds Offset (TSO)
      * @var int
-     * @category General
+     * @category Time
      */
     public $TimeStampOffset = 0;
 
@@ -150,19 +150,25 @@ abstract class ConfigurationBase extends Base {
 	/**
      * Allow to translate all text by internal algorithms
      * @var bool
-     * @category Optimization
+     * @category Language
      */
 	public $AllowTranslate = false;
 	/**
+     * Allow to update the language by translator automatically
+     * @var bool
+     * @category Language
+     */
+	public $AutoUpdateLanguage = false;
+	/**
      * Default language to translate all text by internal algorithms
      * @var string
-     * @category Optimization
+     * @category Language
      */
 	public $DefaultLanguage = null;
     /**
      * The website default Direction
      * @var string
-     * @category General
+     * @category Language
      */
     public $DefaultDirection = null;
 

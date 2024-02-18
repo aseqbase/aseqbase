@@ -16,6 +16,7 @@ class Table extends Module{
 	public $Tag = "table";
 	public $Capturable = true;
 
+	public $Modal = null;
 	public Navigation|null $NavigationBar = null;
 	public $TopNavigation= true;
 	public $BottomNavigation= false;
@@ -30,83 +31,85 @@ class Table extends Module{
      * @var null|array<array<enum-string,mixed>>
      */
 	public $Items = null;
+
 	/**
      * The database table key column name, to get items automatically
      * @var null|string
      */
-	public $ColumnKey = "ID";
+	public $KeyColumn = "ID";
+	/**
+     * The column keys in data to use for row labels
+     * @var array Auto detection
+     */
+	public $KeyColumns = [0];
 	/**
      * An array of column Keys which should show in the table
      * @var null|array<mixed>
      */
-	public $ExcludeColumnKeys = null;
+	public $ExcludeColumns = null;
 	/**
      * An array of column Keys which should not show in the table
      * @var null|array<mixed>
      */
-	public $IncludeColumnKeys = null;
+	public $IncludeColumns = null;
 	/**
      * To use the column keys as the column labels
      * @var null Auto detection
      * @var true To use
      * @var false To unuse
      */
-	public $ColumnKeysAsLabels = true;
-	/**
-     * The column keys in data to use for row labels
-     * @var array Auto detection
-     */
-	public $ColumnsKeys = [0];
+	public $ColumnsKeysAsLabels = true;
 	/**
      * Add numbering to the table columns
 	 * The first number of columns
 	 * @var mixed
 	 */
-	public $StartColumnNumber = null;
+	public $ColumnsNumbersBegin = null;
+
 	/**
      * The database table key row name or index, to get items automatically
      * @var null|string
      */
-	public $RowKey = -1;
+	public $KeyRow = -1;
+	/**
+     * The row keys in data to use for column labels
+     * @var array Auto detection
+     */
+	public $KeysRows = [0];
 	/**
      * An array of row IDs or Indexes which should show in the table
      * @var null|array<mixed>
      */
-	public $IncludeRowKeys = null;
+	public $IncludeRows = null;
 	/**
      * An array of row IDs or Indexes which should not show in the table
      * @var null|array<mixed>
      */
-	public $ExcludeRowKeys = null;
+	public $ExcludeRows = null;
 	/**
 	 * To use the row keys as the row labels
      * @var null Auto detection
      * @var true To use
      * @var false To unuse
 	 */
-	public $RowKeysAsLabels = false;
-	/**
-     * The row keys in data to use for column labels
-     * @var array Auto detection
-     */
-	public $RowsKeys = [0];
+	public $RowsKeysAsLabels = false;
 	/**
      * Add numbering to the table rows, leave null to dont it
      * The first number of rows
 	 * @var mixed
 	 */
-	public $StartRowNumber = null;
+	public $RowsNumbersBegin = 1;
+
 	/**
      * An array of all key=>type columns in data to use for each cell type
      * @var array Auto detection
      */
-	public $CellTypes = [];
+	public $CellsTypes = [];
 	/**
      * An array of all key=>value columns in data to use for each cell values
      * @var array Auto detection
      */
-	public $CellValues = [];
-	public $BorderSize = 1;
+	public $CellsValues = [];
 
     public $Header = true;
     public $HeaderCallback = null;
@@ -120,13 +123,17 @@ class Table extends Module{
                                 let c = 0;
                                 for(const node of footer.children) setTotal(c, getTotal(c++));
                             }";
-
+	public $MediaWidth = "var(--Size-5)";
+	public $MediaHeight = "var(--Size-5)";
+	public $BorderSize = 1;
+	public $TextWrap = false;
+	public $HasDecoration = true;
 	public $DataCompression = 50;
 	public $SevereSecure = true;
 	public $CryptPassword = true;
 
-	public $EvenOddColumns = true;
-	public $EvenOddRows = true;
+	public $OddEvenColumns = true;
+	public $OddEvenRows = true;
 	public $HoverableRows = true;
 	public $HoverableCells = true;
 
@@ -139,21 +146,16 @@ class Table extends Module{
 	public $UpdateAccess = 0;
 	public $ViewAccess = 0;
 	public $ViewCondition = null;
+	public $AddAccess = 0;
+	public $AddCondition = null;
 	public $ModifyAccess = 0;
 	public $ModifyCondition = null;
 	public $RemoveAccess = 0;
 	public $RemoveCondition = null;
-	public $AddAccess = 0;
-	public $AddCondition = null;
 	public $SelectQuery = null;
 	public $SelectParameters = null;
 	public $SelectCondition = null;
-	public $RowNumbersBegin = 1;
-	public $TextWrap = false;
-	public $MediaWidth = "var(--Size-5)";
-	public $MediaHeight = "var(--Size-5)";
-	public $Modal = null;
-	public $HasDecoration = true;
+
 	public $Options = ["deferRender: false", "select: true"];
 
 	public $AllowLabelTranslation = true;
@@ -236,14 +238,14 @@ class Table extends Module{
         table.dataTable.{$this->Name} thead :is(th, tr) {
             text-align: center;
         }
-		".($this->EvenOddColumns?"
+		".($this->OddEvenColumns?"
             table.dataTable.{$this->Name} tbody tr.even :is(td, th):nth-child(odd) {
                 background-color: #88888817 !important;
             }
             table.dataTable.{$this->Name} tbody tr.odd :is(td, th):nth-child(odd) {
                 background-color: #88888815 !important;
             }
-		":"").($this->EvenOddRows?"
+		":"").($this->OddEvenRows?"
             table.dataTable.{$this->Name} tbody tr.odd {
                 background-color: #8881 !important;
             }
@@ -303,7 +305,7 @@ class Table extends Module{
 	public function Capture(){
 		if(
 			isValid($this->Table)
-			&& isValid($this->ColumnKey)
+			&& isValid($this->KeyColumn)
 			&& $this->Controlable
 		)
             if($this->CreateModal()){
@@ -321,19 +323,19 @@ class Table extends Module{
             $res = $this->GetAction();
             if($this->IsAction || !isEmpty($res)) return $res;
         }
-		if(isValid($this->Table) && isValid($this->ColumnKey)){
+		if(isValid($this->Table) && isValid($this->KeyColumn)){
             if($this->AllowServerSide){
                 $this->NavigationBar = isValid($this->SelectQuery)?new Navigation($this->SelectQuery, queryParameters:$this->SelectParameters, defaultItems:$this->Items):
 				new Navigation(\MiMFa\Library\DataBase::MakeSelectQuery($this->Table,
-					isEmpty($this->IncludeColumnKeys)?"*":(in_array($this->ColumnKey, $this->IncludeColumnKeys)?$this->IncludeColumnKeys:[$this->ColumnKey, ...$this->IncludeColumnKeys]),
-					[$this->SelectCondition, isEmpty($this->IncludeRowKeys)?null:("{$this->ColumnKey} IN('".join("', '",$this->IncludeRowKeys)."')")]),defaultItems:$this->Items);
+					isEmpty($this->IncludeColumns)?"*":(in_array($this->KeyColumn, $this->IncludeColumns)?$this->IncludeColumns:[$this->KeyColumn, ...$this->IncludeColumns]),
+					[$this->SelectCondition, isEmpty($this->IncludeRows)?null:("{$this->KeyColumn} IN('".join("', '",$this->IncludeRows)."')")]),defaultItems:$this->Items);
                 $this->Items = $this->NavigationBar->GetItems();
             }
             else {
                 $this->NavigationBar = isValid($this->SelectQuery)?\MiMFa\Library\DataBase::TrySelect($this->SelectQuery, $this->SelectParameters, $this->Items):
                     \MiMFa\Library\DataBase::DoSelect($this->Table,
-                    isEmpty($this->IncludeColumnKeys)?"*":(in_array($this->ColumnKey, $this->IncludeColumnKeys)?$this->IncludeColumnKeys:[$this->ColumnKey, ...$this->IncludeColumnKeys]),
-                    [$this->SelectCondition, isEmpty($this->IncludeRowKeys)?null:("{$this->ColumnKey} IN('".join("', '",$this->IncludeRowKeys)."')")],
+                    isEmpty($this->IncludeColumns)?"*":(in_array($this->KeyColumn, $this->IncludeColumns)?$this->IncludeColumns:[$this->KeyColumn, ...$this->IncludeColumns]),
+                    [$this->SelectCondition, isEmpty($this->IncludeRows)?null:("{$this->KeyColumn} IN('".join("', '",$this->IncludeRows)."')")],
                     [], $this->Items
                 );
                 $this->Items = $this->NavigationBar->GetItems();
@@ -345,32 +347,30 @@ class Table extends Module{
             }
             $isu = false;
         }
-		$hasid = is_countable($this->Items) && !is_null($hasid = array_key_first($this->Items)) && isValid($this->Items[$hasid],$this->ColumnKey);
-		$rks = $this->RowsKeys;
-		$cks = $this->ColumnsKeys;
-		$rkls = $this->RowKeysAsLabels;
-		$ckls = $this->ColumnKeysAsLabels;
-        $ckl = $this->RowKey < 0;
-		$icks = $this->IncludeColumnKeys;
-		$ecks = $this->ExcludeColumnKeys;
+		$hasid = is_countable($this->Items) && !is_null($hasid = array_key_first($this->Items)) && isValid($this->Items[$hasid],$this->KeyColumn);
+		$rks = $this->KeysRows;
+		$cks = $this->KeyColumns;
+		$rkls = $this->RowsKeysAsLabels;
+		$ckls = $this->ColumnsKeysAsLabels;
+        $ckl = $this->KeyRow < 0;
+		$icks = $this->IncludeColumns;
+		$ecks = $this->ExcludeColumns;
 		$ick = !isEmpty($icks);
 		$eck = !isEmpty($ecks);
-		$irks = $hasid?[]:$this->IncludeRowKeys;
-		$erks = $hasid?[]:$this->ExcludeRowKeys;
-		$irids = $hasid?$this->IncludeRowKeys:[];
-		$erids = $hasid?$this->ExcludeRowKeys:[];
+		$irks = $hasid?[]:$this->IncludeRows;
+		$erks = $hasid?[]:$this->ExcludeRows;
+		$irids = $hasid?$this->IncludeRows:[];
+		$erids = $hasid?$this->ExcludeRows:[];
 		$irk = !isEmpty($irks);
 		$erk = !isEmpty($erks);
-		$hasid = $hasid && isValid($this->ColumnKey) && (!isEmpty($irids) || !isEmpty($erids));
-		$srn = $this->StartRowNumber??1;
-		$hrn = !is_null($this->StartRowNumber);
-		$scn = $this->StartColumnNumber;
+		$hasid = $hasid && isValid($this->KeyColumn) && (!isEmpty($irids) || !isEmpty($erids));
+		$srn = $this->RowsNumbersBegin??1;
+		$hrn = !is_null($this->RowsNumbersBegin);
+		$scn = $this->ColumnsNumbersBegin;
 		$hcn = !is_null($scn);
 		$uck = "";
-        $rowCount = $this->RowNumbersBegin;
+        $rowCount = 0;
         $colCount = $ick?count($icks):0;
-        $inum = !is_null($rowCount);
-        $isc = $isc || $inum;
 		if($isu){
 			$uck = HTML::Division(getAccess($this->AddAccess)? HTML::Icon("plus","{$this->Modal->Name}_Create();") : HTML::Image("tasks"));
 			if($ick) array_unshift($icks, $uck);
@@ -380,19 +380,18 @@ class Table extends Module{
 		if(is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey=>$row){
-				$rowid = getValid($row, $this->ColumnKey, null);
+				$rowid = getValid($row, $this->KeyColumn, null);
                 if(
 					(!$irk || in_array($rkey, $irks)) &&
 					(!$erk || !in_array($rkey, $erks)) &&
 					(!$hasid || (in_array($rowid, $irids) || !in_array($rowid, $erids)))
 				){
-                    $isrk = ($rkey === $this->RowKey) || in_array($rkey,$rks) || ($hasid && $rowid === $rkey);
+                    $isrk = ($rkey === $this->KeyRow) || in_array($rkey,$rks) || ($hasid && $rowid === $rkey);
                     if($rkls) array_unshift($row,is_integer($rkey)?($hrn?$rkey+$srn:""):$rkey);
 					if($isc){
                         $row = is_null($rowid)?
-                            [$uck=>$inum?HTML::Span($rowCount++):"",...$row]:
+                            [$uck=>"",...$row]:
                             [$uck=>HTML::Division([
-                                    ...($inum?[HTML::Span($rowCount++)]:[]),
 									...(getAccess($this->ViewAccess)? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);")] : []),
 									...($isu && getAccess($this->ModifyAccess)? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
 									...($isu &&getAccess($this->RemoveAccess)? [HTML::Icon("trash","{$this->Modal->Name}_Delete(`$rowid`);")] : [])
@@ -439,6 +438,7 @@ class Table extends Module{
                             }
                     }
                     $cells[] = $etrow;
+                    $rowCount++;
                 }
             }
             $cells[] = $etrow;
@@ -446,7 +446,7 @@ class Table extends Module{
                 if(is_bool($this->Footer)) {
                     $cells[] = "<tfoot><tr>";
                     for($i = 0; $i < $colCount; $i++)
-                        $cells[] = HTML::Cell("", $ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false);
+                        $cells[] = HTML::Cell("", true/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
                     $cells[] = "</tr></tfoot>";
                 }
                 else $cells[] = Convert::ToString($this->Footer);
@@ -519,21 +519,21 @@ class Table extends Module{
 			});").($this->Controlable?
 			(is_null($this->Modal)?"":("
 				function {$this->Modal->Name}_View(key){
-					{$updateMethod}Data(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=view&{$this->ColumnKey}='+key, `.{$this->Name}`,
+					{$updateMethod}Data(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=view&{$this->KeyColumn}='+key, `.{$this->Name}`,
 						(data,selector)=>{
 							{$this->Modal->ShowScript("null","null","data")}
 						}
 					);
 				}".($this->Updatable?(getAccess($this->AddAccess)?"
 				function {$this->Modal->Name}_Create(){
-					{$updateMethod}Data(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=create&{$this->ColumnKey}=_table_add', `.{$this->Name}`,
+					{$updateMethod}Data(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=create&{$this->KeyColumn}=_table_add', `.{$this->Name}`,
 						(data,selector)=>{
 							{$this->Modal->ShowScript("null","null","data")}
 						}
 					);
 				}":"").(getAccess($this->ModifyAccess)?"
 				function {$this->Modal->Name}_Modify(key){
-					{$updateMethod}Data(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=modify&{$this->ColumnKey}='+key, `.{$this->Name}`,
+					{$updateMethod}Data(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=modify&{$this->KeyColumn}='+key, `.{$this->Name}`,
 						(data,selector)=>{
 							{$this->Modal->ShowScript("null","null","data")}
 						}
@@ -541,7 +541,7 @@ class Table extends Module{
 				}":"").(getAccess($this->RemoveAccess)?"
 				function {$this->Modal->Name}_Delete(key){
 					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?", styling:false)."`))":"")."
-						{$updateMethod}Data(null, `".\_::$CONFIG->ViewHandlerKey."=value&action=delete&{$this->ColumnKey}=`+key, `.{$this->Name}`,
+						{$updateMethod}Data(null, `".\_::$CONFIG->ViewHandlerKey."=value&action=delete&{$this->KeyColumn}=`+key, `.{$this->Name}`,
 						(data,selector)=>{
 							load();
 						});
@@ -551,14 +551,14 @@ class Table extends Module{
     }
 
 	public function GetCell($cel, $key, $isHead = false, $row = []){
-        if(!$isHead || $cel !== $key) $cel = Convert::ToString(Convert::By(getValid($this->CellValues, $key), $cel, $key, $row)??$cel);
+        if(!$isHead || $cel !== $key) $cel = Convert::ToString(Convert::By(getValid($this->CellsValues, $key), $cel, $key, $row)??$cel);
 		if($isHead){
             $cel = Convert::ToString($cel);
 			if(isFile($cel)) return "<th>".HTML::Media($cel)."</th>";
 			else return "<th>".__($cel, translation:$this->AllowLabelTranslation, styling:false)."</th>";
         }
 		//if($this->Updatable && !$isHead && $key > 1){
-        //    $cel = new Field(key:$key, value: $cel, lock: true, type:getValid($this->CellTypes,$key, null));
+        //    $cel = new Field(key:$key, value: $cel, lock: true, type:getValid($this->CellsTypes,$key, null));
         //    $cel->MinWidth = $this->MediaWidth;
         //    $cel->MaxHeight = $this->MediaHeight;
         //    return "<td>".Convert::ToString($cel)."</td>";
@@ -574,7 +574,7 @@ class Table extends Module{
     }
 	public function GetAction(){
         if($this->IsAction = (GRAB(\_::$CONFIG->ViewHandlerKey, $this->UpdateMethod) || $this->IsAction))
-		    return $this->DoAction(RECEIVE($this->ColumnKey, $this->UpdateMethod), GRAB("action", $this->UpdateMethod));
+		    return $this->DoAction(RECEIVE($this->KeyColumn, $this->UpdateMethod), GRAB("action", $this->UpdateMethod));
         else return null;
     }
 	public function DoAction($value, $action = "view"){
@@ -601,7 +601,7 @@ class Table extends Module{
         if(is_null($value)) return null;
         if(!getAccess($this->ViewAccess)) return HTML::Error("You have not access to see datails!");
         MODULE("Form");
-        $row = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ViewCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]);
+        $row = \MiMFa\Library\DataBase::DoSelect($this->Table,count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]);
         if(count($row) > 0) $row = $row[0];
         else return HTML::Error("You can not see this item!");
         $form = new Form(
@@ -612,7 +612,7 @@ class Table extends Module{
             children:(function() use($row){
                 yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
                 foreach ($row as $k=>$cell){
-                    $type = getValid($this->CellTypes, $k, "");
+                    $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)){
                         $type = strtolower($type);
                         switch($type){
@@ -665,7 +665,7 @@ class Table extends Module{
         if(is_null($value)) return null;
         if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
         MODULE("Form");
-        $record = \MiMFa\Library\DataBase::DoSelect($this->Table,"*", [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]);
+        $record = \MiMFa\Library\DataBase::DoSelect($this->Table, count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]);
         if(count($record) > 0) $record = $record[0];
         else return HTML::Error("You can not modify this item!");
         $form = new Form(
@@ -706,7 +706,7 @@ class Table extends Module{
         if(is_null($value)) return null;
         $vals = $this->GetFormValues();
         if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
-        if(\MiMFa\Library\DataBase::DoUpdate($this->Table, [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], $vals))
+        if(\MiMFa\Library\DataBase::DoUpdate($this->Table, [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
             return HTML::Success("The information updated successfully!");
         return HTML::Error("You can not update this item!");
     }
@@ -716,6 +716,9 @@ class Table extends Module{
         if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to add!");
         MODULE("Form");
         $record = [];
+        if(count($this->CellsTypes)>0)
+            foreach ($this->CellsTypes as $key=>$val)
+                $record[$key] = null;
         $form = new Form(
             title:"Add {$this->Title}",
             description:$this->Description,
@@ -727,13 +730,15 @@ class Table extends Module{
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->Table}'");
-                foreach ($schemas as $schema) $record[$schema["COLUMN_NAME"]] = null;
-                foreach ($schemas as $schema){
-                    $key = $schema["COLUMN_NAME"];
-                    $val = $key == $this->ColumnKey? $value:null;
-                    $res = $this->PrepareDataToShow($key, $val, $record, $schema);
-                    if(!isEmpty($res)) yield $res;
-                }
+                if(count($record)==0) foreach ($schemas as $schema) $record[$schema["COLUMN_NAME"]] = null;
+                foreach ($record as $key=>$val)
+                    foreach ($schemas as $schema)
+                        if($schema["COLUMN_NAME"] == $key)
+                        {
+                            $val = $key == $this->KeyColumn? $value:null;
+                            $res = $this->PrepareDataToShow($key, $val, $record, $schema);
+                            if(!isEmpty($res)) yield $res;
+                        }
             })());
         $form->Image = getValid($record,"Image","plus");
         $form->Template = "b";
@@ -753,7 +758,7 @@ class Table extends Module{
         if(is_null($value)) return null;
         $vals = $this->GetFormValues();
         if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to modify!");
-        unset($vals[$this->ColumnKey]);
+        unset($vals[$this->KeyColumn]);
         foreach ($vals as $k=>$v)
             if(isEmpty($v)) unset($vals[$k]);
         if(\MiMFa\Library\DataBase::DoInsert($this->Table, $this->AddCondition, $vals))
@@ -764,26 +769,29 @@ class Table extends Module{
 	public function DoRemoveAction($value){
         if(is_null($value)) return null;
         if(!getAccess($this->RemoveAccess)) return HTML::Error("You have not access to delete!");
-        if(\MiMFa\Library\DataBase::DoDelete($this->Table, [$this->ModifyCondition, "`{$this->ColumnKey}`=:{$this->ColumnKey}"], [":{$this->ColumnKey}"=>$value]))
+        if(\MiMFa\Library\DataBase::DoDelete($this->Table, [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]))
             return HTML::Success("The items removed successfully!");
         return HTML::Error("You can not remove this item!");
     }
 
 	public function PrepareDataToShow(&$key, &$value, &$record, $schema){
-        $type = getValid($this->CellTypes, $key, $schema["DATA_TYPE"]);
+        $type = getValid($this->CellsTypes, $key, $schema["DATA_TYPE"]);
         $options = null;
+        $def = $schema["COLUMN_DEFAULT"]??"";
         if(is_null($value))
-            switch (strtolower($schema["COLUMN_DEFAULT"]??""))
+            switch (strtolower($def))
             {
             	case "null":
+            	case "current_timestamp":
             	case "current_timestamp()":
+            	case "{current_timestamp()}":
                     $value = null;
                     break;
             	default:
-                    $value = $schema["COLUMN_DEFAULT"];
+                    $value = trim($def,"\"'`");
                     break;
             }
-        if($key == $this->ColumnKey && str_contains($schema["EXTRA"] ,'auto_increment'))
+        if($key == $this->KeyColumn && str_contains($schema["EXTRA"] ,'auto_increment'))
             return HTML::HiddenInput($key, $value);
         else {
             if(is_string($type))
@@ -834,26 +842,27 @@ class Table extends Module{
         try{
             foreach (RECEIVE(null, $_FILES)??[] as $k=>$v)
                 if(Local::IsFileObject($_FILES[$k])){
-                    $type = getValid($this->CellTypes, $k, "");
+                    $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)) $type = \_::$CONFIG->GetAcceptableFormats($type);
                     else $type = \_::$CONFIG->GetAcceptableFormats();
                     $vals[$k] = Local::UploadFile($_FILES[$k], extensions:$type);
                 }
                 else unset($vals[$k]);
         }catch(\Exception $ex){ return HTML::Error($ex); }
-        foreach ($vals as $k=>$v){
-            $type = getValid($this->CellTypes, $k, "");
-            if(is_string($type)){
-                switch(strtolower($type)){
-                    case "pass":
-                    case "password":
-                        if(isEmpty($v)) unset($vals[$k]);
-                        elseif($this->CryptPassword) $vals[$k] = \_::$INFO->User->EncryptPassword($v);
-                        break;
+        foreach ($vals as $k=>$v)
+            if($k !== $this->KeyColumn){
+                $type = getValid($this->CellsTypes, $k, "");
+                if(is_string($type)){
+                    switch(strtolower($type)){
+                        case "pass":
+                        case "password":
+                            if(isEmpty($v)) unset($vals[$k]);
+                            elseif($this->CryptPassword) $vals[$k] = \_::$INFO->User->EncryptPassword($v);
+                            break;
+                    }
                 }
+                else if($type === false) unset($vals[$k]);
             }
-            else if($type === false) unset($vals[$k]);
-        }
         return $vals;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 class Information extends InformationBase{
 	public $Owner = "MiMFa";
-	public $FullOwner = "Minimal Member Factory";
+	public $FullOwner = "Minimal Members Factory";
 	public $Product = "aseqbase";
 	public $FullProduct = "aseqbase";
 	public $Name = "aseqbase";

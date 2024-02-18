@@ -29,6 +29,7 @@ class Translate
 	public static $ValidPattern = "/[A-z]+/";
 	public static $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
 	public static $CaseSensitive = true;
+	public static $AutoUpdate = false;
 
 	/**
      * Change the Default Language of translator
@@ -76,10 +77,10 @@ class Translate
 			?DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE `KeyCode`=:KeyCode",[":KeyCode"=>$code])
 			:DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE LOWER(`KeyCode`)=LOWER(:KeyCode)",[":KeyCode"=>$code]);
         if(self::$CaseSensitive && count($col)==0) $col = DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE LOWER(`KeyCode`)=LOWER(:KeyCode)",[":KeyCode"=>$code]);
-        if(count($col)==0)
-			DataBase::Insert("INSERT INTO ".self::$TableName." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode, :ValueOptions)",
+        if(count($col)==0){
+			if(self::$AutoUpdate)  DataBase::Insert("INSERT INTO ".self::$TableName." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode, :ValueOptions)",
 				[":KeyCode"=>$code,":ValueOptions"=>json_encode(array('x'=>$text))]);
-		else {
+        } else {
 			$data = json_decode($col[0]["ValueOptions"]);
 			$text = isset($data->{$lang??self::$Language})? $data->{$lang??self::$Language} : $data->x;
 		}

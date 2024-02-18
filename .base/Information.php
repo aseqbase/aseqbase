@@ -1,7 +1,7 @@
 <?php
 class Information extends InformationBase{
 	public $Owner = "MiMFa";
-	public $FullOwner = "Minimal Member Factory";
+	public $FullOwner = "Minimal Members Factory";
 	public $OwnerDescription = "We are a team has considered the idea as a small start-up project and has developed it through its financial and human resources. The start-up has gathered people from the professionals around a table. Our products are now ready to be presented to our dear users, and we are impatiently waiting to receive your comments.";
 	public $Product = "aseqbase";
 	public $FullProduct = "aseqbase";
@@ -27,7 +27,7 @@ class Information extends InformationBase{
 	
 	public $Location = null;
 	
-	public $KeyWords = array("MiMFa","Minimal Member Factory");
+	public $KeyWords = array("MiMFa","Minimal Members Factory");
 
 	public $MainMenus = array(
 		array("Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png","Attributes"=> "class='menu-link'"),

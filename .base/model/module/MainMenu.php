@@ -85,8 +85,19 @@ class MainMenu extends Module{
 				font-size: var(--Size-0);
 			}
 
+			.{$this->Name} :is(li, li a, li a:visited){
+				border: none;
+			}
+
 			.{$this->Name} li .fa{
 				font-size: var(--Size-2);
+			}
+
+			.{$this->Name} ul li.dropdown{
+				position: initial;
+			}
+			.{$this->Name} ul li.dropdown ul{
+				text-align: start;
 			}
 
 			.{$this->Name} ul:not(.sub-items) {
@@ -94,7 +105,7 @@ class MainMenu extends Module{
 				list-style-type: none;
 				margin: 0;
 				padding: 0;
-				/*overflow: hidden;*/
+				overflow: hidden;
 				display: inline-table;
 				".($this->SearchForm != null?"
 				min-width: fit-content;
@@ -121,7 +132,7 @@ class MainMenu extends Module{
 				font-size: inherit;
 				border-radius: none;
 				text-decoration: none;
-				padding: 14px 16px;
+				padding: var(--Size-0) var(--Size-1);
 				display: block;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
@@ -135,6 +146,15 @@ class MainMenu extends Module{
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active:hover>:is(.button, .button:visited){
 				color: var(--ForeColor-0);
+			}
+			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
+				color: var(--ForeColor-1);
+				background-color: var(--BackColor-1);
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
+				display: block;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
 			.{$this->Name} ul.sub-items {
@@ -152,42 +172,80 @@ class MainMenu extends Module{
 				z-index: 99;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} ul.sub-items>li {
-				display: block;
+			.{$this->Name} ul.sub-items .sub-items {
+				display: flex;
+				position: relative;
+				background-color: #8881;
+				font-size: 80%;
+				min-width: calc(5 * var(--Size-5));
+				max-width: 500px;
+				width: 70vw;
+				max-height: 60vh;
+				padding: 0px;
+				box-shadow: var(--Shadow-1);
+				overflow-x: hidden;
+				overflow-y: auto;
+				flex-wrap: wrap;
+				flex-direction: row;
+				align-content: stretch;
+				justify-content: flex-start;
+				align-items: stretch;
+				padding-".($rtl?"right":"left").": var(--Size-5);
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} ul.sub-items>li.active{
-				color: var(--ForeColor-2);
-				background-color: var(--BackColor-2);
-				box-shadow: var(--Shadow-2);
+			.{$this->Name} ul.sub-items .sub-items li :is(.button, .button:visited) {
+				padding: calc(var(--Size-0) / 2) var(--Size-1);
+				background: transparent;
+				border-color: transparent;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name} ul.sub-items>li {
+				font-size: 80%;
+				display: block;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} ul.sub-items>li>:is(.button, .button:visited){
+				color: var(--ForeColor-1);
 				text-decoration: none;
-				padding: 12px 16px;
+				padding: calc(var(--Size-1) / 2) var(--Size-1);
 				display: block;
-				color: var(--ForeColor-1);
+				text-align: start;
 			}
-			.{$this->Name} ul.sub-items>li:hover>:is(.button, .button:visited){
+			.{$this->Name} ul.sub-items>li.dropdown{
+				border-bottom: var(--Border-1) transparent;
+			}
+			.{$this->Name} ul.sub-items>li.dropdown.active{
+				box-shadow: var(--Shadow-2);
+			}
+			.{$this->Name} ul.sub-items>li.dropdown.active>:is(.button, .button:visited){
 				font-weight: bold;
-				color: var(--ForeColor-2);
-				background-color: var(--BackColor-2);
+			}
+			.{$this->Name} ul.sub-items>li.dropdown:hover{
+				border-bottom: var(--Border-1) var(--BackColor-5);
+				box-shadow: var(--Shadow-1);
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} ul.sub-items>li.active>:is(.button, .button:visited){
-				color: var(--ForeColor-2);
-			}
-
-			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
-				color: var(--ForeColor-1);
-				background-color: var(--BackColor-1);
+			.{$this->Name} ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
+				font-weight: bold;
+				color: #8888;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
-				display: block;
+			.{$this->Name} ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
+				font-weight: bold;
+				background-color: var(--BackColor-5);
+				color: var(--ForeColor-5);
+				border: none;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name} ul.sub-items>li.dropdown:hover>ul.sub-items {
-				display: contents;
+			.{$this->Name} ul.sub-items>li:not(.dropdown).active>:is(.button, .button:visited){
+				font-weight: bold;
+				box-shadow: var(--Shadow-2);
+			}
+			.{$this->Name} ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
+				font-weight: bold;
+				background-color: var(--BackColor-5);
+				color: var(--ForeColor-5);
+				border: none;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
@@ -296,7 +354,7 @@ class MainMenu extends Module{
 		$count = isValid($item, "Items")?count($item["Items"]):0;
 		return HTML::Item(
 			HTML::Button(
-				HTML::Division(__(getBetween($item,"Title","Name"),true,false),["class"=>"box"]),
+				__(getBetween($item,"Title","Name"),true,false),
 				$path, getValid($item,"Attributes")
 			).
 			($count > 0?

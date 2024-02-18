@@ -295,6 +295,7 @@
         \MIMFa\Library\Translate::$Language = \_::$CONFIG->DefaultLanguage;
         \MIMFa\Library\Translate::$Direction = \_::$CONFIG->DefaultDirection;
         \MIMFa\Library\Translate::$Encoding = \_::$CONFIG->Encoding;
+        \MIMFa\Library\Translate::$AutoUpdate = \_::$CONFIG->AutoUpdateLanguage;
         \MIMFa\Library\Translate::Initialize();
     }
 

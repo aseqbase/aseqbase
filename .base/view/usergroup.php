@@ -12,10 +12,10 @@ else
         ACCESS(\_::$CONFIG->UserAccess);
         MODULE("Table");
         $mod = new Table(\_::$CONFIG->DataBasePrefix."UserGroup");
-        $mod->ColumnKey = "Name";
+        $mod->KeyColumn = "Name";
         $mod->Updatable = false;
         $access = $mod->UpdateAccess = \_::$CONFIG->AdminAccess;
-        $mod->CellTypes = [
+        $mod->CellsTypes = [
             "ID"=>false,
             "Status"=>$access,
             "Path"=>$access,
