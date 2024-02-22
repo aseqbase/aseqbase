@@ -152,6 +152,8 @@ class Table extends Module{
 	public $ModifyCondition = null;
 	public $RemoveAccess = 0;
 	public $RemoveCondition = null;
+	public $DuplicateAccess = 0;
+	public $DuplicateCondition = null;
 	public $SelectQuery = null;
 	public $SelectParameters = null;
 	public $SelectCondition = null;
@@ -160,7 +162,7 @@ class Table extends Module{
 
 	public $AllowLabelTranslation = true;
 	public $AllowDataTranslation = false;
-    public $AllowCache= true;
+    public $AllowCache= false;
 	public $AllowPaging= true;
 	public $AllowSearching= true;
 	public $AllowOrdering=  true;
@@ -377,6 +379,11 @@ class Table extends Module{
         }
 		$strow = "<tr>";
 		$etrow = "</tr>";
+        $vaccess = getAccess($this->ViewAccess);
+        $aaccess = $isu && getAccess($this->AddAccess);
+        $daccess = $isu && getAccess($this->DuplicateAccess);
+        $maccess = $isu && getAccess($this->ModifyAccess);
+        $raccess = $isu && getAccess($this->RemoveAccess);
 		if(is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey=>$row){
@@ -392,9 +399,10 @@ class Table extends Module{
                         $row = is_null($rowid)?
                             [$uck=>"",...$row]:
                             [$uck=>HTML::Division([
-									...(getAccess($this->ViewAccess)? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);")] : []),
-									...($isu && getAccess($this->ModifyAccess)? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
-									...($isu &&getAccess($this->RemoveAccess)? [HTML::Icon("trash","{$this->Modal->Name}_Delete(`$rowid`);")] : [])
+									...($vaccess? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);")] : []),
+									...($maccess? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
+									...($daccess? [HTML::Icon("copy","{$this->Modal->Name}_Duplicate(`$rowid`);")] : []),
+									...($raccess? [HTML::Icon("trash","{$this->Modal->Name}_Delete(`$rowid`);")] : [])
 								]),
 							...$row];
                     }
@@ -452,7 +460,7 @@ class Table extends Module{
                 else $cells[] = Convert::ToString($this->Footer);
             return (!$this->TopNavigation||is_null($this->NavigationBar)?"":$this->NavigationBar->Capture()).join(PHP_EOL, $cells);
         }
-		elseif($isu && getAccess($this->AddAccess))
+		elseif($aaccess)
 			return HTML::Center(HTML::Button("Add your first item ".HTML::Image("plus"),"{$this->Modal->Name}_Create();"));
 		return parent::Get();
 	}
@@ -538,6 +546,13 @@ class Table extends Module{
 							{$this->Modal->ShowScript("null","null","data")}
 						}
 					);
+				}":"").(getAccess($this->DuplicateAccess)?"
+				function {$this->Modal->Name}_Duplicate(key){
+					{$updateMethod}Data(null, '".\_::$CONFIG->ViewHandlerKey."=value&action=duplicate&{$this->KeyColumn}='+key, `.{$this->Name}`,
+						(data,selector)=>{
+							{$this->Modal->ShowScript("null","null","data")}
+						}
+					);
 				}":"").(getAccess($this->RemoveAccess)?"
 				function {$this->Modal->Name}_Delete(key){
 					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?", styling:false)."`))":"")."
@@ -585,6 +600,8 @@ class Table extends Module{
                 return $this->ShowModifyForm($value);
             case "create":
                 return $this->ShowAddForm($value);
+            case "duplicate":
+                return $this->ShowDuplicateForm($value);
             case "delete":
                 return $this->DoRemoveAction($value);
             default:
@@ -601,17 +618,16 @@ class Table extends Module{
         if(is_null($value)) return null;
         if(!getAccess($this->ViewAccess)) return HTML::Error("You have not access to see datails!");
         MODULE("Form");
-        $row = \MiMFa\Library\DataBase::DoSelect($this->Table,count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]);
-        if(count($row) > 0) $row = $row[0];
-        else return HTML::Error("You can not see this item!");
+        $record = \MiMFa\Library\DataBase::DoSelectRow($this->Table, count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]);
+        if(isEmpty($record)) return HTML::Error("You can not see this item!");
         $form = new Form(
-            title:getValid($row,"Title",null)??getValid($row,"Name",null),
-            description:getValid($row,"Description",null),
+            title:getValid($record,"Title",null)??getValid($record,"Name",null),
+            description:getValid($record,"Description",null),
             action:'#',
             method:"",
-            children:(function() use($row){
+            children:(function() use($record){
                 yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
-                foreach ($row as $k=>$cell){
+                foreach ($record as $k=>$cell){
                     $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)){
                         $type = strtolower($type);
@@ -637,7 +653,7 @@ class Table extends Module{
                         }
                     }
                     if($type !== false && !isEmpty($cell)) yield HTML::Field(
-                        type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k, $row)),
+                        type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k, $record)),
                         key:$k,
                         value:$cell,
                         description:false,
@@ -645,7 +661,7 @@ class Table extends Module{
                     );
                 }
             })());
-        $form->Image = getValid($row,"Image","eye");
+        $form->Image = getValid($record,"Image","eye");
         $form->Template = "b";
         $form->Class = "container-fluid";
         $form->SubmitLabel = null;
@@ -659,56 +675,6 @@ class Table extends Module{
         $form->BackLabel = null;
         //$form->AllowHeader = false;
         return $form->Capture();
-    }
-
-	public function ShowModifyForm($value){
-        if(is_null($value)) return null;
-        if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
-        MODULE("Form");
-        $record = \MiMFa\Library\DataBase::DoSelect($this->Table, count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]);
-        if(count($record) > 0) $record = $record[0];
-        else return HTML::Error("You can not modify this item!");
-        $form = new Form(
-            title:getValid($record,"Title",null)??getValid($record,"Name",null),
-            description:getValid($record,"Description",null),
-            action:$this->UpdateAction,
-            method:$this->UpdateMethod,
-            children:(function() use($record, $value){
-                yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
-                $schemas = \MiMFa\Library\DataBase::TrySelect(
-                    "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
-                    FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME='{$this->Table}'");
-                foreach ($record as $key=>$val)
-                    foreach ($schemas as $schema)
-                        if($schema["COLUMN_NAME"] == $key)
-                        {
-                            $res = $this->PrepareDataToShow($key, $val, $record, $schema);
-                            if(!isEmpty($res)) yield $res;
-                            break;
-                        }
-            })());
-        $form->Image = getValid($record,"Image","edit");
-        $form->Template = "b";
-        $form->Class = "container-fluid";
-        $form->CancelLabel = "Cancel";
-        if($this->Modal){
-            $form->CancelPath = $this->Modal->HideScript();
-            $form->CancelLabel = "Cancel";
-        } else $form->CancelLabel = null;
-        $form->SuccessPath = \_::$URL;
-        $form->BackPath = \_::$URL;
-        $form->BackLabel = null;
-        //$form->AllowHeader = false;
-        return $form->Capture();
-    }
-	public function DoModifyAction($value){
-        if(is_null($value)) return null;
-        $vals = $this->GetFormValues();
-        if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
-        if(\MiMFa\Library\DataBase::DoUpdate($this->Table, [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
-            return HTML::Success("The information updated successfully!");
-        return HTML::Error("You can not update this item!");
     }
 
 	public function ShowAddForm($value){
@@ -754,6 +720,46 @@ class Table extends Module{
         //$form->AllowHeader = false;
         return $form->Capture();
     }
+	public function ShowDuplicateForm($value){
+        if(is_null($value)) return null;
+        if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to add!");
+        MODULE("Form");
+        $record = \MiMFa\Library\DataBase::DoSelectRow($this->Table, count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]);
+        if(isEmpty($record)) return HTML::Error("You can not add this item!");
+        $form = new Form(
+            title:"Add {$this->Title}",
+            description:$this->Description,
+            action:$this->UpdateAction,
+            method:$this->UpdateMethod,
+            children:(function() use($record, $value){
+                yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
+                $schemas = \MiMFa\Library\DataBase::TrySelect(
+                    "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME='{$this->Table}'");
+                foreach ($record as $key=>$val)
+                    foreach ($schemas as $schema)
+                        if($schema["COLUMN_NAME"] == $key)
+                        {
+                            $val = $key == $this->KeyColumn? "_table_add":$val;
+                            $res = $this->PrepareDataToShow($key, $val, $record, $schema);
+                            if(!isEmpty($res)) yield $res;
+                        }
+            })());
+        $form->Image = getValid($record,"Image","plus");
+        $form->Template = "b";
+        $form->Class = "container-fluid";
+        $form->CancelLabel = "Cancel";
+        if($this->Modal){
+            $form->CancelPath = $this->Modal->HideScript();
+            $form->CancelLabel = "Cancel";
+        } else $form->CancelLabel = null;
+        $form->SuccessPath = \_::$URL;
+        $form->BackPath = \_::$URL;
+        $form->BackLabel = null;
+        //$form->AllowHeader = false;
+        return $form->Capture();
+    }
 	public function DoAddAction($value){
         if(is_null($value)) return null;
         $vals = $this->GetFormValues();
@@ -764,6 +770,55 @@ class Table extends Module{
         if(\MiMFa\Library\DataBase::DoInsert($this->Table, $this->AddCondition, $vals))
             return HTML::Success("The information added successfully!");
         return HTML::Error("You can not add this item!");
+    }
+
+	public function ShowModifyForm($value){
+        if(is_null($value)) return null;
+        if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
+        MODULE("Form");
+        $record = \MiMFa\Library\DataBase::DoSelectRow($this->Table, count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]);
+        if(isEmpty($record)) return HTML::Error("You can not modify this item!");
+        $form = new Form(
+            title:getValid($record,"Title",null)??getValid($record,"Name",null),
+            description:getValid($record,"Description",null),
+            action:$this->UpdateAction,
+            method:$this->UpdateMethod,
+            children:(function() use($record, $value){
+                yield HTML::HiddenInput(\_::$CONFIG->ViewHandlerKey, "value");
+                $schemas = \MiMFa\Library\DataBase::TrySelect(
+                    "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME='{$this->Table}'");
+                foreach ($record as $key=>$val)
+                    foreach ($schemas as $schema)
+                        if($schema["COLUMN_NAME"] == $key)
+                        {
+                            $res = $this->PrepareDataToShow($key, $val, $record, $schema);
+                            if(!isEmpty($res)) yield $res;
+                            break;
+                        }
+            })());
+        $form->Image = getValid($record,"Image","edit");
+        $form->Template = "b";
+        $form->Class = "container-fluid";
+        $form->CancelLabel = "Cancel";
+        if($this->Modal){
+            $form->CancelPath = $this->Modal->HideScript();
+            $form->CancelLabel = "Cancel";
+        } else $form->CancelLabel = null;
+        $form->SuccessPath = \_::$URL;
+        $form->BackPath = \_::$URL;
+        $form->BackLabel = null;
+        //$form->AllowHeader = false;
+        return $form->Capture();
+    }
+	public function DoModifyAction($value){
+        if(is_null($value)) return null;
+        $vals = $this->GetFormValues();
+        if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
+        if(\MiMFa\Library\DataBase::DoUpdate($this->Table, [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
+            return HTML::Success("The information updated successfully!");
+        return HTML::Error("You can not update this item!");
     }
 
 	public function DoRemoveAction($value){
@@ -851,6 +906,7 @@ class Table extends Module{
         }catch(\Exception $ex){ return HTML::Error($ex); }
         foreach ($vals as $k=>$v)
             if($k !== $this->KeyColumn){
+                if($v === '') $vals[$k] = null;
                 $type = getValid($this->CellsTypes, $k, "");
                 if(is_string($type)){
                     switch(strtolower($type)){
@@ -861,7 +917,7 @@ class Table extends Module{
                             break;
                     }
                 }
-                else if($type === false) unset($vals[$k]);
+                elseif($type === false) unset($vals[$k]);
             }
         return $vals;
     }

@@ -182,6 +182,8 @@ class MainMenu extends Module{
 				width: 70vw;
 				max-height: 60vh;
 				padding: 0px;
+				padding-".($rtl?"right":"left").": var(--Size-5);
+				padding-bottom: calc(var(--Size-0) / 2);
 				box-shadow: var(--Shadow-1);
 				overflow-x: hidden;
 				overflow-y: auto;
@@ -190,7 +192,6 @@ class MainMenu extends Module{
 				align-content: stretch;
 				justify-content: flex-start;
 				align-items: stretch;
-				padding-".($rtl?"right":"left").": var(--Size-5);
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			.{$this->Name} ul.sub-items .sub-items li :is(.button, .button:visited) {
@@ -212,6 +213,7 @@ class MainMenu extends Module{
 				text-align: start;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown{
+				display: block;
 				border-bottom: var(--Border-1) transparent;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown.active{

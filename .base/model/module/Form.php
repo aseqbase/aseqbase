@@ -5,6 +5,15 @@ use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
 class Form extends Module{
 	public $Capturable = true;
+	/**
+	 * The name of selected Template
+     *	 'v': vertical
+     *	 'h': horizontal
+     *	 'b': both
+     *	 's': special
+     *	 't': table
+	 * @var mixed
+	 */
 	public $Template = null;
 	public $Path = null;
 	public $Action = null;
@@ -29,6 +38,8 @@ class Form extends Module{
 	public $AllowFooter = true;
     public $Class = "container";
 	public $ContentClass = "col-lg-6";
+
+	public $FieldsTypes = [];
 
 	public $FieldsForeColor = "var(--ForeColor-1)";
 	public $FieldsBackColor = "var(--BackColor-1)";
@@ -60,16 +71,7 @@ class Form extends Module{
 		$this->Image = $image;
 		$this->Action = $action;
 		$this->Method = $method;
-		if(is_array($children) && count($children)>0)
-			if($this->Method) $this->Children = iteration($children, function($k,$v){
-				if(is_integer($k)) return $v;
-				else return HTML::Field(null, $k, $v);
-            });
-			else $this->Children = iteration($children, function($k,$v){
-				if(is_integer($k)) return $v;
-				else return HTML::Field(null, $k, $v, attributes:["disabled"]);
-            });
-		else $this->Children = $children;
+		$this->Children = $children;
 		return $this;
     }
 
@@ -512,6 +514,30 @@ class Form extends Module{
 		$name = $this->Name."_Form";
 		$src = $this->Action??$this->Path??\_::$PATH;
 		$src .=	(is_null($this->ResponseView)?null:((strpos($src,"?")?"&":"?").\_::$CONFIG->ViewHandlerKey."=".$this->ResponseView));
+
+		if(is_array($this->Children) && count($this->Children)>0){
+			$attr = $this->Method?[]:["disabled"];
+			$this->Children = isEmpty($this->FieldsTypes)
+				?iteration($this->Children, function($k,$v) use($attr){
+					if(is_integer($k)) return $v;
+					else return HTML::Field(
+								  type:null,
+								  key:$k,
+								  value:$v,
+								  attributes:$attr);
+				})
+				:iteration($this->FieldsTypes, function($k,$type) use($attr){
+					$v = getValid($this->Children,$k,null);
+					if($type === false) return null;
+					if(is_integer($k) && isEmpty($type)) return $v;
+					else return HTML::Field(
+								  type:$type,
+								  key:$k,
+								  value:$v,
+								  attributes:$attr);
+				});
+        }
+
 		if(isValid($src))
 			if($this->HasDecoration)
 				return
@@ -559,8 +585,10 @@ class Form extends Module{
     }
 	public function GetButtons(){
 		if(isValid($this->Buttons)) yield $this->Buttons;
-		yield (isValid($this->SubmitLabel)?HTML::SubmitButton($this->SubmitLabel, ["name"=>"submit", "class"=>"col-md"]):"");
-		yield (isValid($this->ResetLabel)?HTML::ResetButton($this->ResetLabel, ["name"=>"reset", "class"=>"col-md-4"]):"");
+		if($this->Method) {
+            yield (isValid($this->SubmitLabel)?HTML::SubmitButton($this->SubmitLabel, ["name"=>"submit", "class"=>"col-md"]):"");
+            yield (isValid($this->ResetLabel)?HTML::ResetButton($this->ResetLabel, ["name"=>"reset", "class"=>"col-md-4"]):"");
+        }
 		yield (isValid($this->CancelLabel)?HTML::Button($this->CancelLabel, $this->CancelPath, ["name"=>"cancel", "class"=>"col-lg-3"]):"");
     }
 	public function GetFooter(){

@@ -94,6 +94,15 @@ class DataBase {
 		return $query;
 	}
 
+	public static function ReturnArray($result, $defaultValue = [])
+	{
+		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
+	}
+	public static function ReturnValue($result, $defaultValue = null)
+	{
+		return isEmpty($result)? $defaultValue : $result;
+	}
+
 	public static function SelectValue($query, $params=[]){
 		$Connection = self::Connection();
 		$stmt = $Connection->prepare($query);
@@ -103,7 +112,7 @@ class DataBase {
 	public static function TrySelectValue($query, $params=[], $defaultValue = null)
 	{
 		try{
-			return self::SelectValue($query,$params)??$defaultValue;
+			return self::ReturnValue(self::SelectValue($query,$params),$defaultValue);
         }
         catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
 	}
@@ -126,17 +135,64 @@ class DataBase {
 	public static function TrySelect($query, $params=[], $defaultValue = array())
 	{
 		try{
-			return self::Select($query,$params)??$defaultValue;
+			return self::ReturnArray(self::Select($query,$params),$defaultValue);
         }catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
 	}
 	public static function DoSelect($tableName, $columns = "*", $condition=null, $params=[], $defaultValue = array())
 	{
-		$result = self::TrySelect(self::MakeSelectQuery($tableName, $columns, $condition),$params,$defaultValue);
-		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
+		return self::TrySelect(self::MakeSelectQuery($tableName, $columns, $condition),$params,$defaultValue);
 	}
 	public static function MakeSelectQuery($tableName, $columns = "*", $condition=null)
 	{
 		return "SELECT ".self::ColumnNameNormalization($columns??"*")." FROM ".self::TableNameNormalization($tableName)." ".self::ConditionNormalization($condition);
+	}
+
+	public static function SelectRow($query, $params=[]){
+		$Connection = self::Connection();
+		$stmt = $Connection->prepare($query);
+		$stmt->execute(self::ParametersNormalization($params));
+		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
+		$result = $stmt->fetch();
+		if($result) return $result;
+		else return null;
+	}
+	public static function TrySelectRow($query, $params=[], $defaultValue = array())
+	{
+		try{
+			return self::ReturnArray(self::SelectRow($query,$params),$defaultValue);
+        }catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
+	}
+	public static function DoSelectRow($tableName, $columns = "*", $condition=null, $params=[], $defaultValue = array())
+	{
+		return self::TrySelectRow(self::MakeSelectRowQuery($tableName, $columns, $condition),$params,$defaultValue);
+	}
+	public static function MakeSelectRowQuery($tableName, $columns = "*", $condition=null)
+	{
+		return "SELECT ".self::ColumnNameNormalization($columns??"*")." FROM ".self::TableNameNormalization($tableName)." ".self::ConditionNormalization($condition)." LIMIT 1";
+	}
+
+	public static function SelectColumn($query, $params=[]){
+		$Connection = self::Connection();
+		$stmt = $Connection->prepare($query);
+		$stmt->execute(self::ParametersNormalization($params));
+		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
+		$result = loop($stmt->fetchAll(),function($k,$v){ return first($v); },false);
+		if($result) return $result;
+		else return null;
+	}
+	public static function TrySelectColumn($query, $params=[], $defaultValue = array())
+	{
+		try{
+			return self::ReturnArray(self::SelectColumn($query,$params),$defaultValue);
+        }catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
+	}
+	public static function DoSelectColumn($tableName, $column = "ID", $condition=null, $params=[], $defaultValue = array())
+	{
+		return self::TrySelectColumn(self::MakeSelectColumnQuery($tableName, $column, $condition),$params,$defaultValue);
+	}
+	public static function MakeSelectColumnQuery($tableName, $column = "ID", $condition=null)
+	{
+		return "SELECT ".self::ColumnNameNormalization($column??"ID")." FROM ".self::TableNameNormalization($tableName)." ".self::ConditionNormalization($condition);
 	}
 
 	public static function SelectPairs($query, $params=[]){
@@ -149,13 +205,12 @@ class DataBase {
 	public static function TrySelectPairs($query, $params=[], $defaultValue = array())
 	{
 		try{
-			return self::SelectPairs($query,$params)??$defaultValue;
+			return self::ReturnArray(self::SelectPairs($query,$params), $defaultValue);
         }catch(\Exception $ex){ self::Error($ex); return $defaultValue; }
 	}
 	public static function DoSelectPairs($tableName, $key = "`ID`", $value = "`Name`", $condition=null, $params=[], $defaultValue = array())
 	{
-		$result = self::TrySelectPairs(self::MakeSelectPairsQuery($tableName, $key, $value, $condition),$params,$defaultValue);
-		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
+		return self::TrySelectPairs(self::MakeSelectPairsQuery($tableName, $key, $value, $condition),$params,$defaultValue);
 	}
 	public static function MakeSelectPairsQuery($tableName, $key = "`ID`", $value = "`Name`", $condition=null)
 	{
@@ -347,6 +402,24 @@ class DataTable {
     public function MakeSelectQuery($columns = "*", $condition=null)
 	{
 		return DataBase::MakeSelectQuery($this->TableName, $columns, $condition);
+	}
+
+	public function DoSelectRow($columns = "*", $condition=null, $params=[], $defaultValue = array())
+	{
+		return DataBase::DoSelectRow($this->TableName, $columns, $condition, $params, $defaultValue);
+	}
+    public function MakeSelectRowQuery($columns = "*", $condition=null)
+	{
+		return DataBase::MakeSelectRowQuery($this->TableName, $columns, $condition);
+	}
+
+	public function DoSelectColumn($columns = "*", $condition=null, $params=[], $defaultValue = array())
+	{
+		return DataBase::DoSelectColumn($this->TableName, $columns, $condition, $params, $defaultValue);
+	}
+    public function MakeSelectColumnQuery($columns = "*", $condition=null)
+	{
+		return DataBase::MakeSelectColumnQuery($this->TableName, $columns, $condition);
 	}
 
 	public function DoSelectPairs($key = "`ID`", $value = "`Name`", $condition=null, $params=[], $defaultValue = array())

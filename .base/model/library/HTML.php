@@ -364,7 +364,7 @@ $attachments"]);
         if(!isValid($source)) return null;
         if(isIdentifier($source))
             return self::Element("", "i", [ "class"=>"media fa fa-".strtolower($source)], $attributes);
-        else return self::Element(__($content??"", styling:false), "div", [ "style"=> "background-image: url('".Local::GetUrl($source)."'); background-position: center; background-repeat: no-repeat; background-size: cover;", "class"=> "media" ], $attributes);
+        else return self::Element(__($content??"", styling:false), "div", [ "style"=> "background-image: url('".Local::GetUrl($source)."'); background-position: center; background-repeat: no-repeat; background-size: contain;", "class"=> "media" ], $attributes);
     }
     /**
      * The <IFRAME> HTML Tag
@@ -1388,12 +1388,17 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'division':
                 $content = self::Division($value??$titleOrKey, null, $attributes);
                 break;
+            case 'a':
+            case 'link':
+            case 'hyperlink':
+                $content = self::Link($titleOrKey, $value, $attributes);
+                break;
             case 'p':
             case 'paragraph':
                 $content = self::Paragraph($value??$titleOrKey, null, $attributes);
                 break;
-        	case "disable":
-        	case "disabled":
+        	case 'disable':
+        	case 'disabled':
                 $content = self::DisabledInput($title, $value, $attributes);
                 break;
             case 'label':
@@ -1426,7 +1431,7 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'value':
             case 'string':
             case 'singleline':
-        	case "text":
+        	case 'text':
                 $content = self::ValueInput($title, $value, $attributes);
                 break;
             case 'type':
@@ -1457,7 +1462,7 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'number':
                 $min = is_array($options)?min($options):-999999999;
                 $max = is_array($options)?max($options):999999999;
-                $content = self::NumberInput($title, $value, ["min"=>$min, "max"=>$max], $attributes);
+                $content = self::NumberInput($title, $value, ['min'=>$min, 'max'=>$max], $attributes);
                 break;
             case 'range':
                 $min = is_array($options)?min($options):0;
@@ -1469,7 +1474,7 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'decimal':
                 $min = is_array($options)?min($options):-999999999;
                 $max = is_array($options)?max($options):999999999;
-                $content = self::FloatInput($title, $value, ["min"=>$min, "max"=>$max], $attributes);
+                $content = self::FloatInput($title, $value, ['min'=>$min, 'max'=>$max], $attributes);
                 break;
             case 'phone':
             case 'tel':
@@ -1484,34 +1489,35 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'path':
                 $content = self::ValueInput($title, $value, $attributes);
                 break;
-            case "calendar":
-            case "calendarinput":
-            case "cal":
+            case 'calendar':
+            case 'calendarinput':
+            case 'datetime-local':
+            case 'cal':
                 $content = self::CalendarInput($title, $value, $attributes);
                 break;
-            case "datetime":
+            case 'datetime':
                 $content = self::DateTimeInput($title, $value, $attributes);
                 break;
-            case "date":
+            case 'date':
                 $content = self::DateInput($title, $value, $attributes);
                 break;
-            case "time":
+            case 'time':
                 $content = self::TimeInput($title, $value, $attributes);
                 break;
-            case "week":
+            case 'week':
                 $content = self::WeekInput($title, $value, $attributes);
                 break;
-            case "month":
+            case 'month':
                 $content = self::MonthInput($title, $value, $attributes);
                 break;
-            case "hidden":
-            case "hide":
+            case 'hidden':
+            case 'hide':
                 $titleTag = $descriptionTag = null;
                 $content = self::HiddenInput($title, $value, $attributes);
                 break;
-            case "secret":
-            case "pass":
-            case "password":
+            case 'secret':
+            case 'pass':
+            case 'password':
                 $content = self::SecretInput($title, $value, $attributes);
                 break;
             case 'doc':
@@ -1528,24 +1534,24 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'audios':
             case 'videos':
             case 'files':
-                $content = self::FileInput($title, $value, "multiple", $attributes);
+                $content = self::FileInput($title, $value, 'multiple', $attributes);
                 break;
-            case "dir":
-            case "directory":
-            case "folder":
-                $content = self::FileInput($title, $value, "webkitdirectory multiple", $attributes);
+            case 'dir':
+            case 'directory':
+            case 'folder':
+                $content = self::FileInput($title, $value, 'webkitdirectory multiple', $attributes);
                 break;
-            case "submitbutton":
-            case "submit":
+            case 'submitbutton':
+            case 'submit':
                 $content = self::SubmitButton($title, $value, $attributes);
                 break;
-            case "resetbutton":
-            case "reset":
+            case 'resetbutton':
+            case 'reset':
                 $content = self::ResetButton($title, $value, $attributes);
                 break;
             case 'imagesubmit':
             case 'imgsubmit':
-                $content = self::Input($title, $title, "image", ["src"=>Convert::ToString($value)], $attributes);
+                $content = self::Input($title, $title, 'image', ['src'=>Convert::ToString($value)], $attributes);
                 break;
             case 'json':
             case 'javascript':
@@ -1555,12 +1561,23 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'codes':
                 $content = self::ScriptInput($title, $value, $attributes);
                 break;
+            case 'mail':
+            case 'email':
+                $content = self::EmailInput($title, $value, $attributes);
+                break;
+            case 'color':
+                $content = self::ColorInput($title, $value, $attributes);
+                break;
+            case 'search':
+                $content = self::SearchInput($title, $value, $attributes);
+                break;
         	default:
-                $content = self::Input($title, $value, $type, $attributes);
+                if(is_string($type)) $content = self::Element($value, $type, $attributes);
+                else $content = self::Input($title, $value, $type, $attributes);
                 break;
         }
-        if($scope) return self::Element($titleTag.$content.$descriptionTag,"div", ["class"=> "field"]);
-        else return join("",[$titleTag,Convert::By($prepend, $type, $value),$content,Convert::By($append, $type, $value),$descriptionTag]);
+        if($scope) return self::Element($titleTag.$content.$descriptionTag,'div', ['class'=> 'field']);
+        else return join('',[$titleTag,Convert::By($prepend, $type, $value),$content,Convert::By($append, $type, $value),$descriptionTag]);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1613,6 +1630,7 @@ else return call_user_func("self::Field", null, $k, $f);
         elseif(is_object($type) || ($type instanceof \stdClass))
             return self::InputDetector(getValid($type, "Type", null), $value);
         elseif(is_countable($type)) return "select";
+        elseif($type === true) return "text";
         else return strtolower($type);
     }
     /**

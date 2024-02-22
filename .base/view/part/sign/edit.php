@@ -74,7 +74,7 @@ $('input[type=file]').val(null);
             $form->Timeout = 60000;
             $form->SubmitLabel = "Update";
             $form->ResetLabel = "Reset";
-            $form->AddChild(function() use($user, $form){
+            $form->AddChild(function() use($user, $form) {
                 $img = new \MiMFa\Module\Field("image","Image", $user["Image"], "Click to change the image!");
                 $img->Scripts .= "document.getElementById('Image2').onchange = function(){
                     let data = new FormData();
