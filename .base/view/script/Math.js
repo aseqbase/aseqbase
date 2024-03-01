@@ -179,15 +179,21 @@ Math.power           = function(x,b=2)
     return Math.pow(x,b);
 }
 
-Math.radical           = function(x,b=2) 
+Math.radical         = function(x,b=2) 
 {
     return Math.pow(x,1/b);
 }
 
-Math.decimals       = function(num, dec = 2)
+Math.decimals        = function(num, dec = null)
 {
-    const d = 10**dec;
-    return (Math.round(num * d) / d).toFixed(dec);
+    if (dec === null) {
+        let s = "" + (+num);
+        let groups = /(?:\.(\d+))|(?:e([+\-]\d+))$/gi.exec(s);
+        return !groups ? 0 : Math.max(0, (groups[1] == '0' ? 0 : (groups[1] || '').length) - (groups[2] || 0));
+    }
+    dec = parseInt(dec);
+    const d = parseInt(10**dec);
+    return Number((Math.round(num * d) / d).toFixed(dec));
 }
 
 Math.slice			= function(slicesNumber, x = 100, y = 100, minX=null, minY = null)

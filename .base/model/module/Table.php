@@ -117,9 +117,18 @@ class Table extends Module{
     public $FooterCallback = "function (footer, data, start, end, display) {
                                 if(footer == null) return;
                                 let api = this.api();
-                                let intVal = (val) => isEmpty(val)? 0 : typeof val === 'string' ? parseFloat(val.match(/(^\d+\.?\d*$)|((?<=\>)\s*\d+\.?\d*\s*(?=\<))/gmi)) * 1 : typeof val === 'number' ? val : 0;
-                                let getTotal = (i) => api.column(i).data().reduce((a, b) => intVal(a)+intVal(b) , 0);
-                                let setTotal = (i, total) => api.column(i).footer().innerHTML = isHollow(total)||total==0?'':total+'';
+                                let numberVal = (val) => isEmpty(val)? 0 : typeof val === 'string' ? Number(val.match(/(^\d+\.?\d*$)|((?<=\>)\s*\d+\.?\d*\s*(?=\<))/gmi)) : typeof val === 'number' ? val : 0;
+                                let getTotal = function (i) {
+                                    let dec = 0;
+                                    let res = api.column(i).data().reduce(function (a, b) {
+                                        a = numberVal(a);
+                                        b = numberVal(b);
+                                        dec = Math.maximum(Math.decimals(a),Math.decimals(b),dec);
+                                        return a+b;
+                                    }, 0);
+                                    return Math.decimals(res,dec??0);
+                                };
+                                let setTotal = (i, total) => api.column(i).footer().innerHTML = isHollow(total)||total==0?'':(total.toString());
                                 let c = 0;
                                 for(const node of footer.children) setTotal(c, getTotal(c++));
                             }";

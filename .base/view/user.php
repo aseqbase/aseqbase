@@ -34,9 +34,6 @@ else
             "Path"=>$access,
             "Email"=>$access,
             "Password"=>false,
-            "MetaData"=>$access,
-            "CreateTime"=>$access,
-            "UpdateTime"=>$access,
             "GroupID"=> function(){
                 $std = new stdClass();
                 $std->Title = "Group";
@@ -46,7 +43,10 @@ else
             },
             "Gender"=>["Male"=>"Male","Female"=>"Female","X"=>"X"],
             "Image"=>"image",
-            "Bio"=>"strings"
+            "Bio"=>"strings",
+            "UpdateTime"=>$access,
+            "CreateTime"=>$access,
+            "MetaData"=>$access
         ];
         echo $mod->DoAction($path);
     };

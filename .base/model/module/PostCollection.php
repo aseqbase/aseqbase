@@ -104,7 +104,7 @@ class PostCollection extends Collection{
      * @var bool
      * @category Parts
      */
-	public $ShowAuthor = true;
+	public $ShowAuthor = false;
 	/**
      * @var bool
      * @category Parts
@@ -304,7 +304,7 @@ class PostCollection extends Collection{
 			    $p_showimage = $this->ShowImage || getValid($p_meta,"ShowImage",false);
 			    $p_showtitle = $this->ShowTitle || getValid($p_meta,"ShowTitle",false);
                 $p_showmeta = $this->ShowMetaData || getValid($p_meta,"ShowMeta",false);
-                $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->Root.($p_name??$p_id)):null;
+                $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->Root.getValid($item,'Name',$p_id)):null;
                 $p_path = getValid($item,'Path', $this->DefaultPath);
                 if($this->ShowRoute) $rout->SetValue($p_inselflink);
 			    $hasl = isValid($p_inselflink);
@@ -326,8 +326,8 @@ class PostCollection extends Collection{
 				    if($this->ShowAuthor)
                         doValid(
                             function($val) use(&$p_meta){
-                                $authorName = DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix,"Name","ID=:ID",[":ID"=>$val]);
-                                if(isValid($authorName)) $p_meta .= "<span class='Author'>$authorName</span>";
+                                $authorName = DataBase::DoSelectRow(\_::$CONFIG->DataBasePrefix."User","Signature , Name","ID=:ID",[":ID"=>$val]);
+                                if(!isEmpty($authorName)) $p_meta .= HTML::Link($authorName["Name"],"/user/".$authorName["Signature"],["class"=>"Author"]);
                             },
                             $item,
                             'AuthorID'

@@ -254,7 +254,7 @@ class Post extends Module{
 	</style>
 	<?php
 	}
-   
+
     public function PreDraw(){
 	    $item = $this->Item;
 	    $p_type = getValid($item,'Type');
@@ -309,8 +309,8 @@ class Post extends Module{
             if($this->ShowAuthor)
                 doValid(
                     function($val) use(&$p_meta){
-                        $authorName = DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix,"Name","ID=:ID",[":ID"=>$val]);
-                        if(isValid($authorName)) $p_meta .= "<span class='Author'>$authorName</span>";
+                        $authorName = DataBase::DoSelectRow(\_::$CONFIG->DataBasePrefix."User","Signature , Name","ID=:ID",[":ID"=>$val]);
+                        if(!isEmpty($authorName)) $p_meta .= HTML::Link($authorName["Name"],"/user/".$authorName["Signature"],["class"=>"Author"]);
                     },
                     $item,
                     'AuthorID'
@@ -341,12 +341,12 @@ class Post extends Module{
         }
 
 		$img->Source = $p_image;
-        
+
         COMPONENT("JSONLD");
         $mod = new \MiMFa\Component\JSONLD();
         $mod->EchoArticle(__($p_title),__($p_description),$p_image,
             author:["name"=>$authorName],datePublished: explode(" ", $createTime)[0], dateModified:explode(" ", $modifyTime)[0]);
-        ?>
+?>
 		<div class="head row">
 			<div class="col-md">
                 <?php
