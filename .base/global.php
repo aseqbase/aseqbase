@@ -472,9 +472,9 @@
 		return $input;
 	}
 
-	function INCLUDING(string $filePath, bool $print = true, array $variables = []){
+	function INCLUDING(string $filePath, bool $print = true, array $variables = [], string|null $defaultPath = null){
 		global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT;
-		if(file_exists($filePath)){
+		if(file_exists($filePath) || (!is_null($defaultPath) && file_exists($filePath = $defaultPath))){
 			//if(count($variables) > 0) $filePath = rtrim($filePath,"/")."?". http_build_query($variables);
 			//if(count($variables) > 0) extract($variables);
 			//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
@@ -486,9 +486,9 @@
 		}
 		return null;
 	}
-	function REQUIRING(string $filePath, bool $print = true, array $variables = []){
+	function REQUIRING(string $filePath, bool $print = true, array $variables = [], string|null $defaultPath = null){
 		global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT;
-		if(file_exists($filePath)){
+		if(file_exists($filePath) || (!is_null($defaultPath) && file_exists($filePath = $defaultPath))){
 			//if(count($variables) > 0) extract($variables);
 			//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
 			ob_start();
@@ -500,33 +500,33 @@
 		return null;
 	}
 
-	function USING(string $dir, string|null $name = null, bool $print = true, array $variables = [], string|null $extension = ".php"){
+	function USING(string $dir, string|null $name = null, bool $print = true, array $variables = [], string|null $extension = ".php", string|null $defaultDirOrName = null){
 		$extension = $extension??\_::$EXTENSION;
 		try{ applyPrepends($dir, $name);
 			if(empty($name))
-				if(isFormat($dir, $extension)) return INCLUDING($dir, $print, $variables);
-				else return INCLUDING($dir.$extension, $print, $variables);
-			elseif(isFormat($name, $extension)) return INCLUDING($dir.$name, $print, $variables);
-			else return INCLUDING($dir.$name.$extension, $print, $variables);
+				if(isFormat($dir, $extension)) return INCLUDING($dir, $print, $variables, $defaultDirOrName);
+				else return INCLUDING($dir.$extension, $print, $variables, is_null($defaultDirOrName)?null:$defaultDirOrName.$extension);
+			elseif(isFormat($name, $extension)) return INCLUDING($dir.$name, $print, $variables, is_null($defaultDirOrName)?null:$dir.$defaultDirOrName);
+			else return INCLUDING($dir.$name.$extension, $print, $variables, is_null($defaultDirOrName)?null:$dir.$defaultDirOrName.$extension);
         } finally{ applyAppends($dir, $name); }
 	}
-	function forceUSING(string $nodeDir, string $baseDir, string $name, bool $print = true, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function forceUSING(string $nodeDir, string $baseDir, string $name, bool $print = true, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultDirOrName = null){
 		$seq = null;
 		$seqInd = 0;
 		$c = count(\_::$SEQUENCES);
 		$toSeq = $count < 0 ? ($c + 1 + $count) : ($fromSeq + $count);
-		if($seqInd >= $fromSeq && $seqInd <= $toSeq && (($seq = USING($nodeDir,$name, $print, $variables)) !== null)) return $seq;
+		if($seqInd >= $fromSeq && $seqInd <= $toSeq && (($seq = USING($nodeDir,$name, $print, $variables, defaultDirOrName:$defaultDirOrName)) !== null)) return $seq;
 		$seqInd++;
 		if($fromSeq <= $c) {
 			$dir = substr($nodeDir, strlen(\_::$DIR));
 			foreach(\_::$SEQUENCES as $aseq=>$root) {
 				if($seqInd > $toSeq) return null;
-				if($seqInd >= $fromSeq && (($seq = USING($aseq.$dir, $name, $print, $variables)) !== null))
+				if($seqInd >= $fromSeq && (($seq = USING($aseq.$dir, $name, $print, $variables, defaultDirOrName:$defaultDirOrName)) !== null))
 					return $seq;
                 $seqInd++;
             }
 		} else $seqInd += $c;
-		if($seqInd >= $fromSeq && $seqInd <= $toSeq && (($seq = USING($baseDir, $name, $print, $variables)) !== null)) return $seq;
+		if($seqInd >= $fromSeq && $seqInd <= $toSeq && (($seq = USING($baseDir, $name, $print, $variables, defaultDirOrName:$defaultDirOrName)) !== null)) return $seq;
 		return null;
 	}
 	/**
@@ -585,9 +585,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function RUN(string|null $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function RUN(string|null $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("RUN", $name);
-			return forceUSING($dir??\_::$DIR, \_::$BASE_DIR, $name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$DIR, \_::$BASE_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("RUN", $name); }
 	}
 	/**
@@ -597,9 +597,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function MODEL(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function MODEL(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("MODEL", $name);
-			return forceUSING($dir??\_::$MODEL_DIR, \_::$BASE_MODEL_DIR, $name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$MODEL_DIR, \_::$BASE_MODEL_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("MODEL", $name); }
 	}
 	/**
@@ -609,9 +609,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function LIBRARY(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function LIBRARY(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("LIBRARY", $Name);
-			return forceUSING($dir??\_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $Name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $Name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("LIBRARY", $Name); }
 	}
 	/**
@@ -621,9 +621,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function COMPONENT(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function COMPONENT(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("COMPONENT", $Name);
-			return forceUSING($dir??\_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $Name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $Name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("COMPONENT", $Name); }
 	}
 	/**
@@ -633,9 +633,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function MODULE(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function MODULE(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("MODULE", $Name);
-			return forceUSING($dir??\_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $Name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $Name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("MODULE", $Name); }
 	}
 	/**
@@ -645,9 +645,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function TEMPLATE(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function TEMPLATE(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("TEMPLATE", $Name);
-			return forceUSING($dir??\_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $Name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $Name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("TEMPLATE", $Name); }
 	}
 	/**
@@ -657,9 +657,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function VIEW(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function VIEW(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("VIEW", $name);
-			$output = executeCommands(forceUSING($dir??\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, false, $variables, $fromSeq, $count));
+			$output = executeCommands(forceUSING($dir??\_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, false, $variables, $fromSeq, $count, $defaultName));
 			if($print) return SET(\_::$CONFIG->AllowReduceSize?ReduceSize($output):$output);
 			else return \_::$CONFIG->AllowReduceSize?ReduceSize($output):$output;
         } finally{ applyAppends("VIEW", $name); }
@@ -671,9 +671,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function PAGE(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function PAGE(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("PAGE", $name);
-			return forceUSING($dir??\_::$PAGE_DIR, \_::$BASE_PAGE_DIR, $name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$PAGE_DIR, \_::$BASE_PAGE_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("PAGE", $name); }
 	}
 	/**
@@ -683,9 +683,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function REGION(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function REGION(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("REGION", $name);
-			return forceUSING($dir??\_::$REGION_DIR, \_::$BASE_REGION_DIR, $name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$REGION_DIR, \_::$BASE_REGION_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("REGION", $name); }
 	}
 	/**
@@ -695,9 +695,9 @@
 	 * @param bool $print
 	 * @return mixed
 	 */
-	function PART(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999){
+	function PART(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null){
 		try{ applyPrepends("PART", $name);
-			return forceUSING($dir??\_::$PART_DIR, \_::$BASE_PART_DIR, $name, $print, $variables, $fromSeq, $count);
+			return forceUSING($dir??\_::$PART_DIR, \_::$BASE_PART_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName);
         } finally{ applyAppends("PART", $name); }
 	}
 

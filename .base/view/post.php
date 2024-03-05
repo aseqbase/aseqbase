@@ -1,5 +1,6 @@
 <?php
 use MiMFa\Library\DataBase;
+use MiMFa\Library\User;
 $path = implode("/", array_slice(explode("/",\_::$DIRECTION),1));
 if(!isValid($path)){
     TEMPLATE("Main");
@@ -10,12 +11,11 @@ if(!isValid($path)){
     $templ->Draw();
     return;
 }
-$items = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."Content","*","(Name=:Name OR ID=:ID) AND `Access`<=".getAccess(),[":Name"=>$path,":ID"=>$path]);
-if(count($items)<1){
+$doc = DataBase::DoSelectRow(\_::$CONFIG->DataBasePrefix."Content","*","(Name=:Name OR ID=:ID) AND ".User::GetAccessCondition(),[":Name"=>$path,":ID"=>$path]);
+if(isEmpty($doc)){
     VIEW("404");
     return;
 }
-$doc = $items[0];
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
 $templ->WindowTitle = [$doc['Title']];

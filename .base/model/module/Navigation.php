@@ -284,7 +284,7 @@ class Navigation extends Module{
 			$fromP = $this->GetFromPage();
 			$toP = $this->GetToPage();
 			$query = GET($_REQUEST)??array();
-			$query[$this->CountRequest] = $this->Count."";
+			if(isset($query[$this->CountRequest])) $query[$this->CountRequest] = $this->Count."";
 			$right = Translate::$Direction=="RTL"?"left":"right";
 			$left = Translate::$Direction=="RTL"?"right":"left";
 

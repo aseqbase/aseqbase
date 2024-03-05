@@ -284,9 +284,9 @@ class PostCollection extends Collection{
                 $rout->Tag = "span";
             }
 		    $i = 0;
-		    foreach($this->Items as $item) {
-			    $p_access = getValid($item,'Access', 0);
-			    if(!ACCESS($p_access,die:false)) continue;
+		    foreach(Convert::ToItems($this->Items) as $k=>$item) {
+                $p_access = getValid($item,'Access',0);
+                if(!getAccess($p_access)) continue;
 			    $p_id = getValid($item,'ID');
 			    $p_type = getValid($item,'Type');
 			    $p_image = getValid($item,'Image', $this->DefaultImage);

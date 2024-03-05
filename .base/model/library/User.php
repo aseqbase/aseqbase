@@ -126,6 +126,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			else return in_array($access, $acceptableAccess);
 		return null;
     }
+	public static function GetAccessCondition(){
+        $acc = getAccess();
+        return "(`Status` IS NULL OR `Status` IN ('','1',1)) AND `Access`>".\_::$CONFIG->BanAccess." AND (`Access`=".\_::$CONFIG->GuestAccess.($acc<=\_::$CONFIG->GuestAccess?"":" OR `Access`>=$acc").")";
+    }
 
 	public function Find($signature = null, $password = null, $hashPassword = true){
 		$signature = $signature??$this->Signature??Session::GetSecure("Signature")??$this->TemporarySignature;

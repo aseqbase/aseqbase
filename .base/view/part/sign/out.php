@@ -1,19 +1,18 @@
 <?php
-TEMPLATE("Main");
-    echo "<div class='page'>";
+use MiMFa\Library\HTML;
+echo HTML::Page(function(){
+    echo "<center>";
     if(!getAccess(\_::$CONFIG->UserAccess)):
-        echo "<center><div class='result success'>".__("You signed out successfully!")."</div>";
+        echo HTML::Success("You signed out successfully!");
         PART("access");
-        echo "</center>";
     elseif(\_::$INFO->User->SignOut()):
-        echo "<center><div class='result success'>".__("You signed out successfully!")."</div>";
+        echo HTML::Success("You signed out successfully!");
         PART("access");
-        echo "</center>";
-        load();
+        load(\_::$HOST);
     else:
-        echo "<center><div class='result error'>".__("There a problem is occured in signing out!")."</div>";
+        echo HTML::Error("There a problem is occured in signing out!");
         PART("access");
-        echo "</center>";
     endif;
-    echo "</div>";
+    echo "</center>";
+});
 ?>

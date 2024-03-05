@@ -98,7 +98,7 @@ class Table extends Module{
      * The first number of rows
 	 * @var mixed
 	 */
-	public $RowsNumbersBegin = 1;
+	public $RowsNumbersBegin = null;
 
 	/**
      * An array of all key=>type columns in data to use for each cell type
@@ -117,7 +117,7 @@ class Table extends Module{
     public $FooterCallback = "function (footer, data, start, end, display) {
                                 if(footer == null) return;
                                 let api = this.api();
-                                let numberVal = (val) => isEmpty(val)? 0 : typeof val === 'string' ? Number(val.match(/(^\d+\.?\d*$)|((?<=\>)\s*\d+\.?\d*\s*(?=\<))/gmi)) : typeof val === 'number' ? val : 0;
+                                let numberVal = (val) => isEmpty(val)? 0 : typeof val === 'string' ? Number(val.match(/(^[\+\-]?\d+\.?\d*$)|((?<=\>)\s*[\+\-]?\d+\.?\d*\s*(?=\<))/gmi)) : typeof val === 'number' ? val : 0;
                                 let getTotal = function (i) {
                                     let dec = 0;
                                     let res = api.column(i).data().reduce(function (a, b) {
@@ -126,7 +126,7 @@ class Table extends Module{
                                         dec = Math.maximum(Math.decimals(a),Math.decimals(b),dec);
                                         return a+b;
                                     }, 0);
-                                    return Math.decimals(res,dec??0);
+                                    return Math.decimals(res,dec = Math.maximum(5,dec??0));
                                 };
                                 let setTotal = (i, total) => api.column(i).footer().innerHTML = isHollow(total)||total==0?'':(total.toString());
                                 let c = 0;
@@ -172,21 +172,21 @@ class Table extends Module{
 	public $AllowLabelTranslation = true;
 	public $AllowDataTranslation = false;
     public $AllowCache= false;
-	public $AllowPaging= true;
-	public $AllowSearching= true;
+	public $AllowPaging= false;
+	public $AllowSearching= false;
 	public $AllowOrdering=  true;
 	public $AllowProcessing= true;
 	public $AllowServerSide= false;
 	public $AllowScrollX= true;
-	public $AllowScrollY= true;
+	public $AllowScrollY= false;
 	public $AllowScrollCollapse= false;
 	public $AllowAutoWidth= false;
 	public $AllowAutoHeight= null;
-	public $AllowFixedHeader= true;
+	public $AllowFixedHeader= false;
 	public $AllowFixedColumns= false;
 	public $AllowFixedRows= true;
 	public $AllowResponsive= true;
-	public $AllowEntriesInfo= true;
+	public $AllowEntriesInfo= false;
 
 	/**
      * Create the module
@@ -201,7 +201,15 @@ class Table extends Module{
      * @param array|null $items The module source items
      */
 	public function Set($itemsOrTableName =  null){
-		if(is_string($itemsOrTableName)) $this->Table = $itemsOrTableName;
+		if(is_string($itemsOrTableName)){
+            $this->Table = $itemsOrTableName;
+            $this->AllowScrollX=
+            $this->AllowScrollY=
+            $this->AllowPaging=
+            $this->AllowSearching=
+            $this->AllowEntriesInfo= true;
+            $this->RowsNumbersBegin = 1;
+        }
 		else $this->Items = $itemsOrTableName;
         $this->IsAction = RECEIVE(\_::$CONFIG->ViewHandlerKey, $this->UpdateMethod);
 		return $this;
@@ -248,6 +256,13 @@ class Table extends Module{
         }
         table.dataTable.{$this->Name} thead :is(th, tr) {
             text-align: center;
+        }
+        table.dataTable.{$this->Name} tbody tr :is(th, td) span.number {
+            aspect-ratio: 1;
+            border-radius: var(--Radius-5);
+            padding: calc(var(--Size-0) / 2);
+            margin: calc(var(--Size-0) / 2);
+            background-color: #88888817;
         }
 		".($this->OddEvenColumns?"
             table.dataTable.{$this->Name} tbody tr.even :is(td, th):nth-child(odd) {
@@ -375,14 +390,14 @@ class Table extends Module{
 		$irk = !isEmpty($irks);
 		$erk = !isEmpty($erks);
 		$hasid = $hasid && isValid($this->KeyColumn) && (!isEmpty($irids) || !isEmpty($erids));
-		$srn = $this->RowsNumbersBegin??1;
+		$rn = $srn = $this->RowsNumbersBegin??1;
 		$hrn = !is_null($this->RowsNumbersBegin);
-		$scn = $this->ColumnsNumbersBegin;
-		$hcn = !is_null($scn);
+		$cn = $scn = $this->ColumnsNumbersBegin??1;
+		$hcn = !is_null($this->ColumnsNumbersBegin);
 		$uck = "";
         $rowCount = 0;
         $colCount = $ick?count($icks):0;
-		if($isu){
+		if($isu) {
 			$uck = HTML::Division(getAccess($this->AddAccess)? HTML::Icon("plus","{$this->Modal->Name}_Create();") : HTML::Image("tasks"));
 			if($ick) array_unshift($icks, $uck);
         }
@@ -395,7 +410,8 @@ class Table extends Module{
         $raccess = $isu && getAccess($this->RemoveAccess);
 		if(is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
-            foreach ($this->Items as $rkey=>$row){
+            foreach ($this->Items as $rkey=>$row)
+            if(!isEmpty($row)) {
 				$rowid = getValid($row, $this->KeyColumn, null);
                 if(
 					(!$irk || in_array($rkey, $irks)) &&
@@ -406,8 +422,9 @@ class Table extends Module{
                     if($rkls) array_unshift($row,is_integer($rkey)?($hrn?$rkey+$srn:""):$rkey);
 					if($isc){
                         $row = is_null($rowid)?
-                            [$uck=>"",...$row]:
+                            [$uck=>($hrn?$rn++:""),...$row]:
                             [$uck=>HTML::Division([
+									...[($hrn?HTML::Span($rn++,null,['class'=>'number']):"")],
 									...($vaccess? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);")] : []),
 									...($maccess? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
 									...($daccess? [HTML::Icon("copy","{$this->Modal->Name}_Duplicate(`$rowid`);")] : []),
@@ -415,22 +432,42 @@ class Table extends Module{
 								]),
 							...$row];
                     }
+                    elseif($hrn) $row = [$rn++,...$row];
+
 					if($ckls && ($isrk || $ckl))
                         if($this->Header)
                             if(is_bool($this->Header)) {
                                 $ckl  = false;
-                                $cells[] = "<thead><tr>";
+                                $cells[] = "<thead>";
                                 if($ick){
+                                    if($hcn) {
+                                        $cells[] = $strow;
+                                        foreach($icks as $ckey)
+                                            if(!$eck || !in_array($ckey, $ecks))
+                                                $cells[] = $this->GetCell($cn++, $ckey, true, $row);
+                                        $cells[] = $etrow;
+                                    }
+                                    $cells[] = $strow;
                                     foreach($icks as $ckey)
                                         if(!$eck || !in_array($ckey, $ecks))
                                             $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                                    $cells[] = $etrow;
                                 }
                                 else{
+                                    if($hcn) {
+                                        $cells[] = $strow;
+                                        foreach($row as $ckey=>$cel)
+                                            if(!$eck || !in_array($ckey, $ecks))
+                                                $cells[] = $this->GetCell($cn++, $ckey, true, $row);
+                                        $cells[] = $etrow;
+                                    }
+                                    $cells[] = $strow;
                                     foreach($row as $ckey=>$cel)
                                         if(!$eck || !in_array($ckey, $ecks))
                                             $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                                    $cells[] = $etrow;
                                 }
-                                $cells[] = "</tr></thead>";
+                                $cells[] = "</thead>";
                                 $isrk = false;
                             }
                             else $cells[] = Convert::ToString($this->Header);
@@ -462,7 +499,8 @@ class Table extends Module{
             if($this->Footer)
                 if(is_bool($this->Footer)) {
                     $cells[] = "<tfoot><tr>";
-                    for($i = 0; $i < $colCount; $i++)
+                    if(0 < $colCount) $cells[] = HTML::Cell("", true, $isc||$hrn?["class"=>"invisible"]:[]);
+                    for($i = 1; $i < $colCount; $i++)
                         $cells[] = HTML::Cell("", true/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
                     $cells[] = "</tr></tfoot>";
                 }
@@ -529,7 +567,7 @@ class Table extends Module{
                                 "}".
                             "}"
                         ],
-						...($this->Controlable?["'columnDefs': [{ 'targets': 0, 'orderable': false }],order:[]"]:[]),
+						...($this->Controlable||!is_null($this->RowsNumbersBegin)?["'columnDefs': [{ 'targets': 0, 'orderable': false }],order:[]"]:["order:[]"]),
 						...(isEmpty($this->Options)?[]:(is_array($this->Options)?$this->Options:[Convert::ToString($this->Options)]))
 					]).
 				"});

@@ -1,5 +1,7 @@
 <?php
 namespace MiMFa\Module;
+use MiMFa\Library\HTML;
+use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 use MiMFa\Library\DataBase;
 use MiMFa\Library\Translate;
@@ -11,11 +13,12 @@ use MiMFa\Library\Translate;
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Post extends Module{
+	public $Capturable = true;
     public $Tag = "article";
 
 	/**
      * The whole document Item
-     * @var object|null
+     * @var object|array|null
      */
 	public $Item = null;
 	/**
@@ -177,11 +180,10 @@ class Post extends Module{
         parent::__construct();
     }
 
-	public function EchoStyle(){
+	public function GetStyle(){
 		$ralign = Translate::$Direction=="RTL"?"left":"right";
-?>
-		<style>
-			.<?php echo $this->Name; ?> {
+        return HTML::Style("
+			.{$this->Name} {
 				height: fit-content;
 				background-Color: var(--BackColor-0);
 				color: var(--ForeColor-0);
@@ -192,70 +194,69 @@ class Post extends Module{
 				box-shadow:  var(--Shadow-1);
 				border-radius:  var(--Radius-1);
 				border:  var(--Border-1) var(--BackColor-4);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
-			.<?php echo $this->Name; ?> .head{
+			.{$this->Name} .head{
 				margin-bottom: var(--Size-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
-			.<?php echo $this->Name; ?> .title{
+			.{$this->Name} .title{
                 padding: 0px;
                 margin: 0px;
 				text-align: unset;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> .metadata{
+			.{$this->Name} .metadata{
 				font-size: var(--Size-0);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> .metadata .route{
-				padding-<?php echo $ralign; ?>: var(--Size-0);
+			.{$this->Name} .metadata .route{
+				padding-$ralign: var(--Size-0);
 			}
-			.<?php echo $this->Name; ?> .more{
-				text-align: <?php echo $ralign; ?>;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+			.{$this->Name} .more{
+				text-align: $ralign;
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> .more>a{
+			.{$this->Name} .more>a{
             	opacity: 0;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?>:hover .more>a{
+			.{$this->Name}:hover .more>a{
             	opacity: 1;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 			/* Style the images inside the grid */
-			.<?php echo $this->Name; ?> .image {
-				width: <?php echo $this->ImageWidth; ?>;
-				height: <?php echo $this->ImageHeight; ?>;
-				min-height: <?php echo $this->ImageMinHeight; ?>;
-				min-width: <?php echo $this->ImageMinWidth; ?>;
-				max-height: <?php echo $this->ImageMaxHeight; ?>;
-				max-width: <?php echo $this->ImageMaxWidth; ?>;
+			.{$this->Name} .image {
+				width: $this->ImageWidth;
+				height: $this->ImageHeight;
+				min-height: $this->ImageMinHeight;
+				min-width: $this->ImageMinWidth;
+				max-height: $this->ImageMaxHeight;
+				max-width: $this->ImageMaxWidth;
 				overflow: hidden;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> .description{
+			.{$this->Name} .description{
             	font-size: var(--Size-2);
 				padding-top: var(--Size-2);
 				padding-bottom: var(--Size-2);
             	text-align: justify;
 				position: relative;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
+				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.<?php echo $this->Name; ?> .content{
+			.{$this->Name} .content{
                 font-size: var(--Size-1);
                 text-align: justify;
             	background-Color: var(--BackColor-0);
 				padding-top: var(--Size-3);
 				padding-bottom: var(--Size-3);
 			}
-	</style>
-	<?php
-	}
+        ");
+    }
 
-    public function PreDraw(){
+    public function PreCapture(){
 	    $item = $this->Item;
 	    $p_type = getValid($item,'Type');
 	    $p_class = getValid($item,'Class');
@@ -263,137 +264,115 @@ class Post extends Module{
         if($this->AllowAnimation) $this->Attributes =  "data-aos='zoom-up' data-aos-offset='-500'";
     }
 
-	public function Echo(){
-		$item = $this->Item;
-		$p_access = getValid($item,'Access',0);
-		if(!ACCESS($p_access, die:false)) return false;
-		MODULE("Image");
-		$img = new Image();
-		$img->Class = "image";
-		$img->EchoStyle();
-		$p_id = getValid($item,'ID');
-		$p_image = getValid($item,'Image', $this->Image);
-		$p_name = getValid($item,'Name')??getValid($item,'Title', $this->Title);
-		$p_title = getValid($item,'Title', $p_name);
-		$p_description = getValid($item,'Description', $this->Description);
-		$p_content = getValid($item,'Content',$this->Content);
+	public function Get(){
+        return Convert::ToString(function(){
+            $item = $this->Item;
+            $p_access = getValid($item,'Access',0);
+            $p_status = intval(getValid($item,'Status',1));
+            if($p_status < 1 || !getAccess($p_access)) return;
+            MODULE("Image");
+            $p_id = getValid($item,'ID');
+            $p_image = getValid($item,'Image', $this->Image);
+            $p_name = getValid($item,'Name')??getValid($item,'Title', $this->Title);
+            $p_title = getValid($item,'Title', $p_name);
+            $p_description = getValid($item,'Description', $this->Description);
+            $p_content = getValid($item,'Content',$this->Content);
 
-        if($this->ShowRoute) MODULE("Route");
-        $p_meta = getValid($item,'MetaData',null);
-        if($p_meta !==null) $p_meta = json_decode($p_meta);
-        $p_showexcerpt = $this->ShowExcerpt || getValid($p_meta,"ShowExcerpt",false);
-        $p_showcontent = $this->ShowContent || getValid($p_meta,"ShowContent",false);
-        $p_showdescription = $this->ShowDescription || getValid($p_meta,"ShowDescription",false);
-        $p_showimage = $this->ShowImage || getValid($p_meta,"ShowImage",false);
-        $p_showtitle = $this->ShowTitle || getValid($p_meta,"ShowTitle",false);
-        $p_showmeta = $this->ShowMetaData || getValid($p_meta,"ShowMeta",false);
-        $p_inselflink =  $this->Root.($p_name??$p_id);
-        $p_path = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? $p_inselflink : getValid($item,'Path', $this->Path);
-        $hasl = isValid($p_path);
-        $p_showmorebutton = $hasl && ($this->ShowMoreButton || getValid($p_meta,"ShowMoreButton",false));
-        $p_morebuttontext = getValid($p_meta, "MoreButtonLabel", $this->MoreButtonLabel);
-        $p_excerpt = null;
-        if($this->ShowExcerpt && $this->AutoExcerpt)
-            $p_excerpt = Convert::ToExcerpt(
-					__($p_content??$p_description),
-					0,
-					$this->ExcerptLength,
-					$this->ExcerptSign
-				);
+            if($this->ShowRoute) MODULE("Route");
+            $p_meta = getValid($item,'MetaData',null);
+            if($p_meta !==null) $p_meta = json_decode($p_meta);
+            $p_showexcerpt = $this->ShowExcerpt || getValid($p_meta,"ShowExcerpt",false);
+            $p_showcontent = $this->ShowContent || getValid($p_meta,"ShowContent",false);
+            $p_showdescription = $this->ShowDescription || getValid($p_meta,"ShowDescription",false);
+            $p_showimage = $this->ShowImage || getValid($p_meta,"ShowImage",false);
+            $p_showtitle = $this->ShowTitle || getValid($p_meta,"ShowTitle",false);
+            $p_showmeta = $this->ShowMetaData || getValid($p_meta,"ShowMeta",false);
+            $p_inselflink =  $this->Root.($p_name??$p_id);
+            $p_path = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? $p_inselflink : getValid($item,'Path', $this->Path);
+            $hasl = isValid($p_path);
+            $p_showmorebutton = $hasl && ($this->ShowMoreButton || getValid($p_meta,"ShowMoreButton",false));
+            $p_morebuttontext = getValid($p_meta, "MoreButtonLabel", $this->MoreButtonLabel);
+            $p_excerpt = null;
+            if($this->ShowExcerpt && $this->AutoExcerpt)
+                $p_excerpt = Convert::ToExcerpt(
+                        __($p_content??$p_description),
+                        0,
+                        $this->ExcerptLength,
+                        $this->ExcerptSign
+                    );
 
-		$p_meta = null;
-        $authorName = null;
-        $createTime = getValid($item,'CreateTime');
-        $modifyTime = getValid($item,'UpdateTime');
-		if($p_showmeta){
-            if($this->ShowAuthor)
-                doValid(
-                    function($val) use(&$p_meta){
-                        $authorName = DataBase::DoSelectRow(\_::$CONFIG->DataBasePrefix."User","Signature , Name","ID=:ID",[":ID"=>$val]);
-                        if(!isEmpty($authorName)) $p_meta .= HTML::Link($authorName["Name"],"/user/".$authorName["Signature"],["class"=>"Author"]);
-                    },
-                    $item,
-                    'AuthorID'
-                );
-            if($this->ShowCreateTime)
-                if(isValid($createTime))
-                    $p_meta .= "<span class='CreateTime'>$createTime</span>";
-            if($this->ShowUpdateTime)
-                if(isValid($modifyTime))
-                    $p_meta .= "<span class='UpdateTime'>$modifyTime</span>";
-            if($this->ShowStatus)
-                doValid(
-                    function($val) use(&$p_meta){
-                        if(isValid($val)) $p_meta .= "<span class='Status'>$val</span>";
-                    },
-                    $item,
-                    'Status'
-                );
-            if($this->ShowButtons)
-                doValid(
-                    function($val) use(&$p_meta){
-                        if(isValid($val)) $p_meta .= $val;
-                        else $p_meta .= $this->Buttons;
-                    },
-                    $item,
-                    'Buttons'
-                );
-        }
+            $p_meta = null;
+            $authorName = null;
+            $createTime = getValid($item,'CreateTime');
+            $modifyTime = getValid($item,'UpdateTime');
+            if($p_showmeta){
+                if($this->ShowAuthor)
+                    doValid(
+                        function($val) use(&$p_meta){
+                            $authorName = DataBase::DoSelectRow(\_::$CONFIG->DataBasePrefix."User","Signature , Name","ID=:ID",[":ID"=>$val]);
+                            if(!isEmpty($authorName)) $p_meta .= HTML::Link($authorName["Name"],"/user/".$authorName["Signature"],["class"=>"Author"]);
+                        },
+                        $item,
+                        'AuthorID'
+                    );
+                if($this->ShowCreateTime)
+                    if(isValid($createTime))
+                        $p_meta .= "<span class='CreateTime'>$createTime</span>";
+                if($this->ShowUpdateTime)
+                    if(isValid($modifyTime))
+                        $p_meta .= "<span class='UpdateTime'>$modifyTime</span>";
+                if($this->ShowStatus)
+                    doValid(
+                        function($val) use(&$p_meta){
+                            if(isValid($val)) $p_meta .= "<span class='Status'>$val</span>";
+                        },
+                        $item,
+                        'Status'
+                    );
+                if($this->ShowButtons)
+                    doValid(
+                        function($val) use(&$p_meta){
+                            if(isValid($val)) $p_meta .= $val;
+                            else $p_meta .= $this->Buttons;
+                        },
+                        $item,
+                        'Buttons'
+                    );
+            }
 
-		$img->Source = $p_image;
-
-        COMPONENT("JSONLD");
-        $mod = new \MiMFa\Component\JSONLD();
-        $mod->EchoArticle(__($p_title),__($p_description),$p_image,
-            author:["name"=>$authorName],datePublished: explode(" ", $createTime)[0], dateModified:explode(" ", $modifyTime)[0]);
-?>
-		<div class="head row">
-			<div class="col-md">
-                <?php
-				$lt = $this->LinkedTitle && $hasl;
-				if($p_showtitle) echo ($lt?"<a href='$p_inselflink'>":"")."<h2 class='title'>".__($p_title)."</h2>".($lt?"</a>":"");
-				if($p_showmeta && isValid($p_meta)){
-                    echo "<sub class='metadata'>";
-                    if($this->ShowRoute){
-                        $route = new \MiMFa\Module\Route($p_inselflink);
-                        $route->Tag = "span";
-                        $route->Class = "route";
-                        $route->ReDraw();
+            COMPONENT("JSONLD");
+            $mod = new \MiMFa\Component\JSONLD();
+            yield $mod->GetArticle(__($p_title),__($p_description),$p_image,
+                author:["name"=>$authorName],datePublished: explode(" ", $createTime)[0], dateModified:explode(" ", $modifyTime)[0]);
+            yield HTML::Rack(
+			    HTML::MediumSlot(function() use($p_showtitle,$hasl,$p_inselflink,$p_title,$p_meta,$p_showmeta){
+                    $lt = $this->LinkedTitle && $hasl;
+                    if($p_showtitle) yield ($lt?"<a href='$p_inselflink'>":"")."<h2 class='title'>".__($p_title)."</h2>".($lt?"</a>":"");
+                    if($p_showmeta && isValid($p_meta)){
+                        yield "<sub class='metadata'>";
+                        if($this->ShowRoute){
+                            $route = new \MiMFa\Module\Route($p_inselflink);
+                            $route->Tag = "span";
+                            $route->Class = "route";
+                            $route->ReDraw();
+                        }
+                        yield $p_meta."</sub>";
                     }
-                    echo $p_meta."</sub>";
-                }?>
-			</div>
-			<?php if($p_showmorebutton) {?>
-			<div class="more col-sm col-3 md-hide">
-				<a class="btn btn-outline" href="<?php echo $p_path; ?>">
-                    <?php echo __($p_morebuttontext); ?>
-				</a>
-			</div>
-			<?php } ?>
-		</div>
-		<div class="description row">
-			<div class="excerpt col-md">
-				<?php if($p_showdescription) echo __($p_description); ?>
-                <?php if($p_showexcerpt) echo $p_excerpt; ?>
-			</div>
-            <?php if($p_showimage && isValid($p_image)){
-                echo "<div class='col-5'>";
-                $img->ReDraw();
-                echo "</div>";
-            }?>
-		</div>
-        <?php if($p_showcontent && isValid($p_content)){ ?>
-		<div class="content">
-			<?php echo __($p_content); ?>
-		</div>
-		<?php }
-        if($p_showmorebutton) {?>
-		<div class="more md-show">
-			<a class="btn btn-block btn-outline" href="<?php echo $p_path; ?>">
-                <?php echo __($p_morebuttontext); ?>
-			</a>
-		</div>
-		<?php }
+			    }).
+                ($p_showmorebutton?HTML::SmallSlot(
+				    HTML::Link(__($p_morebuttontext),$p_path,["class"=>"btn btn-outline"])
+			    ,["class"=>"more col-3 md-hide"]):"")
+		    ,["class"=>"head"]);
+            yield HTML::Rack(
+			    HTML::MediumSlot(function()use($p_description,$p_excerpt,$p_showdescription,$p_showexcerpt){
+                    if($p_showdescription) yield __($p_description);
+                    if($p_showexcerpt) yield $p_excerpt;
+                },["class"=>"excerpt"]).
+                ($p_showimage && isValid($p_image)? HTML::Image($p_title,$p_image,["class"=>"col-5"]):"")
+		    ,["class"=>"description"]);
+            if($p_showcontent && isValid($p_content)) yield HTML::Division(__($p_content),["class"=>"content"]);
+            if($p_showmorebutton) yield HTML::Division(HTML::Link(__($p_morebuttontext),$p_path,["class"=>"btn btn-block btn-outline"]),["class"=>"more md-show"]);
+        });
 	}
 }
 ?>
