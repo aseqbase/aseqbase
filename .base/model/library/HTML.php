@@ -1049,9 +1049,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"h1",["class"=> "externalheading" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"h1",["class"=> "externalheading" ], $attributes);
         return self::Element(__($content, styling:false),"h1",["class"=> "externalheading" ], $attributes);
     }
     /**
@@ -1067,9 +1065,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"h2",["class"=> "superheading" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"h2",["class"=> "superheading" ], $attributes);
         return self::Element(__($content, styling:false),"h2",["class"=> "superheading" ], $attributes);
     }
     /**
@@ -1085,9 +1081,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"h3",["class"=> "heading" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"h3",["class"=> "heading" ], $attributes);
         return self::Element(__($content, styling:false),"h3",["class"=> "heading" ], $attributes);
     }
     /**
@@ -1103,9 +1097,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"h4",["class"=> "subheading" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"h4",["class"=> "subheading" ], $attributes);
         return self::Element(__($content, styling:false),"h4",["class"=> "subheading" ], $attributes);
     }
     /**
@@ -1121,9 +1113,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"h5",["class"=> "internalheading" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"h5",["class"=> "internalheading" ], $attributes);
         return self::Element(__($content, styling:false),"h5",["class"=> "internalheading" ], $attributes);
     }
 
@@ -1140,9 +1130,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"p",["class"=> "paragraph" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"p",["class"=> "paragraph" ], $attributes);
         return self::Element(__($content, styling:false),"p",["class"=> "paragraph" ], $attributes);
     }
     /**
@@ -1158,9 +1146,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"span",["class"=> "span" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"span",["class"=> "span" ], $attributes);
         return self::Element(__($content, styling:false),"span",["class"=> "span" ], $attributes);
     }
     /**
@@ -1176,9 +1162,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"strong",["class"=> "strong" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"strong",["class"=> "strong" ], $attributes);
         return self::Element(__($content, styling:false),"strong",["class"=> "strong" ], $attributes);
     }
     /**
@@ -1194,9 +1178,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"big",["class"=> "big" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"big",["class"=> "big" ], $attributes);
         return self::Element(__($content, styling:false),"big",["class"=> "big" ], $attributes);
     }
     /**
@@ -1212,9 +1194,7 @@ $attachments"]);
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Link(
-                self::Element(__($content, styling:false),"small",["class"=> "small" ], $attributes)
-                , $reference);
+            else return self::Element(self::Link($content, $reference),"small",["class"=> "small" ], $attributes);
         return self::Element(__($content, styling:false),"small",["class"=> "small" ], $attributes);
     }
 
@@ -1685,7 +1665,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @return string
      */
     public static function ScriptInput($key, $value = null, ...$attributes){
-        return self::TextInput($key, $value, [ "class"=>"scriptinput", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset;" ], $attributes);
+        return self::TextInput($key, $value, [ "class"=>"scriptinput", "rows"=>"10", "style"=>"font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;" ], $attributes);
     }
     /**
      * The <TEXTAREA> HTML Tag

@@ -9,5 +9,11 @@ COMPONENT("Component");
 TEMPLATE("Template");
 MODULE("Module");
 
+if(!is_null(\_::$INFO->User)){
+    $metadata = json_decode(getValid(\_::$INFO->User->GetGroup(),"MetaData","[]"))??[];
+    foreach ($metadata as $key=>$value)
+        if(isset(\_::$INFO->$key)) \_::$INFO->$key = $value;
+}
+
 RUN("customize");
 ?>

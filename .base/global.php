@@ -302,7 +302,7 @@
 	RUN("global/InformationBase");
 	RUN("Information");
 	_::$INFO = new Information();
-	_::$INFO->User = new \MiMFa\Library\User();
+	_::$INFO->User = _::$INFO->User??new \MiMFa\Library\User();
 
 	RUN("global/TemplateBase");
 	RUN("Template");

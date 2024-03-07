@@ -120,6 +120,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static function CheckAccess($access=null, $acceptableAccess=null){
 		if(is_null($access)) $access = \_::$CONFIG->GuestAccess;
 		if(is_null($acceptableAccess)) return $access;
+		if($acceptableAccess === true || $acceptableAccess === false) return $acceptableAccess;
 		if(is_integer($acceptableAccess)) return $acceptableAccess > 0? ($access > 0? $access <= $acceptableAccess:false) : ($access >= $acceptableAccess);
 		if(is_array($acceptableAccess) && count($acceptableAccess) > 0)
 			if(isset($acceptableAccess["min"])) return ($acceptableAccess["min"] <= $access) && ($acceptableAccess["max"] >= $access);
@@ -198,6 +199,20 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SetValue($key, $value, $signature = null, $password = null){
         if(is_null($id =$this->ID) || !is_null($signature)) $id = getValid($this->Find($signature, $password), "ID");
 		return is_null($id)?null:DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."User","`ID`=$id",[$key => $value]);
+    }
+
+	public function GetGroup($signature = null, $password = null){
+        if(is_null($id =$this->GroupID) || !is_null($signature)) $id = getValid($this->Find($signature, $password), "GroupID");
+		return is_null($id)?null:getValid(DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."UserGroup","*","`ID`=:ID",[":ID"=>$id]),0);
+    }
+	public function SetGroup($fieldsDictionary, $signature = null, $password = null){
+        $id = $this->GroupID;
+		if(!is_null($signature) || is_null($id)) {
+			$person = $this->Find($signature, $password);
+            $id = getValid($person,"GroupID");
+        }
+		if(is_null($id)) return null;
+		return DataBase::DoUpdate(\_::$CONFIG->DataBasePrefix."UserGroup","`ID`='$id'",$fieldsDictionary);
     }
 
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupID = null, $status = null){

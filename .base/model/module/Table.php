@@ -404,10 +404,10 @@ class Table extends Module{
 		$strow = "<tr>";
 		$etrow = "</tr>";
         $vaccess = getAccess($this->ViewAccess);
-        $aaccess = $isu && getAccess($this->AddAccess);
-        $daccess = $isu && getAccess($this->DuplicateAccess);
-        $maccess = $isu && getAccess($this->ModifyAccess);
-        $raccess = $isu && getAccess($this->RemoveAccess);
+        $aaccess = $isu && !is_null($this->AddAccess) && getAccess($this->AddAccess);
+        $daccess = $isu && !is_null($this->DuplicateAccess) && getAccess($this->DuplicateAccess);
+        $maccess = $isu && !is_null($this->ModifyAccess) && getAccess($this->ModifyAccess);
+        $raccess = $isu && !is_null($this->RemoveAccess) && getAccess($this->RemoveAccess);
 		if(is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey=>$row)

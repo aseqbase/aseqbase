@@ -205,6 +205,8 @@ abstract class InformationBase extends Base{
 
 
 	public function __construct(){
+        $this->User = new \MiMFa\Library\User();
+
 		$this->LogoPath = forceUrl($this->LogoPath);
 		$this->FullLogoPath = forceUrl($this->FullLogoPath);
 		$this->BannerPath = forceUrl($this->BannerPath);
