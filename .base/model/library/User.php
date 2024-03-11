@@ -40,6 +40,12 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 	public static $SeparatorSign = "¶";
 	public static $DateTimeSignFormat = "Y/m/d";
+
+	/**
+	 * Direct activeate or deactivate the user abilities
+	 * @var mixed
+	 */
+	public static $Active = true;
 	/**
      * Initial User Default Status:
      *		true/1:		Activated
@@ -72,7 +78,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function __construct(){
 		parent::__construct();
 		Session::Start();
-		$this->Refresh();
+		if(self::$Active) $this->Refresh();
 	}
 
 	public function Load(){
@@ -104,11 +110,12 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
      * @return int|mixed The user accessibility group
      */
 	public function Access($acceptableAccess=null){
+		if(is_null($acceptableAccess)) return ($this->Access)??\_::$CONFIG->GuestAccess;
 		$acc = self::CheckAccess($this->Access, $acceptableAccess);
-		if($acc || count($this->Accesses) === 0) return $acc;
+		if($acc) return true;
 		foreach ($this->Accesses as $key=>$value)
-        if($key = self::CheckAccess($value, $acceptableAccess))
-			return $key;
+            if($key = self::CheckAccess($value, $acceptableAccess))
+                return $key;
         return $acc;
     }
     /**
@@ -123,7 +130,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if($acceptableAccess === true || $acceptableAccess === false) return $acceptableAccess;
 		if(is_integer($acceptableAccess)) return $acceptableAccess > 0? ($access > 0? $access <= $acceptableAccess:false) : ($access >= $acceptableAccess);
 		if(is_array($acceptableAccess) && count($acceptableAccess) > 0)
-			if(isset($acceptableAccess["min"])) return ($acceptableAccess["min"] <= $access) && ($acceptableAccess["max"] >= $access);
+			if(isset($acceptableAccess["min"]) || isset($acceptableAccess["max"]))
+				return (!isset($acceptableAccess["min"]) || $acceptableAccess["min"] <= $access) && (!isset($acceptableAccess["max"]) ||$acceptableAccess["max"] >= $access);
 			else return in_array($access, $acceptableAccess);
 		return null;
     }
@@ -133,6 +141,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
     }
 
 	public function Find($signature = null, $password = null, $hashPassword = true){
+		if(!self::$Active) return [];
 		$signature = $signature??$this->Signature??Session::GetSecure("Signature")??$this->TemporarySignature;
 		if(!isValid($signature)){
             $this->SignOut($signature);

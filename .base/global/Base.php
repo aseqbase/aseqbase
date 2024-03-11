@@ -1,4 +1,5 @@
 <?php
+LIBRARY("Revise");
 /**
  *Guide for Documentations
  *
@@ -45,8 +46,9 @@ class Base{
      */
 	public $Capturable = null;
 
-	function __construct(){
-		$this->Set_Defaults();
+	function __construct($setDefaults = true, $setRevises = true){
+		if($setDefaults) $this->Set_Defaults();
+        if($setRevises) \MiMFa\Library\Revise::Load($this);
     }
 
 	public function Set_Defaults(){

@@ -128,8 +128,8 @@ class Form extends Module{
 				.{$this->Name} .button {
 					background-color: inherit;
 					color: inherit;
-					min-width: max-content;
-					max-width: 90vw;
+					min-width: fit-content;
+					max-width: 85vw;
 					padding: calc(var(--Size-0) / 2) var(--Size-1);
 				}
 				.{$this->Name} .submitbutton {
@@ -209,8 +209,8 @@ class Form extends Module{
 					font-size: 125%;
 					display: inline-flex;
 					width: 100%;
-					min-width: max-content;
-					max-width: 90vw;
+					min-width: 300px;
+					max-width: 85vw;
 					max-width: -webkit-fill-available;
 					padding-top: 0px;
 					padding-bottom: 0px;
@@ -274,8 +274,8 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
-				min-width: max-content;
-				max-width: 90vw;
+				min-width: 300px;
+				max-width: 85vw;
 				border: none;
 				border-bottom: var(--Border-1);
 				".Style::DoProperty("border-color", $this->FieldsBorderColor)."
@@ -333,8 +333,8 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
-				min-width: max-content;
-				max-width: 90vw;
+				min-width: 300px;
+				max-width: 85vw;
 				height: 100%;
 				border-radius: 0px 3px 3px 0px;
 				outline: none;
@@ -404,8 +404,8 @@ class Form extends Module{
 				".Style::DoProperty("background-color", $this->FieldsBackColor)."
 				font-size: 100%;
 				width: 100%;
-				min-width: max-content;
-				max-width: 90vw;
+				min-width: 300px;
+				max-width: 85vw;
 				border-radius: 0px 3px 3px 3px;
 				border: var(--Border-1);
 				border-color: transparent;
@@ -471,8 +471,8 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
-				min-width: max-content;
-				max-width: 90vw;
+				min-width: 300px;
+				max-width: 85vw;
 			    margin: 5px;
 				border: none;
 				border-color: transparent;

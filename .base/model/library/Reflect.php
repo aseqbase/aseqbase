@@ -139,19 +139,20 @@ class Reflect{
     public static function GetForm($objectOrReflection):\MiMFa\Module\Form{
         MODULE("Form");
         $reflection = self::Get($objectOrReflection);
-        $form = new \MiMFa\Module\Form();
+        $form = new \MiMFa\Module\Form(
+            title: "Edit {$reflection->Title}",
+            description: $reflection->Description,
+            method: "POST",
+            image:"edit",
+            children: self::GetFields($objectOrReflection)
+        );
         $form->ResponseView = "value";
-        $form->Title = "Edit {$reflection->Title}";
-        $form->Description = $reflection->Description;
         $form->Id = "{$reflection->Name}EditForm";
-        $form->Image = "edit";
         $form->Template = "both";
-        $form->Method = "POST";
         $form->Timeout = 60000;
         $form->SubmitLabel = "Update";
         $form->ResetLabel = "Reset";
         $form->AllowHeader = false;
-        $form->Children = self::GetFields($objectOrReflection);
         return $form;
     }
     /**

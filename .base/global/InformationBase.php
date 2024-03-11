@@ -205,7 +205,10 @@ abstract class InformationBase extends Base{
 
 
 	public function __construct(){
+        parent::__construct(false);
         $this->User = new \MiMFa\Library\User();
+        \MiMFa\Library\Revise::Decode($this, getValid($this->User->GetGroup(),"MetaData","[]"));
+        \MiMFa\Library\Revise::Decode($this, getValid($this->User->Get(),"MetaData","[]"));
 
 		$this->LogoPath = forceUrl($this->LogoPath);
 		$this->FullLogoPath = forceUrl($this->FullLogoPath);

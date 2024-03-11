@@ -137,7 +137,15 @@
 		public static InformationBase|null $INFO = null;
 		public static TemplateBase|null $TEMPLATE = null;
 
+		/**
+		 * A Path=>Fucntion array to apply the Function before using the Path
+		 * @var mixed
+		 */
 		public static $PREPENDS = array();
+		/**
+         * A Path=>Fucntion array to apply the Function after using the Path
+         * @var mixed
+         */
 		public static $APPENDS = array();
 
 		/**
@@ -562,8 +570,9 @@
 	function applyPrepends($toCase, string|null $name = null){
 		$toCase = strtoupper($toCase??"");
 		$name = strtoupper($name??"");
-        if(!isset(\_::$PREPENDS[$toCase][$name])) return;
-        $value = \_::$PREPENDS[$toCase][$name];
+        if(isset(\_::$PREPENDS[$toCase][$name])) $value = \_::$PREPENDS[$toCase][$name];
+        elseif(isset(\_::$PREPENDS[$toCase.$name])) $value = \_::$PREPENDS[$toCase.$name];
+        else return;
 		if(is_string($value))
 			echo $value;
         else return ($value)();
@@ -571,8 +580,9 @@
 	function applyAppends($toCase, string|null $name = null){
 		$toCase = strtoupper($toCase??"");
 		$name = strtoupper($name??"");
-        if(!isset(\_::$APPENDS[$toCase][$name])) return;
-        $value = \_::$APPENDS[$toCase][$name];
+        if(isset(\_::$PREPENDS[$toCase][$name])) $value = \_::$PREPENDS[$toCase][$name];
+        elseif(isset(\_::$PREPENDS[$toCase.$name])) $value = \_::$PREPENDS[$toCase.$name];
+        else return;
 		if(is_string($value))
 			echo $value;
         else return ($value)();

@@ -480,9 +480,6 @@
     <Content Update="erp\view\page\index.html">
       <SubType>Code</SubType>
     </Content>
-    <Content Update="erp\view\page\tutorial.php">
-      <SubType>Code</SubType>
-    </Content>
     <Content Update="erp\view\part\index.html">
       <SubType>Code</SubType>
     </Content>

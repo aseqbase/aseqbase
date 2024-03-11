@@ -364,28 +364,28 @@ abstract class ConfigurationBase extends Base {
 
 	/**
      * 0: Not show Errors; 1: To show Errors
-     * @field short
+     * @field int
      * @var int|null
      * @category Debug
      */
 	public $DisplayError = null;
 	/**
      * 0: Not show startup Errors; 1: To show startup Errors
-     * @field short
+     * @field int
      * @var int|null
      * @category Debug
      */
 	public $DisplayStartupError = null;
 	/**
      * E_ error flags
-     * @field short
+     * @field int
      * @var int|null
      * @category Debug
 	 */
 	public $ReportError = null;
 	/**
      * Database Errors
-     * @field short
+     * @field int
      * @var int|null
      * @category Debug
 	 */
@@ -449,6 +449,7 @@ abstract class ConfigurationBase extends Base {
 	public $DataBaseAddNameToPrefix = true;
 
 	public function __construct(){
+        parent::__construct(false);
         if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"]??"qb")."_";
     }
 

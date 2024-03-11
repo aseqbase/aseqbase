@@ -60,6 +60,7 @@
 		public function Pattern(int $ind = 0) { return \MiMFa\Library\Local::GetUrl(self::LoopPalette($this->PatternPalette,$ind));}
 
 		public function __construct(){
+            parent::__construct(false);
 			if($this->IsDark($this->BackColor(0))===true) $this->DarkMode = true;
 			else $this->DarkMode = false;
 			$lm = getValid($_REQUEST,"LightMode")? changeMemo("LightMode",getValid($_REQUEST,"LightMode", null)) : false;

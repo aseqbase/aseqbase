@@ -1437,11 +1437,19 @@ else return call_user_func("self::Field", null, $k, $f);
                 break;
             case 'int':
             case 'integer':
+                $min = is_array($options)?min($options):PHP_INT_MIN;
+                $max = is_array($options)?max($options):PHP_INT_MAX;
+                $content = self::NumberInput($title, $value, ['min'=>$min, 'max'=>$max], $attributes);
+                break;
             case 'short':
-            case 'long':
+                $min = is_array($options)?min($options):-255;
+                $max = is_array($options)?max($options):255;
+                $content = self::NumberInput($title, $value, ['min'=>$min, 'max'=>$max], $attributes);
+                break;
             case 'number':
-                $min = is_array($options)?min($options):-999999999;
-                $max = is_array($options)?max($options):999999999;
+            case 'long':
+                $min = is_array($options)?min($options):null;
+                $max = is_array($options)?max($options):null;
                 $content = self::NumberInput($title, $value, ['min'=>$min, 'max'=>$max], $attributes);
                 break;
             case 'range':
@@ -1452,8 +1460,8 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'float':
             case 'double':
             case 'decimal':
-                $min = is_array($options)?min($options):-999999999;
-                $max = is_array($options)?max($options):999999999;
+                $min = is_array($options)?min($options):-PHP_FLOAT_MAX;
+                $max = is_array($options)?max($options):PHP_FLOAT_MAX;
                 $content = self::FloatInput($title, $value, ['min'=>$min, 'max'=>$max], $attributes);
                 break;
             case 'phone':
@@ -1560,7 +1568,7 @@ else return call_user_func("self::Field", null, $k, $f);
         else return join('',[$titleTag,Convert::By($prepend, $type, $value),$content,Convert::By($append, $type, $value),$descriptionTag]);
     }
     /**
-     * The <INPUT> HTML Tag
+     * The <BUTTON TYPE="SUBMIT"> HTML Tag
      * @param mixed $key The tag name, id, or placeholder
      * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag
@@ -1574,7 +1582,7 @@ else return call_user_func("self::Field", null, $k, $f);
         return self::Element(__($value??$key, styling:false), "button", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "class"=> "button submitbutton", "type"=>"submit"], $attributes);
     }
     /**
-     * The <INPUT> HTML Tag
+     * The <BUTTON TYPE="RESET"> HTML Tag
      * @param mixed $key The tag name, id, or placeholder
      * @param mixed $value The tag default value
      * @param mixed $attributes The custom attributes of the Tag

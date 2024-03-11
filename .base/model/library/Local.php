@@ -206,11 +206,13 @@ class Local{
 		return $b;
     }
 
-	public static function ReadText($path){
-		return file_get_contents(self::GetPath($path));
+	public static function ReadText($path):null|string{
+		$res = file_get_contents(self::GetPath($path));
+        if($res === false) return null;
+		return $res;
 	}
 	public static function WriteText($path, string|null $text){
-		return fwrite(self::GetPath($path),$text);
+		return file_put_contents(self::GetPath($path),$text);
 	}
 
 
