@@ -24,6 +24,11 @@
 		<script src='<?php echo forceFullUrl('/view/script/Math.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Array.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Html.js'); ?>'></script>
+		<?php
+		if(isValid(\_::$CONFIG->ReCaptchaSiteKey)) {
+			LIBRARY("reCaptcha");
+			echo \MiMFa\Library\reCaptcha::GetScript(\_::$CONFIG->ReCaptchaSiteKey);
+        }?>
 		<?php echo \_::$TEMPLATE->BasePack; ?>
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/view.css'); ?>'>
 		<script src='https://unpkg.com/@ungap/custom-elements-builtin'></script>

@@ -246,17 +246,11 @@ abstract class ConfigurationBase extends Base {
      */
 	public $AllowContextMenu = true;
 	/**
-     * Default public key for ReCaptcha
+     * Default site key for ReCaptcha
      * @var string
      * @category Security
      */
-    public $ReCaptchaPublicKey = null;
-	/**
-     * Default private key for ReCaptcha
-     * @var string
-     * @category Security
-     */
-    public $ReCaptchaPrivateKey = null;
+    public $ReCaptchaSiteKey = null;
 	/**
      * The minimum group of banned user
      * @var int

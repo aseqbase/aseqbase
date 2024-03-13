@@ -26,8 +26,7 @@ class Form extends Module{
 	public $CancelPath = "/";
 	public $BackLabel = "Back to Home";
 	public $BackPath = "/";
-	public $ReCaptchaPublicKey = null;
-	public $ReCaptchaPrivateKey = null;
+	public $ReCaptchaSiteKey = null;
 	public $Method = "POST";
 	public $EncType="multipart/form-data";
 	public $Timeout = 60000;
@@ -63,8 +62,7 @@ class Form extends Module{
             unset($_GET[\_::$CONFIG->ViewHandlerKey]);
             unset($_REQUEST[\_::$CONFIG->ViewHandlerKey]);
         }
-		$this->ReCaptchaPublicKey = \_::$CONFIG->ReCaptchaPublicKey;
-		$this->ReCaptchaPrivateKey = \_::$CONFIG->ReCaptchaPrivateKey;
+		$this->ReCaptchaSiteKey = \_::$CONFIG->ReCaptchaSiteKey;
     }
 	/**
      * Set the main properties of module
@@ -585,9 +583,9 @@ class Form extends Module{
 
     }
 	public function GetFields(){
-		if(isValid($this->ReCaptchaPublicKey)){
-			LIBRARY("ReCaptcha");
-			yield \MiMFa\Library\ReCaptcha::GetHtml($this->ReCaptchaPublicKey);
+		if(isValid($this->ReCaptchaSiteKey)){
+			LIBRARY("reCaptcha");
+			yield \MiMFa\Library\reCaptcha::GetHtml($this->ReCaptchaSiteKey);
         }
     }
 	public function GetButtons(){
@@ -631,11 +629,10 @@ class Form extends Module{
     }
 
 	public function Action(){
-		if(isValid($this->ReCaptchaPrivateKey)){
-			LIBRARY("GReCaptcha");
-            $resp = \MiMFa\Library\ReCaptcha::CheckAnswer($this->ReCaptchaPrivateKey);
-            if($resp->Valid) echo $this->GetAction();
-            else echo Convert::ToString($resp->Error);
+		if(isValid($this->ReCaptchaSiteKey)){
+			LIBRARY("reCaptcha");
+            if(\MiMFa\Library\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey)) echo $this->GetAction();
+            else echo HTML::Error("Do something to denied access!");
         } else echo $this->GetAction();
     }
 	public function GetAction(){
