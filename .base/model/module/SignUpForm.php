@@ -107,7 +107,6 @@ class SignUpForm extends Form{
 		return parent::GetHeader();
     }
 	public function GetFields(){
-		yield parent::GetFields();
         if($this->HasInternalMethod){
 			yield HTML::Rack(
 				(isValid($this->FirstNameLabel)?HTML::LargeSlot(
@@ -167,6 +166,7 @@ class SignUpForm extends Form{
 		}
 		if($this->HasExternalMethod){
 		}
+		yield from parent::GetFields();
     }
 	public function GetFooter(){
         return parent::GetFooter().HTML::LargeSlot(

@@ -53,15 +53,16 @@ class PaymentForm extends Form{
 		yield (
 			$mod->Set(
 				type:"text",
-				key:"Transaction", 
+				key:"Transaction",
 				value:$this->Transaction,
 				description:null,
-				options:null, 
+				options:null,
 				attributes:null,
 				required:true,
 				lock:!is_null($this->Transaction)
 			)
 		)->ReCapture();
+		yield from parent::GetFields();
 	}
 	public function GetContent($attr = null){
 		if($this->ExternalLink && $this->QRCodeBox != null && isValid($this->Path)){

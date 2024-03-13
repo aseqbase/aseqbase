@@ -89,6 +89,7 @@ class SignInForm extends Form{
 				, ["class"=>"field col", "autocomplete"=>"password"])
 			);
 		}
+		yield from parent::GetFields();
     }
 	public function GetFooter(){
         return parent::GetFooter()

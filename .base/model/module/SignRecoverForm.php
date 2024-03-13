@@ -44,6 +44,7 @@ class SignRecoverForm extends Form{
 				, ["class"=>"field", "autocomplete"=>"username"])
 			);
 		}
+		yield from parent::GetFields();
     }
 
 	public function GetScript(){

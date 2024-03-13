@@ -243,7 +243,7 @@
 	_::$BASE_PUBLIC_DIR = \_::$BASE_DIR."public/";
 	_::$BASE_STORAGE_DIR = \_::$BASE_DIR."storage/";
 	_::$BASE_FILE_DIR = \_::$BASE_DIR."file/";
-	_::$BASE_LIBRARY_DIR = \_::$BASE_MODEL_DIR."library/";
+	_::$BASE_LIBRARY_DIR = \_::$BASE_DIR."library/";
 	_::$BASE_COMPONENT_DIR = \_::$BASE_MODEL_DIR."component/";
 	_::$BASE_TEMPLATE_DIR = \_::$BASE_MODEL_DIR."template/";
 	_::$BASE_MODULE_DIR = \_::$BASE_MODEL_DIR."module/";
@@ -265,7 +265,7 @@
 	_::$STORAGE_DIR = \_::$DIR."storage/";
 	_::$TMP_DIR = \_::$DIR."tmp/";
 	_::$LOG_DIR = \_::$DIR."log/";
-	_::$LIBRARY_DIR = \_::$MODEL_DIR."library/";
+	_::$LIBRARY_DIR = \_::$DIR."library/";
 	_::$COMPONENT_DIR = \_::$MODEL_DIR."component/";
 	_::$TEMPLATE_DIR = \_::$MODEL_DIR."template/";
 	_::$MODULE_DIR = \_::$MODEL_DIR."module/";
