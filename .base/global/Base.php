@@ -34,6 +34,7 @@ class Base{
 	public $Name = null;
 	/**
      * Additional Children of the object
+     * @internal
      * @field collection
      * @var array<string|Base|callable>|Base|callable|string
      * @medium

@@ -11,6 +11,11 @@
 		public $DetectMode = true;
 		public $DarkMode = null;
 
+		/**
+		 * Default page head Packages
+         * @field html
+		 * @var mixed
+		 */
 		public $BasePack = "
 			<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
 			<script>window.jQuery || document.write(`<script src='https://code.jquery.com/jquery-3.6.0.min.js'><\/script>`)</script>
@@ -24,24 +29,80 @@
 			<script src='https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js' crossorigin='anonymous'></script>
 			<script src='https://unpkg.com/jalaali-js/dist/jalaali.min.js'></script>
 		";
+		/**
+		 * The custom page head Packages
+		 * @field html
+		 * @var mixed
+		 */
 		public $CustomPack = "";
 
-		//0:	ForeColor
-		//1:	Input ForeColor
-		//2:	Button ForeColor
-		//3:	BackColor
-		//4:	Input BackColor
-		//5:	Button BackColor
+		/**
+		 * Full Colors Palette
+         * @field array<color>
+		 * @var mixed
+		 */
 		public $ColorPalette = array("#dd2222","#22dd22","#2222dd","#ccbb22","#22dddd","#dd22dd");
+		/**
+         * Fore Colors Palette
+         * @field array<color>
+         * @var mixed
+         */
 		public $ForeColorPalette = array("#030405","#010203","#010203","#040506","#3aa3e9","#fdfeff");
+		/**
+         * Back Colors Palette
+         * @field array<color>
+         * @var mixed
+         */
 		public $BackColorPalette = array("#fcfdfe","#fafbfc","#fafbfc","#fafcfd","#fdfeff","#3aa3e9");
+		/**
+         * Fonts Palette
+         * @field array<font>
+         * @var mixed
+         */
 		public $FontPalette = array("'dubai light', sans-serif","'dubai', sans-serif","'dubai', sans-serif","'Tahoma', sans-serif","'Tahoma', sans-serif","'Times new Romance', sans-serif");
+		/**
+         * Sizes Palette
+         * @field array<size>
+         * @var mixed
+         */
 		public $SizePalette = array("2.3vh","2.4vh","2.6vh","3vh","3.6vh","4.4vh","5.4vh");
+		/**
+         * Shadows Palette
+         * @field array<{'size', 'size', 'size', 'color'}>
+         * @field array<text>
+         * @var mixed
+         */
 		public $ShadowPalette = array("none","4px 7px 20px #00000005","4px 7px 20px #00000015","4px 7px 20px #00000030","5px 10px 25px #00000030","5px 10px 25px #00000050","5px 10px 50px #00000050");
+		/**
+         * Borders Palette
+         * @field array<{'size', ['solid','double','dotted','dashed']}>
+         * @field array<text>
+         * @var mixed
+         */
 		public $BorderPalette = array("0px","1px solid","2px solid","5px solid","10px solid","25px solid");
+		/**
+         * Radiuses Palette
+         * @field array<size>
+         * @var mixed
+         */
 		public $RadiusPalette = array("0px","3px","5px","50px","50%","100%");
+		/**
+         * Transitions Palette
+         * @field array<text>
+         * @var mixed
+         */
 		public $TransitionPalette = array("none","all .25s linear","all .5s linear","all .75s linear","all 1s linear","all 1.5s linear");
+		/**
+		 * Overlays Palette
+         * @field array<path>
+         * @var mixed
+         */
 		public $OverlayPalette = array("/file/overlay/glass.png","/file/overlay/cotton.png","/file/overlay/cloud.png","/file/overlay/wings.svg","/file/overlay/sands.png","/file/overlay/dirty.png");
+		/**
+		 * Patterns Palette
+         * @field array<path>
+         * @var mixed
+         */
 		public $PatternPalette = array("/file/pattern/main.svg","/file/pattern/doddle.png","/file/pattern/doddle-fantasy.png","/file/pattern/triangle.png","/file/pattern/slicksline.png","/file/pattern/doddle-mess.png");
 
 		public static function LoopPalette($palette, int $ind = 0) { $ind %= count($palette); return $palette[$ind];}

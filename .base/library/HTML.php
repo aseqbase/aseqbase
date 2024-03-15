@@ -1291,6 +1291,32 @@ else return call_user_func("self::Field", null, $k, $f);
         return self::Element($content, "form", isValid($reference)?["action"=> $reference]:[], [ "enctype"=>"multipart/form-data", "method"=>"get", "class"=> "form" ], $attributes);
     }
     /**
+     * Detect the type of inputed value
+     * @param mixed $type The suggestion type of value
+     * @param mixed $value The sample value
+     * @return string
+     */
+    public static function InputDetector($type = null, $value = null){
+        if($type === false) return null;
+        if(is_null($type))
+            if(isEmpty($value)) return "text";
+            elseif(is_string($value))
+                if(isUrl($value))
+                    if(isFile($value)) return "file";
+                    else return "url";
+                elseif(strlen($value)>100 || count(explode("\r\n\t\f\v",$value))>1)
+                    return "textarea";
+                else return "text";
+            else return strtolower(gettype($value));
+        elseif(is_callable($type) || ($type instanceof \Closure))
+            return self::InputDetector($type($type, $value), $value);
+        elseif(is_object($type) || ($type instanceof \stdClass))
+            return self::InputDetector(getValid($type, "Type", null), $value);
+        elseif(is_countable($type)) return "select";
+        elseif($type === true) return "text";
+        else return strtolower($type);
+    }
+    /**
      * The <LABEL> and any input HTML Tag
      * @param object|string|array|callable|\Closure|\stdClass|null $type Can be a datatype or an input type
      * @param mixed $key The default key and the name of the field
@@ -1307,26 +1333,73 @@ else return call_user_func("self::Field", null, $k, $f);
             $description = null;
         }
         if($type === false) return null;
-        $prepend = $append = null;
-        if(is_null($type)) $type = self::InputDetector($type, $value);
-        if(is_callable($type) || ($type instanceof \Closure))
-            return self::Field(
-                type:$type($type, $value),
+        if(!is_null($type)){
+            if(!(is_callable($type) || ($type instanceof \Closure)) &&
+                (is_object($type) || ($type instanceof \stdClass))){
+                $description = getBetween($type, "Description", "description")??$description;
+                $scope = getBetween($type, "Scope", "scope")??$scope;
+            } elseif(is_countable($type) && !is_null($options)){
+                $description = getBetween($type, "description", "Description")??$description;
+                $scope = getBetween($type, "scope", "Scope")??$scope;
+            }
+        }
+        $content = self::Interactor(
                 key:$key,
                 value:$value,
-                description:$description,
+                type:$type,
                 options:$options,
-                attributes:$attributes,
                 title:$title,
-                scope:$scope
+                attributes:$attributes
             );
+        if(is_null($content)) return null;
+        $id = getValid($attributes, "id")??Convert::ToId($key).getID();
+        $titleOrKey = $title??Convert::ToTitle(Convert::ToString($key));
+        $titleTag = ($title===false || !isValid($titleOrKey)?"":self::Label($titleOrKey, $id, ["class"=> "title"]));
+        $descriptionTag = ($description===false || !isValid($description)?"":self::Label($description, $id, ["class"=> "description"]));
+        switch ($type)
+        {
+            case null:
+            case false:
+            case 'null':
+            case 'false':
+                return null;
+            case 'hidden':
+            case 'hide':
+                $titleTag = $descriptionTag = null;
+                break;
+        }
+        if($scope) return self::Element(join('',[$titleTag,$content,$descriptionTag]),'div', ['class'=> 'field']);
+        else return join('',[$titleTag,$content,$descriptionTag]);
+    }
+    /**
+     * The any type of input HTML Tag
+     * @param object|string|array|callable|\Closure|\stdClass|null $type Can be a datatype or an input type
+     * @param mixed $key The default key and the name of the field
+     * @param mixed $value The default value of the field
+     * @param array|iterable|bool|string|null $options The other options of the field
+     * @param array|string|null $attributes Other important attributes of the field
+     * @return string
+     */
+    public static function Interactor(&$key = null, &$value = null, &$type = null, &$options = null, &$title = null, &$attributes = []){
+        if($type === false) return null;
+        $prepend = $append = null;
+        if(is_null($type)) $type = self::InputDetector($type, $value);
+        if(is_callable($type) || ($type instanceof \Closure)){
+            $type = $type($type, $value);
+            return self::Interactor(
+                key:$key,
+                value:$value,
+                type:$type,
+                options:$options,
+                title:$title,
+                attributes:$attributes
+            );
+        }
         elseif(is_object($type) || ($type instanceof \stdClass)){
             $key = getBetween($type, "Key", "key")??$key;
             $value = getBetween($type, "Value", "value")??$value;
             $title = getBetween($type, "Title", "title")??$title;
-            $description = getBetween($type, "Description", "description")??$description;
             $options = getBetween($type, "Options", "options")??$options;
-            $scope = getBetween($type, "Scope", "scope")??$scope;
             $prepend = getBetween($type, "Prepend", "prepend")??$prepend;
             $append = getBetween($type, "Append", "append")??$append;
             $attributes = [...$attributes, ...(getBetween($type, "Attributes", "attributes")?[getBetween($type, "Attributes", "attributes")]:[])];
@@ -1338,22 +1411,63 @@ else return call_user_func("self::Field", null, $k, $f);
             } else {
                 $key = getBetween($type, "key", "Key")??$key;
                 $value = getBetween($type, "value", "Value")??$value;
-                $title = getBetween($type, "title", "Title")??$title;
-                $description = getBetween($type, "description", "Description")??$description;
                 $options = getBetween($type, "options", "Options")??$options;
-                $scope = getBetween($type, "scope", "Scope")??$scope;
                 $prepend = getBetween($type, "prepend", "Prepend")??$prepend;
                 $append = getBetween($type, "append", "Append")??$append;
                 $attributes = [...$attributes, ...(getBetween($type, "attributes", "Attributes")?[getBetween($type, "attributes", "Attributes")]:[])];
                 $type = self::InputDetector(getBetween($type, "type", "Type"), $value);
             }
         } else $type = self::InputDetector($type, $value);
+        if(preg_match("/^\s*((\{[\w\W]*\})|(\[[\w\W]*\]))\s*$/",$type)){
+            try{
+                $types = json_decode($type, JSON_OBJECT_AS_ARRAY);
+                return join('',
+                    loop($types,
+                        function($k,$t) use (&$key, &$value, &$options, &$title, &$attributes){
+                            return self::Interactor(
+                                key:$key,
+                                value:$value,
+                                type:$t,
+                                options:$options,
+                                title:$title,
+                                attributes:$attributes
+                            );
+                        }
+                    )
+                );
+            }
+            catch(\Exception $ex) { $type = "text";}
+        }
+        $mt = preg_find("/(?<=\<)[\w\W]+(?=\>$)/i", trim($type), null);
+        if(!isEmpty($mt)){
+            $options = ["type"=>$mt,  ...($options??[])];
+            $type = first(str_split($type,strpos($type,"<")));
+            return self::Interactor(
+                key:$key,
+                value:$value,
+                type:$type,
+                options:$options,
+                title:$title,
+                attributes:$attributes
+            );
+        }
+        $pos = 0;
+        if($pos = strpos($type,"|")>0){
+            $type = first(str_split($type,$pos));
+            return self::Interactor(
+                key:$key,
+                value:$value,
+                type:$type,
+                options:$options,
+                title:$title,
+                attributes:$attributes
+            );
+        }
+
         $titleOrKey = $title??Convert::ToTitle(Convert::ToString($key));
         $key = Convert::ToKey(Convert::ToString($key??$title));
         $id = getValid($attributes, "id")??Convert::ToId($key).getID();
         $attributes = [["id"=>$id,"name"=>$key], ...$attributes];
-        $titleTag = ($title===false || !isValid($titleOrKey)?"":self::Label($titleOrKey, $id, ["class"=> "title"]));
-        $descriptionTag = ($description===false || !isValid($description)?"":self::Label($description, $id, ["class"=> "description"]));
         switch ($type)
         {
             case null:
@@ -1390,12 +1504,11 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'object':
                 $content = self::ObjectInput($title, Convert::ToString($value), $attributes);
                 break;
-            case 'collection'://A collection of Base based objects
-
             case 'countable':
             case 'iterable':
             case 'array':
-                $content = self::ArrayInput($title, $value, $options, $attributes);
+            case 'collection'://A collection of Base based objects
+                $content = self::CollectionInput($title, $value, $options, $attributes);
                 break;
             case 'lines':
             case 'texts':
@@ -1407,6 +1520,10 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'content':
                 $content = self::ContentInput($title, $value, $attributes);
                 break;
+            case 'size':
+            case 'font':
+        	case 'mixed':
+
             case 'line':
             case 'value':
             case 'string':
@@ -1428,6 +1545,8 @@ else return call_user_func("self::Field", null, $k, $f);
             case 'radiobutton':
                 $content = self::RadioInput($titleOrKey, $value, $attributes);
                 break;
+            case '1':
+            case '0':
             case 'bool':
             case 'boolean':
             case 'check':
@@ -1500,7 +1619,6 @@ else return call_user_func("self::Field", null, $k, $f);
                 break;
             case 'hidden':
             case 'hide':
-                $titleTag = $descriptionTag = null;
                 $content = self::HiddenInput($title, $value, $attributes);
                 break;
             case 'secret':
@@ -1564,8 +1682,8 @@ else return call_user_func("self::Field", null, $k, $f);
                 else $content = self::Input($title, $value, $type, $attributes);
                 break;
         }
-        if($scope) return self::Element($titleTag.$content.$descriptionTag,'div', ['class'=> 'field']);
-        else return join('',[$titleTag,Convert::By($prepend, $type, $value),$content,Convert::By($append, $type, $value),$descriptionTag]);
+        if(is_null($prepend) && is_null($content) && is_null($append)) return null;
+        return join('',[Convert::By($prepend, $type, $value),$content,Convert::By($append, $type, $value)]);
     }
     /**
      * The <BUTTON TYPE="SUBMIT"> HTML Tag
@@ -1594,32 +1712,6 @@ else return call_user_func("self::Field", null, $k, $f);
             $value = null;
         }
         return self::Element(__($value??$key, styling:false), "button", [ "id"=>Convert::ToId($key), "name"=>Convert::ToKey($key), "class"=> "button resetbutton", "type"=>"reset"], $attributes);
-    }
-    /**
-     * Detect the type of inputed value
-     * @param mixed $type The suggestion type of value
-     * @param mixed $value The sample value
-     * @return string
-     */
-    public static function InputDetector($type = null, $value = null){
-        if($type === false) return null;
-        if(is_null($type))
-            if(isEmpty($value)) return "text";
-            elseif(is_string($value))
-                if(isUrl($value))
-                    if(isFile($value)) return "file";
-                    else return "url";
-                elseif(strlen($value)>100 || count(explode("\r\n\t\f\v",$value))>1)
-                    return "textarea";
-                else return "text";
-            else return strtolower(gettype($value));
-        elseif(is_callable($type) || ($type instanceof \Closure))
-            return self::InputDetector($type($type, $value), $value);
-        elseif(is_object($type) || ($type instanceof \stdClass))
-            return self::InputDetector(getValid($type, "Type", null), $value);
-        elseif(is_countable($type)) return "select";
-        elseif($type === true) return "text";
-        else return strtolower($type);
     }
     /**
      * The <INPUT> HTML Tag
@@ -1693,7 +1785,7 @@ else return call_user_func("self::Field", null, $k, $f);
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
-    public static function ArrayInput($key, $value = null, $options = ["type"=>null,"add"=>true,"remove"=>true], ...$attributes){
+    public static function CollectionInput($key, $value = null, $options = ["type"=>null,"add"=>true,"remove"=>true], ...$attributes){
         if(is_null($value))
             if(is_array($key)) {
                 $value = $key;
@@ -1711,7 +1803,7 @@ else return call_user_func("self::Field", null, $k, $f);
             $attrs = getValid($options, "attributes", []);
             $options = getValid($options, "options", null);
             if(isEmpty($value)) $value = [];
-            elseif(is_string($value)) $value = is_null($sep)&&startsWith($value,"[","{")?json_decode($value):explode($sep??"|", trim($value, $sep??"|"));
+            elseif(is_string($value)) $value = is_null($sep)&&startsWith($value,"[","{")?json_decode($value, JSON_OBJECT_AS_ARRAY):explode($sep??"|", trim($value, $sep??"|"));
             foreach ($value as $k=>$item){
                 if(is_null($sample)) $sample = $item;
                 $Id = Convert::ToId($key).getId();
@@ -1745,7 +1837,7 @@ else return call_user_func("self::Field", null, $k, $f);
                     options:$options,
                     attributes:[...$attributes, "onchange"=>$oc, "id"=>$id, "name"=>"","style"=>"display: none;", ...$attrs]);
             }
-        },["id"=>$key, "class"=>"arrayinput"]);
+        },["id"=>$key, "class"=>"collectioninput"]);
     }
     /**
      * The <INPUT> HTML Tag

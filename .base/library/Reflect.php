@@ -14,9 +14,9 @@ class Reflect{
         if(is_null($comment)) return [];
         $matches = preg_find_all("/\@\w+\s*.*/", $comment);
         $res = [];
-        $res["abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*?(?<=\s)\s*[^@][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
+        $res["abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*\s*[^@\/][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
         foreach ($matches as $value)
-            $res[preg_find("/(?<=\@)\w+/", $value)] = trim(preg_replace("/^\@\w+\s*/", "", $value));
+            $res[strtolower(preg_find("/(?<=\@)\w+/", $value))] = trim(preg_replace("/^\@\w+\s*/", "", $value));
         return $res;
     }
 

@@ -222,6 +222,11 @@ class Form extends Module{
 					border-radius: var(--Radius-0);
 					".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 				}
+				.{$this->Name} .field .input[type='color'] {
+					min-width: auto;
+					width: initial;
+					aspect-ratio: 1;
+				}
 				.{$this->Name} .field .input::placeholder {
 					color: #888;
 					font-weight: bold;
@@ -285,6 +290,11 @@ class Form extends Module{
 				margin: 5px;
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
+			.{$this->Name} .field .input[type='color'] {
+				min-width: auto;
+				width: initial;
+				aspect-ratio: 1;
+			}
 			.{$this->Name} .field label.description{
 				text-align: initial;
 				display: block;
@@ -346,6 +356,11 @@ class Form extends Module{
 				border-color: transparent;
 				border-radius: var(--Radius-0);
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name} .field .input[type='color'] {
+				min-width: auto;
+				width: initial;
+				aspect-ratio: 1;
 			}
 			.{$this->Name} .field label.description{
 				text-align: initial;
@@ -415,6 +430,11 @@ class Form extends Module{
 				border-radius: var(--Radius-0);
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
+			.{$this->Name} .field .input[type='color'] {
+				min-width: auto;
+				width: initial;
+				aspect-ratio: 1;
+			}
 			.{$this->Name} .field label.description{
 				text-align: initial;
 				display: block;
@@ -481,6 +501,11 @@ class Form extends Module{
 				border-bottom: var(--Border-1);
 				border-radius: var(--Radius-0);
 				".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+			}
+			.{$this->Name} .field .input[type='color'] {
+				min-width: auto;
+				width: initial;
+				aspect-ratio: 1;
 			}
 			.{$this->Name} .field label.description{
 				opacity: 0;

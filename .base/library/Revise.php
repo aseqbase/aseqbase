@@ -75,9 +75,9 @@ class Revise{
         if(is_null($comment)) return [];
         $matches = preg_find_all("/\@\w+\s*.*/", $comment);
         $res = [];
-        $res["abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*?(?<=\s)\s*[^@][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
+        $res["abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*\s*[^@\/][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
         foreach ($matches as $value)
-            $res[preg_find("/(?<=\@)\w+/", $value)] = trim(preg_replace("/^\@\w+\s*/", "", $value));
+            $res[strtolower(preg_find("/(?<=\@)\w+/", $value))] = trim(preg_replace("/^\@\w+\s*/", "", $value));
         return $res;
     }
 
@@ -113,16 +113,22 @@ class Revise{
         MODULE("Field");
         foreach ($reflection->getProperties() as $value){
             $pars = self::GetCommentParameters($value->getDocComment());
+            $mod = $value->getModifiers();
             if(
-                $value->getModifiers() != T_PRIVATE &&
+                $mod != T_PRIVATE &&
+                $mod != T_PROTECTED &&
                 !isValid($pars,"internal") &&
                 !isValid($pars,"private")
             )
                 yield new \MiMFa\Module\Field(
-                key:$value->getName(),
-                value:$value->getValue($object),
-                description:getBetween($pars,"abstract","description"),
-                type:getBetween($pars,"field","type","var")
+                    type:getBetween($pars,"field","type")??($value->getType()??getValid($pars,"var")),
+                    key:$value->getName(),
+                    value:$value->getValue($object),
+                    title:getValid($pars,"title", null),
+                    description:getBetween($pars,"abstract","description"),
+                    required:getValid($pars,"required", null),
+                    options:getValid($pars,"options", null),
+                    attributes:getValid($pars,"attributes", null)
             );
         }
     }
