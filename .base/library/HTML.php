@@ -18,8 +18,8 @@ class HTML
 
     /**
      * Create standard html element
-     * @param mixed $content The content of the Tag, send null to create single tag
-     * @param string|null $tagName The HTML tag name
+     * @param mixed $content The content of the Tag, send tagname to create single tag
+     * @param string|null $tagName The HTML tag name, send attributes to create single tag
      * @param array $tagName Other custom attributes of the single Tag
      * @param array|string|null $attributes Other custom attributes of the Tag
      * @return string
@@ -183,7 +183,7 @@ $attachments"]);
         $head = join("\r\n",array_unique(/*self::$Sources,...$sources]*/$sources));
         //self::$Sources = [];
 
-        return "<!DOCTYPE HTML>" +
+        return "<!DOCTYPE HTML>" .
             self::Element([
                     self::Element([
                         self::Title($title),
@@ -729,6 +729,15 @@ $attachments"]);
         return self::Element(Convert::ToString($content),"div",["class"=> "part" ], $attributes);
     }
     /**
+     * The <DIV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Panel($content, ...$attributes){
+        return self::Element(Convert::ToString($content),"div",["class"=> "panel", "style"=>"display: inline-block; width: fit-content; height: fit-content;" ], $attributes);
+    }
+    /**
      * The <HEADER> HTML Tag
      * @param mixed $content The content of the header Tag
      * @param mixed $attributes Other custom attributes of the Tag
@@ -1118,6 +1127,34 @@ $attachments"]);
     }
 
     /**
+     * The <HR> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null $reference The hyper destination tag id
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Break($content, $reference = null, ...$attributes){
+        if(is_null($content)) return self::Element("hr", ["class"=> "break"], $attributes);
+        $attr = ["class"=> "break", "style"=>
+                "display:flex;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                justify-content: center;
+                align-content: center;
+                text-align: center;
+                align-items: center;"
+        ];
+        $hr = self::Element("hr",["style"=>"width: 100%; margin-bottom: calc(-1* var(--Size-0));"]);
+        if(!is_null($reference))
+            if(is_array($reference) && count($attributes) === 0){
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            }
+            else return self::Element($hr.self::Button($content, $reference,["style"=>"background-color: var(--BackColor-0); padding: 3px; margin: 0px;"]),"div",$attr, $attributes);
+        return self::Element($hr.self::Span($content,null,["style"=>"background-color: var(--BackColor-0); padding: 3px; margin: 0px;"]),"div",$attr, $attributes);
+    }
+
+    /**
      * The <P> HTML Tag
      * @param mixed $content The content of the Tag
      * @param string|null $reference The hyper reference path
@@ -1164,6 +1201,22 @@ $attachments"]);
             }
             else return self::Element(self::Link($content, $reference),"strong",["class"=> "strong" ], $attributes);
         return self::Element(__($content, styling:false),"strong",["class"=> "strong" ], $attributes);
+    }
+    /**
+     * The <B> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Bold($content, $reference = null, ...$attributes){
+        if(!is_null($reference))
+            if(is_array($reference) && count($attributes) === 0){
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            }
+            else return self::Element(self::Link($content, $reference),"b",["class"=> "bold" ], $attributes);
+        return self::Element(__($content, styling:false),"b",["class"=> "bold" ], $attributes);
     }
     /**
      * The <BIG> HTML Tag
@@ -1352,9 +1405,14 @@ else return call_user_func("self::Field", null, $k, $f);
                 attributes:$attributes
             );
         if(is_null($content)) return null;
+        $isRequired = !is_null($attributes) && is_string($attributes) && strpos($attributes,"required")>=0;
+        if(!$isRequired && !is_null($attributes) && is_countable($attributes))
+            foreach ($attributes as $k=>$v)
+                if($isRequired = ((is_string($k) && strpos($k,"required")>=0) || (is_string($v) && strpos($v,"required")>=0)))
+                    break;
         $id = getValid($attributes, "id")??Convert::ToId($key).getID();
         $titleOrKey = $title??Convert::ToTitle(Convert::ToString($key));
-        $titleTag = ($title===false || !isValid($titleOrKey)?"":self::Label($titleOrKey, $id, ["class"=> "title"]));
+        $titleTag = ($title===false || !isValid($titleOrKey)?"":self::Label(__($titleOrKey, styling:false).($isRequired?self::Span("*"):""), $id, ["class"=> "title"]));
         $descriptionTag = ($description===false || !isValid($description)?"":self::Label($description, $id, ["class"=> "description"]));
         switch ($type)
         {
@@ -1420,7 +1478,7 @@ else return call_user_func("self::Field", null, $k, $f);
         } else $type = self::InputDetector($type, $value);
         if(preg_match("/^\s*((\{[\w\W]*\})|(\[[\w\W]*\]))\s*$/",$type)){
             try{
-                $types = json_decode($type, JSON_OBJECT_AS_ARRAY);
+                $types = json_decode($type, flags:JSON_OBJECT_AS_ARRAY);
                 return join('',
                     loop($types,
                         function($k,$t) use (&$key, &$value, &$options, &$title, &$attributes){
@@ -1803,7 +1861,7 @@ else return call_user_func("self::Field", null, $k, $f);
             $attrs = getValid($options, "attributes", []);
             $options = getValid($options, "options", null);
             if(isEmpty($value)) $value = [];
-            elseif(is_string($value)) $value = is_null($sep)&&startsWith($value,"[","{")?json_decode($value, JSON_OBJECT_AS_ARRAY):explode($sep??"|", trim($value, $sep??"|"));
+            elseif(is_string($value)) $value = is_null($sep)&&startsWith($value,"[","{")?json_decode($value, flags:JSON_OBJECT_AS_ARRAY):explode($sep??"|", trim($value, $sep??"|"));
             foreach ($value as $k=>$item){
                 if(is_null($sample)) $sample = $item;
                 $Id = Convert::ToId($key).getId();

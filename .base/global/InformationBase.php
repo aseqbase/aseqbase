@@ -109,17 +109,12 @@ abstract class InformationBase extends Base{
 	 */
 	public $DownloadPath = null;
 	/**
-     * The default payment path
-     * @field path
-	 * @var mixed
-	 */
-	public $PaymentPath = null;
-	/**
-     * The default payment contents to show for paying process
-     * @field strings
-	 * @var mixed
-	 */
-	public $PaymentContent = null;
+     * The default payment JSON data to use for paying process
+     * @field json
+     * @example '{"Network":"TRC-20","Unit":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}'
+     * @var mixed
+     */
+	public $Payment = null;
 	/**
      * The main symbol path to show while system is waiting
      * @field path

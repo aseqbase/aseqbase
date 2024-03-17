@@ -23,9 +23,9 @@ class Form extends Module{
 	public $Buttons = null;
 	public $ResetLabel = "Reset";
 	public $CancelLabel = null;
-	public $CancelPath = "/";
+	public $CancelPath = null;
 	public $BackLabel = "Back to Home";
-	public $BackPath = "/";
+	public $BackPath = null;
 	public $ReCaptchaSiteKey = null;
 	public $Method = "POST";
 	public $EncType="multipart/form-data";
@@ -39,6 +39,7 @@ class Form extends Module{
 	public $AllowFooter = true;
     public $Class = "container";
 	public $ContentClass = "col-lg-6";
+	public $UseAJAX = true;
 
 	public $FieldsTypes = [];
 
@@ -98,8 +99,6 @@ class Form extends Module{
 					position: sticky;
 					top: 0px;
 					bottom: 0px;
-					margin-top: 5vmin;
-					margin-bottom: 5vmin;
 					padding: var(--Size-1);
 				}
 				.{$this->Name} .header :is(.image, .image:before) {
@@ -132,15 +131,23 @@ class Form extends Module{
 					color: inherit;
 					min-width: fit-content;
 					max-width: 85vw;
-					padding: calc(var(--Size-0) / 2) var(--Size-1);
+					border-radius: var(--Radius-1);
+					padding: var(--Size-0) var(--Size-1);
+					margin: calc(var(--Size-0) / 2) var(--Size-0);
+					box-shadow: var(--Shadow-0);
+					".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				}
+				.{$this->Name} .button:hover {
+					font-weight: bold;
+					box-shadow: var(--Shadow-2);
 				}
 				.{$this->Name} .submitbutton {
 					background-color: var(--ForeColor-2);
 					color: var(--BackColor-2);
 				}
 				.{$this->Name} .submitbutton:hover {
-					background-color: var(--ForeColor-4);
-					color: var(--BackColor-4);
+					background-color: var(--BackColor-5);
+					color: var(--ForeColor-5);
 				}
 
 				.{$this->Name} .group {
@@ -187,9 +194,9 @@ class Form extends Module{
 					opacity: 80%;
 					min-width: fit-content;
 					display: inline-flex;
-					position: relative;
-					text-align: initial;
-					vertical-align: top;
+					vertical-align: middle;
+					align-items: center;
+					margin: 0px;
 					padding: 0px var(--Size-0);
 					".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 				}
@@ -211,11 +218,10 @@ class Form extends Module{
 					font-size: 125%;
 					display: inline-flex;
 					width: 100%;
-					min-width: 300px;
 					max-width: 85vw;
 					max-width: -webkit-fill-available;
-					padding-top: 0px;
-					padding-bottom: 0px;
+					padding-top: calc(var(--Size-0) / 2.5);
+					padding-bottom: calc(var(--Size-0) / 2.5);
 					border: none;
 					border-bottom: var(--Border-1);
 					border-color: transparent;
@@ -281,7 +287,7 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
-				min-width: 300px;
+				min-width: min(300px, 40vw);
 				max-width: 85vw;
 				border: none;
 				border-bottom: var(--Border-1);
@@ -345,7 +351,7 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
-				min-width: 300px;
+				min-width: min(300px, 40vw);
 				max-width: 85vw;
 				height: 100%;
 				border-radius: 0px 3px 3px 0px;
@@ -421,7 +427,7 @@ class Form extends Module{
 				".Style::DoProperty("background-color", $this->FieldsBackColor)."
 				font-size: 100%;
 				width: 100%;
-				min-width: 300px;
+				min-width: min(300px, 40vw);
 				max-width: 85vw;
 				border-radius: 0px 3px 3px 3px;
 				border: var(--Border-1);
@@ -493,7 +499,7 @@ class Form extends Module{
 				display: table-cell;
 				font-size: 125%;
 				width: 100%;
-				min-width: 300px;
+				min-width: min(300px, 40vw);
 				max-width: 85vw;
 			    margin: 5px;
 				border: none;
@@ -536,7 +542,6 @@ class Form extends Module{
 		");
 	}
 
-
 	public function Get(){
 		$name = $this->Name."_Form";
 		$src = $this->Action??$this->Path??\_::$PATH;
@@ -574,7 +579,7 @@ class Form extends Module{
 							$this->GetHeader().
 							$this->GetTitle().
 							$this->GetDescription().
-							(isValid($this->BackLabel)? HTML::Button($this->BackLabel, $this->BackPath):"")
+							(isValid($this->BackLabel)? HTML::Button($this->BackLabel, $this->BackPath??\_::$HOST):"")
 						,["class"=>"header"]):"").
 						HTML::LargeSlot(
 							HTML::Form(
@@ -594,7 +599,7 @@ class Form extends Module{
 						$this->GetHeader().
 						$this->GetTitle().
 						$this->GetDescription().
-						(isValid($this->BackLabel)? HTML::Button($this->BackLabel, $this->BackPath):"")
+						(isValid($this->BackLabel)? HTML::Button($this->BackLabel, $this->BackPath??\_::$HOST):"")
 					:"").
 					HTML::Form(
                         ($this->AllowContent?$this->GetContent():"").
@@ -619,7 +624,7 @@ class Form extends Module{
             yield (isValid($this->SubmitLabel)?HTML::SubmitButton($this->SubmitLabel, ["name"=>"submit", "class"=>"col-md"]):"");
             yield (isValid($this->ResetLabel)?HTML::ResetButton($this->ResetLabel, ["name"=>"reset", "class"=>"col-md-4"]):"");
         }
-		yield (isValid($this->CancelLabel)?HTML::Button($this->CancelLabel, $this->CancelPath, ["name"=>"cancel", "class"=>"col-lg-3"]):"");
+		yield (isValid($this->CancelLabel)?HTML::Button($this->CancelLabel, $this->CancelPath??\_::$HOST, ["name"=>"cancel", "class"=>"col-lg-3"]):"");
     }
 	public function GetFooter(){
 
@@ -628,7 +633,7 @@ class Form extends Module{
 	public function GetScript(){
 		return parent::GetScript().HTML::Script("
 			$(function () {
-				handleForm('.{$this->Name} form',
+				".($this->UseAJAX?"handleForm('.{$this->Name} form',
 					function (data, selector)  {//success
 						if (data.includes('result success')) {
 							$(`.{$this->Name} form .result`).remove();
@@ -642,7 +647,7 @@ class Form extends Module{
 						}
 					},
 					{ timeout: {$this->Timeout} }
-				);
+				);":"")."
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
 					$(this).parent().find(`.{$this->Name} .input-group .text`).css('border-color', 'var(--ForeColor-2)');
 				});
@@ -657,7 +662,7 @@ class Form extends Module{
 		if(isValid($this->ReCaptchaSiteKey)){
 			LIBRARY("reCaptcha");
             if(\MiMFa\Library\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey)) echo $this->GetAction();
-            else echo HTML::Error("Do something to denied access!");
+            else echo $this->GetError("Do something to denied access!");
         } else echo $this->GetAction();
     }
 	public function GetAction(){
@@ -672,9 +677,19 @@ class Form extends Module{
         }
 		try {
 			if(count($_req) > 0)
-                return HTML::Success("The form submitted successfully!",["class"=>"page"]);
-			else return HTML::Warning("There a problem is occured!");
-		} catch(\Exception $ex) { return HTML::Error($ex); }
+                return $this->GetSuccess("The form submitted successfully!",["class"=>"page"]);
+			else return $this->GetWarning("There a problem is occured!");
+		} catch(\Exception $ex) { return $this->GetError($ex); }
+    }
+
+	public function GetSuccess($msg, ...$attr) {
+		return HTML::Success($msg, ...$attr);
+    }
+	public function GetWarning($msg, ...$attr) {
+        return HTML::Warning($msg, ...$attr);
+    }
+	public function GetError($msg, ...$attr) {
+        return HTML::Error($msg, ...$attr);
     }
 }
 ?>

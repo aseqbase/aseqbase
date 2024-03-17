@@ -45,11 +45,11 @@ abstract class ConfigurationBase extends Base {
     public $TimeStampOffset = 0;
 
 	/**
-     * A key to use for sending the requested virtual path of website
-     * @var string
+     * A key to use for sending the requested virtual path of website, leave null to set as special
+     * @var string|null
      * @category General
      */
-	public $PathKey = "path";
+	public $PathKey = null;
 
     /**
      * The website view name
@@ -89,11 +89,11 @@ abstract class ConfigurationBase extends Base {
         "/^(public|private)(\/|\?|$)/i"=>"run"
     );
     /**
-     * The requested view key to handle the virtual pathes
-     * @var string
+     * The requested view key to handle the virtual pathes, leave null to set as special
+     * @var string|null
      * @category General
      */
-	public $ViewHandlerKey = "view";
+	public $ViewHandlerKey = null;
 
 
 	/**
@@ -456,6 +456,9 @@ abstract class ConfigurationBase extends Base {
 
 	public function __construct(){
         parent::__construct(false);
+        $sp = str_replace(".","", getClientIP()."");
+        if(is_null($this->PathKey)) $this->PathKey = "path_".$sp;
+        if(is_null($this->ViewHandlerKey)) $this->ViewHandlerKey = "view_".$sp;
         if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"]??"qb")."_";
     }
 

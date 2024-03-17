@@ -98,30 +98,30 @@ class Message extends Template{
 					}
 				</style>
         <?php }
-		public function DrawMain(){?>
-			</head>
-			<body>
-        <?php }
-        public function DrawContent(){?>
-				<div class='restriction-view'>
-					<div class='content'>
-						<div class='frame frame-1'>
-							<?php if(isValid($this->SupTitle)) echo "<p>".__($this->SupTitle,true,false)."</p>"; ?>
-							<?php if(isValid($this->Title)) echo "<h1>".__($this->Title,true,false)."</h1>"; ?>
-							<?php if(isValid($this->SubTitle)) echo "<p>".__($this->SubTitle,true,false)."</p>"; ?>
-						</div>
-						<div class='frame frame-2'>
-							<?php if(isValid($this->SupDescription)) echo "<div>".__($this->SupDescription,true,false)."</div>"; ?>
-							<?php if(isValid($this->Description)) echo __($this->Description,true,false); ?>
-							<?php if(isValid($this->SubDescription)) echo "<div>".__($this->SubDescription,true,false)."</div>"; ?>
-						</div>
+	public function DrawMain(){?>
+		</head>
+		<body>
+    <?php }
+    public function DrawContent(){?>
+			<div class='restriction-view'>
+				<div class='content'>
+					<div class='frame frame-1'>
+						<?php if(isValid($this->SupTitle)) echo "<p>".__($this->SupTitle,true,false)."</p>"; ?>
+						<?php if(isValid($this->Title)) echo "<h1>".__($this->Title,true,false)."</h1>"; ?>
+						<?php if(isValid($this->SubTitle)) echo "<p>".__($this->SubTitle,true,false)."</p>"; ?>
 					</div>
-					<div class="logo"></div>
+					<div class='frame frame-2'>
+						<?php if(isValid($this->SupDescription)) echo "<div>".__($this->SupDescription,true,false)."</div>"; ?>
+						<?php if(isValid($this->Description)) echo __($this->Description,true,false); ?>
+						<?php if(isValid($this->SubDescription)) echo "<div>".__($this->SubDescription,true,false)."</div>"; ?>
+					</div>
 				</div>
-        <?php }
-        public function DrawFinal(){?>
-			</body>
-		</html>
-	<?php }
+				<div class="logo"></div>
+			</div>
+    <?php }
+    public function DrawFinal(){?>
+		</body>
+	</html>
+<?php }
 }
 ?>

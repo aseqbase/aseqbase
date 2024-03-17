@@ -3,7 +3,7 @@ MODULE("Content");
 $module = new \MiMFa\Module\Content();
 $module->Content = function(){
 	if(isValid(\_::$DIRECTION))
-		PAGE(NormalizePath(\_::$DIRECTION), defaultName:"404");
+		PAGE(normalizePath(\_::$DIRECTION), defaultName:"404");
 	else PAGE("home", defaultName:"404");
 };
 $module->Draw();
