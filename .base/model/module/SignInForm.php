@@ -17,7 +17,7 @@ class SignInForm extends Form{
 	public $SignUpLabel = "Do not have an account?";
 	public $RememberLabel = "Forgot your password?";
 	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
-	public $WelcomePart = null;
+	public $Welcome = null;
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
@@ -26,7 +26,7 @@ class SignInForm extends Form{
 	public function __construct(){
         parent::__construct();
 		$this->Action = User::$InHandlerPath;
-		$this->WelcomePart = User::$DashboardHandlerPath;
+		$this->Welcome = function(){ return PART(User::$DashboardHandlerPath, print:false); };
 		$this->SuccessPath = \_::$PATH;
 	}
 
@@ -67,7 +67,7 @@ class SignInForm extends Form{
 
 	public function Get(){
 		if(getAccess(\_::$CONFIG->UserAccess) && !$this->MultipleSignIn){
-			return $this->GetHeader().PART($this->WelcomePart, print:false);
+			return $this->GetHeader().Convert::ToString($this->Welcome);
         } else return parent::Get();
 	}
 	public function GetHeader(){
