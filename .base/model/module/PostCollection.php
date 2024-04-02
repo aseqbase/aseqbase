@@ -14,6 +14,8 @@ MODULE("Collection");
  */
 class PostCollection extends Collection{
 	public $Capturable = true;
+	public $TitleTag = "h1";
+
 	public $MaximumColumns = 2;
 
 	/**
@@ -21,6 +23,7 @@ class PostCollection extends Collection{
      * @var string|null
      */
 	public $Root = "/post/";
+	public $CompressPath = false;
 
 	/**
      * The default Content HTML
@@ -184,8 +187,7 @@ class PostCollection extends Collection{
 		return HTML::Style("
 			.{$this->Name}>*>.item {
 				height: fit-content;
-				background-Color: var(--BackColor-1);
-				color: var(--ForeColor-0);
+				background-Color: #88888808;
 				margin: var(--Size-2);
             	padding: var(--Size-3);
 				font-size: var(--Size-0);
@@ -198,7 +200,7 @@ class PostCollection extends Collection{
 				box-shadow: var(--Shadow-2);
 				border-radius:  var(--Radius-1);
 				border-color: var(--BackColor-4);
-				background-Color: var(--BackColor-0);
+				background-Color: #88888818;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
 
@@ -250,7 +252,6 @@ class PostCollection extends Collection{
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
 			.{$this->Name}>*>.item:hover .image{
-				background-Color: var(--BackColor-0);
 				opacity: 0.6;
 				".(\MiMFa\Library\Style::UniversalProperty("filter","blur(".$this->BlurSize.")"))."
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
@@ -263,7 +264,6 @@ class PostCollection extends Collection{
 			.{$this->Name}>*>.item .content{
                 font-size: var(--Size-1);
             	text-align: justify;
-            	background-Color: var(--BackColor-0);
 				padding-top: var(--Size-3);
 				padding-bottom: var(--Size-3);
 			}
@@ -284,6 +284,8 @@ class PostCollection extends Collection{
                 $rout->Tag = "span";
             }
 		    $i = 0;
+		    yield $this->GetTitle();
+		    yield $this->GetDescription();
 		    foreach(Convert::ToItems($this->Items) as $k=>$item) {
                 $p_access = getValid($item,'Access',0);
                 if(!getAccess($p_access)) continue;
@@ -305,6 +307,11 @@ class PostCollection extends Collection{
 			    $p_showtitle = $this->ShowTitle || getValid($p_meta,"ShowTitle",false);
                 $p_showmeta = $this->ShowMetaData || getValid($p_meta,"ShowMeta",false);
                 $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->Root.getValid($item,'Name',$p_id)):null;
+                if(!$this->CompressPath) {
+                    LIBRARY("Query");
+                    $catDir = \MiMFa\Library\Query::GetContentCategoryDirection($item);
+                    if(isValid($catDir)) $p_inselflink = $this->Root.trim($catDir,"/\\")."/".($p_name??$p_id);
+                }
                 $p_path = getValid($item,'Path', $this->DefaultPath);
                 if($this->ShowRoute) $rout->SetValue($p_inselflink);
 			    $hasl = isValid($p_inselflink);
@@ -368,25 +375,25 @@ class PostCollection extends Collection{
                 }
 			    $img->Source = $p_image;
 			    if($i % $this->MaximumColumns === 0)  yield "<div class='row'>";
-                yield "<article class='item $p_type $p_class col-md'".($this->AllowAnimation? " data-aos='zoom-up' data-aos-offset='-500'":"").">";
+                yield "<article class='item $p_type $p_class col-lg'".($this->AllowAnimation? " data-aos='zoom-up' data-aos-offset='-500'":"").">";
                 yield "<div class='head row'>";
-                yield "<div class='col-md'>";
-                $lt = $this->LinkedTitle && $hasl;
-                if($p_showtitle) yield ($lt?"<a href='$p_inselflink'>":"")."<h2 class='title'>".__($p_title)."</h2>".($lt?"</a>":"");
-                if($p_showmeta && isValid($p_meta)) {
-                    yield "<sub class='metadata'>";
-                    if($this->ShowRoute) yield $rout->ReCapture();
-                    yield $p_meta."</sub>";
-                }
-                yield "</div>";
-                if($p_showmorebutton || $p_showpathbutton) {
-                    yield "<div class='more col-sm col-3 md-hide'>";
-                    if($p_showmorebutton)
-                        yield "<a class='btn btn-outline' href='$p_inselflink'>".__($p_morebuttontext)."</a>";
-                    if($p_showpathbutton)
-                        yield "<a class='btn btn-outline' href='$p_path'>".__($p_pathbuttontext)."</a>";
+                    yield "<div class='col-lg'>";
+                        $lt = $this->LinkedTitle && $hasl;
+                        if($p_showtitle) yield ($lt?"<a href='$p_inselflink'>":"")."<h2 class='title'>".__($p_title)."</h2>".($lt?"</a>":"");
+                        if($p_showmeta && isValid($p_meta)) {
+                            yield "<sub class='metadata'>";
+                            if($this->ShowRoute) yield $rout->ReCapture();
+                            yield $p_meta."</sub>";
+                        }
                     yield "</div>";
-                }
+                    if($p_showmorebutton || $p_showpathbutton) {
+                        yield "<div class='more col-sm col-3 md-hide'>";
+                        if($p_showmorebutton)
+                            yield "<a class='btn btn-outline' href='$p_inselflink'>".__($p_morebuttontext)."</a>";
+                        if($p_showpathbutton)
+                            yield "<a class='btn btn-outline' href='$p_path'>".__($p_pathbuttontext)."</a>";
+                        yield "</div>";
+                    }
                 yield "</div>";
                 yield "<div class='description row'>";
                 yield "<div class='excerpt col-md'>";

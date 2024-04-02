@@ -59,7 +59,7 @@ class Script
             (preg_replace("/,\s+,/m", ", 0,",
                 (preg_replace("/,\s*$/m", ", 0",
                     (preg_replace("/^\s*,\s+/m", "0, ",
-                        join(", ", is_array($arr) ? $arr : Convert::ToArray($arr)))))))) : $arr;
+                        join(", ", is_array($arr) ? $arr : Convert::ToSequence($arr)))))))) : $arr;
         return isEmpty($val) ? "0" : ($isarr ? "[" + $val + "]" : $val);
     }
 }

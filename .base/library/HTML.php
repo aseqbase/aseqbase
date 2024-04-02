@@ -1476,52 +1476,53 @@ else return call_user_func("self::Field", null, $k, $f);
                 $type = self::InputDetector(getBetween($type, "type", "Type"), $value);
             }
         } else $type = self::InputDetector($type, $value);
-        if(preg_match("/^\s*((\{[\w\W]*\})|(\[[\w\W]*\]))\s*$/",$type)){
-            try{
-                $types = json_decode($type, flags:JSON_OBJECT_AS_ARRAY);
-                return join('',
-                    loop($types,
-                        function($k,$t) use (&$key, &$value, &$options, &$title, &$attributes){
-                            return self::Interactor(
-                                key:$key,
-                                value:$value,
-                                type:$t,
-                                options:$options,
-                                title:$title,
-                                attributes:$attributes
-                            );
-                        }
-                    )
+        if(!is_null($type)){
+            if(preg_match("/^\s*((\{[\w\W]*\})|(\[[\w\W]*\]))\s*$/",$type)){
+                try{
+                    $types = json_decode($type, flags:JSON_OBJECT_AS_ARRAY);
+                    return join('',
+                        loop($types,
+                            function($k,$t) use (&$key, &$value, &$options, &$title, &$attributes){
+                                return self::Interactor(
+                                    key:$key,
+                                    value:$value,
+                                    type:$t,
+                                    options:$options,
+                                    title:$title,
+                                    attributes:$attributes
+                                );
+                            }
+                        )
+                    );
+                }
+                catch(\Exception $ex) { $type = "text";}
+            }
+            $mt = preg_find("/(?<=\<)[\w\W]+(?=\>$)/i", trim($type), null);
+            if(!isEmpty($mt)){
+                $options = ["type"=>$mt,  ...($options??[])];
+                $type = first(str_split($type,strpos($type,"<")));
+                return self::Interactor(
+                    key:$key,
+                    value:$value,
+                    type:$type,
+                    options:$options,
+                    title:$title,
+                    attributes:$attributes
                 );
             }
-            catch(\Exception $ex) { $type = "text";}
+            $pos = 0;
+            if($pos = strpos($type,"|")>0){
+                $type = first(str_split($type,$pos));
+                return self::Interactor(
+                    key:$key,
+                    value:$value,
+                    type:$type,
+                    options:$options,
+                    title:$title,
+                    attributes:$attributes
+                );
+            }
         }
-        $mt = preg_find("/(?<=\<)[\w\W]+(?=\>$)/i", trim($type), null);
-        if(!isEmpty($mt)){
-            $options = ["type"=>$mt,  ...($options??[])];
-            $type = first(str_split($type,strpos($type,"<")));
-            return self::Interactor(
-                key:$key,
-                value:$value,
-                type:$type,
-                options:$options,
-                title:$title,
-                attributes:$attributes
-            );
-        }
-        $pos = 0;
-        if($pos = strpos($type,"|")>0){
-            $type = first(str_split($type,$pos));
-            return self::Interactor(
-                key:$key,
-                value:$value,
-                type:$type,
-                options:$options,
-                title:$title,
-                attributes:$attributes
-            );
-        }
-
         $titleOrKey = $title??Convert::ToTitle(Convert::ToString($key));
         $key = Convert::ToKey(Convert::ToString($key??$title));
         $id = getValid($attributes, "id")??Convert::ToId($key).getID();

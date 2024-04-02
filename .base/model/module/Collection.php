@@ -11,6 +11,7 @@ use MiMFa\Library\HTML;
  */
 class Collection extends Module{
 	public $Capturable = true;
+	public $TitleTag = "h2";
 	public $Class = "container";
 	/**
      * An array of items, which contains a Key-Value based array of features

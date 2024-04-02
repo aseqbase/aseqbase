@@ -31,7 +31,7 @@ class Math
 
     public static function Values()
     {
-        return Convert::ToArray(func_get_args());
+        return Convert::ToSequence(func_get_args());
     }
 
     public static function Count()

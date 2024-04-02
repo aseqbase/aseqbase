@@ -1,4 +1,6 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\HTML;
 /**
  * Automatic crate route map through url or item iterations
  *@copyright All rights are reserved for MiMFa Development Group
@@ -7,6 +9,7 @@
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Route extends Module{
+	public $Capturable = true;
 	/**
 	 * The source of items
      * @var array<string,string>
@@ -28,6 +31,11 @@ class Route extends Module{
      */
 	public $RootLabel = null;
 	/**
+     * Show current document name in route
+     * @var bool
+     */
+	public $ShowCurrent = false;
+	/**
      * Convert the first character of each word in a string to uppercase
      * @var bool
      */
@@ -38,43 +46,42 @@ class Route extends Module{
 		$this->SetValue($itemsOrpath);
 	}
 
-	public function EchoStyle(){
-		parent::EchoStyle(); ?>
-		<style>
-			.<?php echo $this->Name; ?>{
+	public function GetStyle(){
+		return parent::GetStyle().HTML::Style("
+			.{$this->Name}{
 				padding: var(--Size-1);
 				width: 100%;
 				text-align: unset;
 			}
-			.<?php echo $this->Name; ?> a,.<?php echo $this->Name; ?> a:visited{
-				color: <?php echo \_::$TEMPLATE->ForeColor(1)."88";?>;
+			.{$this->Name} a,.{$this->Name} a:visited{
+				color: ".\_::$TEMPLATE->ForeColor(1)."88;
 			}
-
-		</style>
-		<?php
+		");
 	}
 
-	public function Echo(){
-		parent::Echo();
-		$this->Items = getValid($this->Items,null,array());
-		if(count($this->Items)<1 && isValid($this->Path)){
-            $host = "";
-            $paths = preg_split("/(?<=[^\\/\\\])\\//i",$this->Path);
-			$host = $paths[0];
-			$this->Items[trim($host,"/\\")] = $host;
-			foreach (array_slice($paths,1) as $value)
-                $this->Items[trim($value,"/\\")] = $host.= "/".$value;
-        }
-		if(count($this->Items) > 0){
-			$route = "<a href='".array_values($this->Items)[0]."'>".__($this->RootLabel??array_keys($this->Items)[0],true,false)."</a>";
-			if($this->AllowUpperCase)
-				foreach (array_slice($this->Items,1) as $key=>$value)
-					$route .= $this->SeparatorSymbol."<a href='".$value."'>".ucwords(__($key,true,false))."</a>";
-			else
-				foreach (array_slice($this->Items,1) as $key=>$value)
-					$route .= $this->SeparatorSymbol."<a href='".$value."'>".__($key,true,false)."</a>";
-			echo $route;
-        }
+	public function Get(){
+		return parent::Get().join(PHP_EOL, iterator_to_array((function(){
+			yield parent::Get();
+			$this->Items = getValid($this->Items,null,array());
+			if(count($this->Items)<1 && isValid($this->Path)){
+				$host = "";
+				$paths = preg_split("/(?<=[^\\/\\\])\\//i",$this->Path);
+				$host = $paths[0];
+				$this->Items[trim($host,"/\\")] = $host;
+				foreach (array_slice($paths,1) as $value)
+					$this->Items[trim($value,"/\\")] = $host.= "/".$value;
+			}
+			if(count($this->Items) > 1){
+				$route = "<a href='".array_values($this->Items)[0]."'>".__($this->RootLabel??array_keys($this->Items)[0],true,false)."</a>";
+				if($this->AllowUpperCase)
+					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
+						$route .= $this->SeparatorSymbol."<a href='".$value."'>".ucwords(__($key,true,false))."</a>";
+				else
+					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
+						$route .= $this->SeparatorSymbol."<a href='".$value."'>".__($key,true,false)."</a>";
+				yield $route;
+			}
+        })()));
 	}
 
 	public function SetValue($itemsOrpath = null){

@@ -148,7 +148,7 @@ class Navigation extends Module{
 			$this->Items = $itemsOrQuery;
 			if($this->LiveCount || $this->Count <= 0)
                 if(isValid($count)) $this->Count = $count;
-                elseif($this->AllowCount) $this->Count = count(between($this->Items,$this->DefaultItems));
+                elseif($this->AllowCount) $this->Count = count(Convert::ToItems(between($this->Items,$this->DefaultItems)));
 				else $this->Count = 12;
         }
 		$this->Numbers = ceil($this->Count / $this->Limit);
@@ -160,7 +160,7 @@ class Navigation extends Module{
      * @return mixed
      */
 	public function GetItems($iterator=null){
-		if(isValid($iterator??$this->Items)) return array_slice($iterator??$this->Items, $this->GetFromItem(), $this->GetLimit());
+		if(isValid($iterator??$this->Items)) return array_slice(Convert::ToItems($iterator??$this->Items), $this->GetFromItem(), $this->GetLimit());
 		else return between(DataBase::Select($this->Query." LIMIT ".$this->GetFromItem().", ".$this->GetLimit(),$this->QueryParameters),array_slice($this->DefaultItems, $this->GetFromItem(), $this->GetLimit()));
 	}
 	public function GetFromItem(){

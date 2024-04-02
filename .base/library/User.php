@@ -137,7 +137,11 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
     }
 	public static function GetAccessCondition(){
         $acc = getAccess();
-        return "(`Status` IS NULL OR `Status` IN ('','1',1)) AND `Access`>".\_::$CONFIG->BanAccess." AND (`Access`=".\_::$CONFIG->GuestAccess.($acc<=\_::$CONFIG->GuestAccess?"":" OR `Access`>=$acc").")";
+        return "
+				(`Status` IS NULL OR `Status` IN ('','1',1))
+				AND `Access`>".\_::$CONFIG->BanAccess."
+				AND (`Access`=".\_::$CONFIG->GuestAccess.($acc<=\_::$CONFIG->GuestAccess?"":" OR `Access`>=$acc").')'.
+				(\_::$CONFIG->AllowTranslate?'AND (`MetaData` IS NULL OR `MetaData` NOT REGEXP \'/\s*(["\\\']?)lang\1\s*\:/i\' OR `MetaData` REGEXP \'/\s*(["\\\']?)lang\1\s*\:[\s\S]*([\"\\\'])'.Translate::$Language.'\2/i\')':'');
     }
 
 	public function Find($signature = null, $password = null, $hashPassword = true){

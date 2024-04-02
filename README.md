@@ -63,6 +63,9 @@
 <h3>Contributions</h3>
 <p>Contributions can take the form of new components or features, changes to existing features, tests, documentation (such as developer guides, user guides, examples, or specifications), bug fixes, optimizations, or just good suggestions.</p>
 
+<h3>License</h3>
+<p>aseqbase Core is released under the terms of the GNU general public license.</p>
+
 <h3>Links</h3>
 	<ul>
 		<li>To download the latest release, click <a href="http://aseqbase.mimfa.net/download" target="_blank">here &#128279</a>.</li>

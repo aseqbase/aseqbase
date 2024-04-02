@@ -118,21 +118,21 @@ class Members extends Module{
                 </div>
                 <div class="title">
                     <sup>
-                        <?php echo __(getValid($menu[$i],'PreName')); ?>
+                        <?php echo __(getValid($menu[$i],'PreName'), styling:false); ?>
                     </sup>
                     <div>
                         <strong>
-                            <?php echo __(getValid($menu[$i],'FirstName'))." ".__(getValid($menu[$i],'MiddleName'))." ".__(getValid($menu[$i],'LastName')); ?>
+                            <?php echo __(getValid($menu[$i],'FirstName'), styling:false)." ".__(getValid($menu[$i],'MiddleName'), styling:false)." ".__(getValid($menu[$i],'LastName'), styling:false); ?>
                         </strong>
                     </div>
                     <sub>
-                        <?php echo __(getValid($menu[$i],'PostName')); ?>
+                        <?php echo __(getValid($menu[$i],'PostName'), styling:false); ?>
                     </sub>
                 </div>
                 <div class="features">
                     <?php foreach(getValid($menu[$i],'Assignees', array()) as $assignee) { ?>
                     <div>
-                        <?php echo __($assignee,true,false); ?>
+                        <?php echo __($assignee, styling:false); ?>
                     </div><br />
                     <?php } ?>
                 </div>
@@ -140,14 +140,14 @@ class Members extends Module{
                     <?php foreach(getValid($menu[$i],'Items',array()) as $item) { ?>
                     <li class="list-item d-flex justify-content-between align-items-center">
                         <i class="fa <?php echo getValid($item,'Class') ?>" aria-hidden="true">
-                            <?php echo __(getValid($item,'Key'),true,false).__(":",true,false); ?>
+                            <?php echo __(getValid($item,'Key'), styling:false).__(":", styling:false); ?>
                         </i>
-                        <?php echo __(getValid($item,'Value'),true,false); ?>
+                        <?php echo __(getValid($item,'Value'), styling:false); ?>
                     </li>
                     <?php } ?>
                 </ul>
                 <a class="btn" target="blank" href="<?php echo $menu[$i]['Link']; ?>">
-                    <?php echo __($this->MoreButtonLabel); ?>
+                    <?php echo __($this->MoreButtonLabel, styling:false); ?>
                 </a>
             </div>
         </div>

@@ -179,7 +179,8 @@ class Convert{
 		if(is_null($values)) return [];
 		elseif(is_string($values)) return preg_split($splitPattern, $values);
 		elseif(is_subclass_of($values,"\Base")) return $values->Children;
-		elseif(is_callable($values) || $values instanceof \Closure) return $values();
+		elseif(is_callable($values) || $values instanceof \Closure) return self::ToItems($values());
+		elseif($values instanceof \Traversable) return iterator_to_array($values);
         else return $values;
     }
 	/**
@@ -199,8 +200,8 @@ class Convert{
      * @param mixed $arguments
      * @return array
      */
-	public static function ToArray(...$arguments){
-		return iterator_to_array(call_user_func_array("self::ToIteration",$arguments));
+	public static function ToSequence(...$arguments){
+        return iterator_to_array(call_user_func_array("self::ToIteration",$arguments));
 	}
 
     public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true){

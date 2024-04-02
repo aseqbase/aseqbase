@@ -1,36 +1,32 @@
 <?php
-use MiMFa\Library\DataBase;
+LIBRARY("Query");
+use MiMFa\Library\Query;
 $path = implode("/", array_slice(explode("/",\_::$DIRECTION),1));
-if(!isValid($path)){
-    TEMPLATE("Main");
-    $templ = new \MiMFa\Template\Main();
-    $templ->Content = function() {
-        PART("post-collection");
-    };
-    $templ->Draw();
-    return;
-}
-$items = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."Tag","*","(Name=:Name OR ID=:ID) AND `Access`<=".getAccess(),[":Name"=>$path,":ID"=>$path]);
-if(count($items)<1){
+$parent = Query::FindTag($path,[]);
+if(count($parent)<1){
     VIEW("404");
     return;
 }
-$doc = $items[0];
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
-$templ->WindowTitle = [getValid($doc,"Title")??getValid($doc,"Name")];
-$templ->Content = function() use($doc){
-    MODULE("Post");
-    $module = new \MiMFa\Module\Post();
-    $module->Item = $doc;
-    $module->Draw();
+$templ->WindowTitle = [getValid($parent, "Title")??getValid($parent, "Name")];
+$templ->Content = function() use($parent, $path){
+    MODULE("Navigation");
+    $nav = new \MiMFa\Module\Navigation(Query::SearchContents(
+        query:RECEIVE("q"),
+        type:RECEIVE("type"),
+        tag:$path,
+        order:RECEIVE("sort")?\MiMFa\Library\Convert::ToSequence(loop(explode(",",RECEIVE("sort")), function($k, $v, $i) use($orders) { return [$v=>getValid($orders, $i%count($orders), "ASC")]; })):[]
+    ));
     MODULE("PostCollection");
     $module = new \MiMFa\Module\PostCollection();
+    $module->Title = getValid($parent, "Title");
+    $module->Description = getValid($parent, "Description");
+    $module->DefaultImage = getValid($parent, "Image", \_::$INFO->FullLogoPath);
     $module->ShowRoute = false;
-    $module->DefaultImage = \_::$INFO->FullLogoPath;
-    $module->Items = DataBase::DoSelect(\_::$CONFIG->DataBasePrefix."Content","*",
-        "TagIDs LIKE \"%|".$doc["ID"]."|%\" AND `Access`<=".getAccess());
-    $module->Draw();
+    $module->Items = $nav->GetItems();
+    $module->DoDraw();
+    $nav->DoDraw();
 };
 $templ->Draw();
 ?>

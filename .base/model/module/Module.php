@@ -391,6 +391,14 @@ class Module extends \Base{
 			return ob_get_clean();
         }
     }
+	/**
+     * Capture Or Recapture if is Captured.
+     * @return string
+     */
+    public function DoCapture(){
+        if($this->Captured) return $this->ReCapture();
+        else return $this->Capture();
+    }
 
     public function Render($print = true, $force = false){
         if($print)
@@ -467,5 +475,12 @@ class Module extends \Base{
         }
         return $this->Drawn = true;
 	}
+	/**
+     * Draw Or ReDraw if is Drawn.
+     */
+    public function DoDraw(){
+        if($this->Drawn) return $this->ReDraw();
+        else return $this->Draw();
+    }
 
 }?>

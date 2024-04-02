@@ -26,6 +26,7 @@ class Post extends Module{
      * @var string|null
      */
 	public $Root = "/post/";
+	public $CompressPath = false;
 
 	/**
      * The default Path for more button reference
@@ -287,7 +288,12 @@ class Post extends Module{
             $p_showimage = $this->ShowImage || getValid($p_meta,"ShowImage",false);
             $p_showtitle = $this->ShowTitle || getValid($p_meta,"ShowTitle",false);
             $p_showmeta = $this->ShowMetaData || getValid($p_meta,"ShowMeta",false);
-            $p_inselflink =  $this->Root.($p_name??$p_id);
+            $p_inselflink = $this->Root.($p_name??$p_id);
+            if(!$this->CompressPath) {
+                LIBRARY("Query");
+                $catDir = \MiMFa\Library\Query::GetContentCategoryDirection($item);
+                if(isValid($catDir)) $p_inselflink = $this->Root.trim($catDir,"/\\")."/".($p_name??$p_id);
+            }
             $p_path = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? $p_inselflink : getValid($item,'Path', $this->Path);
             $hasl = isValid($p_path);
             $p_showmorebutton = $hasl && ($this->ShowMoreButton || getValid($p_meta,"ShowMoreButton",false));
@@ -354,7 +360,7 @@ class Post extends Module{
                             $route = new \MiMFa\Module\Route($p_inselflink);
                             $route->Tag = "span";
                             $route->Class = "route";
-                            $route->ReDraw();
+                            yield $route->ReCapture();
                         }
                         yield $p_meta."</sub>";
                     }

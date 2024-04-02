@@ -1,21 +1,28 @@
 <?php
-use MiMFa\Library\DataBase;
-use MiMFa\Library\User;
-$path = implode("/", array_slice(explode("/",\_::$DIRECTION),1));
-if(!isValid($path)){
-    TEMPLATE("Main");
-    $templ = new \MiMFa\Template\Main();
-    $templ->Content = function() {
-        PART("post-collection");
-    };
-    $templ->Draw();
+LIBRARY("Query");
+use \MiMFa\Library\Query;
+$path = array_slice(explode("/",\_::$DIRECTION),1);
+$name = last($path);
+if(count($path) > 1) $path = implode("/", array_slice($path,0, count($path) - 1));
+else $path = null;
+
+if(!isValid($name)){
+    VIEW("category");
     return;
 }
-$doc = DataBase::DoSelectRow(\_::$CONFIG->DataBasePrefix."Content","*","(Name=:Name OR ID=:ID) AND ".User::GetAccessCondition(),[":Name"=>$path,":ID"=>$path]);
+
+$doc = Query::FindContent(
+    name:$name,
+    direction:$path??RECEIVE("cat"),
+    type:RECEIVE("type"),
+    tag:RECEIVE("tag")
+);
+
 if(isEmpty($doc)){
-    VIEW("404");
+    VIEW("category");
     return;
 }
+
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
 $templ->WindowTitle = [$doc['Title']];

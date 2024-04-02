@@ -2,19 +2,28 @@
 LIBRARY("Query");
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
-$templ->WindowTitle = [isValid($_REQUEST,"q")? $_REQUEST["q"]:\_::$DIRECTION,isValid($_REQUEST,"type")? $_REQUEST["type"]:null];
+$templ->WindowTitle = [RECEIVE("q",RECEIVE("cat")),RECEIVE("type")];
 $templ->Content = function(){
+    MODULE("Navigation");
+    $query = RECEIVE("q");
+    $orders = explode(",", RECEIVE("order", default:"ASC"));
+    $nav = new \MiMFa\Module\Navigation(iterator_to_array(\MiMFa\Library\Query::Search(
+        query:$query,
+        direction:RECEIVE("cat"),
+        type:RECEIVE("type"),
+        tag:RECEIVE("tag"),
+        order:RECEIVE("sort")?\MiMFa\Library\Convert::ToSequence(loop(explode(",",RECEIVE("sort")), function($k, $v, $i) use($orders) { return [$v=>getValid($orders, $i%count($orders), "ASC")]; })):[]
+    )));
     MODULE("PostCollection");
     $module = new \MiMFa\Module\PostCollection();
+    $module->TitleTag = "h2";
+    $module->Title = "Search Results";
+    $module->Description = "Found <b>\"{$nav->Count}\"</b> results for searching <b>\"$query\"</b>!";
     $module->Class .= " page";
-    $module->ShowRoute = false;
     $module->DefaultImage = \_::$INFO->FullLogoPath;
-    $module->Items = \MiMFa\Library\Query::Search(
-        isValid($_REQUEST,"q")? $_REQUEST["q"]:null,
-        \_::$DIRECTION,
-        isValid($_REQUEST,"type")? $_REQUEST["type"]:null
-    );
-    $module->Draw();
+    $module->Items = $nav->GetItems();
+    $module->DoDraw();
+    $nav->DoDraw();
 };
 $templ->Draw();
 ?>
