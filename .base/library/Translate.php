@@ -25,7 +25,7 @@ class Translate
 	public static $CodeStart = "<";
 	public static $CodeEnd = ">";
 	public static $CodeLimit = 160;
-	public static $CodePattern = "/(\<\S+[\w\W]*\>)|(([\"'`])\S+[\w\W]*\\3)|(\d*\.?\d+)/U";
+	public static $CodePattern = "/(([\"'`])\S+[\w\W]*\\2)|(\<\S+[\w\W]*\>)|(\d*\.?\d+)/U";
 	public static $ValidPattern = "/[A-z]+/";
 	public static $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
 	public static $CaseSensitive = true;
@@ -52,11 +52,11 @@ class Translate
 		$args = [];
 		$len = count($rows);
 		for($i = 0; $i < $len; $i++){
-			$data = json_decode($rows[$i]["ValueOptions"]);
-			if(!isset($data->$lang)){
-				$data->$lang = $data["x"];
+			$data = Convert::FromJSON($rows[$i]["ValueOptions"]);
+			if(!isset($data[$lang])){
+				$data[$lang] = $data["x"];
 				$args[":KeyCode$i"]= $rows[$i]["KeyCode"];
-				$args[":ValueOptions$i"]= json_encode($data);
+				$args[":ValueOptions$i"]= Convert::ToJSON($data);
 				$query .= "UPDATE ".self::$TableName." SET `ValueOptions`=:ValueOptions$i WHERE `KeyCode`=:KeyCode$i;";
 			}
         }
@@ -79,10 +79,10 @@ class Translate
         if(self::$CaseSensitive && count($col)==0) $col = DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE LOWER(`KeyCode`)=LOWER(:KeyCode)",[":KeyCode"=>$code]);
         if(count($col)==0){
 			if(self::$AutoUpdate)  DataBase::Insert("INSERT INTO ".self::$TableName." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode, :ValueOptions)",
-				[":KeyCode"=>$code,":ValueOptions"=>json_encode(array('x'=>$text))]);
+				[":KeyCode"=>$code,":ValueOptions"=>Convert::ToJSON(array('x'=>$text))]);
         } else {
-			$data = json_decode($col[0]["ValueOptions"]);
-			$text = isset($data->{$lang??self::$Language})? $data->{$lang??self::$Language} : $data->x;
+			$data = Convert::FromJSON($col[0]["ValueOptions"]);
+			$text = isset($data[$lang??self::$Language])? $data[$lang??self::$Language] : $data["x"];
 		}
 		foreach($replacements as $key=>$val) $text = str_replace($key,$val,$text);
 		return Decode($text, $dic);
@@ -93,7 +93,7 @@ class Translate
 		foreach ($rows as $value){
 			$row = [];
 			$row["KEY"]=$value["KeyCode"];
-			foreach(json_decode($value["ValueOptions"]) as $k => $v)
+			foreach(Convert::FromJSON($value["ValueOptions"]) as $k => $v)
 				$row[$k]=$v;
 			yield $row;
 		}
@@ -112,9 +112,9 @@ class Translate
 			?DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE `KeyCode`=:KeyCode",[":KeyCode"=>$code])
 			:DataBase::Select("SELECT `ValueOptions` FROM ".self::$TableName." WHERE LOWER(`KeyCode`)=LOWER(:KeyCode)",[":KeyCode"=>$code]);
 		if(count($col) > 0) $data = $col[0]["ValueOptions"];
-		$data = json_encode(array('x'=>$text));
-		if(!is_null($val)) $data->{$lang??self::$Language} = Code($val, $dic, self::$CodeStart, self::$CodeEnd, self::$CodePattern);
-		$args = [":KeyCode"=>$code,":ValueOptions"=>$data];
+		$data = array('x'=>$text);
+		if(!is_null($val)) $data[$lang??self::$Language] = Code($val, $dic, self::$CodeStart, self::$CodeEnd, self::$CodePattern);
+		$args = [":KeyCode"=>$code,":ValueOptions"=>Convert::ToJSON($data)];
 		return DataBase::Replace("REPLACE INTO ".self::$TableName." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode,:ValueOptions)", $args);
 	}
 
@@ -128,7 +128,7 @@ class Translate
 			foreach ($value as $key=>$val)
 				if($key !== "KEY" && !isEmpty($key))
 					$vals[$key] = $val;
-			$args[":ValueOptions$i"] = json_encode($vals);
+			$args[":ValueOptions$i"] = Convert::ToJSON($vals);
         }
         return DataBase::Replace(join(PHP_EOL, $queries), $args);
 	}

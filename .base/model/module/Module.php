@@ -272,7 +272,7 @@ class Module extends \Base{
 			if(isValid($this->Title)){
 				yield (isValid($this->TitleTag)?"<".$this->TitleTag." $attrs>":"");
 				if(is_string($this->Title))
-					yield __($this->Title);
+					yield __($this->Title, styling:false);
 				elseif(is_callable($this->Title))
 					($this->Title)($attrs);
 				else yield $this->Title;

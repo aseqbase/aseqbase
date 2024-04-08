@@ -146,7 +146,7 @@ class Query{
     public static function GetContentCategoryIDs(array|string $content, array|null $default = []){
         $content = is_array($content)?$content:self::FindContent($content, null);
         if(isEmpty($content)) return $default;
-        return json_decode(getValid($content,"CategoryIDs","{}"), JSON_OBJECT_AS_ARRAY)??$default;
+        return Convert::FromJSON(getValid($content,"CategoryIDs","{}"))??$default;
     }
     public static function GetContentCategoryID(array|string $content, string|null $default = null){
         return first(self::GetContentCategoryIDs($content, []), default:$default);
@@ -160,7 +160,7 @@ class Query{
     public static function GetContentTagIDs(array|string $content, array|null $default = []){
         $content = is_array($content)?$content:self::FindContent($content, null);
         if(isEmpty($content)) return $default;
-        return json_decode(getValid($content,"TagIDs","{}"), JSON_OBJECT_AS_ARRAY)??$default;
+        return Convert::FromJSON(getValid($content,"TagIDs","{}"))??$default;
     }
     public static function GetContentTagID(array|string $content, string|null $default = null){
         return first(self::GetContentTagIDs($content, []), default:$default);

@@ -207,6 +207,8 @@ class Player extends Module{
 					{$this->Name}slider.addEventListener('mousedown', {$this->Name}startDragging, false);
 					{$this->Name}slider.addEventListener('mouseup', {$this->Name}stopDragging, false);
 					{$this->Name}slider.addEventListener('mouseleave', {$this->Name}stopDragging, false);
+
+					{$this->Name}slider.addEventListener('dblclick', (e) => { {$this->Name}_Zoom(); });
 				}
 			);
 		":"")."

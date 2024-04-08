@@ -718,12 +718,44 @@
 	 * @param mixed $textOrObject The target object tot do process
 	 * @param bool $translation Do translation
 	 * @param bool $styling Do style and strongify the keywords
+	 * @param bool $refering Refering tags and categories to their links
 	 * @return string|null
 	 */
-	function __(mixed $textOrObject, bool $translation = true, bool $styling = true) :string|null {
+	function __(mixed $textOrObject, bool $translation = true, bool $styling = true, bool|null $refering = null) :string|null {
 		$textOrObject = \MiMFa\Library\Convert::ToString($textOrObject);
 		if($translation && \_::$CONFIG->AllowTranslate) $textOrObject = \MiMFa\Library\Translate::Get($textOrObject);
-		if($styling && \_::$CONFIG->AllowTextAnalyzing) $textOrObject = \MiMFa\Library\Style::DoStrong($textOrObject);
+		if($refering??$styling){
+            if(\_::$CONFIG->AllowContentRefering)
+                $textOrObject = \MiMFa\Library\Style::DoProcess(
+                    $textOrObject,
+                    process:function($k, $v, $i){
+                        return \MiMFa\Library\HTML::Link($v,"/post/".strtolower($k));
+                    },
+                    keyWords:\MiMFa\Library\DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Content","Name","Title", "ORDER BY LENGTH(`Title`) DESC"),
+                    both:true,
+                    caseSensitive:false
+                );
+            if(\_::$CONFIG->AllowCategoryRefering)
+                $textOrObject = \MiMFa\Library\Style::DoProcess(
+                    $textOrObject,
+                    process:function($k, $v, $i){
+                        return \MiMFa\Library\HTML::Link($v,"/cat/".strtolower($k));
+                    },
+                    keyWords:\MiMFa\Library\DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Category","Name","Title", "ORDER BY LENGTH(`Title`) DESC"),
+                    both:true,
+                    caseSensitive:true
+                );
+            if(\_::$CONFIG->AllowTagRefering)
+                $textOrObject = \MiMFa\Library\Style::DoProcess(
+                    $textOrObject,
+                    process:function($k, $v, $i){
+                        return \MiMFa\Library\HTML::Link($v,"/tag/".strtolower($k));
+                    },
+                    keyWords:\MiMFa\Library\DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Tag","Name","Title", "ORDER BY LENGTH(`Title`) DESC"),
+                    both:true,
+                    caseSensitive:true
+                );
+        }
 		return $textOrObject;
 	}
 
@@ -804,13 +836,14 @@
         return $res;
     }
 
-	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = "/(\<\S+[\w\W]*\>)|(([\"'])\S+[\w\W]*\\3)|(\d*\.?\d+)/iU")
+	function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = '/((["\'])\S+[\w\W]*\2)|(\<\S+[\w\W]*[^\\\\]\>)|(\d*\.?\d+)/iU')
 	{
 		if(!is_array($dic)) $dic = array();
-		return preg_replace_callback($pattern,function($a) use(&$dic,$startCode, $endCode){
+		$c = count($dic);
+		return preg_replace_callback($pattern,function($a) use(&$dic,&$c,$startCode, $endCode){
 			$key = $a[0];
-			if(!array_key_exists($key,$dic)) return $dic[$key] = $startCode.count($dic).$endCode;
-			return $dic[$key];
+			if(array_key_exists($key,$dic)) return $dic[$key];
+			return $dic[$key] = $startCode.$c++.$endCode;
 		},$html);
 	}
 	function decode($html, $dic)

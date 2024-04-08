@@ -1,5 +1,6 @@
 <?php
 namespace MiMFa\Component;
+use MiMFa\Library\HTML;
 class Icons extends Component{
     public $DefaultRoot = "body";
     public $Version = "6.4.2";
@@ -16,152 +17,156 @@ class Icons extends Component{
         //    ");
 	}
 
-	public function Echo(){
-		$this->EchoStyle();
-		$this->EchoTechnologyStyle();
+	public function Echo($root=null){
+		echo $this->Get($root);
+	}
+	public function Get($root=null){
+		return $this->GetStyle($root).$this->GetTechnologyStyle($root);
 	}
 
 	public function EchoStyle($root=null){
+		echo $this->GetStyle($root);
+    }
+	public function GetStyle($root=null){
 		$root = $root??$this->DefaultRoot;
-?>
-		<style>
-			<?php echo $root; ?> .fa {
-			padding: 20px;
-			min-width: 60px;
-			text-align: center;
-			text-decoration: none;
-			margin: 5px 2px;
-			opacity: 0.9;
-			<?php echo  \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+		return HTML::Style("
+			$root .fa {
+				padding: 20px;
+				min-width: 60px;
+				text-align: center;
+				text-decoration: none;
+				margin: 5px 2px;
+				opacity: 0.9;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
-			<?php echo $root; ?> .fa:hover {
-			opacity: 0.95;
-			color: var(--BackColor-1);
-			background-color: var(--ForeColor-1);
-			<?php echo  \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+			$root .fa:hover {
+				opacity: 0.95;
+				color: var(--BackColor-1);
+				background-color: var(--ForeColor-1);
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-		</style>
-		<?php
+		");
 	}
-	
+
 	public function EchoTechnologyStyle($root=null){
+		echo $this->GetTechnologyStyle($root);
+    }
+	public function GetTechnologyStyle($root=null){
 		$root = $root??$this->DefaultRoot;
-		?>
-		<style>
-			<?php echo $root; ?> .fa:hover {
+		return HTML::Style("
+			$root .fa:hover {
 				opacity: 1;
 				color: var(--BackColor-1);
 				background-color: var(--ForeColor-1);
-				<?php echo  \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>;
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
 
-			<?php echo $root; ?> .fa-facebook:hover {
+			$root .fa-facebook:hover {
 			background-color: #3B5998;
 			}
 
-			<?php echo $root; ?> .fa-twitter:hover {
+			$root .fa-twitter:hover {
 			background-color: #55ACEE;
 			}
 
-			<?php echo $root; ?> .fa-google:hover {
+			$root .fa-google:hover {
 			background-color: #dd4b39;
 			}
 
-			<?php echo $root; ?> .fa-linkedin:hover {
+			$root .fa-linkedin:hover {
 			background-color: #007bb5;
 			}
 
-			<?php echo $root; ?> .fa-youtube:hover {
+			$root .fa-youtube:hover {
 			background-color: #bb0000;
 			}
 
-			<?php echo $root; ?> .fa-instagram:hover {
+			$root .fa-instagram:hover {
 			background-color: #125688;
 			}
 
-			<?php echo $root; ?> .fa-pinterest:hover {
+			$root .fa-pinterest:hover {
 			background-color: #cb2027;
 			}
 
-			<?php echo $root; ?> .fa-snapchat-ghost:hover {
+			$root .fa-snapchat-ghost:hover {
 			background-color: #fffc00;
 			}
 
-			<?php echo $root; ?> .fa-skype:hover {
+			$root .fa-skype:hover {
 			background-color: #00aff0;
 			}
 
-			<?php echo $root; ?> .fa-whatsapp:hover {
+			$root .fa-whatsapp:hover {
 			background-color: #2cd61c;
 			}
 
-			<?php echo $root; ?> .fa-android:hover {
+			$root .fa-android:hover {
 			background-color: #a4c639;
 			}
 
-			<?php echo $root; ?> .fa-dribbble:hover {
+			$root .fa-dribbble:hover {
 			background-color: #ea4c89;
 			}
 
-			<?php echo $root; ?> .fa-vimeo:hover {
+			$root .fa-vimeo:hover {
 			background-color: #45bbff;
 			}
 
-			<?php echo $root; ?> .fa-tumblr:hover {
+			$root .fa-tumblr:hover {
 			background-color: #2c4762;
 			}
 
-			<?php echo $root; ?> .fa-comments:hover {
+			$root .fa-comments:hover {
 			background-color: #00b489;
 			}
 
-			<?php echo $root; ?> .fa-telegram:hover {
+			$root .fa-telegram:hover {
 			background-color: #45bbff;
 			}
 
-			<?php echo $root; ?> .fa-stumbleupon:hover {
+			$root .fa-stumbleupon:hover {
 			background-color: #eb4924;
 			}
 
-			<?php echo $root; ?> .fa-flickr:hover {
+			$root .fa-flickr:hover {
 			background-color: #f40083;
 			}
 
-			<?php echo $root; ?> .fa-envelope:hover {
+			$root .fa-envelope:hover {
 			background-color: #430297;
 			}
 
-			<?php echo $root; ?> .fa-soundcloud:hover {
+			$root .fa-soundcloud:hover {
 			background-color: #ff5500;
 			}
 
-			<?php echo $root; ?> .fa-reddit:hover {
+			$root .fa-reddit:hover {
 			background-color: #ff5700;
 			}
 
-			<?php echo $root; ?> .fa-github:hover {
+			$root .fa-github:hover {
 			background-color: #8957e5;
 			}
 
-			<?php echo $root; ?> .fa-gitlab:hover {
+			$root .fa-gitlab:hover {
 			background-color: #8957e5;
 			}
 
-			<?php echo $root; ?> .fa-rss:hover {
+			$root .fa-rss:hover {
 			background-color: #ff6600;
 			}
-			<?php echo $root; ?> .fa-fax:hover {
+			$root .fa-fax:hover {
 			background-color: #ed2476;
 			}
-			<?php echo $root; ?> .fa-phone:hover {
+			$root .fa-phone:hover {
 			background-color: #38E54D;
 			}
-			<?php echo $root; ?> .fa-map-marker:hover {
+			$root .fa-map-marker:hover {
 			background-color: #bd081c;
 			}
-		</style>
-		<?php
+		");
 	}
 }
 ?>

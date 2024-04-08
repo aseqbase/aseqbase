@@ -54,7 +54,7 @@ class reCaptcha{
         $siteKey = $siteKey??\_::$CONFIG->ReCaptchaSiteKey;
         $captcha = false;
         $captcha = GRAB(self::$FieldName, "POST");
-        if($captcha) return json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret="."$siteKey&response=$captcha&remoteip=$remoteIp"));
+        if($captcha) return Convert::FromJSON(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret="."$siteKey&response=$captcha&remoteip=$remoteIp"));
 	    return [];
     }
 

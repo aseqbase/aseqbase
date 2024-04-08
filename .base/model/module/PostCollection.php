@@ -23,7 +23,7 @@ class PostCollection extends Collection{
      * @var string|null
      */
 	public $Root = "/post/";
-	public $CompressPath = false;
+	public $CompressPath = true;
 
 	/**
      * The default Content HTML
@@ -145,6 +145,11 @@ class PostCollection extends Collection{
      */
 	public $AutoExcerpt = true;
 	/**
+     * Allow to analyze all text and linking categories and tags to their descriptions, to improve the website's SEO
+	 * @var mixed
+	 */
+	public $AutoRefering = true;
+	/**
      * The length of selected Excerpt text characters
      * @var int
      * @category Excerption
@@ -162,7 +167,7 @@ class PostCollection extends Collection{
 	public $ShowMoreButton = true;
 	/**
      * The label text of More button
-     * @var string|null
+     * @var array|string|null
      * @category Excerption
      */
 	public $MoreButtonLabel = "More...";
@@ -173,10 +178,11 @@ class PostCollection extends Collection{
 	public $ShowPathButton = true;
 	/**
      * The label text of Path button
-     * @var string|null
+     * @var array|string|null
+     * @example ["News"=>"Source","Post"=>"Refer","Text"=>"Refer","File"=>"Download","Document"=>"Download","default"=>"Visit"]
      * @category Excerption
      */
-	public $PathButtonLabel = "Visit";
+	public $PathButtonLabel = ["News"=>"Source","Post"=>"Refer","Text"=>"Refer","File"=>"Download","Document"=>"Download","Video"=>"Watch","Audio"=>"Listen","Image"=>"Look","default"=>"Visit"];
 
 	function __construct(){
         parent::__construct();
@@ -228,6 +234,7 @@ class PostCollection extends Collection{
 				padding-{$ralign}: var(--Size-0);
 			}
 			.{$this->Name}>*>.item .more{
+                gap: var(--Size-0);
 				text-align: {$ralign};
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
@@ -257,8 +264,10 @@ class PostCollection extends Collection{
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
 			.{$this->Name}>*>.item .description{
+                gap: var(--Size-0);
             	font-size: var(--Size-2);
 				position: relative;
+                margin-bottom: var(--Size-0);
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
 			.{$this->Name}>*>.item .content{
@@ -299,34 +308,45 @@ class PostCollection extends Collection{
 			    $p_class = getValid($item,'Class');
 
 			    $p_meta = getValid($item,'MetaData',null);
-			    if($p_meta !==null) $p_meta = json_decode($p_meta);
-			    $p_showexcerpt = $this->ShowExcerpt || getValid($p_meta,"ShowExcerpt",false);
-			    $p_showcontent = $this->ShowContent || getValid($p_meta,"ShowContent",false);
-			    $p_showdescription = $this->ShowDescription || getValid($p_meta,"ShowDescription",false);
-			    $p_showimage = $this->ShowImage || getValid($p_meta,"ShowImage",false);
-			    $p_showtitle = $this->ShowTitle || getValid($p_meta,"ShowTitle",false);
-                $p_showmeta = $this->ShowMetaData || getValid($p_meta,"ShowMeta",false);
+			    if($p_meta !==null) $p_meta = Convert::FromJSON($p_meta);
+			    $p_showexcerpt = getValid($p_meta,"ShowExcerpt",$this->ShowExcerpt);
+			    $p_showcontent = getValid($p_meta,"ShowContent",$this->ShowContent);
+			    $p_showdescription = getValid($p_meta,"ShowDescription",$this->ShowDescription);
+			    $p_showimage = getValid($p_meta,"ShowImage", $this->ShowImage);
+			    $p_showtitle = getValid($p_meta,"ShowTitle",$this->ShowTitle);
+                $p_showmeta = getValid($p_meta,"ShowMetaData", $this->ShowMetaData);
+                $p_refering = getValid($p_meta,"AutoRefering", $this->AutoRefering);
                 $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->Root.getValid($item,'Name',$p_id)):null;
                 if(!$this->CompressPath) {
                     LIBRARY("Query");
                     $catDir = \MiMFa\Library\Query::GetContentCategoryDirection($item);
                     if(isValid($catDir)) $p_inselflink = $this->Root.trim($catDir,"/\\")."/".($p_name??$p_id);
                 }
-                $p_path = getValid($item,'Path', $this->DefaultPath);
+                $p_path = first(Convert::FromJSON(getValid($item,'Path', $this->DefaultPath)));
                 if($this->ShowRoute) $rout->SetValue($p_inselflink);
 			    $hasl = isValid($p_inselflink);
-			    $p_showmorebutton = $hasl && ($this->ShowMoreButton || getValid($p_meta,"ShowMoreButton",false));
-                $p_morebuttontext = getValid($p_meta,"MoreButtonLabel",$this->MoreButtonLabel);
-			    $p_showpathbutton = isValid($p_path) && ($this->ShowPathButton || getValid($p_meta,"ShowPathButton",false));
-                $p_pathbuttontext = getValid($p_meta,"PathButtonLabel",$this->PathButtonLabel);
-			    $p_excerpt = null;
-			    if($p_showexcerpt && $this->AutoExcerpt)
-                    $p_excerpt = Convert::ToExcerpt(
-						    __($p_content??$p_description),
+			    $p_showmorebutton = $hasl && getValid($p_meta,"ShowMoreButton",$this->ShowMoreButton );
+                $p_morebuttontext = __(Convert::FromSwitch(getValid($p_meta,"MoreButtonLabel",$this->MoreButtonLabel), $p_type));
+			    $p_showpathbutton = isValid($p_path) && getValid($p_meta,"ShowPathButton",$this->ShowPathButton);
+                $p_pathbuttontext = __(Convert::FromSwitch(getValid($p_meta,"PathButtonLabel",$this->PathButtonLabel), $p_type));
+
+                $p_excerpt = null;
+			    if($this->AutoExcerpt){
+                    $p_description = __(Convert::ToExcerpt(
+						    $p_description,
 						    0,
 						    $this->ExcerptLength,
 						    $this->ExcerptSign
-					    );
+					    ), refering:$p_refering);
+                    if($p_showexcerpt)
+                        $p_excerpt = __(Convert::ToExcerpt(
+						    $p_content,
+						    0,
+						    $this->ExcerptLength,
+						    $this->ExcerptSign
+					    ), refering:$p_refering);
+                }
+                else $p_description = __($p_description, refering:$p_refering);
 
 			    $p_meta = null;
 			    if($p_showmeta){
@@ -334,7 +354,7 @@ class PostCollection extends Collection{
                         doValid(
                             function($val) use(&$p_meta){
                                 $authorName = DataBase::DoSelectRow(\_::$CONFIG->DataBasePrefix."User","Signature , Name","ID=:ID",[":ID"=>$val]);
-                                if(!isEmpty($authorName)) $p_meta .= HTML::Link($authorName["Name"],"/user/".$authorName["Signature"],["class"=>"Author"]);
+                                if(!isEmpty($authorName)) $p_meta .=  " ".HTML::Link($authorName["Name"],"/user/".$authorName["Signature"],["class"=>"Author"]);
                             },
                             $item,
                             'AuthorID'
@@ -342,7 +362,7 @@ class PostCollection extends Collection{
                     if($this->ShowCreateTime)
                         doValid(
                             function($val) use(&$p_meta){
-                                if(isValid($val)) $p_meta .= "<span class='CreateTime'>$val</span>";
+                                if(isValid($val)) $p_meta .= " <span class='CreateTime'>$val</span>";
                             },
                             $item,
                             'CreateTime'
@@ -350,7 +370,7 @@ class PostCollection extends Collection{
                     if($this->ShowUpdateTime)
                         doValid(
                             function($val) use(&$p_meta){
-                                if(isValid($val)) $p_meta .= "<span class='UpdateTime'>$val</span>";
+                                if(isValid($val)) $p_meta .= " <span class='UpdateTime'>$val</span>";
                             },
                             $item,
                             'UpdateTime'
@@ -358,7 +378,7 @@ class PostCollection extends Collection{
                     if($this->ShowStatus)
                         doValid(
                             function($val) use(&$p_meta){
-                                if(isValid($val)) $p_meta .= "<span class='Status'>$val</span>";
+                                if(isValid($val)) $p_meta .= " <span class='Status'>$val</span>";
                             },
                             $item,
                             'Status'
@@ -366,8 +386,8 @@ class PostCollection extends Collection{
                     if($this->ShowButtons)
                         doValid(
                             function($val) use(&$p_meta){
-                                if(isValid($val)) $p_meta .= $val;
-                                else $p_meta .= $this->DefaultButtons;
+                                if(isValid($val)) $p_meta .=  " ".$val;
+                                else $p_meta .=  " ".$this->DefaultButtons;
                             },
                             $item,
                             'Buttons'
@@ -379,7 +399,7 @@ class PostCollection extends Collection{
                 yield "<div class='head row'>";
                     yield "<div class='col-lg'>";
                         $lt = $this->LinkedTitle && $hasl;
-                        if($p_showtitle) yield ($lt?"<a href='$p_inselflink'>":"")."<h2 class='title'>".__($p_title)."</h2>".($lt?"</a>":"");
+                        if($p_showtitle) yield ($lt?"<a href='$p_inselflink'>":"")."<h2 class='title'>".__($p_title, styling:false)."</h2>".($lt?"</a>":"");
                         if($p_showmeta && isValid($p_meta)) {
                             yield "<sub class='metadata'>";
                             if($this->ShowRoute) yield $rout->ReCapture();
@@ -389,28 +409,28 @@ class PostCollection extends Collection{
                     if($p_showmorebutton || $p_showpathbutton) {
                         yield "<div class='more col-sm col-3 md-hide'>";
                         if($p_showmorebutton)
-                            yield "<a class='btn btn-outline' href='$p_inselflink'>".__($p_morebuttontext)."</a>";
+                            yield "<a class='btn btn-outline' href='$p_inselflink'>".$p_morebuttontext."</a>";
                         if($p_showpathbutton)
-                            yield "<a class='btn btn-outline' href='$p_path'>".__($p_pathbuttontext)."</a>";
+                            yield "<a class='btn btn-outline' href='$p_path'>".$p_pathbuttontext."</a>";
                         yield "</div>";
                     }
                 yield "</div>";
                 yield "<div class='description row'>";
                 yield "<div class='excerpt col-md'>";
-                if($p_showdescription) yield __($p_description);
+                if($p_showdescription && !isEmpty($p_description)) yield $p_description;
                 if($p_showexcerpt) yield $p_excerpt;
                 yield "</div>";
                 if($p_showimage && isValid($p_image))
-                    yield "<div class='col-3'>".$img->ReCapture()."</div>";
+                    yield "<div class='col-lg-3'>".$img->ReCapture()."</div>";
                 yield "</div>";
                 if($p_showcontent && isValid($p_content))
-                    yield "<div class='content'>".__($p_content)."</div>";
+                    yield "<div class='content'>".__($p_content, refering:$p_refering)."</div>";
                 if($p_showmorebutton || $p_showpathbutton) {
                     yield "<div class='more md-show'>";
                     if($p_showmorebutton)
-                        yield "<a class='btn btn-outline' href='$p_inselflink'>".__($p_morebuttontext)."</a>";
+                        yield "<a class='btn btn-outline' href='$p_inselflink'>".$p_morebuttontext."</a>";
                     if($p_showpathbutton)
-                        yield "<a class='btn btn-outline' href='$p_path'>".__($p_pathbuttontext)."</a>";
+                        yield "<a class='btn btn-outline' href='$p_path'>".$p_pathbuttontext."</a>";
                     yield "</div>";
                 }
                 yield "</article>";

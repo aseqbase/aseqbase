@@ -46,7 +46,7 @@ class DataBase {
 	{
 		if(is_null($conditions)) return null;
 		if(is_string($conditions))
-			return startsWith(strtolower(trim($conditions)),"where")?$conditions:"WHERE $conditions";
+			return preg_match("/^\s*(where|order|limit|union|join|group)\s*/im", $conditions)?$conditions:"WHERE $conditions";
 		elseif(is_array($conditions) || is_iterable($conditions))
             return join(" AND ", array_filter(loop($conditions,
                                 function($k,$v){return self::ConditionNormalization($v);}),
@@ -61,7 +61,7 @@ class DataBase {
 	{
 		if(!\_::$CONFIG->DataBaseValueNormalization) return $params;
 		if(isEmpty($params)) return null;
-		if(is_string($params)) return json_decode($params);
+		if(is_string($params)) return Convert::FromJSON($params);
 		elseif(is_array($params) || is_iterable($params)){
 			foreach ($params as $key=>$value) $params[$key] = self::ParameterNormalization($key, $params[$key]);
             return $params;
@@ -74,7 +74,7 @@ class DataBase {
 	{
 		if(is_null($value)) return null;
 		elseif(is_array($value) || is_iterable($value) || is_object($value))
-			return json_encode($value);
+			return Convert::ToJSON($value);
 		elseif(!is_string($value) && (is_callable($value) || $value instanceof \Closure))
 			return self::ParameterNormalization($key, $value($key, $value));
 		elseif(is_numeric($value)) return floatval($value);

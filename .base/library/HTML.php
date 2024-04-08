@@ -142,10 +142,8 @@ class HTML
             } else $attrs = Convert::ToString($attributes);
         }
 
-        if ($isSingle) return "<$tagName$attrs data-single/>
-$attachments";
-        else return join("",["<$tagName$attrs>", Convert::ToString($content), "</$tagName>
-$attachments"]);
+        if ($isSingle) return "<$tagName$attrs data-single/>$attachments";
+        else return join("",["<$tagName$attrs>", Convert::ToString($content), "</$tagName>$attachments"]);
     }
     public static function Attribute($key, $value=null){
         if(is_null($value)){
@@ -338,10 +336,10 @@ $attachments"]);
         }
         if(!isValid($source)) return null;
         if(startsWith($source, "fa ", "fa-"))
-            return self::Element("", "i", [ "class"=>"image ".strtolower($source)], $attributes);
+            return self::Element(__($content??"", styling:false), "i", [ "class"=>"image ".strtolower($source)], $attributes);
         elseif(isIdentifier($source))
-            return self::Element("", "i", [ "class"=>"image fa fa-".strtolower($source)], $attributes);
-        else return self::Element("img", [ "src"=> $source, "alt"=>$content, "class"=> "image" ], $attributes);
+            return self::Element(__($content??"", styling:false), "i", [ "class"=>"image fa fa-".strtolower($source)], $attributes);
+        else return self::Element("img", [ "src"=> $source, "alt"=>__($content??"", styling:false), "class"=> "image" ], $attributes);
     }
     /**
      * The <IMAGE> or <I> HTML Tag
@@ -1479,7 +1477,7 @@ else return call_user_func("self::Field", null, $k, $f);
         if(!is_null($type)){
             if(preg_match("/^\s*((\{[\w\W]*\})|(\[[\w\W]*\]))\s*$/",$type)){
                 try{
-                    $types = json_decode($type, flags:JSON_OBJECT_AS_ARRAY);
+                    $types = Convert::FromJSON($type);
                     return join('',
                         loop($types,
                             function($k,$t) use (&$key, &$value, &$options, &$title, &$attributes){
@@ -1862,7 +1860,7 @@ else return call_user_func("self::Field", null, $k, $f);
             $attrs = getValid($options, "attributes", []);
             $options = getValid($options, "options", null);
             if(isEmpty($value)) $value = [];
-            elseif(is_string($value)) $value = is_null($sep)&&startsWith($value,"[","{")?json_decode($value, flags:JSON_OBJECT_AS_ARRAY):explode($sep??"|", trim($value, $sep??"|"));
+            elseif(is_string($value)) $value = is_null($sep)&&startsWith($value,"[","{")?Convert::FromJSON($value)??[]:explode($sep??"|", trim($value, $sep??"|"));
             foreach ($value as $k=>$item){
                 if(is_null($sample)) $sample = $item;
                 $Id = Convert::ToId($key).getId();

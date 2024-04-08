@@ -41,7 +41,7 @@ class Table extends Module{
      * The column keys in data to use for row labels
      * @var array Auto detection
      */
-	public $KeyColumns = [0];
+	public $KeyColumns = [];
 	/**
      * An array of column Keys which should show in the table
      * @var null|array<mixed>
@@ -75,7 +75,7 @@ class Table extends Module{
      * The row keys in data to use for column labels
      * @var array Auto detection
      */
-	public $KeysRows = [0];
+	public $KeysRows = [];
 	/**
      * An array of row IDs or Indexes which should show in the table
      * @var null|array<mixed>
@@ -135,9 +135,10 @@ class Table extends Module{
 	public $MediaWidth = "var(--Size-5)";
 	public $MediaHeight = "var(--Size-5)";
 	public $BorderSize = 1;
-	public $TextWrap = false;
 	public $HasDecoration = true;
-	public $DataCompression = 50;
+	public $TextWrap = false;
+	public $TextLength = 50;
+
 	public $SevereSecure = true;
 	public $CryptPassword = true;
 
@@ -228,7 +229,15 @@ class Table extends Module{
 		.{$this->Name} tr th{
 			font-weight: bold;
 		}
+		.{$this->Name} :is(thead, tfoot) tr :is(td, th){
+            padding: 10px;
+		}
+		.{$this->Name} tbody tr :is(td,th){
+            padding: 2px 10px !important;
+		}
 		.{$this->Name} tr :is(td,th){
+            align-content: center;
+            align-items: center;
 			".Style::DoProperty("text-wrap",($this->TextWrap===true?"pretty":($this->TextWrap===false?"nowrap":$this->TextWrap)))."
 		}
 		.{$this->Name} tr :is(td,th) .media:not(.icon){
@@ -408,7 +417,8 @@ class Table extends Module{
         $daccess = $isu && !is_null($this->DuplicateAccess) && getAccess($this->DuplicateAccess);
         $maccess = $isu && !is_null($this->ModifyAccess) && getAccess($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && getAccess($this->RemoveAccess);
-		if(is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
+		$isc = $isc && ($vaccess || $aaccess || $maccess || $daccess || $raccess);
+        if(is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey=>$row)
             if(!isEmpty($row)) {
@@ -434,43 +444,43 @@ class Table extends Module{
                     }
                     elseif($hrn) $row = [$rn++,...$row];
 
-					if($ckls && ($isrk || $ckl))
-                        if($this->Header)
-                            if(is_bool($this->Header)) {
-                                $ckl  = false;
-                                $cells[] = "<thead>";
-                                if($ick){
-                                    if($hcn) {
-                                        $cells[] = $strow;
-                                        foreach($icks as $ckey)
-                                            if(!$eck || !in_array($ckey, $ecks))
-                                                $cells[] = $this->GetCell($cn++, $ckey, true, $row);
-                                        $cells[] = $etrow;
-                                    }
+					if($ckls && ($isrk || $ckl) && !is_null($this->Header))
+                        if(is_bool($this->Header)) {
+                            $ckl  = false;
+                            if($this->Header === true) $cells[] = "<thead>";
+                            else $cells[] = "<thead style='display:none'>";
+                            if($ick){
+                                if($hcn) {
                                     $cells[] = $strow;
                                     foreach($icks as $ckey)
                                         if(!$eck || !in_array($ckey, $ecks))
-                                            $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                                            $cells[] = $this->GetCell($cn++, $ckey, true, $row);
                                     $cells[] = $etrow;
                                 }
-                                else{
-                                    if($hcn) {
-                                        $cells[] = $strow;
-                                        foreach($row as $ckey=>$cel)
-                                            if(!$eck || !in_array($ckey, $ecks))
-                                                $cells[] = $this->GetCell($cn++, $ckey, true, $row);
-                                        $cells[] = $etrow;
-                                    }
+                                $cells[] = $strow;
+                                foreach($icks as $ckey)
+                                    if(!$eck || !in_array($ckey, $ecks))
+                                        $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                                $cells[] = $etrow;
+                            }
+                            else{
+                                if($hcn) {
                                     $cells[] = $strow;
                                     foreach($row as $ckey=>$cel)
                                         if(!$eck || !in_array($ckey, $ecks))
-                                            $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                                            $cells[] = $this->GetCell($cn++, $ckey, true, $row);
                                     $cells[] = $etrow;
                                 }
-                                $cells[] = "</thead>";
-                                $isrk = false;
+                                $cells[] = $strow;
+                                foreach($row as $ckey=>$cel)
+                                    if(!$eck || !in_array($ckey, $ecks))
+                                        $cells[] = $this->GetCell(is_integer($ckey)?($hcn?$ckey+$scn:""):$ckey, $ckey, true, $row);
+                                $cells[] = $etrow;
                             }
-                            else $cells[] = Convert::ToString($this->Header);
+                            $cells[] = "</thead>";
+                            $isrk = false;
+                        }
+                        else $cells[] = Convert::ToString($this->Header);
                     $cells[] = $strow;
                     if($ick) {
                         $colCount = max($colCount,count($icks));
@@ -505,10 +515,10 @@ class Table extends Module{
                     $cells[] = "</tr></tfoot>";
                 }
                 else $cells[] = Convert::ToString($this->Footer);
-            return (!$this->TopNavigation||is_null($this->NavigationBar)?"":$this->NavigationBar->Capture()).join(PHP_EOL, $cells);
+            return parent::Get().(!$this->TopNavigation||is_null($this->NavigationBar)?"":$this->NavigationBar->Capture()).join(PHP_EOL, $cells);
         }
 		elseif($aaccess)
-			return HTML::Center(HTML::Button("Add your first item ".HTML::Image("plus"),"{$this->Modal->Name}_Create();"));
+			return parent::Get().HTML::Center(HTML::Button("Add your first item ".HTML::Image("plus"),"{$this->Modal->Name}_Create();"));
 		return parent::Get();
 	}
 
@@ -627,7 +637,7 @@ class Table extends Module{
         //}
         if(isFile($cel)) return "<td>".HTML::Media($cel)."</td>";
 		$cel = __($cel, translation:$this->AllowDataTranslation, styling:false);
-        if(!$this->TextWrap && !startsWith($cel,"<")) return "<td>".Convert::ToExcerpt($cel, 0, $this->DataCompression, "...".HTML::Tooltip($cel))."</td>";
+        if(!$this->TextWrap && !startsWith($cel,"<")) return "<td>".Convert::ToExcerpt($cel, 0, $this->TextLength, "...".HTML::Tooltip($cel))."</td>";
         return "<td>$cel</td>";
     }
 

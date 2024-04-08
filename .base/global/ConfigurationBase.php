@@ -142,11 +142,29 @@ abstract class ConfigurationBase extends Base {
      */
 	public $AllowReduceSize = true;
 	/**
-     * Allow to analyze all text and signing them, to improve the website SEO
+     * Allow to analyze all text and signing them, to improve the website's SEO
      * @var bool
      * @category Optimization
      */
 	public $AllowTextAnalyzing = true;
+	/**
+     * Allow to analyze all text and linking contents to their called names or titles, to improve the website's SEO
+     * @var bool
+     * @category Optimization
+     */
+	public $AllowContentRefering = true;
+	/**
+     * Allow to analyze all text and linking categories to their called names or titles, to improve the website's SEO
+     * @var bool
+     * @category Optimization
+     */
+	public $AllowCategoryRefering = false;
+	/**
+     * Allow to analyze all text and linking tags to their called names or titles, to improve the website's SEO
+     * @var bool
+     * @category Optimization
+     */
+	public $AllowTagRefering = true;
 	/**
      * Allow to translate all text by internal algorithms
      * @var bool

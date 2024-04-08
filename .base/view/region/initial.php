@@ -31,7 +31,6 @@
         }?>
 		<?php echo \_::$TEMPLATE->BasePack; ?>
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/view.css'); ?>'>
-		<script src='https://unpkg.com/@ungap/custom-elements-builtin'></script>
 		<?php
 		echo \_::$TEMPLATE->GetInitial();
 		echo \_::$TEMPLATE->CustomPack;

@@ -10,7 +10,6 @@ if(!isValid($path))
     };
 else
     $templ->Content = function() use($path){
-        ACCESS(\_::$CONFIG->UserAccess);
         MODULE("Table");
         $mod = new Table(\_::$CONFIG->DataBasePrefix."User");
         $mod->KeyColumn = "Signature";

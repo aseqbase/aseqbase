@@ -12,6 +12,7 @@ $templ = new \MiMFa\Template\Main();
 $templ->WindowTitle = [getValid($parent,"Title")??getValid($parent,"Name")];
 $templ->Content = function() use($parent,$path){
     MODULE("Navigation");
+    $orders = explode(",", RECEIVE("order", default:"ASC"));
     $nav = new \MiMFa\Module\Navigation(Query::SearchContents(
         query:RECEIVE("q"),
         direction:$path,

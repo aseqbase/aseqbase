@@ -5,9 +5,9 @@
     $module->Style = new \MiMFa\Library\Style();
     $separator = new \MiMFa\Module\Separator();
     $separator->Style = new \MiMFa\Library\Style();
-    
+
     $module->Style->TextAlign = "justify";
-    $module->Style->Padding = "calc(2*var(--Size-5))";
+    $module->Style->Padding = "calc(2*var(--Size-5)) var(--Size-5)";
     $module->Style->BackgroundColor =
     $separator->Style->BackgroundColor = "var(--Color-5)";
     $module->Style->Color =

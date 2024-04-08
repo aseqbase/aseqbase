@@ -1,20 +1,18 @@
 <?php namespace MiMFa\Library;
-require_once "Translate.php";
 
 class Transport
 {
-
 	public static $Items = array();
 
 	public static function SetINPUTedItems(){
 		$json = file_get_contents('php://input');
-		self::$Items = json_decode($json);
+		self::$Items = Convert::FromJSON($json);
 	}
 	public static function SetGETedItems(){
-		self::$Items = json_decode(json_encode($_GET));
+		self::$Items = Convert::FromJSON(Convert::ToJSON($_GET));
 	}
 	public static function SetPOSTedItems(){
-		self::$Items = json_decode(json_encode($_POST));
+		self::$Items = Convert::FromJSON(Convert::ToJSON($_POST));
 	}
 	public static function SetItems($items){
 		self::$Items = $items;
@@ -26,7 +24,7 @@ class Transport
 	public static function IsItem($name){
 		return isset(self::$Items->$name);
 	}
- 
+
 	public static function GetPOSTedItem($name,$dflt = null){
 		return (isset($_POST[$name])? self::Normalize($_POST[$name]) : $dflt);
 	}
@@ -49,7 +47,7 @@ class Transport
 		self::PushMessage("Error",$message);
 		return "<div class='error'>$message</div>";
 	}
-	
+
 	public static function Message($message,$translate = true){
 		if($translate) $message = Translate::Get($message);
 		self::PushMessage("Message",$message);
@@ -61,7 +59,7 @@ class Transport
 
 	public static function SendData($data,$functionName="Result",$message = ""){
 		self::PushMessage("Data",$message);
-		$result= "{\"type\":\"0\",\"message\":\"$message\",\"function\":\"$functionName\",\"data\":".json_encode($data)."}";
+		$result= "{\"type\":\"0\",\"message\":\"$message\",\"function\":\"$functionName\",\"data\":".Convert::ToJSON($data)."}";
 		self::Send($result);
 	}
 
@@ -122,7 +120,7 @@ class Transport
 			else $message .= self::Message($val,$translate).$splitor;
 		self::Send("{\"type\":\"${num}\",\"message\":\"${message}\"}");
 	}
-	
+
 	public static function Send($result){
 		self::Action($result);
 	}
@@ -136,7 +134,7 @@ class Transport
 		$result= "{\"type\":\"${num}\",\"message\":\"".$message."\"}";
 		self::Show($result);
 	}
-	
+
 	public static function ShowMessage($message,$num=0,$translate = true){
 		self::$ResultNum = $num;
 		self::Show(self::Message($message,$translate),$num);
@@ -182,7 +180,7 @@ class Transport
 		else foreach(self::$Messages as $key=>$val) $message .= $val.$splitor;
 		self::Show($message,$num);
 	}
-	
+
 	public static function Show($result,$num = 0){
 		if((self::$ResultNum =$num) == 0){
 			$result = "<style>
@@ -215,7 +213,7 @@ class Transport
 		ob_start(); // ensures anything dumped out will be caught
 
 		// clear out the output buffer
-		while (ob_get_status()) 
+		while (ob_get_status())
 			ob_end_clean();
 
 		// no redirect
@@ -229,7 +227,7 @@ class Transport
 
 	public static function Suspend() { self::$Run = false;}
 	public static function Resume() { self::$Run = true;}
-		
+
 	public static function GetMessages($kind = "Message",$translate = true,$splitor="<br>")
 	{
 		$message = "";
@@ -243,7 +241,7 @@ class Transport
 	}
 	public static function PushMessage($key,$val)
 	{
-		self::$Messages[$key."-".count(self::$Messages)] = $val; 
+		self::$Messages[$key."-".count(self::$Messages)] = $val;
 	}
 	public static function Action($object=null)
 	{

@@ -143,35 +143,61 @@ class Style extends \ArrayObject{
 			);
 	}
 
-	/**
-	 * Specify the keywords in the tag content automatically
-	 * @param string|null $text
-	 * @param array<string>|null $keyWords
-	 * @param bool $caseSensitive
-     * @param bool $multiline
-	 * @return string|null
-	 */
-	public static function DoStrong($text, $keyWords=null, $caseSensitive = false, $multiline = true, $standardization = false){
-		if($text === null) return $text;
-		if($keyWords === null) $keyWords = \_::$INFO->KeyWords;
-        $start = "/\b(?<!\\\§)(";
-        $end = ")(?!§\\\>)\b/".($caseSensitive?"":"i").($multiline?"m":"");
-        $length = count($keyWords);
-		$keywordPatterns = array();
-        for ($i = 0; $i < $length; $i++)
-            $keywordPatterns[$i] = $start.preg_quote($keyWords[$i]).$end;
-		$dic = array();
-		$text = Code($text, $dic, "\\§", "§\\");
-        if($standardization)
-			for ($i = 0; $i < $length; $i++)
-				$text = preg_replace($keywordPatterns[$i],"<strong>{$keyWords[$i]}</strong>",$text);
-		else
-			for ($i = 0; $i < $length; $i++)
-				$text = preg_replace($keywordPatterns[$i],"<strong>$1</strong>",$text);
-		return Decode($text, $dic);
-	}
 	public static function DoStyle($text,$keyWords=null){
 		return self::DoStrong($text,$keyWords);
+	}
+	/**
+     * Specify the keywords in the tag content automatically
+     * @param string|null $text
+     * @param array<string>|null $keyWords
+     * @param bool $caseSensitive
+     * @param bool $multiline
+     * @param bool $both If you want to process both of key and value of your $keyWords
+     * @return string|null
+     */
+	public static function DoStrong($text, $keyWords=null, $caseSensitive = false, $multiline = true, $both = false, $standardization = false){
+		if($standardization) return self::DoProcess($text, function($k, $v) {return "<strong>$v</strong>";}, $keyWords, $caseSensitive, $multiline, $both);
+		else return self::DoProcess($text, function($k, $v) {return "<strong>$v</strong>";}, $keyWords, $caseSensitive, $multiline, $both);
+	}
+	/**
+     * Specify the keywords in the tag content automatically by a special process
+     * @param callable $process function($key, $value, $index) {return $value;}
+     * @param string|null $text
+     * @param array|null $keyWords
+     * @param bool $caseSensitive
+     * @param bool $multiline
+     * @param bool $both If you want to process both of key and value of your $keyWords
+     * @return string|null
+     */
+	public static function DoProcess($text, $process, $keyWords=null, $caseSensitive = false, $multiline = true, $both = false){
+		if($text === null) return $text;
+		if($keyWords === null) $keyWords = \_::$INFO->KeyWords;
+		$dic = array();
+		$text = Code($text, $dic,
+			startCode:"<",
+			endCode:">",
+			pattern:'/((["\'`])\S+[\w\W]*\2)|(\<\/?[A-z]+[^>]*[^\\\\]?\>)/iU'
+		);
+        $start = "/\b(?<!\<)(";
+        $end = ")(?!\>)\b/".($caseSensitive?"":"i").($multiline?"m":"");
+		$c = count($dic);
+		$i = 0;
+        if($both) foreach ($keyWords as $key=>$value){
+                if(array_key_exists($nv = $process($key, $key, $i++), $dic)) $nk = $dic[$nv];
+                else $nk = $dic[$nv] = "<".$c++.">";
+                $text = preg_replace($start.preg_quote($key).$end, $nk, $text);
+                if($key!=$value && !is_null($value)){
+                    if(array_key_exists($nv = $process($key, $value, $i++), $dic)) $nk = $dic[$nv];
+                    else $nk = $dic[$nv] = "<".$c++.">";
+                    $text = preg_replace($start.preg_quote($value).$end, $nk, $text);
+                }
+            }
+		else foreach ($keyWords as $key=>$value){
+                if(array_key_exists($nv = $process($key, $value, $i++), $dic)) $nk = $dic[$nv];
+                else $nk = $dic[$nv] = "<".$c++.">";
+                if(!is_null($value)) $text = preg_replace($start.preg_quote($value).$end, $nk, $text);
+            }
+		return Decode($text, $dic);
 	}
 
 	public static function DropColor($color){

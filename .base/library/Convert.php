@@ -204,6 +204,16 @@ class Convert{
         return iterator_to_array(call_user_func_array("self::ToIteration",$arguments));
 	}
 
+    public static function ToJSON($obj) :string {
+        if(isEmpty($obj)) return "null";
+        return json_encode($obj, flags:JSON_OBJECT_AS_ARRAY);
+    }
+    public static function FromJSON($json, $defultValue = null) :null|array {
+        if(isEmpty($json) || trim(strtolower($json)) === "null") return null;
+        if(!preg_match("/^\s*[\{|\[][\s\S]*[\}\]]\s*$/", $json)) return [$json];
+        return json_decode($json, flags:JSON_OBJECT_AS_ARRAY)??$defultValue;
+    }
+
     public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true){
 		if($addDefaultKeys){
             $email = getEmail(null,"info");
@@ -235,5 +245,21 @@ class Convert{
         //    $text = str_replace($key, $value??"", $text);
 		return $text;
 	}
+
+    public static function FromSwitch($obj, $key, $defultValue = null){
+        return (
+			is_null($obj) || is_string($obj)
+				?$obj
+				:(
+                    is_array($obj) || $obj instanceof \stdClass
+                        ?(getBetween($obj, $key, "default")??last($obj))
+					    :(
+					        is_callable($obj) || $obj instanceof \Closure
+                                ?self::FromSwitch($obj($key), $key, $defultValue)
+                                :$obj
+                        )
+				)
+			)??$defultValue;
+    }
 }
 ?>

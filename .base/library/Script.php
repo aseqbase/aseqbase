@@ -50,7 +50,7 @@ class Script
         return isEmpty($arr) ? "" :
             (is_iterable($arr) ? join("", ["[", join(", ", loop($arr, function($i, $o) { return self::Parameters($o);})), "]"]) :
                 (is_string($arr) ? "`$arr`" :
-                    (is_object($arr) ? json_encode($arr) :
+                    (is_object($arr) ? Convert::ToJSON($arr) :
                         Convert::ToString($arr))));
     }
     public static function Numbers($arr) {

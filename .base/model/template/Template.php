@@ -107,6 +107,8 @@ class Template extends \Base{
             direction: ".(\MIMFa\Library\Translate::$Direction??\_::$CONFIG->DefaultDirection).";
         }
         .tooltip {
+            position: absolute;
+            opacity: 0;
             font-family: inherit;
             font-size: var(--Size-0);
             font-weight: lighter;

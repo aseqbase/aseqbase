@@ -1,6 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\DataBase;
+use MiMFa\Library\Convert;
 use MiMFa\Library\Translate;
 /**
  * To show data as pages
@@ -244,7 +245,7 @@ class Page extends Module{
 
         if($this->ShowRoute) MODULE("Route");
         $p_meta = getValid($item,'MetaData',null);
-        if($p_meta !==null) $p_meta = json_decode($p_meta);
+        if($p_meta !==null) $p_meta = Convert::FromJSON($p_meta);
         $p_showcontent = $this->ShowContent || getValid($p_meta,"ShowContent",false);
         $p_showdescription = $this->ShowDescription || getValid($p_meta,"ShowDescription",false);
         $p_showimage = $this->ShowImage || getValid($p_meta,"ShowImage",false);

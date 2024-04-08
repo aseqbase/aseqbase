@@ -74,8 +74,8 @@ echo HTML::Style("
 echo "<div class='page-home'>";
 	MODULE("PostCollection");
 	$module = new \MiMFa\Module\PostCollection();
-	$module->Style = new \MiMFa\Library\Style();
-	$module->Style->Padding = "var(--Size-5)";
+	$module->Style = new Style();
+	$module->Style->Padding = "var(--Size-5) var(--Size-0)";
 	$module->Class = "container-fluid";
 	$module->MaximumColumns = 3;
 	$module->ShowRoute = false;
@@ -90,25 +90,6 @@ echo "<div class='page-home'>";
             if(!isEmpty($items = DataBase::DoSelect($table_content,"*",
                 User::GetAccessCondition()." AND `Type`='$value' ORDER BY `Priority` DESC, `UpdateTime` DESC LIMIT $num"))
             ){
-				switch ($value)
-                {
-                	case "File":
-                	case "Book":
-                	case "Article":
-                        $module->PathButtonLabel = "Download";
-						break;
-                	case "News":
-                	case "Post":
-                	case "Text":
-                        $module->PathButtonLabel = "Refer";
-						break;
-                	case "Product":
-                        $module->PathButtonLabel = "Visit";
-						break;
-                	default:
-                        $module->PathButtonLabel = "Visit";
-						break;
-                }
 				$module->Items = array_slice($items, 0, 9);
                 yield HTML::Rack(
 					HTML::LargeSlot(

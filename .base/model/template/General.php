@@ -58,34 +58,52 @@ class General extends Template{
 				:is(h1,h2,h3,h4,h5,h6) strong{
 					font-weight: normal;
 				}
-				h1,h2,h3,h4,h5,h6{
+				h1{
+					font-size: var(--Size-5);
 					text-align: center;
 					text-transform: uppercase;
 					margin-top: 2vmax;
-				}
-				h1{
-					font-size: var(--Size-5);
 					margin-bottom: var(--Size-4);
 				}
 				h2{
 					font-size: var(--Size-4);
+					text-align: center;
+					text-transform: uppercase;
+					margin-top: 2vmax;
 				}
 				h3{
 					font-size: var(--Size-3);
+					text-transform: uppercase;
+					margin-top: 2vmax;
 				}
 				h4{
 					font-size: var(--Size-2);
+					margin-top: 2vmax;
 				}
 				h5{
 					font-size: var(--Size-1);
+					margin-top: 2vmax;
 				}
 				h6{
-					font-size: var(--Size-0);
+					font-size: var(--Size-1);
+					display: inline-block;
+				}
+				h6:before{
+					display: block;
 				}
 
 				p{
 					text-align: justify;
 				}
+
+				a, a:visited, a:active, a:hover{
+					color: inherit;
+					text-decoration: none;
+				}
+				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.btn,.image,.media,.item,.fa){
+					text-decoration: underline;
+				}
+
 				:is(.button, .icon, .btn), :is(.button, .icon, .btn):is(:visited, :active){
 					border: var(--Border-1) transparent;
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
@@ -109,10 +127,6 @@ class General extends Template{
 					padding: calc(var(--Size-0) / 3) var(--Size-1);
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
 				}
-                a, a:is(:visited, :active) {
-					color:var(--ForeColor-1);
-					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
-				}
 				a .icon{
 					text-decoration: none;
 					display: initial;
@@ -125,6 +139,7 @@ class General extends Template{
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
 				}
 				.btn:hover{
+                	text-decoration: none;
 					background-color: var(--BackColor-2);
 					color: var(--ForeColor-2);
 					border-color: var(--ForeColor-2);
@@ -132,12 +147,9 @@ class General extends Template{
 					box-shadow: var(--Shadow-2);
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
 				}
-				:is(a, .btn):hover {
-                	text-decoration: none;
-					color:var(--ForeColor-0);
-					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
+				.btn-block {
+					width: 100%;
 				}
-
 				.btn-main, .btn-main:is(:visited, :active) {
 					background-color: var(--BackColor-2);
 					color: var(--ForeColor-2);
