@@ -143,9 +143,10 @@ class Style extends \ArrayObject{
 			);
 	}
 
-	public static function DoStyle($text,$keyWords=null){
-		return self::DoStrong($text,$keyWords);
+	public static function DoStyle($text, $keyWords=null){
+		return self::DoStrong(Convert::ToHTML($text), $keyWords);
 	}
+
 	/**
      * Specify the keywords in the tag content automatically
      * @param string|null $text

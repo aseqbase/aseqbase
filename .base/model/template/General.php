@@ -96,6 +96,17 @@ class General extends Template{
 					text-align: justify;
 				}
 
+				quote{
+					background-color: #8881;
+					padding-left: 3px;
+					padding-right: 3px;
+					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."
+				}
+				quote:hover{
+					background-color: #8882;
+					font-weight: bold;
+				}
+
 				a, a:visited, a:active, a:hover{
 					color: inherit;
 					text-decoration: none;

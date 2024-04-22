@@ -240,12 +240,16 @@ class Table extends Module{
             align-items: center;
 			".Style::DoProperty("text-wrap",($this->TextWrap===true?"pretty":($this->TextWrap===false?"nowrap":$this->TextWrap)))."
 		}
+		.{$this->Name} tr :is(td,th):has(.media:not(.icon)){
+            display: flex;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+		}
 		.{$this->Name} tr :is(td,th) .media:not(.icon){
 			".Style::DoProperty("width",$this->MediaWidth)."
 			".Style::DoProperty("height",$this->MediaHeight)."
-			display: inline-grid;
-			align-items: center;
-			text-align: center;
+			display: block;
 		}
 		.{$this->Name} .media.icon{
 			cursor: pointer;
@@ -274,33 +278,30 @@ class Table extends Module{
             background-color: #88888817;
         }
 		".($this->OddEvenColumns?"
-            table.dataTable.{$this->Name} tbody tr.even :is(td, th):nth-child(odd) {
-                background-color: #88888817 !important;
+            table.dataTable.{$this->Name} tbody tr:nth-child(even) :is(td, th):nth-child(odd) {
+                background-color: #88888817;
             }
-            table.dataTable.{$this->Name} tbody tr.odd :is(td, th):nth-child(odd) {
-                background-color: #88888815 !important;
+            table.dataTable.{$this->Name} tbody tr:nth-child(odd) :is(td, th):nth-child(odd) {
+                background-color: #88888815;
             }
 		":"").($this->OddEvenRows?"
-            table.dataTable.{$this->Name} tbody tr.odd {
-                background-color: #8881 !important;
+            table.dataTable.{$this->Name} tbody tr:nth-child(odd) {
+                background-color: #8881;
             }
 		":"").($this->HoverableRows?"
-            table.dataTable.{$this->Name} tbody tr:not(.odd, .even):hover {
-                background-color: #8883;
-            }
-            table.dataTable.{$this->Name} tbody tr:is(.odd, .even):hover {
-                background-color: #8882 !important;
+            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)):hover {
+                background-color: #8882;
 				".Style::UniversalProperty("transition", "var(--Transition-1)")."
             }
 		":"").($this->HoverableCells?"
-            table.dataTable.{$this->Name} tbody tr:is(.odd, .even) td:hover {
-                background-color: transparent !important;
+            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
+                background-color: transparent;
                 outline: 1px solid var(--Color-3);
                 border-radius: var(--Radius-1);
 				".Style::UniversalProperty("transition", "var(--Transition-1)")."
             }
-            table.dataTable.{$this->Name} tbody tr:is(.odd, .even) th:hover {
-                background-color: transparent !important;
+            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
+                background-color: transparent;
                 outline: 1px solid var(--Color-1);
                 border-radius: var(--Radius-1);
 				".Style::UniversalProperty("transition", "var(--Transition-1)")."

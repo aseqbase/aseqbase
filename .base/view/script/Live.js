@@ -1,7 +1,6 @@
-Live = function () {
-    (new Live(this)).each((act) => act(...arguments));
-};
-class Live extends array {
+alive = () => (new Live(this)).each((act) => act(...arguments));
+
+class Live extends Array {
     constructor(query = null, mode = null, source = null) {
         super();
         this.clear();
@@ -21,27 +20,40 @@ class Live extends array {
 
     from = function (query = null, mode = null, source = null) {
         if (query === null && source === null && mode === null) return this;
-        if (query !== null && (typeof query != "string") && source === null && mode === null) return this.clear().merge(query);
+        let isArrQuery = (query !== null && query instanceof Array && query.length === 2 && query[0].isInteger());
+        if (query !== null) {
+            if (typeof query != "string" && !isArrQuery && source === null && mode === null) return this.clear().merge(query);
+            else if (typeof query[Symbol.iterator] === 'function') return this.clear().merge(query);
+        }
         for (const src of (source === null ? [document] : new Live(source, mode))) {
-            switch ((mode ?? "").toLowerCase()) {
+            switch ((mode ?? (query.match(/^\s*\//) ? "xpath" : isArrQuery? "location" : "")).toLowerCase()) {
                 case "id":
-                    this.merge(src.getElementById(query));
+                    this.merge([src.getElementById(query)]);
+                    break;
                 case "name":
                     this.merge(src.getElementsByName(query));
+                    break;
                 case "tag":
                     this.merge(src.getElementsByTagName(query));
+                    break;
                 case "class":
                     this.merge(src.getElementsByClassName(query));
+                    break;
                 case "location":
-                    this.merge(src.elementsFromPoint(query));
+                    if (isArrQuery) this.merge(src.elementsFromPoint(query[0], query[1]));
+                    else this.merge(src.elementsFromPoint(query));
+                    break;
                 case "query":
                     this.merge(src.querySelectorAll(query));
+                    break;
                 case "xpath":
-                    this.merge(document.evaluate(query, src, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null));
+                    this.merge(src.evaluate(query, document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null));
+                    break;
                 case "pure":
                 default:
                     if (typeof query === 'string') this.merge(src.querySelectorAll(query));
                     else this.merge(query);
+                    break;
             }
         }
         return this;
@@ -72,14 +84,17 @@ class Live extends array {
                 if (arg !== undefined)
                     if (Array.isArray(arg)) this.merge(...arg);
                     else if (arg !== null && typeof arg[Symbol.iterator] === 'function')
-                        this.merge(...Array.from(arg));
+                        this.merge(...Array.from((function* () {
+                            let current = null;
+                            while (current = arg.iterateNext()) yield current;
+                        })()));
                     else if (typeof arg === 'function') this.merge(arg(this, arg));
                     else this.push(arg);
         return this;
     }
 
     clear = function () {
-        this.splice(0, this.length);
+        this.length = 0;
         return this;
     }
 

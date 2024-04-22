@@ -187,6 +187,18 @@ class Post extends Module{
      * @var bool
      * @category Parts
      */
+	public $ShowAttaches = true;
+    /**
+     * The label text of Attaches part
+     * @var string|null
+     * @example ["News"=>"Read Also: ", "default"=>"Relateds: "]
+     * @category Parts
+     */
+	public $AttachesLabel = ["default"=>"<h5>Attaches:</h5>"];
+	/**
+     * @var bool
+     * @category Parts
+     */
 	public $ShowImage = true;
 	/**
      * @var bool
@@ -237,6 +249,8 @@ class Post extends Module{
      * @category Excerption
      */
 	public $MoreButtonLabel = ["News"=>"Source","Post"=>"Refer","Text"=>"Refer","File"=>"Download File","Document"=>"Download Document","Video"=>"Watch","Audio"=>"Listen","Image"=>"Look","default"=>"Visit"];
+
+	public $Template = ["default"=>null];
 
 
 	function __construct(){
@@ -355,6 +369,7 @@ class Post extends Module{
             $p_description = getValid($item,'Description', $this->Description);
             $p_content = getValid($item,'Content',$this->Content);
             $p_tags = Convert::FromJSON(getValid($item,'TagIDs'));
+            $p_attaches = Convert::FromJSON(getValid($item,'Attach'));
 
             if($this->ShowRoute) MODULE("Route");
             $p_meta = getValid($item,'MetaData',null);
@@ -379,12 +394,15 @@ class Post extends Module{
             $p_tagstext = $p_showtags?__(Convert::FromSwitch(getValid($p_meta, "TagsLabel", $this->TagsLabel), $p_type)):"";
             $p_tagscount = $p_showtags?__(Convert::FromSwitch(getValid($p_meta, "TagsCount", $this->TagsCount), $p_type)):"";
             $p_tagsorder = $p_showtags?__(Convert::FromSwitch(getValid($p_meta, "TagsOrder", $this->TagsOrder), $p_type)):"";
+            $p_showattaches = getValid($p_meta,"ShowAttaches",$this->ShowAttaches) && !isEmpty($p_attaches);
+            $p_attachestext = $p_showattaches?__(Convert::FromSwitch(getValid($p_meta, "AttachesLabel", $this->AttachesLabel), $p_type)):"";
             $p_showrelateds = getValid($p_meta,"ShowRelateds", $this->ShowRelateds) && !isEmpty($p_tags);
             $p_relatedstext = $p_showrelateds?__(Convert::FromSwitch(getValid($p_meta, "RelatedsLabel", $this->RelatedsLabel), $p_type)):"";
             $p_relatedscount = $p_showrelateds?__(Convert::FromSwitch(getValid($p_meta, "RelatedsCount", $this->RelatedsCount), $p_type)):"";
             $p_relatedsorder = $p_showrelateds?__(Convert::FromSwitch(getValid($p_meta, "RelatedsOrder", $this->RelatedsOrder), $p_type)):"";
             $p_refering = getValid($p_meta,"AutoRefering", $this->AutoRefering);
             $p_excerpt = null;
+            $p_template = Convert::FromSwitch(getValid($p_meta, "Template", $this->Template), $p_type)??$p_type;
             if($p_showexcerpt && $this->AutoExcerpt)
                 $p_excerpt = __(Convert::ToExcerpt(
                         $p_content,
@@ -436,8 +454,9 @@ class Post extends Module{
             $mod = new \MiMFa\Component\JSONLD();
             yield $mod->GetArticle(__($p_title, styling:false),__($p_description, styling:false),$p_image,
                 author:["name"=>$authorName],datePublished: explode(" ", $createTime)[0], dateModified:explode(" ", $modifyTime)[0]);
+
             yield HTML::Rack(
-			    HTML::MediumSlot(function() use($p_showtitle,$hasl,$p_inselflink,$p_title,$p_meta,$p_showmeta){
+                HTML::MediumSlot(function() use($p_showtitle,$hasl,$p_inselflink,$p_title,$p_meta,$p_showmeta){
                     $lt = $this->LinkedTitle && $hasl;
                     if($p_showtitle) yield HTML::ExternalHeading($p_title,$lt?$p_inselflink:null,['class'=>'title']);
                     if($p_showmeta && isValid($p_meta)){
@@ -450,27 +469,43 @@ class Post extends Module{
                         }
                         yield $p_meta."</sub>";
                     }
-			    }).
+                }).
                 ($p_showmorebutton?HTML::SmallSlot(
-				    loop($p_path, function($k,$v,$i) use($p_morebuttontext) { return HTML::Link(is_numeric($k)?$p_morebuttontext:$k, $v,["class"=>"btn btn-outline"]);})
-			    ,["class"=>"more col-3 md-hide"]):"")
-		    ,["class"=>"head"]);
+                    loop($p_path, function($k,$v,$i) use($p_morebuttontext) { return HTML::Link(is_numeric($k)?$p_morebuttontext:$k, $v,["class"=>"btn btn-outline"]);})
+                ,["class"=>"more col-3 md-hide"]):"")
+            ,["class"=>"head"]);
             yield HTML::Rack(
-			    HTML::MediumSlot(function()use($p_description,$p_excerpt,$p_showdescription,$p_showexcerpt, $p_refering){
+                HTML::MediumSlot(function()use($p_description,$p_excerpt,$p_showdescription,$p_showexcerpt, $p_refering){
                     if($p_showdescription) yield __($p_description, refering:$p_refering);
                     if($p_showexcerpt) yield $p_excerpt;
                 },["class"=>"excerpt"]).
                 ($p_showimage && isValid($p_image)? HTML::Division(HTML::Image($p_title,$p_image),["class"=>"col-lg-5", "style"=>"text-align: center;"]):"")
-		    ,["class"=>"description"]);
+            ,["class"=>"description"]);
             if($p_showcontent && isValid($p_content)) yield HTML::Division(__($p_content, refering:$p_refering),["class"=>"content"]);
-            if($p_showmorebutton) yield HTML::Division(loop($p_path, function($k,$v,$i) use($p_morebuttontext) { return HTML::Link(is_numeric($k)?$p_morebuttontext:$k, $v,["class"=>"btn btn-block btn-outline"]);}),["class"=>"more md-show"]);
+            switch ($p_template)
+            {
+            	case "Media":
+            	case "Image":
+            	case "Audio":
+            	case "Video":
+            	case "Course":
+                    MODULE("MediaFrame");
+                    if($p_showmorebutton) yield join(PHP_EOL, loop($p_path, function($k,$v,$i) use($p_morebuttontext) {
+                        return (new MediaFrame($v, name:is_numeric($k)?$p_morebuttontext:$k))->DoCapture();
+                    })).HTML::Division(loop($p_path, function($k,$v,$i) use($p_morebuttontext) { return HTML::Link(is_numeric($k)?$p_morebuttontext:$k, $v,["class"=>"btn btn-block btn-outline"]);}),["class"=>"more md-show"]);
+                    break;
+            	default:
+                    if($p_showmorebutton) yield HTML::Division(loop($p_path, function($k,$v,$i) use($p_morebuttontext) { return HTML::Link(is_numeric($k)?$p_morebuttontext:$k, $v,["class"=>"btn btn-block btn-outline"]);}),["class"=>"more md-show"]);
+                    break;
+            }
+            if($p_showattaches) yield HTML::Division($p_attachestext.Convert::ToHTML($p_attaches));
             if($p_showtags) yield HTML::$HorizontalBreak.HTML::Division($p_tagstext.join(PHP_EOL, loop(DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Tag","Name","Title","`ID` IN (".join(",",$p_tags).") ".(isEmpty($p_tagsorder)?"":"ORDER BY $p_tagsorder")." LIMIT $p_tagscount"),
-                function($k,$v,$i) {
-                    return HTML::Link(isValid($v)
-                       ?__(strtolower(preg_replace("/\W*/","", $k))!=strtolower(preg_replace("/\W*/","", $v))? "$v ($k)" : $v, styling:false)
-                       :$k
-                    , "/tag/$k",["class"=>"btn"]);
-                })), ["class"=>"tags"]);
+                        function($k,$v,$i) {
+                            return HTML::Link(isValid($v)
+                               ?__(strtolower(preg_replace("/\W*/","", $k))!=strtolower(preg_replace("/\W*/","", $v))? "$v ($k)" : $v, styling:false)
+                               :$k
+                            , "/tag/$k",["class"=>"btn"]);
+                        })), ["class"=>"tags"]);
             if($p_showrelateds) yield HTML::$HorizontalBreak.HTML::Division($p_relatedstext.join(PHP_EOL, loop(DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix."Content","ID","Title","`ID`!=$p_id AND (`Title` IS NOT NULL OR `Title`!='') AND `TagIDs` REGEXP '(\"".join("\")|(\"",$p_tags)."\")' ".(isEmpty($p_tagsorder)?"":"ORDER BY $p_relatedsorder")." LIMIT $p_relatedscount"),
                 function($k,$v,$i) {return HTML::Link(isValid($v)?$v:$k, "/post/$k",["class"=>"btn"]);})), ["class"=>"relateds"]);
         });

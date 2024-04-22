@@ -133,7 +133,7 @@ abstract class ConfigurationBase extends Base {
 	 * @var string
      * @category Optimization
      */
-	public $CachePeriod = "Y-z-H-i-s";
+	public $CachePeriod = "Y";
 
 	/**
      * Allow to reduce size of documents for increasing site speed

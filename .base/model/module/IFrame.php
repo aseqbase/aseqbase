@@ -1,5 +1,8 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use MiMFa\Library\HTML;
 class IFrame extends Module{
+	public $Capturable = true;
 	public $Name = "IFrame";
 	public $Source = null;
 	public $Image = null;
@@ -31,43 +34,33 @@ class IFrame extends Module{
 		return $this;
     }
 
-	public function EchoStyle(){
-		parent::EchoStyle();
-?>
-		<style>
-			.<?php echo $this->Name; ?>{
-				<?php echo \MiMFa\Library\Style::DoProperty("color", $this->ForeColor); ?>
+	public function GetStyle(){
+		return parent::GetStyle().HTML::Style("
+			.{$this->Name}{
+				".\MiMFa\Library\Style::DoProperty("color", $this->ForeColor)."
 				text-align: center;
 			}
-			.<?php echo $this->Name; ?> .block{
-				background: <?php echo $this->BackColor; ?>88 url('<?php echo $this->Image; ?>') no-repeat center;
-				<?php echo \MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("width", $this->Width); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("height", $this->Height); ?>
+			.{$this->Name} .block{
+				background: ".$this->BackColor."88 url('".$this->Image."') no-repeat center;
+				".\MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth)."
+				".\MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight)."
+				".\MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth)."
+				".\MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight)."
+				".\MiMFa\Library\Style::DoProperty("width", $this->Width)."
+				".\MiMFa\Library\Style::DoProperty("height", $this->Height)."
 				margin-bottom: 30px;
-				border: <?php echo \_::$TEMPLATE->Border(1); ?> transparent;
-				<?php echo \MiMFa\Library\Style::DoProperty("border", \_::$TEMPLATE->Border(1) . " transparent"); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("border-radius", \_::$TEMPLATE->Radius(1)); ?>
+				border: var(--Border-1) transparent;
+				".\MiMFa\Library\Style::DoProperty("border", "var(--Border-1)" . " transparent")."
+				".\MiMFa\Library\Style::DoProperty("border-radius", "var(--Radius-1)")."
 			}
-			.<?php echo $this->Name; ?> .block:hover{
-				<?php echo \MiMFa\Library\Style::DoProperty("background-color", $this->BackColor); ?>
-				<?php echo \MiMFa\Library\Style::DoProperty("border-color", $this->BorderColor); ?>
-			}
-		</style>
-		<?php
+			.{$this->Name} .block:hover{
+				".\MiMFa\Library\Style::DoProperty("background-color", $this->BackColor)."
+				".\MiMFa\Library\Style::DoProperty("border-color", $this->BorderColor)."
+			}");
 	}
 
-	public function Echo(){
-		parent::Echo();
-		?>	
-			<iframe class="block"
-					allowfullscreen="<?php echo $this->AllowFullScreen; ?>"
-					src="<?php echo $this->Source; ?>">
-			</iframe>
-		<?php
+	public function Get(){
+		return parent::Get().HTML::Embed(null,$this->Source,["class"=>"block","allowfullscreen"=>$this->AllowFullScreen]);
 	}
 }
 ?>

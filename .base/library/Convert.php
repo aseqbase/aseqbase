@@ -98,6 +98,56 @@ class Convert{
     }
 
 	/**
+     * Convert everything to a simple HTML format
+     * @param mixed $value
+     * @return string
+     */
+	public static function ToHTML($value){
+		if(!is_null($value)){
+			if(is_string($value)){
+                if(preg_match("/\<[^\>]+\>/i",$value)) return $value;
+                else {
+                    $value = preg_replace("/\B\"(\S[^\r\n]+\S)\"\B/i", "<quote onclick='copy(this.innerText)'>$1</quote>",$value);
+                    if(isAbsoluteUrl($value)) return HTML::Link($value, $value);
+                    if(isEmail($value)) return HTML::Link($value, "mailto".$value);
+                    $value = preg_replace("/^\#\s(.*)/im", "<h1>$1</h1>",$value);
+                    $value = preg_replace("/^\#{2}\s(.*)/im", "<h2>$1</h2>",$value);
+                    $value = preg_replace("/^\#{3}\s(.*)/im", "<h3>$1</h3>",$value);
+                    $value = preg_replace("/^\#{4}\s(.*)/im", "<h4>$1</h4>",$value);
+                    $value = preg_replace("/^\#{5}\s(.*)/im", "<h5>$1</h5>",$value);
+                    $value = preg_replace("/^\#{6}\s(.*)/im", "<h6>$1</h6>",$value);
+                    $value = preg_replace("/((\r?\n\r?\*\s.*)+\r?\n\r?[^\*])/i", "<ul>".PHP_EOL."$1".PHP_EOL."</ul>",$value);
+                    $value = preg_replace("/((\r?\n\r?\+\s.*)+\r?\n\r?[^\+])/i", "<ol>".PHP_EOL."$1".PHP_EOL."</ol>",$value);
+                    $value = preg_replace("/^[\*\+]\s(.*)/im", "<li>$1</li>",$value);
+                    $value = preg_replace("/^\-{6,}$/im", "<hr/>",$value);
+                    $value = preg_replace("/\B\@image:([^\s\[\]\{\}]+)\B/i", "<img src=\"$1\"/>",$value);
+                    $value = preg_replace("/\B\@\[([^\]]*)\]:([^\s\[\]\{\}]+)\B/i", "<a href=\"$2\">$1</a>",$value);
+                    $value = preg_replace("/\B\*(\S[^\*\r\n]+\S)\*\B/i", "<strong>$1</strong>",$value);
+                    $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<)/i", "<br/>",trim($value));
+                    return $value;
+                }
+            }
+			if(is_subclass_of($value,"\Base")) return $value->Capture();
+			if(is_countable($value) || is_iterable($value)){
+				$m = "";
+				$texts = array();
+				if(is_numeric(array_key_first($value)))
+				    foreach ($value as $val) array_push($texts, self::ToHTML($val));
+				else switch (getBetween($value,"type","Type")??"")
+                    {
+                        default:
+                            array_push($texts, HTML::Interactor(type:$val, options:$m));
+                        break;
+                    }
+                return join(PHP_EOL,$texts);
+            }
+			if(is_callable($value) || $value instanceof \Closure) return self::ToHTML($value());
+            return $value."";
+        }
+		return "";
+    }
+
+	/**
      * Convert a text to an Identifier
      * @param string $text
      * @return string
@@ -150,7 +200,7 @@ class Convert{
 	public static function ToTitle(){
         $ls=[];
         foreach (self::ToIteration(func_get_args()) as $text)
-            if(!is_null($text)) $ls[] = ucwords(trim(preg_replace('/(?<=[^A-Z\s])([A-Z])/', " $1", preg_replace('/\W/', " ", $text))));
+            if(!is_null($text)) $ls[] = ucwords(trim(preg_replace('/(?<=[^A-Z\s]{2})([A-Z])/', " $1", preg_replace('/\W/', " ", $text))));
         return join(" - ", array_unique($ls));
 	}
 

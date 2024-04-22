@@ -12,7 +12,7 @@ class MediaFrame extends IFrame{
 	public $MaxHeight = "90vmin";
 	public $MaxWidth = "100%";
 
-	public function __construct($source=null, $color="#bb0000", $logo=null, $name="Media"){
+	public function __construct($source=null, $color="#bb0000", $logo=null, $name="media"){
 		parent::__construct();
 		$this->Source = $source;
 		$this->BackColor =

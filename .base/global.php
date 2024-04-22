@@ -724,6 +724,11 @@
 	function __(mixed $textOrObject, bool $translation = true, bool $styling = true, bool|null $refering = null) :string|null {
 		$textOrObject = \MiMFa\Library\Convert::ToString($textOrObject);
 		if($translation && \_::$CONFIG->AllowTranslate) $textOrObject = \MiMFa\Library\Translate::Get($textOrObject);
+        if($styling)
+            $textOrObject = \MiMFa\Library\Style::DoStyle(
+                $textOrObject,
+                \_::$INFO->KeyWords
+            );
 		if($refering??$styling){
             if(\_::$CONFIG->AllowContentRefering)
                 $textOrObject = \MiMFa\Library\Style::DoProcess(
@@ -786,6 +791,7 @@
      */
 	function loop($array, callable $action, $nullValues = false)
 	{
+		if(is_null($array)) return [];
 		return iterator_to_array(iteration($array, $action, $nullValues));
 	}
 	/**
@@ -796,14 +802,16 @@
      */
 	function iteration($array, callable $action, $nullValues = false)
 	{
-		$i = 0;
-		if(!is_iterable($array)){
-            if(($res = $action($i, $array, $i)) !== null || $nullValues)
-				yield $res;
+		if(!is_null($array)){
+            $i = 0;
+            if(!is_iterable($array)){
+                if(($res = $action($i, $array, $i)) !== null || $nullValues)
+                    yield $res;
+            }
+            else foreach ($array as $key=>$value)
+                    if(($res = $action($key, $value, $i++)) !== null || $nullValues)
+                        yield $res;
         }
-		else foreach ($array as $key=>$value)
-            if(($res = $action($key, $value, $i++)) !== null || $nullValues)
-				yield $res;
     }
 	/**
 	 * Returns the value of the first array element.
@@ -811,6 +819,7 @@
 	 * @return mixed
 	 */
 	function first($array, $default = null){
+		if(is_null($array)) return $default;
 		if(is_array($array)) return count($array)>0?$array[array_key_first($array)]:$default;
 		if(is_iterable($array)) {
 			foreach ($array as $value) return $value;
@@ -826,6 +835,7 @@
      * @return mixed
      */
 	function last($array, $default = null){
+		if(is_null($array)) return $default;
 		if(is_array($array)) return count($array)>0?$array[array_key_last($array)]:$default;
 		if(is_iterable($array)) {
 			foreach ($array as $value) $default = $value;
