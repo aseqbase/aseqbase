@@ -490,8 +490,8 @@ class Post extends Module{
             	case "Video":
             	case "Course":
                     MODULE("MediaFrame");
-                    if($p_showmorebutton) yield join(PHP_EOL, loop($p_path, function($k,$v,$i) use($p_morebuttontext) {
-                        return (new MediaFrame($v, name:is_numeric($k)?$p_morebuttontext:$k))->DoCapture();
+                    if($p_showmorebutton) yield join(PHP_EOL, loop($p_path, function($k,$v,$i) use($p_image, $p_morebuttontext) {
+                        return (new MediaFrame($v, logo:$p_image, name:is_numeric($k)?$p_morebuttontext:$k))->DoCapture();
                     })).HTML::Division(loop($p_path, function($k,$v,$i) use($p_morebuttontext) { return HTML::Link(is_numeric($k)?$p_morebuttontext:$k, $v,["class"=>"btn btn-block btn-outline"]);}),["class"=>"more md-show"]);
                     break;
             	default:

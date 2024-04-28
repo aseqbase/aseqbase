@@ -111,8 +111,11 @@ class General extends Template{
 					color: inherit;
 					text-decoration: none;
 				}
-				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.btn,.image,.media,.item,.fa){
+				a:not(.button, .icon, .btn):hover{
 					text-decoration: underline;
+				}
+				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.btn,.image,.media,.item,.fa){
+					font-weight: bold;
 				}
 
 				:is(.button, .icon, .btn), :is(.button, .icon, .btn):is(:visited, :active){

@@ -42,6 +42,7 @@ class IFrame extends Module{
 			}
 			.{$this->Name} .block{
 				background: ".$this->BackColor."88 url('".$this->Image."') no-repeat center;
+				background-size: clamp(50px, 100%, 100%);
 				".\MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth)."
 				".\MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight)."
 				".\MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth)."

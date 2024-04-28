@@ -82,6 +82,12 @@ class SideMenu extends Module{
 			.{$this->Name} .header, .{$this->Name} .header a, .{$this->Name} .header a:visited{
 				color: var(--ForeColor-2);
 			}
+			$notactiveselector .header .branding{
+				display: none;
+			}
+			$activeselector .header .branding{
+				display: table-cell;
+			}
 			.{$this->Name} .header .title{
 				font-size: var(--Size-2);
 				padding: 0px 10px;
@@ -115,7 +121,7 @@ class SideMenu extends Module{
 				margin: 0px;
 			}
 
-			.{$this->Name} .main-items .items{
+			.{$this->Name} .main-items.items{
 				color: var(--BackColor-2);
 				text-transform: uppercase;
 				padding: 0px;
@@ -151,7 +157,7 @@ class SideMenu extends Module{
 				background-color: var(--BackColor-0);
 				color: var(--ForeColor-0);
 			}
-			.{$this->Name}:not(.active) .main-items .item.active :is(a, a:visited, a:active){
+			$notactiveselector .main-items .item.active :is(a, a:visited, a:active){
 				color: var(--ForeColor-0);
 			}
 			.{$this->Name} .main-items .item .image{
@@ -284,11 +290,13 @@ class SideMenu extends Module{
 				display: block !important;
 			}
 			$notactiveselector .header .image{
+				display: block;
 				width: 100%;
 				height: var(--Size-5);
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(0)))."
 			}
 			$activeselector .header .image{
+				display: table-cell;
 				width: var(--Size-3);
 				aspect-ratio: 1;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(0)))."
@@ -340,8 +348,8 @@ class SideMenu extends Module{
 					HTML::Division(
 						(isValid($this->Description)?  HTML::Division(__($this->Description,true,false),["class"=>"td description"]):"").
 						(isValid($this->Title)?  HTML::Division(HTML::Link(__($this->Title,true,false),'/'),["class"=>"td title"]):"")
-					,["class"=>"td"])
-				,["class"=>"td row"]);
+					,["class"=>"td branding"])
+				,["class"=>"td header"]);
 
 			if($this->HasOthers)
 				yield HTML::Division(
