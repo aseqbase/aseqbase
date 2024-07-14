@@ -264,6 +264,91 @@ class Convert{
         return json_decode($json, flags:JSON_OBJECT_AS_ARRAY)??$defultValue;
     }
 
+    public static function ToSeparatedValues($rows, $delimiter = ',', $enclosure = '"', $escape = "\\", $eol = "\n") :string {
+        if(isEmpty($rows)) return "";
+        $fstream = fopen('php://temp', 'r+b');
+        foreach ($rows as $fields) fputcsv($fstream, $fields, $delimiter, $enclosure, $escape, $eol);
+        rewind($fstream);
+        $data = rtrim(stream_get_contents($fstream), $eol);
+        fclose($fstream);
+        return $data;
+    }
+    public static function FromSeparatedValues($svString, $delimiter = ',', $enclosure = '"', $escape = "\\", $eol = "\n") :array {
+        if(isEmpty($svString)) return [];
+        $rows = [];
+        $length = strlen($svString);
+        $index = 0;
+        while ($index < $length) {
+            $row = [];
+            $column = '';
+            $inEnclosure = false;
+            do {
+                $char = $svString[$index++];
+                if ($inEnclosure) {
+                    if ($char == $enclosure) {
+                        if ($index < $length) {
+                            $char = $svString[$index];
+                            if ($char == $enclosure) {
+                                $column .= $char;
+                                $index++;
+                            } else { $inEnclosure = false; }
+                        } else {
+                            $inEnclosure = false;
+                            $row[] = $column;
+                            break;
+                        }
+                    } else { $column .= $char; }
+                } else if ($char == $enclosure) {
+                    if($index < $length) {
+                        $char = $svString[$index++];
+                        if ($char == $enclosure) { $column .= $char; }
+                        else {
+                            $inEnclosure = true;
+                            $column .= $char;
+                        }
+                    } else {
+                        $row[] = $column;
+                        break;
+                    }
+                } else if ($char == $delimiter) {
+                    $row[] = $column;
+                    $column = '';
+                } else if ($char == "\r") {
+                    if ($index < $length) {
+                        $char = $svString[$index];
+                        if ($char == $eol) { $index++; }
+                    }
+                    $row[] = $column;
+                    break;
+                } else if ($char == $eol) {
+                    $row[] = $column;
+                    break;
+                } else { $column .= $char; }
+
+                if ($index == $length) {
+                    $row[] = $column;
+                    break;
+                }
+            } while ($index < $length);
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
+    public static function ToSeparatedValuesFile($rows, $path = null, $delimiter = ',', $enclosure = '"', $escape = "\\", $eol = "\n") :string {
+        $path = $path??Local::NewUniquePath("table",".csv",random:false);
+        $fstream = fopen($path, 'r+b');
+        foreach ($rows as $fields) fputcsv($fstream, $fields, $delimiter, $enclosure, $escape, $eol);
+        fclose($fstream);
+        return $path;
+    }
+    public static function FromSeparatedValuesFile($path, $delimiter = ',', $enclosure = '"', $escape = "\\", $eol = "\n") :null|array {
+        if (file_exists($path) && is_readable($path)){
+            return FromSeparatedValues($fstream, $delimiter, $enclosure, $escape, $eol);
+        }
+        return null;
+    }
+
     public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true){
 		if($addDefaultKeys){
             $email = getEmail(null,"info");

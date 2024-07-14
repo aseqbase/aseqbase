@@ -408,7 +408,7 @@ class Table extends Module{
         $rowCount = 0;
         $colCount = $ick?count($icks):0;
 		if($isu) {
-			$uck = HTML::Division(getAccess($this->AddAccess)? HTML::Icon("plus","{$this->Modal->Name}_Create();") : HTML::Image("tasks"));
+			$uck = HTML::Division(getAccess($this->AddAccess)? HTML::Icon("plus","{$this->Modal->Name}_Create();", ["class"=>"table-item-create"]) : HTML::Image("tasks"));
 			if($ick) array_unshift($icks, $uck);
         }
 		$strow = "<tr>";
@@ -436,10 +436,10 @@ class Table extends Module{
                             [$uck=>($hrn?$rn++:""),...$row]:
                             [$uck=>HTML::Division([
 									...[($hrn?HTML::Span($rn++,null,['class'=>'number']):"")],
-									...($vaccess? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);")] : []),
-									...($maccess? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);")] : []),
-									...($daccess? [HTML::Icon("copy","{$this->Modal->Name}_Duplicate(`$rowid`);")] : []),
-									...($raccess? [HTML::Icon("trash","{$this->Modal->Name}_Delete(`$rowid`);")] : [])
+									...($vaccess? [HTML::Icon("eye","{$this->Modal->Name}_View(`$rowid`);", ["class"=>"table-item-view"])] : []),
+									...($maccess? [HTML::Icon("edit","{$this->Modal->Name}_Modify(`$rowid`);", ["class"=>"table-item-modify"])] : []),
+									...($daccess? [HTML::Icon("copy","{$this->Modal->Name}_Duplicate(`$rowid`);", ["class"=>"table-item-duplicate"])] : []),
+									...($raccess? [HTML::Icon("trash","{$this->Modal->Name}_Delete(`$rowid`);", ["class"=>"table-item-delete"])] : [])
 								]),
 							...$row];
                     }
@@ -519,7 +519,7 @@ class Table extends Module{
             return parent::Get().(!$this->TopNavigation||is_null($this->NavigationBar)?"":$this->NavigationBar->Capture()).join(PHP_EOL, $cells);
         }
 		elseif($aaccess)
-			return parent::Get().HTML::Center(HTML::Button("Add your first item ".HTML::Image("plus"),"{$this->Modal->Name}_Create();"));
+			return parent::Get().HTML::Center(HTML::Button("Add your first item ".HTML::Image("plus"),"{$this->Modal->Name}_Create();", ["class"=>"table-item-create"]));
 		return parent::Get();
 	}
 

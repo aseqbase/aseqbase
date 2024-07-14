@@ -1,5 +1,9 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
+use \MiMFa\Library\HTML;
+use \MiMFa\Library\Convert;
 class FixedBanner extends Module{
+	public $Capturable = true;
 	public $Image = null;
 	public $Logo = null;
 	public $Slogan = null;
@@ -12,16 +16,15 @@ class FixedBanner extends Module{
 	public $BorderColor = null;
 	public $HeaderBanner = null;
 	public $BlurSize = "10px";
-	
-	public function EchoStyle(){
+
+	public function GetStyle(){
 		$this->Class = $this->Class." ".$this->Type;
-		parent::EchoStyle();
-		?>
-		<style>
-			.<?php echo $this->Name; ?>{
+		return parent::GetStyle().
+			HTML::Style("
+			.{$this->Name}{
 				text-align: center;
 			}
-			.<?php echo $this->Name; ?>>.background{
+			.{$this->Name}>.background{
 				height: 100vh;
 				width: 100vw;
 				background-position: center;
@@ -33,10 +36,10 @@ class FixedBanner extends Module{
     			left: 0px;
     			right: 0px;
 				z-index: -999999999;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("filter","blur(".$this->BlurSize.")");?>
+				".(\MiMFa\Library\Style::UniversalProperty("filter","blur(".$this->BlurSize.")"))."
 			}
-			
-			.<?php echo $this->Name; ?>>.content{
+
+			.{$this->Name}>.content{
 				text-align: center;
 				justify-content: center;
 				min-height: 50vh;
@@ -44,149 +47,127 @@ class FixedBanner extends Module{
 				box-shadow: var(--Shadow-2);
 				padding: 0px;
 				overflow: hidden;
-				color: <?php echo isValid($this->ForeColor)?$this->ForeColor:(\_::$TEMPLATE->ForeColor(0)); ?>;
-				<?php if(isValid($this->BorderColor)) { ?>
-				border: <?php echo \_::$TEMPLATE->Border(2)." ".$this->BorderColor; ?>;
-				<?php } ?>
+				color: ".(isValid($this->ForeColor)?$this->ForeColor:(\_::$TEMPLATE->ForeColor(0))).";
+				".(isValid($this->BorderColor)? ("border: ".(\_::$TEMPLATE->Border(2)." ".$this->BorderColor).";"):"")."
 			}
-			.<?php echo $this->Name; ?>.box>.content{
+			.{$this->Name}.box>.content{
 				display: inline-block;
-				background-color: <?php echo isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(0)); ?>;
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(0))).";
 				border-radius: var(--Radius-1);
 			}
-			.<?php echo $this->Name; ?>.hybrid>.content{
+			.{$this->Name}.hybrid>.content{
 				height: 100%;
 				width: 100%;
 				background-position: center;
 				background-repeat: repeat;
-				background-image: url('<?php echo $this->HeaderBanner??\_::$TEMPLATE->Pattern(0); ?>');
+				background-image: url('".($this->HeaderBanner??\_::$TEMPLATE->Pattern(0))."');
 			}
-			.<?php echo $this->Name; ?>:is(.transparent,.hybrid)>.content{
-				background-color: <?php echo isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(0)."77"); ?>;
+			.{$this->Name}:is(.transparent,.hybrid)>.content{
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(0)."77")).";
 				border: none;
 				border-radius: var(--Radius-0);
 			}
 
-			.<?php echo $this->Name; ?>>.content>.top{
+			.{$this->Name}>.content>.top{
 				padding: 10vmin;
 				padding-bottom: 0px;
-				color: <?php echo isValid($this->ForeColor)?$this->ForeColor:(\_::$TEMPLATE->ForeColor(4)); ?>;
+				color: ".(isValid($this->ForeColor)?$this->ForeColor:(\_::$TEMPLATE->ForeColor(4))).";
 			}
-			.<?php echo $this->Name; ?>.box>.content>.top{
-				background-color: <?php echo isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(4)); ?>;
+			.{$this->Name}.box>.content>.top{
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(4))).";
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: cover;
-				background-image: url('<?php echo $this->HeaderBanner??\_::$TEMPLATE->Pattern(0); ?>');
+				background-image: url('".($this->HeaderBanner??\_::$TEMPLATE->Pattern(0))."');
 			}
 
-			.<?php echo $this->Name; ?>>.content>.bottom{
+			.{$this->Name}>.content>.bottom{
 				padding: 10vmin;
 				padding-top: 0px;
-				color: <?php echo isValid($this->ForeColor)?$this->ForeColor:(\_::$TEMPLATE->ForeColor(0)); ?>;
+				color: ".(isValid($this->ForeColor)?$this->ForeColor:(\_::$TEMPLATE->ForeColor(0))).";
 			}
-			.<?php echo $this->Name; ?>.box>.content>.bottom{
-				background-color: <?php echo isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(0)); ?>;
+			.{$this->Name}.box>.content>.bottom{
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(0))).";
 			}
-			.<?php echo $this->Name; ?>:is(.transparent,.hybrid)>.content>.bottom{
-				background-color: <?php echo isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(0)); ?>77;
+			.{$this->Name}:is(.transparent,.hybrid)>.content>.bottom{
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$TEMPLATE->BackColor(0)))."77;
 			}
 
-			.<?php echo $this->Name; ?>>.content>.top>.image{
+			.{$this->Name}>.content>.top>.image{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 100%;
 				height: 7.5vmax;
 			}
-			.<?php echo $this->Name; ?>>.content>.top>.title{
+			.{$this->Name}>.content>.top>.title{
 				padding-top: 0px;
 				font-size: var(--Size-3);
     			font-weight: bold;
-				color: <?php echo isValid($this->SpecialColor)?$this->SpecialColor:(\_::$TEMPLATE->ForeColor(4)); ?>;
+				color: ".(isValid($this->SpecialColor)?$this->SpecialColor:(\_::$TEMPLATE->ForeColor(4))).";
 			}
 
-			.<?php echo $this->Name; ?>>.content>.bottom>.description{
+			.{$this->Name}>.content>.bottom>.description{
 				font-size: var(--Size-2);
 			}
-			
-			.<?php echo $this->Name; ?>>.content>.bottom>.services a:not(.btn),.<?php echo $this->Name; ?> .services a:not(.btn):visited,.<?php echo $this->Name; ?> .services a:not(.btn):hover{
+
+			.{$this->Name}>.content>.bottom>.services a:not(.btn),.{$this->Name} .services a:not(.btn):visited,.{$this->Name} .services a:not(.btn):hover{
 				color: unset;
 			}
-			.<?php echo $this->Name; ?>>.content>.bottom>.services .row>div{
+			.{$this->Name}>.content>.bottom>.services .row>div{
 				text-align: center;
 				margin-top: 3vmin;
 				font-size: var(--Size-1);
 			}
-			.<?php echo $this->Name; ?>>.content>.bottom>.services .image{
+			.{$this->Name}>.content>.bottom>.services .image{
 				display: block;
 				height: 3vmin;
 			}
-			.<?php echo $this->Name; ?>>.content>.bottom>.services .icon{
+			.{$this->Name}>.content>.bottom>.services .icon{
 				display: block;
 			}
-			.<?php echo $this->Name; ?>>.content>.bottom>.services .title{
+			.{$this->Name}>.content>.bottom>.services .title{
 				display: inline-block;
 			}
-			.<?php echo $this->Name; ?>>.content>.bottom>.services .more{
+			.{$this->Name}>.content>.bottom>.services .more{
 				display: inline-block;
 				font-size: var(--Size-1);
 			}
-		</style>
-		<?php
+		");
 	}
 
-	public function Echo(){
-		?>
-		<div class="background" style="background-image: url('<?php echo $this->Image;?>');">
-		</div>
-		<div class="content">
-			<div class="top">
-				<?php if(isValid($this->Logo)){ ?>
-					<div class="image" style="background-image: url('<?php echo $this->Logo; ?>');" data-aos="flip-up" data-aos-delay="500"></div>
-				<?php } ?>
-				<?php if(isValid($this->Title)){ ?>
-					<h1 class="title" data-aos="zoom-up" data-aos-offset="-500" data-aos-delay="1000"><?php echo __($this->Title,true,false);?></h1>
-				<?php } ?>
-			</div>
-			<div class="bottom">
-				<?php if(isValid($this->Description)){ ?>
-					<div class="description" data-aos="flip-right" data-aos-offset="-500" data-aos-delay="1500"><?php echo __($this->Description,true,false);?></div>
-				<?php } ?>
-				<?php if(isValid($this->Items)){ ?>
-				<div class="container services">
-					<div class="row">
-					<?php $i = 6;
-					foreach($this->Items as $item){?>
-						<div class="col-md" data-aos="fade-down" data-aos-offset="-500" data-aos-delay="<?php echo $i++*300; ?>">
-							<?php if(isValid($item,'Link')){ ?>
-								<a href="<?php echo $item['Link'];?>">
-							<?php } ?>
-								<?php if(isValid($item,'Image')){ ?>
-									<img class="image" src="<?php echo $item['Image'];?>">
-								<?php } ?>
-								<?php if(isValid($item,'Icon')){ ?>
-									<i class="icon <?php echo $item['Icon'];?>" aria-hidden="true"></i>
-								<?php } ?>
-								<?php if(isValid($item,'Name')){ ?>
-									<div class="title"><?php echo __($item['Name'],true,false);?></div>
-								<?php } ?>
-								<?php if(isValid($item,'More')){ ?>
-									<div class="more"><?php echo __($item['More'],true,false);?></div>
-								<?php } ?>
-							<?php if(isValid($item,'Link')){ ?>
-								</a>
-							<?php } ?>
-						</div>
-					<?php } 
-					} ?>
-					</div>
-					<?php if(isValid($this->Content)){ ?>
-						<div class="row" data-aos="flip-down" data-aos-offset="-500" data-aos-delay="<?php echo $i++*300; ?>"><div class="col"><?php echo $this->Content;?></div></div>
-					<?php } ?>
-				</div>
-			</div>
-		</div>
-	<?php
+	public function Get(){
+		return Convert::ToString(function(){
+			yield HTML::Division(null,["class"=>"background", "style"=>"background-image: url('{$this->Image}');"]);
+			yield HTML::Division(
+					HTML::Division(
+						(isValid($this->Logo)? HTML::Media($this->Logo, ["class"=>'image', "data-aos"=>'flip-up', "data-aos-delay"=>'500']):"").
+						(isValid($this->Title)? HTML::ExternalHeading($this->Title, ["class"=>'title', "data-aos"=>'zoom-up', "data-aos-delay"=>'1000', "data-aos-offset"=>'-500']):"")
+					,["class"=>"top"]).
+					HTML::Division(
+						(isValid($this->Description)? HTML::Division(__($this->Description,true,false), ["class"=>'description', "data-aos"=>'flip-right', "data-aos-delay"=>'1500', "data-aos-offset"=>'-500']):"").
+						(isValid($this->Items)? HTML::Division(
+							Convert::ToString(function(){
+								$i = 6;
+                                yield "<div class='row'>";
+								foreach($this->Items as $item){
+									yield "<div class='col-md' data-aos='fade-down' data-aos-offset='-500' data-aos-delay='".($i++*300)."'>";
+									if(isValid($item,'Link')) yield "<a href='{$item['Link']}'>";
+									if(isValid($item,'Image')) yield "<img class='image' src='{$item['Image']}'>";
+									if(isValid($item,'Icon')) yield "<i class='icon {$item['Icon']}' aria-hidden='true'></i>";
+									if(isValid($item,'Name')) yield "<div class='title'>".__($item['Name'],true,false)."</div>";
+									if(isValid($item,'More')) yield "<div class='more'>".__($item['More'],true,false)."</div>";
+									if(isValid($item,'Link')) yield "</a>";
+									yield "</div>";
+								}
+								yield "</div>";
+								if(isValid($this->Content))
+									yield "<div class='row' data-aos='flip-down' data-aos-offset='-500' data-aos-delay='".($i*300)."'>
+										<div class='col'>{$this->Content}</div>
+									</div>";
+                            }), ["class"=>'container services']):"")
+					,["class"=>"bottom"])
+				,["class"=>"content"]);
+		});
 	}
 }
 ?>

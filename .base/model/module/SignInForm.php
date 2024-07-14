@@ -16,6 +16,10 @@ class SignInForm extends Form{
 	public $PasswordPlaceHolder = "Password";
 	public $SignUpLabel = "Do not have an account?";
 	public $RememberLabel = "Forgot your password?";
+	public $LoggedInWarning = "You are logged in!";
+	public $IncompleteWarning = "Please fill all fields correctly!";
+	public $IncorrectWarning = "UserName or Password is not correct!";
+	public $CorrectConfirmingFormat = 'Dear \'$NAME\', you have logged in successfully';
 	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
 	public $Welcome = null;
 	public $HasInternalMethod = true;
@@ -117,15 +121,15 @@ class SignInForm extends Form{
 						\_::$INFO->User->SignInOrSignUp(getValid($_req,"Signature"), getValid($_req,"Password")):
 						\_::$INFO->User->SignIn(getValid($_req,"Signature"), getValid($_req,"Password"));
 				if($res === true)
-                	return HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', you have logged in successfully");
+                	return HTML::Success(Convert::FromDynamicString($this->CorrectConfirmingFormat));
 				elseif($res === false)
-					return HTML::Error("UserName or Password is not correct!");
+					return HTML::Error($this->IncorrectWarning);
 				else
 					return HTML::Error($res);
 			}
-			else return HTML::Warning("Please fill all fields correctly!");
+			else return HTML::Warning($this->IncompleteWarning);
 		} catch(\Exception $ex) { return HTML::Error($ex); }
-		else return HTML::Warning("You are logged in!");
+		else return HTML::Warning($this->LoggedInWarning);
     }
 }
 ?>

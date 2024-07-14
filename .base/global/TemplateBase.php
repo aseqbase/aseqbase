@@ -158,8 +158,9 @@
 
 					successHandler = successHandler??function(data, selector){
 						$(selector + ' .result').remove();
-						if(isEmpty(data)) load();
-						else {
+						//if(isEmpty(data)) load();
+						//else {
+						if(!isEmpty(data)) {
 							data = ((typeof(data) == 'object')?data.statusText:data)??'".__("The form submitted successfully!")."';
 							if(!isEmpty(data))
 								$(selector).prepend(Html.success(data));
@@ -167,8 +168,9 @@
 					};
 					errorHandler = errorHandler??function(data, selector){
 						$(selector + ' .result').remove();
-						if(isEmpty(data)) load();
-						else {
+						//if(isEmpty(data)) load();
+						//else {
+						if(!isEmpty(data)) {
 							data = ((typeof(data) == 'object')?data.statusText:data)??'".__("There a problem occured!")."';
 							if(!isEmpty(data))
 								$(selector).prepend(Html.error(data));
@@ -383,6 +385,9 @@
 				AOS.init({
 				  easing: 'ease-in-out-sine'
 				});
+				$(function(){
+					Evaluate.URL();
+				})();
 			</script>";
 		}
 

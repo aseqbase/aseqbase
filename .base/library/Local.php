@@ -79,7 +79,8 @@ class Local{
      * @param int $random Pass 0 or false to get the name sequential from the number 1 to infinity
      * @return string
      */
-    public static function NewUniquePath(string $dir, string $fileName = "new", string $format = "", bool $random = true):string{
+    public static function NewUniquePath(string $fileName = "new", string $format = "", string $dir = null, bool $random = true):string{
+		$dir =  $dir??\_::$PUBLIC_DIR;
 		do $path = $dir.Convert::ToExcerpt(Convert::ToKey($fileName, true,'/[^A-Za-z0-9\_ \(\)]/'),0,50,"")."-".getId($random).$format;
         while(file_exists($path));
         return $path;
@@ -269,7 +270,7 @@ class Local{
 		if($fileObject["size"]<$minSize) throw new \Exception("The file size is very small!");
 		elseif($fileObject["size"]>$maxSize) throw new \Exception("The file size is very big!");
 
-		$filepath = self::NewUniquePath($dir,$fileName,".$fileType");
+		$filepath = self::NewUniquePath($fileName,".$fileType", $dir);
 		if(!move_uploaded_file($fileObject["tmp_name"], $filepath))
             throw new \Exception("Sorry, there was an error uploading your file.");
         return self::GetUrl($filepath);
@@ -372,7 +373,7 @@ class Local{
         header("Content-Type: $contentType; charset=".\_::$CONFIG->Encoding);
         ob_clean();
         flush();
-        SEND($content);
+        SEND("\xEF\xBB\xBF".$content);
     }
 }
 

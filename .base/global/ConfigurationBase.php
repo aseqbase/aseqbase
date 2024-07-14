@@ -474,7 +474,7 @@ abstract class ConfigurationBase extends Base {
 
 	public function __construct(){
         parent::__construct(false);
-        $sp = str_replace(".","", getClientIP()."");
+        $sp = preg_replace("/\W/","", getClientIP()."");
         if(is_null($this->PathKey)) $this->PathKey = "path_".$sp;
         if(is_null($this->ViewHandlerKey)) $this->ViewHandlerKey = "view_".$sp;
         if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"]??"qb")."_";

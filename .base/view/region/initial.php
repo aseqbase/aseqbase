@@ -23,6 +23,7 @@
 		<!--<script src='<?php echo forceFullUrl('/view/script/Live.js'); ?>'></script>-->
 		<script src='<?php echo forceFullUrl('/view/script/Math.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Array.js'); ?>'></script>
+		<script src='<?php echo forceFullUrl('/view/script/Evaluate.js'); ?>'></script>
 		<script src='<?php echo forceFullUrl('/view/script/Html.js'); ?>'></script>
 		<?php
 		if(isValid(\_::$CONFIG->ReCaptchaSiteKey)) {

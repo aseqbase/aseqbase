@@ -586,7 +586,7 @@ class Form extends Module{
 								HTML::Rack(
 									($this->AllowContent?$this->GetContent():"").
 									Convert::ToString($this->GetFields()),
-								[ "class"=>"group fields"]).
+								["class"=>"group fields"]).
 								HTML::Rack(Convert::ToString($this->GetButtons()),[ "class"=>"group buttons"])
 							,$src, ["id"=>$name, "name"=>$name, "enctype"=>$this->EncType, "method"=>$this->Method]).
 							($this->AllowFooter?$this->GetFooter():"")
