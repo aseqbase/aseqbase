@@ -119,7 +119,7 @@ class Player extends Module{
 				".($this->AllowZoom?"cursor: grab;":"")."
 				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
 			}
-			.{$this->Name}>.content>:not(html,head,body,style,script,link,meta,title) {
+			.{$this->Name}>.content>:not(.page,html,head,body,style,script,link,meta,title) {
 				min-width: auto;
 				width: auto;
 				height: 100%;

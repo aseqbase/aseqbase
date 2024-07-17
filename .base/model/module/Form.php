@@ -81,9 +81,6 @@ class Form extends Module{
 	public function GetStyle(){
 		if($this->HasDecoration){
 			$style = parent::GetStyle().HTML::Style("
-				.{$this->Name}{
-					max-width: 100%;
-				}
 				.{$this->Name} .rack {
 					align-items: center;
 				}
@@ -93,7 +90,7 @@ class Form extends Module{
 				}
 				.{$this->Name} form .fields {
 					display: table;
-					width: 100%;
+					min-width: 100%;
 				}
 				.{$this->Name} .header {
 					position: sticky;

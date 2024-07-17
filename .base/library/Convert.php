@@ -264,16 +264,7 @@ class Convert{
         return json_decode($json, flags:JSON_OBJECT_AS_ARRAY)??$defultValue;
     }
 
-    public static function ToSeparatedValues($rows, $delimiter = ',', $enclosure = '"', $escape = "\\", $eol = "\n") :string {
-        if(isEmpty($rows)) return "";
-        $fstream = fopen('php://temp', 'r+b');
-        foreach ($rows as $fields) fputcsv($fstream, $fields, $delimiter, $enclosure, $escape, $eol);
-        rewind($fstream);
-        $data = rtrim(stream_get_contents($fstream), $eol);
-        fclose($fstream);
-        return $data;
-    }
-    public static function FromSeparatedValues($svString, $delimiter = ',', $enclosure = '"', $escape = "\\", $eol = "\n") :array {
+    public static function ToCells($svString, $delimiter = ',', $enclosure = '"', $eol = "\n") :array {
         if(isEmpty($svString)) return [];
         $rows = [];
         $length = strlen($svString);
@@ -334,17 +325,26 @@ class Convert{
         }
         return $rows;
     }
+    public static function FromCells($cells, $delimiter = ',', $enclosure = '"', $eol = "\n") :string {
+        if(isEmpty($cells)) return "";
+        $fstream = fopen('php://temp', 'r+b');
+        foreach ($cells as $fields) fputcsv($fstream, $fields, $delimiter, $enclosure, "\\", $eol);
+        rewind($fstream);
+        $data = rtrim(stream_get_contents($fstream), $eol);
+        fclose($fstream);
+        return $data;
+    }
 
-    public static function ToSeparatedValuesFile($rows, $path = null, $delimiter = ',', $enclosure = '"', $escape = "\\", $eol = "\n") :string {
+    public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n") :string {
         $path = $path??Local::NewUniquePath("table",".csv",random:false);
         $fstream = fopen($path, 'r+b');
-        foreach ($rows as $fields) fputcsv($fstream, $fields, $delimiter, $enclosure, $escape, $eol);
+        foreach ($cells as $fields) fputcsv($fstream, $fields, $delimiter, $enclosure, "\\", $eol);
         fclose($fstream);
         return $path;
     }
-    public static function FromSeparatedValuesFile($path, $delimiter = ',', $enclosure = '"', $escape = "\\", $eol = "\n") :null|array {
+    public static function FromSeparatedValuesFile($path, $delimiter = ',', $enclosure = '"', $eol = "\n") :null|array {
         if (file_exists($path) && is_readable($path)){
-            return FromSeparatedValues($fstream, $delimiter, $enclosure, $escape, $eol);
+            return self::ToCells(file_get_contents($path), $delimiter, $enclosure, $eol);
         }
         return null;
     }

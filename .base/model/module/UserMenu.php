@@ -110,7 +110,7 @@ class UserMenu extends Module{
 						yield HTML::Link(
 							HTML::Division(__(getBetween($item,"Name", "Title"), styling:false),["style"=>(isValid($item,'Image')?("background-image: url('".$item['Image']."')"):"")]),
 							getValid($item,'Path'),
-							["class"=>"btn btn-primary"],
+							["class"=>"btn"],
 							getValid($item,"Attributes"));
 					else
 						yield HTML::Span(

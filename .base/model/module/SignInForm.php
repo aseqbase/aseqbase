@@ -80,18 +80,14 @@ class SignInForm extends Form{
     }
 	public function GetFields(){
         if($this->HasInternalMethod){
-			yield HTML::Rack(
-				HTML::LargeSlot(
+			yield HTML::LargeSlot(
 					HTML::Label($this->SignatureLabel, "Signature", ["class"=>"prepend"]).
 					HTML::ValueInput("Signature", ["placeholder"=> $this->SignaturePlaceHolder])
-				, ["class"=>"field col", "autocomplete"=>"username"])
-			);
-			yield HTML::Rack(
-				HTML::LargeSlot(
+				, ["class"=>"field col", "autocomplete"=>"username"]);
+			yield HTML::LargeSlot(
 					HTML::Label($this->PasswordLabel, "Password", ["class"=>"prepend"]).
 					HTML::SecretInput("Password", ["placeholder"=> $this->PasswordPlaceHolder])
-				, ["class"=>"field col", "autocomplete"=>"password"])
-			);
+				, ["class"=>"field col", "autocomplete"=>"password"]);
 		}
 		yield from parent::GetFields();
     }

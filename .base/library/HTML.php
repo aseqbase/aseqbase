@@ -13,7 +13,15 @@ class HTML
     public static $ManageAttributes = true;
     public static $MaxDecimalPrecision = 2;
     public static $MaxValueLength = 10;
+    /**
+     * A custom Break Line (<BR/> Tag)
+     * @var string
+     */
     public static $NewLine = "<br/>";
+    /**
+     * A custom Horizontal Row (<HR/> Tag)
+     * @var string
+     */
     public static $HorizontalBreak = "<hr/>";
 
     /**

@@ -359,11 +359,14 @@ class Local{
 	 * @param mixed $contentType
 	 */
 	public static function Download($content, $fileName = "Export.txt",  $contentType = "text/plain"){
-        ini_set('mbstring.internal_encoding',\_::$CONFIG->Encoding);
+        ob_clean();
+        flush();
+
+        ini_set('mbstring.internal_encoding', \_::$CONFIG->Encoding);
         ini_set('mbstring.http_input','auto');
-        ini_set('mbstring.http_output',\_::$CONFIG->Encoding);
+        ini_set('mbstring.http_output', \_::$CONFIG->Encoding);
         ini_set('mbstring.detect_order','auto');
-        ini_set('default_charset',\_::$CONFIG->Encoding);
+        ini_set('default_charset', \_::$CONFIG->Encoding);
 
         header("Content-Disposition: attachment; filename=\"$fileName\"");
         header("Content-Type: application/force-download");
@@ -371,8 +374,7 @@ class Local{
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
         header("Content-Type: $contentType; charset=".\_::$CONFIG->Encoding);
-        ob_clean();
-        flush();
+
         SEND("\xEF\xBB\xBF".$content);
     }
 }

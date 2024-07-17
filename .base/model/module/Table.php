@@ -721,7 +721,7 @@ class Table extends Module{
             })());
         $form->Image = getValid($record,"Image","eye");
         $form->Template = "b";
-        $form->Class = "container-fluid";
+        $form->Class = "container";
         $form->SubmitLabel = null;
         $form->ResetLabel = null;
         if($this->Modal) {
@@ -766,7 +766,7 @@ class Table extends Module{
             })());
         $form->Image = getValid($record,"Image","plus");
         $form->Template = "b";
-        $form->Class = "container-fluid";
+        $form->Class = "container";
         $form->CancelLabel = "Cancel";
         if($this->Modal){
             $form->CancelPath = $this->Modal->HideScript();
@@ -806,7 +806,7 @@ class Table extends Module{
             })());
         $form->Image = getValid($record,"Image","plus");
         $form->Template = "b";
-        $form->Class = "container-fluid";
+        $form->Class = "container";
         $form->CancelLabel = "Cancel";
         if($this->Modal){
             $form->CancelPath = $this->Modal->HideScript();
@@ -858,7 +858,7 @@ class Table extends Module{
             })());
         $form->Image = getValid($record,"Image","edit");
         $form->Template = "b";
-        $form->Class = "container-fluid";
+        $form->Class = "container";
         $form->CancelLabel = "Cancel";
         if($this->Modal){
             $form->CancelPath = $this->Modal->HideScript();
