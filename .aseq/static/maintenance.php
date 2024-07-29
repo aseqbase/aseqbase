@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<title><?php echo $StaticTitle; ?></title>
-	<link rel="icon" href="/file/logo/logo.png" fetchpriority="high">
-	<link rel="preload" href="/file/general/process.gif" fetchpriority="high">
+	<link rel="icon" href="/asset/logo/logo.png" fetchpriority="high">
+	<link rel="preload" href="/asset/general/process.gif" fetchpriority="high">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta charset="UTF-8">
@@ -23,7 +23,7 @@
 			
 			<section class="left-section full-height">
 		
-				<a class="logo" href="#"><img src="/file/logo/logo.png" alt="Logo"></a>
+				<a class="logo" href="#"><img src="/asset/logo/logo.png" alt="Logo"></a>
 				
 				<div class="display-table">
 					<div class="display-table-cell">
@@ -53,7 +53,7 @@
 		
 			</section>
 		
-			<section class="right-section" style="background-image: url('/static/file/side.png')">
+			<section class="right-section" style="background-image: url('/static/asset/side.png')">
 			
 				<div class="display-table center-text">
 					<div class="display-table-cell">

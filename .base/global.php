@@ -165,7 +165,7 @@
 		public static string|null $VIEW_DIR = null;
 		public static string|null $PRIVATE_DIR = null;
 		public static string|null $PUBLIC_DIR = null;
-		public static string|null $FILE_DIR = null;
+		public static string|null $ASSET_DIR = null;
 		public static string|null $STORAGE_DIR = null;
 		public static string|null $TMP_DIR = null;
 		public static string|null $LOG_DIR = null;
@@ -198,7 +198,7 @@
 		public static string|null $BASE_VIEW_DIR = null;
 		public static string|null $BASE_PRIVATE_DIR = null;
 		public static string|null $BASE_PUBLIC_DIR = null;
-		public static string|null $BASE_FILE_DIR = null;
+		public static string|null $BASE_ASSET_DIR = null;
 		public static string|null $BASE_STORAGE_DIR = null;
 
 		public static string|null $BASE_LIBRARY_DIR = null;
@@ -242,7 +242,7 @@
 	_::$BASE_PRIVATE_DIR = \_::$BASE_DIR."private/";
 	_::$BASE_PUBLIC_DIR = \_::$BASE_DIR."public/";
 	_::$BASE_STORAGE_DIR = \_::$BASE_DIR."storage/";
-	_::$BASE_FILE_DIR = \_::$BASE_DIR."file/";
+	_::$BASE_ASSET_DIR = \_::$BASE_DIR."asset/";
 	_::$BASE_LIBRARY_DIR = \_::$BASE_DIR."library/";
 	_::$BASE_COMPONENT_DIR = \_::$BASE_MODEL_DIR."component/";
 	_::$BASE_TEMPLATE_DIR = \_::$BASE_MODEL_DIR."template/";
@@ -261,7 +261,7 @@
 	_::$VIEW_DIR = \_::$DIR."view/";
 	_::$PRIVATE_DIR = \_::$DIR."private/";
 	_::$PUBLIC_DIR = \_::$DIR."public/";
-	_::$FILE_DIR = \_::$DIR."file/";
+	_::$ASSET_DIR = \_::$DIR."asset/";
 	_::$STORAGE_DIR = \_::$DIR."storage/";
 	_::$TMP_DIR = \_::$DIR."tmp/";
 	_::$LOG_DIR = \_::$DIR."log/";

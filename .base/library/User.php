@@ -13,7 +13,7 @@ class User extends \Base{
 	public static $EditHandlerPath = "/sign/edit.php";
 	public static $DashboardHandlerPath = "/sign/dashboard.php";
 	public static $RecoverHandlerPath = "/sign/recover.php";
-	public static $DefaultImagePath = "/file/symbol/user.png";
+	public static $DefaultImagePath = "/asset/symbol/user.png";
 
 	public static $RecoverEmailSubject = 'Account Recovery Request';
 	public static $RecoverEmailContent = 'Hello dear $NAME,<br><br>

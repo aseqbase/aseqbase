@@ -217,7 +217,7 @@ class Local{
 	}
 
 
-    public static function GetForceImage($path="/file/image/image.png", array $extensions = null){
+    public static function GetForceImage($path="/asset/image/image.png", array $extensions = null){
 		$filepath = self::GetPath(preg_replace("/\.[^\.\\/\\\]+$/","",$path));
 		foreach ($extensions??\_::$CONFIG->AcceptableImageFormats as $format)
             if(file_exists(self::GetUrl("$filepath$format"))) return self::GetUrl("$filepath$format");

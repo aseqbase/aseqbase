@@ -96,13 +96,13 @@
          * @field array<path>
          * @var mixed
          */
-		public $OverlayPalette = array("/file/overlay/glass.png","/file/overlay/cotton.png","/file/overlay/cloud.png","/file/overlay/wings.svg","/file/overlay/sands.png","/file/overlay/dirty.png");
+		public $OverlayPalette = array("/asset/overlay/glass.png","/asset/overlay/cotton.png","/asset/overlay/cloud.png","/asset/overlay/wings.svg","/asset/overlay/sands.png","/asset/overlay/dirty.png");
 		/**
 		 * Patterns Palette
          * @field array<path>
          * @var mixed
          */
-		public $PatternPalette = array("/file/pattern/main.svg","/file/pattern/doddle.png","/file/pattern/doddle-fantasy.png","/file/pattern/triangle.png","/file/pattern/slicksline.png","/file/pattern/doddle-mess.png");
+		public $PatternPalette = array("/asset/pattern/main.svg","/asset/pattern/doddle.png","/asset/pattern/doddle-fantasy.png","/asset/pattern/triangle.png","/asset/pattern/slicksline.png","/asset/pattern/doddle-mess.png");
 
 		public static function LoopPalette($palette, int $ind = 0) { $ind %= count($palette); return $palette[$ind];}
 		public static function LimitPalette($palette, int $ind = 0) { return $palette[$ind >= count($palette)?count($palette)-1:max(0,$ind)];}

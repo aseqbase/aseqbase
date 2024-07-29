@@ -13,15 +13,15 @@ class AseqInformation extends InformationBase{
 	public $FullDescription = "aseqbase is a project sponsored by MiMFa. Designed by: MiMFa aseqbase Pure Web Design Framework";
 
 	public $Path = "https://mimfa.net";
-	public $LogoPath = "/file/logo/logo.png";
-	public $FullLogoPath = "/file/logo/full-logo.png";
+	public $LogoPath = "/asset/logo/logo.png";
+	public $FullLogoPath = "/asset/logo/full-logo.png";
 	public $BannerPath = null;
 	public $FullBannerPath = null;
 	public $HomePath = "/home";
 	public $DownloadPath = null;
-	public $WaitSymbolPath = "/file/general/wait.gif";
-	public $ProcessSymbolPath = "/file/general/process.gif";
-	public $ErrorSymbolPath = "/file/general/error.png";
+	public $WaitSymbolPath = "/asset/general/wait.gif";
+	public $ProcessSymbolPath = "/asset/general/process.gif";
+	public $ErrorSymbolPath = "/asset/general/error.png";
 
 	public $User = null;
 
@@ -30,21 +30,21 @@ class AseqInformation extends InformationBase{
 	public $KeyWords = array("MiMFa","Minimal Members Factory");
 
 	public $MainMenus = array(
-		array("Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png","Attributes"=> "class='menu-link'"),
-		array("Name"=>"SERVICE","Link"=>"#embed","Image"=>"/file/symbol/service.png","Attributes"=> "class='embed-link' data-target='.page' onclick='viewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); viewSideMenu(false);'"),
-		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/file/symbol/about.png","Attributes"=> "class='menu-link'","Items"=> array(
-			array("Name"=>"CONTACTS","Link"=>"/contacts","Image"=>"/file/symbol/contact.png","Attributes"=> "class='menu-link'"),
-			array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/file/symbol/about.png","Attributes"=> "class='menu-link'"),
-			array("Name"=>"TEAM","Link"=>"/team","Image"=>"/file/symbol/team.png","Attributes"=> "class='menu-link'")
+		array("Name"=>"HOME","Link"=>"/home","Image"=>"/asset/symbol/home.png","Attributes"=> "class='menu-link'"),
+		array("Name"=>"SERVICE","Link"=>"#embed","Image"=>"/asset/symbol/service.png","Attributes"=> "class='embed-link' data-target='.page' onclick='viewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); viewSideMenu(false);'"),
+		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/asset/symbol/about.png","Attributes"=> "class='menu-link'","Items"=> array(
+			array("Name"=>"CONTACTS","Link"=>"/contacts","Image"=>"/asset/symbol/contact.png","Attributes"=> "class='menu-link'"),
+			array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/asset/symbol/about.png","Attributes"=> "class='menu-link'"),
+			array("Name"=>"TEAM","Link"=>"/team","Image"=>"/asset/symbol/team.png","Attributes"=> "class='menu-link'")
 		)),
 	);
 
 	public $Shortcuts = array(
-		array("Name"=>"Menu","Link"=>"","Image"=>"/file/symbol/menu.png", "Attributes"=>"onclick='viewSideMenu()'"),
-		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/file/symbol/about.png","Attributes"=> "class='menu-link'"),
-		array("Name"=>"Home","Link"=>"#internal","Image"=>"/file/symbol/home.png","Attributes"=> "class='internal-link' data-target='.page' onclick='viewInternal(\"/home\",\"fade\"); viewSideMenu(false);'"),
-		array("Name"=>"About","Link"=>"#internal","Image"=>"/file/symbol/about.png", "Attributes"=>"class='internal-link' data-target='.page' onclick='viewInternal(\"/about\",\"fade\"); viewSideMenu(false);'"),
-		array("Name"=>"CONTACTS","Link"=>"/contacts","Image"=>"/file/symbol/contact.png","Attributes"=> "class='menu-link'")
+		array("Name"=>"Menu","Link"=>"","Image"=>"/asset/symbol/menu.png", "Attributes"=>"onclick='viewSideMenu()'"),
+		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/asset/symbol/about.png","Attributes"=> "class='menu-link'"),
+		array("Name"=>"Home","Link"=>"#internal","Image"=>"/asset/symbol/home.png","Attributes"=> "class='internal-link' data-target='.page' onclick='viewInternal(\"/home\",\"fade\"); viewSideMenu(false);'"),
+		array("Name"=>"About","Link"=>"#internal","Image"=>"/asset/symbol/about.png", "Attributes"=>"class='internal-link' data-target='.page' onclick='viewInternal(\"/about\",\"fade\"); viewSideMenu(false);'"),
+		array("Name"=>"CONTACTS","Link"=>"/contacts","Image"=>"/asset/symbol/contact.png","Attributes"=> "class='menu-link'")
 		);
 
 	public $Services = array(
@@ -59,7 +59,7 @@ class AseqInformation extends InformationBase{
 			"MiddleName"=>"",
 			"LastName"=>"Development Group",
 			"PostName"=>"MiMFa aseqbase Pure Web Design Framework",
-			"Image"=>"/file/general/avatar.png",
+			"Image"=>"/asset/general/avatar.png",
 			"Link"=>"https://www.linkedin.com/company/mimfa",
 			"Assignees"=> array(
 								"Solution Designer",

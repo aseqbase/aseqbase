@@ -77,13 +77,13 @@ abstract class InformationBase extends Base{
      * @field path
      * @var mixed
 	 */
-	public $LogoPath = "/file/logo/logo.png";
+	public $LogoPath = "/asset/logo/logo.png";
 	/**
      * The website full logo path
      * @field path
 	 * @var mixed
 	 */
-	public $FullLogoPath = "/file/logo/full-logo.png";
+	public $FullLogoPath = "/asset/logo/full-logo.png";
 	/**
      * The website main banner path
      * @field path
@@ -120,19 +120,19 @@ abstract class InformationBase extends Base{
      * @field path
 	 * @var mixed
 	 */
-	public $WaitSymbolPath = "/file/general/wait.gif";
+	public $WaitSymbolPath = "/asset/general/wait.gif";
 	/**
      * The main symbol path to show while system is processing
      * @field path
 	 * @var mixed
 	 */
-	public $ProcessSymbolPath = "/file/general/process.gif";
+	public $ProcessSymbolPath = "/asset/general/process.gif";
 	/**
      * The main symbol path to show on the errors
      * @field path
 	 * @var mixed
 	 */
-	public $ErrorSymbolPath = "/file/general/error.png";
+	public $ErrorSymbolPath = "/asset/general/error.png";
 
 	/**
 	 * The user service
@@ -160,7 +160,7 @@ abstract class InformationBase extends Base{
      * @var array
 	 */
 	public $MainMenus = array(
-		array("Name"=>"HOME","Link"=>"/home","Image"=>"/file/symbol/home.png","Attributes"=> "class='menu-link'")
+		array("Name"=>"HOME","Link"=>"/home","Image"=>"/asset/symbol/home.png","Attributes"=> "class='menu-link'")
 	);
 
 	/**
