@@ -65,6 +65,8 @@ class Gallery extends Collection{
      */
 	public $ThumbnailMaxHeight = "50vh";
 
+	public $Animation = "flip-up";
+
 	public function GetStyle(){
 		return HTML::Style("
 			.{$this->Name} {
@@ -178,7 +180,7 @@ class Gallery extends Collection{
 				["class"=>"description"]).
 				(isValid($p_path)? HTML::Button($this->MoreButtonLabel, $clickact, ["class"=>"btn-outline btn-block"]):null).
 				HTML::Division(__($p_content??$p_description,true,false),["class"=>"hide"]),
-				["class"=>"item item-$i col-md"], $this->AllowAnimation? " data-aos='zoom-up' data-aos-offset='-500'":null);
+				["class"=>"item item-$i col-md"], $this->Animation? "data-aos-delay='".($i % $this->MaximumColumns*\_::$TEMPLATE->AnimationSpeed)."' data-aos='{$this->Animation}'":null);
                 if(++$i % $this->MaximumColumns === 0) yield "</div>";
             }
             if($i % $this->MaximumColumns !== 0)  yield "</div>";

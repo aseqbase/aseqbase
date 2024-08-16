@@ -98,6 +98,10 @@ StyleCopReport.xml
 *.svclog
 *.scc
 
+# Files built by PHP Project
+*.phpproj
+*.phpproj.user
+
 # Chutzpah Test files
 _Chutzpah*
 

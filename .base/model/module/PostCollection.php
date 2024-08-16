@@ -394,8 +394,8 @@ class PostCollection extends Collection{
                         );
                 }
 			    $img->Source = $p_image;
-			    if($i % $this->MaximumColumns === 0)  yield "<div class='row'>";
-                yield "<article class='item $p_type $p_class col-lg'".($this->AllowAnimation? " data-aos='zoom-up' data-aos-offset='-500'":"").">";
+			    if($i % $this->MaximumColumns === 0) yield "<div class='row'>";
+                yield "<article class='item $p_type $p_class col-lg'". ($this->Animation? " data-aos-delay='".($i % $this->MaximumColumns*\_::$TEMPLATE->AnimationSpeed)."' data-aos='{$this->Animation}'":"").">";
                 yield "<div class='head row'>";
                     yield "<div class='col-lg'>";
                         $lt = $this->LinkedTitle && $hasl;

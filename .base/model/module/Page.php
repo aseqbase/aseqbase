@@ -69,10 +69,10 @@ class Page extends Module{
 	public $ImageMaxHeight = "50vh";
 
 	/**
-     * @var bool
+     * @var string|null
      * @category Part
      */
-	public $AllowAnimation = true;
+	public $Animation = "zoom-up";
 
 	/**
      * @var bool
@@ -302,10 +302,10 @@ class Page extends Module{
         }
 
 		$img->Source = $p_image;?>
-		<div class="<?php echo "$p_type $p_class container"; ?>" <?php if($this->AllowAnimation) echo " data-aos='zoom-up' data-aos-offset='-500'";?>>
-			<div class="head row">
-				<div class="col-md">
-                    <?php
+		<div class="<?php echo "$p_type $p_class container"; ?>" <?php echo $this->Animation? "data-aos='{$this->Animation}'":null;?>>
+    <div class="head row">
+        <div class="col-md">
+            <?php
 					$lt = $this->LinkedTitle && $hasl;
 					if($p_showtitle) echo ($lt?"<a href='$p_path'>":"")."<h2 class='title'>".__($p_title)."</h2>".($lt?"</a>":"");
 					if($p_showmeta && isValid($p_meta)){
@@ -318,37 +318,37 @@ class Page extends Module{
                         }
                         echo $p_meta."</sub>";
                     }?>
-				</div>
-				<?php if($p_showmorebutton) {?>
-				<div class="more col-sm col-3 md-hide">
-					<a class="btn btn-outline" href="<?php echo $p_path; ?>">
-                        <?php echo __($p_morebuttontext); ?>
-					</a>
-				</div>
-				<?php } ?>
-			</div>
-			<div class="description row">
-				<div class="col-md">
-					<?php if($p_showdescription) echo __($p_description); ?>
-				</div>
-                <?php if($p_showimage && isValid($p_image)){
+        </div>
+        <?php if($p_showmorebutton) {?>
+        <div class="more col-sm col-3 md-hide">
+            <a class="btn btn-outline" href="<?php echo $p_path; ?>">
+                <?php echo __($p_morebuttontext); ?>
+            </a>
+        </div>
+        <?php } ?>
+    </div>
+    <div class="description row">
+        <div class="col-md">
+            <?php if($p_showdescription) echo __($p_description); ?>
+        </div>
+        <?php if($p_showimage && isValid($p_image)){
                           echo "<div class='col-5'>";
                           $img->ReDraw();
                           echo "</div>";
                       }?>
-			</div>
-            <?php if($p_showcontent && isValid($p_content)): ?>
-			<div class="content">
-				<?php echo __($p_content); ?>
-			</div>
-			<?php elseif($p_showmorebutton):?>
-			<div class="more md-show">
-				<a class="btn btn-block btn-outline" href="<?php echo $p_path; ?>">
-                    <?php echo __($p_morebuttontext); ?>
-				</a>
-			</div>
-			<?php endif; ?>
-		</div>
+    </div>
+    <?php if($p_showcontent && isValid($p_content)): ?>
+    <div class="content">
+        <?php echo __($p_content); ?>
+    </div>
+    <?php elseif($p_showmorebutton):?>
+    <div class="more md-show">
+        <a class="btn btn-block btn-outline" href="<?php echo $p_path; ?>">
+            <?php echo __($p_morebuttontext); ?>
+        </a>
+    </div>
+    <?php endif; ?>
+</div>
 		<?php
 	}
 }

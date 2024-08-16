@@ -60,9 +60,9 @@ class Collection extends Module{
 	public $MoreButtonLabel = "Read More...";
 	/**
      * Show items with an animation effect
-     * @var bool
+     * @var string|null
      */
-	public $AllowAnimation = true;
+	public $Animation = "fade-in";
 
 	public function GetStyle(){
 		return parent::GetStyle().HTML::Style("
@@ -147,7 +147,7 @@ class Collection extends Module{
 							Convert::ToString($p_content).
                             Convert::ToString($p_buttons),
                             $p_link,
-                            ["class"=>"item col-sm"], $this->AllowAnimation? "data-aos='fade-up'":null);
+                            ["class"=>"item col-sm"], $this->Animation? " data-aos-delay='".($i % $this->MaximumColumns*\_::$TEMPLATE->AnimationSpeed)."' data-aos='{$this->Animation}'":null);
 					else yield HTML::Division(
                             (isEmpty($img->Source)?"":$img->ReCapture()).
                             HTML::SubHeading($p_name).
@@ -155,7 +155,7 @@ class Collection extends Module{
 							Convert::ToString($p_content).
                             Convert::ToString($p_buttons).
                             (isValid($p_link)? HTML::Button($this->MoreButtonLabel, $p_link, ["target"=>"blank"]):""),
-                            ["class"=>"item col-sm"], $this->AllowAnimation? "data-aos='fade-up'":null);
+                            ["class"=>"item col-sm"], $this->Animation? "data-aos='{$this->Animation}'":null);
                 }
 				if(++$i % $this->MaximumColumns === 0) yield "</div>";
             }

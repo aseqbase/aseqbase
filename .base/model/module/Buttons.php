@@ -8,7 +8,7 @@ MODULE("Collection");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
-class Gallery extends Collection{
+class Buttons extends Collection{
 	public $Class = "container";
 	/**
      * The default Content HTML
@@ -170,7 +170,7 @@ class Gallery extends Collection{
 			$clickact = "onclick=\"".$viewer->ShowScript("`$p_title`","$(`.".$this->Name.">*>.item-$i>.description>:last-child`).html()","`".($p_link??$p_path??$p_image)."`","`$p_buttons`", "`".getFullUrl($p_download??$p_path??$p_link??$p_image)."`")."\"";
 			$img->Attributes = $clickact;
 			?>
-			<div class="item item-<?php echo $i; ?> col-md" <?php if($this->AllowAnimation) echo " data-aos='zoom-up' data-aos-offset='-500'";?>>
+			<div class="item item-<?php echo $i; ?> col-md" <?php echo $this->Animation? "data-aos-delay='".($i % $this->MaximumColumns*\_::$TEMPLATE->AnimationSpeed/2)."' data-aos='{$this->Animation}'":null;?>>
     <?php $img->ReDraw(); ?>
     <div class="description">
         <h4>

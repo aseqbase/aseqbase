@@ -76,10 +76,10 @@ class Post extends Module{
 	public $ImageMaxHeight = "40vh";
 
 	/**
-     * @var bool
+     * @var string|null
      * @category Part
      */
-	public $AllowAnimation = true;
+	public $Animation = "flip-up";
 
 	/**
      * @var bool
@@ -351,7 +351,7 @@ class Post extends Module{
 	    $p_type = getValid($item,'Type');
 	    $p_class = getValid($item,'Class');
         $this->Class = "$p_type $p_class container";
-        if($this->AllowAnimation) $this->Attributes =  "data-aos='zoom-up' data-aos-offset='-500'";
+        if($this->Animation) $this->Attributes = "data-aos='{$this->Animation}'";
     }
 
 	public function Get(){
