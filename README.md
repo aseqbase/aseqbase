@@ -56,7 +56,9 @@
   2. Copy and replace all files and folders to the home directory (public_html) of the website
 
   #### To make the Sub Domain of aseqbase website
-  2. Copy and replace all files and folders to your subdomain directory (public_html/[my-subdomain-name]/)3. Change the value of `$GLOBALS["ASEQ"]` located on `/initialize.php`, to the current subdomains sequence (like [my-subdomain-name]) or if this file is in the root directory, leave null for that
+  2. Copy and replace all files and folders to your subdomain directory (public_html/[my-subdomain-name]/)
+  3. Change the value of `$GLOBALS["ASEQ"]` located on `/initialize.php`, to the current subdomains sequence (like [my-subdomain-name]) or if this file is in the root directory, leave null for that
+
 4. Use it through its special link (http://[my-domain-name].com or http://[my-subdomain-name].[my-domain-name].com)
 5. Enjoy...
 
