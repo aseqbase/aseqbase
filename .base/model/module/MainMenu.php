@@ -8,6 +8,7 @@ use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 class MainMenu extends Module{
 	public $Capturable = true;
+	public $Tag = "nav";
 	public $Class = "row";
 	public $Image = null;
 	public $Items = null;
@@ -159,7 +160,7 @@ class MainMenu extends Module{
 
 			.{$this->Name} ul.sub-items {
 				display: none;
-				position: absolute;
+				position: fixed;
 				color: var(--ForeColor-2);
 				background-color: var(--BackColor-1);
 				min-width: 160px;
