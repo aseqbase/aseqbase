@@ -54,13 +54,14 @@
 
   #### To make the Main Domain of aseqbase website
   2. Copy and replace all files and folders to the home directory (public_html) of the website
+  3. Use it through domain url (http://[my-domain-name].com)
+  4. Enjoy...
 
   #### To make the Sub Domain of aseqbase website
   2. Copy and replace all files and folders to your subdomain directory (public_html/[my-subdomain-name]/)
   3. Change the value of `$GLOBALS["ASEQ"]` located on `/initialize.php`, to the current subdomains sequence (like [my-subdomain-name]) or if this file is in the root directory, leave null for that
-
-4. Use it through its special link (http://[my-domain-name].com or http://[my-subdomain-name].[my-domain-name].com)
-5. Enjoy...
+  4. Use it through its special url (http://[my-subdomain-name].[my-domain-name].com)
+  5. Enjoy...
 
 <h3>Contributions</h3>
 <p>Contributions can take the form of new components or features, changes to existing features, tests, documentation (such as developer guides, user guides, examples, or specifications), bug fixes, optimizations, or just good suggestions.</p>
