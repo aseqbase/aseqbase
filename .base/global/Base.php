@@ -26,7 +26,7 @@ LIBRARY("Revise");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
  */
-class Base{
+class Base extends \ArrayObject{
 	/**
 	 * The main name of the object
 	 * @var string|null
@@ -98,7 +98,7 @@ class Base{
     }
 
 	public function Get(){
-		return MiMFa\Library\Convert::ToString($this->Children);
+		return MiMFa\Library\Convert::ToString($this->Children).MiMFa\Library\Convert::ToString($this->ToArray());
     }
 
 	public function Capture(){
@@ -120,6 +120,20 @@ class Base{
 	public function __toString(){
 		return $this->Capturable?$this->Capture():$this->Draw();
     }
+
+	public function ToArray(){
+		$arr = [];
+		foreach ($this as $key=>$value)
+			$arr[$key] = $value;
+		return $arr;
+    }
+	public function __toArray(){
+		$arr = [];
+		foreach ($this as $key=>$value)
+			$arr[$key] = $value;
+		return $arr;
+    }
+
 
 
 	/**

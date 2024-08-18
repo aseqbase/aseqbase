@@ -1,4 +1,5 @@
 <?php
+LIBRARY("Revise");
 /**
  *All the basic website informations
  *@copyright All rights are reserved for MiMFa Development Group
@@ -6,7 +7,7 @@
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
  */
-abstract class InformationBase extends Base{
+abstract class InformationBase{
 	/**
 	 * The website owner name
 	 * @var mixed
@@ -200,7 +201,7 @@ abstract class InformationBase extends Base{
 
 
 	public function __construct(){
-        parent::__construct(false);
+		\MiMFa\Library\Revise::Load($this);
         $this->User = new \MiMFa\Library\User();
         \MiMFa\Library\Revise::Decode($this, getValid($this->User->GetGroup(),"MetaData","[]"));
         \MiMFa\Library\Revise::Decode($this, getValid($this->User->Get(),"MetaData","[]"));

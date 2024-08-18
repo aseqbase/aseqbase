@@ -1,4 +1,5 @@
 <?php
+LIBRARY("Revise");
 /**
  *All the basic website and libraries configurations
  *@copyright All rights are reserved for MiMFa Development Group
@@ -6,7 +7,7 @@
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
  */
-abstract class ConfigurationBase extends Base {
+abstract class ConfigurationBase{
     /**
      * The website Encoding
      * @var string
@@ -473,7 +474,7 @@ abstract class ConfigurationBase extends Base {
 	public $DataBaseAddNameToPrefix = true;
 
 	public function __construct(){
-        parent::__construct(false);
+        \MiMFa\Library\Revise::Load($this);
         $sp = preg_replace("/\W/","", getClientIP()."");
         if(is_null($this->PathKey)) $this->PathKey = "path_".$sp;
         if(is_null($this->ViewHandlerKey)) $this->ViewHandlerKey = "view_".$sp;

@@ -56,7 +56,7 @@ class Revise{
      */
     public static function Encode($object){
         if($object === null) return "null";
-        $res = json_encode($object,flags:self::$Flags);
+        $res = json_encode($object, flags:self::$Flags);
         if($res === false) return "{}";
         return $res;
     }
@@ -65,7 +65,7 @@ class Revise{
      * @param mixed $object
      */
     public static function Decode(&$object, string $reviseData = "{}"){
-        $metadata = json_decode($reviseData,flags:self::$Flags)??[];
+        $metadata = json_decode($reviseData, flags:self::$Flags)??[];
         foreach ($metadata as $key=>$value)
             if(isset($object->$key)) $object->$key = $value;
         return $object;
