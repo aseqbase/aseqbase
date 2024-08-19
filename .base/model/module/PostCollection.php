@@ -193,6 +193,7 @@ class PostCollection extends Collection{
 		return HTML::Style("
 			.{$this->Name}>*>.item {
 				height: fit-content;
+				max-width: calc(100% - 2 * var(--Size-2));
 				background-Color: #88888808;
 				margin: var(--Size-2);
             	padding: var(--Size-3);

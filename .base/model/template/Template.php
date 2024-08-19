@@ -167,6 +167,9 @@ class Template extends \Base{
             transition: var(--Transition-1);
         }
         ");
+        foreach ($this as $key=>$value)
+        	if(is_string($key)) echo HTML::Meta($key, Convert::ToString($value));
+            else echo Convert::ToString($value);
     }
 	public function DrawMain(){
         REGION("main");
@@ -174,6 +177,9 @@ class Template extends \Base{
 	public function DrawHeader(){
     }
 	public function DrawContent(){
+        foreach ($this->Children as $key=>$value)
+        	if(is_string($key)) echo HTML::Section(Convert::ToString($value),["id"=>$key]);
+            else echo Convert::ToString($value);
     }
 	public function DrawFooter(){
     }

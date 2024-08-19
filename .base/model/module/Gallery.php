@@ -74,6 +74,7 @@ class Gallery extends Collection{
 
 			.{$this->Name}>*>.item {
 				height: fit-content;
+				max-width: calc(100% - 2 * 2vmin);
 				background-Color: var(--BackColor-0);
 				color: var(--ForeColor-0);
 				margin: 3vmin 2vmin;

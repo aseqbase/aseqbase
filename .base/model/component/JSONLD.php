@@ -7,10 +7,38 @@ class JSONLD extends Component{
 	public $HasWebsite = true;
 
 	public function Echo(){
-		if($this->HasWebsite) $this->EchoWebsite();
+		if($this->HasWebsite) $this->EchoWebsite(
+				name:getValid($this, "name"),
+				url:getValid($this, "url"),
+				searchUrl:getValid($this, "searchUrl")
+			);
+		else $this->EchoArticle(
+				title:getValid($this, "title"),
+				excerpt:getValid($this, "excerpt"),
+				image:getValid($this, "image"),
+				author:getValid($this, "author"),
+				publisher:getValid($this, "publisher"),
+				datePublished:getValid($this, "datePublished"),
+				dateModified:getValid($this, "dateModified"),
+				type:getValid($this, "type")
+			);
 	}
 	public function Get(){
-		if($this->HasWebsite) $this->GetWebsite();
+		if($this->HasWebsite) $this->GetWebsite(
+				name:getValid($this, "name"),
+				url:getValid($this, "url"),
+				searchUrl:getValid($this, "searchUrl")
+			);
+		else $this->GetArticle(
+				title:getValid($this, "title"),
+				excerpt:getValid($this, "excerpt"),
+				image:getValid($this, "image"),
+				author:getValid($this, "author"),
+				publisher:getValid($this, "publisher"),
+				datePublished:getValid($this, "datePublished"),
+				dateModified:getValid($this, "dateModified"),
+				type:getValid($this, "type")
+			);
 	}
 
 	public function EchoWebsite($name = null, $url = null, $searchUrl = null){

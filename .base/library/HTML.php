@@ -753,6 +753,15 @@ class HTML
         return self::Element(Convert::ToString($content),"header",["class"=> "header" ], $attributes);
     }
     /**
+     * The <NAV> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Nav($content, ...$attributes){
+        return self::Element(Convert::ToString($content),"nav",[ "class"=> "nav" ], $attributes);
+    }
+    /**
      * The <MAIN> HTML Tag
      * @param mixed $content The content of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
@@ -760,6 +769,15 @@ class HTML
      */
     public static function Content($content, ...$attributes){
         return self::Element(Convert::ToString($content),"main",["class"=> "content" ], $attributes);
+    }
+    /**
+     * The <SECTION> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Section($content, ...$attributes){
+        return self::Element(Convert::ToString($content),"section",[ "class"=> "section" ], $attributes);
     }
     /**
      * The <FOOTER> HTML Tag
