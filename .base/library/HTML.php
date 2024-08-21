@@ -1391,7 +1391,8 @@ else return call_user_func("self::Field", null, $k, $f);
             return self::InputDetector(getValid($type, "Type", null), $value);
         elseif(is_countable($type)) return "select";
         elseif($type === true) return "text";
-        else return strtolower($type);
+        elseif(is_string($type)) return strtolower($type);
+        else return $type;
     }
     /**
      * The <LABEL> and any input HTML Tag
@@ -1500,7 +1501,7 @@ else return call_user_func("self::Field", null, $k, $f);
                 $type = self::InputDetector(getBetween($type, "type", "Type"), $value);
             }
         } else $type = self::InputDetector($type, $value);
-        if(!is_null($type)){
+        if(!is_null($type) && is_string($type)){
             if(preg_match("/^\s*((\{[\w\W]*\})|(\[[\w\W]*\]))\s*$/",$type)){
                 try{
                     $types = Convert::FromJSON($type);

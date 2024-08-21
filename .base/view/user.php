@@ -5,11 +5,10 @@ $path = \_::$PAGE;
 TEMPLATE("Main");
 $templ = new \MiMFa\Template\Main();
 if(!isValid($path))
-    $templ->Content = function(){
+    $templ->Content = function() {
         PAGE("home");
     };
-else
-    $templ->Content = function() use($path){
+else $templ->Content = function() use($path) {
         MODULE("Table");
         $mod = new Table(\_::$CONFIG->DataBasePrefix."User");
         $mod->KeyColumn = "Signature";
@@ -33,7 +32,7 @@ else
             "Path"=>$access,
             "Email"=>$access,
             "Password"=>false,
-            "GroupID"=> function(){
+            "GroupID"=>function() {
                 $std = new stdClass();
                 $std->Title = "Group";
                 $std->Type = "select";
