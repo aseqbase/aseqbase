@@ -177,7 +177,7 @@ class Template extends \Base{
 	public function DrawHeader(){
     }
 	public function DrawContent(){
-        foreach ($this->Children as $key=>$value)
+        foreach ($this->Children??[] as $key=>$value)
         	if(is_string($key)) echo HTML::Section(Convert::ToString($value),["id"=>$key]);
             else echo Convert::ToString($value);
     }
