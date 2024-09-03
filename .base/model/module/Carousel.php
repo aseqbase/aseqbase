@@ -34,6 +34,13 @@ class Carousel extends Collection{
 			$target = ".".$this->Name;
 			$i = 0;
             foreach(Convert::ToItems($this->Items) as $item) {
+				if(is_array($item) && (isValid($item, "Image") || isValid($item, "image")))
+                    $item = "
+						<img src='".getBetween($item, "Image", "image")."'>
+						<div class='carousel-caption'>
+							<h3>".getBetween($item, "Title", "title")."</h3>
+							<p>".getBetween($item, "Description", "description", "Caption", "caption")."</p>
+						</div>";
 				$active = $i==$this->ActiveItem;
                 $indicators[] = HTML::Element($this->IndicatorLabel, "button", ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>$active?"active":""]);
                 $inners[] = HTML::Division($item, ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>"carousel-item".($active?" active":"")]);
