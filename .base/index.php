@@ -11,7 +11,7 @@ if(
             foreach (\_::$CONFIG->Handlers as $pat=>$handler)
                 if(preg_match($pat, $request)
                     && VIEW($handler, variables:$_REQUEST)) return;
-            VIEW(\_::$CONFIG->ViewName??\_::$CONFIG->DefaultViewName??"main",variables:$_REQUEST);
+            VIEW(\_::$CONFIG->ViewName??\_::$CONFIG->DefaultViewName??"main", variables:$_REQUEST);
         }
     else VIEW(\_::$CONFIG->HomeViewName, variables:$_REQUEST);
 }
