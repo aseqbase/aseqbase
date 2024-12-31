@@ -1,5 +1,8 @@
 <?php
 namespace MiMFa\Template;
+
+use MiMFa\Library\Convert;
+
 class Message extends Template{
 	public $SupTitle = null;
 	public $Title = null;
@@ -22,7 +25,7 @@ class Message extends Template{
 				<meta name="owner" content="<?php echo \_::$INFO->FullOwner; ?>">
 				<title><?php echo $this->WindowTitle??\_::$INFO->FullName; ?></title>
 				<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??\_::$INFO->LogoPath); ?>">
-				<?php echo \_::$TEMPLATE->BasePack; ?>
+				<?php echo join(PHP_EOL, \_::$TEMPLATE->Basics); ?>
 				<?php echo \_::$TEMPLATE->GetInitial(); ?>
 				<style>
 					body {

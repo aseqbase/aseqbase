@@ -99,7 +99,7 @@ class Query{
 	public static function FindCategoryID(string|null $direction, int|null $default = null, string|null $table = null){
         if(isEmpty($direction)) return $default;
         $condit = User::GetAccessCondition();
-        $paths = explode("/",trim($direction??"","/\\"));
+        $paths = explode("/",trim($direction??"", "/\\"));
         $parentID = null;
         $id = null;
         foreach ($paths as $name)

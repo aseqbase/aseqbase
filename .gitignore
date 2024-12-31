@@ -88,6 +88,7 @@ StyleCopReport.xml
 *.tlh
 *.tmp
 *.tmp_proj
+*.csproj
 *_wpftmp.csproj
 *.log
 *.tlog
@@ -401,16 +402,20 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+/single
+/sequence
+/administrator
 /test
+/tmp
 /ms
 /ums
 /gms
 /erp
-/single
-/sequence
-/administrator
 /vendor
+/.updater
+/.installer
 /.vs
+/.vscode
 /.git
 /.package
 /MiMFa aseqbase.sln

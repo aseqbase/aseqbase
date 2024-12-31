@@ -19,7 +19,7 @@ class Transport
 	}
 
 	public static function GetItem($name,$dflt = null){
-		return ((self::IsItem($name))? self::Normalize(self::$Items->$name) : $dflt);
+		return ((self::IsItem($name))? self::Normalize(self::$Items[$name]) : $dflt);
 	}
 	public static function IsItem($name){
 		return isset(self::$Items->$name);
@@ -63,29 +63,29 @@ class Transport
 		self::Send($result);
 	}
 
-	public static function SendText($message,$num = 1,$translate = true){
+	public static function SendText($message, $num = 1, $translate = true){
 		if($translate) $message = Translate::Get($message);
 		self::PushMessage("Text",$message);
-		$result= "{\"type\":\"${num}\",\"message\":\"".$message."\"}";
+		$result= "{\"type\":\"$num\",\"message\":\"".$message."\"}";
 		self::Send($result);
 	}
 
-	public static function SendMessage($message,$num = 1,$translate = true){
+	public static function SendMessage($message, $num = 1, $translate = true){
 		self::$ResultNum = $num;
 		if($translate) $message = Translate::Get($message);
-		$result= "{\"type\":\"${num}\",\"message\":\"".self::Message($message,$translate)."\"}";
+		$result= "{\"type\":\"$num\",\"message\":\"".self::Message($message,$translate)."\"}";
 		self::Send($result);
 	}
 
 	public static function SendSuccess($message,$num = 1,$translate = true){
 		self::$ResultNum = $num;
-		$result= "{\"type\":\"${num}\",\"message\":\"".self::Success($message,$translate)."\"}";
+		$result= "{\"type\":\"$num\",\"message\":\"".self::Success($message,$translate)."\"}";
 		self::Send($result);
 	}
 
 	public static function SendError($message, $num = -1,$translate = true){
 		self::$ResultNum = $num;
-		$result= "{\"type\":\"${num}\",\"message\":\"".self::Error($message,$translate)."\"}";
+		$result= "{\"type\":\"$num\",\"message\":\"".self::Error($message,$translate)."\"}";
 		self::Send($result);
 	}
 
@@ -96,19 +96,19 @@ class Transport
 	public static function SendSuccesses($num = 1,$translate = true,$splitor="<br>"){
 		self::$ResultNum = $num;
 		$message = self::GetMessages("Success",$translate,$splitor);
-		self::Send("{\"type\":\"${num}\",\"message\":\"".self::Success($message,false)."\"}");
+		self::Send("{\"type\":\"$num\",\"message\":\"".self::Success($message,false)."\"}");
 	}
 
 	public static function SendErrors($num = -1,$translate = true,$splitor="<br>"){
 		self::$ResultNum = $num;
 		$message = self::GetMessages("Error",$translate,$splitor);
-		self::Send("{\"type\":\"${num}\",\"message\":\"".self::Error($message,false)."\"}");
+		self::Send("{\"type\":\"\$num\",\"message\":\"".self::Error($message,false)."\"}");
 	}
 
 	public static function SendMessages($num = 1,$translate = true,$splitor="<br>"){
 		self::$ResultNum = $num;
 		$message = self::GetMessages("Message",$translate,$splitor);
-		self::Send("{\"type\":\"${num}\",\"message\":\"".self::Message($message,false)."\"}");
+		self::Send("{\"type\":\"\$num\",\"message\":\"".self::Message($message,false)."\"}");
 	}
 
 	public static function SendAll($num = 1,$translate = true,$splitor="<br>"){
@@ -118,7 +118,7 @@ class Transport
 			if(strpos($key,"Success-")==0) $message .= self::Success($val,$translate).$splitor;
 			elseif(strpos($key,"Error-")==0) $message .= self::Error($val,$translate).$splitor;
 			else $message .= self::Message($val,$translate).$splitor;
-		self::Send("{\"type\":\"${num}\",\"message\":\"${message}\"}");
+		self::Send("{\"type\":\"\$num\",\"message\":\"$message\"}");
 	}
 
 	public static function Send($result){
@@ -131,7 +131,7 @@ class Transport
 	public static function ShowText($message,$num=0,$translate = true){
 		if($translate) $message = Translate::Get($message);
 		self::PushMessage("Text",$message);
-		$result= "{\"type\":\"${num}\",\"message\":\"".$message."\"}";
+		$result= "{\"type\":\"\$num\",\"message\":\"".$message."\"}";
 		self::Show($result);
 	}
 

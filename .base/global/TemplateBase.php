@@ -15,9 +15,9 @@ abstract class TemplateBase{
 	/**
 		* Default page head Packages
         * @field html
-		* @var mixed
+		* @var array
 		*/
-	public $BasePack = "
+	public $Basics = ["
 		<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js'></script>
 		<script>window.jQuery || document.write(`<script src='https://code.jquery.com/jquery-3.7.1.min.js'><\/script>`)</script>
 		<link rel='stylesheet' href='https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.min.css'>
@@ -28,13 +28,25 @@ abstract class TemplateBase{
 		<script src='https://kit.fontawesome.com/e557f8d9f4.js' crossorigin='anonymous'></script>
 		<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css'>
 		<script src='https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js' crossorigin='anonymous'></script>
-	";
+	"];
 	/**
-		* The custom page head Packages
+		* The custom head packages
 		* @field html
-		* @var mixed
+		* @var array
 		*/
-	public $CustomPack = "";
+	public $Initials = [];
+	/**
+		* The custom top of body's tags
+		* @field html
+		* @var array
+		*/
+	public $Mains = [];
+	/**
+		* The custom top of body's tags
+		* @field html
+		* @var array
+		*/
+	public $Finals = [];
 
 	/**
 		* Full Colors Palette
@@ -376,10 +388,10 @@ abstract class TemplateBase{
 				--Url-ProcessSymbolPath: URL(\"".\MiMFa\Library\Local::GetUrl(\_::$INFO->ProcessSymbolPath)."\");
 				--Url-ErrorSymbolPath: URL(\"".\MiMFa\Library\Local::GetUrl(\_::$INFO->ErrorSymbolPath)."\");
 			}
-		</style>";
+		</style>".join(PHP_EOL, $this->Initials);
 	}
 	public function GetMain():string|null{
-		return "";
+		return join(PHP_EOL, $this->Mains);
 	}
 	public function GetFinal():string|null{
 		return "<script>
@@ -389,7 +401,7 @@ abstract class TemplateBase{
 			$(function(){
 				Evaluate.URL();
 			})();
-		</script>";
+		</script>".join(PHP_EOL, $this->Finals);
 	}
 
 

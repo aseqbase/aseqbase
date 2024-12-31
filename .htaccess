@@ -136,7 +136,7 @@ RewriteRule ^ /index.php [L]
 ## End - MiMFa! core SEF Section.
 
 # php -- BEGIN cPanel-generated handler, do not edit
-# Set the “ea-php81” package as the default “PHP” programming language.
+# Set the ï¿½ea-php81ï¿½ package as the default ï¿½PHPï¿½ programming language.
 <IfModule mime_module>
   AddHandler application/x-httpd-ea-php81 .php .php8 .phtml
 </IfModule>

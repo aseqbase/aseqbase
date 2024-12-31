@@ -18,26 +18,32 @@ class Local{
     }
     /**
      * Get or Find a file, then get the external url
-     * @param mixed $path Probable file external url or path
+     * @param string|null $path Probable file external url or path
      * @return mixed
      */
 	public static function GetUrl($path){
 		if((!isValid($path)) || isAbsoluteUrl($path)) return $path;
-		if(startsWith($path, \_::$DIR)) return \_::$ROOT.substr($path, strlen(\_::$DIR));
-		if(startsWith($path, \_::$BASE_DIR)) return \_::$BASE_ROOT.substr($path, strlen(\_::$BASE_DIR));
+		$dir = $path;
+		if(DIRECTORY_SEPARATOR != "/") {
+			$dir = str_replace("/", DIRECTORY_SEPARATOR, $path);
+			$path = str_replace(DIRECTORY_SEPARATOR, "/", $path);
+		} 
+		if(startsWith($dir, \_::$DIR)) return \_::$ROOT.substr($path, strlen(\_::$DIR));
+		if(startsWith($dir, \_::$BASE_DIR)) return \_::$BASE_ROOT.substr($path, strlen(\_::$BASE_DIR));
 		if(!startsWith($path, "/")){
 			$dirs = explode("/", \_::$DIRECTION);
 			$dirs = implode("/", array_slice($dirs, 0, count($dirs) - 1));
 			if(strlen($dirs) !== 0) $path = "$dirs/$path";
         }
-		$p = ltrim(getRelative($path), "/\\");
-		if(file_exists(\_::$DIR.$p)) return \_::$ROOT.$p;
+		$d = ltrim(getRelative($dir), DIRECTORY_SEPARATOR);
+		$p = ltrim(getRelative($path), "/");
+		if(file_exists(\_::$DIR.$d)) return \_::$ROOT.$p;
 		if(count(\_::$SEQUENCES) > 0){
 			foreach(\_::$SEQUENCES as $dir=>$root)
-				if(file_exists($dir.$p))
+				if(file_exists($dir.$d))
 					return $root.$p;
 		}
-		if(file_exists(\_::$BASE_DIR.$p)) return \_::$BASE_ROOT.$p;
+		if(file_exists(\_::$BASE_DIR.$d)) return \_::$BASE_ROOT.$p;
 		return $path;
 	}
 	/**
@@ -101,19 +107,20 @@ class Local{
 		return is_dir($path);
 	}
 	public static function CreateDirectory($destPath){
-		$dirs = explode("/",trim($destPath,"/"));
-		$dir = "";
+		if(startsWith($destPath, \_::$DIR)) $destPath = substr($destPath, strlen(\_::$DIR));
+		$dirs = explode(DIRECTORY_SEPARATOR, trim($destPath, DIRECTORY_SEPARATOR));
+		$dir = rtrim(\_::$DIR, DIRECTORY_SEPARATOR);
 		foreach($dirs as $d){
-			$dir .= "/".$d;
+			$dir .= DIRECTORY_SEPARATOR.$d;
 			if(!file_exists($dir)){
                 mkdir($dir, 0777, true);
-				self::CreateFile($dir."/index.html");
+				self::CreateFile($dir.DIRECTORY_SEPARATOR."index.html");
             }
 		}
-		return $dir."/";
+		return $dir.DIRECTORY_SEPARATOR;
 	}
 	public static function DeleteDirectory($destPath){
-		$dir = trim($destPath,"/");
+		$dir = trim($destPath, DIRECTORY_SEPARATOR);
 		return unlink($dir);
 	}
 	public static function MoveDirectory($sourceDir, $destDir, $recursive = true){
@@ -256,7 +263,7 @@ class Local{
 		if(!isValid($destDir)) $destDir = \_::$PUBLIC_DIR;
 
 		$fileType = strtolower(pathinfo($fileObject["name"], PATHINFO_EXTENSION));
-		$dir = self::CreateDirectory(trim($destDir,"/"));
+		$dir = self::CreateDirectory(trim($destDir, DIRECTORY_SEPARATOR));
 		$fileName = strtolower(pathinfo($fileObject["name"], PATHINFO_FILENAME))."_";
 
 		// Allow certain file formats

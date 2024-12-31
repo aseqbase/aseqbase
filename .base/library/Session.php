@@ -108,7 +108,7 @@ class Session
 
 	public static function SetCookie($key,$val){
 		if($val == null) return false;
-		return setcookie(self::ToCipherKey($key), self::ToCipherValue($val), time() + self::$Time,"/");
+		return setcookie(self::ToCipherKey($key), self::ToCipherValue($val), time() + self::$Time, "/");
 	}
 	public static function GetCookie($key){
 		$key = self::ToCipherKey($key);

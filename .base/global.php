@@ -189,7 +189,7 @@
 		public static string|null $BASE_ROOT = null;
 		/**
 		 * The base internal root directory
-		 * Example: "home/base/public_html/"
+		 * Example: "home/mimfa/public_html/.base"
 		 * @var string|null
 		 */
 		public static string|null $BASE_DIR = null;
@@ -213,70 +213,72 @@
 		public static string|null $BASE_STYLE_DIR = null;
 	}
 
-	_::$ASEQ = $GLOBALS["ASEQBASE"];
-	_::$BASE = $GLOBALS["BASE"];
+	\_::$ASEQ = $GLOBALS["ASEQBASE"];
+	\_::$BASE = $GLOBALS["BASE"];
 
-	_::$SEQUENCES = $GLOBALS["SEQUENCES"];
-	_::$NEST = $GLOBALS["NEST"];
+	\_::$SEQUENCES = $GLOBALS["SEQUENCES"];
+	\_::$NEST = $GLOBALS["NEST"];
 
-	_::$ID = getId(true)."";
-	_::$DYNAMIC_ID = getId(false);
+	\_::$ID = getId(true)."";
+	\_::$DYNAMIC_ID = getId(false);
 
-	_::$URL = getUrl();
-	_::$HOST = getHost();
-	_::$SITE = getSite();
-	_::$DOMAIN = getDomain();
-	_::$PATH = getPath();
-	_::$REQUEST = getRequest();
-	_::$DIRECTION = getDirection();
-	_::$PAGE = getPage();
-	_::$QUERY = getQuery();
-	_::$FRAGMENT = getFragment();
-	_::$EMAIL = getEmail();
+	\_::$URL = getUrl();
+	\_::$HOST = getHost();
+	\_::$SITE = getSite();
+	\_::$DOMAIN = getDomain();
+	\_::$PATH = getPath();
+	\_::$REQUEST = getRequest();
+	\_::$DIRECTION = getDirection();
+	\_::$PAGE = getPage();
+	\_::$QUERY = getQuery();
+	\_::$FRAGMENT = getFragment();
+	\_::$EMAIL = getEmail();
 
-	_::$BASE_ROOT = $GLOBALS["BASE_ROOT"];
-	_::$BASE_DIR = $GLOBALS["BASE_DIR"] = __DIR__."/";
+	\_::$BASE_ROOT = $GLOBALS["BASE_ROOT"];
+	\_::$BASE_DIR = $GLOBALS["BASE_DIR"] = str_replace(str_replace(["\\","/"], DIRECTORY_SEPARATOR, $_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR), "", subject: str_replace(["\\","/"], DIRECTORY_SEPARATOR, __DIR__).DIRECTORY_SEPARATOR);
 
-	_::$BASE_MODEL_DIR = \_::$BASE_DIR."model/";
-	_::$BASE_VIEW_DIR = \_::$BASE_DIR."view/";
-	_::$BASE_PRIVATE_DIR = \_::$BASE_DIR."private/";
-	_::$BASE_PUBLIC_DIR = \_::$BASE_DIR."public/";
-	_::$BASE_STORAGE_DIR = \_::$BASE_DIR."storage/";
-	_::$BASE_ASSET_DIR = \_::$BASE_DIR."asset/";
-	_::$BASE_LIBRARY_DIR = \_::$BASE_DIR."library/";
-	_::$BASE_COMPONENT_DIR = \_::$BASE_MODEL_DIR."component/";
-	_::$BASE_TEMPLATE_DIR = \_::$BASE_MODEL_DIR."template/";
-	_::$BASE_MODULE_DIR = \_::$BASE_MODEL_DIR."module/";
-	_::$BASE_REGION_DIR = \_::$BASE_VIEW_DIR."region/";
-	_::$BASE_PAGE_DIR = \_::$BASE_VIEW_DIR."page/";
-	_::$BASE_PART_DIR = \_::$BASE_VIEW_DIR."part/";
-	_::$BASE_SCRIPT_DIR = \_::$BASE_VIEW_DIR."script/";
-	_::$BASE_STYLE_DIR = \_::$BASE_VIEW_DIR."style/";
+	\_::$BASE_MODEL_DIR = \_::$BASE_DIR."model".DIRECTORY_SEPARATOR;
+	\_::$BASE_VIEW_DIR = \_::$BASE_DIR."view".DIRECTORY_SEPARATOR;
+	\_::$BASE_PRIVATE_DIR = \_::$BASE_DIR."private".DIRECTORY_SEPARATOR;
+	\_::$BASE_PUBLIC_DIR = \_::$BASE_DIR."public".DIRECTORY_SEPARATOR;
+	\_::$BASE_STORAGE_DIR = \_::$BASE_DIR."storage".DIRECTORY_SEPARATOR;
+	\_::$BASE_ASSET_DIR = \_::$BASE_DIR."asset".DIRECTORY_SEPARATOR;
+	\_::$BASE_LIBRARY_DIR = \_::$BASE_DIR."library".DIRECTORY_SEPARATOR;
+	\_::$BASE_COMPONENT_DIR = \_::$BASE_MODEL_DIR."component".DIRECTORY_SEPARATOR;
+	\_::$BASE_TEMPLATE_DIR = \_::$BASE_MODEL_DIR."template".DIRECTORY_SEPARATOR;
+	\_::$BASE_MODULE_DIR = \_::$BASE_MODEL_DIR."module".DIRECTORY_SEPARATOR;
+	\_::$BASE_REGION_DIR = \_::$BASE_VIEW_DIR."region".DIRECTORY_SEPARATOR;
+	\_::$BASE_PAGE_DIR = \_::$BASE_VIEW_DIR."page".DIRECTORY_SEPARATOR;
+	\_::$BASE_PART_DIR = \_::$BASE_VIEW_DIR."part".DIRECTORY_SEPARATOR;
+	\_::$BASE_SCRIPT_DIR = \_::$BASE_VIEW_DIR."script".DIRECTORY_SEPARATOR;
+	\_::$BASE_STYLE_DIR = \_::$BASE_VIEW_DIR."style".DIRECTORY_SEPARATOR;
 
 
-	_::$ROOT = $GLOBALS["ROOT"];
-	_::$DIR = $GLOBALS["DIR"];
+	\_::$ROOT = $GLOBALS["ROOT"];
+	\_::$DIR = $GLOBALS["DIR"];
 
-	_::$MODEL_DIR = \_::$DIR."model/";
-	_::$VIEW_DIR = \_::$DIR."view/";
-	_::$PRIVATE_DIR = \_::$DIR."private/";
-	_::$PUBLIC_DIR = \_::$DIR."public/";
-	_::$ASSET_DIR = \_::$DIR."asset/";
-	_::$STORAGE_DIR = \_::$DIR."storage/";
-	_::$TMP_DIR = \_::$DIR."tmp/";
-	_::$LOG_DIR = \_::$DIR."log/";
-	_::$LIBRARY_DIR = \_::$DIR."library/";
-	_::$COMPONENT_DIR = \_::$MODEL_DIR."component/";
-	_::$TEMPLATE_DIR = \_::$MODEL_DIR."template/";
-	_::$MODULE_DIR = \_::$MODEL_DIR."module/";
-	_::$PAGE_DIR = \_::$VIEW_DIR."page/";
-	_::$REGION_DIR = \_::$VIEW_DIR."region/";
-	_::$PART_DIR = \_::$VIEW_DIR."part/";
-	_::$SCRIPT_DIR = \_::$VIEW_DIR."script/";
-	_::$STYLE_DIR = \_::$VIEW_DIR."style/";
+	\_::$MODEL_DIR = \_::$DIR."model".DIRECTORY_SEPARATOR;
+	\_::$VIEW_DIR = \_::$DIR."view".DIRECTORY_SEPARATOR;
+	\_::$PRIVATE_DIR = \_::$DIR."private".DIRECTORY_SEPARATOR;
+	\_::$PUBLIC_DIR = \_::$DIR."public".DIRECTORY_SEPARATOR;
+	\_::$ASSET_DIR = \_::$DIR."asset".DIRECTORY_SEPARATOR;
+	\_::$STORAGE_DIR = \_::$DIR."storage".DIRECTORY_SEPARATOR;
+	\_::$TMP_DIR = \_::$DIR."tmp".DIRECTORY_SEPARATOR;
+	\_::$LOG_DIR = \_::$DIR."log".DIRECTORY_SEPARATOR;
+	\_::$LIBRARY_DIR = \_::$DIR."library".DIRECTORY_SEPARATOR;
+	\_::$COMPONENT_DIR = \_::$MODEL_DIR."component".DIRECTORY_SEPARATOR;
+	\_::$TEMPLATE_DIR = \_::$MODEL_DIR."template".DIRECTORY_SEPARATOR;
+	\_::$MODULE_DIR = \_::$MODEL_DIR."module".DIRECTORY_SEPARATOR;
+	\_::$PAGE_DIR = \_::$VIEW_DIR."page".DIRECTORY_SEPARATOR;
+	\_::$REGION_DIR = \_::$VIEW_DIR."region".DIRECTORY_SEPARATOR;
+	\_::$PART_DIR = \_::$VIEW_DIR."part".DIRECTORY_SEPARATOR;
+	\_::$SCRIPT_DIR = \_::$VIEW_DIR."script".DIRECTORY_SEPARATOR;
+	\_::$STYLE_DIR = \_::$VIEW_DIR."style".DIRECTORY_SEPARATOR;
 
-	_::$SERIES = array_merge([\_::$DIR=>\_::$ROOT], $GLOBALS["SEQUENCES"], [\_::$BASE_DIR=>\_::$BASE_ROOT]);
+	\_::$SERIES = array_merge([\_::$DIR=>\_::$ROOT], $GLOBALS["SEQUENCES"], [\_::$BASE_DIR=>\_::$BASE_ROOT]);
 
+	//test_path();test_url();die();
+	
 	RUN("global/Base");
 	RUN("global/EnumBase");
 
@@ -294,7 +296,7 @@
 
 	RUN("global/ConfigurationBase");
 	RUN("Configuration");
-	_::$CONFIG = new Configuration();
+	\_::$CONFIG = new Configuration();
 	ini_set('display_errors', \_::$CONFIG->DisplayError);
 	ini_set('display_startup_errors', \_::$CONFIG->DisplayStartupError);
 	error_reporting(\_::$CONFIG->ReportError);
@@ -309,12 +311,12 @@
 
 	RUN("global/InformationBase");
 	RUN("Information");
-	_::$INFO = new Information();
-	_::$INFO->User = _::$INFO->User??new \MiMFa\Library\User();
+	\_::$INFO = new Information();
+	\_::$INFO->User = _::$INFO->User??new \MiMFa\Library\User();
 
 	RUN("global/TemplateBase");
 	RUN("Template");
-	_::$TEMPLATE = new Template();
+	\_::$TEMPLATE = new Template();
 
 	\MiMFa\Library\Local::CreateDirectory(\_::$TMP_DIR);
 	\MiMFa\Library\Local::CreateDirectory(\_::$LOG_DIR);
@@ -481,9 +483,8 @@
 	}
 
 	function INCLUDING(string $filePath, bool $print = true, array $variables = [], string|null $defaultPath = null, $default = null){
-		global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT;
 		if(file_exists($filePath) || (!is_null($defaultPath) && file_exists($filePath = $defaultPath))){
-			//if(count($variables) > 0) $filePath = rtrim($filePath,"/")."?". http_build_query($variables);
+			//if(count($variables) > 0) $filePath = rtrim($filePath,DIRECTORY_SEPARATOR)."?". http_build_query($variables);
 			//if(count($variables) > 0) extract($variables);
 			//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
 			ob_start();
@@ -496,7 +497,6 @@
 		return $default;
 	}
 	function REQUIRING(string $filePath, bool $print = true, array $variables = [], string|null $defaultPath = null, $default = null){
-		global $ASEQ, $BASE, $DIR, $BASE_DIR, $ROOT, $BASE_ROOT;
 		if(file_exists($filePath) || (!is_null($defaultPath) && file_exists($filePath = $defaultPath))){
 			//if(count($variables) > 0) extract($variables);
 			//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
@@ -948,15 +948,12 @@
      */
 	function getUrl(string|null $path = null):string|null{
 		if($path === null)
-			$path = //$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'] or
-				(
-					(
-						getValid($_SERVER,'SCRIPT_URI')??
+			$path =(
+						getValid($_SERVER, 'SCRIPT_URI')??
 						(((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https":"http").
-						"://".$_SERVER["HTTP_HOST"].(getValid($_SERVER,'PHP_SELF')?? $_SERVER["REQUEST_URI"])
-					).($_SERVER['QUERY_STRING']?"?".$_SERVER['QUERY_STRING']:"")
-				);
-		return preg_replace("/^([\/\\\])/",rtrim(GetHost(),"/\\")."$1",$path);
+						"://".$_SERVER["HTTP_HOST"].getBetween($_SERVER, "REQUEST_URI", "PHP_SELF")
+			);//.($_SERVER['QUERY_STRING']?"?".$_SERVER['QUERY_STRING']:"");
+		return preg_replace("/^([\/\\\])/", rtrim(GetHost(),"/\\")."$1",$path);
 	}
 	/**
 	* Get the host part of a url
@@ -965,7 +962,7 @@
 	*/
 	function getHost(string|null $path = null):string|null{
 		$pat = "/^\w+\:\/*[^\/]+/";
-		if($path == null || !preg_match($pat,$path)) $path = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://').$_SERVER['HTTP_HOST'];
+		if($path == null || !preg_match($pat, $path)) $path = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://').$_SERVER['HTTP_HOST'];
 		return PREG_Find($pat, $path);
 	}
 	/**
@@ -974,7 +971,7 @@
 	* @return string|null
 	*/
 	function getSite(string|null $path = null):string|null{
-		return PREG_replace("/(^\w+:\/*)|(\:\d+$)/","", getHost($path));
+		return PREG_replace("/(^\w+:\/*)|(\:\d+$)/", "", getHost($path));
 	}
 	/**
 	* Get the domain name part of a url
@@ -982,7 +979,7 @@
 	* @return string|null
 	*/
 	function getDomain(string|null $path = null):string|null{
-		return PREG_replace("/(^\w+:\/*(www\.)?)|(\:\d+$)/","", getHost($path));
+		return PREG_replace("/(^\w+:\/*(www\.)?)|(\:\d+$)/", "", getHost($path));
 	}
 	/**
 	* Get the path part of a url
@@ -999,8 +996,8 @@
 	*/
 	function getRequest(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();
-		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
-		return PREG_Replace("/(^\w+:\/*[^\/]+)/","", $path);
+		if(startsWith($path, \_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
+		return PREG_Replace("/(^\w+:\/*[^\/]+)/", "", $path);
 	}
 	/**
 	* Get the relative address from a url
@@ -1010,7 +1007,7 @@
 	function getRelative(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();
 		if(startsWith($path,\_::$BASE_DIR)) return substr($path, strlen(\_::$BASE_DIR));
-		return PREG_Replace("/^\w+:\/*[^\/]+/","", $path);
+		return PREG_Replace("/^\w+:\/*[^\/]+/", "", $path);
 	}
 	/**
      * Get the direction part of a url from the root
@@ -1020,7 +1017,7 @@
 	function getDirection(string|null $path = null):string|null{
 		if($path == null) $path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
 		if(startsWith($path,\_::$BASE_DIR)) $path = substr($path, strlen(\_::$BASE_DIR));
-		return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/","", $path);
+		return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/", "", $path);
 	}
 	/**
      * Get the last part of a direction url
@@ -1028,7 +1025,7 @@
      * @return string|null
      */
 	function getPage(string|null $path = null):string|null{
-		return last(explode("/", getDirection($path)));
+		return last(explode(DIRECTORY_SEPARATOR, getDirection($path)));
 	}
 	/**
 	* Get the query part of a url
@@ -1070,7 +1067,7 @@
 	}
 	function setMemo($key, $val){
 		if($val == null) return false;
-		return setcookie($key, $val, 0,"/");
+		return setcookie($key, $val, 0,DIRECTORY_SEPARATOR);
 	}
 	function getMemo($key){
 		if(isset($_COOKIE[$key])) return $_COOKIE[$key];
@@ -1081,12 +1078,12 @@
 	}
 	function forgetMemo($key){
 		unset($_COOKIE[$key]);
-		return setcookie($key, "", 0,"/");
+		return setcookie($key, "", 0,DIRECTORY_SEPARATOR);
 	}
 	function flushMemos($key){
 		foreach($_COOKIE as $key => $val){
             unset($_COOKIE[$key]);
-            return setcookie($key, "", 0,"/");
+            return setcookie($key, "", 0,DIRECTORY_SEPARATOR);
         }
 	}
 
@@ -1301,12 +1298,13 @@
 	}
 
 	/**
-	 * Remove all changeable command signs from a path (such as ../ or /./.)
-	 * @param string|null $path The source path
-	 * @return array|string|null
-	 */
-	function normalizePath(string|null $path):string|null{
-		return preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/","",$path??getUrl());
+     * Remove all changeable command signs from a path (such as ../ or /./.)
+	 * Change all slashes/backslashes to the DIRECTORY_SEPARATOR
+     * @param string|null $path The source path
+     * @return array|string|null
+     */
+	function normalizePath(string|null $path): string|null{
+		return str_replace(["\\","/"], DIRECTORY_SEPARATOR, preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/","", $path??getUrl()));
 	}
 
 	/**
@@ -1349,7 +1347,7 @@
 						return "";
 					}, $page);
 					foreach($matches as $m)
-						$page = preg_replace("/".preg_find($patcommand,$m)."/i", "\1$m", $page);
+						$page = preg_replace(DIRECTORY_SEPARATOR.preg_find($patcommand,$m)."/i", "\1$m", $page);
 				break;
 				case "prepend":
 					$page = preg_replace_callback($patfull, function($m) use(&$matches){
@@ -1357,7 +1355,7 @@
 						return "";
 					}, $page);
 					foreach($matches as $m)
-						$page = preg_replace("/".preg_find($patcommand,$m)."/i", "$m\1", $page);
+						$page = preg_replace(DIRECTORY_SEPARATOR.preg_find($patcommand,$m)."/i", "$m\1", $page);
 					break;
 			}
 			$pat = "/<!-{3}".$name."[\w\W]*-{3}>/i";
@@ -1453,33 +1451,44 @@
 	}
 
 	//Test Region
-	function test_Details(){
-		echo "<br>"."PHP_SELF: ".$_SERVER['PHP_SELF'];
-		echo "<br>"."GATEWAY_INTERFACE: ".$_SERVER['GATEWAY_INTERFACE'];
-		echo "<br>"."SERVER_ADDR: ".$_SERVER['SERVER_ADDR'];
-		echo "<br>"."SERVER_NAME: ".$_SERVER['SERVER_NAME'];
-		echo "<br>"."SERVER_SOFTWARE: ".$_SERVER['SERVER_SOFTWARE'];
-		echo "<br>"."SERVER_PROTOCOL: ".$_SERVER['SERVER_PROTOCOL'];
-		echo "<br>"."REQUEST_METHOD: ".$_SERVER['REQUEST_METHOD'];
-		echo "<br>"."REQUEST_TIME: ".$_SERVER['REQUEST_TIME'];
-		echo "<br>"."QUERY_STRING: ".$_SERVER['QUERY_STRING'];
-		echo "<br>"."HTTP_ACCEPT: ".$_SERVER['HTTP_ACCEPT'];
-		echo "<br>"."HTTP_ACCEPT_CHARSET: ".$_SERVER['HTTP_ACCEPT_CHARSET'];
-		echo "<br>"."HTTP_HOST: ".$_SERVER['HTTP_HOST'];
-		echo "<br>"."HTTP_REFERER: ".$_SERVER['HTTP_REFERER'];
-		echo "<br>"."HTTPS: ".$_SERVER['HTTPS'];
-		echo "<br>"."REMOTE_ADDR: ".$_SERVER['REMOTE_ADDR'];
-		echo "<br>"."REMOTE_HOST: ".$_SERVER['REMOTE_HOST'];
-		echo "<br>"."REMOTE_PORT: ".$_SERVER['REMOTE_PORT'];
-		echo "<br>"."SCRIPT_FILENAME: ".$_SERVER['SCRIPT_FILENAME'];
-		echo "<br>"."SERVER_ADMIN: ".$_SERVER['SERVER_ADMIN'];
-		echo "<br>"."SERVER_PORT: ".$_SERVER['SERVER_PORT'];
-		echo "<br>"."SERVER_SIGNATURE: ".$_SERVER['SERVER_SIGNATURE'];
-		echo "<br>"."PATH_TRANSLATED: ".$_SERVER['PATH_TRANSLATED'];
-		echo "<br>"."SCRIPT_NAME: ".$_SERVER['SCRIPT_NAME'];
-		echo "<br>"."SCRIPT_URI: ".$_SERVER['SCRIPT_URI'];
+	function test_server(){
+		foreach($_SERVER as $k=>$v) echo "<br>"."$k: ".$v;
+		// echo "<br>"."PHP_SELF: ".$_SERVER['PHP_SELF'];
+		// echo "<br>"."GATEWAY_INTERFACE: ".$_SERVER['GATEWAY_INTERFACE'];
+		// echo "<br>"."SERVER_ADDR: ".$_SERVER['SERVER_ADDR'];
+		// echo "<br>"."SERVER_NAME: ".$_SERVER['SERVER_NAME'];
+		// echo "<br>"."SERVER_SOFTWARE: ".$_SERVER['SERVER_SOFTWARE'];
+		// echo "<br>"."SERVER_PROTOCOL: ".$_SERVER['SERVER_PROTOCOL'];
+		// echo "<br>"."REQUEST_METHOD: ".$_SERVER['REQUEST_METHOD'];
+		// echo "<br>"."REQUEST_TIME: ".$_SERVER['REQUEST_TIME'];
+		// echo "<br>"."QUERY_STRING: ".$_SERVER['QUERY_STRING'];
+		// echo "<br>"."HTTP_ACCEPT: ".$_SERVER['HTTP_ACCEPT'];
+		// echo "<br>"."HTTP_ACCEPT_CHARSET: ".$_SERVER['HTTP_ACCEPT_CHARSET'];
+		// echo "<br>"."HTTP_HOST: ".$_SERVER['HTTP_HOST'];
+		// echo "<br>"."HTTP_REFERER: ".$_SERVER['HTTP_REFERER'];
+		// echo "<br>"."HTTPS: ".$_SERVER['HTTPS'];
+		// echo "<br>"."REMOTE_ADDR: ".$_SERVER['REMOTE_ADDR'];
+		// echo "<br>"."REMOTE_HOST: ".$_SERVER['REMOTE_HOST'];
+		// echo "<br>"."REMOTE_PORT: ".$_SERVER['REMOTE_PORT'];
+		// echo "<br>"."SCRIPT_FILENAME: ".$_SERVER['SCRIPT_FILENAME'];
+		// echo "<br>"."SERVER_ADMIN: ".$_SERVER['SERVER_ADMIN'];
+		// echo "<br>"."SERVER_PORT: ".$_SERVER['SERVER_PORT'];
+		// echo "<br>"."SERVER_SIGNATURE: ".$_SERVER['SERVER_SIGNATURE'];
+		// echo "<br>"."PATH_TRANSLATED: ".$_SERVER['PATH_TRANSLATED'];
+		// echo "<br>"."SCRIPT_NAME: ".$_SERVER['SCRIPT_NAME'];
+		// echo "<br>"."SCRIPT_URI: ".$_SERVER['SCRIPT_URI'];
 	}
-	function test_Address(){
+	function test_path(){
+		echo "<br>ASEQ: "._::$ASEQ;
+		echo "<br>BASE: "._::$BASE;
+		echo "<br>ROOT: "._::$ROOT;
+		echo "<br>DIR: "._::$DIR;
+		echo "<br>BASE_ROOT: "._::$BASE_ROOT;
+		echo "<br>BASE_DIR: "._::$BASE_DIR;
+		echo "<br>LOG_DIR: "._::$LOG_DIR;
+		echo "<br>TMP_DIR: "._::$TMP_DIR;
+	}
+	function test_url(){
 		echo "<br>URL: "._::$URL;
 		echo "<br>HOST: "._::$HOST;
 		echo "<br>SITE: "._::$SITE;
@@ -1490,7 +1499,7 @@
 		echo "<br>FRAGMENT: "._::$FRAGMENT;
 		echo "<br>EMAIL: "._::$EMAIL;
 	}
-	function test_Access($func,$res=null){
+	function test_access($func,$res=null){
 		$r = null;
 		if(ACCESS(0, false, false)){
 			if($r = $func()) echo "<b>TRUE: ".($r??$res)."</b><br>";

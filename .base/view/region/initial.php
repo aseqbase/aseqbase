@@ -33,9 +33,6 @@
 			LIBRARY("reCaptcha");
 			echo \MiMFa\Library\reCaptcha::GetScript(\_::$CONFIG->ReCaptchaSiteKey);
         }?>
-		<?php echo \_::$TEMPLATE->BasePack; ?>
+		<?php echo join(PHP_EOL, \_::$TEMPLATE->Basics); ?>
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/view.css'); ?>'>
-		<?php
-		echo \_::$TEMPLATE->GetInitial();
-		echo \_::$TEMPLATE->CustomPack;
-        ?>
+		<?php echo \_::$TEMPLATE->GetInitial(); ?>

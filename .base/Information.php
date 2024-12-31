@@ -33,7 +33,7 @@ class Information extends InformationBase{
 		array("Name"=>"HOME","Link"=>"/home","Image"=>"/asset/symbol/home.png","Attributes"=> "class='menu-link'"),
 		array("Name"=>"SERVICE","Link"=>"#embed","Image"=>"/asset/symbol/service.png","Attributes"=> "class='embed-link' data-target='.page' onclick='ViewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); ViewSideMenu(false);'"),
 		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/asset/symbol/about.png","Attributes"=> "class='menu-link'","Items"=> array(
-			array("Name"=>"CONTACTS","Link"=>"/contacts","Image"=>"/asset/symbol/contact.png","Attributes"=> "class='menu-link'"),
+			array("Name"=>"CONTACTS","Link"=>"/contact","Image"=>"/asset/symbol/contact.png","Attributes"=> "class='menu-link'"),
 			array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/asset/symbol/about.png","Attributes"=> "class='menu-link'"),
 			array("Name"=>"TEAM","Link"=>"/team","Image"=>"/asset/symbol/team.png","Attributes"=> "class='menu-link'")
 		)),

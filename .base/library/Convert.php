@@ -77,15 +77,15 @@ class Convert{
 					elseif(is_countable($val) || is_iterable($val))
                         array_push($texts, str_replace(["{0}","{1}"],[$key,$item],$assignFormat));
                     else{
-                        $sp;
+                        $sp = "";
                         if(str_contains($item,'"')){
                             if(str_contains($item,"'")){
                                 $item = str_replace("'","`",$item);
-                                $sp ="'";
+                                $sp = "'";
                             }
                             else $sp = "'";
                         }
-                        else $sp ='"';
+                        else $sp = '"';
                         array_push($texts, "$key$spacer$sp$item$sp");
                     }
                 }
@@ -240,8 +240,8 @@ class Convert{
 	public static function ToIteration(...$arguments){
         foreach ($arguments as $key=>$val){
 			if(is_countable($val) || is_iterable($val))
-                if(is_array($val)) yield from call_user_func_array("self::ToIteration", $val);
-                else yield from call_user_func_array("self::ToIteration", iterator_to_array($val));
+                if(is_array($val)) yield from call_user_func_array(function (...$args) { return self::ToIteration(...$args);}, $val);
+                else yield from call_user_func_array(function (...$args) { return self::ToIteration(...$args);}, iterator_to_array($val));
             else yield $key=>$val;
         }
     }
@@ -251,7 +251,7 @@ class Convert{
      * @return array
      */
 	public static function ToSequence(...$arguments){
-        return iterator_to_array(call_user_func_array("self::ToIteration",$arguments));
+        return iterator_to_array(call_user_func_array(function (...$args) { return self::ToIteration(...$args);},$arguments));
 	}
 
     public static function ToJSON($obj) :string {
