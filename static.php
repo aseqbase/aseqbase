@@ -1,6 +1,6 @@
 <?php
      // Active Maintenace Mode
-     $page  = "..".DIRECTORY_SEPARATOR."aseq".DIRECTORY_SEPARATOR."static".DIRECTORY_SEPARATOR."maintenance.php";
+     $page  = __DIR__.DIRECTORY_SEPARATOR.".aseq".DIRECTORY_SEPARATOR."static".DIRECTORY_SEPARATOR."maintenance.php";
      $value = new DateTime("tomorrow");//DateTime::createFromFormat('Y-m-d H:i', '2020-01-01 00:00');
      $title = "Under Maintenance";
      $description = "<p>Our website is currently undergoing scheduled maintenance.

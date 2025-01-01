@@ -7,9 +7,9 @@
  * Change the value, to the current subdomains sequence (like [my-subdomain-name])
  * or if this file is in the root address, leave null for that
  */
-$relativePath = str_replace(str_replace(["\\","/"], DIRECTORY_SEPARATOR, $_SERVER['DOCUMENT_ROOT']), "", subject: __DIR__);
+$relativePath = __DIR__;//str_replace(str_replace(["\\","/"], DIRECTORY_SEPARATOR, $_SERVER['DOCUMENT_ROOT']), "", subject: __DIR__);
 $dirs = preg_split("/[\/\\\]/", trim($relativePath, "/\\"));
-$GLOBALS["ASEQ"] = join(".", $dirs);/* Change it to null if the file is in the root directory */
+$GLOBALS["ASEQ"] = end($dirs);//join(".", $dirs);/* Change it to null if the file is in the root directory */
 $GLOBALS["BASE"] = ".base";/* Change it to the base directory if deferents */
 
 /*
@@ -20,6 +20,6 @@ $GLOBALS["BASE"] = ".base";/* Change it to the base directory if deferents */
 */
 $GLOBALS["SEQUENCES_PATCH"] = array();
 
-require_once("initialize.php");
+require_once(__DIR__.DIRECTORY_SEPARATOR."initialize.php");
 require_once($GLOBALS["BASE_DIR"]."index.php");
 ?>

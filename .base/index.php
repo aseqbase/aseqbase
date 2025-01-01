@@ -1,5 +1,5 @@
 <?php //MiMFa aseqbase	http://aseqbase.ir
-require_once("initialize.php");
+require_once(__DIR__."/initialize.php");
 if(
     startsWith(DIRECTORY_SEPARATOR.\_::$DIRECTION, MiMFa\Library\User::$HandlerPath) ||
 	ACCESS(\_::$CONFIG->VisitAccess, assign:true, die:true)){
