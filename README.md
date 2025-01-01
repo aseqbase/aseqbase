@@ -32,7 +32,7 @@
 	<h4>Programming Language Options:</h4>
 		<table>
 			<tr><th>ENGINE</th><th>VER</th></tr>
-			<tr><td>PHP</td><td>8.1 +</td></tr>
+			<tr><td>PHP</td><td>8.2 +</td></tr>
 		</table>
 	<h4>Web Server Options:</h4>
 		<table>
