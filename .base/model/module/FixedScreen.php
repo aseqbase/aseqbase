@@ -1,20 +1,20 @@
 <?php namespace MiMFa\Module;
+use \MiMFa\Library\HTML;
 class FixedScreen extends Module{
+	public $Capturable = true;
 	public $Image = null;
 	public $BlurSize = "0px";
 	
-	public function EchoStyle(){
-		parent::EchoStyle();
-		?>
-		<style>
+	public function GetStyle(){
+		return parent::GetStyle().HTML::Style("
 			body{
 				padding: 0px;
 			}
-			.<?php echo $this->Name; ?>{
+			.{$this->Name}{
 				display: flex;
 				justify-content: center;
 			}
-			.<?php echo $this->Name; ?> .background{
+			.{$this->Name} .background{
 				height: 100vh;
 				width: 100vw;
 				background-position: center;
@@ -26,18 +26,13 @@ class FixedScreen extends Module{
     			left: 0px;
     			right: 0px;
 				z-index: -999999999;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("filter","blur(".$this->BlurSize.")");?>
+				".\MiMFa\Library\Style::UniversalProperty("filter","blur(".$this->BlurSize.")")."
 			}
-		</style>
-		<?php
+		");
 	}
 
-	public function Echo(){
-		?>
-		<div class="background" style="background-image: url('<?php echo $this->Image;?>');">
-		</div>
-		<?php
-		parent::Echo();
+	public function Get(){
+		return HTML::Division(null,["class"=>"background","style"=>"background-image: url('{$this->Image}');"]).parent::Get();
 	}
 }
 ?>

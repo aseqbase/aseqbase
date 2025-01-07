@@ -345,7 +345,7 @@ class Table extends Module{
 			&& $this->Controlable
 		)
             if($this->CreateModal()){
-                $res = $this->GetAction();
+                $res = $this->Handler();
                 if(!isEmpty($res)) return $res;
                 return $this->Modal->Capture().parent::Capture();
             }
@@ -356,7 +356,7 @@ class Table extends Module{
 		$isu = $isc && $this->Updatable && getAccess($this->UpdateAccess);
         if($isc){
             $this->CreateModal();
-            $res = $this->GetAction();
+            $res = $this->Handler();
             if($this->IsAction || !isEmpty($res)) return $res;
         }
 		if(isValid($this->Table) && isValid($this->KeyColumn)){
@@ -642,15 +642,15 @@ class Table extends Module{
         return "<td>$cel</td>";
     }
 
-	public function Action(){
-		echo $this->GetAction();
+	public function Handle(){
+		echo $this->Handler();
     }
-	public function GetAction(){
+	public function Handler(){
         if($this->IsAction = (GRAB(\_::$CONFIG->ViewHandlerKey, $this->UpdateMethod) || $this->IsAction))
-		    return $this->DoAction(RECEIVE($this->KeyColumn, $this->UpdateMethod), GRAB("action", $this->UpdateMethod));
+		    return $this->Action(RECEIVE($this->KeyColumn, $this->UpdateMethod), GRAB("action", $this->UpdateMethod));
         else return null;
     }
-	public function DoAction($value, $action = "view"){
+	public function Action($value, $action = "view"){
         switch ($action) {
             case "view":
                 return $this->ShowViewForm($value);
@@ -661,13 +661,13 @@ class Table extends Module{
             case "duplicate":
                 return $this->ShowDuplicateForm($value);
             case "delete":
-                return $this->DoRemoveAction($value);
+                return $this->DoRemoveHandle($value);
             default:
                 switch ($value) {
                     case "_table_add":
-                        return $this->DoAddAction($value);
+                        return $this->DoAddHandle($value);
                     default:
-                        return $this->DoModifyAction($value);
+                        return $this->DoModifyHandle($value);
                 }
         }
     }
@@ -818,7 +818,7 @@ class Table extends Module{
         //$form->AllowHeader = false;
         return $form->Capture();
     }
-	public function DoAddAction($value){
+	public function DoAddHandle($value){
         if(is_null($value)) return null;
         $vals = $this->GetFormValues();
         if(!getAccess($this->AddAccess)) return HTML::Error("You have not access to modify!");
@@ -870,7 +870,7 @@ class Table extends Module{
         //$form->AllowHeader = false;
         return $form->Capture();
     }
-	public function DoModifyAction($value){
+	public function DoModifyHandle($value){
         if(is_null($value)) return null;
         $vals = $this->GetFormValues();
         if(!getAccess($this->ModifyAccess)) return HTML::Error("You have not access to modify!");
@@ -879,7 +879,7 @@ class Table extends Module{
         return HTML::Error("You can not update this item!");
     }
 
-	public function DoRemoveAction($value){
+	public function DoRemoveHandle($value){
         if(is_null($value)) return null;
         if(!getAccess($this->RemoveAccess)) return HTML::Error("You have not access to delete!");
         if(\MiMFa\Library\DataBase::DoDelete($this->Table, [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]))

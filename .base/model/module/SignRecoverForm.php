@@ -14,6 +14,8 @@ class SignRecoverForm extends Form{
 	public $SignaturePlaceHolder = "Email/Phone";
 	public $PasswordPlaceHolder = "Password";
 	public $PasswordConfirmationPlaceHolder = "Confirm Password";
+	public $BlockTimeout = 30000;
+	public $ResponseView = null;
 
 	public function __construct(){
         parent::__construct();
@@ -61,7 +63,7 @@ class SignRecoverForm extends Form{
 		").parent::GetScript();
     }
 
-	public function GetAction(){
+	public function Handler(){
 		$_req = $_REQUEST;
 		switch(strtolower($this->Method)){
             case "get":

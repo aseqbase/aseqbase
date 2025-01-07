@@ -44,7 +44,7 @@ class Math
         $arr = [];
         foreach(Convert::ToIteration(func_get_args()) as $key=>$val)
         {
-            $ind = array_find_key($arr, function($k,$v)use($val) { return $k == $val;});
+            $ind = array_key_first(array_filter($arr, function($k,$v) use($val){ return $v == $val;}, ARRAY_FILTER_USE_BOTH));
             if($ind) $arr[$val]=1;
             else $arr[$ind] += 1;
         }
@@ -103,7 +103,7 @@ class Math
 
     public static function Range()
     {
-        return self::Maximum(func_get_args()) - slef::Minimum(func_get_args());
+        return self::Maximum(func_get_args()) - self::Minimum(func_get_args());
     }
 
     public static function Minimum()
@@ -207,22 +207,22 @@ class Math
 
     public static function Sin()
     {
-        return call_user_func(sin,func_get_args());
+        return sin(...func_get_args());
     }
 
     public static function Cos()
     {
-        return call_user_func(cos,func_get_args());
+        return cos(...func_get_args());
     }
 
     public static function Tan()
     {
-        return call_user_func(tan,func_get_args());
+        return tan(...func_get_args());
     }
 
     public static function Cot()
     {
-        return 1/call_user_func(tan,func_get_args());
+        return 1/tan(...func_get_args());
     }
 
     public static function Decimals($num, $dec = 2)

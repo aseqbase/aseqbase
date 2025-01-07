@@ -240,8 +240,8 @@ class Convert{
 	public static function ToIteration(...$arguments){
         foreach ($arguments as $key=>$val){
 			if(is_countable($val) || is_iterable($val))
-                if(is_array($val)) yield from call_user_func_array(function (...$args) { return self::ToIteration(...$args);}, $val);
-                else yield from call_user_func_array(function (...$args) { return self::ToIteration(...$args);}, iterator_to_array($val));
+                if(is_array($val)) yield from self::ToIteration(...$val);
+                else yield from self::ToIteration(...iterator_to_array($val));
             else yield $key=>$val;
         }
     }
@@ -251,7 +251,7 @@ class Convert{
      * @return array
      */
 	public static function ToSequence(...$arguments){
-        return iterator_to_array(call_user_func_array(function (...$args) { return self::ToIteration(...$args);},$arguments));
+        return iterator_to_array(self::ToIteration(...$arguments));
 	}
 
     public static function ToJSON($obj) :string {
@@ -351,7 +351,7 @@ class Convert{
 
     public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true){
 		if($addDefaultKeys){
-            $email = getEmail(null,"info");
+            $email = createEmail("info");
             if(!isset($additionalKeys['$HOSTEMAILLINK'])) $additionalKeys['$HOSTEMAILLINK'] = HTML::Link($email, "mailto:$email");
             if(!isset($additionalKeys['$HOSTEMAIL'])) $additionalKeys['$HOSTEMAIL'] = $email;
             if(!isset($additionalKeys['$HOSTLINK'])) $additionalKeys['$HOSTLINK'] = HTML::Link(\_::$SITE, \_::$HOST);

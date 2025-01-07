@@ -47,6 +47,8 @@ class SignUpForm extends Form{
 	 * @var bool|null
 	 */
 	public $InitialStatus = null;
+	public $BlockTimeout = 60000;
+	public $ResponseView = null;
 
 	public function __construct(){
         parent::__construct();
@@ -188,7 +190,7 @@ class SignUpForm extends Form{
 		").parent::GetScript();
     }
 
-	public function GetAction(){
+	public function Handler(){
 		$_req = $_REQUEST;
 		switch(strtolower($this->Method)){
             case "get":

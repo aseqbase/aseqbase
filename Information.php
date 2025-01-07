@@ -15,6 +15,7 @@ class Information extends InformationBase
 	public $Path = "https://aseqbase.ir";
 	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
 	public $Location = null;
+	public $Payment = '{"Network":"TRC-20","Unit":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}';
 
 	public $KeyWords = array("MiMFa aseqbase Framework", "MiMFa", "aseqbase", "Web Development", "Development", "Web Framework", "Website", "Framework");
 

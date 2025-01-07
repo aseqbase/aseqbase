@@ -31,7 +31,7 @@ else
             "Image"=>"image",
             "Description"=>"strings"
         ];
-        echo $mod->DoAction($path);
+        echo $mod->Action($path);
     };
 $templ->Draw();
 ?>

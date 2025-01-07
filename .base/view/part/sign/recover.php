@@ -1,7 +1,7 @@
 <?php
 MODULE("SignRecoverForm");
 $mod = new \MiMFa\Module\SignRecoverForm();
-if(isset($_REQUEST["Signature"]) || isset($_REQUEST["Password"])) $mod->Action();
+if(isset($_REQUEST["Signature"]) || isset($_REQUEST["Password"])) $mod->Handle();
 else {
     try{
         \_::$INFO->User->ReceiveRecoveryEmail();

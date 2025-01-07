@@ -272,48 +272,56 @@ abstract class ConfigurationBase{
     public $ReCaptchaSiteKey = null;
 	/**
      * The minimum group of banned user
+     * @default -1
      * @var int
      * @category Security
      */
     public $BanAccess = -1;
 	/**
      * Default accessibility for the guests
+     * @default 0
      * @var int
      * @category Security
      */
     public $GuestAccess = 0;
 	/**
      * The lowest group that registered user will be on
+     * @default 1000000000
      * @var int
      * @category Security
      */
     public $UserAccess = 1000000000;
 	/**
      * The lowest group of administrators
+     * @default 10
      * @var int
      * @category Security
      */
     public $AdminAccess = 10;
 	/**
      * The highest group of administrators
+     * @default 1
      * @var int
      * @category Security
      */
     public $SuperAccess = 1;
 	/**
      * Minimum accessibility needs to visit the website
+     * @default 0
      * @var int
      * @category Security
      */
     public $VisitAccess = 0;
 	/**
      * The status of all server response: 400, 404, 500, etc.
-	 * @var mixed
+     * @default null
+     * @var mixed
      * @category Security
      */
 	public $StatusMode = null;
 	/**
      * The accessibility mode: 1 for whitelisted IPs, -1 for blacklisted IPs
+     * @default null
      * @field short
      * @var mixed
      * @category Security
@@ -321,6 +329,7 @@ abstract class ConfigurationBase{
 	public $AccessMode = null;
 	/**
 	 * Patterns to detect IPs
+     * @default []
      * @field array
      * @var array<string>
      * @category Security
@@ -386,6 +395,22 @@ abstract class ConfigurationBase{
      * @category Security
      */
     public $AcceptableFileFormats = [".zip", ".rar"];
+    /**
+     * Default mail sender
+     * @example: "do-not-reply@mimfa.net"
+     * @field array
+     * @var string|null|array<string>
+     * @category Security
+     */
+     public $SenderEmail = null;
+     /**
+     * Default mail reciever
+     * @example: "info@mimfa.net"
+     * @field array
+     * @var string|null|array<string>
+     * @category Security
+     */
+     public $ReceiverEmail = null;
 
 	/**
      * 0: Not show Errors; 1: To show Errors
@@ -471,7 +496,7 @@ abstract class ConfigurationBase{
      * @var string
      * @category DataBase
      */
-	public $DataBaseAddNameToPrefix = true;
+	public $DataBaseAddNameToPrefix = false;
 
 	public function __construct(){
         \MiMFa\Library\Revise::Load($this);
@@ -479,6 +504,8 @@ abstract class ConfigurationBase{
         if(is_null($this->PathKey)) $this->PathKey = "path_".$sp;
         if(is_null($this->ViewHandlerKey)) $this->ViewHandlerKey = "view_".$sp;
         if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i","_",$GLOBALS["ASEQBASE"]??"qb")."_";
+          $this->SenderEmail = createEmail("do-not-reply");
+          $this->ReceiverEmail = createEmail("info");
     }
 
 

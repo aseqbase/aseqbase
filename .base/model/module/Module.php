@@ -270,6 +270,7 @@ class Module extends \Base{
     }
 	public function GetTitle($attrs = null){
 		return Convert::ToString(function()use($attrs){
+            $attrs = \MiMFa\Library\HTML::Attributes($attrs,$atcm);
 			if(isValid($this->Title)){
 				yield (isValid($this->TitleTag)?"<".$this->TitleTag." $attrs>":"");
 				if(is_string($this->Title))
@@ -287,6 +288,7 @@ class Module extends \Base{
     }
 	public function GetDescription($attrs = null){
 		return Convert::ToString(function()use($attrs){
+            $attrs = \MiMFa\Library\HTML::Attributes($attrs, $atcm);
 			if(isValid($this->Description)){
 				yield (isValid($this->DescriptionTag)?"<".$this->DescriptionTag." $attrs>":"");
 				if(is_string($this->Description))
@@ -304,6 +306,7 @@ class Module extends \Base{
     }
     public function GetContent($attrs = null){
 		return Convert::ToString(function()use($attrs){
+            $attrs = \MiMFa\Library\HTML::Attributes($attrs,$atcm);
             if(isValid($this->Content)){
                 yield (isValid($this->ContentTag)?"<".$this->ContentTag." $attrs>":"");
                 if(is_string($this->Content))

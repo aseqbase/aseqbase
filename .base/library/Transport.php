@@ -122,7 +122,7 @@ class Transport
 	}
 
 	public static function Send($result){
-		self::Action($result);
+		self::Handle($result);
 	}
 
 
@@ -203,7 +203,7 @@ class Transport
 				border: 2px solid #f11;
 			}
 			</style>".$result;
-			self::Action($result);
+			self::Handle($result);
 		}
 		else self::ShowURL("/view?message=".$result);
 	}
@@ -218,7 +218,7 @@ class Transport
 
 		// no redirect
 		header( "Location: $url" );
-		self::Action(null);
+		self::Handle(null);
 	}
 
 	public static $Messages = array();
@@ -243,7 +243,7 @@ class Transport
 	{
 		self::$Messages[$key."-".count(self::$Messages)] = $val;
 	}
-	public static function Action($object=null)
+	public static function Handle($object=null)
 	{
 		if(self::$Run) if($object==null) exit(); else exit($object);
 	}

@@ -2,7 +2,7 @@
 use MiMFa\Library\HTML;
 MODULE("SignInForm");
 $mod = new \MiMFa\Module\SignInForm();
-if(isset($_REQUEST["Signature"])) $mod->Action();
+if(isset($_REQUEST["Signature"])) $mod->Handle();
 else {
     $mod->Title = "Sign In";
     $mod->Image = "sign-in";

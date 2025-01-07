@@ -26,6 +26,8 @@ class SignInForm extends Form{
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
 	public $SignUpIfNotRegistered = false;
+	public $BlockTimeout = 5000;
+	public $ResponseView = null;
 
 	public function __construct(){
         parent::__construct();
@@ -101,7 +103,7 @@ class SignInForm extends Form{
 			, ["class"=>"col-lg-12"]);
     }
 
-	public function GetAction(){
+	public function Handler(){
 		$_req = $_REQUEST;
 		switch(strtolower($this->Method)){
             case "get":

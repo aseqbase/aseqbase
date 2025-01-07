@@ -8,5 +8,5 @@ elseif(isValid($path)) {
         PART("sign/".strtolower(implode("/", array_slice(explode("/",$path),1))));
     };
     $templ->Draw();
-}else VIEW("404");
+} else VIEW("404");
 ?>

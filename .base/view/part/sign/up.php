@@ -1,7 +1,7 @@
 <?php
 MODULE("SignUpForm");
 $mod = new \MiMFa\Module\SignUpForm();
-if(isset($_REQUEST["UserName"])) $mod->Action();
+if(isset($_REQUEST["UserName"])) $mod->Handle();
 else {
     echo "<div class='page'>";
     $mod->Title = "Sign Up";

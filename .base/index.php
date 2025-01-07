@@ -2,7 +2,7 @@
 require_once(__DIR__."/initialize.php");
 if(
     startsWith(DIRECTORY_SEPARATOR.\_::$DIRECTION, MiMFa\Library\User::$HandlerPath) ||
-	ACCESS(\_::$CONFIG->VisitAccess, assign:true, die:true)){
+	ACCESS(\_::$CONFIG->VisitAccess, assign:true, die:true)) {
 	if(isValid(\_::$REQUEST))
 		if(isset($_REQUEST[\_::$CONFIG->ViewHandlerKey]))
             VIEW($_REQUEST[\_::$CONFIG->ViewHandlerKey], variables:$_REQUEST);

@@ -29,6 +29,8 @@ class PaymentForm extends Form{
 	public $Method = "POST";
 	public $SuccessSubject = "Transaction";
 	public $SuccessContent = "<h1>A Successful Transaction</h1>";
+	public $BlockTimeout = 0;
+	public $ResponseView = null;
 
 	/**
 	 * New payment form
@@ -62,7 +64,7 @@ class PaymentForm extends Form{
 		$this->Transaction->Destination = between($this->Transaction->Destination,RECEIVE("Destination", $this->Method, \_::$INFO->FullOwner));
 		$this->Transaction->DestinationContent = between($this->Transaction->DestinationContent,RECEIVE("DestinationContent", $this->Method, null));
 		$this->Transaction->DestinationPath = between($this->Transaction->DestinationPath,RECEIVE("DestinationPath", $this->Method, null));
-		$this->Transaction->DestinationEmail = between($this->Transaction->DestinationEmail, \_::$EMAIL);
+		$this->Transaction->DestinationEmail = between($this->Transaction->DestinationEmail, \_::$CONFIG->ReceiverEmail);
 
 		$this->Title = $this->Transaction->Destination??"Details";
 		if(!is_null($this->Transaction->Value))
@@ -200,7 +202,7 @@ class PaymentForm extends Form{
 		else return parent::GetDescription();
     }
 
-	public function GetAction() {
+	public function Handler() {
 		if($code = RECEIVE($this->ValidationRequest, $this->Method))
 			try{
 				$code = SpecialCrypt::Decrypt($code, $this->ValidationKey, true);
@@ -229,11 +231,11 @@ class PaymentForm extends Form{
 		$doc = HTML::Document(__($this->SuccessContent).$this->Transaction->ToHTML());
 		$res = "";
 		if(isValid($this->Transaction->DestinationEmail))
-			if(Contact::SendHTMLEmail(\_::$EMAIL, $this->Transaction->DestinationEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->ID, $doc, $this->Transaction->SourceEmail,$this->Transaction->DestinationEmail == \_::$EMAIL?null:\_::$EMAIL))
+			if(Contact::SendHTMLEmail(\_::$CONFIG->SenderEmail, $this->Transaction->DestinationEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->ID, $doc, $this->Transaction->SourceEmail,$this->Transaction->DestinationEmail == \_::$CONFIG->ReceiverEmail?null:\_::$CONFIG->ReceiverEmail))
                 $res .= HTML::Success("Your transaction received", $attr);
             else $res .= HTML::Warning("We could not receive your transaction details, please notify us!", $attr);
         if(isValid($this->Transaction->SourceEmail))
-			if(Contact::SendHTMLEmail(\_::$EMAIL, $this->Transaction->SourceEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->ID, $doc, $this->Transaction->DestinationEmail))
+			if(Contact::SendHTMLEmail(\_::$CONFIG->SenderEmail, $this->Transaction->SourceEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->ID, $doc, $this->Transaction->DestinationEmail))
                 $res .= HTML::Success("A notification to '{$this->Transaction->SourceEmail}' has been sent!", $attr);
             else $res .= HTML::Warning("Could not send a notification to '{$this->Transaction->SourceEmail}'!", $attr);
 		if(DataBase::DoInsert(\_::$CONFIG->DataBaseAddNameToPrefix."Payment", null, [
@@ -265,7 +267,7 @@ class PaymentForm extends Form{
     }
 
 	public function Capture(){
-        if(RECEIVE($this->ValidationRequest, $this->Method) && RECEIVE("Value", $this->Method, false) !== false) return $this->Action();
+        if(RECEIVE($this->ValidationRequest, $this->Method) && RECEIVE("Value", $this->Method, false) !== false) return $this->Handle();
 		else return parent::Capture();
     }
 }

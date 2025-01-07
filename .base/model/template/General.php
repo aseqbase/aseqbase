@@ -62,31 +62,32 @@ class General extends Template{
 					font-size: var(--Size-5);
 					text-align: center;
 					text-transform: uppercase;
-					margin-top: 2vmax;
-					margin-bottom: var(--Size-4);
+					margin-top: max(4vmax, var(--Size-5));
+					margin-bottom: var(--Size-2);
 				}
 				h2{
 					font-size: var(--Size-4);
 					text-align: center;
 					text-transform: uppercase;
-					margin-top: 2vmax;
+					margin-top: var(--Size-4);
 				}
 				h3{
 					font-size: var(--Size-3);
 					text-transform: uppercase;
-					margin-top: 2vmax;
+					margin-top: var(--Size-3);
 				}
 				h4{
 					font-size: var(--Size-2);
-					margin-top: 2vmax;
+					margin-top: var(--Size-2);
 				}
 				h5{
 					font-size: var(--Size-1);
-					margin-top: 2vmax;
+					margin-top: var(--Size-1);
 				}
 				h6{
 					font-size: var(--Size-1);
 					display: inline-block;
+					margin-top: var(--Size-1);
 				}
 				h6:before{
 					display: block;
@@ -116,6 +117,42 @@ class General extends Template{
 				}
 				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.btn,.image,.media,.item,.fa){
 					font-weight: bold;
+				}
+
+				.be.wide{
+					display: block;
+					width: 100%;
+				}
+				.be.tall{
+					display: block;
+					height: 100%;
+				}
+				:has(.be.top, .be.middle, .be.bottom){
+					display: flex;
+				}
+				.be.top{
+					align-self: top;
+				}
+				.be.middle{
+					align-self: center;
+				}
+				.be.bottom{
+					align-self: bottom;
+				}
+				.be.left{
+					text-align: left;
+				}
+				.be.right{
+					text-align: right;
+				}
+				.be.ltr{
+					direction: ltr;
+				}
+				.be.rtl{
+					direction: rtl;
+				}
+				.be.center{
+					text-align: center;
 				}
 
 				:is(.button, .icon, .btn), :is(.button, .icon, .btn):is(:visited, :active){

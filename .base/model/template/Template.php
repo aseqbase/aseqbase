@@ -8,10 +8,10 @@ use MiMFa\Library\HTML;
  *Guide for Documentations
  *
  *○ Use @var {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
-	enum-string: to indicate the legal string name for a variable
-	class-string: to indicate the exist class name
-	interface-string: to indicate the exist interface name
-	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
+ *	enum-string: to indicate the legal string name for a variable
+ *	class-string: to indicate the exist class name
+ *	interface-string: to indicate the exist interface name
+ *	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
  *○ Use @param datatype $paramname [description]: to indicate comments of a function parameter
  *○ Use @small, @medium, @large: to indicate the size of input box
  *○ Use @category categoryname: to specify a category to organize the documented element's package into

@@ -1,9 +1,11 @@
-<div class="page page-pay">
-    <?php
+<?php
+use MiMFa\Library\HTML;
+
+if (!isView()) {
 	MODULE("PrePage");
 	$module = new MiMFa\Module\PrePage();
 	$module->Title = "Payment";
-	$module->Draw();
-	PART("pay");
-    ?>
-</div>
+	echo HTML::Page($module->Capture(), ["class" => "page-pay"]);
+}
+PART("pay");
+?>

@@ -1,4 +1,5 @@
 <?php
+if(!isView()){
 	MODULE("PrePage");
 	$module = new MiMFa\Module\PrePage();
 	$module->Title = "Contact";
@@ -8,4 +9,6 @@
 	$module->Items = \_::$INFO->Contacts;
 	$module->Location = \_::$INFO->Location;
 	$module->Draw();
+}
+	PAGE("message");
 ?>

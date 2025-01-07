@@ -10,7 +10,7 @@ namespace MiMFa\Library;
 class HTML
 {
     //public static $Sources = [];
-    public static $ManageAttributes = true;
+    public static $AttributesOptimization = true;
     public static $MaxDecimalPrecision = 2;
     public static $MaxValueLength = 10;
     /**
@@ -32,10 +32,10 @@ class HTML
      * @param array|string|null $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Element($content = null, array|string|null $tagName = null, ...$attributes) {
+    public static function Element($content = null, string|array|null $tagName = null, ...$attributes) {
         $isSingle = (!is_null($content)) && is_string($content) && is_array($tagName);
         if ($isSingle) {
-            $attributes = Convert::ToIteration($tagName, $attributes);
+            $attributes = [$tagName, $attributes];
             $tagName = $content;
             $content = null;
         }
@@ -53,7 +53,12 @@ class HTML
                 $allowMA = false;
                 break;
         }
-
+        $attachments = "";
+        $attrs = self::Attributes($attributes, $attachments, $allowMA);
+        if ($isSingle) return "<$tagName$attrs data-single/>$attachments";
+        else return join("",["<$tagName$attrs>", Convert::ToString($content), "</$tagName>$attachments"]);
+    }
+    public static function Attributes($attributes, &$attachments, $optimization = false){
         $attrs = "";
         $attachments = "";
         if($attributes){
@@ -61,7 +66,7 @@ class HTML
                 $attrdic = [];
                 $scripts = [];
                 $id = null;
-                foreach($isSingle?$attributes:Convert::ToIteration($attributes) as $key=>$value)
+                foreach(Convert::ToIteration($attributes) as $key=>$value)
                     if(isEmpty($key) || is_integer($key))
                         if(isEmpty($value)) continue;
                         else $attrdic[$value] = null;
@@ -109,7 +114,7 @@ class HTML
                     switch ($key)
                     {
                         case "style":
-                            if(self::$ManageAttributes && $allowMA){
+                            if(self::$AttributesOptimization && $optimization){
                                 if(!isValid($id)){
                                     $id = "_".getId(true);
                                     $attrs .= " id='$id'";
@@ -124,8 +129,8 @@ class HTML
                         case "oninput":
                         case "onmouseover":
                         case "onmouseout":
-                            if(self::$ManageAttributes && $allowMA){
-                                if(!isValid($id)){
+                            if(self::$AttributesOptimization && $optimization){
+                                if(!isValid(obj: $id)){
                                     $id = "_".getId(true);
                                     $attrs .= " id='$id'";
                                 }
@@ -149,9 +154,7 @@ class HTML
                 if(count($scripts) > 0) $attachments .= self::Script($scripts);
             } else $attrs = Convert::ToString($attributes);
         }
-
-        if ($isSingle) return "<$tagName$attrs data-single/>$attachments";
-        else return join("",["<$tagName$attrs>", Convert::ToString($content), "</$tagName>$attachments"]);
+        return $attrs;
     }
     public static function Attribute($key, $value=null){
         if(is_null($value)){
@@ -1028,7 +1031,7 @@ class HTML
      * @return string
      */
     public static function Center($content, ...$attributes){
-        return self::Element(Convert::ToString($content),"center",["class"=> "center" ], $attributes);
+        return self::Element(Convert::ToString($content),"div",["class"=> "be center" ], $attributes);
     }
 
     /**
@@ -1174,8 +1177,8 @@ class HTML
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
             }
-            else return self::Element($hr.self::Button($content, $reference,["style"=>"background-color: var(--BackColor-0); padding: 3px; margin: 0px;"]),"div",$attr, $attributes);
-        return self::Element($hr.self::Span($content,null,["style"=>"background-color: var(--BackColor-0); padding: 3px; margin: 0px;"]),"div",$attr, $attributes);
+            else return self::Element($hr.self::Button($content, $reference,["style"=>"background-color: var(--BackColor-0); padding: 2px; margin: 0px;"]),"div",$attr, $attributes);
+        return self::Element($hr.self::Span($content,null,["style"=>"background-color: var(--BackColor-0); padding: 2px; margin: 0px;"]),"div",$attr, $attributes);
     }
 
     /**

@@ -46,7 +46,7 @@ else $templ->Content = function() use($path) {
             "CreateTime"=>$access,
             "MetaData"=>$access
         ];
-        echo $mod->DoAction($path);
+        echo $mod->Action($path);
     };
 $templ->Draw();
 ?>

@@ -156,7 +156,7 @@ abstract class TemplateBase{
 		return "
 		<script>
 			const mailTo = function(url=null){
-				open('mailto:'+(url??`".\_::$EMAIL."`), '_blank');
+				open('mailto:'+(url??`".\_::$CONFIG->ReceiverEmail."`), '_blank');
 			};
 			const transitData = function(
 				methodName = 'POST',

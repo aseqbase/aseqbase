@@ -6,7 +6,7 @@ class Configuration extends ConfigurationBase {
 	public $DisplayError = 1;
 	public $DisplayStartupError = 1;
 	public $ReportError = E_ALL;
-	public $DataBaseError = 0;
+	public $DataBaseError = 1;
 
 	public $AllowCache = false;
 	public $AllowSigning = true;
@@ -25,12 +25,12 @@ class Configuration extends ConfigurationBase {
     //public $AccessPatterns = array();
     //public $RestrictionContent = "Unfortunately you have no access to the site now!<br>Please try a few minute later...";
 
-    //public $DataBaseEncoding = "utf8";
-    //public $DataBaseType = 'mysql';
-    //public $DataBaseHost = 'localhost';
-    //public $DataBaseUser = 'root';
-    //public $DataBasePassword = null;
-    //public $DataBaseName = 'localhost';
-    //public $DataBasePrefix = 'qb_';
+    public $DataBaseEncoding = "utf8";
+    public $DataBaseType = 'mysql';
+    public $DataBaseHost = 'localhost';
+    public $DataBaseUser = 'root';
+    public $DataBasePassword = null;
+    public $DataBaseName = 'localhost';
+    public $DataBasePrefix = 'aseq_';
 }
 ?>

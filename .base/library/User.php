@@ -18,7 +18,7 @@ class User extends \Base{
 	public static $RecoverEmailSubject = 'Account Recovery Request';
 	public static $RecoverEmailContent = 'Hello dear $NAME,<br><br>
 We received an account recovery request on $HOSTLINK for $EMAILLINK.<br>
-This email address is associated with an account but no password is associated with it yet, so it can’t be used to log in.<br>
+This email address is associated with an account but no password is associated with it yet, so it canï¿½t be used to log in.<br>
 Please $HYPERLINK or the below link if you want to reset your password... else ignore this message.<br>$LINK<br><br>
 With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $RecoverLinkAnchor = "CLICK ON THIS LINK";
@@ -26,7 +26,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $ActiveEmailSubject = "Account Activation Request";
 	public static $ActiveEmailContent = 'Hello dear $NAME,<br><br>
 We received an account activation request on $HOSTLINK for $EMAILLINK.<br>
-Thank you for registration, This email address is associated with an account but is not activated yet, so it can’t be used to log in.<br>
+Thank you for registration, This email address is associated with an account but is not activated yet, so it canï¿½t be used to log in.<br>
 Please $HYPERLINK or the below link to active your account!<br>$LINK<br><br>
 With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $ActiveLinkAnchor = "CLICK ON THIS LINK";
@@ -38,7 +38,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $PasswordPattern = "/([\w\W]+){8,64}/";
 	public static $PasswordTips = "The password should be more than eigh and less than 64 alphabetic and numeric characters.";
 
-	public static $SeparatorSign = "¶";
+	public static $SeparatorSign = "ï¿½";
 	public static $DateTimeSignFormat = "Y/m/d";
 
 	/**
@@ -240,7 +240,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				":FirstName"=> $firstName,
 				":LastName"=> $lastName,
 				":Contact"=> $phone,
-				":GroupID"=> $groupID??\_::$CONFIG->UserAccess,
+				":GroupID"=> $groupID??DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix."UserGroup", "`ID`", "Access=". \_::$CONFIG->UserAccess)??100,
 				":Status"=> $status
 			]);
 	}
@@ -319,7 +319,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
      * @return bool
      */
 	public function SendActivationEmail($emailFrom=null, $emailTo=null, $subject= null, $content=null, $linkAnchor = null){
-		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject??self::$ActiveEmailSubject, $content??self::$ActiveEmailContent, $linkAnchor??self::$ActiveLinkAnchor, self::$ActiveHandlerPath, self::$ActiveRequestKey);
+		return $this->SendEmail($emailFrom??\_::$CONFIG->SenderEmail, $emailTo??$this->TemporaryEmail, $subject??self::$ActiveEmailSubject, $content??self::$ActiveEmailContent, $linkAnchor??self::$ActiveLinkAnchor, self::$ActiveHandlerPath, self::$ActiveRequestKey);
 	}
 	/**
      * Receive the Activation Email and return the basic data of user
@@ -357,7 +357,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 * @return bool
 	 */
 	public function SendRecoveryEmail($emailFrom = null, $emailTo = null, $subject=null, $content=null, $linkAnchor = null){
-		return $this->SendEmail($emailFrom??\_::$EMAIL, $emailTo??$this->TemporaryEmail, $subject??self::$RecoverEmailSubject, $content??self::$RecoverEmailContent, $linkAnchor??self::$RecoverLinkAnchor, self::$RecoverHandlerPath, self::$RecoveryRequestKey);
+		return $this->SendEmail($emailFrom??\_::$CONFIG->SenderEmail, $emailTo??$this->TemporaryEmail, $subject??self::$RecoverEmailSubject, $content??self::$RecoverEmailContent, $linkAnchor??self::$RecoverLinkAnchor, self::$RecoverHandlerPath, self::$RecoveryRequestKey);
 	}
 	/**
      * Receive the Recovery Email and return the basic data of user
