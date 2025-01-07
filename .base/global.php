@@ -510,8 +510,8 @@ function GET($input = null)
 		curl_setopt($ch, CURLOPT_URL, $input);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		return curl_exec($ch);
-	} else
-		return RECEIVE($input, $_GET);
+	} elseif (is_string($input)) return RECEIVE($input, $_GET);
+	return $input;
 }
 /**
  * Received posted values from the client side
@@ -529,8 +529,8 @@ function POST($input = null, ...$data)
 		$response = curl_exec($ch);
 		curl_close($ch);
 		return $response;
-	} else
-		return RECEIVE($input, $_POST);
+	} elseif (is_string($input)) return RECEIVE($input, $_POST);
+	return $input;
 }
 
 function INCLUDING(string $filePath, bool $print = true, array $variables = [], string|null $defaultPath = null, $default = null)
