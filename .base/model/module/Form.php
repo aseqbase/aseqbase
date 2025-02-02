@@ -48,6 +48,12 @@ class Form extends Module
 	public $ContentClass = "col-lg-6";
 	public $UseAJAX = true;
 
+	/**
+	 * A function to check received values before accepting
+	 * @template function($key,$value,$allVariables)
+	 * @var callable|null
+	 */
+	public $FieldsChecker = null;
 	public $FieldsTypes = [];
 
 	public $FieldsForeColor = "var(--ForeColor-1)";
@@ -59,11 +65,12 @@ class Form extends Module
 	public $FieldsMinWidth = "auto";
 	public $FieldsMaxHeight = "25vmin";
 	public $FieldsMaxWidth = "100vw";
+	public $Result = null;
 
 	/**
 	 * Create the module
 	 */
-	public function __construct($title = "Form", $action = null, $method = "POST", mixed $children = [], $description = null, $image = null)
+	public function __construct($title = null, $action = null, $method = "POST", mixed $children = [], $description = null, $image = null)
 	{
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
@@ -150,10 +157,10 @@ class Form extends Module
 				.{$this->Name} .button {
 					background-color: inherit;
 					color: inherit;
-					min-width: fit-content;
+					width: initial;
 					max-width: 85vw;
 					border-radius: var(--Radius-1);
-					padding: var(--Size-0) var(--Size-1);
+					padding: calc(var(--Size-0) / 2) var(--Size-0);
 					box-shadow: var(--Shadow-0);
 					" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
 				}
@@ -276,6 +283,10 @@ class Form extends Module
 				.{$this->Name} .field:hover label.description{
 					opacity: 0.75;
 					" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				}
+					
+				.{$this->Name} .group.buttons {
+					text-align: center;
 				}
 			");
 	}
@@ -564,12 +575,16 @@ class Form extends Module
 				font-size: 75%;
 				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
 			}
+					
+			.{$this->Name} .group.buttons {
+				text-align: center;
+			}
 		");
 	}
 
 	public function Get()
 	{
-		if($this->CheckBlock()) return null;
+		if(($res = $this->CheckBlock()) !== false) return $res;
 		$name = $this->Name . "_Form";
 		$src = $this->Action ?? $this->Path ?? \_::$PATH;
 		$src .= (is_null($this->ResponseView) ? null : ((strpos($src, "?") ? "&" : "?") . \_::$CONFIG->ViewHandlerKey . "=" . $this->ResponseView));
@@ -635,13 +650,15 @@ class Form extends Module
 					);
 			else
 				return
-					($this->AllowHeader ?
-						HTML::Media(null, $this->Image, ["class" => "image"]) .
-						$this->GetHeader() .
-						$this->GetTitle(["class"=>"form-title"]) .
-						$this->GetDescription(["class"=>"form-description"]) .
-						(isValid($this->BackLabel) ? HTML::Link($this->BackLabel, $this->BackPath ?? \_::$HOST, ["class"=>"back-button"]) : "")
-						: "") .
+					(
+						$this->AllowHeader ?
+							HTML::Media(null, $this->Image, ["class" => "image"]) .
+							$this->GetHeader() .
+							$this->GetTitle(["class"=>"form-title"]) .
+							$this->GetDescription(["class"=>"form-description"]) .
+							(isValid($this->BackLabel) ? HTML::Link($this->BackLabel, $this->BackPath ?? \_::$HOST, ["class"=>"back-button"]) : "")
+							: ""
+					) .
 					HTML::Form(
 						($this->AllowContent ? $this->GetContent() : "") .
 						Convert::ToString($this->GetFields()) .
@@ -669,10 +686,10 @@ class Form extends Module
 		if (isValid($this->Buttons))
 			yield $this->Buttons;
 		if ($this->Method) {
-			yield (isValid($this->SubmitLabel) ? HTML::SubmitButton($this->SubmitLabel, ["name" => "submit", "class" => "col-md"]) : "");
-			yield (isValid($this->ResetLabel) ? HTML::ResetButton($this->ResetLabel, ["name" => "reset", "class" => "col-md-4"]) : "");
+			yield (isValid($this->SubmitLabel) ? HTML::SubmitButton($this->SubmitLabel, ["name" => "submit"]) : "");
+			yield (isValid($this->ResetLabel) ? HTML::ResetButton($this->ResetLabel, ["name" => "reset"]) : "");
 		}
-		yield (isValid($this->CancelLabel) ? HTML::Button($this->CancelLabel, $this->CancelPath ?? \_::$HOST, ["name" => "cancel", "class" => "col-lg-3"]) : "");
+		yield (isValid($this->CancelLabel) ? HTML::Button($this->CancelLabel, $this->CancelPath ?? \_::$HOST, ["name" => "cancel"]) : "");
 	}
 	public function GetFooter()
 	{
@@ -719,8 +736,8 @@ class Form extends Module
 			} else {
 				$dt = new \DateTime("@0");
 				$dt->add(new \DateInterval("PT{$remains}S"));
-				SEND($this->GetError("Please try about {$dt->format('H:i:s')} later!"));
-				return true;
+				$this->Result = -403;
+				return __($this->GetError("Please try about {$dt->format('H:i:s')} later!"));
 			}
 		}
 		return false;
@@ -729,17 +746,27 @@ class Form extends Module
 		if ($this->BlockTimeout < 1) return false;
 		return setSession(getClientIP() . getDirection(), time()+($this->BlockTimeout/1000));
 	}
+	public function UnBlock() {
+		return popSession(getClientIP() . getDirection());
+	}
 
-	public function Handle()
-	{
-		if($this->CheckBlock()) return;
-		else $this->MakeBlock();
+	public function Handle(){
+		if(($res = $this->CheckBlock()) === false) $this->MakeBlock();
+		else return SEND($res, $this->Result);
 		if (isValid($this->ReCaptchaSiteKey)) {
 			LIBRARY("reCaptcha");
-			if (\MiMFa\Library\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey))
-				return SET($this->Handler());
-			else return SET($this->GetError("Do something to denied access!"));
-		} else return SET($this->Handler());
+			if (!\MiMFa\Library\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey))
+			     return SEND($this->GetError("Do something to denied access!"));
+		}
+		$res = $this->Handler();
+		if($this->Result === null) //Did not get result yet
+			return SET($res);
+		elseif($this->Result >= 200 && $this->Result < 300) //Is success
+			return FLIP($res, $this->Result);
+		elseif($this->Result == 0) //There is a warning
+			$this->UnBlock();
+		//There a problem is occured
+		return SEND($res, $this->Result);
 	}
 	public function Handler()
 	{
@@ -753,12 +780,15 @@ class Form extends Module
 				break;
 		}
 		try {
+			if(isValid($this->FieldsChecker))
+				foreach ($_req as $key => $value)
+					$_req[$key] = ($this->FieldsChecker)($key, $value, $_req);
 			if (count($_req) > 0) {
 				if(isValid($this->ReceiverEmail)){
 					if(!mail(
 						$this->ReceiverEmail,
 						$this->MailSubject??\_::$DOMAIN.": A new form submitted", 
-						\MiMFa\Library\Convert::ToString($_req),
+						Convert::ToString($_req),
 						$this->SenderEmail?["from"=>$this->SenderEmail]:[]))
 							return $this->GetWarning("Could not send data successfully!");
 				}
@@ -773,14 +803,17 @@ class Form extends Module
 
 	public function GetSuccess($msg, ...$attr)
 	{
+		$this->Result = $this->Result??200;
 		return HTML::Success($msg, ...$attr);
 	}
 	public function GetWarning($msg, ...$attr)
 	{
+		$this->Result = $this->Result??-500;
 		return HTML::Warning($msg, ...$attr);
 	}
 	public function GetError($msg, ...$attr)
 	{
+		$this->Result = $this->Result??-400;
 		return HTML::Error($msg, ...$attr);
 	}
 }

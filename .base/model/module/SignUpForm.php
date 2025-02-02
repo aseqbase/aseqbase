@@ -215,14 +215,14 @@ class SignUpForm extends Form{
 					$this->InitialStatus
 				))
 				{
-					return HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully").
+					return $this->GetSuccess("Dear '".\_::$INFO->User->TemporaryName."', You registered successfully").
 					($this->SendActivationEmail? PART(User::$ActiveHandlerPath, print:false) : "");
 				}
-				else return HTML::Error("The user with these email or username could not register!");
+				else return $this->GetError("The user with these email or username could not register!");
 			}
-			else return HTML::Warning("Please fill all required fields correctly!");
-		} catch(\Exception $ex) { return HTML::Error($ex); }
-		else return HTML::Warning("You are logged in!");
+			else return $this->GetWarning("Please fill all required fields correctly!");
+		} catch(\Exception $ex) { return $this->GetError($ex); }
+		else return $this->GetWarning("You are logged in!");
     }
 }
 ?>

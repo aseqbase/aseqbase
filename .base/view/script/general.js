@@ -307,6 +307,9 @@ const scrollTo = function(selector = "body :nth-child(1)", time = 1000) {
 	}, time);
 };
 
+const reload = function(){
+	window.location.assign(location.href);
+};
 const load = function(url=null){
 	window.location.assign(url??location.href);
 };

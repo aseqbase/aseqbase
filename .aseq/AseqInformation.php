@@ -32,6 +32,8 @@ class AseqInformation extends InformationBase
 
 	public $MainMenus = array(
 		array("Name" => "HOME", "Link" => "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "POSTS", "Link" => "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "FORUMS", "Link" => "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
 		array("Name" => "SERVICE", "Link" => "#embed", "Image" => "/asset/symbol/service.png", "Attributes" => "class='embed-link' data-target='.page' onclick='viewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); viewSideMenu(false);'"),
 		array("Name" => "CONTACTS", "Link" => "/contact", "Image" => "/asset/symbol/contact.png", "Attributes" => "class='menu-link'"),
 		array("Name" => "ABOUT", "Link" => "/about", "Image" => "/asset/symbol/about.png", "Attributes" => "class='menu-link'"),
@@ -40,6 +42,8 @@ class AseqInformation extends InformationBase
 
 	public $SideMenus = array(
 		array("Name" => "HOME", "Link" => "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "POSTS", "Link" => "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "FORUMS", "Link" => "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
 		array("Name" => "SERVICE", "Link" => "#embed", "Image" => "/asset/symbol/service.png", "Attributes" => "class='embed-link' data-target='.page' onclick='viewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); viewSideMenu(false);'"),
 		array("Name" => "ABOUT", "Link" => "/about", "Image" => "/asset/symbol/about.png", "Attributes" => "class='menu-link'"),
 		array("Name" => "CONTACTS", "Link" => "/contact", "Image" => "/asset/symbol/contact.png", "Attributes" => "class='menu-link'"),
@@ -48,7 +52,8 @@ class AseqInformation extends InformationBase
 
 	public $Shortcuts = array(
 		array("Name" => "Menu", "Link" => "", "Image" => "/asset/symbol/menu.png", "Attributes" => "onclick='viewSideMenu()'"),
-		array("Name" => "ABOUT", "Link" => "/about", "Image" => "/asset/symbol/about.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "POSTS", "Link" => "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "FORUMS", "Link" => "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
 		array("Name" => "Home", "Link" => "#internal", "Image" => "/asset/symbol/home.png", "Attributes" => "class='internal-link' data-target='.page' onclick='viewInternal(\"/home\",\"fade\"); viewSideMenu(false);'"),
 		array("Name" => "About", "Link" => "#internal", "Image" => "/asset/symbol/about.png", "Attributes" => "class='internal-link' data-target='.page' onclick='viewInternal(\"/about\",\"fade\"); viewSideMenu(false);'"),
 		array("Name" => "CONTACTS", "Link" => "/contact", "Image" => "/asset/symbol/contact.png", "Attributes" => "class='menu-link'")

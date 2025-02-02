@@ -56,6 +56,7 @@ class Local{
 		elseif(startsWith($path, \_::$ROOT)) $path = \_::$DIR.substr($path,strlen(\_::$ROOT));
 		elseif(startsWith($path, \_::$BASE_ROOT)) $path = \_::$BASE_DIR.substr($path,strlen(\_::$BASE_ROOT));
 		else{
+			$path = str_replace(["\\","/"], DIRECTORY_SEPARATOR, $path);
 			$p = ltrim(getRelative($path), "/\\");
             if(file_exists(\_::$DIR.$p)) return realpath(\_::$DIR.$p);
             if(count(\_::$SEQUENCES) > 0){
@@ -65,6 +66,7 @@ class Local{
             }
             if(file_exists(\_::$BASE_DIR.$p)) return realpath(\_::$BASE_DIR.$p);
         }
+		$path = str_replace(["\\","/"], DIRECTORY_SEPARATOR, $path);
 		return realpath($path);
 	}
     /**

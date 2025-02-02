@@ -119,42 +119,6 @@ class General extends Template{
 					font-weight: bold;
 				}
 
-				.be.wide{
-					display: block;
-					width: 100%;
-				}
-				.be.tall{
-					display: block;
-					height: 100%;
-				}
-				:has(.be.top, .be.middle, .be.bottom){
-					display: flex;
-				}
-				.be.top{
-					align-self: top;
-				}
-				.be.middle{
-					align-self: center;
-				}
-				.be.bottom{
-					align-self: bottom;
-				}
-				.be.left{
-					text-align: left;
-				}
-				.be.right{
-					text-align: right;
-				}
-				.be.ltr{
-					direction: ltr;
-				}
-				.be.rtl{
-					direction: rtl;
-				}
-				.be.center{
-					text-align: center;
-				}
-
 				:is(.button, .icon, .btn), :is(.button, .icon, .btn):is(:visited, :active){
 					border: var(--Border-1) transparent;
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--Transition-1)")."

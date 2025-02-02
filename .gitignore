@@ -405,6 +405,7 @@ FodyWeavers.xsd
 /single
 /sequence
 /administrator
+/public
 /test
 /tmp
 /ms

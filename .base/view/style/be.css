@@ -1,0 +1,90 @@
+/*
+ MiMFa.net
+ Quick Styles
+ */
+
+.be.wide {
+  display: block;
+  width: 100%;
+}
+.be.tall {
+  display: block;
+  height: 100%;
+}
+
+:has(.be.top, .be.middle, .be.bottom) {
+  display: flex;
+}
+.be.top {
+  align-self: top;
+}
+.be.middle {
+  align-self: center;
+}
+.be.bottom {
+  align-self: bottom;
+}
+.be.left {
+  text-align: left;
+}
+.be.right {
+  text-align: right;
+}
+.be.center {
+  text-align: center;
+}
+
+.be.ltr {
+  direction: ltr;
+}
+.be.rtl {
+  direction: rtl;
+}
+
+
+.be.table {
+  display: table;
+}
+.be.grid {
+  display: grid;
+}
+.be.flex {
+  display: flex;
+}
+.be.block {
+  display: block;
+}
+.be.inline {
+  display: inline;
+}
+.be.inline-block {
+  display: block;
+}
+.be.hide {
+  display: none;
+}
+.be.show {
+  display: inherit;
+}
+
+.be.light{
+	-webkit-filter: brightness(100) grayscale(100);
+	-moz-filter: brightness(100) grayscale(100);
+	-o-filter: brightness(100) grayscale(100);
+	-ms-filter: brightness(100) grayscale(100);
+	filter: brightness(100) grayscale(100);
+}
+.be.dark{
+	-webkit-filter: brightness(-100) grayscale(100);
+	-moz-filter: brightness(-100) grayscale(100);
+	-o-filter: brightness(-100) grayscale(100);
+	-ms-filter: brightness(-100) grayscale(100);
+	filter: brightness(-100) grayscale(100);
+}
+.be.blackwhite{
+	-webkit-filter: brightness(100) grayscale(100) contrast(0.8);
+	-moz-filter: brightness(100) grayscale(100) contrast(0.8);
+	-o-filter: brightness(100) grayscale(100) contrast(0.8);
+	-ms-filter: brightness(100) grayscale(100) contrast(0.8);
+	filter: brightness(100) grayscale(100) contrast(0.8);
+}

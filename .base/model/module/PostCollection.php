@@ -189,7 +189,6 @@ class PostCollection extends Collection{
     }
 
 	public function GetStyle(){
-		$ralign = Translate::$Direction=="RTL"?"left":"right";
 		return HTML::Style("
 			.{$this->Name}>*>.item {
 				height: fit-content;
@@ -232,18 +231,18 @@ class PostCollection extends Collection{
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
 			.{$this->Name}>*>.item .metadata .route{
-				padding-{$ralign}: var(--Size-0);
+				padding-inline-end: var(--Size-0);
 			}
 			.{$this->Name}>*>.item .more{
                 gap: var(--Size-0);
-				text-align: {$ralign};
+				text-align: end;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
-			.{$this->Name}>*>.item .more>a{
+			.{$this->Name}>*>.item .more>*{
 				opacity: 0;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}
-			.{$this->Name}>*>.item:hover .more>a{
+			.{$this->Name}>*>.item:hover .more>*{
             	opacity: 1;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
 			}

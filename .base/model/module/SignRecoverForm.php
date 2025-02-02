@@ -77,24 +77,24 @@ class SignRecoverForm extends Form{
 			if(isValid($_req,"Password") && isValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey)){
 				$res = \_::$INFO->User->ReceiveRecoveryLink();
 				if($res === true)
-                	return HTML::Success("Dear '".\_::$INFO->User->TemporaryName."', your password changed successfully!");
+                	return $this->GetSuccess("Dear '".\_::$INFO->User->TemporaryName."', your password changed successfully!");
 				elseif($res === false)
-					return HTML::Error("There a problem is occured!");
+					return $this->GetError("There a problem is occured!");
 				else
-					return HTML::Error($res);
+					return $this->GetError($res);
 			}
 			elseif(isValid($_req,"Signature")){
 				\_::$INFO->User->Find(getValid($_req,"Signature"));
 				$res = \_::$INFO->User->SendRecoveryEmail();
 				if($res === true)
-                	return HTML::Success("Dear user, the reset password sent to your email successfully!");
+                	return $this->GetSuccess("Dear user, the reset password sent to your email successfully!");
 				elseif($res === false)
-					return HTML::Error("There a problem is occured!");
+					return $this->GetError("There a problem is occured!");
 				else
-					return HTML::Error($res);
+					return $this->GetError($res);
 			}
-			else return HTML::Warning("Please fill fields correctly!");
-		} catch(\Exception $ex) { return HTML::Error($ex); }
+			else return $this->GetWarning("Please fill fields correctly!");
+		} catch(\Exception $ex) { return $this->GetError($ex); }
     }
 }
 ?>

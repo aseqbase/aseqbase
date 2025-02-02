@@ -7,10 +7,11 @@ if(
 		if(isset($_REQUEST[\_::$CONFIG->ViewHandlerKey]))
             VIEW($_REQUEST[\_::$CONFIG->ViewHandlerKey], variables:$_REQUEST);
         else {
-			$request = ltrim(\_::$REQUEST, " \r\n\t\v\f\\/");
+			$request = \_::$REQUEST;
+            if(\_::$CONFIG->Router->Handle($request)) return;
             foreach (\_::$CONFIG->Handlers as $pat=>$handler)
-                if(preg_match($pat, $request)
-                    && VIEW($handler, variables:$_REQUEST)) return;
+                if(preg_match($pat, $request) && \_::$CONFIG->Router->View($handler))
+                    return;
             VIEW(\_::$CONFIG->ViewName??\_::$CONFIG->DefaultViewName??"main", variables:$_REQUEST);
         }
     else VIEW(\_::$CONFIG->HomeViewName, variables:$_REQUEST);

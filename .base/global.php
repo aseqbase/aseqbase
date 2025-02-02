@@ -62,6 +62,17 @@ class _
 	public static int|null $NEST = null;
 
 	/**
+	 * The request method
+	 * @template -1: ALL
+	 * @template 0: GET
+	 * @template 1: POST
+	 * @template 2: ADD
+	 * @template 3: PUT
+	 * @template 4: DEL
+	 * @var int|null
+	 */
+	public static int|null $METHOD = 0;
+	/**
 	 * Full part of the current url
 	 * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php?p=3&l=10#serp"
 	 * @var string|null
@@ -207,6 +218,28 @@ class _
 	public static string|null $BASE_SCRIPT_DIR = null;
 	public static string|null $BASE_STYLE_DIR = null;
 }
+switch($_SERVER['REQUEST_METHOD']){
+	case "GET":
+		\_::$METHOD = 0;
+	break;
+	case "POST":
+		\_::$METHOD = 1;
+	break;
+	case "PATCH":
+	case "ADD":
+		\_::$METHOD = 2;
+	break;
+	case "PUT":
+		\_::$METHOD = 3;
+	break;
+	case "DEL":
+	case "DELETE":
+		\_::$METHOD = 4;
+	break;
+	default:
+		\_::$METHOD = -1;
+	break;
+}
 
 \_::$ASEQ = $GLOBALS["ASEQBASE"];
 \_::$BASE = $GLOBALS["BASE"];
@@ -287,6 +320,7 @@ LIBRARY("Contact");
 LIBRARY("User");
 LIBRARY("HTML");
 LIBRARY("Script");
+LIBRARY("Router");
 
 RUN("global/ConfigurationBase");
 RUN("Configuration");
@@ -397,26 +431,53 @@ function getView()
 }
 
 /**
- * Print only this output on the client side then reload the page
- * @param mixed $value The data that is ready to print
+ * Echo output on the client side
+ * @param mixed $output The data that is ready to print
  * @return mixed Printed data
  */
-function FLIP($value = null, $url = null)
+function SET($output = null)
 {
 	ob_clean();
 	flush();
-	die($value . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
+	echo $output;
+	ob_start();
+	return $output;
 }
 /**
  * Print only this output on the client side
  * @param mixed $value The data that is ready to print
  * @return mixed Printed data
  */
-function SEND($value = null)
+function SEND($value = null, $status = null)
 {
-	ob_clean();
-	flush();
+	if(isValid($status)){
+		ob_clean();
+		header("Status: ".abs($status));
+		flush();
+	}
+	else{
+		ob_clean();
+		flush();
+	}
 	die($value . "");
+}
+/**
+ * Print only this output on the client side then reload the page
+ * @param mixed $value The data that is ready to print
+ * @return mixed Printed data
+ */
+function FLIP($value = null, $status = null, $url = null)
+{
+	if(isValid($status)){
+		ob_clean();
+		header("Status: ".abs($status));
+		flush();
+	}
+	else{
+		ob_clean();
+		flush();
+	}
+	die($value . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
 }
 /**
  * Receive requests from the client side
@@ -489,16 +550,6 @@ function GRAB($key = null, array|string|null $source = null, $default = null)
 }
 
 /**
- * Echo output on the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function SET($output = null)
-{
-	echo $output;
-	return $output;
-}
-/**
  * Received input from the client side
  * @param mixed $input The GETed data key or The Url to get data from that
  * @return mixed Received data
@@ -542,8 +593,7 @@ function INCLUDING(string $filePath, bool $print = true, array $variables = [], 
 		//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
 		include_once $filePath;
 		$output = ob_get_clean();
-		if ($print)
-			return SET($output) ?? true;
+		if ($print) echo $output;
 		return $output ?? true;
 	}
 	if (!is_null($default) && (is_callable($default) || $default instanceof \Closure))
@@ -558,8 +608,7 @@ function REQUIRING(string $filePath, bool $print = true, array $variables = [], 
 		//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
 		require_once $filePath;
 		$output = ob_get_clean();
-		if ($print)
-			return SET($output) ?? true;
+		if ($print) echo $output;
 		return $output ?? true;
 	}
 	if (!is_null($default) && (is_callable($default) || $default instanceof \Closure))
@@ -677,6 +726,23 @@ function applyAppends($toCase, string|null $name = null)
 }
 
 /**
+ * To interprete, the specified file in all sequences
+ * @param non-empty-string $name
+ * @param array $variables
+ * @param bool $print
+ * @return mixed
+ */
+function RUNALL(string|null $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+{
+	try {
+		applyPrepends("RUN", $name);
+		$count = min($count, count(\_::$SEQUENCES)+1);
+		for(;$fromSeq<$count; $fromSeq++) forceUSING($dir ?? \_::$DIR, \_::$BASE_DIR, $name, $print, $variables, $fromSeq, 1, $defaultName, $default);
+	} finally {
+		applyAppends("RUN", $name);
+	}
+}
+/**
  * To interprete, the specified path
  * @param non-empty-string $name
  * @param array $variables
@@ -784,9 +850,10 @@ function VIEW(string $name, bool $print = true, string|null $dir = null, array $
 	try {
 		applyPrepends("VIEW", $name);
 		$output = executeCommands(forceUSING($dir ?? \_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, false, $variables, $fromSeq, $count, $defaultName, $default));
-		if ($print)
-			return SET(\_::$CONFIG->AllowReduceSize ? ReduceSize($output) : $output);
-		else
+		if ($print){
+			echo $output = (\_::$CONFIG->AllowReduceSize ? ReduceSize($output) : $output);
+			return $output;
+	    }else
 			return \_::$CONFIG->AllowReduceSize ? ReduceSize($output) : $output;
 	} finally {
 		applyAppends("VIEW", $name);
@@ -890,6 +957,16 @@ function __(mixed $textOrObject, bool $translation = true, bool $styling = true,
 				both: true,
 				caseSensitive: true
 			);
+			if (\_::$CONFIG->AllowUserRefering)
+				$textOrObject = \MiMFa\Library\Style::DoProcess(
+					$textOrObject,
+					process: function ($k, $v, $i) {
+						return \MiMFa\Library\HTML::Link($v, "/user/" . strtolower($k));
+					},
+					keyWords: \MiMFa\Library\DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix . "User", "Name", "Name", "ORDER BY LENGTH(`Name`) DESC"),
+					both: false,
+					caseSensitive: true
+				);
 	}
 	return $textOrObject;
 }
@@ -1259,7 +1336,7 @@ function setMemo($key, $val)
 {
 	if ($val == null)
 		return false;
-	return setcookie($key, $val, 0, DIRECTORY_SEPARATOR);
+	return setcookie($key, $val, 0, "/");
 }
 function getMemo($key)
 {
@@ -1275,13 +1352,13 @@ function hasMemo($key)
 function forgetMemo($key)
 {
 	unset($_COOKIE[$key]);
-	return setcookie($key, "", 0, DIRECTORY_SEPARATOR);
+	return setcookie($key, "", 0, "/");
 }
 function flushMemos($key)
 {
 	foreach ($_COOKIE as $key => $val) {
 		unset($_COOKIE[$key]);
-		return setcookie($key, "", 0, DIRECTORY_SEPARATOR);
+		return setcookie($key, "", 0, "/");
 	}
 }
 

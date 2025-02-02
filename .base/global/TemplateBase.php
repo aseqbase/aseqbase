@@ -154,10 +154,10 @@ abstract class TemplateBase{
 
 	public function GetInitial():string|null{
 		return "
-		<script>
-			const mailTo = function(url=null){
-				open('mailto:'+(url??`".\_::$CONFIG->ReceiverEmail."`), '_blank');
-			};
+<script>
+	const mailTo = function(url=null){
+		open('mailto:'+(url??`".\_::$CONFIG->ReceiverEmail."`), '_blank');
+	};
 			const transitData = function(
 				methodName = 'POST',
 				actionPath = null,
@@ -169,49 +169,55 @@ abstract class TemplateBase{
 				processHandler = null,
 				timeout = null) {
 
-				successHandler = successHandler??function(data, selector){
+				successHandler = successHandler??function(data, err, selector){
 					$(selector + ' .result').remove();
-					//if(isEmpty(data)) load();
-					//else {
 					if(!isEmpty(data)) {
-						data = ((typeof(data) == 'object')?data.statusText:data)??'".__("The form submitted successfully!")."';
+						data = ((typeof(data) == 'object') ? data.statusText : data) ?? 'Form submitted successfully!';
 						if(!isEmpty(data))
 							$(selector).prepend(Html.success(data));
 					}
 				};
-				errorHandler = errorHandler??function(data, selector){
+				
+				errorHandler = errorHandler??function(data, err, selector){
 					$(selector + ' .result').remove();
-					//if(isEmpty(data)) load();
-					//else {
 					if(!isEmpty(data)) {
-						data = ((typeof(data) == 'object')?data.statusText:data)??'".__("There a problem occured!")."';
+						data = ((typeof(data) == 'object') ? data.statusText : data) ?? 'There was a problem!';
 						if(!isEmpty(data))
 							$(selector).prepend(Html.error(data));
 					}
 				};
-				readyHandler = readyHandler??function(data, selector){
+
+				readyHandler = readyHandler??function(data, err, selector){
 					$(selector + ' .result').remove();
 				};
-				processHandler = processHandler??function(data, selector){
+
+				processHandler = processHandler??function(data, err, selector){
 					if(!isEmpty(data)){
-						data = typeof(data) == 'object'?data.statusText:data;
+						data = typeof(data) == 'object' ? data.statusText : data;
 						if(!isEmpty(data)) $(selector).prepend(data);
 					}
 				};
 
-				const btns = selector+' :is(button, .btn, .icon, input:is([type=button], [type=submit], [type=image], [type=reset]))';
-				actionPath = actionPath??location.href;
-				timeout = timeout??30000;
-				contentType = false;
+				const btns = selector + ' :is(button, .btn, .icon, input:is([type=button], [type=submit], [type=image], [type=reset]))';
+				actionPath = actionPath ?? location.href;
+				timeout = timeout ?? 30000;
+				let processData = true;
+				let contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+
 				switch(typeof(requestData)){
 					case 'object':
-						if(!requestData instanceof(FormData)){
+						if(requestData instanceof FormData){
+							processData = false;
+							contentType = false;
+						} else {
 							contentType = 'application/json; charset=utf-8';
 							requestData = JSON.stringify(requestData);
+							processData = true;
 						}
 					break;
 					default:
 						contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+						processData = true;
 					break;
 				}
 
@@ -221,37 +227,40 @@ abstract class TemplateBase{
 					data: requestData,
 					xhr: function () {
 						var myXhr = $.ajaxSettings.xhr();
-						if (myXhr.upload) myXhr.upload.addEventListener('progress', (data)=>processHandler(data, selector), false);
+						if (myXhr.upload) myXhr.upload.addEventListener('progress', (data, err) => processHandler(data, err, selector), false);
 						return myXhr;
 					},
-					success: function (data) {
-						successHandler(data,selector);
+					success: function (data, err) {
+						successHandler(data, err, selector);
 						$(btns).removeClass('hide');
-						$(selector).css('opacity','1');
+						$(selector).css('opacity', '1');
 					},
-					error: function (data) {
-						errorHandler(data,selector);
+					error: function (data, err) {
+						errorHandler(data, err, selector);
 						$(btns).removeClass('hide');
-						$(selector).css('opacity','1');
+						$(selector).css('opacity', '1');
 					},
-					beforeSend: function (data) {
-						readyHandler(data,selector);
+					beforeSend: function (data, err) {
+						readyHandler(data, err, selector);
 						$(btns).addClass('hide');
-						$(selector).css('opacity','.5');
+						$(selector).css('opacity', '.5');
 					},
 					async: true,
 					cache: false,
 					contentType: contentType,
-					processData: false,
+					processData: processData,
 					timeout: timeout
 				});
 			};
+
 			const getData = function(actionPath = null, requestData = null, selector = 'body :nth-child(1)', successHandler = null, errorHandler = null, readyHandler = null, processHandler = null, timeout = null) {
-					return transitData('GET', actionPath, requestData, selector, successHandler, errorHandler, readyHandler, processHandler, timeout);
+				return transitData('GET', actionPath, requestData, selector, successHandler, errorHandler, readyHandler, processHandler, timeout);
 			};
+
 			const postData = function(actionPath = null, requestData = null, selector = 'body :nth-child(1)', successHandler = null, errorHandler = null, readyHandler = null, processHandler = null, timeout = null) {
-					return transitData('POST', actionPath, requestData, selector, successHandler, errorHandler, readyHandler, processHandler, timeout);
+				return transitData('POST', actionPath, requestData, selector, successHandler, errorHandler, readyHandler, processHandler, timeout);
 			};
+
 			const submitForm = function(selector = 'form', successHandler = null, errorHandler = null, readyHandler = null, processHandler = null, timeout = null){
 				const actionPath = $(selector).attr('action');
 				const methodName = $(selector).attr('method');

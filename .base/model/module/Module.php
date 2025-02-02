@@ -332,6 +332,21 @@ class Module extends \Base{
         $this->Captured = true;
 		return join("",[$this->GetTitle(),$this->GetDescription(),$this->GetContent()]);
 	}
+	/**
+     * Get all the HTML document and elements of the Module
+     * @return string
+     */
+	public function Fetch(){
+        if($this->Capturable){
+            $this->Get();
+        }
+        else {
+            ob_start();
+			$this->Draw();
+			ob_clean();
+        }
+        return null;
+	}
 
 	/**
      * Capture and return whole the Document contains Elements, Styles, Scripts, etc. completely.
@@ -483,7 +498,7 @@ class Module extends \Base{
      * Draw Or ReDraw if is Drawn.
      */
     public function DoDraw(){
-        if($this->Drawn) return $this->ReDraw();
+        if($this->Drawn) return $this->DoDraw();
         else return $this->Draw();
     }
 

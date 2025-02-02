@@ -23,7 +23,9 @@
                     "Encoding"=>"UTF-8"
                 )
             );
-        echo HTML::Center($module->Capture());
+        $module->Style = new Style();
+        $module->Style->TextAlign = "center";
+        $module->Draw();
     }
     MODULE("TemplateButton");
     $module = new MiMFa\Module\TemplateButton();
@@ -33,7 +35,8 @@
     $module->Style->Position = "absolute";
     $module->Style->Left = "var(--Size-1)";
     $module->Draw();
-    echo HTML::Icon("arrow-up","scrollTo('body :nth-child(1)');",["style"=>"border: none; position: absolute; right: var(--Size-1);"]);
+    MODULE("Simple");
+    (new MiMFa\Module\Simple(HTML::Icon("arrow-up","scrollTo('body :nth-child(1)');",["style"=>"border: none; position: absolute; right: var(--Size-1);"])))->Draw();
     PART("copyright");
     ?>
 </footer>

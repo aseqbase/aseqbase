@@ -9,5 +9,5 @@ COMPONENT("Component");
 TEMPLATE("Template");
 MODULE("Module");
 
-RUN("customize");
+RUNALL("customize");
 ?>

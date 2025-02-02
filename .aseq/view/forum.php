@@ -1,9 +1,7 @@
 <?php
-
-use MiMFa\Library\Router;
-use MiMFa\Module\CommentForm;
 LIBRARY("Query");
 use \MiMFa\Library\Query;
+use \MiMFa\Library\Router;
 $path = array_slice(explode("/",\_::$DIRECTION),1);
 $name = last($path);
 if(count($path) > 1) $path = implode("/", array_slice($path,0, count($path) - 1));
@@ -25,6 +23,7 @@ if(isEmpty($doc)){
     VIEW("category");
     return;
 }
+if($doc['Type'] != "Forum") return VIEW("forums");
 
 (new Router())
     ->GET(function() use($doc){
@@ -32,18 +31,20 @@ if(isEmpty($doc)){
         $templ = new \MiMFa\Template\Main();
         $templ->WindowTitle = [$doc['Title']];
         $templ->Content = function() use($doc){
-            MODULE("Post");
-            $module = new \MiMFa\Module\Post();
+            MODULE("Forum");
+            $module = new \MiMFa\Module\Forum();
             $module->Item = $doc;
             $module->Draw();
         };
         $templ->Draw();
     })
-    ->ALL(function() use($doc) {
-        MODULE("CommentForm");
-        $cc = new CommentForm();
-        $cc->Relation = $doc['ID'];
-        return $cc->Handle();
+    ->ALL(function() use($doc){
+        if(RECEIVE()) {
+            MODULE("CommentForm");
+            $cc = new \MiMFa\Module\CommentForm();
+            $cc->Relation = $doc['ID'];
+            return $cc->Handle();
+        }
     })
-->Handle();
+    ->Handle();
 ?>

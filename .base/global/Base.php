@@ -97,6 +97,9 @@ class Base extends \ArrayObject{
 		return false;
     }
 
+	public function Fetch(){
+		return $this->Get();
+    }
 	public function Get(){
 		return MiMFa\Library\Convert::ToString($this->Children).MiMFa\Library\Convert::ToString($this->ToArray());
     }

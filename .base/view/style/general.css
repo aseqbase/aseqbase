@@ -57,6 +57,14 @@
 	filter: brightness(-100) grayscale(100);
 }
 
+.blackwhite{
+	-webkit-filter: brightness(100) grayscale(100) contrast(0.8);
+	-moz-filter: brightness(100) grayscale(100) contrast(0.8);
+	-o-filter: brightness(100) grayscale(100) contrast(0.8);
+	-ms-filter: brightness(100) grayscale(100) contrast(0.8);
+	filter: brightness(100) grayscale(100) contrast(0.8);
+}
+
 .text{
 	text-align: justify;
 	margin-bottom: 1vmax;
@@ -78,14 +86,6 @@
 }
 .warning {
 	color: #9d9d4c;
-}
-
-.blackwhite{
-	-webkit-filter: brightness(100) grayscale(100) contrast(0.8);
-	-moz-filter: brightness(100) grayscale(100) contrast(0.8);
-	-o-filter: brightness(100) grayscale(100) contrast(0.8);
-	-ms-filter: brightness(100) grayscale(100) contrast(0.8);
-	filter: brightness(100) grayscale(100) contrast(0.8);
 }
 
 

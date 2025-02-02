@@ -119,15 +119,15 @@ class SignInForm extends Form{
 						\_::$INFO->User->SignInOrSignUp(getValid($_req,"Signature"), getValid($_req,"Password")):
 						\_::$INFO->User->SignIn(getValid($_req,"Signature"), getValid($_req,"Password"));
 				if($res === true)
-                	return HTML::Success(Convert::FromDynamicString($this->CorrectConfirmingFormat));
+                	return $this->GetSuccess(Convert::FromDynamicString($this->CorrectConfirmingFormat));
 				elseif($res === false)
-					return HTML::Error($this->IncorrectWarning);
+					return $this->GetError($this->IncorrectWarning);
 				else
-					return HTML::Error($res);
+					return $this->GetError($res);
 			}
-			else return HTML::Warning($this->IncompleteWarning);
-		} catch(\Exception $ex) { return HTML::Error($ex); }
-		else return HTML::Warning($this->LoggedInWarning);
+			else return $this->GetWarning($this->IncompleteWarning);
+		} catch(\Exception $ex) { return $this->GetError($ex); }
+		else return $this->GetWarning($this->LoggedInWarning);
     }
 }
 ?>

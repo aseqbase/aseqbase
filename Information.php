@@ -20,11 +20,12 @@ class Information extends InformationBase
 	public $KeyWords = array("MiMFa aseqbase Framework", "MiMFa", "aseqbase", "Web Development", "Development", "Web Framework", "Website", "Framework");
 
 	public $MainMenus = array(
-		array("Layer" => 1, "Name" => "HOME", "Link" => "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
-		array("Layer" => 1, "Name" => "INTRODUCTION", "Link" => "/introduction", "Image" => "/asset/symbol/introduction.png", "Attributes" => "class='menu-link'"),
-		array("Layer" => 1, "Name" => "GIT", "Link" => "http://github.com/mimfa/aseqbase", "Image" => "/asset/symbol/market.png", "Attributes" => "class='menu-link'"),
-		array("Layer" => 2, "Name" => "FORUM", "Link" => "https://github.com/aseqbase/aseqbase/issues", "Image" => "/asset/symbol/chat.png", "Attributes" => "class='menu-link'"),
-		array("Layer" => 1, "Name" => "PRODUCTS", "Link" => "http://github.com/mimfa", "Image" => "/asset/symbol/product.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "HOME", "Link" => "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "POSTS", "Link" => "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "FORUMS", "Link" => "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "INTRODUCTION", "Link" => "/introduction", "Image" => "/asset/symbol/introduction.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "GIT", "Link" => "http://github.com/mimfa/aseqbase", "Image" => "/asset/symbol/market.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "PRODUCTS", "Link" => "http://github.com/mimfa", "Image" => "/asset/symbol/product.png", "Attributes" => "class='menu-link'"),
 		array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/asset/symbol/about.png","Attributes"=> "class='menu-link'","Items"=> array(
 			array("Name"=>"CONTACTS","Link"=>"/contact","Image"=>"/asset/symbol/contact.png","Attributes"=> "class='menu-link'"),
 			array("Name"=>"ABOUT","Link"=>"/about","Image"=>"/asset/symbol/about.png","Attributes"=> "class='menu-link'"),
@@ -34,6 +35,8 @@ class Information extends InformationBase
 
 	public $SideMenus = array(
 		array("Name" => "HOME", "Link" => "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "POSTS", "Link" => "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "FORUMS", "Link" => "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
 		array("Name" => "SERVICE", "Link" => "#embed", "Image" => "/asset/symbol/service.png", "Attributes" => "class='embed-link' data-target='.page' onclick='viewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); viewSideMenu(false);'"),
 		array("Name" => "ABOUT", "Link" => "/about", "Image" => "/asset/symbol/about.png", "Attributes" => "class='menu-link'"),
 		array("Name" => "CONTACTS", "Link"=>"/contact", "Image" => "/asset/symbol/contact.png", "Attributes" => "class='menu-link'"),
@@ -43,9 +46,9 @@ class Information extends InformationBase
 	public $Shortcuts = array(
 		array("Name" => "Menu", "Link" => "", "Image" => "/asset/symbol/menu.png", "Attributes" => "onclick='viewSideMenu()'"),
 		array("Name" => "Market", "Link" => "#embed", "Image" => "/asset/symbol/market.png", "Attributes" => "class='embed-link' onclick='viewEmbed(\"https://github.com/aseqbase/aseqbase\",\"fade\"); viewSideMenu(false);'"),
-		array("Name" => "Home", "Link" => "#internal", "Image" => "/asset/symbol/home.png", "Attributes" => "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
-		array("Name" => "Products", "Link" => "#internal", "Image" => "/asset/symbol/product.png", "Attributes" => "class='internal-link' onclick='viewInternal(\"https://github.com/mimfa\",\"fade\"); viewSideMenu(false);'"),
-		array("Name" => "Chat", "Link" => "#internal", "Image" => "/asset/symbol/chat.png", "Attributes" => "class='internal-link' onclick='viewInternal(\"https://github.com/aseqbase/aseqbase/issues\",\"fade\"); viewSideMenu(false);'")
+		array("Name" => "Home", "Link" => "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
+		array("Name" => "Forum", "Link" => "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "Posts", "Link" => "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'")
 	);
 
 	public $Services = array(

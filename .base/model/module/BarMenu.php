@@ -154,11 +154,12 @@ class BarMenu extends Module{
                         //    )
                         //    , getValid($this->Items[$i],'Path')??getValid($this->Items[$i],'Link'), getValid($this->Items[$i],"Attributes")
                         //);
+						$hr = getBetween($item, "Link", 'Path');
                         yield
-                            "<a ".getValid($item,"Attributes")." ".(isValid($item,'Path')?"href='".$item['Path']."'":"").">
+                            "<a ".getValid($item,"Attributes").(isValid($hr)?" href='$hr'":"").">
 								<div class='button $cls' style='width:".($ism?$msize:$size)."vw;'>
-									<div style=\"background-image: url('{$item['Image']}')\">
-										<span>".__($item['Name'])."</span>
+									<div style=\"background-image: url('".getBetween($item, "Image", 'Icon')."')\">
+										<span>".__(getBetween($item, "Title", 'Name'))."</span>
 									</div>
 								</div>
 							</a>";
