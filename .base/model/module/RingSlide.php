@@ -4,7 +4,6 @@ use MiMFa\Library\User;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 class RingSlide extends Module{
-	public $Capturable = true;
 	public $Name = "RingSlide";
 	public $Class = "row";
 	public $Image = null;
@@ -23,12 +22,12 @@ class RingSlide extends Module{
         $this->Set($items, $path);
     }
 	public function Set($items =  null, $path = null){
-		$this->Path = $path??(\_::$CONFIG->AllowSigning?User::$InHandlerPath:null);
+		$this->Path = $path??(\_::$Config->AllowSigning?User::$InHandlerPath:null);
 		$this->Items = $items;
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name} .tabs{
 				max-width: 100%;
 				margin-top: 15Vmin;
@@ -51,17 +50,17 @@ class RingSlide extends Module{
 				text-align: center;
 			}
 			.{$this->Name} .sign .btn{
-				font-size: var(--Size-2);
-				color: var(--ForeColor-2);
+				font-size: var(--size-2);
+				color: var(--fore-color-2);
 				border-color: transparent;
 				margin: 0px 5px;
 			}
 			.{$this->Name} .sign .btn:hover{
-				background-color: var(--BackColor-2);
-				font-size: var(--Size-2);
-				color: var(--ForeColor-2);
-				border-color: var(--ForeColor-2);
-				border-radius: var(--Radius-2);
+				background-color: var(--back-color-2);
+				font-size: var(--size-2);
+				color: var(--fore-color-2);
+				border-color: var(--fore-color-2);
+				border-radius: var(--radius-2);
 			}
 			.{$this->Name} .menu {
 				min-height: 60vh;
@@ -87,13 +86,13 @@ class RingSlide extends Module{
 				height: {$this->CenterSize}px;
 				border-radius: 50%;
 				position: relative;
-				box-shadow: 0px 0px 20px var(--BackColor-2);
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
+				box-shadow: 0px 0px 20px var(--back-color-2);
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
 			}
 
 			.{$this->Name} .menu>.center:hover {
-				box-shadow: 0px 0px 50px var(--BackColor-2);
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
+				box-shadow: 0px 0px 50px var(--back-color-2);
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
 			}
 
 			.{$this->Name} .menu>.center:before {
@@ -105,33 +104,33 @@ class RingSlide extends Module{
 				font-size: 180%;
 				left: 0px;
 				top: 0px;
-				background-image: url('".((\_::$INFO->User??$this)->Image??$this->Image)."');
+				background-image: url('".((\_::$Back->User??$this)->Image??$this->Image)."');
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: contain;
-				background-color: var(--BackColor-2);
+				background-color: var(--back-color-2);
 				border-radius: 100%;
 				cursor: pointer;
-				box-shadow: 0px 0px 20px var(--BackColor-2);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
+				box-shadow: 0px 0px 20px var(--back-color-2);
+				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
 			}
 
 			.{$this->Name} .menu>.center>a{
-				background-color: var(--BackColor-2);
-				color: var(--ForeColor-2);
+				background-color: var(--back-color-2);
+				color: var(--fore-color-2);
 				position: absolute;
 				text-align: center;
 				cursor: pointer;
-				border: var(--Border-1) var(--BackColor-2);
+				border: var(--border-1) var(--back-color-2);
 				border-radius: 100%;
-				box-shadow: var(--Shadow-3);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
+				box-shadow: var(--shadow-3);
+				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
 			}
 
 			.{$this->Name} .menu>.center>a:hover {
-				box-shadow: var(--Shadow-4);
-				border:  var(--Border-1) var(--BackColor-2);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
+				box-shadow: var(--shadow-4);
+				border:  var(--border-1) var(--back-color-2);
+				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
 			}
 
 			.{$this->Name} .menu>.center>a>.button{
@@ -144,46 +143,46 @@ class RingSlide extends Module{
 				background-size: 50% 50% !important;
 				width: {$this->ButtonsSize}px;
 				height: {$this->ButtonsSize}px;
-                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor(\_::$TEMPLATE->ForeColor(2)):"")."
+                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor(\_::$Front->ForeColor(2)):"")."
 			}
 			.{$this->Name} .menu>.center>a:hover>.button>.media {
 				background-size: 60% 60%;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(2))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
 			}
 		");
 	}
 
 	public function Get(){
-		parent::Get();
 		$count = count($this->Items);
 		if($count > 0)
 			return Convert::ToString(function() use($count){
+				yield parent::Get();
 				$btns = "";
 				$tags = "";
 				for($i = 0; $i < $count; $i++)
-					if(getAccess(getValid($this->Items[$i],"Access",\_::$CONFIG->VisitAccess))) {
-						$btns .= HTML::Link(
-							HTML::Division(
-								HTML::Media("", getValid($this->Items[$i],'Image'))
+					if(auth(findValid($this->Items[$i],"Access" ,\_::$Config->VisitAccess))) {
+						$btns .= Html::Link(
+							Html::Division(
+								Html::Media("", findBetween($this->Items[$i],'Image' , "Icon"))
 							,["class"=>"button"])
 						, "#tab$i", ["data-target"=>".tab", "data-toggle"=>'tab']);
 
-						$tags .= HTML::Division(
-							HTML::ExternalHeading(getValid($this->Items[$i],'Name'), getBetween($this->Items[$i],'Path','Link'), ["class"=>"title"]).
-							HTML::Division(
-								getValid($this->Items[$i], 'Description').
-								(getValid($this->Items[$i], "Button")??getValid($this->Items[$i],"More"))
-							, ["class"=>"description"])
-						, ["class"=>"tab fade".($i===0?' active show':''), "id"=>"tab$i"]);
+						$tags .= Html::Division(
+							Html::ExternalHeading(get($this->Items[$i],'Name' ), findBetween($this->Items[$i],'Path' ,'Link'), ["class"=>"title" ]).
+							Html::Division(
+								get($this->Items[$i], 'Description' ).
+								(get($this->Items[$i], "Button")??get($this->Items[$i],"More"))
+							, ["class"=>"description" ])
+						, ["class"=>"tab fade".($i===0?' active show':''), "Id" =>"tab$i"]);
 					}
-				yield HTML::Division(HTML::Division(HTML::Division($btns,["class"=>"center"]),["class"=>"menu"]),["class"=>"col-md-5", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]);
-				yield HTML::Division(HTML::Division($tags,["class"=>"tabs"]),["class"=>"col-md", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]);
+				yield Html::Division(Html::Division(Html::Division($btns,["class"=>"center"]),["class"=>"menu"]),["class"=>"col-md-5", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]);
+				yield Html::Division(Html::Division($tags,["class"=>"tabs"]),["class"=>"col-md", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]);
 			});
 		else return null;
 	}
 
 	public function GetScript(){
-		return parent::GetScript().(count($this->Items) > 0? HTML::Script("
+		return parent::GetScript().(count($this->Items) > 0? Html::Script("
 			$(document).ready(function(){
 				".(isValid($this->Path)?"$('.{$this->Name} .menu>.center:before').click(function () { load('{$this->Path}'); });":"")."
 				const bselector = '.{$this->Name} .menu>.center>a';
@@ -192,7 +191,7 @@ class RingSlide extends Module{
 					const tar = $(this).attr('data-target');
 					const x = xn.replace('#', '');
 					$(tar).each(function(){
-						const y = $(this).attr('id');
+						const y = $(this).attr('Id' );
 						if (x == y) $(this).addClass('active show');
 						else $(this).removeClass('active show');
 					});

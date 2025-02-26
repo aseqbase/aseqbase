@@ -1,9 +1,8 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
-MODULE("Form");
+module("Form");
 class SignRecoverForm extends Form{
-	public $Capturable = true;
 	public $Action = null;
 	public $Title = "Account Recovery";
 	public $Image = "undo-alt";
@@ -24,33 +23,33 @@ class SignRecoverForm extends Form{
 	}
 
 	public function GetFields(){
-		if(isValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey)){
-			yield HTML::HiddenInput(\MiMFa\Library\User::$RecoveryRequestKey, getValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey));
-			yield HTML::Rack(
-				HTML::LargeSlot(
-					HTML::Label($this->PasswordLabel, "Password", ["class"=>"prepend"]).
-					HTML::SecretInput("Password", ["placeholder"=> $this->PasswordPlaceHolder])
-				, ["class"=>"field", "autocomplete"=>"password"])
+		if(!is_null($rrk = \Req::Receive(\MiMFa\Library\User::$RecoveryRequestKey))){
+			yield Html::HiddenInput(\MiMFa\Library\User::$RecoveryRequestKey, $rrk);
+			yield Html::Rack(
+				Html::LargeSlot(
+					Html::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
+					Html::SecretInput("Password" , ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"Password"])
+				, ["class"=>"field"])
 			);
-			yield HTML::Rack(
-				HTML::LargeSlot(
-					HTML::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=>"prepend"]).
-					HTML::SecretInput("PasswordConfirmation", ["placeholder"=> $this->PasswordConfirmationPlaceHolder])
-				, ["class"=>"field", "autocomplete"=>"password"])
+			yield Html::Rack(
+				Html::LargeSlot(
+					Html::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=>"prepend"]).
+					Html::SecretInput("PasswordConfirmation", ["placeholder"=> $this->PasswordConfirmationPlaceHolder, "autocomplete"=>"Password"])
+				, ["class"=>"field"])
 			);
         }else{
-			yield HTML::Rack(
-				HTML::LargeSlot(
-					HTML::Label($this->SignatureLabel, "Signature", ["class"=>"prepend"]).
-					HTML::ValueInput("Signature", ["placeholder"=> $this->SignaturePlaceHolder])
-				, ["class"=>"field", "autocomplete"=>"username"])
+			yield Html::Rack(
+				Html::LargeSlot(
+					Html::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
+					Html::ValueInput("Signature" , ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
+				, ["class"=>"field"])
 			);
 		}
 		yield from parent::GetFields();
     }
 
 	public function GetScript(){
-        return HTML::Script("
+        return Html::Script("
 			$(function () {
                 $('.{$this->Name} form').submit(function(e) {
 					if ($('.{$this->Name} form #PasswordConfirmation').val() == $('.{$this->Name} form #Password').val()) return true;
@@ -63,29 +62,21 @@ class SignRecoverForm extends Form{
 		").parent::GetScript();
     }
 
-	public function Handler(){
-		$_req = $_REQUEST;
-		switch(strtolower($this->Method)){
-            case "get":
-				$_req = $_GET;
-			break;
-            case "post":
-				$_req = $_POST;
-			break;
-        }
+	public function Post(){
 		try {
-			if(isValid($_req,"Password") && isValid($_REQUEST, \MiMFa\Library\User::$RecoveryRequestKey)){
-				$res = \_::$INFO->User->ReceiveRecoveryLink();
+			$received = \Req::Post();
+			if(isValid($received, "Password" ) && \Req::Receive(\MiMFa\Library\User::$RecoveryRequestKey)){
+				$res = \_::$Back->User->ReceiveRecoveryLink();
 				if($res === true)
-                	return $this->GetSuccess("Dear '".\_::$INFO->User->TemporaryName."', your password changed successfully!");
+                	return $this->GetSuccess("Dear '".\_::$Back->User->TemporaryName."', your password changed successfully!");
 				elseif($res === false)
 					return $this->GetError("There a problem is occured!");
 				else
 					return $this->GetError($res);
 			}
-			elseif(isValid($_req,"Signature")){
-				\_::$INFO->User->Find(getValid($_req,"Signature"));
-				$res = \_::$INFO->User->SendRecoveryEmail();
+			elseif(isValid($received,"Signature" )){
+				\_::$Back->User->Find(get($received,"Signature" ));
+				$res = \_::$Back->User->SendRecoveryEmail();
 				if($res === true)
                 	return $this->GetSuccess("Dear user, the reset password sent to your email successfully!");
 				elseif($res === false)

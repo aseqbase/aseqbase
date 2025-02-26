@@ -2,7 +2,6 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 class IFrame extends Module{
-	public $Capturable = true;
 	public $Name = "IFrame";
 	public $Source = null;
 	public $Image = null;
@@ -35,7 +34,7 @@ class IFrame extends Module{
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name}{
 				".\MiMFa\Library\Style::DoProperty("color", $this->ForeColor)."
 				text-align: center;
@@ -50,9 +49,9 @@ class IFrame extends Module{
 				".\MiMFa\Library\Style::DoProperty("width", $this->Width)."
 				".\MiMFa\Library\Style::DoProperty("height", $this->Height)."
 				margin-bottom: 30px;
-				border: var(--Border-1) transparent;
-				".\MiMFa\Library\Style::DoProperty("border", "var(--Border-1)" . " transparent")."
-				".\MiMFa\Library\Style::DoProperty("border-radius", "var(--Radius-1)")."
+				border: var(--border-1) transparent;
+				".\MiMFa\Library\Style::DoProperty("border", "var(--border-1)" . " transparent")."
+				".\MiMFa\Library\Style::DoProperty("border-radius", "var(--radius-1)")."
 			}
 			.{$this->Name} .block:hover{
 				".\MiMFa\Library\Style::DoProperty("background-color", $this->BackColor)."
@@ -61,7 +60,7 @@ class IFrame extends Module{
 	}
 
 	public function Get(){
-		return parent::Get().HTML::Embed(null,$this->Source,["class"=>"block","allowfullscreen"=>$this->AllowFullScreen]);
+		return parent::Get().Html::Embed(null,$this->Source, ["class"=>"block","allowfullscreen"=>$this->AllowFullScreen]);
 	}
 }
 ?>

@@ -1,13 +1,13 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
-use MiMFa\Library\SpecialCrypt;
 use MiMFa\Library\Contact;
-use MiMFa\Library\DataBase;
-MODULE("Form");
-MODULE("QRCodeBox");
+use MiMFa\Library\Cryptograph;
+use MiMFa\Library\SpecialCrypt;
+module("Form");
+module("QRCodeBox");
+library("SpecialCrypt");
 class PaymentForm extends Form{
-	public $Capturable = true;
 	/**
      * Leave null for dynamic key
      * @var string
@@ -23,6 +23,7 @@ class PaymentForm extends Form{
 	public QRCodeBox|null $QRCodeBox = null;
 	public $ExternalLink = true;
 	public $Types = array();
+	public Cryptograph $Cryptograph;
 	public Transaction $Transaction;
 	public $Contact = null;
 	public $SubmitLabel = "Pay";
@@ -39,6 +40,7 @@ class PaymentForm extends Form{
 	public function __construct(Transaction ...$types) {
         parent::__construct();
 		$this->UseAJAX = false;
+		$this->Cryptograph = new SpecialCrypt();
 		$this->QRCodeBox = new QRCodeBox();
 		$this->QRCodeBox->Height = "30vmin";
         $this->SetTypes(...$types);
@@ -47,24 +49,24 @@ class PaymentForm extends Form{
 	public function SetTypes(Transaction ...$types) {
 		$this->Types = [];
 		foreach ($types as $v) $this->Types[$v->DestinationPath] = $v;
-		$this->Transaction = first($types)??new Transaction(path:RECEIVE("DestinationPath", $this->Method, RECEIVE("DestinationContent", $this->Method, null)), content:RECEIVE("DestinationContent", $this->Method, null), unit:RECEIVE("Unit", $this->Method, null), network:RECEIVE("Network", $this->Method, null));
+		$this->Transaction = first($types)??new Transaction(path:\Req::Receive("destinationpath" , $this->Method, \Req::Receive("DestinationContent" , $this->Method, null)), content:\Req::Receive("DestinationContent" , $this->Method, null), unit:\Req::Receive("Unit" , $this->Method, null), network:\Req::Receive("Network" , $this->Method, null));
 
-		$this->Transaction->Source = RECEIVE("Source", $this->Method, $this->Transaction->Source)??(is_null(\_::$INFO->User)?null:\_::$INFO->User->Name);
-		$this->Transaction->SourceContent = RECEIVE("SourceContent", $this->Method, null);
-		$this->Transaction->SourcePath = RECEIVE("SourcePath", $this->Method, null);
-		$this->Transaction->SourceEmail = RECEIVE("Email", $this->Method, (is_null(\_::$INFO->User)?null:\_::$INFO->User->Email));
-		$this->Transaction->Others = $this->Contact = RECEIVE("Contact", $this->Method, (is_null(\_::$INFO->User)?null:\_::$INFO->User->GetValue("Contact")));
+		$this->Transaction->Source = \Req::Receive("Source" , $this->Method, $this->Transaction->Source)??(is_null(\_::$Back->User)?null:\_::$Back->User->Name);
+		$this->Transaction->SourceContent = \Req::Receive("SourceContent" , $this->Method, null);
+		$this->Transaction->SourcePath = \Req::Receive("SourcePath" , $this->Method, null);
+		$this->Transaction->SourceEmail = \Req::Receive("Email", $this->Method, (is_null(\_::$Back->User)?null:\_::$Back->User->Email));
+		$this->Transaction->Others = $this->Contact = \Req::Receive("Contact", $this->Method, (is_null(\_::$Back->User)?null:\_::$Back->User->GetValue("Contact")));
 
-		$this->Transaction->Unit = between($this->Transaction->Unit,RECEIVE("Unit", $this->Method, null));
-		$this->Transaction->Value = between($this->Transaction->Value,RECEIVE("Value", $this->Method, null));
-		$this->Transaction->Transaction = between($this->Transaction->Transaction,RECEIVE("Transaction", $this->Method, null));
-		$this->Transaction->Identifier = between($this->Transaction->Identifier,RECEIVE("Identifier", $this->Method, null));
-		$this->Transaction->Network = between($this->Transaction->Network,RECEIVE("Network", $this->Method, null));
+		$this->Transaction->Unit = between($this->Transaction->Unit,\Req::Receive("Unit" , $this->Method, null));
+		$this->Transaction->Value = between($this->Transaction->Value,\Req::Receive("Value" , $this->Method, null));
+		$this->Transaction->Transaction = between($this->Transaction->Transaction,\Req::Receive("Transaction" , $this->Method, null));
+		$this->Transaction->Identifier = between($this->Transaction->Identifier,\Req::Receive("Identifier" , $this->Method, null));
+		$this->Transaction->Network = between($this->Transaction->Network,\Req::Receive("Network" , $this->Method, null));
 
-		$this->Transaction->Destination = between($this->Transaction->Destination,RECEIVE("Destination", $this->Method, \_::$INFO->FullOwner));
-		$this->Transaction->DestinationContent = between($this->Transaction->DestinationContent,RECEIVE("DestinationContent", $this->Method, null));
-		$this->Transaction->DestinationPath = between($this->Transaction->DestinationPath,RECEIVE("DestinationPath", $this->Method, null));
-		$this->Transaction->DestinationEmail = between($this->Transaction->DestinationEmail, \_::$CONFIG->ReceiverEmail);
+		$this->Transaction->Destination = between($this->Transaction->Destination,\Req::Receive("Destination" , $this->Method, \_::$Info->FullOwner));
+		$this->Transaction->DestinationContent = between($this->Transaction->DestinationContent,\Req::Receive("DestinationContent" , $this->Method, null));
+		$this->Transaction->DestinationPath = between($this->Transaction->DestinationPath,\Req::Receive("destinationpath" , $this->Method, null));
+		$this->Transaction->DestinationEmail = between($this->Transaction->DestinationEmail, \_::$Info->ReceiverEmail);
 
 		$this->Title = $this->Transaction->Destination??"Details";
 		if(!is_null($this->Transaction->Value))
@@ -72,44 +74,43 @@ class PaymentForm extends Form{
     }
 
 	public function GetStyle() {
-        return parent::GetStyle().HTML::Style("
+        return parent::GetStyle().Html::Style("
 			.{$this->Name} .center{
-				background-color: var(--BackColor-1);
-				padding: var(--Size-5);
-				margin: var(--Size-0);
+				background-color: var(--back-color-1);
+				padding: var(--size-5);
+				margin: var(--size-0);
 			}
 			.{$this->Name} .center .path{
-				margin: var(--Size-0);
+				margin: var(--size-0);
 				overflow-wrap: break-word;
 			}
 			.{$this->Name} .center .path .link{
-				font-size: var(--Size-0);
+				font-size: var(--size-0);
 			}
 			.{$this->Name} .input{
-				background-color: var(--BackColor-0);
-				margin: 0px var(--Size-0);
+				background-color: var(--back-color-0);
+				margin: 0px var(--size-0);
 			}
 		");
     }
-
 	public function GetFields() {
 		$trans = $this->Transaction;
 		$id = "_".getId();
-        MODULE("Field");
+        module("Field");
 		$mod = new Field();
         yield ($mod->Set(
 					type:"text",
-					key:"SourceContent",
-					title:"Source",
+					key:"SourceContent" ,
+					title:"Source" ,
 					value:$trans->SourceContent,
 					required:!is_null($trans->SourceContent),
 					lock:!is_null($trans->SourceContent)
 				)
-			)->Capture();
+			)->ToString();
         yield (
 			$mod->Set(
 					type:"float",
-					key:"Value",
+					key:"Value" ,
 					value:$trans->Value??0,
 					description:$trans->Unit,
 					options:null,
@@ -117,11 +118,11 @@ class PaymentForm extends Form{
 					required:true,
 					lock:!is_null($trans->Value)
 				)
-			)->ReCapture();
+			)->ToString();
 		yield (
 			$mod->Set(
 				type:"text",
-				key:"Transaction",
+				key:"Transaction" ,
 				value:$trans->Transaction,
 				description:$trans->Network,
 				options:null,
@@ -129,47 +130,47 @@ class PaymentForm extends Form{
 				required:true,
 				lock:!is_null($trans->Transaction)
 			)
-		)->ReCapture();
-		yield HTML::Break("More","document.getElementById('$id').style.display = document.getElementById('$id').computedStyleMap().get('display') == 'none'?'inherit':'none';");
-        yield HTML::Division(
-			HTML::Rack(
-				HTML::SmallSlot(
+		)->ToString();
+		yield Html::Break("More","document.getElementById('$id').style.display = document.getElementById('$id').computedStyleMap().get('display') == 'none'?'inherit':'none';");
+        yield Html::Division(
+			Html::Rack(
+				Html::SmallSlot(
 					$mod->Set(
 						type:"text",
-						key:"Source",
+						key:"Source" ,
 						title:"From",
 						value:$trans->Source,
 						required:!is_null($trans->Source),
 						lock:!is_null($trans->Source)
 					)
-					->ReCapture()).
-				HTML::SmallSlot(
+					->ToString()).
+				Html::SmallSlot(
 					$mod->Set(
 						type:"text",
-						key:"Destination",
+						key:"Destination" ,
 						title:"To",
 						value:$trans->Destination,
 						required:false,
 						lock:!is_null($trans->Destination)
 					)
-					->ReCapture())
+					->ToString())
 				).
 				$mod->Set(
 					type:"text",
-					key:"Identifier",
+					key:"Identifier" ,
 					value:$trans->Identifier,
 					required:!is_null($trans->Identifier),
 					lock:!is_null($trans->Identifier)
 				)
-				->ReCapture().
+				->ToString().
 				$mod->Set(
-					type:"email",
+					type:"Email",
 					key:"Email",
 					value:$trans->SourceEmail,
 					required:!is_null($trans->SourceEmail),
 					lock:!is_null($trans->SourceEmail)
 				)
-				->ReCapture().
+				->ToString().
 				$mod->Set(
 					type:"text",
 					key:"Contact",
@@ -177,40 +178,93 @@ class PaymentForm extends Form{
 					required:!is_null($this->Contact),
 					lock:!is_null($this->Contact)
 				)
-				->ReCapture().
-				HTML::HiddenInput(
+				->ToString().
+				Html::HiddenInput(
 					key:$this->ValidationRequest,
-					value:SpecialCrypt::Encrypt($this->ValidationCode??join("|",[randomString(),getClientIP(),randomString(),microtime(true),randomString()]), $this->ValidationKey, true),
-					attributes:["required"])
-			,["id"=>$id, "style"=>"display: none;"]);
+					value:$this->Cryptograph->Encrypt($this->ValidationCode??join("|",[randomString(),getClientIp(),randomString(),microtime(true),randomString()]), $this->ValidationKey, true),
+					attributes:["Required"])
+			,["Id" =>$id, "style"=>"display: none;"]);
 		yield from parent::GetFields();
 	}
-
 	public function GetDescription($attrs = null) {
 		if($this->ExternalLink && $this->QRCodeBox != null && isValid($this->Transaction->DestinationPath??$this->Transaction->DestinationContent)) {
 			$this->QRCodeBox->Content = $this->Transaction->DestinationPath??$this->Transaction->DestinationContent;
 			$content = $this->Transaction->DestinationContent??$this->Transaction->DestinationPath;
-			return parent::GetDescription($attrs).HTML::Center(
-				$this->QRCodeBox->Capture().
-				HTML::Division(
-					HTML::Link($content, $this->Transaction->DestinationPath).
-					HTML::Panel(HTML::Icon("copy", "copy('$content');").
-					HTML::Tooltip("Copy to clipboard"))
-				,["class"=>"path"])
+			return parent::GetDescription($attrs).Html::Center(
+				$this->QRCodeBox->ToString().
+				Html::Division(
+					Html::Link($content, $this->Transaction->DestinationPath).
+					Html::Panel(Html::Icon("copy", "copy('$content');").
+					Html::Tooltip("Copy to clipboard"))
+				,["class"=>"path" ])
 			);
 		}
 		else return parent::GetDescription();
     }
+	public function GetSuccess($msg, ...$attr){
+		$doc = Html::Document(__($this->SuccessContent).$this->Transaction->ToHtml());
+		$res = "";
+		if(isValid($this->Transaction->DestinationEmail))
+			if(Contact::SendHTMLEmail(\_::$Info->SenderEmail, $this->Transaction->DestinationEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->Id, $doc, $this->Transaction->SourceEmail,$this->Transaction->DestinationEmail == \_::$Info->ReceiverEmail?null:\_::$Info->ReceiverEmail))
+                $res .= Html::Success("Your transaction received", $attr);
+            else $res .= Html::Warning("We could not receive your transaction details, please notify us!", $attr);
+        if(isValid($this->Transaction->SourceEmail))
+			if(Contact::SendHTMLEmail(\_::$Info->SenderEmail, $this->Transaction->SourceEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->Id, $doc, $this->Transaction->DestinationEmail))
+                $res .= Html::Success("A notification to '{$this->Transaction->SourceEmail}' has been sent!", $attr);
+            else $res .= Html::Warning("Could not send a notification to '{$this->Transaction->SourceEmail}'!", $attr);
+		if(table("Payment")->DoInsert(null, [
+				"TId" =>$this->Transaction->Id,
+				"Source" =>$this->Transaction->Source,
+				"SourceContent" =>$this->Transaction->SourceContent,
+				"SourcePath" =>$this->Transaction->SourcePath,
+				"SourceEmail" =>$this->Transaction->SourceEmail,
+				"Value" =>$this->Transaction->Value,
+				"Unit" =>$this->Transaction->Unit,
+				"Network" =>$this->Transaction->Network,
+				"Transaction" =>$this->Transaction->Transaction,
+				"Identifier" =>$this->Transaction->Identifier,
+				"Destination" =>$this->Transaction->Destination,
+				"DestinationContent" =>$this->Transaction->DestinationContent,
+				"destinationpath" =>$this->Transaction->DestinationPath,
+				"DestinationEmail" =>$this->Transaction->DestinationEmail,
+				"Others" =>$this->Transaction->Others
+			]))
+			$res .= Html::Success("Your transaction recorded successfully", $attr);
+        else $res .= Html::Error("We could not record your transaction details, please notify us!", $attr);
+		return Html::Center(
+			Html::Container(
+				Html::Heading(Html::Bold(parent::GetSuccess($msg))).
+				$this->Transaction->ToHtml().
+				$res
+				, ...$attr)
+			);
+    }
 
-	public function Handler() {
-		if($code = RECEIVE($this->ValidationRequest, $this->Method))
+	public function Put(){
+		return null;
+	}
+
+	public function File(){
+		return null;
+	}
+
+	public function Patch(){
+		return null;
+	}
+
+	public function Delete(){
+		return null;
+	}
+
+	public function Handler($received = null) {
+		if(($code = \Req::Receive($this->ValidationRequest, $this->Method)) && \Req::Receive("Value" , $this->Method, false) !== false)
 			try{
-				$code = SpecialCrypt::Decrypt($code, $this->ValidationKey, true);
+				$code = $this->Cryptograph->Decrypt($code, $this->ValidationKey, true);
 				if(is_null($this->ValidationCode)){
 					$arr = preg_split("/\|/", $code);
 					if(isEmpty($arr[1]))
 						return self::GetError("Your connection is not valid!");
-					if($arr[1] !== getClientIP())
+					if($arr[1] !== getClientIp())
 						return self::GetError("Your connection is not secure!");
 					$code = floatval($arr[3]);
 					if(microtime(true)-$this->ValidationSeconds > $code)
@@ -223,57 +277,13 @@ class PaymentForm extends Form{
 
 				//Process
                 return self::GetSuccess("Transaction done successfully!");
-			}catch(\Exception $ex){return self::GetError("Error in transaction!").HTML::Error($ex);}
+			}catch(\Exception $ex){return self::GetError("Error in transaction!").Html::Error($ex);}
 		return self::GetError("Fault in transaction!");
-    }
-
-	public function GetSuccess($msg, ...$attr){
-		$doc = HTML::Document(__($this->SuccessContent).$this->Transaction->ToHTML());
-		$res = "";
-		if(isValid($this->Transaction->DestinationEmail))
-			if(Contact::SendHTMLEmail(\_::$CONFIG->SenderEmail, $this->Transaction->DestinationEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->ID, $doc, $this->Transaction->SourceEmail,$this->Transaction->DestinationEmail == \_::$CONFIG->ReceiverEmail?null:\_::$CONFIG->ReceiverEmail))
-                $res .= HTML::Success("Your transaction received", $attr);
-            else $res .= HTML::Warning("We could not receive your transaction details, please notify us!", $attr);
-        if(isValid($this->Transaction->SourceEmail))
-			if(Contact::SendHTMLEmail(\_::$CONFIG->SenderEmail, $this->Transaction->SourceEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->ID, $doc, $this->Transaction->DestinationEmail))
-                $res .= HTML::Success("A notification to '{$this->Transaction->SourceEmail}' has been sent!", $attr);
-            else $res .= HTML::Warning("Could not send a notification to '{$this->Transaction->SourceEmail}'!", $attr);
-		if(DataBase::DoInsert(\_::$CONFIG->DataBaseAddNameToPrefix."Payment", null, [
-				"TID"=>$this->Transaction->ID,
-				"Source"=>$this->Transaction->Source,
-				"SourceContent"=>$this->Transaction->SourceContent,
-				"SourcePath"=>$this->Transaction->SourcePath,
-				"SourceEmail"=>$this->Transaction->SourceEmail,
-				"Value"=>$this->Transaction->Value,
-				"Unit"=>$this->Transaction->Unit,
-				"Network"=>$this->Transaction->Network,
-				"Transaction"=>$this->Transaction->Transaction,
-				"Identifier"=>$this->Transaction->Identifier,
-				"Destination"=>$this->Transaction->Destination,
-				"DestinationContent"=>$this->Transaction->DestinationContent,
-				"DestinationPath"=>$this->Transaction->DestinationPath,
-				"DestinationEmail"=>$this->Transaction->DestinationEmail,
-				"Others"=>$this->Transaction->Others
-			]))
-			$res .= HTML::Success("Your transaction recorded successfully", $attr);
-        else $res .= HTML::Error("We could not record your transaction details, please notify us!", $attr);
-		return HTML::Center(
-			HTML::Container(
-				HTML::Heading(HTML::Bold(parent::GetSuccess($msg))).
-				$this->Transaction->ToHTML().
-				$res
-				, ...$attr)
-			);
-    }
-
-	public function Capture(){
-        if(RECEIVE($this->ValidationRequest, $this->Method) && RECEIVE("Value", $this->Method, false) !== false) return $this->Handle();
-		else return parent::Capture();
     }
 }
 
 class Transaction {
-	public $ID = null;
+	public $Id = null;
 
 	/**
      * The client|source name
@@ -351,7 +361,7 @@ class Transaction {
 	public $Others = null;
 
 	public function __construct($path = null, $value = null, $unit = null, $network = null, $identifier = null, $content = null, $source = null, $destination = null, $rate = 1, $transaction = null){
-		$this->ID = randomString(5)."_".first(preg_split("/\./",microtime(true)));
+		$this->Id = randomString(5)."_".first(preg_split("/\./",microtime(true)));
 		$this->DestinationPath = $path;
 		$this->Value = $value;
 		$this->Unit = $unit;
@@ -364,16 +374,16 @@ class Transaction {
 		$this->Transaction = $transaction;
     }
 
-	public function ToHTML(){
-        return HTML::Heading(__("Traction Number", styling: false).": ".HTML::Bold($this->ID)).
-			HTML::Table([
+	public function ToHtml(){
+        return Html::Heading(__("Traction Number", styling: false).": ".Html::Bold($this->Id)).
+			Html::Table([
 			[__("From",styling:false).":", "{$this->Source} {$this->SourceEmail} {$this->SourceContent}"],
 			[__("To",styling:false).":", "{$this->Destination} {$this->DestinationEmail} {$this->DestinationContent}"],
-			[__("Value",styling:false).":", $this->Value.$this->Unit],
-			[__("Network",styling:false).":", $this->Network],
-			[__("Transaction",styling:false).":", $this->Transaction],
-			[__("Identifier",styling:false).":", $this->Identifier],
-			[__("Others",styling:false).":", $this->Others]
+			[__("Value" ,styling:false).":", $this->Value.$this->Unit],
+			[__("Network" ,styling:false).":", $this->Network],
+			[__("Transaction" ,styling:false).":", $this->Transaction],
+			[__("Identifier" ,styling:false).":", $this->Identifier],
+			[__("Others" ,styling:false).":", $this->Others]
 		],[],[]);
     }
 }

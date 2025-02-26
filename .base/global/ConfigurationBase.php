@@ -1,5 +1,5 @@
 <?php
-LIBRARY("Revise");
+library("Revise");
 /**
  *All the basic website and libraries configurations
  *@copyright All rights are reserved for MiMFa Development Group
@@ -47,64 +47,19 @@ abstract class ConfigurationBase
      public $TimeStampOffset = 0;
 
      /**
-      * A key to use for sending the requested virtual path of website, leave null to set as special
-      * @var string|null
-      * @category General
-      */
-     public $PathKey = null;
-
-     /**
       * The website view name
       * @var string
-      * @category General
-      */
-     public $ViewName = "main";
-     /**
-      * The view name to manage the Root url of website
-      * @var string
-      * @category General
-      */
-     public $HomeViewName = "main";
-     /**
-      * The view name to show pages
-      * @var string
+      * @default "main"
       * @category General
       */
      public $DefaultViewName = "main";
      /**
-      * An array of all method=>patterns=>handler view names to handle all type request virtual pathes
-      * Empty array causing to pass all patterns to the Handelers
-      * @internal
-      * @var \MiMFa\Library\Router
+      * The view name to show pages
+      * @var string
+      * @default "main"
       * @category General
       */
-     public \MiMFa\Library\Router $Router;
-     /**
-      * An array of all patterns=>handler view names to handle default request virtual pathes
-      * Empty array causing to pass all patterns to the ViewName or DefaultViewName or "main" view
-      * @internal
-      * @var array<string,string>
-      * @category General
-      */
-     public $Handlers = array(
-          "/^\/post(\/|\?|$)/i" => "post",
-          "/^\/page(\/|\?|$)/i" => "page",
-          "/^\/query(\/|\?|$)/i" => "query",
-          "/^\/search(\/|\?|$)/i" => "search",
-          "/^\/tag(\/|\?|$)/i" => "tag",
-          "/^\/sign(\/|\?|$)/i" => "sign",
-          "/^\/(category|cat)(\/|\?|$)/i" => "category",
-          "/^\/user(\/|\?|$)/i" => "user",
-          "/^\/usergroup(\/|\?|$)/i" => "usergroup",
-          "/^\/(public|private)(\/|\?|$)/i" => "run"
-     );
-     /**
-      * The requested view key to handle the virtual pathes, leave null to set as special
-      * @var string|null
-      * @category General
-      */
-     public $ViewHandlerKey = null;
-
+     public $DefaultRouteName = "main";
 
      /**
       * Source to get the version of latest aseqbase release
@@ -123,27 +78,22 @@ abstract class ConfigurationBase
      public $LatestVersionSourcePath = "http://aseqbase.ir/api/information/link.php?req=download&tag=latest";
 
      /**
-      * Allow cache data for increasing loading speed
-      * @var bool
-      * @category Optimization
-      */
-     public $AllowCache = true;
-     /**
       * The period of caching, Type
-      * u:   for each 1 millisecond of each second
-      * s:   for each 1 second of each minute
-      * i:   for each 1 minute of each hour
-      * H:   for each 1 hour of each day
-      * j:   for each 1 day of each month
-      * m:   for each 1 month of each year
-      * Y:   for each 1 year
-      *
-      * z:   for each 1 day of each year
-      * W:   for each 1 week of each year
-      * @var string
+      * @template null  To don't remove caches
+      * @template "v"   To remove caches with each kernel updates
+      * @template "u"   To remove caches each 1 millisecond of each second
+      * @template "s"   To remove caches each 1 second of each minute
+      * @template "i"   To remove caches each 1 minute of each hour
+      * @template "H"   To remove caches each 1 hour of each day
+      * @template "j"   To remove caches each 1 day of each month
+      * @template "m"   To remove caches each 1 month of each year
+      * @template "Y"   To remove caches each 1 year
+      * @template "z"   To remove caches each 1 day of each year
+      * @template "W"   To remove caches each 1 week of each year
+      * @var string|null
       * @category Optimization
       */
-     public $CachePeriod = "Y";
+     public $CachePeriod = "v";
 
      /**
       * Allow to reduce size of documents for increasing site speed
@@ -392,7 +342,7 @@ abstract class ConfigurationBase
       * @var string
       * @category Security
       */
-     public $RestrictionViewName = "restriction";
+     public $RestrictionRouteName = "403";
 
      /**
       * The minimum file size available to uploud
@@ -441,23 +391,6 @@ abstract class ConfigurationBase
       * @category Security
       */
      public $AcceptableFileFormats = [".zip", ".rar"];
-     /**
-      * Default mail sender
-      * @example: "do-not-reply@mimfa.net"
-      * @field array
-      * @var string|null|array<string>
-      * @category Security
-      */
-     public $SenderEmail = null;
-     /**
-      * Default mail reciever
-      * @example: "info@mimfa.net"
-      * @field array
-      * @var string|null|array<string>
-      * @category Security
-      */
-     public $ReceiverEmail = null;
-
      /**
       * 0: Not show Errors; 1: To show Errors
       * @field int
@@ -546,31 +479,24 @@ abstract class ConfigurationBase
 
      public function __construct()
      {
-          $this->SenderEmail = createEmail("do-not-reply");
-          $this->ReceiverEmail = createEmail("info");
-          $this->Router = new \MiMFa\Library\Router();
           \MiMFa\Library\Revise::Load($this);
-          $sp = preg_replace("/\W/", "", getClientIP() . "");
-          if (is_null($this->PathKey))
-               $this->PathKey = "path_" . $sp;
-          if (is_null($this->ViewHandlerKey))
-               $this->ViewHandlerKey = "view_" . $sp;
-          if ($this->DataBaseAddNameToPrefix)
-               $this->DataBasePrefix .= preg_replace("/\W/i", "_", $GLOBALS["ASEQBASE"] ?? "qb") . "_";
+		ini_set('display_errors', $this->DisplayError);
+		ini_set('display_startup_errors', $this->DisplayStartupError);
+		error_reporting($this->ReportError);
      }
 
 
      public function IsLatestVersion(): bool|null
      {
-          return \_::$VERSION >= $this->GetLatestVersion();
+          return \_::$Version >= $this->GetLatestVersion();
      }
      public function GetLatestVersion(): float|null
      {
-          return floatval(GET($this->CheckVersionSourcePath));
+          return floatval(\Req::Get($this->CheckVersionSourcePath));
      }
      public function GetLatestVersionPath(): string|null
      {
-          return GET($this->LatestVersionSourcePath);
+          return \Req::Get($this->LatestVersionSourcePath);
      }
      public function GetAcceptableFormats(string $type = null)
      {
@@ -595,33 +521,6 @@ abstract class ConfigurationBase
                default:
                     return [...$this->AcceptableImageFormats, ...$this->AcceptableAudioFormats, ...$this->AcceptableVideoFormats, ...$this->AcceptableDocumentFormats, ...$this->AcceptableFileFormats];
           }
-     }
-
-     public function GetDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null)
-     {
-          return (is_string($dateTime) || is_null($dateTime)) ? new DateTime($dateTime ?? $this->CurrentDateTime, $dateTimeZone ?? new DateTimeZone($this->DateTimeZone)) : $dateTime;
-     }
-     public function GetFormattedDateTime(string|null $dateTimeFormat = null, $dateTime = null, DateTimeZone|null $dateTimeZone = null)
-     {
-          return $this->GetDateTime($dateTime, $dateTimeZone)->format($dateTimeFormat ?? $this->DateTimeFormat);
-     }
-     public function ToShownDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null)
-     {
-          return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp() + $this->TimeStampOffset);
-     }
-     public function FromShownDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null)
-     {
-          return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp() - $this->TimeStampOffset);
-     }
-     public function ToShownFormattedDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null)
-     {
-          return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp() + $this->TimeStampOffset)
-               ->format($dateTimeFormat ?? $this->DateTimeFormat);
-     }
-     public function FromShownFormattedDateTime($dateTime = null, DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null)
-     {
-          return (new DateTime())->setTimestamp($this->GetDateTime($dateTime, $dateTimeZone)->getTimestamp() - $this->TimeStampOffset)
-               ->format($dateTimeFormat ?? $this->DateTimeFormat);
      }
 }
 ?>

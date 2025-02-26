@@ -12,14 +12,12 @@ class Convert
     /**
      * Convert everything through the costum converter
      */
-    public static function By($converter, ...$args)
+    public static function By($converter, &...$args)
     {
-        if (is_null($converter))
-            return null;
-        if (is_string($converter))
+        if (is_null($converter) || is_string($converter))
             return $converter;
         if (is_countable($converter) || is_iterable($converter))
-            return iterator_to_array((function () use ($converter, $args) {
+            return iterator_to_array((function () use ($converter, &$args) {
                 foreach ($converter as $k => $c)
                     yield $k => self::By($c, ...$args);
             })());
@@ -29,22 +27,57 @@ class Convert
     }
 
     /**
-     * Get an Excerpt text of a bigger one
-     * @param string $text
+     * Convert everything to a static format
+     * @param mixed $value
      * @return string
      */
-    public static function ToExcerpt($text, $from = 0, $maxlength = 100, $excerptedSign = "...", $reverse = false)
+    public static function ToStatic($value, $separator = PHP_EOL, $spacer = ":", $assignFormat = "{0}:{\t{1}},")
     {
-        if (!isValid($text))
-            return $text;
-        $text = trim(self::ToText($text));
-        $len = strlen($text);
-        if ($len <= $maxlength)
-            return $text;
-        if ($reverse)
-            return $excerptedSign . substr($text, max(0, $len - $from - $maxlength), max(0, $maxlength - strlen($excerptedSign))) . ($from > strlen($excerptedSign) ? $excerptedSign : "");
-        else
-            return ($from > strlen($excerptedSign) ? $excerptedSign : "") . substr($text, $from, $maxlength - strlen($excerptedSign)) . $excerptedSign;
+        if (!is_null($value)) {
+            if (is_string($value) || is_numeric($value))
+                return $value;
+            if (is_subclass_of($value, "\Base"))
+                return $value->ToString();
+            if (is_countable($value) || is_iterable($value)) {
+                $texts = array();
+                foreach ($value as $key => $val) {
+                    $item = self::ToStatic($val, $separator, $spacer);
+                    if (is_numeric($key))
+                        array_push($texts, $item);
+                    elseif (is_countable($val) || is_iterable($val))
+                        array_push($texts, str_replace(["{0}", "{1}"], [$key, $item], $assignFormat));
+                    else {
+                        $sp = "";
+                        if (is_string($item))
+                            if (str_contains($item, '"')) {
+                                if (str_contains($item, "'")) {
+                                    $item = str_replace("'", "`", $item);
+                                    $sp = "'";
+                                } else
+                                    $sp = "'";
+                            } else
+                                $sp = '"';
+                        array_push($texts, "$key$spacer$sp$item$sp");
+                    }
+                }
+                return join($separator, $texts);
+            }
+            if (is_callable($value) || $value instanceof \Closure)
+                return self::ToStatic($value(), $separator, $spacer);
+            if ($value instanceof \DateTime)
+                return self::ToShownDateTimeString($value);
+            return $value;
+        }
+        return null;
+    }
+    /**
+     * Convert everything to a simple string format
+     * @param mixed $value
+     * @return string
+     */
+    public static function ToString($value, $separator = PHP_EOL, $spacer = ":", $assignFormat = "{0}:{\t{1}},")
+    {
+        return self::ToStatic($value, $separator, $spacer, $assignFormat) . "";
     }
 
     /**
@@ -80,53 +113,22 @@ class Convert
     }
 
     /**
-     * Convert everything to a static format
-     * @param mixed $value
+     * Get an Excerpt text of a bigger one
+     * @param string $text
      * @return string
      */
-    public static function ToStatic($value, $separator = PHP_EOL, $spacer = ":", $assignFormat = "{0}:{\t{1}},")
+    public static function ToExcerpt($text, $from = 0, $maxlength = 100, $excerptedSign = "...", $reverse = false)
     {
-        if (!is_null($value)) {
-            if (is_string($value) || is_numeric($value))
-                return $value;
-            if (is_subclass_of($value, "\Base"))
-                return $value->ToString();
-            if (is_countable($value) || is_iterable($value)) {
-                $texts = array();
-                foreach ($value as $key => $val) {
-                    $item = self::ToStatic($val, $separator, $spacer);
-                    if (is_numeric($key))
-                        array_push($texts, $item);
-                    elseif (is_countable($val) || is_iterable($val))
-                        array_push($texts, str_replace(["{0}", "{1}"], [$key, $item], $assignFormat));
-                    else {
-                        $sp = "";
-                        if (is_string($item))
-                            if (str_contains($item, '"')) {
-                                if (str_contains($item, "'")) {
-                                    $item = str_replace("'", "`", $item);
-                                    $sp = "'";
-                                } else $sp = "'";
-                            } else $sp = '"';
-                        array_push($texts, "$key$spacer$sp$item$sp");
-                    }
-                }
-                return join($separator, $texts);
-            }
-            if (is_callable($value) || $value instanceof \Closure)
-                return self::ToStatic($value(), $separator, $spacer);
-            return $value;
-        }
-        return null;
-    }
-    /**
-     * Convert everything to a simple string format
-     * @param mixed $value
-     * @return string
-     */
-    public static function ToString($value, $separator = PHP_EOL, $spacer = ":", $assignFormat = "{0}:{\t{1}},")
-    {
-        return self::ToStatic($value, $separator, $spacer, $assignFormat) . "";
+        if (!isValid($text))
+            return $text;
+        $text = trim(self::ToText($text));
+        $len = strlen($text);
+        if ($len <= $maxlength)
+            return $text;
+        if ($reverse)
+            return $excerptedSign . substr($text, max(0, $len - $from - $maxlength), max(0, $maxlength - strlen($excerptedSign))) . ($from > strlen($excerptedSign) ? $excerptedSign : "");
+        else
+            return ($from > strlen($excerptedSign) ? $excerptedSign : "") . substr($text, $from, $maxlength - strlen($excerptedSign)) . $excerptedSign;
     }
 
     /**
@@ -134,7 +136,7 @@ class Convert
      * @param mixed $value
      * @return string
      */
-    public static function ToHTML($value)
+    public static function ToHtml($value)
     {
         if (!is_null($value)) {
             if (is_string($value)) {
@@ -168,24 +170,36 @@ class Convert
                 }
             }
             if (is_subclass_of($value, "\Base"))
-                return $value->Capture();
+                return $value->ToString();
             if (is_countable($value) || is_iterable($value)) {
-                $m = "";
                 $texts = array();
-                if (is_numeric(array_key_first($value)))
+                if (is_numeric(array_key_first($value))) {
                     foreach ($value as $val)
-                        array_push($texts, self::ToHTML($val));
-                else
-                    switch (getBetween($value, "type", "Type") ?? "") {
-                        default:
-                            array_push($texts, HTML::Interactor(type: $val, options: $m));
-                            break;
-                    }
-                return join(PHP_EOL, $texts);
+                        $texts[] = Html::Item(self::ToHtml($val));
+                    return Html::List(join(PHP_EOL, $texts));
+                } elseif ($args = findBetween($value, "Arguments", "Item")) {
+                    $key = get($value, "Key");
+                    $val = get($value, "Value");
+                    $ops = get($value, "Options");
+                    $type = get($value, "Type");
+                    $title = get($value, "Title");
+                    return Html::Interactor(
+                        $key,
+                        $val,
+                        $type,
+                        $ops,
+                        $title,
+                        $args
+                    );
+                } else {
+                    foreach ($value as $key => $val)
+                        $texts[] = Html::Item(Html::Span($key) . ":" . self::ToHtml($val));
+                    return Html::Items(join(PHP_EOL, $texts));
+                }
             }
             if (is_callable($value) || $value instanceof \Closure)
-                return self::ToHTML($value());
-            return $value . "";
+                return self::ToHtml($value());
+            return Html::Division(self::ToString($value));
         }
         return "";
     }
@@ -326,19 +340,65 @@ class Convert
         return iterator_to_array(self::ToIteration(...$arguments));
     }
 
-    public static function ToJSON($obj): string
+    public static function ToJson($obj): string
     {
         if (isEmpty($obj))
             return "null";
         return json_encode($obj, flags: JSON_OBJECT_AS_ARRAY);
     }
-    public static function FromJSON($json, $defultValue = null): null|array
+    public static function FromJson($json): null|array
     {
         if (isEmpty($json) || trim(strtolower($json)) === "null")
             return null;
-        if (!preg_match("/^\s*[\{|\[][\s\S]*[\}\]]\s*$/", $json))
-            return [$json];
-        return json_decode($json, flags: JSON_OBJECT_AS_ARRAY) ?? $defultValue;
+        if (isJson($json))
+            return json_decode($json, flags: JSON_OBJECT_AS_ARRAY);
+        return [$json];
+    }
+
+    public static function FromFormData($data, &$files = [])
+    {
+        // Define the boundary from the raw data
+        preg_match('/^\s*(-+\S+)/', $data, $matches);
+        $blocks = preg_split("/$matches[1]/", $data);
+        array_pop($blocks); // remove the last block as it is empty
+        $res = array();
+        foreach ($blocks as $block) {
+            if (empty($block))
+                continue;
+            // Split header and body
+            list($header, $body) = explode("\r\n\r\n", $block, 2);
+
+            // Extract key name
+            if (preg_match('/name="([^"]*)"/', $header, $matches)) {
+                $key = $matches[1];
+
+                if (strpos($header, 'filename') !== false) {
+                    // It's a file
+                    if (
+                        preg_match('/filename="([^"]*)"/i', $header, $filenameMatches) &&
+                        preg_match('/Content-Type:\s*([^\s]+)/i', $header, $typeMatches)
+                    ) {
+                        $filename = $filenameMatches[1];
+                        $type = $typeMatches[1];
+                        if (isValid($filename)) {
+                            // Create file array structure like $_FILES
+                            $files[$key] = array(
+                                'name' => $filename,
+                                'type' => $type,
+                                'tmp_name' => Local::NewUniquePath($filename, ".tmp", \_::$Aseq->TempDirectory),
+                                'error' => UPLOAD_ERR_OK,
+                                'size' => strlen($body)
+                            );
+
+                            // Write file content to the temporary file
+                            file_put_contents($files[$key]['tmp_name'], $body);
+                        }
+                    }
+                } else
+                    $res[$key] = trim($body);// It's a regular form field
+            }
+        }
+        return $res;
     }
 
     public static function ToCells($svString, $delimiter = ',', $enclosure = '"', $eol = "\n"): array
@@ -426,6 +486,49 @@ class Convert
         return $data;
     }
 
+
+    /**
+     * To convert a string to DateTime or compatible it with a DateTimeZone
+     */
+    public static function ToDateTime(\DateTime|string|null $dateTime = null, \DateTimeZone|null $dateTimeZone = null)
+    {
+        return (is_string($dateTime) || is_null($dateTime)) ? new \DateTime($dateTime ?? \_::$Config->CurrentDateTime, $dateTimeZone ?? new \DateTimeZone(\_::$Config->DateTimeZone)) : $dateTime;
+    }
+    /**
+     * Get the DateTime as a String type suitable to save or send to the databases
+     */
+    public static function ToDateTimeString(string|null $dateTimeFormat = null, $dateTime = null, \DateTimeZone|null $dateTimeZone = null)
+    {
+        return self::ToDateTime($dateTime, $dateTimeZone)->format($dateTimeFormat ?? "Y-m-d H:i:s");
+    }
+    /**
+     * To convert a string to DateTime or compatible it with a DateTimeZone
+     * Considering to the toleranse sat on TimeStampOffset
+     * @param \DateTime|string|null $dateTime
+     * @param \DateTimeZone|null $dateTimeZone
+     */
+    public static function ToShownDateTime($dateTime = null, \DateTimeZone|null $dateTimeZone = null, $tolerance = null)
+    {
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + $tolerance ?? \_::$Config->TimeStampOffset);
+    }
+    public static function FromShownDateTime($dateTime = null, \DateTimeZone|null $dateTimeZone = null, $tolerance = null)
+    {
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - $tolerance ?? \_::$Config->TimeStampOffset);
+    }
+    /**
+     * Get the DateTime as a String type suitable to show on website
+     */
+    public static function ToShownDateTimeString($dateTime = null, \DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null, $tolerance = null)
+    {
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + $tolerance ?? \_::$Config->TimeStampOffset)
+            ->format($dateTimeFormat ?? \_::$Config->DateTimeFormat);
+    }
+    public static function FromShownDateTimeString($dateTime = null, \DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null, $tolerance = null)
+    {
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - $tolerance ?? \_::$Config->TimeStampOffset)
+            ->format($dateTimeFormat ?? \_::$Config->DateTimeFormat);
+    }
+
     public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
         $path = $path ?? Local::NewUniquePath("table", ".csv", random: false);
@@ -448,38 +551,38 @@ class Convert
         if ($addDefaultKeys) {
             $email = createEmail("info");
             if (!isset($additionalKeys['$HOSTEMAILLINK']))
-                $additionalKeys['$HOSTEMAILLINK'] = HTML::Link($email, "mailto:$email");
+                $additionalKeys['$HOSTEMAILLINK'] = Html::Link($email, "mailto:$email");
             if (!isset($additionalKeys['$HOSTEMAIL']))
                 $additionalKeys['$HOSTEMAIL'] = $email;
             if (!isset($additionalKeys['$HOSTLINK']))
-                $additionalKeys['$HOSTLINK'] = HTML::Link(\_::$SITE, \_::$HOST);
+                $additionalKeys['$HOSTLINK'] = Html::Link(\Req::$Site, \Req::$Host);
             if (!isset($additionalKeys['$HOST']))
-                $additionalKeys['$HOST'] = \_::$HOST;
+                $additionalKeys['$HOST'] = \Req::$Host;
             if (!isset($additionalKeys['$URLLINK']))
-                $additionalKeys['$URLLINK'] = HTML::Link(\_::$URL, \_::$URL);
+                $additionalKeys['$URLLINK'] = Html::Link(\Req::$Url, \Req::$Url);
             if (!isset($additionalKeys['$URL']))
-                $additionalKeys['$URL'] = \_::$URL;
-            if (isValid(\_::$INFO->User)) {
-                $person = \_::$INFO->User->Get(getValid($additionalKeys, '$SIGNATURE'));
+                $additionalKeys['$URL'] = \Req::$Url;
+            if (isValid(\_::$Back->User->Id)) {
+                $person = \_::$Back->User->Get(get($additionalKeys, '$SIGNATURE'));
                 if (!isset($additionalKeys['$SIGNATURE']))
-                    $additionalKeys['$SIGNATURE'] = getValid($person, "Signature") ?? \_::$INFO->User->TemporarySignature;
+                    $additionalKeys['$SIGNATURE'] = get($person, "Signature") ?? \_::$Back->User->TemporarySignature;
                 if (!isset($additionalKeys['$NAME']))
-                    $additionalKeys['$NAME'] = getValid($person, "Name") ?? \_::$INFO->User->TemporaryName;
-                $email = getValid($person, "Email") ?? \_::$INFO->User->TemporaryEmail;
+                    $additionalKeys['$NAME'] = get($person, "Name") ?? \_::$Back->User->TemporaryName;
+                $email = get($person, "Email") ?? \_::$Back->User->TemporaryEmail;
                 if (!isset($additionalKeys['$EMAILLINK']))
-                    $additionalKeys['$EMAILLINK'] = HTML::Link($email, "mailto:$email");
+                    $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
                 if (!isset($additionalKeys['$EMAIL']))
                     $additionalKeys['$EMAIL'] = $email;
                 if (!isset($additionalKeys['$IMAGE']))
-                    $additionalKeys['$IMAGE'] = getValid($person, "Image") ?? \_::$INFO->User->TemporaryImage;
+                    $additionalKeys['$IMAGE'] = get($person, "Image") ?? \_::$Back->User->TemporaryImage;
                 if (!isset($additionalKeys['$IMAGETAG']))
-                    $additionalKeys['$IMAGETAG'] = HTML::Image($additionalKeys['$SIGNATURE'], getValid($person, "Image"));
+                    $additionalKeys['$IMAGETAG'] = Html::Image($additionalKeys['$SIGNATURE'], get($person, "Image"));
                 if (!isset($additionalKeys['$ADDRESS']))
-                    $additionalKeys['$ADDRESS'] = getValid($person, "Address");
+                    $additionalKeys['$ADDRESS'] = get($person, "Address");
                 if (!isset($additionalKeys['$CONTACT']))
-                    $additionalKeys['$CONTACT'] = getValid($person, "Contact");
+                    $additionalKeys['$CONTACT'] = get($person, "Contact");
                 if (!isset($additionalKeys['$ORGANIZATION']))
-                    $additionalKeys['$ORGANIZATION'] = getValid($person, "Organization");
+                    $additionalKeys['$ORGANIZATION'] = get($person, "Organization");
             }
             uksort($additionalKeys, function ($a, $b) {
                 return (strlen($a) == strlen($b)) ? 0 : ((strlen($a) < strlen($b)) ? 1 : -1);
@@ -498,7 +601,7 @@ class Convert
             ? $obj
             : (
                 is_array($obj) || $obj instanceof \stdClass
-                ? (getBetween($obj, $key, "default") ?? last($obj))
+                ? (findBetween($obj, $key, "Default") ?? last($obj))
                 : (
                     is_callable($obj) || $obj instanceof \Closure
                     ? self::FromSwitch($obj($key), $key, $defultValue)

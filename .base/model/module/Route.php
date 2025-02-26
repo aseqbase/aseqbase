@@ -9,7 +9,6 @@ use MiMFa\Library\HTML;
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Route extends Module{
-	public $Capturable = true;
 	/**
 	 * The source of items
      * @var array<string,string>
@@ -39,7 +38,10 @@ class Route extends Module{
      * Convert the first character of each word in a string to uppercase
      * @var bool
      */
-	public $AllowUpperCase = true;
+	public $AllowProperCase = true;
+	public $FirstItemsLimit = 2;
+	public $LastItemsLimit = 2;
+	public $ItemsLimitSign = "...";
 
 	public function __construct($itemsOrpath = null){
 		parent::__construct();
@@ -47,14 +49,13 @@ class Route extends Module{
 	}
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name}{
-				padding: var(--Size-1);
 				width: 100%;
 				text-align: unset;
 			}
-			.{$this->Name} a,.{$this->Name} a:visited{
-				color: ".\_::$TEMPLATE->ForeColor(1)."88;
+			.{$this->Name}, .{$this->Name} :is(*, a:visited){
+				color: ".\_::$Front->ForeColor(1)."aa;
 			}
 		");
 	}
@@ -71,14 +72,24 @@ class Route extends Module{
 				foreach (array_slice($paths,1) as $value)
 					$this->Items[trim($value,"/\\")] = $host.= "/".$value;
 			}
-			if(count($this->Items) > 1){
+			$c = count($this->Items);
+			if($c > 1){
+				if($c > $this->FirstItemsLimit + $this->LastItemsLimit + 1) {
+					$s = $this->FirstItemsLimit;
+					$e = $c - $this->LastItemsLimit - 2;
+					$i = -1;
+					foreach ($this->Items as $key => $value) 
+						if(++$i < $e && $i >= $s) unset($this->Items[$key]);
+						elseif($i >= $e){ $i = $key; break;}
+					$this->Items[$i] = $this->ItemsLimitSign;
+				}
 				$route = "<a href='".array_values($this->Items)[0]."'>".__($this->RootLabel??array_keys($this->Items)[0],true,false)."</a>";
-				if($this->AllowUpperCase)
+				if($this->AllowProperCase)
 					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
-						$route .= $this->SeparatorSymbol."<a href='".$value."'>".ucwords(__($key,true,false))."</a>";
+						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:"<a href='".$value."'>".ucwords(__($key,true,false))."</a>");
 				else
 					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
-						$route .= $this->SeparatorSymbol."<a href='".$value."'>".__($key,true,false)."</a>";
+						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:"<a href='".$value."'>".__($key,true,false)."</a>");
 				yield $route;
 			}
         })()));
@@ -86,7 +97,7 @@ class Route extends Module{
 
 	public function SetValue($itemsOrpath = null){
 		if(is_null($itemsOrpath)){
-            $this->Path = getValid("/".getDirection(\_::$URL),null,"/".\_::$DIRECTION);
+            $this->Path = getValid("/".getDirection(\Req::$Url),null,"/".\Req::$Direction);
             $this->Items = null;
         }elseif(is_array($itemsOrpath)){
             $this->Path = null;

@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 use MiMFa\Library\DataBase;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Translate;
+use MiMFa\Library\HTML;
 /**
  * To show data as pages
  *@copyright All rights are reserved for MiMFa Development Group
@@ -152,204 +152,218 @@ class Page extends Module{
         parent::__construct();
     }
 
-	public function EchoStyle(){
-		$ralign = Translate::$Direction=="RTL"?"left":"right";
-?>
-		<style>
-			.<?php echo $this->Name; ?> {
-				height: fit-content;
-                margin-top: var(--Size-3);
-                margin-bottom: var(--Size-3);
-            	padding: var(--Size-4);
-				font-size:  var(--Size-0);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
+    public function GetStyle()
+    {
+        return Html::Style("
+            .{$this->Name} {
+                height: fit-content;
+                margin-top: var(--size-3);
+                margin-bottom: var(--size-3);
+                padding: var(--size-4);
+                font-size: var(--size-0);
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
 
-			.<?php echo $this->Name; ?> .head{
-				margin-bottom: var(--Size-2);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
+            .{$this->Name} .head {
+                margin-bottom: var(--size-2);
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
 
-			.<?php echo $this->Name; ?> .title{
+            .{$this->Name} .title {
                 padding: 0px;
                 margin: 0px;
-				text-align: unset;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-			.<?php echo $this->Name; ?> .metadata{
-				font-size: var(--Size-0);
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-			.<?php echo $this->Name; ?> .metadata .route{
-				padding-<?php echo $ralign; ?>: var(--Size-0);
-			}
-			.<?php echo $this->Name; ?> .more{
-				text-align: <?php echo $ralign; ?>;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-			.<?php echo $this->Name; ?> .more>a{
-            	opacity: 0;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-			.<?php echo $this->Name; ?>:hover .more>a{
-            	opacity: 1;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-			/* Style the images inside the grid */
-			.<?php echo $this->Name; ?> .image {
-				width: <?php echo $this->ImageWidth; ?>;
-				height: <?php echo $this->ImageHeight; ?>;
-				min-height: <?php echo $this->ImageMinHeight; ?>;
-				min-width: <?php echo $this->ImageMinWidth; ?>;
-				max-height: <?php echo $this->ImageMaxHeight; ?>;
-				max-width: <?php echo $this->ImageMaxWidth; ?>;
-				overflow: hidden;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-			.<?php echo $this->Name; ?> .description{
-            	font-size: var(--Size-2);
-				padding-top: var(--Size-2);
-				padding-bottom: var(--Size-2);
-            	text-align: justify;
-				position: relative;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-			.<?php echo $this->Name; ?> .content{
-                font-size: var(--Size-1);
+                text-align: unset;
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
+
+            .{$this->Name} .metadata {
+                font-size: var(--size-0);
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
+
+            .{$this->Name} .metadata .route {
+                padding-inline-end: var(--size-0); 
+            }
+
+            .{$this->Name} .more {
+                text-align: end;
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
+
+            .{$this->Name} .more > a {
+                opacity: 0;
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
+
+            .{$this->Name}:hover .more > a {
+                opacity: 1;
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
+
+            .{$this->Name} .image {
+                width: {$this->ImageWidth};
+                height: {$this->ImageHeight};
+                min-height: {$this->ImageMinHeight};
+                min-width: {$this->ImageMinWidth};
+                max-height: {$this->ImageMaxHeight};
+                max-width: {$this->ImageMaxWidth};
+                overflow: hidden;
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
+
+            .{$this->Name} .description {
+                font-size: var(--size-2);
+                padding-top: var(--size-2);
+                padding-bottom: var(--size-2);
                 text-align: justify;
-                Color: var(--ForeColor-1);
-            	background-Color: var(--BackColor-1);
-				padding-top: var(--Size-3);
-				padding-bottom: var(--Size-3);
-			}
-	</style>
-	<?php
-	}
+                position: relative;
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
 
-	public function Echo(){
-		$item = $this->Item;
-		$p_access = getValid($item,'Access');
-		if(!ACCESS($p_access, die:false)) return false;
-		MODULE("Image");
-		$img = new Image();
-		$img->Class = "image";
-		$img->EchoStyle();
-		$p_id = getValid($item,'ID');
-		$p_type = getValid($item,'Type');
-		$p_image = getValid($item,'Image', $this->Image);
-		$p_name = getValid($item,'Name')??getValid($item,'Title', $this->Title);
-		$p_title = getValid($item,'Title', $p_name);
-		$p_description = getValid($item,'Description', $this->Description);
-		$p_content = getValid($item,'Content',$this->Content);
-		$p_class = getValid($item,'Class');
+            .{$this->Name} .content {
+                font-size: var(--size-1);
+                text-align: justify;
+                color: var(--fore-color-1);
+                background-color: var(--back-color-1);
+                padding-top: var(--size-3);
+                padding-bottom: var(--size-3);
+            }
+        ");
+    }
 
-        if($this->ShowRoute) MODULE("Route");
-        $p_meta = getValid($item,'MetaData',null);
-        if($p_meta !==null) $p_meta = Convert::FromJSON($p_meta);
-        $p_showcontent = $this->ShowContent || getValid($p_meta,"ShowContent",false);
-        $p_showdescription = $this->ShowDescription || getValid($p_meta,"ShowDescription",false);
-        $p_showimage = $this->ShowImage || getValid($p_meta,"ShowImage",false);
-        $p_showtitle = $this->ShowTitle || getValid($p_meta,"ShowTitle",false);
-        $p_showmeta = $this->ShowMetaData || getValid($p_meta,"ShowMeta",false);
-        $p_path = getValid($item,'Path', $this->Path);
-        $hasl = isValid($p_path);
-        $p_showmorebutton = $hasl && ($this->ShowMoreButton || getValid($p_meta,"ShowMoreButton",false));
-        $p_morebuttontext = getValid($p_meta, "MoreButtonLabel", $this->MoreButtonLabel);
-		$p_meta = null;
-		if($p_showmeta){
-            if($this->ShowAuthor)
-                doValid(
-                    function($val) use(&$p_meta){
-                        $authorName = DataBase::DoSelectValue(\_::$CONFIG->DataBasePrefix,"Name","ID=:ID",[":ID"=>$val]);
-                        if(isValid($authorName)) $p_meta .= "<span class='Author'>$authorName</span>";
-                    },
-                    $item,
-                    'AuthorID'
-                );
-            if($this->ShowCreateTime)
-                doValid(
-                    function($val) use(&$p_meta){
-                        if(isValid($val)) $p_meta .= "<span class='CreateTime'>$val</span>";
-                    },
-                    $item,
-                    'CreateTime'
-                );
-            if($this->ShowUpdateTime)
-                doValid(
-                    function($val) use(&$p_meta){
-                        if(isValid($val)) $p_meta .= "<span class='UpdateTime'>$val</span>";
-                    },
-                    $item,
-                    'UpdateTime'
-                );
-            if($this->ShowStatus)
-                doValid(
-                    function($val) use(&$p_meta){
-                        if(isValid($val)) $p_meta .= "<span class='Status'>$val</span>";
-                    },
-                    $item,
-                    'Status'
-                );
-            if($this->ShowButtons)
-                doValid(
-                    function($val) use(&$p_meta){
-                        if(isValid($val)) $p_meta .= $val;
-                        else $p_meta .= $this->Buttons;
-                    },
-                    $item,
-                    'Buttons'
-                );
+    public function Get()
+    {
+        $item = $this->Item;
+        $p_access = get($item, 'Access' );
+
+        if (!inspect($p_access, die: false)) return null; // Or return an appropriate empty HTML string
+
+        module("Image" ); // Assuming this function makes the Image class available
+        $img = new \MiMFa\Module\Image(); // Make sure the correct namespace is used
+        $img->Class = "image";
+
+        $p_id = get($item, 'Id' );
+        $p_type = get($item, 'Type' );
+        $p_image = findValid($item, 'Image' , $this->Image);
+        $p_name = findBetween($item, 'Name', 'Title')?? $this->Title;
+        $p_title = findValid($item, 'Title' , $p_name);
+        $p_description = findValid($item, 'Description' , $this->Description);
+        $p_content = findValid($item, 'Content' , $this->Content);
+        $p_class = get($item, 'class');
+
+        if ($this->ShowRoute) {
+            module("Route"); // Assuming this makes the Route class available
         }
 
-		$img->Source = $p_image;?>
-		<div class="<?php echo "$p_type $p_class container"; ?>" <?php echo $this->Animation? "data-aos='{$this->Animation}'":null;?>>
-    <div class="head row">
-        <div class="col-md">
-            <?php
-					$lt = $this->LinkedTitle && $hasl;
-					if($p_showtitle) echo ($lt?"<a href='$p_path'>":"")."<h2 class='title'>".__($p_title)."</h2>".($lt?"</a>":"");
-					if($p_showmeta && isValid($p_meta)){
-                        echo "<sub class='metadata'>";
-                        if($this->ShowRoute){
+        $p_meta = findValid($item, 'MetaData' , null);
+        if ($p_meta !== null) {
+            $p_meta = Convert::FromJson($p_meta);
+        }
+
+        $p_showcontent = $this->ShowContent || findValid($p_meta, "ShowContent", false);
+        $p_showdescription = $this->ShowDescription || findValid($p_meta, "ShowDescription", false);
+        $p_showimage = $this->ShowImage || findValid($p_meta, "ShowImage", false);
+        $p_showtitle = $this->ShowTitle || findValid($p_meta, "ShowTitle", false);
+        $p_showmeta = $this->ShowMetaData || findValid($p_meta, "ShowMeta", false);
+        $p_path = findValid($item, 'Path' , $this->Path);
+        $hasl = isValid($p_path);
+        $p_showmorebutton = $hasl && ($this->ShowMoreButton || findValid($p_meta, "ShowMoreButton", false));
+        $p_morebuttontext = findValid($p_meta, "MoreButtonLabel", $this->MoreButtonLabel);
+        $p_meta = null;
+
+
+        if ($p_showmeta) {
+            if ($this->ShowAuthor) {
+                doValid(function ($val) use (&$p_meta) {
+                    $authorName = table("User")->DoSelectValue("Name" , "Id=:Id", [":Id" => $val]);
+                    if (isValid($authorName)) {
+                        $p_meta .= Html::Span($authorName, ["class"=> "author"]); // Use Html::Tag
+                    }
+                }, $item, 'AuthorId' );
+            }
+
+            // ... (Similar conversions for ShowCreateTime, ShowUpdateTime, ShowStatus, ShowButtons using Html::Tag)
+            if ($this->ShowCreateTime) {
+                doValid(function ($val) use (&$p_meta) {
+                    if (isValid($val)) {
+                        $p_meta .= Html::Span($val, ["class"=> "createtime"]);
+                    }
+                }, $item, 'CreateTime' );
+            }
+
+            if ($this->ShowUpdateTime) {
+                doValid(function ($val) use (&$p_meta) {
+                    if (isValid($val)) {
+                        $p_meta .= Html::Span($val, ["class"=> "updatetime"]);
+                    }
+                }, $item, 'UpdateTime' );
+            }
+
+            if ($this->ShowStatus) {
+                doValid(function ($val) use (&$p_meta) {
+                    if (isValid($val)) {
+                        $p_meta .= Html::Span($val, ["class"=> "status"]);
+                    }
+                }, $item, 'Status' );
+            }
+
+            if ($this->ShowButtons) {
+                doValid(function ($val) use (&$p_meta) {
+                    if (isValid($val)) {
+                        $p_meta .= $val; // Assuming $val is already HTML
+                    } else {
+                        $p_meta .= $this->Buttons; // Assuming $this->Buttons is already HTML
+                    }
+                }, $item, 'Buttons');
+            }
+        }
+
+        $img->Source = $p_image;
+
+        return Html::Container( // Main container
+            function () use ($this, $p_showtitle, $p_title, $p_showcontent, $hasl, $p_path, $p_showmeta, $p_meta, $p_showmorebutton, $p_morebuttontext, $p_showdescription, $p_description, $p_showimage, $img, $p_content) {
+                yield $img->GetStyle(); // Use GetStyle() 
+                {
+                    $headContent = Html::MediumSlot(function() use ($p_showtitle, $p_title, $hasl, $p_path, $p_showmeta, $p_meta){
+                    if($p_showtitle) yield Html::SuperHeading(__($p_title),($hasl && $this->LinkedTitle) ? $p_path:null, ["class"=> "title"]);
+
+                    if($p_showmeta && isValid($p_meta)){
+                        yield Html::Sub($p_meta, ["class"=> "metadata"]);
+                        if ($this->ShowRoute) {
                             $route = new \MiMFa\Module\Route($p_path);
                             $route->Tag = "span";
                             $route->Class = "route";
-                            $route->ReDraw();
+                            yield $route->ToString(); // Assuming ReDraw returns HTML
                         }
-                        echo $p_meta."</sub>";
-                    }?>
-        </div>
-        <?php if($p_showmorebutton) {?>
-        <div class="more col-sm col-3 md-hide">
-            <a class="btn btn-outline" href="<?php echo $p_path; ?>">
-                <?php echo __($p_morebuttontext); ?>
-            </a>
-        </div>
-        <?php } ?>
-    </div>
-    <div class="description row">
-        <div class="col-md">
-            <?php if($p_showdescription) echo __($p_description); ?>
-        </div>
-        <?php if($p_showimage && isValid($p_image)){
-                          echo "<div class='col-5'>";
-                          $img->ReDraw();
-                          echo "</div>";
-                      }?>
-    </div>
-    <?php if($p_showcontent && isValid($p_content)): ?>
-    <div class="content">
-        <?php echo __($p_content); ?>
-    </div>
-    <?php elseif($p_showmorebutton):?>
-    <div class="more md-show">
-        <a class="btn btn-block btn-outline" href="<?php echo $p_path; ?>">
-            <?php echo __($p_morebuttontext); ?>
-        </a>
-    </div>
-    <?php endif; ?>
-</div>
-		<?php
-	}
+                    }
+                    });
+
+                    $moreButtonHead = "";
+                    if ($p_showmorebutton) {
+                        $moreButtonHead = Html::Division(Html::Link(__($p_morebuttontext), $p_path, ["class"=> "btn btn-outline"]), ["class"=> "more col-sm col-3 md-hide"]);
+                    }
+
+                    yield Html::Rack($headContent . $moreButtonHead, ["class"=>"head"]);
+                }
+                yield Html::Rack(function() use ($p_showdescription, $p_description, $p_showimage, $img){
+                    $descriptionContent = "";
+                    if ($p_showdescription) {
+                        $descriptionContent .= __($p_description);
+                    }
+                    $imageContent = "";
+                    if ($p_showimage && isValid($img->Source)) { //Check if image source is valid
+                        $imageContent .= Html::Division($img->ToString(), ["class"=> "col-5"]);
+                    }
+                    return $descriptionContent . $imageContent;
+                }, ["class"=>"description" ]);
+
+                if ($p_showcontent && isValid($p_content))
+                    yield Html::Division(__($p_content), ["class"=> "content"]);
+                elseif ($p_showmorebutton)
+                    yield Html::Division(Html::Link(__($p_morebuttontext), $p_path, ["class"=> "btn btn-block btn-outline"]), ["class"=> "more md-show"]);
+            },
+            ["class"=> "$p_type $p_class", ...($this->Animation ? ["data-aos"=>$this->Animation] : [])]
+        );
+    }
 }
 ?>

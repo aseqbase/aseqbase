@@ -4,11 +4,6 @@ use MiMFa\Library\User;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 class UserMenu extends Module{
-	/**
-     * This object is convertable to string and able to embedd anywhere or not
-     * @var bool|null
-     */
-	public $Capturable = true;
 	public $Items = null;
 	public $AllowLabels = false;
 	public $AllowAnimate = true;
@@ -22,37 +17,37 @@ class UserMenu extends Module{
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name}{
 				aspect-ratio: 1;
 			}
 			.{$this->Name} .menu{
 				aspect-ratio: 1;
 				max-height: 30vmin;
-				padding: calc(var(--Size-0) / 2);
+				padding: calc(var(--size-0) / 2);
 				border-radius: 100%;
 				display: inline-flex;
 				align-items: center;
 			}
 			.{$this->Name} .menu>:not(html,head,body,style,script,link,meta,title){
-                padding: var(--Size-0);
+                padding: var(--size-0);
 				aspect-ratio: 1;
 				border-radius: 100%;
 				align-items: center;
 			}
 			.{$this->Name} .menu>i{
-                padding: calc(var(--Size-0) / 2);
+                padding: calc(var(--size-0) / 2);
 				display: flex;
 			}
 
 			.{$this->Name} .submenu{
 				display: none;
 				position: absolute;
-				top: calc(100% - var(--Size-0)/2);
+				top: calc(100% - var(--size-0)/2);
             	left: auto;
 				right: 0;
-				color: var(--ForeColor-2);
-				background-color: var(--BackColor-1);
+				color: var(--fore-color-2);
+				background-color: var(--back-color-1);
 				min-width: 300px;
 				min-width: min(210px, 100%);
 				max-width: 90vw;
@@ -64,21 +59,21 @@ class UserMenu extends Module{
 				overflow-y: auto;
 				text-align: initial;
 				z-index: 9;
-            	".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+            	".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name} .submenu .bio>:not(html,head,body,style,script,link,meta,title){
             	font-size: 80%;
 				opacity: 0.8;
-				color: var(--ForeColor-1);
+				color: var(--fore-color-1);
 				width: min-content;
 				min-width: 100%;
-				padding: 5px var(--Size-1);
+				padding: 5px var(--size-1);
 				".\MiMFa\Library\Style::UniversalProperty("word-wrap","break-word")."
 			}
-			.{$this->Name} .submenu .link{
+			.{$this->Name} .submenu :is(.link, .button){
             	width: 100%;
             	text-align: initial;
-            	padding: 5px var(--Size-1);
+            	padding: 5px var(--size-1);
 			}
 			.{$this->Name}:hover .submenu{
             	display: grid;
@@ -87,37 +82,36 @@ class UserMenu extends Module{
 	}
 	public function Get(){
 		if($this->Items == null){
-			if(!getAccess(\_::$CONFIG->UserAccess))
+			if(!auth(\_::$Config->UserAccess))
 				$this->Items = array(
-					array("Name"=>"Sign In", "Path"=>User::$InHandlerPath),
-					array("Name"=>"Sign Up", "Path"=>User::$UpHandlerPath)
+					array("Name" =>"Sign In", "Path" =>User::$InHandlerPath),
+					array("Name" =>"Sign Up", "Path" =>User::$UpHandlerPath)
 				);
 			else
 				$this->Items = array(
-					array("Name"=>getValid(\_::$INFO->User,"Name","Profile"), "Path"=>User::$ViewHandlerPath),
-					array("Name"=>Convert::ToExcerpt(getValid(\_::$INFO->User,"Bio", null)??getValid(\_::$INFO->User->GetValue("Bio"), null, "New User..."))),
-					array("Name"=>"Dashboard", "Path"=>User::$DashboardHandlerPath),
-					array("Name"=>"Edit Profile", "Path"=>User::$EditHandlerPath),
-					array("Name"=>"Sign Out", "Path"=>User::$OutHandlerPath)
+					array("Name" =>getValid(\_::$Back->User,"Name" ,"Profile"), "Path" =>User::$RoutePath),
+					array("Name" =>Convert::ToExcerpt(getValid(\_::$Back->User,"Bio" , null)??getValid(\_::$Back->User->GetValue("Bio" ), null, "New User..."))),
+					array("Name" =>"Dashboard", "Path" =>User::$DashboardHandlerPath),
+					array("Name" =>"Edit Profile", "Path" =>User::$EditHandlerPath),
+					array("Name" =>"Sign Out", "Path" =>User::$OutHandlerPath)
 				);
         }
 		$count = count($this->Items);
 		if($count > 0){
-            return HTML::Icon(getValid(\_::$INFO->User,"Image","user"), $this->Path,["class"=>"menu"]).
-				HTML::Division(function(){
+            return Html::Icon(getValid(\_::$Back->User,"Image" ,"user"), $this->Path,["class"=>"menu"]).
+				Html::Division(function(){
 				foreach($this->Items as $item)
-                    if(isValid($item,'Path'))
-						yield HTML::Link(
-							HTML::Division(__(getBetween($item,"Name", "Title"), styling:false),["style"=>(isValid($item,'Image')?("background-image: url('".$item['Image']."')"):"")]),
-							getValid($item,'Path'),
-							["class"=>"btn"],
-							getValid($item,"Attributes"));
+                    if(isValid($item,'Path' ))
+						yield Html::Button(
+							Html::Division(__(findBetween($item,"Name" , "Title" ), styling:false),["style"=>(isValid($item,'Image' )?("background-image: url('".$item['Image' ]."')"):"")]),
+							get($item,'Path' ),
+							get($item,"Attributes"));
 					else
-						yield HTML::Span(
-							HTML::Division(__(getBetween($item,"Name", "Title"), styling:false),["style"=>(isValid($item,'Image')?("background-image: url('".$item['Image']."')"):"")]),
+						yield Html::Span(
+							Html::Division(__(findBetween($item,"Name" , "Title" ), styling:false),["style"=>(isValid($item,'Image' )?("background-image: url('".$item['Image' ]."')"):"")]),
 							null,
 							["class"=>"bio"],
-							getValid($item,"Attributes"));
+							get($item,"Attributes"));
             },["class"=>"submenu"]).$this->GetContent();
 		}
 		return parent::Get();

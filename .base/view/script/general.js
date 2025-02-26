@@ -7,7 +7,7 @@ const isNull = function (obj) {
 // }
 
 const isEmpty = function (obj) {
-	return obj === null || obj === "" || obj === {} || obj === [];
+	return obj === null || obj === "" || obj == {} || obj == [];
 };
 
 
@@ -60,7 +60,7 @@ const isArray = function (obj, dim = 1) {
 	let objt = typeof obj;
 	if (objt === 'string') return false;
 	if (Array.isArray(obj)) return --dim === 0 || isArray(obj[0], dim);
-	if (objt === 'object' && (obj["Count"] !== undefined || obj["Length"] !== undefined))
+	if (objt === 'object' && (obj["count"] !== undefined || obj["Length"] !== undefined))
 		return --dim === 0 || isArray(obj[0], dim);
 	return false;
 };
@@ -301,24 +301,210 @@ const isVisible = (element, partiallyVisible = true) => {
 };
 const isFocused = (element) => document.activeElement === element;
 
-const scrollTo = function(selector = "body :nth-child(1)", time = 1000) {
+const scrollTo = function (selector = "body :nth-child(1)", time = 1000) {
 	$('html, body').animate({
 		scrollTop: parseInt($(selector).offset().top)
 	}, time);
 };
 
-const reload = function(){
+const reload = function () {
 	window.location.assign(location.href);
 };
-const load = function(url=null){
-	window.location.assign(url??location.href);
+const load = function (url = null) {
+	window.location.assign(url ?? location.href);
 };
-const open = function(url=null, target = '_blank'){
-	window.open(url??location.href, target);
+const open = function (url = null, target = '_blank') {
+	window.open(url ?? location.href, target);
 };
-const share = function(url=null, path=null){
-	open('sms://'+path+'?body='+(url??location.href), '_blank');
+const share = function (url = null, path = null) {
+	open('sms://' + path + '?body=' + (url ?? location.href), '_blank');
 };
-const message = function(url=null, path=null){
-	open('sms://'+path+'?body='+(url??location.href), '_blank');
+const message = function (url = null, path = null) {
+	open('sms://' + path + '?body=' + (url ?? location.href), '_blank');
+};
+
+const mailTo = function (email) {
+	open('mailto:' + email, '_blank');
+};
+
+const sendRequest = function (
+	method = 'POST',
+	url = null,
+	data = null,
+	selector = 'body :nth-child(1)',
+	success = null,
+	error = null,
+	ready = null,
+	progress = null,
+	timeout = null) {
+
+	const btns = document.querySelectorAll(selector + ' :is(button, .btn, .icon, input:is([type=button],[type=submit],[type=image],[type=reset]))');
+	const elems = document.querySelectorAll(selector);
+	const opacity = document.querySelector(selector).style.opacity;
+	url = url ?? location.href;
+	timeout = timeout ?? 30000;
+	method = (method ?? "POST").toUpperCase();
+	let isForm = false;
+	let contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+
+	if (data)
+		if (isForm = data instanceof FormData) {
+			contentType = false;
+		} else if (method === "GET") {
+			url += (url.includes('?') ? '&' : '?');
+			if (typeof data === 'object' || Array.isArray(data))
+				url += new URLSearchParams(data).toString();
+			else url += data;
+			contentType = false;
+			data = null;
+		} else if (typeof data === 'object' || Array.isArray(data)) {
+			data = JSON.stringify(data);
+			contentType = 'application/json; charset=utf-8';
+		} else if (typeof data === 'string') {
+			contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+		}
+
+	success = success ?? function (result = null, err = null) {
+		if (err) error(result, err);
+		else {
+			try { document.querySelector(selector + ' .result').remove(); } catch { }
+			if (!isEmpty(result)) {
+				result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'Form submitted successfully!';
+				if (!isEmpty(result)) {
+					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Html.success(result);
+					if (isForm) $(selector).append(result);
+					else $(selector).prepend(result);
+				}
+			}
+		}
+	};
+
+	error = error ?? function (result = null, err = null) {
+		try { document.querySelector(selector + ' .result').remove(); } catch { }
+		if (!isEmpty(result)) {
+			result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'There was a problem!';
+			if (!isEmpty(result)) {
+				if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Html.error(result);
+				if (isForm) $(selector).append(result);
+				else $(selector).prepend(result);
+			}
+		}
+	};
+
+	ready = ready ?? function (result = null, err = null) {
+		try { document.querySelector(selector + ' .result').remove(); } catch { }
+	};
+
+	progress = progress ?? function (result = null, err = null) {
+		if (!isEmpty(result)) {
+			result = (typeof (result) === 'object') ? result.statusText : result;
+			if (result) {
+				try { document.querySelector(selector + ' .result').remove(); } catch { }
+				{
+					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Html.message(result);
+					if (isForm) $(selector).append(result);
+					else $(selector).prepend(result);
+				}
+			}
+		}
+	};
+
+	const xhr = new XMLHttpRequest();
+	xhr.open(method, url, true);
+
+	if (contentType) xhr.setRequestHeader('Content-Type', contentType);
+
+	xhr.timeout = timeout;
+
+	xhr.upload.addEventListener('progress', progress);
+
+	xhr.onload = function () {
+		btns.forEach(btn => btn.classList.remove('hide'));
+		elems.forEach(elem => elem.style.opacity = opacity);
+
+		if (xhr.status >= 200 && xhr.status < 300) {
+			try {
+				const response = xhr.getResponseHeader('Content-Type')?.includes('application/json') ? JSON.parse(xhr.response) : xhr.response;
+				success(response);
+			} catch (e) {
+				error("There was a problem on retrieving data!<br>" + e.message, xhr.status);
+			}
+		} else {
+			error(xhr.response, xhr.status);
+		}
+	};
+
+	xhr.onerror = function () {
+		btns.forEach(btn => btn.classList.remove('hide'));
+		elems.forEach(elem => elem.style.opacity = opacity);
+		error('Network Error' + (xhr.statusText ? "<br>" + xhr.statusText : ""), xhr.status);
+	};
+
+	xhr.ontimeout = function () {
+		btns.forEach(btn => btn.classList.remove('hide'));
+		elems.forEach(elem => elem.style.opacity = opacity);
+		error('Timeout' + (xhr.statusText ? "<br>" + xhr.statusText : ""), xhr.status ?? 'timeout');
+	};
+
+	xhr.onloadstart = function () {
+		ready(xhr.statusText, xhr.status);
+		btns.forEach(btn => btn.classList.add('hide'));
+		elems.forEach(elem => elem.style.opacity = '.5');
+	};
+
+	if (data) xhr.send(data);
+	else xhr.send();
+
+	return xhr;
+};
+
+const sendGet = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return sendRequest('GET', url, data, selector, success, error, ready, progress, timeout);
+};
+const sendPost = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
+};
+const sendPut = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return sendRequest('PUT', url, data, selector, success, error, ready, progress, timeout);
+};
+const sendPatch = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return sendRequest('PATCH', url, data, selector, success, error, ready, progress, timeout);
+};
+const sendDelete = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return sendRequest('DELETE', url, data, selector, success, error, ready, progress, timeout);
+};
+const sendFile = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	if (data) return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
+	else {
+		input.setAttribute('type', 'file');
+		res = null;
+		input.onchange = evt => {
+			const [file] = input.files;
+			if (file) {
+				const reader = new FileReader();
+				reader.addEventListener('load', (event) => {
+					res = sendRequest('POST', url, encodeURIComponent(event.target.result), selector, success, error, ready, progress, timeout);
+				});
+				reader.readAsDataURL(file);
+			}
+		}
+		$(input).trigger('click');
+		return res;
+	}
+};
+const sendInternal = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return sendRequest('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
+};
+
+const submitForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
+	form = document.querySelector(selector);
+	if (!form) return null;
+	return sendRequest(form.getAttribute('method'), form.getAttribute('action'), new FormData(form), selector, success, error, ready, progress, timeout);
+};
+const handleForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
+	form = document.querySelector(selector);
+	if (form) form.onsubmit = function (e) {
+		e.preventDefault();
+		return sendRequest(form.getAttribute('method'), form.getAttribute('action'), new FormData(form), selector, success, error, ready, progress, timeout);
+	};
 };

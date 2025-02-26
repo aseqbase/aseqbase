@@ -15,9 +15,4 @@ enum ScreenSize: string {
 	case XXSmall = "xxsm";
 	case XXSmallRange = "xxsm-range";
 }
-
-enum HTTPMethods: string {
-    case Get = 'get';
-    case Post = 'post';
-}
 ?>

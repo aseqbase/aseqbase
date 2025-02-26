@@ -1,13 +1,11 @@
 <?php
 namespace MiMFa\Module;
 
-use Error;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
 class Form extends Module
 {
-	public $Capturable = true;
 	/**
 	 * The name of selected Template
 	 *	 'v': vertical
@@ -18,6 +16,7 @@ class Form extends Module
 	 * @var mixed
 	 */
 	public $Template = null;
+	public $Access = 0;
 	public $Path = null;
 	public $Action = null;
 	public $Image = null;
@@ -40,7 +39,6 @@ class Form extends Module
 	public $SuccessPath = null;
 	public $ErrorPath = null;
 	public $HasDecoration = true;
-	public $ResponseView = "value";
 	public $AllowHeader = true;
 	public $AllowContent = true;
 	public $AllowFooter = true;
@@ -56,15 +54,16 @@ class Form extends Module
 	public $FieldsChecker = null;
 	public $FieldsTypes = [];
 
-	public $FieldsForeColor = "var(--ForeColor-1)";
-	public $FieldsBackColor = "var(--BackColor-1)";
-	public $FieldsBorderColor = "var(--ForeColor-4)";
+	public $FieldsForeColor = "var(--fore-color-1)";
+	public $FieldsBackColor = "var(--back-color-1)";
+	public $FieldsBorderColor = "var(--fore-color-4)";
 	public $FieldsHeight = "auto";
 	public $FieldsWidth = "100%";
 	public $FieldsMinHeight = "10px";
 	public $FieldsMinWidth = "auto";
-	public $FieldsMaxHeight = "25vmin";
+	public $FieldsMaxHeight = null;
 	public $FieldsMaxWidth = "100vw";
+	public $Status = null;
 	public $Result = null;
 
 	/**
@@ -74,37 +73,95 @@ class Form extends Module
 	{
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
-		if (!is_null($this->Action)) $this->ResponseView = null;
-		if (!is_null($this->ResponseView)) {
-			unset($_GET[\_::$CONFIG->ViewHandlerKey]);
-			unset($_REQUEST[\_::$CONFIG->ViewHandlerKey]);
-		}
-		$this->ReCaptchaSiteKey = \_::$CONFIG->ReCaptchaSiteKey;
+		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
+		// $this->Router->All(function(){
+		// 	if($this->Status && $this->Router->DefaultMethod > 1) \Res::Status($this->Status);
+		// });
 	}
+
+	public function CheckAccess($access = 0, $blocking = true, $reaction = false, &$message = null)
+	{
+		if (!inspect($access, die: false)) {
+			$message = $this->GetError("You have not enough access!");
+			if ($reaction)
+				\Res::Send($message, 403);
+			return false;
+		}
+		if (($message = $this->CheckBlock()) === false) {
+			if ($blocking)
+				$this->MakeBlock();
+		} else {
+			if ($reaction)
+				\Res::Send($message, $this->Status);
+			return false;
+		}
+		if (isValid($this->ReCaptchaSiteKey)) {
+			library("recaptcha");
+			if (!\MiMFa\Library\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey)) {
+				$message = $this->GetError("Do something to denied access!");
+				if ($reaction)
+					\Res::Send($message, 403);
+				return false;
+			}
+		}
+		return true;
+	}
+	public function CheckBlock()
+	{
+		if ($this->BlockTimeout < 1)
+			return false;
+		$key = getClientIp() . getDirection();
+		if (hasSession($key)) {
+			$remains = getSession($key) - time();
+			if ($remains <= 0) {
+				popSession($key);
+				return false;
+			} else {
+				$dt = new \DateTime("@0");
+				$dt->add(new \DateInterval("PT{$remains}S"));
+				$this->Status = 403;
+				return $this->GetError("Please try about {$dt->format('H:i:s')} later!");
+			}
+		}
+		return false;
+	}
+	public function MakeBlock()
+	{
+		if ($this->BlockTimeout < 1)
+			return false;
+		return setSession(getClientIp() . getDirection(), time() + ($this->BlockTimeout / 1000));
+	}
+	public function UnBlock()
+	{
+		return popSession(getClientIp() . getDirection());
+	}
+
 	/**
 	 * Set the main properties of module
 	 */
 	public function Set($title = null, $action = null, $method = "POST", mixed $children = [], $description = null, $image = null)
 	{
-		$this->Title = $title??$this->Title;
-		$this->Description = $description??$this->Description;
-		$this->Image = $image??$this->Image ;
-		$this->Action = $action??$this->Action;
-		$this->Method = $method??$this->Method;
-		$this->Children = $children??$this->Children;
+		$this->Title = $title ?? $this->Title;
+		$this->Description = $description ?? $this->Description;
+		$this->Image = $image ?? $this->Image;
+		$this->Action = $action ?? $this->Action;
+		$this->Method = getMethodName($method ?? $this->Method);
+		$this->Children = $children ?? $this->Children;
 		return $this;
 	}
 
 	public function GetStyle()
 	{
 		if ($this->HasDecoration) {
-			$style = parent::GetStyle() . HTML::Style("
+			$style = parent::GetStyle() . Html::Style("
 				.{$this->Name} .rack {
 					align-items: center;
 				}
 				.{$this->Name} form {
-					padding-top: var(--Size-0);
-					padding-bottom: var(--Size-0);
+					padding-top: var(--size-0);
+					padding-bottom: var(--size-0);
+					background-color: var(--back-color-0);
+    				position: relative;
 				}
 				.{$this->Name} form .fields {
 					display: table;
@@ -114,14 +171,14 @@ class Form extends Module
 					position: sticky;
 					top: 0px;
 					bottom: 0px;
-					padding: var(--Size-1);
+					padding: var(--size-1);
 				}
 				.{$this->Name} .header :is(.image, .image:before) {
-					color: var(--ForeColor-3);
+					color: var(--fore-color-3);
 					font-size: 300%;
 					margin: 0px 5%;
             		width: 90%;
-					padding: var(--Size-1);
+					padding: var(--size-1);
 					height: auto;
 					text-align: center;
 				}
@@ -131,19 +188,19 @@ class Form extends Module
 					border-radius: 100%;
 					aspect-ratio: 1;
 				}
-				.{$this->Name} .header  .form-title {
+				.{$this->Name} .header .form-title {
 					text-align: center;
 				}
-				".($this->Description?"":
-					".{$this->Name} .header  .back-button {
+				" . ($this->Description ? "" :
+				".{$this->Name} .header .back-button {
 					text-align: center;
 					display: block;
 					width: 100%;
 				}"
-				)."
+			) . "
 				.{$this->Name} .content {
-					background-color: var(--BackColor-0);
-					color: var(--ForeColor-0);
+					background-color: var(--back-color-0);
+					color: var(--fore-color-0);
 				}
 
 				.{$this->Name} .content .title {
@@ -151,7 +208,7 @@ class Form extends Module
 				}
 				
 				.{$this->Name} .group.buttons {
-					gap: calc(var(--Size-0) / 2) var(--Size-0);
+					gap: calc(var(--size-0) / 2) var(--size-0);
 				}
 				
 				.{$this->Name} .button {
@@ -159,26 +216,26 @@ class Form extends Module
 					color: inherit;
 					width: initial;
 					max-width: 85vw;
-					border-radius: var(--Radius-1);
-					padding: calc(var(--Size-0) / 2) var(--Size-0);
-					box-shadow: var(--Shadow-0);
-					" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+					border-radius: var(--radius-1);
+					padding: calc(var(--size-0) / 2) var(--size-0);
+					box-shadow: var(--shadow-0);
+					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 				}
 				.{$this->Name} .button:hover {
 					font-weight: bold;
-					box-shadow: var(--Shadow-2);
+					box-shadow: var(--shadow-2);
 				}
 				.{$this->Name} .submitbutton {
-					background-color: var(--ForeColor-2);
-					color: var(--BackColor-2);
+					background-color: var(--fore-color-2);
+					color: var(--back-color-2);
 				}
 				.{$this->Name} .submitbutton:hover {
-					background-color: var(--BackColor-5);
-					color: var(--ForeColor-5);
+					background-color: var(--back-color-5);
+					color: var(--fore-color-5);
 				}
 
 				.{$this->Name} .group {
-					padding: var(--Size-0);
+					padding: var(--size-0);
 				}
 			");
 			switch (strtolower($this->Template ?? "")) {
@@ -204,7 +261,7 @@ class Form extends Module
 	}
 	public function GetFieldsDefaultStyle()
 	{
-		return HTML::Style("
+		return Html::Style("
 				.{$this->Name} .field {
 					" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 					" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -213,7 +270,7 @@ class Form extends Module
 					" . Style::DoProperty("width", $this->FieldsWidth) . "
 					" . Style::DoProperty("height", $this->FieldsHeight) . "
 					display: flex;
-					padding: 0px var(--Size-0) var(--Size-0);
+					padding: 0px var(--size-0) var(--size-0);
 					padding: 3px 0px;
 				}
 
@@ -225,20 +282,20 @@ class Form extends Module
 					vertical-align: middle;
 					align-items: center;
 					margin: 0px;
-					padding: 0px var(--Size-0);
-					" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+					padding: 0px var(--size-0);
+					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 				}
 				.{$this->Name} .field .prepend{
 					display: inline-flex;
 					margin: 0px;
 					width: fit-content;
-					padding: var(--Size-0);
+					padding: var(--size-0);
 					height: 100%;
 					border: none;
-					background-color: var(--BackColor-1);
-					color: var(--ForeColor-1);
+					background-color: var(--back-color-1);
+					color: var(--fore-color-1);
 					border-top: none;
-					border-bottom: 1px solid var(--ForeColor-4);
+					border-bottom: 1px solid var(--fore-color-4);
 				}
 				.{$this->Name} .field .input {
 					" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -248,13 +305,13 @@ class Form extends Module
 					width: 100%;
 					max-width: 85vw;
 					max-width: -webkit-fill-available;
-					padding-top: calc(var(--Size-0) / 2.5);
-					padding-bottom: calc(var(--Size-0) / 2.5);
+					padding-top: calc(var(--size-0) / 2.5);
+					padding-bottom: calc(var(--size-0) / 2.5);
 					border: none;
-					border-bottom: var(--Border-1);
+					border-bottom: var(--border-1);
 					border-color: transparent;
-					border-radius: var(--Radius-0);
-					" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+					border-radius: var(--radius-0);
+					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 				}
 				.{$this->Name} .field .input[type='color'] {
 					min-width: auto;
@@ -269,7 +326,7 @@ class Form extends Module
 				.{$this->Name} .field .input:focus {
 					box-shadow: none;
 					" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-					" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 				}
 				.{$this->Name} .field label.description{
 					font-size: 75%;
@@ -278,11 +335,11 @@ class Form extends Module
 					text-align: initial;
 					display: block;
 					padding-top: 5px;
-					" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 				}
 				.{$this->Name} .field:hover label.description{
 					opacity: 0.75;
-					" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 				}
 					
 				.{$this->Name} .group.buttons {
@@ -292,7 +349,7 @@ class Form extends Module
 	}
 	public function GetFieldsBothStyle()
 	{
-		return HTML::Style("
+		return Html::Style("
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -300,7 +357,7 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
-				font-size: var(--Size-1);
+				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
 			}
@@ -311,8 +368,8 @@ class Form extends Module
 				text-align: initial;
 				vertical-align: top;
 				margin: 5px;
-				padding: 5px var(--Size-0);
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				padding: 5px var(--size-0);
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field .input{
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -323,11 +380,11 @@ class Form extends Module
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
 				border: none;
-				border-bottom: var(--Border-1);
+				border-bottom: var(--border-1);
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				border-radius: var(--Radius-0);
+				border-radius: var(--radius-0);
 				margin: 5px;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -341,21 +398,21 @@ class Form extends Module
 				line-height: 100%;
 				padding: 5px 2px;
 				opacity: 0.5;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover .input{
 				" . Style::DoProperty("outline-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover label.description{
 				opacity: 0.75;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 		");
 	}
 	public function GetFieldsHorizontalStyle()
 	{
-		return HTML::Style("
+		return Html::Style("
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -363,7 +420,7 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
-				font-size: var(--Size-1);
+				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
 				padding: 3px 0px;
@@ -375,9 +432,9 @@ class Form extends Module
 				text-align: initial;
 				vertical-align: top;
 				margin-right: -1px;
-				padding: 3px var(--Size-1);
+				padding: 3px var(--size-1);
 				border-radius: 3px 0px 0px 3px;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field .input{
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -392,10 +449,10 @@ class Form extends Module
 				outline: none;
 				border: none;
 				padding: 3px;
-				border-bottom: var(--Border-1);
+				border-bottom: var(--border-1);
 				border-color: transparent;
-				border-radius: var(--Radius-0);
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				border-radius: var(--radius-0);
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -410,25 +467,25 @@ class Form extends Module
 				line-height: 100%;
 				padding: 3px;
 				opacity: 0;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover label.title{
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover .input{
 				outline: none;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover label.description{
 				opacity: 0.75;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 		");
 	}
 	public function GetFieldsVerticalStyle()
 	{
-		return HTML::Style("
+		return Html::Style("
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -436,7 +493,7 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
-				font-size: var(--Size-1);
+				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
 			}
@@ -449,13 +506,13 @@ class Form extends Module
 				font-size: 125%;
 				text-align: initial;
 				margin-bottom: -1px;
-				padding: 2px var(--Size-0);
+				padding: 2px var(--size-0);
 				border-radius: 3px 3px 0px 0px;
-				border: var(--Border-1);
+				border: var(--border-1);
 				border-color: transparent;
 				border-bottom: 0px solid;
 				z-index: 1;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field .input{
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -465,11 +522,11 @@ class Form extends Module
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
 				border-radius: 0px 3px 3px 3px;
-				border: var(--Border-1);
+				border: var(--border-1);
 				border-color: transparent;
-				padding: 2px var(--Size-0);
-				border-radius: var(--Radius-0);
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				padding: 2px var(--size-0);
+				border-radius: var(--radius-0);
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -482,31 +539,31 @@ class Form extends Module
 				font-size: 50%;
 				line-height: 100%;
 				margin-top: -1px;
-				padding: 2px var(--Size-0);
+				padding: 2px var(--size-0);
 				opacity: 0;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover label.title{
 				font-size: 75%;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover .input{
 				font-size: 125%;
 				outline: none;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover label.description{
 				font-size: 75%;
 				opacity: 0.75;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 		");
 	}
 	public function GetFieldsTableStyle()
 	{
-		return HTML::Style("
+		return Html::Style("
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -514,7 +571,7 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
-				font-size: var(--Size-1);
+				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
 			}
@@ -525,9 +582,9 @@ class Form extends Module
 				text-align: initial;
 				vertical-align: top;
 				margin-right: -1px;
-				padding: 5px var(--Size-0);
+				padding: 5px var(--size-0);
 			    margin: 5px;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field .input{
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -540,9 +597,9 @@ class Form extends Module
 			    margin: 5px;
 				border: none;
 				border-color: transparent;
-				border-bottom: var(--Border-1);
-				border-radius: var(--Radius-0);
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				border-bottom: var(--border-1);
+				border-radius: var(--radius-0);
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -556,24 +613,24 @@ class Form extends Module
 				line-height: 100%;
 				text-align: initial;
 				border-radius: 3px;
-				border: var(--Border-1) var(--BackColor-2);
-				background-color: var(--ForeColor-2);
-				color: var(--BackColor-2);
+				border: var(--border-1) var(--back-color-2);
+				background-color: var(--fore-color-2);
+				color: var(--back-color-2);
 				position: absolute;
-				padding: calc(var(--Size-0) / 2);
+				padding: calc(var(--size-0) / 2);
 				z-index: 1;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover .input{
 				outline: none;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .field:hover label.description{
 				opacity: 1;
 				display: block;
 				font-size: 75%;
-				" . Style::UniversalProperty("transition", \_::$TEMPLATE->Transition(1)) . "
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 					
 			.{$this->Name} .group.buttons {
@@ -581,21 +638,34 @@ class Form extends Module
 			}
 		");
 	}
-
 	public function Get()
 	{
-		if(($res = $this->CheckBlock()) !== false) return $res;
+		if (!auth($this->Access))
+			return null;
+		if (($res = $this->CheckBlock()) !== false)
+			return $res;
 		$name = $this->Name . "_Form";
-		$src = $this->Action ?? $this->Path ?? \_::$PATH;
-		$src .= (is_null($this->ResponseView) ? null : ((strpos($src, "?") ? "&" : "?") . \_::$CONFIG->ViewHandlerKey . "=" . $this->ResponseView));
+		$src = $this->Action ?? $this->Path ?? \Req::$Path;
 		if (is_array($this->Children) && count($this->Children) > 0) {
+			module(Name: "Field");
 			$attr = $this->Method ? [] : ["disabled"];
 			$this->Children = isEmpty($this->FieldsTypes)
 				? iteration($this->Children, function ($k, $v) use ($attr) {
 					if (is_integer($k))
-						return $v;
+						if($v instanceof \MiMFa\Module\Field) return $v;
+						elseif(is_array($v)) return Html::Field(
+							type: grab($v, "Type"),
+							key: grab($v, "Key"),
+							value: grab($v, "Value"),
+							description: grab($v, "Description"),
+							options: grab($v, "Option"),
+							title: grab($v, "Title"),
+							scope: grab($v, "Scope")??[],
+							attributes: [...(grab($v, "Attributes")??[]), ...$v]
+						);
+						else return $v;
 					else
-						return HTML::Field(
+						return Html::Field(
 							type: null,
 							key: $k,
 							value: $v,
@@ -603,13 +673,13 @@ class Form extends Module
 						);
 				})
 				: iteration($this->FieldsTypes, function ($k, $type) use ($attr) {
-					$v = getValid($this->Children, $k, null);
+					$v = findValid($this->Children, $k, null);
 					if ($type === false)
 						return null;
 					if (is_integer($k) && isEmpty($type))
 						return $v;
 					else
-						return HTML::Field(
+						return Html::Field(
 							type: $type,
 							key: $k,
 							value: $v,
@@ -618,56 +688,58 @@ class Form extends Module
 				});
 		}
 
-		if (isValid($src))
+		if (isValid($src)){
+			$this->Status = $this->Status ?? 200;
 			if ($this->HasDecoration)
 				return
-					HTML::Rack(
-						($this->AllowHeader ? HTML::LargeSlot(
-							HTML::Media(null, $this->Image, ["class" => "image"]) .
+					Html::Rack(
+						($this->AllowHeader ? Html::LargeSlot(
+							Html::Media(null, $this->Image, ["class"=> "image"]) .
 							$this->GetHeader() .
-							$this->GetTitle(["class"=>"form-title"]) .
-							$this->GetDescription(["class"=>"form-description"]) .
-							(isValid($this->BackLabel) ? HTML::Link($this->BackLabel, $this->BackPath ?? \_::$HOST, ["class"=>"back-button"]) : "")
+							$this->GetTitle(["class"=> "form-title"]) .
+							$this->GetDescription(["class"=> "form-description"]) .
+							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class"=> "back-button"]) : "")
 							,
-							["class" => "header"]
+							["class"=> "header"]
 						) : "") .
-						HTML::LargeSlot(
-							HTML::Form(
-								HTML::Rack(
+						Html::LargeSlot(
+							Html::Form(
+								Html::Rack(
 									($this->AllowContent ? $this->GetContent() : "") .
 									Convert::ToString($this->GetFields()),
-									["class" => "group fields"]
+									["class"=> "group fields"]
 								) .
-								HTML::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
+								Html::Rack(Convert::ToString($this->GetButtons()), ["class"=> "group buttons"])
 								,
 								$src,
-								["id" => $name, "name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
+								["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
 							) .
 							($this->AllowFooter ? $this->GetFooter() : "")
 							,
-							["class" => "{$this->ContentClass} content"]
+							["class"=> "{$this->ContentClass} content"]
 						)
 					);
 			else
 				return
 					(
 						$this->AllowHeader ?
-							HTML::Media(null, $this->Image, ["class" => "image"]) .
-							$this->GetHeader() .
-							$this->GetTitle(["class"=>"form-title"]) .
-							$this->GetDescription(["class"=>"form-description"]) .
-							(isValid($this->BackLabel) ? HTML::Link($this->BackLabel, $this->BackPath ?? \_::$HOST, ["class"=>"back-button"]) : "")
-							: ""
+						Html::Media(null, $this->Image, ["class"=> "image"]) .
+						$this->GetHeader() .
+						$this->GetTitle(["class"=> "form-title"]) .
+						$this->GetDescription(["class"=> "form-description"]) .
+						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class"=> "back-button"]) : "")
+						: ""
 					) .
-					HTML::Form(
+					Html::Form(
 						($this->AllowContent ? $this->GetContent() : "") .
 						Convert::ToString($this->GetFields()) .
-						HTML::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
+						Html::Rack(Convert::ToString($this->GetButtons()), ["class"=> "group buttons"])
 						,
 						$src,
-						["id" => $name, "name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
+						["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
 					) .
 					($this->AllowFooter ? $this->GetFooter() : "");
+				}
 		return null;
 	}
 	public function GetHeader()
@@ -677,7 +749,7 @@ class Form extends Module
 	public function GetFields()
 	{
 		if (isValid($this->ReCaptchaSiteKey)) {
-			LIBRARY("reCaptcha");
+			library("recaptcha");
 			yield \MiMFa\Library\reCaptcha::GetHtml($this->ReCaptchaSiteKey);
 		}
 	}
@@ -686,135 +758,127 @@ class Form extends Module
 		if (isValid($this->Buttons))
 			yield $this->Buttons;
 		if ($this->Method) {
-			yield (isValid($this->SubmitLabel) ? HTML::SubmitButton($this->SubmitLabel, ["name" => "submit"]) : "");
-			yield (isValid($this->ResetLabel) ? HTML::ResetButton($this->ResetLabel, ["name" => "reset"]) : "");
+			yield (isValid($this->SubmitLabel) ? Html::SubmitButton($this->SubmitLabel, ["Name" => "submit"]) : "");
+			yield (isValid($this->ResetLabel) ? Html::ResetButton($this->ResetLabel, ["Name" => "reset"]) : "");
 		}
-		yield (isValid($this->CancelLabel) ? HTML::Button($this->CancelLabel, $this->CancelPath ?? \_::$HOST, ["name" => "cancel"]) : "");
+		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \Req::$Host, ["Name" => "cancel"]) : "");
 	}
 	public function GetFooter()
 	{
 
 	}
-
 	public function GetScript()
 	{
-		return parent::GetScript() . HTML::Script("
+		return parent::GetScript() . Html::Script("
 			$(function () {
-				" . ($this->UseAJAX ? "handleForm('.{$this->Name} form',
-					function (data, selector)  {//success
-						if (data.includes('result success')) {
-							$(`.{$this->Name} form .result`).remove();
-							$(`.{$this->Name} form`).append(data);
-							" . (isValid($this->SuccessPath) ? "load(`{$this->SuccessPath}`);" : "") . "
-						}
-						else {
-							$(`.{$this->Name} form .result`).remove();
-							$(`.{$this->Name} form`).append(data);
-            				" . (isValid($this->ErrorPath) ? "load(`{$this->ErrorPath}`);" : "") . "
-						}
-					},
-					{ timeout: {$this->Timeout} }
-				);" : "") . "
+				" . ($this->UseAJAX ? "handleForm('.{$this->Name} form', null,null,null,null, {$this->Timeout});" : "") . "
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('border-color', 'var(--ForeColor-2)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
 				});
 				$(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('border-color', 'var(--ForeColor-2)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
 				});
 			});
 		");
 	}
 
-	public function CheckBlock() {
-		if ($this->BlockTimeout < 1) return false;
-		$key = getClientIP() . getDirection();
-		if (hasSession($key)) {
-			$remains = getSession($key) - time();
-			if ($remains <= 0) {
-				popSession($key);
-				return false;
-			} else {
-				$dt = new \DateTime("@0");
-				$dt->add(new \DateInterval("PT{$remains}S"));
-				$this->Result = -403;
-				return __($this->GetError("Please try about {$dt->format('H:i:s')} later!"));
-			}
-		}
-		return false;
-	}
-	public function MakeBlock() {
-		if ($this->BlockTimeout < 1) return false;
-		return setSession(getClientIP() . getDirection(), time()+($this->BlockTimeout/1000));
-	}
-	public function UnBlock() {
-		return popSession(getClientIP() . getDirection());
-	}
 
-	public function Handle(){
-		if(($res = $this->CheckBlock()) === false) $this->MakeBlock();
-		else return SEND($res, $this->Result);
-		if (isValid($this->ReCaptchaSiteKey)) {
-			LIBRARY("reCaptcha");
-			if (!\MiMFa\Library\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey))
-			     return SEND($this->GetError("Do something to denied access!"));
-		}
-		$res = $this->Handler();
-		if($this->Result === null) //Did not get result yet
-			return SET($res);
-		elseif($this->Result >= 200 && $this->Result < 300) //Is success
-			return FLIP($res, $this->Result);
-		elseif($this->Result == 0) //There is a warning
-			$this->UnBlock();
-		//There a problem is occured
-		return SEND($res, $this->Result);
-	}
-	public function Handler()
+	public function GetMessage($msg, ...$attr)
 	{
-		$_req = $_REQUEST;
-		switch (strtolower($this->Method)) {
-			case "get":
-				$_req = $_GET;
-				break;
-			case "post":
-				$_req = $_POST;
-				break;
-		}
-		try {
-			if(isValid($this->FieldsChecker))
-				foreach ($_req as $key => $value)
-					$_req[$key] = ($this->FieldsChecker)($key, $value, $_req);
-			if (count($_req) > 0) {
-				if(isValid($this->ReceiverEmail)){
-					if(!mail(
-						$this->ReceiverEmail,
-						$this->MailSubject??\_::$DOMAIN.": A new form submitted", 
-						Convert::ToString($_req),
-						$this->SenderEmail?["from"=>$this->SenderEmail]:[]))
-							return $this->GetWarning("Could not send data successfully!");
-				}
-				return $this->GetSuccess("The form submitted successfully!", ["class" => "page"]);
-			}
-			else
-				return $this->GetWarning("There a problem is occured!");
-		} catch (\Exception $ex) {
-			return $this->GetError($ex);
-		}
+		return Html::Result($msg, ...$attr);
 	}
-
 	public function GetSuccess($msg, ...$attr)
 	{
-		$this->Result = $this->Result??200;
-		return HTML::Success($msg, ...$attr);
+		$this->Result = $this->Result ?? true;
+		$this->Status = $this->Status ?? 200;
+		return Html::Success($msg, ...$attr);
 	}
 	public function GetWarning($msg, ...$attr)
 	{
-		$this->Result = $this->Result??-500;
-		return HTML::Warning($msg, ...$attr);
+		$this->Result = $this->Result ?? null;
+		$this->Status = $this->Status ?? 500;
+		return Html::Warning($msg, ...$attr);
 	}
 	public function GetError($msg, ...$attr)
 	{
-		$this->Result = $this->Result??-400;
-		return HTML::Error($msg, ...$attr);
+		$this->Result = $this->Result ?? false;
+		$this->Status = $this->Status ?? 400;
+		return Html::Error($msg, ...$attr);
+	}
+
+	public function Post()
+	{
+		if ($this->CheckAccess(reaction: true))
+			return parent::Post();
+		return null;
+	}
+	public function Put()
+	{
+		if ($this->CheckAccess(reaction: true))
+			return parent::Put();
+		return null;
+	}
+	public function Patch()
+	{
+		if ($this->CheckAccess(reaction: true))
+			return parent::Patch();
+		return null;
+	}
+	public function Delete()
+	{
+		if ($this->CheckAccess(reaction: true))
+			return parent::Delete();
+		return null;
+	}
+
+	public function Handler($received = null)
+	{
+		if (!isEmpty($received))
+			try {
+				library("Contact");
+				if (count($received) > 0) {
+					if (isValid($this->ReceiverEmail)) {
+						if (
+							!\MiMFa\Library\Contact::SendHTMLEmail(
+								$this->SenderEmail ?? \_::$Info->SenderEmail,
+								$this->ReceiverEmail,
+								$this->MailSubject ?? \Req::$Domain . ": A new form submitted",
+								$received
+							)
+						)
+							return $this->GetWarning("Could not send data successfully!");
+					}
+					return $this->GetSuccess("The form submitted successfully!", ["class"=> "page"]);
+				} else
+					return $this->GetWarning("There a problem is occured!");
+			} catch (\Exception $ex) {
+				return $this->GetError($ex);
+			}
+		return null;
+	}
+
+	public function Mail($data)
+	{
+		try {
+			library("Contact");
+			if (count($data) > 0) {
+				if (isValid($this->ReceiverEmail)) {
+					if (
+						!\MiMFa\Library\Contact::SendHTMLEmail(
+							$this->SenderEmail ?? \_::$Info->SenderEmail,
+							$this->ReceiverEmail,
+							$this->MailSubject ?? \Req::$Domain . ": A new form submitted",
+							$data
+						)
+					)
+						return Html::Warning("Could not send data successfully!");
+				}
+				return Html::Success("The form submitted successfully!", ["class"=> "page"]);
+			} else
+				return Html::Warning("There a problem is occured!");
+		} catch (\Exception $ex) {
+			return Html::Error($ex);
+		}
 	}
 }
 ?>

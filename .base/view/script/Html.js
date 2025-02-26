@@ -30,7 +30,7 @@ Html.newLine = "<br/>";
 
 Html.toText = (obj) => textConvertor.Done(obj);
 Html.tryToText = (obj) => textConvertor.TryDone(obj);
-Html.subject = (content, attributes = {}) => Html(content, "title", attributes);
+Html.subject = (content, attributes = {}) => Html(content, "Title" , attributes);
 Html.source = (source, attributes = {}) => {
     const srci = Html("", "script", { ...{ SRC: source }, ...attributes });
     Html.usedHeadItems.push(srci);
@@ -58,7 +58,7 @@ Html.script.const = (name, value = null, attributes = {}) => {
 Html.style = (content, source = null, attributes = {}) => {
     if (source === null)
         return Html(content, "style", attributes);
-    const srci = Html("link", { ...{ REL: "stylesheet", HREF: source ?? content }, ...attributes });
+    const srci = Html("Link", { ...{ REL: "stylesheet", HREF: source ?? content }, ...attributes });
     Html.usedHeadItems.push(srci);
     return srci;
 }
@@ -124,9 +124,9 @@ Html.page = (title, content = null, description = null, attributes = {}, head = 
                     [
                         Html.subject(title),
                         Html("meta", { CHARSET: Html.charset }),
-                        Html("link", { HREF: Html.styleResetPath, REL: "stylesheet" }),
-                        Html("link", { HREF: Html.stylePresetPath, REL: "stylesheet" }),
-                        Html("link", { HREF: Html.stylePath, REL: "stylesheet" }),
+                        Html("Link", { HREF: Html.styleResetPath, REL: "stylesheet" }),
+                        Html("Link", { HREF: Html.stylePresetPath, REL: "stylesheet" }),
+                        Html("Link", { HREF: Html.stylePath, REL: "stylesheet" }),
                         Html("", "script", { SRC: Html.scriptPath }),
                         styles.length > 0 ?
                             each(styles, (item, i) => Html.style("", item)).join("") :
@@ -194,8 +194,8 @@ Html.box = (title, content = null, description = null, attributes = {}) => {
 Html.element = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "element" }, ...attributes });
 
 Html.superTitle = (content, attributes = {}) => Html(content, "h1", { ...{ CLASS: "supertitle" }, ...attributes });
-Html.title = (content, attributes = {}) => Html(content, "h2", { ...{ CLASS: "title" }, ...attributes });
-Html.subTitle = (content, attributes = {}) => Html(content, "h3", { ...{ CLASS: "subtitle" }, ...attributes });
+Html.title = (content, attributes = {}) => Html(content, "h2", { ...{ CLASS: "Title" }, ...attributes });
+Html.subTitle = (content, attributes = {}) => Html(content, "h3", { ...{ CLASS: "SubTitle" }, ...attributes });
 Html.caption = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "caption" }, ...attributes });
 Html.footNote = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "footnote" }, ...attributes });
 Html.context = (content, attributes = {}) => Html(content, "p", { ...{ CLASS: "context" }, ...attributes });
@@ -204,14 +204,15 @@ Html.bold = (content, attributes = {}) => Html(content, "b", { ...{ CLASS: "bold
 Html.italic = (content, attributes = {}) => Html(content, "i", { ...{ CLASS: "italic" }, ...attributes });
 Html.big = (content, attributes = {}) => Html(content, "span", { ...{ CLASS: "big" }, ...attributes });
 Html.small = (content, attributes = {}) => Html(content, "span", { ...{ CLASS: "small" }, ...attributes });
-Html.message = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result message" }, ...attributes });
-Html.success = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result success" }, ...attributes });
-Html.error = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result error" }, ...attributes });
-Html.warning = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result warning" }, ...attributes });
+Html.result = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result", ondblclick: "this.style.display = 'none'" }, ...attributes });
+Html.message = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result message" , ondblclick: "this.style.display = 'none'"}, ...attributes });
+Html.success = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result success" , ondblclick: "this.style.display = 'none'"}, ...attributes });
+Html.error = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result error" , ondblclick: "this.style.display = 'none'"}, ...attributes });
+Html.warning = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result warning" , ondblclick: "this.style.display = 'none'"}, ...attributes });
 
-Html.link = (link, anchor = null, attributes = {}) => Html(anchor ?? link, "a", { ...{ HREF: link, CLASS: "link" }, ...attributes });
+Html.link = (link, anchor = null, attributes = {}) => Html(anchor ?? link, "a", { ...{ HREF: link, CLASS: "Link" }, ...attributes });
 
-Html.image = (source, alt = null, attributes = {}) => Html("img", { ...{ SRC: source, ALT: alt, CLASS: "image" }, ...attributes });
+Html.image = (source, alt = null, attributes = {}) => Html("img", { ...{ SRC: source, ALT: alt, CLASS: "Image" }, ...attributes });
 
 Html.center = (content, attributes = {}) =>
     Html(isArray(content) ? each(content, (item, i) => Html.center(item, attributes)) : content, "div", { ...{ CLASS: "center" }, ...attributes });
@@ -265,9 +266,9 @@ Html.cells = function (content, attributes = {}, cellHeads = []) {
 }
 
 Html.value = (content, attributes = {}) => {
-    if (isFloat(content)) return Html.abbr(content, Html(+parseFloat(content).toFixed(Html.maxFloatDecimals), "span", { ...{ CLASS: "value" }, ...attributes }));
-    if (isText(content) && content.length > Html.maxValueLength) return Html.abbr(content.substring(Html.maxValueLength), Html(content.substring(0, Html.maxValueLength) + "⋯", "span", { ...{ CLASS: "value" }, ...attributes }));
-    return Html(content, "span", { ...{ CLASS: "value" }, ...attributes });
+    if (isFloat(content)) return Html.abbr(content, Html(+parseFloat(content).toFixed(Html.maxFloatDecimals), "span", { ...{ CLASS: "Value" }, ...attributes }));
+    if (isText(content) && content.length > Html.maxValueLength) return Html.abbr(content.substring(Html.maxValueLength), Html(content.substring(0, Html.maxValueLength) + "⋯", "span", { ...{ CLASS: "Value" }, ...attributes }));
+    return Html(content, "span", { ...{ CLASS: "Value" }, ...attributes });
 }
 Html.values = (content, attributes = {}) =>
     isArray(content) ? each(content, (item, i) => Html.value(item, attributes)).join(", ") : Html.value(content, attributes);
@@ -285,9 +286,9 @@ Html.list = (content, attributes = {}) =>
 Html.collection = (content, attributes = {}) =>
     Html(isArray(content) ? each(content, (item, i) => Html.items(item)).join("\r\n") : content, "ul", { ...{ CLASS: "collection" }, ...attributes });
 Html.item = (content, attributes = {}) =>
-    Html(isArray(content) ? each(content, (item, i) => Html.values(item)).join(Html.newLine) : content, "li", { ...{ CLASS: "item" }, ...attributes });
+    Html(isArray(content) ? each(content, (item, i) => Html.values(item)).join(Html.newLine) : content, "li", { ...{ CLASS: "Item" }, ...attributes });
 Html.items = (content, attributes = {}) =>
-    Html(isArray(content) ? each(content, (item, i) => Html.item(item)).join("\r\n") : content, "li", { ...{ CLASS: "item" }, ...attributes });
+    Html(isArray(content) ? each(content, (item, i) => Html.item(item)).join("\r\n") : content, "li", { ...{ CLASS: "Item" }, ...attributes });
 Html.usedChartNumber = 0;
 Html.chart = function (title, content = null, description = null, attributes = {}, type = "column", axisXTitle = "X", axisYTitle = "Y", options = null) {
     if (content === null) {
@@ -304,7 +305,7 @@ Html.chart = function (title, content = null, description = null, attributes = {
         if (!isen && isobj) {
             let rows = between(content["matrix"], content["table"], content["rows"], content["columns"]);
             if (isHollow(rows))
-                rows = between(content["source"], content["document"], document).Rows.Skip(between(content["source"], document).RowsLabelsIndex);
+                rows = between(content["Source"], content["document"], document).Rows.Skip(between(content["Source"], document).RowsLabelsIndex);
             let arr = [];
             let l = between(content["labels"], content["label"], -1);
             let xs = between(content["axisX"], content["xs"], content["x"], []);
@@ -363,9 +364,9 @@ Html.chart = function (title, content = null, description = null, attributes = {
         let arr = new Array();
         const isten = isArray(type);
         if (isen && isArray(content, 3))
-            arr = each(content, (cnt, i) => ["{", `type: "`, isten ? type[i] : type, `"`, `, dataPoints: [`, Html.points(cnt), `]}`].join(""));
+            arr = each(content, (cnt, i) => ["{", `Type: "`, isten ? type[i] : type, `"`, `, dataPoints: [`, Html.points(cnt), `]}`].join(""));
         else if (isten)
-            arr = each(type, (ty, i) => ["{", ty.includes(":") ? ty : `type: "` + ty + `"`, `, dataPoints: [`, Html.points(isen ? content[i] : content), `]}`].join(""));
+            arr = each(type, (ty, i) => ["{", ty.includes(":") ? ty : `Type: "` + ty + `"`, `, dataPoints: [`, Html.points(isen ? content[i] : content), `]}`].join(""));
         else arr.push([`{type: "`, type, `", dataPoints: [`, Html.points(content), `]}`].join(""));
 
         datachart = "[" + arr.join(",") + "]";
@@ -374,7 +375,7 @@ Html.chart = function (title, content = null, description = null, attributes = {
     return Html.box(
         title,
         [
-            Html.source("https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/canvasjs.min.js"),
+            Html.source("https://cdnjs.cloudflare.com/ajax/libs/canvasjs/1.7.0/CanvasJS.min.js"),
             Html.script([
                 `
                 window.addEventListener("load", function() 
@@ -426,7 +427,7 @@ Html.chart = function (title, content = null, description = null, attributes = {
                         chart.render();
                     });`
             ].join(""), null, { TYPE: "text/javascript" }),
-            Html.center(Html("", "div", { ID: id, CLASS: "chart" }))
+            Html.center(Html("", "div", { Id: id, CLASS: "chart" }))
         ].join("\r\n"),
         description,
         { ...{}, ...attributes }

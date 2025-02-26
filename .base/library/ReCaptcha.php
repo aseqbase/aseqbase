@@ -20,11 +20,11 @@ class reCaptcha{
      * @return string - The additional heads to be embedded in the client page.
      */
 	public static function GetScript(string|null $siteKey){
-        $siteKey = $siteKey??self::$SiteKey??\_::$CONFIG->ReCaptchaSiteKey;
-        return "<script src='https://www.google.com/recaptcha/api.js?render=".\_::$CONFIG->ReCaptchaSiteKey."'></script>".
+        $siteKey = $siteKey??self::$SiteKey??\_::$Config->ReCaptchaSiteKey;
+        return "<script src='https://www.google.com/recaptcha/api.js?render=".\_::$Config->ReCaptchaSiteKey."'></script>".
             "<script>
 	            grecaptcha.ready(function() {
-		            grecaptcha.execute('".\_::$CONFIG->ReCaptchaSiteKey."', {action: 'submit'}).then(function(token) {
+		            grecaptcha.execute('".\_::$Config->ReCaptchaSiteKey."', {action: 'submit'}).then(function(token) {
                         document.getElementById('".self::$FieldName."').value = token;
 		            });
 	            });
@@ -39,7 +39,7 @@ class reCaptcha{
      * @return string - The HTML to be embedded in the user's form.
      */
 	public static function GetHtml(string|null $siteKey){
-        $siteKey = $siteKey??self::$SiteKey??\_::$CONFIG->ReCaptchaSiteKey;
+        $siteKey = $siteKey??self::$SiteKey??\_::$Config->ReCaptchaSiteKey;
         return "<input id='".self::$FieldName."' name='".self::$FieldName."'/>";
 	}
 
@@ -51,10 +51,10 @@ class reCaptcha{
      */
 	public static function GetAnswer(string|null $siteKey, $remoteIp = null){
         $remoteIp = $remoteIp??self::$SiteKey??$_SERVER['REMOTE_ADDR'];
-        $siteKey = $siteKey??\_::$CONFIG->ReCaptchaSiteKey;
+        $siteKey = $siteKey??\_::$Config->ReCaptchaSiteKey;
         $captcha = false;
-        $captcha = GRAB(self::$FieldName, "POST");
-        if($captcha) return Convert::FromJSON(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret="."$siteKey&response=$captcha&remoteip=$remoteIp"));
+        $captcha = \Req::Grab(self::$FieldName, "POST");
+        if($captcha) return Convert::FromJson(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret="."$siteKey&response=$captcha&remoteip=$remoteIp"));
 	    return [];
     }
 
@@ -66,7 +66,7 @@ class reCaptcha{
      */
 	public static function CheckAnswer(string|null $siteKey, $remoteIp = null){
         $response = self::GetAnswer($siteKey, $remoteIp);
-        return (getValid($response,'success',false) == true && getValid($response,'score',0) >= 0.5);
+        return (findValid($response,'Success',false) == true && findValid($response,'Score',0) >= 0.5);
 	}
 }
 ?>

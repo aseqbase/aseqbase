@@ -1,6 +1,6 @@
 <?php
-$name = $_POST["name"];
+$name = \Req::Post("Name");
 if(empty($name)) return;
 $name = NormalizePath($name);
-PAGE($name);
+page($name);
 ?>

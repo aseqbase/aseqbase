@@ -7,78 +7,18 @@
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#style See the Library Documentation
 */
 class Style extends \ArrayObject{
-	public null|string $Background = null;
-	public null|string $BackgroundColor = null;
-	public null|string $BackgroundImage = null;
-	public null|string $BackgroundSize = null;
-	public null|string $BackgroundRepeat = null;
-	public null|string $BackgroundPosition = null;
-	public null|string $BackgroundAttachment = null;
-	public null|string $BackgroundClip = null;
-	public null|string $BackgroundFilter = null;
-	public null|string $Content = null;
-	public null|string $Color = null;
-	public null|string $Opacity = null;
-	public null|string $Font = null;
-	public null|string $FontFamily = null;
-	public null|string $FontSize = null;
-	public null|string $FontWeight = null;
-	public null|string $Height = null;
-	public null|string $Width = null;
-	public null|string $Margin = null;
-	public null|string $Padding = null;
-	public null|string $TextAlign = null;
-	public null|string $Display = null;
-	public null|string $Position = null;
-	public null|string $Left = null;
-	public null|string $Top = null;
-	public null|string $Right = null;
-	public null|string $Bottom = null;
-	public null|string $Overflow = null;
-	public null|string $Border = null;
-	public null|string $BorderRadius = null;
-	public null|string $BoxShadow = null;
-	public null|string $TextShadow = null;
-	public null|string $Filter = null;
-
-	public function IsValid(){
-		return !isempty($this->Get());
+	public function __get($name) {
+        return get($this, self::NormalizeProperty($name));
     }
+    public function __set($name, $value) {
+        $this[self::NormalizeProperty($name)] = $value;
+    }
+    public static function NormalizeProperty($name) {
+        return strtolower(preg_replace_callback("/(?<=[^A-Z\-\b^])[A-Z]/", fn($mts)=> "-".strtolower($mts[0]), $name));
+    }
+
 	public function Get(){
-		$styles =
-			self::DoProperty("content",$this->Content).
-			self::DoProperty("color",$this->Color).
-			self::DoProperty("background",$this->Background).
-			self::DoProperty("background-color",$this->BackgroundColor).
-			self::DoProperty("background-image",$this->BackgroundImage).
-			self::DoProperty("background-size",$this->BackgroundSize).
-			self::DoProperty("background-repeat",$this->BackgroundRepeat).
-			self::DoProperty("background-attachment",$this->BackgroundAttachment).
-			self::DoProperty("background-position",$this->BackgroundPosition).
-			self::DoProperty("background-clip",$this->BackgroundClip).
-			self::DoProperty("backdrop-filter",$this->BackgroundFilter,false,true).
-			self::DoProperty("opacity",$this->Opacity).
-			self::DoProperty("font",$this->Font).
-			self::DoProperty("font-family",$this->FontFamily).
-			self::DoProperty("font-size",$this->FontSize).
-			self::DoProperty("font-weight",$this->FontWeight).
-			self::DoProperty("height",$this->Height).
-			self::DoProperty("width",$this->Width).
-			self::DoProperty("margin",$this->Margin).
-			self::DoProperty("padding",$this->Padding).
-			self::DoProperty("text-align",$this->TextAlign).
-			self::DoProperty("display",$this->Display).
-			self::DoProperty("position",$this->Position).
-			self::DoProperty("left",$this->Left).
-			self::DoProperty("top",$this->Top).
-			self::DoProperty("right",$this->Right).
-			self::DoProperty("bottom",$this->Bottom).
-			self::DoProperty("overflow",$this->Overflow).
-			self::DoProperty("border",$this->Border).
-			self::DoProperty("border-radius",$this->BorderRadius).
-			self::DoProperty("box-shadow",$this->BoxShadow).
-			self::DoProperty("text-shadow",$this->TextShadow).
-			self::DoProperty("filter",$this->Filter,false,true);
+		$styles = "";
 		foreach($this as $key=>$val) $styles .= self::DoProperty($key,$val);
 		return $styles;
 	}
@@ -144,7 +84,7 @@ class Style extends \ArrayObject{
 	}
 
 	public static function DoStyle($text, $keyWords=null){
-		return self::DoStrong(Convert::ToHTML($text), $keyWords);
+		return self::DoStrong(Convert::ToHtml($text), $keyWords);
 	}
 
 	/**
@@ -172,7 +112,7 @@ class Style extends \ArrayObject{
      */
 	public static function DoProcess($text, $process, $keyWords=null, $caseSensitive = false, $multiline = true, $both = false){
 		if($text === null) return $text;
-		if($keyWords === null) $keyWords = \_::$INFO->KeyWords;
+		if($keyWords === null) $keyWords = \_::$Info->KeyWords;
 		$dic = array();
 		$text = Code($text, $dic,
 			startCode:"<",
@@ -186,17 +126,17 @@ class Style extends \ArrayObject{
         if($both) foreach ($keyWords as $key=>$value){
                 if(array_key_exists($nv = $process($key, $key, $i++), $dic)) $nk = $dic[$nv];
                 else $nk = $dic[$nv] = "<".$c++.">";
-                $text = preg_replace($start.preg_quote($key).$end, $nk, $text);
+                $text = preg_replace($start.preg_quote($key, "/").$end, $nk, $text);
                 if($key!=$value && !is_null($value)){
                     if(array_key_exists($nv = $process($key, $value, $i++), $dic)) $nk = $dic[$nv];
                     else $nk = $dic[$nv] = "<".$c++.">";
-                    $text = preg_replace($start.preg_quote($value).$end, $nk, $text);
+                    $text = preg_replace($start.preg_quote($value, "/").$end, $nk, $text);
                 }
             }
 		else foreach ($keyWords as $key=>$value){
                 if(array_key_exists($nv = $process($key, $value, $i++), $dic)) $nk = $dic[$nv];
                 else $nk = $dic[$nv] = "<".$c++.">";
-                if(!is_null($value)) $text = preg_replace($start.preg_quote($value).$end, $nk, $text);
+                if(!is_null($value)) $text = preg_replace($start.preg_quote($value, "/").$end, $nk, $text);
             }
 		return Decode($text, $dic);
 	}
@@ -212,7 +152,7 @@ class Style extends \ArrayObject{
 	}
 
 	public static function ToggleFilter(){
-		return \_::$TEMPLATE->DarkMode? self::LightFilter():self::DarkFilter();
+		return \_::$Front->DarkMode? self::LightFilter():self::DarkFilter();
 	}
 	public static function DarkFilter(){
 		return self::UniversalProperty("filter","brightness(-1000%) opacity(1) grayscale(100%)");

@@ -1,5 +1,5 @@
 <?php
-RUN("AseqInformation");
-class Information extends AseqInformation{
+run("InformationAseq");
+class Information extends InformationAseq{
 }
 ?>

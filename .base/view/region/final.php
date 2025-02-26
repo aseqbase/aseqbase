@@ -1,3 +1,3 @@
-﻿		<?php echo \_::$TEMPLATE->GetFinal(); ?>
+﻿		<?php echo \_::$Front->GetFinal(); ?>
 	</body>
 </html>

@@ -2,7 +2,6 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 class Image extends Module{
-	public $Capturable = true;
 	public $Source = null;
 	public $Image = null;
 	public $Tag = null;
@@ -57,7 +56,7 @@ class Image extends Module{
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 		.{$this->Name}{
 			min-width:  {$this->MinWidth};
 			min-height:  {$this->MinHeight};

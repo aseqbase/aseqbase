@@ -75,7 +75,7 @@ class Revise{
         if(is_null($comment)) return [];
         $matches = preg_find_all("/\@\w+\s*.*/", $comment);
         $res = [];
-        $res["abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*\s*[^@\/][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
+        $res["Abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*\s*[^@\/][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
         foreach ($matches as $value)
             $res[strtolower(preg_find("/(?<=\@)\w+/", $value))] = trim(preg_replace("/^\@\w+\s*/", "", $value));
         return $res;
@@ -86,17 +86,16 @@ class Revise{
      * @param mixed $object
      */
     public static function GetForm($object):\MiMFa\Module\Form{
-        MODULE("Form");
+        module("Form");
         if(is_null($object)) return new \MiMFa\Module\Form();
         $reflection = new \ReflectionClass($object);
         $form = new \MiMFa\Module\Form(
             title: "Edit {$reflection->getName()}",
-            description: getBetween(self::GetCommentParameters($reflection->getDocComment()),"abstract","description"),
+            description: findBetween(self::GetCommentParameters($reflection->getDocComment()),"Abstract","Description" ),
             method: "POST",
             image:"edit",
             children: self::GetFields($reflection, $object)
         );
-        $form->ResponseView = "value";
         $form->Id = "{$reflection->getName()}EditForm";
         $form->Template = "both";
         $form->Timeout = 60000;
@@ -110,7 +109,7 @@ class Revise{
      * @param mixed $object
      */
     public static function GetFields(\ReflectionClass $reflection, $object){
-        MODULE("Field");
+        module("Field");
         foreach ($reflection->getProperties() as $value){
             $pars = self::GetCommentParameters($value->getDocComment());
             $mod = $value->getModifiers();
@@ -121,14 +120,14 @@ class Revise{
                 !isValid($pars,"private")
             )
                 yield new \MiMFa\Module\Field(
-                    type:getBetween($pars,"field","type")??($value->getType()??getValid($pars,"var")),
+                    type:findBetween($pars,"Field","Type" )??($value->getType()??get($pars,"Var")),
                     key:$value->getName(),
                     value:$value->getValue($object),
-                    title:getValid($pars,"title", null),
-                    description:getBetween($pars,"abstract","description"),
-                    required:getValid($pars,"required", null),
-                    options:getValid($pars,"options", null),
-                    attributes:getValid($pars,"attributes", null)
+                    title:findValid($pars,"Title" , null),
+                    description:findBetween($pars,"Abstract","Description" ),
+                    required:findValid($pars,"Required", null),
+                    options:findValid($pars,"Options", null),
+                    attributes:findValid($pars,"Attributes", null)
             );
         }
     }
@@ -138,12 +137,12 @@ class Revise{
      */
     public static function HandleForm($object, array $newValues = null){
         try {
-            if(is_null($newValues)) $newValues = RECEIVE(null,"POST");
+            if(is_null($newValues)) $newValues = \Req::Receive(null,"POST");
             foreach ($newValues as $key=>$value)
                 if(isset($object->$key)) $object->$key = $value;
-            if(self::Store($object)) return HTML::Success("Data updated successfully!");
-            else return HTML::Error("There a problem is occured!");
-        } catch(\Exception $ex) { return HTML::Error($ex); }
+            if(self::Store($object)) return Html::Success("Data updated successfully!");
+            else return Html::Error("There a problem is occured!");
+        } catch(\Exception $ex) { return Html::Error($ex); }
     }
 }
 ?>

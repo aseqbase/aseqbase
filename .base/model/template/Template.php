@@ -5,7 +5,7 @@ use MiMFa\Library\HTML;
 /**
  * Pre-designed layouts that allow you to arrange content onto a web page to quickly create a well-designed website.
  *
- *Guide for Documentations
+ * Guide for Documentations
  *
  *○ Use @var {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
  *	enum-string: to indicate the legal string name for a variable
@@ -74,27 +74,39 @@ class Template extends \Base{
      */
 	public $Footer = null;
 
-	public function Draw(){
-		if(isValid($this->Initial)) echo Convert::ToString($this->Initial);
-		else $this->DrawInitial();
-		if(isValid($this->Main)) echo Convert::ToString($this->Main);
-		else $this->DrawMain();
-        if(isValid($this->Header)) echo Convert::ToString($this->Header);
-        else $this->DrawHeader();
-        if(isValid($this->Content)) echo Convert::ToString($this->Content);
-        else $this->DrawContent();
-        if(isValid($this->Footer)) echo Convert::ToString($this->Footer);
-        else $this->DrawFooter();
-		if(isValid($this->Final)) echo Convert::ToString($this->Final);
-		else $this->DrawFinal();
+	public function __construct($setDefaults = true, $setRevises = true){
+        parent::__construct($setDefaults, $setRevises);
+		component("Global");
+		component("Icons");
+    }
+
+	public function Handler($received = null){
+        ob_start();
+		$this->Render();
+        return ob_get_clean();
+    }
+
+	public function Render(){
+		if(isValid($this->Initial)) \Res::Render($this->Initial);
+		else $this->RenderInitial();
+		if(isValid($this->Main)) \Res::Render($this->Main);
+		else $this->RenderMain();
+        if(isValid($this->Header)) \Res::Render($this->Header);
+        else $this->RenderHeader();
+        if(isValid($this->Content)) \Res::Render($this->Content);
+        else $this->RenderContent();
+        if(isValid($this->Footer)) \Res::Render($this->Footer);
+        else $this->RenderFooter();
+		if(isValid($this->Final)) \Res::Render($this->Final);
+		else $this->RenderFinal();
 	}
 
-	public function DrawInitial(){
-        REGION("initial");
-        $title = $this->WindowTitle??[preg_replace("/\.[A-z]+$/","",\_::$DIRECTION)];
-        echo HTML::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$INFO->Name]]:$title));
-		echo HTML::Logo(getFullUrl($this->WindowLogo??\_::$INFO->LogoPath));
-        echo HTML::Style("
+	public function RenderInitial(){
+        region("initial");
+        $title = $this->WindowTitle??[preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/","",\Req::$Direction)];
+        \Res::Render(Html::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
+		\Res::Render(Html::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
+        \Res::Render(Html::Style("
         head, style, script, link, meta, title{
             display: none !important;
             visible: hidden !important;
@@ -104,87 +116,87 @@ class Template extends \Base{
             text-align: unset;
         }
         * {
-            direction: ".(\MIMFa\Library\Translate::$Direction??\_::$CONFIG->DefaultDirection).";
+            direction: ".(\_::$Back->Translate->Direction??\_::$Config->DefaultDirection).";
         }
         .tooltip {
             position: absolute;
             opacity: 0;
             font-family: inherit;
-            font-size: var(--Size-0);
+            font-size: var(--size-0);
             font-weight: lighter;
             max-width: 70vw;
             min-width: 120px;
             width: max-content;
-            background-color: var(--ForeColor-0);
-            color: var(--BackColor-0);
-            border: var(--Border-1);
-            border-radius: var(--Radius-1);
-            box-shadow: var(--Shadow-4);
+            background-color: var(--fore-color-0);
+            color: var(--back-color-0);
+            border: var(--border-1);
+            border-radius: var(--radius-1);
+            box-shadow: var(--shadow-4);
             padding: 9px 9px;
             z-index: -999;
-            transition: var(--Transition-0);
+            transition: var(--transition-0);
         }
         :not(html,head,body,style,script,link,meta,title):hover>.tooltip {
             opacity: 1;
             z-index: 999;
-            transition: var(--Transition-1) 2s;
+            transition: var(--transition-1) 2s;
         }
 
-        :is(.button, .btn, .icon).Error{
-            background-color: var(--Color-0);
-            color: var(--ForeColor-2);
-            transition: var(--Transition-1);
+        :is(.button, .btn, .icon).success{
+            background-color: var(--color-2);
+            color: var(--fore-color-2);
+            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).Success{
-            background-color: var(--Color-1);
-            color: var(--ForeColor-2);
-            transition: var(--Transition-1);
+        :is(.button, .btn, .icon).error{
+            background-color: var(--color-1);
+            color: var(--fore-color-2);
+            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).Message{
-            background-color: var(--Color-2);
-            color: var(--ForeColor-2);
-            transition: var(--Transition-1);
+        :is(.button, .btn, .icon).message{
+            background-color: var(--color-3);
+            color: var(--fore-color-2);
+            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).Warning{
-            background-color: var(--Color-3);
-            color: var(--ForeColor-2);
-            transition: var(--Transition-1);
+        :is(.button, .btn, .icon).warning{
+            background-color: var(--color-4);
+            color: var(--fore-color-2);
+            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).Error:hover{
-            background-color: ".\_::$TEMPLATE->Color(0)."88;
-            transition: var(--Transition-1);
+        :is(.button, .btn, .icon).success:hover{
+            background-color: ".\_::$Front->Color(1)."88;
+            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).Success:hover{
-            background-color: ".\_::$TEMPLATE->Color(1)."88;
-            transition: var(--Transition-1);
+        :is(.button, .btn, .icon).error:hover{
+            background-color: ".\_::$Front->Color(0)."88;
+            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).Message:hover{
-            background-color: ".\_::$TEMPLATE->Color(2)."88;
-            transition: var(--Transition-1);
+        :is(.button, .btn, .icon).message:hover{
+            background-color: ".\_::$Front->Color(2)."88;
+            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).Warning:hover{
-            background-color: ".\_::$TEMPLATE->Color(3)."88;
-            transition: var(--Transition-1);
+        :is(.button, .btn, .icon).warning:hover{
+            background-color: ".\_::$Front->Color(3)."88;
+            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        ");
+        "));
         foreach ($this as $key=>$value)
-        	if(is_string($key)) echo HTML::Meta($key, Convert::ToString($value));
-            else echo Convert::ToString($value);
+        	if(is_string($key)) \Res::Render(Html::Meta($key, Convert::ToString($value)));
+            else \Res::Render($value);
     }
-	public function DrawMain(){
-        REGION("main");
+	public function RenderMain(){
+        region("main");
     }
-	public function DrawHeader(){
+	public function RenderHeader(){
     }
-	public function DrawContent(){
+	public function RenderContent(){
         foreach ($this->Children??[] as $key=>$value)
-        	if(is_string($key)) echo HTML::Section(Convert::ToString($value),["id"=>$key]);
-            else echo Convert::ToString($value);
+        	if(is_string($key)) \Res::Render(Html::Section($value,["Id" =>$key]));
+            else \Res::Render($value);
     }
-	public function DrawFooter(){
+	public function RenderFooter(){
     }
-	public function DrawFinal(){
-        REGION("final");
+	public function RenderFinal(){
+        region("final");
     }
 }
 ?>

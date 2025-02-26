@@ -3,7 +3,6 @@ namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 class BarMenu extends Module{
-	public $Capturable = true;
 	public $Items = null;
 	public $AllowLabels = false;
 	public $AllowAnimate = true;
@@ -14,9 +13,9 @@ class BarMenu extends Module{
 	public $Height = 40;
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name}{
-				color: var(--ForeColor-2);
+				color: var(--fore-color-2);
 				text-transform: uppercase;
 				text-align: center;
 				width:100vw;
@@ -35,7 +34,7 @@ class BarMenu extends Module{
 
 			.{$this->Name}:hover{
 				box-shadow: -5px 0px 20px #00000045;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 
 			.{$this->Name}>a {
@@ -43,21 +42,21 @@ class BarMenu extends Module{
 				display: table-cell;
 			}
 			.{$this->Name}>a>.button {
-				background-color: ".\_::$TEMPLATE->BackColor(2)."dd;
-				background-image: var(--Url-Overlay-0);
+				background-color: ".\_::$Front->BackColor(2)."dd;
+				background-image: var(--overlay-url-0);
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: cover;
-				color: var(--ForeColor-2);
+				color: var(--fore-color-2);
 				height: {$this->Height}px;
 				display: inline-table;
 				cursor: pointer;
 			}
 
 			.{$this->Name}>a>.button:hover{
-				".(($this->AllowAnimate)?"background-color: var(--ForeColor-2);
-				color: var(--BackColor-2);":"").
-				\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".(($this->AllowAnimate)?"background-color: var(--fore-color-2);
+				color: var(--back-color-2);":"").
+				\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 
 			.{$this->Name}>a>.button>div{
@@ -65,14 +64,14 @@ class BarMenu extends Module{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 60%;
-				color: var(--ForeColor-2);".
+				color: var(--fore-color-2);".
 				(($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter():"").
-				\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}>a>.button:hover>div{
 				background-size: auto 70%;".
 				(($this->AllowAnimate)? \MiMFa\Library\Style::UniversalProperty("filter","none"):"").
-				\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 
 			.{$this->Name}>a>.button>div>span {
@@ -94,14 +93,14 @@ class BarMenu extends Module{
 					margin-top: -".($this->Height*0.25)."px;
 					height: ".($this->Height*1.25)."px;
 					border-radius: 100% 100% 0px 0px;
-					box-shadow: var(--Shadow-1);
+					box-shadow: var(--shadow-1);
 					border-left: none !important;
 					border-right: none !important;
 					border-bottom: none !important;
 					outline: none !important;
 				}
 				.{$this->Name}>a>.button.middle:hover{
-					box-shadow:var(--Shadow-2);
+					box-shadow:var(--shadow-2);
 				}
 
 				.{$this->Name}>a>.button.right{
@@ -122,18 +121,18 @@ class BarMenu extends Module{
 
 	public function Get(){
 		return Convert::ToString(function(){
-            $rtl = \MiMFa\Library\Translate::$Direction == "RTL";
+            $rtl = \_::$Back->Translate->Direction == "RTL";
             yield parent::Get();
             $count = 0;
             foreach ($this->Items as $item)
-                if(getAccess(getValid($item,"Access",\_::$CONFIG->VisitAccess)))
+                if(auth(findValid($item,"Access" ,\_::$Config->VisitAccess)))
 					$count++;
             if($count > 0){
                 $size = 100 / $count;
                 $msize = 100 - $size * ($count-1);
 				$i = 1;
                 foreach ($this->Items as $item)
-					if(getAccess(getValid($item,"Access",\_::$CONFIG->VisitAccess))) {
+					if(auth(findValid($item,"Access" ,\_::$Config->VisitAccess))) {
                         $m = $count/floatval(2.0);
                         $cls = "";
                         $ism = false;
@@ -142,24 +141,24 @@ class BarMenu extends Module{
                         elseif(($i <= $m) && (($i+1) >= $m)) $cls = $rtl?"right":"left";
                         elseif((($i-1) >= $m) && ($i >= $m)) $cls = $rtl?"left":"right";
                         elseif($ism =((($i-1) <= $m) && (($i+1) >= $m))) $cls = "middle";
-                        //yield HTML::Link(
-                        //    HTML::Division(
-                        //        HTML::Image(
-                        //            HTML::Span(
-                        //                __(getValid($this->Items[$i],'Name'), styling:false)
+                        //yield Html::Link(
+                        //    Html::Division(
+                        //        Html::Image(
+                        //            Html::Span(
+                        //                __(get($this->Items[$i],'Name' ), styling:false)
                         //            ),
-                        //            getValid($this->Items[$i],'Image')??getValid($this->Items[$i],'Icon')
+                        //            get($this->Items[$i],'Image' )??get($this->Items[$i],'Icon')
                         //        )
                         //        ,["class"=>"button $cls", "style"=>"width:".($ism?$msize:$size)."vw;"]
                         //    )
-                        //    , getValid($this->Items[$i],'Path')??getValid($this->Items[$i],'Link'), getValid($this->Items[$i],"Attributes")
+                        //    , get($this->Items[$i],'Path' )??get($this->Items[$i],'Link'), get($this->Items[$i],"Attributes")
                         //);
-						$hr = getBetween($item, "Link", 'Path');
+						$hr = findBetween($item, "Link", 'Path' );
                         yield
-                            "<a ".getValid($item,"Attributes").(isValid($hr)?" href='$hr'":"").">
+                            "<a ".get($item,"Attributes").(isValid($hr)?" href='$hr'":"").">
 								<div class='button $cls' style='width:".($ism?$msize:$size)."vw;'>
-									<div style=\"background-image: url('".getBetween($item, "Image", 'Icon')."')\">
-										<span>".__(getBetween($item, "Title", 'Name'))."</span>
+									<div style=\"background-image: url('".findBetween($item, "Image" , 'Icon')."')\">
+										<span>".__(findBetween($item, "Title" , 'Name' ))."</span>
 									</div>
 								</div>
 							</a>";

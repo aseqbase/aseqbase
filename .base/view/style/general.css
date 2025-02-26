@@ -75,17 +75,25 @@
 }
 
 .result {
-	padding: 5px 10px;
-	margin: 5px;
+	/* border-bottom: 3px double var(--fore-color-0); */
+	padding: 5px 0px;
+    margin: 5px 0px;
 }
-.success {
-	color: #169d4c;
+.result.success {
+	/* border-color: var(--color-2); */
+	color: var(--color-2);
 }
-.error {
-	color: #9d164c;
+.result.message {
+	/* border-color: var(--color-3); */
+	color: var(--color-3);
 }
-.warning {
-	color: #9d9d4c;
+.result.warning {
+	/* border-color: var(--color-4); */
+	color: var(--color-4);
+}
+.result.error {
+	/* border-color: var(--color-1); */
+	color: var(--color-1);
 }
 
 

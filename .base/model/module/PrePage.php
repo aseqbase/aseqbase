@@ -2,15 +2,14 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 class PrePage extends Module{
-	public $Capturable = true;
 	public $Class = "container";
 	public $Image = null;
 	public $TitleTag = "h1";
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name} .description{
-				font-size: var(--Size-1);
+				font-size: var(--size-1);
 				text-align: justify;
 				padding: 3vmax 3vmax;
 			}
@@ -18,21 +17,16 @@ class PrePage extends Module{
 				background-size: cover;
 				background-position: center;
 				background-repeat: no-repeat;
-				font-size: var(--Size-1);
+				font-size: var(--size-1);
 			}
 		");
 	}
 
 	public function Get(){
-		return $this->GetTitle().HTML::Rack(
+		return $this->GetTitle().Html::Rack(
 			$this->GetDescription("class='col-md description'").
-			HTML::Media("",$this->Image,["class"=>"blackwhite col-md-4"])
+			Html::Media("",$this->Image,["class"=>"blackwhite col-md-4"])
 		).$this->GetContent("class='content'");
 	}
-
-	public function Capture(){
-        if(isView()) return null;
-        else return parent::Capture();
-    }
 }
 ?>

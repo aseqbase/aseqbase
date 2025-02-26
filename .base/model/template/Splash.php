@@ -12,24 +12,24 @@ class Splash extends Template{
     public $Image = null;
     public $Logo = null;
 
-    public function DrawInitial(){
-        parent::DrawInitial();?>
-	<title><?php echo $this->WindowTitle??\_::$INFO->FullName; ?></title>
-	<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??$this->Logo??\_::$INFO->LogoPath); ?>">
+    public function RenderInitial(){
+        parent::RenderInitial();?>
+	<title><?php echo $this->WindowTitle??\_::$Info->FullName; ?></title>
+	<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??$this->Logo??\_::$Info->LogoPath); ?>">
 	<script type="text/javascript">
 		$(document).ready(function(){
 			setTimeout(finishScreen,5000+(<?php echo count($this->Phrases)*1000; ?>));
 		});
 		function finishScreen(){
-			load("<?php echo $this->NextPath??\_::$INFO->HomePath; ?>");
+			load("<?php echo $this->NextPath??\_::$Info->HomePath; ?>");
 		}
 	</script>
 	<style>
 		body {
-			font-family: var(--Font-1);
-			color: var(--ForeColor-5);
-			background-color: var(--BackColor-5);
-			background-image: <?php echo isValid($this->Image)?("url('".$this->Image."')"):"var(--Url-Overlay-0)"; ?>;
+			font-family: var(--font-1);
+			color: var(--fore-color-5);
+			background-color: var(--back-color-5);
+			background-image: <?php echo isValid($this->Image)?("url('".$this->Image."')"):"var(--overlay-url-0)"; ?>;
 			background-size: cover;
 			background-position: center;
 			background-repeat: no-repeat;
@@ -39,7 +39,7 @@ class Splash extends Template{
 			padding: 0px;
 			position: fixed;
 			z-index: 999999999;
-			line-height: var(--Size-3);
+			line-height: var(--size-3);
 			font-size: 5vmin;
 		}
 		.splash-view {
@@ -112,14 +112,14 @@ class Splash extends Template{
 			top: -25vh;
 			animation: none;
 			color: transparent;
-			text-shadow: 0px 0px 1px  var(--ForeColor-5);
+			text-shadow: 0px 0px 1px  var(--fore-color-5);
 		}
 		.splash-view .frame-3>* {
 			width: fit-content;
 			display: inline-block;
 			animation: blurFadeIn 1s ease-in 5s backwards;
 			color: transparent;
-			text-shadow: 0px 0px 1px var(--ForeColor-5);
+			text-shadow: 0px 0px 1px var(--fore-color-5);
 		}
 		.splash-view .frame-3>*:nth-child(2) {
 			animation-delay: 6s;
@@ -138,18 +138,18 @@ class Splash extends Template{
 			0%{
 				opacity: 0;
 				display: none;
-				text-shadow: 0px 0px 40px var(--ForeColor-5);
+				text-shadow: 0px 0px 40px var(--fore-color-5);
 				transform: scale(0.9);
 			}
 			20%,75%{
 				opacity: 1;
-				text-shadow: 0px 0px 1px var(--ForeColor-5);
+				text-shadow: 0px 0px 1px var(--fore-color-5);
 				transform: scale(1);
 			}
 			100%{
 				opacity: 0;
 				display: none;
-				text-shadow: 0px 0px 50px var(--ForeColor-5);
+				text-shadow: 0px 0px 50px var(--fore-color-5);
 				transform: scale(0);
 			}
 		}
@@ -157,17 +157,17 @@ class Splash extends Template{
 			0%{
 				opacity: 0;
 				display: none;
-				text-shadow: 0px 0px 40px var(--ForeColor-5);
+				text-shadow: 0px 0px 40px var(--fore-color-5);
 				transform: scale(1.3);
 			}
 			50%{
 				opacity: 0.5;
-				text-shadow: 0px 0px 10px var(--ForeColor-5);
+				text-shadow: 0px 0px 10px var(--fore-color-5);
 				transform: scale(1.1);
 			}
 			100%{
 				opacity: 1;
-				text-shadow: 0px 0px 1px var(--ForeColor-5);
+				text-shadow: 0px 0px 1px var(--fore-color-5);
 				transform: scale(1);
 			}
 		}
@@ -188,8 +188,8 @@ class Splash extends Template{
 		}
 	</style>
 <?php }
-    public function DrawMain(){
-        parent::DrawMain();?>
+    public function RenderMain(){
+        parent::RenderMain();?>
 	<div class='splash-view'>
 		<div class='content'>
 			<div class='frame frame-1'>
@@ -204,7 +204,7 @@ class Splash extends Template{
 			</div>
 			<?php if(count($this->Phrases) > 0) { ?>
 			<div class='frame frame-3'>
-				<?php foreach($this->Phrases as $ser) { echo "<div>".__($ser["Name"],true,false)."</div> "; } ?> 
+				<?php foreach($this->Phrases as $ser) { echo "<div>".__($ser["Name" ],true,false)."</div> "; } ?> 
 			</div>
 			<?php } ?>
 		</div>

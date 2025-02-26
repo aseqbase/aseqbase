@@ -10,7 +10,6 @@ use MiMFa\Library\HTML;
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Collection extends Module{
-	public $Capturable = true;
 	public $TitleTag = "h2";
 	public $Class = "container";
 	/**
@@ -65,28 +64,28 @@ class Collection extends Module{
 	public $Animation = "fade-in";
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name} .items{
 				gap: 3vmax;
 				margin-bottom: 3vmax;
 			}
 			.{$this->Name} .items .item{
-				background-color: var(--BackColor-0);
-				color: var(--ForeColor-0);
-				font-size: var(--Size-1);
+				background-color: var(--back-color-0);
+				color: var(--fore-color-0);
+				font-size: var(--size-1);
 				text-align: center;
     			padding: 0px;
-				border: var(--Border-1) var(--ForeColor-4);
-				border-radius: var(--Radius-1);
-				box-shadow: var(--Shadow-1);
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+				border: var(--border-1) var(--fore-color-4);
+				border-radius: var(--radius-1);
+				box-shadow: var(--shadow-1);
+				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
 			.{$this->Name} .items .item:hover{
-				background-color: var(--BackColor-1);
-				color: var(--ForeColor-1);
-				border-radius: var(--Radius-2);
-				box-shadow: var(--Shadow-2);
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)))."
+				background-color: var(--back-color-1);
+				color: var(--fore-color-1);
+				border-radius: var(--radius-2);
+				box-shadow: var(--shadow-2);
+				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
 			.{$this->Name} .items .item .image{
 				margin: 2vmax;
@@ -102,8 +101,8 @@ class Collection extends Module{
 				max-width: 100%;
 			}
 			.{$this->Name} .items .item .description{
-				background-color: var(--BackColor-0);
-				color: var(--ForeColor-0);
+				background-color: var(--back-color-0);
+				color: var(--fore-color-0);
 				text-align: start;
 				padding: 2vmin 2vmax;
 				margin-bottom: 0px;
@@ -111,7 +110,7 @@ class Collection extends Module{
 			.{$this->Name} .items .item .fa{
 				padding: 20px;
 				margin-bottom: 3vh;
-				border: var(--Border-0) var(--ForeColor-0);
+				border: var(--border-0) var(--fore-color-0);
 				border-radius: 50%;
 			}
 			.{$this->Name} .items .item .btn{
@@ -122,7 +121,7 @@ class Collection extends Module{
 
 	public function Get(){
 		return parent::Get().join(PHP_EOL, iterator_to_array((function(){
-            MODULE("Image");
+            module("Image" );
             $img = new Image();
             $img->Class = "image";
             yield $img->GetStyle();
@@ -131,30 +130,30 @@ class Collection extends Module{
             foreach(Convert::ToItems($this->Items) as $item) {
                 if($i % $this->MaximumColumns === 0)  yield "<div class='row items'>";
 				if(is_string($item)) yield $item;
-				else if(getAccess(getValid($item,'Access', \_::$CONFIG->VisitAccess))){
-                    $p_image = getValid($item,'Image', $this->DefaultImage);
-                    $p_name = __(getValid($item,'Title')??getValid($item,'Name', $this->DefaultTitle),true,false);
-                    $p_content = getValid($item,'Content', $this->DefaultContent);
-                    $p_description = getValid($item,'Description', $this->DefaultDescription);
+				else if(auth(findValid($item,'Access' , \_::$Config->VisitAccess))){
+                    $p_image = findValid($item,'Image' , $this->DefaultImage);
+                    $p_name = __(findBetween($item,'Title', 'Name')?? $this->DefaultTitle,true,false);
+                    $p_content = findValid($item,'Content' , $this->DefaultContent);
+                    $p_description = findValid($item,'Description' , $this->DefaultDescription);
                     $p_description = is_null($p_description)?null:__($p_description);
-                    $p_link = getValid($item,'Link')??getValid($item,'Path', $this->DefaultLink);
-                    $p_buttons = getValid($item,'Buttons', $this->DefaultButtons);
+                    $p_link = findBetween($item,'Link','Path')?? $this->DefaultLink;
+                    $p_buttons = findValid($item,'Buttons', $this->DefaultButtons);
                     $img->Source = $p_image;
 					if(is_null($p_description))
-                        yield HTML::Button(
-                            (isEmpty($img->Source)?"":$img->ReCapture()).
-                            HTML::SubHeading($p_name).
+                        yield Html::Button(
+                            (isEmpty($img->Source)?"":$img->ToString()).
+                            Html::SubHeading($p_name).
 							Convert::ToString($p_content).
                             Convert::ToString($p_buttons),
                             $p_link,
-                            ["class"=>"item col-sm"], $this->Animation? " data-aos-delay='".($i % $this->MaximumColumns*\_::$TEMPLATE->AnimationSpeed)."' data-aos='{$this->Animation}'":null);
-					else yield HTML::Division(
-                            (isEmpty($img->Source)?"":$img->ReCapture()).
-                            HTML::SubHeading($p_name).
-                            HTML::Division($p_description, ["class"=>"description"]).
+                            ["class"=>"item col-sm"], $this->Animation? " data-aos-delay='".($i % $this->MaximumColumns*\_::$Front->AnimationSpeed)."' data-aos='{$this->Animation}'":null);
+					else yield Html::Division(
+                            (isEmpty($img->Source)?"":$img->ToString()).
+                            Html::SubHeading($p_name).
+                            Html::Division($p_description, ["class"=>"description" ]).
 							Convert::ToString($p_content).
                             Convert::ToString($p_buttons).
-                            (isValid($p_link)? HTML::Button($this->MoreButtonLabel, $p_link, ["target"=>"blank"]):""),
+                            (isValid($p_link)? Html::Button($this->MoreButtonLabel, $p_link, ["target"=>"blank"]):""),
                             ["class"=>"item col-sm"], $this->Animation? "data-aos='{$this->Animation}'":null);
                 }
 				if(++$i % $this->MaximumColumns === 0) yield "</div>";

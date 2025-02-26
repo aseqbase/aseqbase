@@ -865,7 +865,7 @@
         }
         if (typeof TC_Instance_List[cur_id] === "undefined") {
             var options = this.options;
-            var element_options = $(element).data('options');
+            var element_options = $(element).data('Options');
             if (typeof element_options === "string") {
                 element_options = JSON.parse(element_options);
             }

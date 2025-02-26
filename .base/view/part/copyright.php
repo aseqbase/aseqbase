@@ -1,4 +1,5 @@
-<?php MODULE("Copyright");
+<?php module("Copyright");
 $module = new \MiMFa\Module\Copyright();
-$module->Draw();
+swap($module, $data);
+$module->Render();
 ?>

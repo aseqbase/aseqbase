@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<title><?php echo $StaticTitle; ?></title>
-	<link rel="icon" href="/asset/logo/logo.png" fetchpriority="high">
+	<link rel="Icon" href="/asset/logo/logo.png" fetchpriority="high">
 	<link rel="preload" href="/asset/general/process.gif" fetchpriority="high">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -33,7 +33,7 @@
 
 							<div class="email-input-area">
 								<form method="post">
-									<input class="email-input" name="email" type="text" placeholder="Enter your email"/>
+									<input class="email-input" name="Email" type="text" placeholder="Enter your email"/>
 									<button class="submit-btn" name="submit" type="submit"><b>NOTIFY US</b></button>
 								</form>
 							</div>

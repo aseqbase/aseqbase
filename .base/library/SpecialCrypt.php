@@ -3,6 +3,12 @@ namespace MiMFa\Library;
 require_once "HashCrypt.php";
 class SpecialCrypt extends HashCrypt
 {
+    public Cryptograph $Cryptograph;
+
+    function __construct(){
+        $this->Cryptograph = new Cryptograph();
+    }
+
     /**
      * Encrypts then MACs a message
      *
@@ -11,16 +17,16 @@ class SpecialCrypt extends HashCrypt
      * @param boolean $encode - set to TRUE to return a base64-encoded string
      * @return string (raw binary)
      */
-    public static function Encrypt($message, $key, $encode = false)
+    public function Encrypt($message, $key, $encode = false)
     {
         if(!isValid($message)) return $message;
-        list($encKey, $authKey) = self::SplitKeys($key);
+        list($encKey, $authKey) = $this->SplitKeys($key);
 
-        // Pass to SimpleCrypt::encrypt
-        $ciphertext = SimpleCrypt::Encrypt(self::AddSampleChars($message), $encKey);
+        // Pass to Cryptograph::encrypt
+        $ciphertext = $this->Cryptograph->Encrypt($this->AddSampleChars($message), $encKey);
 
         // Calculate a MAC of the IV and ciphertext
-        $mac = hash_hmac(self::$Algorithm, $ciphertext, $authKey, true);
+        $mac = hash_hmac($this->Algorithm, $ciphertext, $authKey, true);
 
         if ($encode) {
             return base64_encode($mac.$ciphertext);
@@ -37,10 +43,10 @@ class SpecialCrypt extends HashCrypt
      * @param boolean $encoded - are we expecting an encoded string?
      * @return string (raw binary)
      */
-    public static function Decrypt($message, $key, $encoded = false)
+    public function Decrypt($message, $key, $encoded = false)
     {
         if(!isValid($message)) return $message;
-        list($encKey, $authKey) = self::SplitKeys($key);
+        list($encKey, $authKey) = $this->SplitKeys($key);
         if ($encoded) {
             $message = base64_decode($message, true);
             if ($message === false) {
@@ -49,42 +55,42 @@ class SpecialCrypt extends HashCrypt
         }
 
         // Hash Size -- in case HASH_ALGO is changed
-        $hs = mb_strlen(hash(self::$Algorithm, '', true), '8bit');
+        $hs = mb_strlen(hash($this->Algorithm, '', true), '8bit');
         $mac = mb_substr($message, 0, $hs, '8bit');
 
         $ciphertext = mb_substr($message, $hs, null, '8bit');
 
         $calculated = hash_hmac(
-            self::$Algorithm,
+            $this->Algorithm,
             $ciphertext,
             $authKey,
             true
         );
 
-        if (!self::HashEquals($mac, $calculated)) {
+        if (!$this->HashEquals($mac, $calculated)) {
             throw new \Exception('Decryption failure');
         }
 
-        // Pass to SimpleCrypt::decrypt
-        return self::RemoveSampleChars(SimpleCrypt::Decrypt($ciphertext, $encKey));
+        // Pass to Cryptograph::decrypt
+        return $this->RemoveSampleChars( $this->Cryptograph->Decrypt($ciphertext, $encKey));
     }
 
-    protected static function AddSampleChars($text)
+    protected function AddSampleChars($text)
     {
-        $sampler = \_::$CONFIG->EncryptSampler;
-        $samplechars = \_::$CONFIG->EncryptSampleChars;
+        $sampler = \_::$Config->EncryptSampler;
+        $samplechars = \_::$Config->EncryptSampleChars;
         $samplelen = strlen($samplechars);
-        $indexer = \_::$CONFIG->EncryptIndexer;
-        for (; $indexer < strlen($text); $indexer+=\_::$CONFIG->EncryptIndexer){
+        $indexer = \_::$Config->EncryptIndexer;
+        for (; $indexer < strlen($text); $indexer+=\_::$Config->EncryptIndexer){
             $text = insertToString($text, substr($samplechars, $sampler%$samplelen,1), $indexer);
-            $sampler+=\_::$CONFIG->EncryptSampler;
+            $sampler+=\_::$Config->EncryptSampler;
         }
         return $text;
     }
-    protected static function RemoveSampleChars($text)
+    protected function RemoveSampleChars($text)
     {
-        $indexer = strlen($text) - strlen($text)%\_::$CONFIG->EncryptIndexer;
-        for (; $indexer > 0 ; $indexer-=\_::$CONFIG->EncryptIndexer)
+        $indexer = strlen($text) - strlen($text)%\_::$Config->EncryptIndexer;
+        for (; $indexer > 0 ; $indexer-=\_::$Config->EncryptIndexer)
             $text = deleteFromString($text, $indexer, 1);
         return $text;
     }

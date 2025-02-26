@@ -2,16 +2,15 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 class Copyright extends Module{
-	public $Capturable = true;
 	public $Title = "MiMFa";
 	public $Description = "Powered By: ";
 	public $Source = "http://mimfa.net";
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name}, .{$this->Name} :is(a, a:visited){
 				text-align: center;
-				font-size: var(--Size-0);
+				font-size: var(--size-0);
 				text-decoration: none;
 			}
 			");

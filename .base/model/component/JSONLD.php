@@ -1,95 +1,61 @@
-<?php
-namespace MiMFa\Component;
+<?php namespace MiMFa\Component;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 
-class JSONLD extends Component{
-	public $HasWebsite = true;
-
-	public function Echo(){
-		if($this->HasWebsite) $this->EchoWebsite(
-				name:getValid($this, "name"),
-				url:getValid($this, "url"),
-				searchUrl:getValid($this, "searchUrl")
-			);
-		else $this->EchoArticle(
-				title:getValid($this, "title"),
-				excerpt:getValid($this, "excerpt"),
-				image:getValid($this, "image"),
-				author:getValid($this, "author"),
-				publisher:getValid($this, "publisher"),
-				datePublished:getValid($this, "datePublished"),
-				dateModified:getValid($this, "dateModified"),
-				type:getValid($this, "type")
-			);
-	}
-	public function Get(){
-		if($this->HasWebsite) $this->GetWebsite(
-				name:getValid($this, "name"),
-				url:getValid($this, "url"),
-				searchUrl:getValid($this, "searchUrl")
-			);
-		else $this->GetArticle(
-				title:getValid($this, "title"),
-				excerpt:getValid($this, "excerpt"),
-				image:getValid($this, "image"),
-				author:getValid($this, "author"),
-				publisher:getValid($this, "publisher"),
-				datePublished:getValid($this, "datePublished"),
-				dateModified:getValid($this, "dateModified"),
-				type:getValid($this, "type")
-			);
+class JsonLD{
+	public static function Create($data){
+		if(!isEmpty($data)) 
+        return Html::Script(is_iterable($data)?
+			("{
+			  '@context': `".(grab($data, "@context")??"https://schema.org")."`,
+			  '@type': `".(grab($data, "@type")??"Article")."`,
+			  ".loop($data, fn($k, $v)=>'"'.$k.'":'.(is_iterable($v)?Convert::ToJson($v):'"'.$v.'"'))."
+			}"):$data
+		, ['type' =>'application/ld+json']);
 	}
 
-	public function EchoWebsite($name = null, $url = null, $searchUrl = null){
-		echo $this->GetWebsite($name, $url, $searchUrl);
-	}
-	public function EchoArticle($title = null, $excerpt = null, $image = null, $author = ["name" => null, "url" =>null, "image"=>null],$publisher = ["name" => null, "url" =>null, "image"=>null], $datePublished = null, $dateModified = null, $type="Article"){
-		echo $this->GetArticle($title, $excerpt, $image, $author,$publisher, $datePublished, $dateModified, $type);
-	}
-
-
-	public function GetWebsite($name = null, $url = null, $searchUrl = null){
-        return "<!---prepend:<\/head>--->".HTML::Script(
+	public static function Website($name = null, $url = null, $searchUrl = null){
+        return "<!---prepend:<\/head>--->".Html::Script(
 			"{
 			  '@context': 'https://schema.org/',
 			  '@type': 'WebSite',
-			  'name': `".($name??\_::$INFO->FullName)."`,
-			  'url': `".($url??\_::$HOST)."`,
+			  'name': `".($name??\_::$Info->FullName)."`,
+			  'url': `".($url??\Req::$Host)."`,
 			  'potentialAction': {
 				'@type': 'SearchAction',
-				'target': `".($searchUrl??(\_::$HOST.'/search?q={search_term_string}'))."`,
+				'target': `".($searchUrl??(\Req::$Host.'/search?q={search_term_string}'))."`,
 				'query-input': 'required name=search_term_string'
 			  }
 			}"
-		,['type'=>'application/ld+json'])."<!---prepend--->";
+		,['type' =>'application/ld+json'])."<!---prepend--->";
 	}
-	public function GetArticle($title = null, $excerpt = null, $image = null, $author = ["name" => null, "url" =>null, "image"=>null],$publisher = ["name" => null, "url" =>null, "image"=>null], $datePublished = null, $dateModified = null, $type="Article"){
-        return "<!---prepend:<\/head>--->".HTML::Script(
+	public static function Article($title = null, $excerpt = null, $image = null, $author = ["Name" => null, "Url" =>null, "Image" =>null],$publisher = ["Name" => null, "Url" =>null, "Image" =>null], $datePublished = null, $dateModified = null, $type="Article"){
+        return "<!---prepend:<\/head>--->".Html::Script(
 			"{
 			  '@context': 'https://schema.org',
 			  '@type': `$type`,
-			  'headline': `".Convert::ToExcerpt($title??\_::$INFO->FullName,0,110)."`,
-			  'description': `".($excerpt??\_::$INFO->Description)."`,
-			  'image': `".($image??\_::$INFO->FullLogoPath)."`,
+			  'headline': `".Convert::ToExcerpt($title??\_::$Info->FullName,0,110)."`,
+			  'description': `".($excerpt??\_::$Info->Description)."`,
+			  'image': `".($image??\_::$Info->FullLogoPath)."`,
 			  'author': {
 				'@type': 'Person',
-				'name': `".getValid($author,'name')."`,
-				'url': `".getValid($author,'url',(\_::$HOST.(isValid($author,'name')?'':'/'.getValid($author,'name'))))."`
+				'name': `".get($author,'Name' )."`,
+				'url': `".findValid($author,'Url',(\Req::$Host.(isValid($author,'Name' )?'':'/'.get($author,'Name' ))))."`
 			  },
 			  'publisher': {
 				'@type': 'Organization',
-				'name': `".getValid($publisher,'name')."`,
-				'url': `".getValid($publisher,'url',(\_::$HOST.(isValid($publisher,'name')?'':'/'.getValid($publisher,'name'))))."`
+				'name': `".get($publisher,'Name' )."`,
+				'url': `".findValid($publisher,'Url',(\Req::$Host.(isValid($publisher,'Name' )?'':'/'.get($publisher,'Name' ))))."`
 				'logo': {
 				  '@type': 'ImageObject',
-				  'url': `".getValid($publisher,'url',\_::$INFO->LogoPath)."`
+				  'url': `".findValid($publisher,'Url',\_::$Info->LogoPath)."`
 				}
 			  },
 			  'datePublished': `$datePublished`,
 			  'dateModified': `$dateModified`
 			}"
-		,['type'=>'application/ld+json'])."<!---prepend--->";
+		, ['type' =>'application/ld+json'])."<!---prepend--->";
 	}
 }
+JsonLD::Create($data??null);
 ?>

@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Module;
-MODULE("IFrame");
+module("IFrame");
 class MediaFrame extends IFrame{
 	public $Source = null;
 	public $Image = null;

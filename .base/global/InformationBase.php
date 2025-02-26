@@ -1,5 +1,5 @@
 <?php
-LIBRARY("Revise");
+library("Revise");
 /**
  *All the basic website informations
  *@copyright All rights are reserved for MiMFa Development Group
@@ -67,6 +67,22 @@ abstract class InformationBase{
 	 */
 	public $FullDescription = null;
 
+	/**
+	 * Default mail sender
+	* @example: "do-not-reply@mimfa.net"
+	* @field array
+	* @var string|null|array<string>
+	* @category Security
+	*/
+	public $SenderEmail = null;
+	/**
+	 * Default mail reciever
+	 * @example: "info@mimfa.net"
+	 * @field array
+	 * @var string|null|array<string>
+	 * @category Security
+	 */
+	public $ReceiverEmail = null;
 	/**
 	 * The main path
      * @field path
@@ -136,12 +152,6 @@ abstract class InformationBase{
 	public $ErrorSymbolPath = "/asset/general/error.png";
 
 	/**
-	 * The user service
-     * @internal
-	 * @var \MiMFa\Library\User
-	 */
-	public $User = null;
-	/**
      * The location link on the map
      * @field map
 	 * @var mixed
@@ -161,7 +171,7 @@ abstract class InformationBase{
      * @var array
 	 */
 	public $MainMenus = array(
-		array("Name"=>"HOME","Link"=>"/home","Image"=>"/asset/symbol/home.png","Attributes"=> "class='menu-link'")
+		array("Name" =>"HOME","Link"=>"/home","Image" =>"/asset/symbol/home.png","Attributes"=> "class='menu-link'")
 	);
 
 	/**
@@ -201,11 +211,10 @@ abstract class InformationBase{
 
 
 	public function __construct(){
+		$this->SenderEmail = createEmail("do-not-reply");
+		$this->ReceiverEmail = createEmail("info");
 		\MiMFa\Library\Revise::Load($this);
-        $this->User = new \MiMFa\Library\User();
-        \MiMFa\Library\Revise::Decode($this, getValid($this->User->GetGroup(),"MetaData","[]"));
-        \MiMFa\Library\Revise::Decode($this, getValid($this->User->Get(),"MetaData","[]"));
-
+		
 		$this->LogoPath = forceUrl($this->LogoPath);
 		$this->FullLogoPath = forceUrl($this->FullLogoPath);
 		$this->BannerPath = forceUrl($this->BannerPath);

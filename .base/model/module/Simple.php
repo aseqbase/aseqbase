@@ -3,7 +3,6 @@
 use MiMFa\Library\Convert;
 
 class Simple extends Module{
-	public $Capturable = true;
 	public $DefaultGet = null;
 
 	public function __construct($defaultGet){

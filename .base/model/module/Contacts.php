@@ -2,13 +2,12 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 class Contacts extends Module{
-	public $Capturable = true;
 	public $Class = "container";
 	public $Items = null;
 	public $Location = null;
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name} ul.contacts{
 				margin:0px !important;
 			}
@@ -17,18 +16,18 @@ class Contacts extends Module{
 				margin:0px !important;
 			}
 			.{$this->Name} a.badge, a.badge:visited {
-				background-color: var(--BackColor-1);
-				color: var(--ForeColor-1);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				background-color: var(--back-color-1);
+				color: var(--fore-color-1);
+				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name} a.badge:hover {
-				background-color: var(--ForeColor-1);
-				color: var(--BackColor-1);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				background-color: var(--fore-color-1);
+				color: var(--back-color-1);
+				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name} .map{
-				border: 10px solid var(--BackColor-3);
-				box-shadow: var(--Shadow-2);
+				border: 10px solid var(--back-color-3);
+				box-shadow: var(--shadow-2);
 				border-radius: 5px;
 			}
 			.{$this->Name} .map>iframe{
@@ -38,7 +37,7 @@ class Contacts extends Module{
 				min-height: 200px;
 				padding:0px;
 				margin:0px;
-				".(\_::$TEMPLATE->DarkMode? \MiMFa\Library\Style::UniversalProperty("filter","invert(90%)"):"")."
+				".(\_::$Front->DarkMode? \MiMFa\Library\Style::UniversalProperty("filter","invert(90%)"):"")."
 			}
 		");
 	}
@@ -51,9 +50,9 @@ class Contacts extends Module{
 					for($i = 0; $i < $count; $i++){
 						$item = $this->Items[$i];
 						yield '<li class="d-flex justify-content-between align-items-center">';
-							yield HTML::Image(" ".getBetween($item,'Name','Title'), getBetween($item,'Icon','Image'));
-							yield '<a href="'.getBetween($item,'Path','Url','Link').'" target="_blank" class="badge badge-pill">';
-                            yield getBetween($item,'Value','Title','Path','Url','Link','Name');
+							yield Html::Image(" ".findBetween($item,'Name' ,'Title' ), findBetween($item,'Icon','Image' ));
+							yield '<a href="'.findBetween($item,'Path' ,'Url','Link').'" target="_blank" class="badge badge-pill">';
+                            yield findBetween($item,'Value' ,'Title' ,'Path' ,'Url','Link','Name' );
 							yield '</a>';
 						yield '</li>';
 					}

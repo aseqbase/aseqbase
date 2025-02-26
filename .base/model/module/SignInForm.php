@@ -3,9 +3,8 @@ namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 use MiMFa\Library\User;
-MODULE("Form");
+module("Form");
 class SignInForm extends Form{
-	public $Capturable = true;
 	public $Action = null;
 	public $Title = "Sign In";
 	public $Image = "sign-in";
@@ -25,19 +24,23 @@ class SignInForm extends Form{
 	public $HasInternalMethod = true;
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
-	public $SignUpIfNotRegistered = false;
+	/**
+	 * Simple signing up if the user is not exists
+	 * @var 
+	 */
+	public $SignUp = false;
 	public $BlockTimeout = 5000;
 	public $ResponseView = null;
 
 	public function __construct(){
         parent::__construct();
 		$this->Action = User::$InHandlerPath;
-		$this->Welcome = function(){ return PART(User::$DashboardHandlerPath, print:false); };
-		$this->SuccessPath = \_::$PATH;
+		$this->SuccessPath = \Req::$Path;
+		$this->Welcome = function(){ return part(User::$DashboardHandlerPath, print:false); };
 	}
 
 	public function GetStyle(){
-		if($this->HasDecoration) return ((getAccess(\_::$CONFIG->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).HTML::Style("
+		if($this->HasDecoration) return ((auth(\_::$Config->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Html::Style("
 			.{$this->Name} .btn-facebook {
 				background-color: #405D9D55 !important;
 			}
@@ -72,52 +75,46 @@ class SignInForm extends Form{
 	}
 
 	public function Get(){
-		if(getAccess(\_::$CONFIG->UserAccess) && !$this->MultipleSignIn){
+		if(auth(\_::$Config->UserAccess) && !$this->MultipleSignIn)
 			return $this->GetHeader().Convert::ToString($this->Welcome);
-        } else return parent::Get();
+        else return parent::Get();
 	}
 	public function GetHeader(){
-        if(getAccess(\_::$CONFIG->UserAccess) && !isEmpty($this->WelcomeFormat))
+        if(auth(\_::$Config->UserAccess) && !isEmpty($this->WelcomeFormat))
 			return __(Convert::FromDynamicString($this->WelcomeFormat));
     }
 	public function GetFields(){
         if($this->HasInternalMethod){
-			yield HTML::LargeSlot(
-					HTML::Label($this->SignatureLabel, "Signature", ["class"=>"prepend"]).
-					HTML::ValueInput("Signature", ["placeholder"=> $this->SignaturePlaceHolder])
-				, ["class"=>"field col", "autocomplete"=>"username"]);
-			yield HTML::LargeSlot(
-					HTML::Label($this->PasswordLabel, "Password", ["class"=>"prepend"]).
-					HTML::SecretInput("Password", ["placeholder"=> $this->PasswordPlaceHolder])
-				, ["class"=>"field col", "autocomplete"=>"password"]);
+			yield Html::LargeSlot(
+					Html::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
+					Html::ValueInput("Signature" , ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
+				, ["class"=>"field col"]);
+			yield Html::LargeSlot(
+					Html::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
+					Html::SecretInput("Password" , ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"Password"])
+				, ["class"=>"field col"]);
 		}
 		yield from parent::GetFields();
     }
 	public function GetFooter(){
         return parent::GetFooter()
-			.HTML::LargeSlot(
-				HTML::Link($this->SignUpLabel, User::$UpHandlerPath)
+			.Html::LargeSlot(
+				Html::Link($this->SignUpLabel, User::$UpHandlerPath)
 			, ["class"=>"col-lg-12"])
-			.HTML::LargeSlot(
-				HTML::Link($this->RememberLabel, User::$RecoverHandlerPath)
+			.Html::LargeSlot(
+				Html::Link($this->RememberLabel, User::$RecoverHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 
-	public function Handler(){
-		$_req = $_REQUEST;
-		switch(strtolower($this->Method)){
-            case "get":
-				$_req = $_GET;
-			break;
-            case "post":
-				$_req = $_POST;
-			break;
-        }
-		if(!getAccess(\_::$CONFIG->UserAccess)) try {
-			if(isValid($_req,"Signature") && isValid($_req,"Password")){
-				$res = $this->SignUpIfNotRegistered?
-						\_::$INFO->User->SignInOrSignUp(getValid($_req,"Signature"), getValid($_req,"Password")):
-						\_::$INFO->User->SignIn(getValid($_req,"Signature"), getValid($_req,"Password"));
+	public function Post(){
+		if(!auth(\_::$Config->UserAccess) || $this->MultipleSignIn) try {
+			$received = \Req::Post();
+			$signature = get($received,"Signature" );
+			$password = get($received,"Password" );
+			if(isValid($signature) && isValid($password)){
+				$res = $this->SignUp && isEmail($signature)?
+						\_::$Back->User->SignInOrSignUp($signature, $password, $signature):
+						\_::$Back->User->SignIn($signature, $password);
 				if($res === true)
                 	return $this->GetSuccess(Convert::FromDynamicString($this->CorrectConfirmingFormat));
 				elseif($res === false)
@@ -127,7 +124,19 @@ class SignInForm extends Form{
 			}
 			else return $this->GetWarning($this->IncompleteWarning);
 		} catch(\Exception $ex) { return $this->GetError($ex); }
-		else return $this->GetWarning($this->LoggedInWarning);
+		$this->Result = true;
+		return $this->GetMessage($this->LoggedInWarning);
+    }
+	
+	public function Delete(){
+		if(auth(\_::$Config->UserAccess)) try {
+			$user = \_::$Back->User->Get();
+			if (!isValid($user)) return $this->GetSuccess("You are no longer signed in!");
+			elseif(\_::$Back->User->SignOut()) return $this->GetSuccess("You signed out successfully!");
+			else return $this->GetError("There a problem is occured in signing out!");
+		} catch(\Exception $ex) { return $this->GetError($ex); }
+		$this->Result = true;
+		return $this->GetMessage("You are not signed in!");
     }
 }
 ?>

@@ -14,7 +14,7 @@ class Reflect{
         if(is_null($comment)) return [];
         $matches = preg_find_all("/\@\w+\s*.*/", $comment);
         $res = [];
-        $res["abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*\s*[^@\/][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
+        $res["Abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*\s*[^@\/][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
         foreach ($matches as $value)
             $res[strtolower(preg_find("/(?<=\@)\w+/", $value))] = trim(preg_replace("/^\@\w+\s*/", "", $value));
         return $res;
@@ -137,7 +137,7 @@ class Reflect{
      * @param mixed $object
      */
     public static function GetForm($objectOrReflection):\MiMFa\Module\Form{
-        MODULE("Form");
+        module("Form");
         $reflection = self::Get($objectOrReflection);
         $form = new \MiMFa\Module\Form(
             title: "Edit {$reflection->Title}",
@@ -146,7 +146,6 @@ class Reflect{
             image:"edit",
             children: self::GetFields($objectOrReflection)
         );
-        $form->ResponseView = "value";
         $form->Id = "{$reflection->Name}EditForm";
         $form->Template = "both";
         $form->Timeout = 60000;
@@ -160,7 +159,7 @@ class Reflect{
      * @param mixed $object
      */
     public static function GetFields($objectOrReflection){
-        MODULE("Field");
+        module("Field");
         foreach (self::Get($objectOrReflection) as $key=>$value)
             yield new \MiMFa\Module\Field(
                 key:$key,
@@ -177,14 +176,14 @@ class Reflect{
      */
     public static function HandleForm($objectOrReflection, array $newValues = null){
         try {
-            if(is_null($newValues)) $newValues = RECEIVE(null,"POST");
+            if(is_null($newValues)) $newValues = \Req::Receive(null,"POST");
             $objectOrReflection = self::Update($objectOrReflection, $newValues);
             $c = count($objectOrReflection);
-            if($c < 1) return HTML::Warning("Here is no unsaved change!");
+            if($c < 1) return Html::Warning("Here is no unsaved change!");
             else $c = self::Write($objectOrReflection);
-            if($c < 1) return HTML::Warning("Here is not anythings to update!");
-            else return HTML::Success("'$c' field(s) of data updated successfully!");
-        } catch(\Exception $ex) { return HTML::Error($ex); }
+            if($c < 1) return Html::Warning("Here is not anythings to update!");
+            else return Html::Success("'$c' field(s) of data updated successfully!");
+        } catch(\Exception $ex) { return Html::Error($ex); }
     }
 }
 
@@ -280,7 +279,7 @@ class Reflected extends \ArrayObject{
     public string|null $Author = null;
     /**
      * If used @author authorname: to indicate the author name of everythings. By default the authorname of everything are  Mohammad Fathi
-     * @var string|null
+     * @var array
      */
     public array $Authors = [];
     /**
@@ -326,7 +325,7 @@ class Reflected extends \ArrayObject{
                 $this->SetAttribute($reflection, $object);
             elseif($reflection instanceof \ReflectionGenerator)
                 $this->SetGenerator($reflection, $object);
-            else $this->SetObject(new ReflectionObject($reflection, $object));
+            else $this->SetObject($reflection, $object);
         return $this;
     }
     public function SetClass(\ReflectionClass $reflection, $object = null){
@@ -411,10 +410,10 @@ class Reflected extends \ArrayObject{
         $this->Type = $this->Field = $this->Structure = "method";
         $this->Name = $reflection->getName();
         $this->Modifires = [];
-        if($reflection->isPublic) $this->Modifires[] = "public";
-        if($reflection->isPrivate) $this->Modifires[] = "private";
-        if($reflection->isProtected) $this->Modifires[] = "protected";
-        if($reflection->isStatic) $this->Modifires[] = "static";
+        if($reflection->isPublic()) $this->Modifires[] = "public";
+        if($reflection->isPrivate()) $this->Modifires[] = "private";
+        if($reflection->isProtected()) $this->Modifires[] = "protected";
+        if($reflection->isStatic()) $this->Modifires[] = "static";
         $this->Load($reflection->getDocComment());
         return $this;
     }
@@ -426,14 +425,14 @@ class Reflected extends \ArrayObject{
     }
     public function SetGenerator(\ReflectionGenerator $reflection, $object = null){
         $this->Type = $this->Field = $this->Structure = "generator";
-        $this->Name = $reflection->getName();
-        $this->Load($reflection->getDocComment());
+        $this->Name = $reflection->getFunction()->getName();
+        $this->Load($reflection->getFunction()->getDocComment());
         return $this;
     }
     public function SetAttribute(\ReflectionAttribute $reflection, $object = null){
         $this->Type = $this->Field = $this->Structure = "attribute";
         $this->Name = $reflection->getName();
-        $this->Load($reflection->getDocComment());
+        $this->Load($reflection->getArguments());
         return $this;
     }
 
@@ -441,19 +440,19 @@ class Reflected extends \ArrayObject{
         $this->Comment = $comment;
         $comments = Reflect::GetCommentParameters($comment);
         $splt = "\t \r\n\f\v";
-        if(isEmpty($this->Title)) $this->Title = getValid($comments, "title")??Convert::ToTitle($this->Name);
-        $val = getValid($comments, "description")??getValid($comments, "abstract");
+        if(isEmpty($this->Title)) $this->Title = get($comments, "title" )??Convert::ToTitle($this->Name);
+        $val = get($comments, "description" )??get($comments, "abstract");
         if(!isEmpty($val)) $this->Description = $val.(isEmpty($this->Description) || $val == $this->Description?null:(PHP_EOL.$this->Description));
         if(isEmpty($this->Var)){
-            $this->Var = getValid($comments, "var");
+            $this->Var = get($comments, "var");
             if($this->Var==="mixed") $this->Var = null;
             $arr = preg_split("/\s*\|\s*/", $this->Var??"");
             if($arr) array_push($this->Vars, ...$arr);
         }
         $this->Vars = array_unique(array_filter($this->Vars, function($var){ return $var !== "mixed" && !isEmpty($var);}));
-        if(isEmpty($this->Field)) $this->Field = getValid($comments, "field", null);
+        if(isEmpty($this->Field)) $this->Field = findValid($comments, "field", null);
         if(isEmpty($this->Size)) {
-            $size = getValid($comments, "size");
+            $size = get($comments, "size");
             switch ($size) {
                 case "n":
                 case "none":
@@ -477,21 +476,21 @@ class Reflected extends \ArrayObject{
         }
         if(isEmpty($this->Category)) $this->Category = doValid(function($v)use($splt){ return explode($splt, $v)[0]; }, $comments, "category");
         $this->Visible = !isset($comments["internal"]);
-        if(isEmpty($this->Access)) $this->Access = doValid(function($v)use($splt){ return explode($splt, $v)[0]; }, $comments, "access");
+        if(isEmpty($this->Access)) $this->Access = doValid(function($v)use($splt){ return explode($splt, $v)[0]; }, $comments, "access" );
         if(isEmpty($this->Version)) $this->Version = doValid(function($v)use($splt){ return explode($splt, $v)[0]; }, $comments, "version");
-        $this->Example = getValid($comments, "example");
-        $val = getValid($comments, "example");
+        $this->Example = get($comments, "example");
+        $val = get($comments, "example");
         if(!isEmpty($val)) $this->Example = $val.(isEmpty($this->Example) || $val == $this->Example?null:(PHP_EOL.$this->Example));
-        if(isEmpty($this->Link)) $this->Link = getValid($comments, "link");
-        if(isEmpty($this->See)) $this->See = getValid($comments, "see");
-        if(isEmpty($this->Author)) $this->Author = getValid($comments, "author");
+        if(isEmpty($this->Link)) $this->Link = get($comments, "link");
+        if(isEmpty($this->See)) $this->See = get($comments, "see");
+        if(isEmpty($this->Author)) $this->Author = get($comments, "author");
         if(isValid($comments, "author")){
-            array_push($this->Authors, ...preg_split("/\s*\;\s*/", getValid($comments, "author")));
+            array_push($this->Authors, ...preg_split("/\s*\;\s*/", get($comments, "author")));
             $this->Authors = array_unique(array_filter($this->Authors, function($var){ return !isEmpty($var);}));
         }
-        if(isEmpty($this->Copyright)) $this->Copyright = getValid($comments, "copyright");
-        if(isEmpty($this->License)) $this->License = getValid($comments, "license");
-        if(!isEmpty($this->Vars) && (isEmpty($this->Type) || $this->Type === "mixed")) $this->Type = getValid($this->Vars,0);
+        if(isEmpty($this->Copyright)) $this->Copyright = get($comments, "copyright");
+        if(isEmpty($this->License)) $this->License = get($comments, "license");
+        if(!isEmpty($this->Vars) && (isEmpty($this->Type) || $this->Type === "mixed")) $this->Type = get($this->Vars,0);
         return $this;
     }
 }

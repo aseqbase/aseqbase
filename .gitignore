@@ -402,22 +402,26 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# aseqbase
 /single
 /sequence
 /administrator
 /public
 /test
 /tmp
+/temp
 /ms
 /ums
 /gms
 /erp
 /vendor
-/.updater
-/.installer
+/shop
 /.vs
 /.vscode
 /.git
 /.package
 /MiMFa aseqbase.sln
 *.zip
+*.rar
+# temporary
+/-installer/*.php

@@ -1,14 +1,13 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
-MODULE("Modal");
+module("Modal");
 class ImageModal extends Modal{
-	public $Capturable = true;
 	public $Image = null;
 	public $AllowOriginal = true;
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 		.{$this->Name} .content .image{
 			background-position: center;
 			background-repeat: no-repeat;

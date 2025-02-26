@@ -1,6 +1,5 @@
 <?php namespace MiMFa\Module;
 class QRCodeBox extends Module{
-	public $Capturable = true;
 	public $ContentBox = null;
 	public $AllowOriginal = false;
 	public $ShowContent = false;
@@ -10,14 +9,14 @@ class QRCodeBox extends Module{
 
 	public function Get(){
 		$val = getValue($this->Content);
-		MODULE("Image");
+		module("Image" );
 		$this->ContentBox = new Image();
 		$this->ContentBox->Source = "https://api.qrserver.com/v1/create-qr-code/?data=".$val;
 		$this->ContentBox->Style = new \MiMFa\Library\Style();
 		$this->ContentBox->Style->Width = $this->Width;
 		$this->ContentBox->Style->Height = $this->Height;
 		$this->ContentBox->AllowOriginal = $this->AllowOriginal;
-		return parent::GetTitle().parent::GetDescription().$this->ContentBox->Capture().
+		return parent::GetTitle().parent::GetDescription().$this->ContentBox->ToString().
 			($this->ShowContent? parent::GetContent():"");
     }
 }

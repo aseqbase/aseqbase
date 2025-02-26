@@ -1,1 +1,0 @@
-<?php REGION("main"); ?>

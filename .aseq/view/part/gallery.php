@@ -1,13 +1,13 @@
 <?php
-MODULE("Navigation");
-$nav = new MiMFa\Module\Navigation("SELECT * FROM ".\_::$CONFIG->DataBasePrefix."Gallery");
-$nav->Draw();
+module("Navigation");
+$nav = new MiMFa\Module\Navigation("SELECT * FROM ".table("Gallery")->Name);
+$nav->Render();
 
-MODULE("Gallery");
+module("Gallery");
 $module = new MiMFa\Module\Gallery();
 $module->Items =  $nav->GetItems();
-$module->Draw();
+$module->Render();
 
-$nav->Draw();
+$nav->Render();
 ?>
 

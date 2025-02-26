@@ -1,0 +1,11 @@
+<?php
+\_::$Back->Router->Route("posts?")->Default("post");
+\_::$Back->Router->Route("forums?")->Default("forum");
+\_::$Back->Router->Route("(categor(ies|y))|(cats?)")->Default("category");
+\_::$Back->Router->Route("tags?")->Default("tag");
+\_::$Back->Router->Route("query")->Default("query");
+\_::$Back->Router->Route("search")->Default("search");
+\_::$Back->Router->Route("sign")->Default("sign");
+\_::$Back->Router->Route("/\/(home\/?)?(?=\/|\\\|\?|#|@|$)/i")->Default(\_::$Config->DefaultRouteName);
+\_::$Back->Router->Route()->Default(\_::$Config->DefaultRouteName);
+?>

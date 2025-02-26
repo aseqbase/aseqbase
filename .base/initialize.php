@@ -5,9 +5,10 @@ ini_set('display_startup_errors', E_ALL);
 
 require_once(__DIR__."/global.php");
 
-COMPONENT("Component");
-TEMPLATE("Template");
-MODULE("Module");
+component("Component");
+template("Template");
+module("Module");
 
-RUNALL("customize");
+runAll("customize");
+runAll("router");
 ?>

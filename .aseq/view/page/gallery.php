@@ -1,8 +1,8 @@
 <?php
-	MODULE("PrePage");
+	module("PrePage");
 	$module = new MiMFa\Module\PrePage();
 	$module->Title = "Gallery";
-	$module->Draw();
+	$module->Render();
 
-	PART("gallery");
+	part("gallery");
 ?>

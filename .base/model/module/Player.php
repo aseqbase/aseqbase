@@ -3,11 +3,6 @@ namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
 class Player extends Module{
-	/**
-     * This object is convertable to string and able to embedd anywhere or not
-     * @var bool|null
-     */
-	public $Capturable = true;
 	public $Content = null;
 	public $Source = null;
 	public $AllowZoom = true;
@@ -40,18 +35,18 @@ class Player extends Module{
     }
 
 	public function GetStyle(){
-		return HTML::Style("
+		return Html::Style("
 			.{$this->Name}>.controls{
 				opacity: 0;
 				display: inline-flex;
 				position: absolute;
 				top: auto;
 				right: auto;
-				font-size: var(--Size-1);
-				color: var(--ForeColor-3);
+				font-size: var(--size-1);
+				color: var(--fore-color-3);
 				z-index: 1;
-				".\MiMFa\Library\Style::UniversalProperty("text-stroke","1px var(--BackColor-3)")."
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("text-stroke","1px var(--back-color-3)")."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}>.controls>.button {
 				aspect-ratio: 1;
@@ -59,17 +54,17 @@ class Player extends Module{
 				display: inline;
 				padding: 1vh;
 				cursor: pointer;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}>.controls>.button:hover {
-				background-color: var(--BackColor-3);
+				background-color: var(--back-color-3);
 				".\MiMFa\Library\Style::UniversalProperty("text-stroke","0px")."
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 
 			.{$this->Name}:hover>.controls{
 				opacity: 1;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 
 			.{$this->Name}>.content {
@@ -86,38 +81,38 @@ class Player extends Module{
 			}
 
 			.{$this->Name}>.content::-webkit-scrollbar {
-				background: var(--BackColor-3);
+				background: var(--back-color-3);
 				width: 0px;
 				height: 0px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}:hover>.content::-webkit-scrollbar {
 				width: 5px;
 				height: 5px;
 			}
 			.{$this->Name}>.content::-webkit-scrollbar:hover {
-				//background: var(--BackColor-1);
+				//background: var(--back-color-1);
 				width: 10px;
 				height: 10px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-track {
 				border-radius: 1px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-track:hover {
 				border-radius: 0px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-thumb {
-				background: var(--ForeColor-3);
+				background: var(--fore-color-3);
 				border-radius: 5px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-thumb:hover {
-				background: var(--ForeColor-1);
+				background: var(--fore-color-1);
 				".($this->AllowZoom?"cursor: grab;":"")."
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 			}
 			.{$this->Name}>.content>:not(.page,html,head,body,style,script,link,meta,title) {
 				min-width: auto;
@@ -160,17 +155,17 @@ class Player extends Module{
 				foreach ($source as $value)
 				    yield from self::ToElements($value);
 			elseif(isFormat($source,".mpg",".mpeg", ".mp4",".avi",".mkv",".mov",".wmv",".flv",".webm"))
-				yield HTML::Video(null,$source, "controls");
+				yield Html::Video(null,$source, "controls");
 			elseif(isFormat($source,".wav",".mp3",".aac",".amr",".ogg",".flac",".wma",".m4a"))
-				yield HTML::Audio($source, "controls");
+				yield Html::Audio($source, "controls");
 			elseif(isFormat($source,".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg", ".webp"))
-				yield HTML::Image($source);
-			else yield HTML::Embed($source);
+				yield Html::Image($source);
+			else yield Html::Embed($source);
 		yield "</div>";
 	}
 
 	public function GetScript(){
-		return HTML::Script(($this->AllowZoom?"
+		return Html::Script(($this->AllowZoom?"
 			let {$this->Name}slider = null;
 			let {$this->Name}mouseDown = false;
 			let {$this->Name}startX, {$this->Name}scrollLeft;
@@ -216,13 +211,13 @@ class Player extends Module{
 
 			function {$this->Name}_Set(content, source = null){
 				{$this->Name}_Source = source??{$this->Name}_Source??content;
-				if(content !== null) $('.{$this->Name}>.content').html(".$this->ContentScript("content").");
+				if(content !== null) $('.{$this->Name}>.content').html(".$this->ContentScript("content" ).");
 			}
 			function {$this->Name}_Clear(){
 				$('.{$this->Name}>.content').html('');
 			}
 			function {$this->Name}_Focus(){
-				$('.{$this->Name}>.controls').toggle(".\_::$TEMPLATE->AnimationSpeed.");
+				$('.{$this->Name}>.controls').toggle(".\_::$Front->AnimationSpeed.");
 			}
 			function {$this->Name}_Reset(){
 				let box = document.querySelector('.{$this->Name}>.content>*');

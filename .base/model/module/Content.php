@@ -1,82 +1,87 @@
 <?php namespace MiMFa\Module;
-class Content extends Module{
-	public $AllowTitle = true;
-	public $AllowDescription = true;
-	public $AllowImage = true;
-	public $Content = null;
-	public $Tag = "main";
-	public $Attributes = " onclick='viewSideMenu(false)'";
 
+use \MiMFa\Library\HTML;
+use \MiMFa\Library\Convert;
 
-	public function EchoStyle(){
-		parent::EchoStyle();
-		?>
-		<style>
-			.<?php echo $this->Name; ?>{
-				width:100%;
-				Height:max-content;
-			}
-			.<?php echo $this->Name; ?>>.page{
-				width:100%;
-				Height:max-content;
-				padding: 0px;
-				margin: 0px;
-			}
-			.<?php echo $this->Name; ?>>.page>.frame{
-				width:100%;
-				Height:max-content;
-				padding: 0px;
-				margin: 0px;
-			}
-			.<?php echo $this->Name; ?>>.page.active{
-				opacity:1;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-			.<?php echo $this->Name; ?>>.page:not(.active){
-				opacity:0;
-				<?php echo \MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)); ?>
-			}
-		</style>
-		<?php
-	}
+/**
+ * A module to display content within different frames (internal, external, embed).
+ * @copyright All rights are reserved for MiMFa Development Group
+ * @author Mohammad Fathi
+ * @see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ * @link https://github.com/aseqbase/aseqbase/wiki/Modules#Content See the Documentation
+ */
+class Content extends Module
+{
+    public $AllowTitle = true;
+    public $AllowDescription = true;
+    public $AllowImage = true;
+    public $Content = null;
+    public $Tag = "main";
+    public $Attributes = " onclick='viewSideMenu(false)'";
 
-	public function Echo(){
-		$this->EchoTitle();
-		$this->EchoDescription();
-		?>
-		<div class="page external-page" id="external" style="display: none;">
-			<div class="frame"></div>
-		</div>
-		<div class="page internal-page active" id="internal">
-			<div class="frame"><?php
-							   if(!isValid($this->Content))
-								   if(isValid(\_::$DIRECTION))
-										PAGE(NormalizePath(\_::$DIRECTION));
-								   else PAGE("home");
-							   elseif(is_string($this->Content)) echo "".$this->Content;
-							   else ($this->Content)(); ?>
-			</div>
-		</div>
-		<div class="page embed-page" id="embed" style="display: none;">
-			<iframe class="frame" ></iframe>
-		</div>
-		<?php
-	}
+    public function GetStyle()
+    {
+        return Html::Style("
+            .{$this->Name} {
+                width: 100%;
+                height: max-content;
+            }
 
-	public function EchoScript(){
-		parent::EchoScript();
-		?>
-		<script>
-			var ReadyHTML = {
-				load: (data="")=> [
+            .{$this->Name} > .page {
+                width: 100%;
+                height: max-content;
+                padding: 0;
+                margin: 0;
+                opacity: 0; /* Initially hide all pages */
+                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            }
+
+            .{$this->Name} > .page > .frame {
+                width: 100%;
+                height: max-content;
+                padding: 0;
+                margin: 0;
+            }
+
+            .{$this->Name} > .page.active {
+                opacity: 1;
+            }
+        ");
+    }
+	
+    public function Get()
+    {
+        return Convert::ToString(function () {
+            yield $this->GetTitle();       // Handle and yield the title
+            yield $this->GetDescription();  // Handle and yield the description
+
+            // Internal Page
+            yield Html::Division(
+				Html::Division(
+					Convert::ToString($this->Content)
+				, ["class"=>"frame"]),
+			["class"=> "page internal-page active", "Id" => "internal"]);
+
+            // External Page (using iframe)
+            yield Html::Division(Html::Embed("", null, ["class"=> "frame"]), ["class"=> "page external-page", "Id" => "external", "style" => "display:none;"]);
+
+            // Embed Page (using iframe)
+            yield Html::Division(Html::Embed("",  null,["class"=> "frame"]), ["class"=> "page embed-page", "Id" => "embed", "style" => "display:none;"]);
+        });
+    }
+
+	public function GetScript(){
+		return parent::GetScript().Html::Script("
+			var ReadyHtml = {
+				load: (data=``)=> [
 					`<style>
 					.load {
-						background-image: var(--Url-WaitSymbolPath);
+						background-image: var(--wait-symbol-path-url);
 						background-size: 70% 70%;
 						background-repeat: no-repeat;
 						background-position: center;
-						background-color: var(--BackColor-1);
-						color: var(--ForeColor-1);
+						background-color: var(--back-color-1);
+						color: var(--fore-color-1);
 						position: absolute;
 						top: calc(50% - 5VMAX);
 						left: calc(50% - 5VMAX);
@@ -97,8 +102,8 @@ class Content extends Module{
 						opacity: 0;
 						}
 					}
-					</style>`,"<div class='load'>",data,"</div>"].join("\r\n"),
-				wait: (data="")=>[
+					</style>`,`<div class='load'>`,data,`</div>`].join(`\r\n`),
+				wait: (data=``)=>[
 					`<style>
 					.wait{
 						background-size: 15vmax auto;
@@ -110,10 +115,10 @@ class Content extends Module{
 						width: 100vw;
 						max-width: 100%;
 						text-align: center;
-						background-image: var(--Url-ProcessSymbolPath);
+						background-image: var(--process-symbol-path-url);
 					}
-					</style>`,"<div class='wait'>",data,"</div>"].join("\r\n"),
-				error: (data="")=>[
+					</style>`,`<div class='wait'>`,data,`</div>`].join(`\r\n`),
+				error: (data=``)=>[
 					`<style>
 					.error {
 						background-size: 15vmax auto;
@@ -125,10 +130,10 @@ class Content extends Module{
 						width: 100vw;
 						max-width: 100%;
 						text-align: center;
-						background-image: var(--Url-ErrorSymbolPath);
+						background-image: var(--error-symbol-path-url);
 					}
-					</style>`,"<div class='error'>",data,"</div>"].join("\r\n"),
-				connectionError: (data="") => [
+					</style>`,`<div class='error'>`,data,`</div>`].join(`\r\n`),
+				connectionError: (data=``) => [
 					`<style>
 					.error {
 						background-size: 15vmax auto;
@@ -140,58 +145,57 @@ class Content extends Module{
 						width: 100vw;
 						max-width: 100%;
 						text-align: center;
-						background-image: var(--Url-ErrorSymbolPath);
+						background-image: var(--error-symbol-path-url);
 					}
-					</style>`,"<div class='error'>",data,"</div>"].join("\r\n")
+					</style>`,`<div class='error'>`,data,`</div>`].join(`\r\n`)
 			};
-			function <?php echo $this->Name."_"; ?>ShowFrame(selector = ".<?php echo $this->Name; ?>"){
-				$(".<?php echo $this->Name; ?>>.page").removeClass("active");
-				$(".<?php echo $this->Name; ?>>.page").hide();
-				$(".<?php echo $this->Name; ?> "+selector).addClass("active");
-				$(".<?php echo $this->Name; ?> "+selector).show();
+			function {$this->Name}_ShowFrame(selector = `.{$this->Name}`){
+				$(`.{$this->Name}>.page`).removeClass(`active`);
+				$(`.{$this->Name}>.page`).hide();
+				$(`.{$this->Name} `+selector).addClass(`active`);
+				$(`.{$this->Name} `+selector).show();
 			}
-			function <?php echo $this->Name."_"; ?>ViewInternal(link,anim=null,cls=null, selector = "#internal"){
-				<?php echo $this->Name."_"; ?>InjectInternal(link,anim,cls, selector);
-				<?php echo $this->Name."_"; ?>ShowFrame(selector);
+			function {$this->Name}_ViewInternal(link,anim=null,cls=null, selector = `#internal`){
+				{$this->Name}_InjectInternal(link,anim,cls, selector);
+				{$this->Name}_ShowFrame(selector);
 			}
-			function <?php echo $this->Name."_"; ?>ViewExternal(link,anim=null,cls=null, selector = "#external"){
-				<?php echo $this->Name."_"; ?>InjectExternal(link,anim,cls, selector);
-				<?php echo $this->Name."_"; ?>ShowFrame(selector);
+			function {$this->Name}_ViewExternal(link,anim=null,cls=null, selector = `#external`){
+				{$this->Name}_InjectExternal(link,anim,cls, selector);
+				{$this->Name}_ShowFrame(selector);
 			}
-			function <?php echo $this->Name."_"; ?>ViewEmbed(link,anim=null,cls=null, selector = "#embed"){
-				<?php echo $this->Name."_"; ?>EmbedExternal(link,anim,cls, selector);
-				<?php echo $this->Name."_"; ?>ShowFrame(selector);
+			function {$this->Name}_ViewEmbed(link,anim=null,cls=null, selector = `#embed`){
+				{$this->Name}_EmbedExternal(link,anim,cls, selector);
+				{$this->Name}_ShowFrame(selector);
 			}
 
-			function <?php echo $this->Name."_"; ?>InjectInternal(link, anim=null, cls=null, selector = "#internal"){
-				selector += ">.frame";
+			function {$this->Name}_InjectInternal(link, anim=null, cls=null, selector = `#internal`){
+				selector += `>.frame`;
 				const frame = $(selector)[0];
-				frame.innerHTML = ReadyHTML.load();
+				frame.innerHTML = ReadyHtml.load();
 				if(!isEmpty(cls)) frame.addClass(cls);
-				if(!isEmpty(anim)) frame.setAttribute("data-aos",(isEmpty(anim)?"":anim));
-				$(selector).load("/private.php?<?php echo \_::$CONFIG->PathKey."=page".(isEmpty(\_::$QUERY)?"":("&".\_::$QUERY)); ?>", {name:link,animation:anim,class:cls},
+				if(!isEmpty(anim)) frame.setAttribute(`data-aos`,(isEmpty(anim)?``:anim));
+				$(selector).load(`/private.php?".(isEmpty(\Req::$Query)?"":(\Req::$Query))."`".", {name:link,animation:anim,class:cls},
 					function(data){
-						if(!data) frame.innerHTML = ReadyHTML.connectionError("Please check your connection...");
+						if(!data) frame.innerHTML = ReadyHtml.connectionError(`Please check your connection...`);
 					},
 					function(data){
-						frame.innerHTML = ReadyHTML.error(data.statusText);
+						frame.innerHTML = ReadyHtml.error(data.statusText);
 					}
 				);
 			}
 
-			function <?php echo $this->Name."_"; ?>InjectExternal(link,anim=null, cls=null, selector = "#external"){
+			function {$this->Name}_InjectExternal(link,anim=null, cls=null, selector = `#external`){
 				const frame = $(selector)[0];
-				frame.innerHTML = ReadyHTML.load();
-				frame.innerHTML = `<iframe is="x-frame" data-loading-page="`+ReadyHTML.load()+`" data-aos="`+anim+`" class="frame `+cls+`" src="`+link+`"></iframe>`;
+				frame.innerHTML = ReadyHtml.load();
+				frame.innerHTML = `<iframe is='x-frame' data-loading-page=\``+ReadyHtml.load()+`\` data-aos='`+anim+`' class='frame `+cls+`' src='`+link+`'></iframe>`;
 			}
 
-			function <?php echo $this->Name."_"; ?>EmbedExternal(link,anim=null, cls=null, selector = "#embed"){
-				const frame = $(selector+" .frame")[0];
+			function {$this->Name}_EmbedExternal(link,anim=null, cls=null, selector = `#embed`){
+				const frame = $(selector+` .frame`)[0];
 				frame.src = link;
 			}
 
-		</script>
-		<?php
+		");
 	}
 }
 ?>

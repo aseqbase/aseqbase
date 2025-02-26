@@ -1,9 +1,9 @@
 <?php
 namespace MiMFa\Library;
-require_once "SimpleCrypt.php";
-class HashCrypt extends SimpleCrypt
+require_once "Cryptograph.php";
+class HashCrypt extends Cryptograph
 {
-    public static $Algorithm = 'sha256';
+    public $Algorithm = 'sha256';
 
     /**
      * Encrypts then MACs a message
@@ -13,16 +13,16 @@ class HashCrypt extends SimpleCrypt
      * @param boolean $encode - set to TRUE to return a base64-encoded string
      * @return string (raw binary)
      */
-    public static function Encrypt($message, $key, $encode = false)
+    public function Encrypt($message, $key, $encode = false)
     {
         if(!isValid($message)) return $message;
-        list($encKey, $authKey) = self::SplitKeys($key);
+        list($encKey, $authKey) = $this->SplitKeys($key);
 
-        // Pass to SimpleCrypt::encrypt
+        // Pass to Cryptograph::encrypt
         $ciphertext = parent::Encrypt($message, $encKey);
 
         // Calculate a MAC of the IV and ciphertext
-        $mac = hash_hmac(self::$Algorithm, $ciphertext, $authKey, true);
+        $mac = hash_hmac($this->Algorithm, $ciphertext, $authKey, true);
 
         if ($encode) {
             return base64_encode($mac.$ciphertext);
@@ -39,10 +39,10 @@ class HashCrypt extends SimpleCrypt
      * @param boolean $encoded - are we expecting an encoded string?
      * @return string (raw binary)
      */
-    public static function Decrypt($message, $key, $encoded = false)
+    public function Decrypt($message, $key, $encoded = false)
     {
         if(!isValid($message)) return $message;
-        list($encKey, $authKey) = self::SplitKeys($key);
+        list($encKey, $authKey) = $this->SplitKeys($key);
         if ($encoded) {
             $message = base64_decode($message, true);
             if ($message === false) {
@@ -51,23 +51,23 @@ class HashCrypt extends SimpleCrypt
         }
 
         // Hash Size -- in case HASH_ALGO is changed
-        $hs = mb_strlen(hash(self::$Algorithm, '', true), '8bit');
+        $hs = mb_strlen(hash($this->Algorithm, '', true), '8bit');
         $mac = mb_substr($message, 0, $hs, '8bit');
 
         $ciphertext = mb_substr($message, $hs, null, '8bit');
 
         $calculated = hash_hmac(
-            self::$Algorithm,
+            $this->Algorithm,
             $ciphertext,
             $authKey,
             true
         );
 
-        if (!self::HashEquals($mac, $calculated)) {
+        if (!$this->HashEquals($mac, $calculated)) {
             throw new \Exception('Encryption failure');
         }
 
-        // Pass to SimpleCrypt::decrypt
+        // Pass to Cryptograph::decrypt
         $plaintext = parent::Decrypt($ciphertext, $encKey);
 
         return $plaintext;
@@ -80,13 +80,13 @@ class HashCrypt extends SimpleCrypt
      * @param string $masterKey (raw binary)
      * @return array (two raw binary strings)
      */
-    protected static function SplitKeys($masterKey)
+    protected function SplitKeys($masterKey)
     {
         if(empty($masterKey)) return ["",""];
         // You really want to implement HKDF here instead!
         return [
-            hash_hmac(self::$Algorithm, 'ENCRYPTION', $masterKey, true),
-            hash_hmac(self::$Algorithm, 'AUTHENTICATION', $masterKey, true)
+            hash_hmac($this->Algorithm, 'ENCRYPTION', $masterKey, true),
+            hash_hmac($this->Algorithm, 'AUTHENTICATION', $masterKey, true)
         ];
     }
 
@@ -98,13 +98,13 @@ class HashCrypt extends SimpleCrypt
      * @ref https://paragonie.com/b/WS1DLx6BnpsdaVQW
      * @return boolean
      */
-    protected static function HashEquals($a, $b)
+    protected function HashEquals($a, $b)
     {
         if (function_exists('hash_equals')) {
             return hash_equals($a, $b);
         }
         $nonce = openssl_random_pseudo_bytes(32);
-        return hash_hmac(self::$Algorithm, $a, $nonce) === hash_hmac(self::$Algorithm, $b, $nonce);
+        return hash_hmac($this->Algorithm, $a, $nonce) === hash_hmac($this->Algorithm, $b, $nonce);
     }
 }
 ?>

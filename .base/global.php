@@ -1,6 +1,9 @@
 <?php
+
+use MiMFa\Library\Convert;
+
 /**
- * The Global Static Class
+ * The Global Static Variables
  * It contains the most useful objects along developments
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
@@ -9,345 +12,259 @@
  */
 class _
 {
-	public static string $ID = "0";
-	public static int $DYNAMIC_ID = 0;
-
+	public static int $DynamicId = 0;
 	/**
 	 * The version of aseqbase framework
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
-	 * X		.	xx	xx	x
-	 * @var float
+	 * X			.	xx		xx		x
 	 */
-	public static float $VERSION = 0.21003;
-
-	/**
-	 * The top domain name
-	 * @example: "mimfa"
-	 * @var string
-	 */
-	public static string|null $ASEQ = null;
-	/**
-	 * The base directory and the end point of all sequences
-	 * @example: ".base"
-	 * @var string|null
-	 */
-	public static string|null $BASE = null;
-
-	/**
-	 * All sequences
-	 * @example: "[
-	 *	'home/mimfa/mimfa/' => 'https://mimfa.net/',
-	 *	'home/mimfa/seq1/' => 'https://seq1.mimfa.net/',
-	 *	'home/mimfa/seq2/' => 'https://seq2.mimfa.net/',
-	 *	'home/mimfa/seq3/' => 'https://seq3.mimfa.net/',
-	 *	'home/mimfa/.base/' => 'https://mimfa.net/.base/',
-	 *]"
-	 * @var array
-	 */
-	public static array|null $SERIES = null;
-	/**
-	 * All sequences between $ASEQ and $BASE
-	 * @example: "[
-	 *	'home/mimfa/seq1/' => 'https://seq1.mimfa.net/',
-	 *	'home/mimfa/seq2/' => 'https://seq2.mimfa.net/',
-	 *	'home/mimfa/seq3/' => 'https://seq3.mimfa.net/',
-	 *]"
-	 * @var array
-	 */
-	public static array|null $SEQUENCES = null;
-	/**
-	 * Number of subdomains nestings
-	 * @var int|null
-	 */
-	public static int|null $NEST = null;
-
-	/**
-	 * The request method
-	 * @template -1: ALL
-	 * @template 0: GET
-	 * @template 1: POST
-	 * @template 2: ADD
-	 * @template 3: PUT
-	 * @template 4: DEL
-	 * @var int|null
-	 */
-	public static int|null $METHOD = 0;
-	/**
-	 * Full part of the current url
-	 * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php?p=3&l=10#serp"
-	 * @var string|null
-	 */
-	public static string|null $URL = null;
-	/**
-	 * The path part of the current url
-	 * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php"
-	 * @var string|null
-	 */
-	public static string|null $PATH = null;
-	/**
-	 * The host part of the current url
-	 * @example: "https://www.mimfa.net:5056"
-	 * @var string|null
-	 */
-	public static string|null $HOST = null;
-	/**
-	 * The site name part of the current url
-	 * @example: "www.mimfa.net"
-	 * @var string|null
-	 */
-	public static string|null $SITE = null;
-	/**
-	 * The domain name part of the current url
-	 * @example: "mimfa.net"
-	 * @var string|null
-	 */
-	public static string|null $DOMAIN = null;
-	/**
-	 * The request part of the current url
-	 * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
-	 * @var string|null
-	 */
-	public static string|null $REQUEST = null;
-	/**
-	 * The direction part of the current url from the root
-	 * @example: "Category/mimfa/service/web.php"
-	 * @var string|null
-	 */
-	public static string|null $DIRECTION = null;
-	/**
-	 * The last part of the current direction url
-	 * @example: "web.php"
-	 * @var string|null
-	 */
-	public static string|null $PAGE = null;
-	/**
-	 * The query part of the current url
-	 * @example: "p=3&l=10"
-	 * @var string|null
-	 */
-	public static string|null $QUERY = null;
-	/**
-	 * The fragment or anchor part of the current url
-	 * @example: "serp"
-	 * @var string|null
-	 */
-	public static string|null $FRAGMENT = null;
+	public static float $Version = 2.00000;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
-	 * @var string|null
 	 */
-	public static string $EXTENSION = ".php";
-
-	public static ConfigurationBase|null $CONFIG = null;
-	public static InformationBase|null $INFO = null;
-	public static TemplateBase|null $TEMPLATE = null;
+	public static string|null $Extension = ".php";
 
 	/**
 	 * A Path=>Fucntion array to apply the Function before using the Path
 	 * @var mixed
 	 */
-	public static $PREPENDS = array();
+	public static array $Prepends = array();
 	/**
 	 * A Path=>Fucntion array to apply the Function after using the Path
 	 * @var mixed
 	 */
-	public static $APPENDS = array();
+	public static array $Appends = array();
 
 	/**
-	 * The current website url root
-	 * @example: "http://mimfa.net/"
-	 * @var string|null
+	 * All sequences either $ASEQ and $BASE
+	 * @example: [
+	 *	'home/domain/aseq/' => 'https://aseq.domain.tld/',
+	 *	'home/domain/1stseq/' => 'https://1stseq.domain.tld/',
+	 *	'home/domain/2ndseq/' => 'https://2ndseq.domain.tld/',
+	 *	'home/domain/3rdseq/' => 'https://3rdseq.domain.tld/',
+	 *	'home/domain/base/' => 'https://base.domain.tld/'
+	 *]
 	 */
-	public static string|null $ROOT = null;
-	/**
-	 * The current website internal root directory
-	 * @example: "home/mimfa/public_html/"
-	 * @var string|null
-	 */
-	public static string|null $DIR = null;
-
-	public static string|null $MODEL_DIR = null;
-	public static string|null $VIEW_DIR = null;
-	public static string|null $PRIVATE_DIR = null;
-	public static string|null $PUBLIC_DIR = null;
-	public static string|null $ASSET_DIR = null;
-	public static string|null $STORAGE_DIR = null;
-	public static string|null $TMP_DIR = null;
-	public static string|null $LOG_DIR = null;
-
-	public static string|null $LIBRARY_DIR = null;
-	public static string|null $COMPONENT_DIR = null;
-	public static string|null $TEMPLATE_DIR = null;
-	public static string|null $MODULE_DIR = null;
-
-	public static string|null $PAGE_DIR = null;
-	public static string|null $REGION_DIR = null;
-	public static string|null $PART_DIR = null;
-	public static string|null $SCRIPT_DIR = null;
-	public static string|null $STYLE_DIR = null;
+	public static array $Sequences;
 
 	/**
-	 * The base website url root
-	 * @example: "http://base.aseqbase.ir/"
-	 * @var string|null
+	 * To access all the website configurations
 	 */
-	public static string|null $BASE_ROOT = null;
+	public static Configuration $Config;
+
 	/**
-	 * The base internal root directory
-	 * @example: "home/mimfa/public_html/.base"
-	 * @var string|null
+	 * To access all the website information
 	 */
-	public static string|null $BASE_DIR = null;
+	public static Information $Info;
 
-	public static string|null $BASE_MODEL_DIR = null;
-	public static string|null $BASE_VIEW_DIR = null;
-	public static string|null $BASE_PRIVATE_DIR = null;
-	public static string|null $BASE_PUBLIC_DIR = null;
-	public static string|null $BASE_ASSET_DIR = null;
-	public static string|null $BASE_STORAGE_DIR = null;
+	/**
+	 * To access all back-end tools
+	 */
+	public static Back $Back;
 
-	public static string|null $BASE_LIBRARY_DIR = null;
-	public static string|null $BASE_COMPONENT_DIR = null;
-	public static string|null $BASE_TEMPLATE_DIR = null;
-	public static string|null $BASE_MODULE_DIR = null;
+	/**
+	 * To access all front-end tools
+	 */
+	public static Front $Front;
 
-	public static string|null $BASE_PAGE_DIR = null;
-	public static string|null $BASE_REGION_DIR = null;
-	public static string|null $BASE_PART_DIR = null;
-	public static string|null $BASE_SCRIPT_DIR = null;
-	public static string|null $BASE_STYLE_DIR = null;
-}
-switch($_SERVER['REQUEST_METHOD']){
-	case "GET":
-		\_::$METHOD = 0;
-	break;
-	case "POST":
-		\_::$METHOD = 1;
-	break;
-	case "PATCH":
-	case "ADD":
-		\_::$METHOD = 2;
-	break;
-	case "PUT":
-		\_::$METHOD = 3;
-	break;
-	case "DEL":
-	case "DELETE":
-		\_::$METHOD = 4;
-	break;
-	default:
-		\_::$METHOD = -1;
-	break;
+	/**
+	 * To access all addresses to a sequence of the website
+	 */
+	public static AddressBase $Aseq;
+	/**
+	 * To access all addresses to the base of the website,
+	 * and the dinal sequence of the website
+	 */
+	public static AddressBase $Base;
+
+	/**
+	 * To access all basic directory names
+	 */
+	public static AddressBase $Address;
 }
 
-\_::$ASEQ = $GLOBALS["ASEQBASE"];
-\_::$BASE = $GLOBALS["BASE"];
+require_once(__DIR__ . "/global/AddressBase.php");
 
-\_::$SEQUENCES = $GLOBALS["SEQUENCES"];
-\_::$NEST = $GLOBALS["NEST"];
+\_::$Address = new AddressBase();
 
-\_::$ID = getId(true) . "";
-\_::$DYNAMIC_ID = getId(false);
+\_::$Sequences = array_merge(
+	[
+		str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
+		=> str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? "")
+	],
+	$GLOBALS["SEQUENCES"],
+	[
+		str_replace(["\\", "/"], DIRECTORY_SEPARATOR, __DIR__ . DIRECTORY_SEPARATOR ?? "")
+		=> str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
+	]
+);
 
-\_::$URL = getUrl();
-\_::$HOST = getHost();
-\_::$SITE = getSite();
-\_::$DOMAIN = getDomain();
-\_::$PATH = getPath();
-\_::$REQUEST = getRequest();
-\_::$DIRECTION = getDirection();
-\_::$PAGE = getPage();
-\_::$QUERY = getQuery();
-\_::$FRAGMENT = getFragment();
+run("global/Base");
+run("global/EnumBase");
 
-\_::$BASE_ROOT = $GLOBALS["BASE_ROOT"];
-\_::$BASE_DIR = $GLOBALS["BASE_DIR"] = str_replace(str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR), "", subject: str_replace(["\\", "/"], DIRECTORY_SEPARATOR, __DIR__) . DIRECTORY_SEPARATOR);
+run("Address");
 
-\_::$BASE_MODEL_DIR = \_::$BASE_DIR . "model" . DIRECTORY_SEPARATOR;
-\_::$BASE_VIEW_DIR = \_::$BASE_DIR . "view" . DIRECTORY_SEPARATOR;
-\_::$BASE_PRIVATE_DIR = \_::$BASE_DIR . "private" . DIRECTORY_SEPARATOR;
-\_::$BASE_PUBLIC_DIR = \_::$BASE_DIR . "public" . DIRECTORY_SEPARATOR;
-\_::$BASE_STORAGE_DIR = \_::$BASE_DIR . "storage" . DIRECTORY_SEPARATOR;
-\_::$BASE_ASSET_DIR = \_::$BASE_DIR . "asset" . DIRECTORY_SEPARATOR;
-\_::$BASE_LIBRARY_DIR = \_::$BASE_DIR . "library" . DIRECTORY_SEPARATOR;
-\_::$BASE_COMPONENT_DIR = \_::$BASE_MODEL_DIR . "component" . DIRECTORY_SEPARATOR;
-\_::$BASE_TEMPLATE_DIR = \_::$BASE_MODEL_DIR . "template" . DIRECTORY_SEPARATOR;
-\_::$BASE_MODULE_DIR = \_::$BASE_MODEL_DIR . "module" . DIRECTORY_SEPARATOR;
-\_::$BASE_REGION_DIR = \_::$BASE_VIEW_DIR . "region" . DIRECTORY_SEPARATOR;
-\_::$BASE_PAGE_DIR = \_::$BASE_VIEW_DIR . "page" . DIRECTORY_SEPARATOR;
-\_::$BASE_PART_DIR = \_::$BASE_VIEW_DIR . "part" . DIRECTORY_SEPARATOR;
-\_::$BASE_SCRIPT_DIR = \_::$BASE_VIEW_DIR . "script" . DIRECTORY_SEPARATOR;
-\_::$BASE_STYLE_DIR = \_::$BASE_VIEW_DIR . "style" . DIRECTORY_SEPARATOR;
+\_::$Aseq = new Address(
+	$GLOBALS["ASEQBASE"],
+	$GLOBALS["DIR"],
+	$GLOBALS["ROOT"]
+);
+
+\_::$Base = new Address(
+	$GLOBALS["BASE"],
+	__DIR__ . DIRECTORY_SEPARATOR,
+	$GLOBALS["BASE_ROOT"]
+);
+
+unset($GLOBALS["ASEQ"]);
+unset($GLOBALS["BASE"]);
+unset($GLOBALS["ASEQBASE"]);
+unset($GLOBALS["DIR"]);
+unset($GLOBALS["ROOT"]);
+unset($GLOBALS["BASE_DIR"]);
+unset($GLOBALS["BASE_ROOT"]);
+unset($GLOBALS["NEST"]);
+unset($GLOBALS["SEQUENCES"]);
+
+run("global/ReqBase");
+run("Req");
+
+run("global/ResBase");
+run("Res");
+
+library("Math");
+library("Local");
+library("Convert");
+library("Html");
+library("Style");
+library("Script");
+
+run("global/ConfigurationBase");
+run("Configuration");
+\_::$Config = new Configuration();
+
+run("global/BackBase");
+run("Back");
+\_::$Back = new Back();
+
+run("global/InformationBase");
+run("Information");
+\_::$Info = new Information();
+
+run("global/FrontBase");
+run("Front");
+\_::$Front = new Front();
+
+\MiMFa\Library\Local::CreateDirectory(\_::$Aseq->TempDirectory);
+\MiMFa\Library\Local::CreateDirectory(\_::$Aseq->LogDirectory);
 
 
-\_::$ROOT = $GLOBALS["ROOT"];
-\_::$DIR = $GLOBALS["DIR"];
-
-\_::$MODEL_DIR = \_::$DIR . "model" . DIRECTORY_SEPARATOR;
-\_::$VIEW_DIR = \_::$DIR . "view" . DIRECTORY_SEPARATOR;
-\_::$PRIVATE_DIR = \_::$DIR . "private" . DIRECTORY_SEPARATOR;
-\_::$PUBLIC_DIR = \_::$DIR . "public" . DIRECTORY_SEPARATOR;
-\_::$ASSET_DIR = \_::$DIR . "asset" . DIRECTORY_SEPARATOR;
-\_::$STORAGE_DIR = \_::$DIR . "storage" . DIRECTORY_SEPARATOR;
-\_::$TMP_DIR = \_::$DIR . "tmp" . DIRECTORY_SEPARATOR;
-\_::$LOG_DIR = \_::$DIR . "log" . DIRECTORY_SEPARATOR;
-\_::$LIBRARY_DIR = \_::$DIR . "library" . DIRECTORY_SEPARATOR;
-\_::$COMPONENT_DIR = \_::$MODEL_DIR . "component" . DIRECTORY_SEPARATOR;
-\_::$TEMPLATE_DIR = \_::$MODEL_DIR . "template" . DIRECTORY_SEPARATOR;
-\_::$MODULE_DIR = \_::$MODEL_DIR . "module" . DIRECTORY_SEPARATOR;
-\_::$PAGE_DIR = \_::$VIEW_DIR . "page" . DIRECTORY_SEPARATOR;
-\_::$REGION_DIR = \_::$VIEW_DIR . "region" . DIRECTORY_SEPARATOR;
-\_::$PART_DIR = \_::$VIEW_DIR . "part" . DIRECTORY_SEPARATOR;
-\_::$SCRIPT_DIR = \_::$VIEW_DIR . "script" . DIRECTORY_SEPARATOR;
-\_::$STYLE_DIR = \_::$VIEW_DIR . "style" . DIRECTORY_SEPARATOR;
-
-\_::$SERIES = array_merge([\_::$DIR => \_::$ROOT], $GLOBALS["SEQUENCES"], [\_::$BASE_DIR => \_::$BASE_ROOT]);
-
-//test_path();test_url();die();
-
-RUN("global/Base");
-RUN("global/EnumBase");
-
-LIBRARY("Math");
-LIBRARY("Local");
-LIBRARY("DataBase");
-LIBRARY("Session");
-LIBRARY("Style");
-LIBRARY("Translate");
-LIBRARY("Convert");
-LIBRARY("Contact");
-LIBRARY("User");
-LIBRARY("HTML");
-LIBRARY("Script");
-LIBRARY("Router");
-
-RUN("global/ConfigurationBase");
-RUN("Configuration");
-\_::$CONFIG = new Configuration();
-ini_set('display_errors', \_::$CONFIG->DisplayError);
-ini_set('display_startup_errors', \_::$CONFIG->DisplayStartupError);
-error_reporting(\_::$CONFIG->ReportError);
-\MiMFa\Library\Session::Start();
-if (\_::$CONFIG->AllowTranslate) {
-	\MIMFa\Library\Translate::$Language = \_::$CONFIG->DefaultLanguage;
-	\MIMFa\Library\Translate::$Direction = \_::$CONFIG->DefaultDirection;
-	\MIMFa\Library\Translate::$Encoding = \_::$CONFIG->Encoding;
-	\MIMFa\Library\Translate::$AutoUpdate = \_::$CONFIG->AutoUpdateLanguage;
-	\MIMFa\Library\Translate::Initialize();
+/**
+ * To get Features of an object from an array
+ * @param mixed $object
+ */
+function get($object, $data){
+	if(!is_array($data))
+	{
+		if (is_array($object)) {
+			if (isset($object[$data]))
+				return $object[$data];
+			$data = strtolower($data);
+			foreach ($object as $k => $v)
+				if ($data === strtolower($k))
+					return $v;
+		} else return $object->{$data} ??
+					$object->{strtoproper($data)} ??
+					$object->{strtolower($data)} ??
+					$object->{strtoupper($data)} ?? null;
+	} elseif(is_numeric(array_key_first($data))){
+		$res = [];
+		foreach ($data as $k)
+			if(($val = get($object, $k)) !== null) $res[$k] = $val;
+		return $res;
+	} else {
+		foreach ($data as $k=>$v)
+			if(($val = get($object, $k)) === null) $res[$k] = $v;
+			else $res[$k] = $val;
+		return $res;
+	}
+}
+/**
+ * To get Features of an object from an array
+ * Then unset that key of the $data
+ * @param mixed $object
+ */
+function grab(&$object, $data){
+	$res = null;
+	if(!is_array($data)) {
+		if (is_array($object)) {
+			if (isset($object[$data])) {
+				$res = $object[$data];
+				unset($object[$data]);
+			}
+			else {
+			$data = strtolower($data);
+			foreach ($object as $k => $v)
+				if ($data === strtolower($k)){
+					$res = $v;
+					unset($object[$k]);
+					break;
+				}
+			}
+		} else {
+			$key = null;
+			$res = $object->{$key = $data} ??
+				$object->{$key = strtoproper($data)} ??
+				$object->{$key = strtolower($data)} ??
+				$object->{$key = strtoupper($data)} ?? 
+				($key = null);
+			if($key !== null) unset($object->$key);
+		}
+	} else {
+		$res = [];
+		$val = null;
+		if(is_numeric(array_key_first($data))){
+			foreach ($data as $k)
+				if(($val = grab($object, $k)) !== null) $res[$k] = $val;
+		}
+		else 
+			foreach ($data as $k=>$v)
+				if(($val = grab($object, $k)) === null) $res[$k] = $v;
+				else $res[$k] = $val;
+	}
+	return $res;
 }
 
-RUN("global/InformationBase");
-RUN("Information");
-\_::$INFO = new Information();
-\_::$INFO->User = _::$INFO->User ?? new \MiMFa\Library\User();
-
-RUN("global/TemplateBase");
-RUN("Template");
-\_::$TEMPLATE = new Template();
-
-\MiMFa\Library\Local::CreateDirectory(\_::$TMP_DIR);
-\MiMFa\Library\Local::CreateDirectory(\_::$LOG_DIR);
+/**
+ * To set Features of an object from an array or other object
+ * @param mixed $object
+ */
+function set(&$object, $data){
+	if(!is_array($data) || is_array($object)) try{ return $object = $data; } catch(Exception $ex) {}
+	else foreach ($data as $k=>$v)
+		if((findValid($object, $k, null, $key)) !== null)
+			set($object->$key, $v);
+	return $object;
+}
+/**
+ * To set Features of an object from an array or other object
+ * Then unset that key of the $data
+ * @param mixed $object
+ */
+function swap(&$object, &$data){
+	if(!is_array($data) || is_array($object))
+		try{ 
+			$object = $data;
+			unset($data);
+		} catch(Exception $ex) {}
+	else foreach ($data as $k=>$v)
+		if((findValid($object, $k, null, $key)) !== null) {
+			set($object->$key, $v);
+			unset($data[$k]);
+		}
+	return $object;
+}
 
 /**
  * Check if the client has access to the page or assign them to other page, based on thair IP, Accessibility, Restriction and etc.
@@ -358,44 +275,44 @@ RUN("Template");
  * @return bool The client has accessibility bigger than $minaccess or not
  * @return int|mixed The user accessibility group
  */
-function ACCESS($minaccess = 0, bool|string $assign = true, bool|string|int|null $die = true): mixed
+function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|null $die = true): mixed
 {
-	if (isValid(\_::$CONFIG->StatusMode)) {
+	if (isValid(\_::$Config->StatusMode)) {
 		if ($assign) {
 			if (is_string($assign))
-				go($assign);
+				\Res::Go($assign);
 			else
-				VIEW(\_::$CONFIG->StatusMode, variables: $_REQUEST) ?? VIEW(\_::$CONFIG->RestrictionViewName ?? "restriction", variables: $_REQUEST);
+				route(\_::$Config->StatusMode??\_::$Config->RestrictionRouteName, alternative:"403");
 		}
 		if ($die !== false)
 			die($die);
 		return false;
-	} elseif (isValid(\_::$CONFIG->AccessMode)) {
-		$ip = getClientIP();
+	} elseif (isValid(\_::$Config->AccessMode)) {
+		$ip = getClientIp();
 		$cip = false;
-		foreach (\_::$CONFIG->AccessPatterns as $pat)
+		foreach (\_::$Config->AccessPatterns as $pat)
 			if ($cip = preg_match($pat, $ip))
 				break;
-		if ((\_::$CONFIG->AccessMode > 0 && !$cip) || (\_::$CONFIG->AccessMode < 0 && $cip)) {
+		if ((\_::$Config->AccessMode > 0 && !$cip) || (\_::$Config->AccessMode < 0 && $cip)) {
 			if ($assign) {
 				if (is_string($assign))
-					go($assign);
+					\Res::Go($assign);
 				else
-					VIEW(\_::$CONFIG->RestrictionViewName ?? "restriction", variables: $_REQUEST) ?? VIEW("401", variables: $_REQUEST);
+					route(\_::$Config->RestrictionRouteName, alternative:"401");
 			}
 			if ($die !== false)
 				die($die);
 			return false;
 		}
 	}
-	$b = getAccess($minaccess);
+	$b = auth($minaccess);
 	if ($b !== false)
 		return $b;
 	if ($assign) {
 		if (is_string($assign))
-			go($assign);
+			\Res::Go($assign);
 		else
-			go(\MiMFa\Library\User::$InHandlerPath);
+			\Res::Go(\MiMFa\Library\User::$InHandlerPath);
 	}
 	if ($die !== false)
 		die($die);
@@ -406,595 +323,359 @@ function ACCESS($minaccess = 0, bool|string $assign = true, bool|string|int|null
  * @param int|array|null $acceptableAccess The minimum accessibility for the user, pass null to give the user access
  * @return int|bool|null The user accessibility group
  */
-function getAccess($minaccess = null): mixed
+function auth($minaccess = null): mixed
 {
-	if (is_null(\_::$INFO) || is_null(\_::$INFO->User))
+	if (is_null(\_::$Info) || is_null(\_::$Back->User))
 		return \MiMFa\Library\User::CheckAccess(null, $minaccess);
 	else
-		return \_::$INFO->User->Access($minaccess);
-}
-/**
- * Check if the url requested only get value or view
- * @return bool
- */
-function isView($viewName = "value"): bool
-{
-	return getView() == $viewName;
-}
-/**
- * Get the url requested view
- * @return bool
- */
-function getView()
-{
-	return RECEIVE(\_::$CONFIG->ViewHandlerKey,null);
+		return \_::$Back->User->Access($minaccess);
 }
 
-/**
- * Echo output on the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function SET($output = null)
+function including(string $path, mixed $data = [], bool $print = true, $default = null)
 {
-	ob_clean();
-	flush();
-	echo $output;
-	ob_start();
-	return $output;
-}
-/**
- * Print only this output on the client side
- * @param mixed $value The data that is ready to print
- * @return mixed Printed data
- */
-function SEND($value = null, $status = null)
-{
-	if(isValid($status)){
-		ob_clean();
-		header("Status: ".abs($status));
-		flush();
-	}
-	else{
-		ob_clean();
-		flush();
-	}
-	die($value . "");
-}
-/**
- * Print only this output on the client side then reload the page
- * @param mixed $value The data that is ready to print
- * @return mixed Printed data
- */
-function FLIP($value = null, $status = null, $url = null)
-{
-	if(isValid($status)){
-		ob_clean();
-		header("Status: ".abs($status));
-		flush();
-	}
-	else{
-		ob_clean();
-		flush();
-	}
-	die($value . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
-}
-/**
- * Receive requests from the client side
- * @param mixed $key The key of the received value
- * @param array|string|null $source The the received data source $_GET/$POST/$_FILES (by default it is $_REQUEST)
- * @return mixed The value
- */
-function RECEIVE($key = null, array|string|null $source = null, $default = null)
-{
-	if (is_null($source))
-		$source = $_REQUEST;
-	if (is_string($source))
-		switch (trim(strtolower($source))) {
-			case "public":
-			case "get":
-				$source = $_GET;
-				break;
-			case "private":
-			case "post":
-				$source = $_POST;
-				break;
-			case "file":
-			case "files":
-				$source = $_FILES;
-				break;
-			default:
-				$source = $_REQUEST;
-				break;
-		}
-	if (is_null($key))
-		return count($source) > 0 ? $source : $default;
-	else
-		return getValid($source, $key, $default);
-}
-/**
- * Receive requests from the client side then remove it
- * @param mixed $key The key of the received value
- * @param array|string|null $source The the received data source $_GET/$POST/$_FILES (by default it is $_REQUEST)
- * @return mixed The value
- */
-function GRAB($key = null, array|string|null $source = null, $default = null)
-{
-	$val = RECEIVE($key, $source, $default);
-	if (is_null($key)) {
-		if (is_string($source))
-			switch (trim(strtolower($source))) {
-				case "public":
-				case "get":
-					$_GET = [];
-					break;
-				case "private":
-				case "post":
-					$_POST = [];
-					break;
-				case "file":
-				case "files":
-					$_FILES = [];
-					break;
-				default:
-					$_REQUEST = [];
-					break;
-			}
-	} else {
-		unset($_POST[$key]);
-		unset($_GET[$key]);
-		unset($_REQUEST[$key]);
-		unset($_FILES[$key]);
-	}
-	return $val;
-}
-
-/**
- * Received input from the client side
- * @param mixed $input The GETed data key or The Url to get data from that
- * @return mixed Received data
- */
-function GET($input = null)
-{
-	if (is_string($input) && isAbsoluteUrl($input)) {
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $input);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		return curl_exec($ch);
-	} elseif (is_string($input)) return RECEIVE($input, $_GET);
-	return $input;
-}
-/**
- * Received posted values from the client side
- * @param mixed $input The POSTed data key or The Url to post data to that
- * @param mixed $data Desired data to post
- * @return mixed Received data
- */
-function POST($input = null, ...$data)
-{
-	if (is_string($input) && isAbsoluteUrl($input)) {
-		$ch = curl_init($input);
-		curl_setopt($ch, CURLOPT_POST, true); // Use POST method
-		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-		$response = curl_exec($ch);
-		curl_close($ch);
-		return $response;
-	} elseif (is_string($input)) return RECEIVE($input, $_POST);
-	return $input;
-}
-
-function INCLUDING(string $filePath, bool $print = true, array $variables = [], string|null $defaultPath = null, $default = null)
-{
-	if (file_exists($filePath) || (!is_null($defaultPath) && file_exists($filePath = $defaultPath))) {
+	if (file_exists($path)) {
 		ob_start();
-		//if(count($variables) > 0) $filePath = rtrim($filePath,DIRECTORY_SEPARATOR)."?". http_build_query($variables);
-		//if(count($variables) > 0) extract($variables);
-		//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
-		include_once $filePath;
+		// if (count($data) > 0)
+		// 	extract($data);
+		$res = include_once $path;
 		$output = ob_get_clean();
 		if ($print) echo $output;
-		return $output ?? true;
+		else return $output;
+		return $res;
 	}
-	if (!is_null($default) && (is_callable($default) || $default instanceof \Closure))
-		return $default();
+	if (is_callable($default) || $default instanceof \Closure)
+		return ($default)($path, $data, $print);
 	return $default;
 }
-function REQUIRING(string $filePath, bool $print = true, array $variables = [], string|null $defaultPath = null, $default = null)
+function requiring(string $path, mixed $data = [], bool $print = true, $default = null)
 {
-	if (file_exists($filePath) || (!is_null($defaultPath) && file_exists($filePath = $defaultPath))) {
+	if (file_exists($path)) {
 		ob_start();
-		//if(count($variables) > 0) extract($variables);
-		//foreach($variables as $k=>$v) $_POST[$k] = $_REQUEST[$k] = $v;
-		require_once $filePath;
+		// if (count($data) > 0)
+		// 	extract($data);
+		$res = require_once $path;
 		$output = ob_get_clean();
-		if ($print) echo $output;
-		return $output ?? true;
-	}
-	if (!is_null($default) && (is_callable($default) || $default instanceof \Closure))
-		return $default();
-	return $default;
-}
-
-function USING(string $dir, string|null $name = null, bool $print = true, array $variables = [], string|null $extension = ".php", string|null $defaultDirOrName = null, $default = null)
-{
-	$extension = $extension ?? \_::$EXTENSION;
-	try {
-		applyPrepends($dir, $name);
-		if (empty($name))
-			if (isFormat($dir, $extension))
-				return INCLUDING($dir, $print, $variables, $defaultDirOrName, $default);
-			else
-				return INCLUDING($dir . $extension, $print, $variables, is_null($defaultDirOrName) ? null : $defaultDirOrName . $extension, $default);
-		elseif (isFormat($name, $extension))
-			return INCLUDING($dir . $name, $print, $variables, is_null($defaultDirOrName) ? null : $dir . $defaultDirOrName, $default);
+		if ($print)
+			echo $output;
 		else
-			return INCLUDING($dir . $name . $extension, $print, $variables, is_null($defaultDirOrName) ? null : $dir . $defaultDirOrName . $extension, $default);
-	} finally {
-		applyAppends($dir, $name);
+			return $output;
+		return $res;
 	}
+	if (is_callable($default) || $default instanceof \Closure)
+		return ($default)($path, $data, $print);
+	return $default;
 }
-function forceUSING(string $nodeDir, string $baseDir, string $name, bool $print = true, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultDirOrName = null, $default = null)
+
+function addressing(string|null $file = null, $extension = null, int $origin = 0, int $depth = 99)
 {
-	$seq = null;
-	$seqInd = 0;
-	$c = count(\_::$SEQUENCES);
-	$toSeq = $count < 0 ? ($c + 1 + $count) : ($fromSeq + $count);
-	if ($seqInd >= $fromSeq && $seqInd <= $toSeq && (($seq = USING($nodeDir, $name, $print, $variables, defaultDirOrName: $defaultDirOrName, default: $default)) !== null))
-		return $seq;
-	$seqInd++;
-	if ($fromSeq <= $c) {
-		$dir = substr($nodeDir, strlen(\_::$DIR));
-		foreach (\_::$SEQUENCES as $aseq => $root) {
-			if ($seqInd > $toSeq)
-				return null;
-			if ($seqInd >= $fromSeq && (($seq = USING($aseq . $dir, $name, $print, $variables, defaultDirOrName: $defaultDirOrName, default: $default)) !== null))
-				return $seq;
-			$seqInd++;
-		}
-	} else
-		$seqInd += $c;
-	if ($seqInd >= $fromSeq && $seqInd <= $toSeq && (($seq = USING($baseDir, $name, $print, $variables, defaultDirOrName: $defaultDirOrName, default: $default)) !== null))
-		return $seq;
+	$file = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $file ?? "");
+	$extension = $extension ?? \_::$Extension;
+	if (!endsWith($file, $extension)) $file .= $extension;
+	$path = null;
+	$toSeq = $depth < 0 ? (count(\_::$Sequences) + $depth) : ($origin + $depth);
+	$seqInd = -1;
+	foreach (\_::$Sequences as $dir => $host)
+		if (++$seqInd < $origin)
+			continue;
+		elseif ($seqInd < $toSeq) {
+			if (file_exists($path = $dir . $file))
+				return $path;
+		} else
+			return null;
 	return null;
 }
+
+function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = ".php")
+{
+	try {
+		renderPrepends($directory, $name);
+		if($path = 
+			addressing("$directory$name", $extension, $origin, $depth) ?? 
+			addressing("$directory$alternative", $extension, $origin, $depth)
+		) return including($path, $data, $print, $default);
+	} finally {
+		renderAppends($directory, $name);
+	}
+}
+
 /**
  * Prepend something to any function or directory's files or actions
- * @param mixed function name or directory
- * @param null|string file name
- * @param null|string|callable the action or content tou want to do
+ * @param mixed $directory function name or directory
+ * @param null|string $name file name
+ * @param null|string|callable $value the action or content tou want to do
  */
-function prepend($toCase, string|null $name = null, null|string|callable $value = null)
+function before($directory, string|null $name = null, null|string|callable $value = null)
 {
 	if (isValid($value)) {
-		$toCase = strtoupper($toCase ?? "");
-		$name = strtoupper($name ?? "");
-		if (!isset(\_::$PREPENDS[$toCase]))
-			\_::$PREPENDS[$toCase] = array();
-		if (!isset(\_::$PREPENDS[$toCase][$name]))
-			\_::$PREPENDS[$toCase][$name] = array();
-		array_push(\_::$PREPENDS[$toCase][$name], $value);
+		$directory = strtolower($directory ?? "");
+		$name = strtolower($name ?? "");
+		if (!isset(\_::$Prepends[$directory]))
+			\_::$Prepends[$directory] = array();
+		if (!isset(\_::$Prepends[$directory][$name]))
+			\_::$Prepends[$directory][$name] = array();
+		array_push(\_::$Prepends[$directory][$name], $value);
 	}
 }
 /**
  * Append something to any function or directory's files or actions
- * @param mixed function name or directory
- * @param null|string file name
- * @param null|string|callable the action or content tou want to do
+ * @param mixed $directory function name or directory
+ * @param null|string $name file name
+ * @param null|string|callable $value the action or content tou want to do
  */
-function append($toCase, string|null $name = null, null|string|callable $value = null)
+function after($directory, string|null $name = null, null|string|callable $value = null)
 {
 	if (isValid($value)) {
-		$toCase = strtoupper($toCase ?? "");
-		$name = strtoupper($name ?? "");
-		if (!isset(\_::$APPENDS[$toCase]))
-			\_::$APPENDS[$toCase] = array();
-		if (!isset(\_::$APPENDS[$toCase][$name]))
-			\_::$APPENDS[$toCase][$name] = array();
-		array_push(\_::$APPENDS[$toCase][$name], $value);
+		$directory = strtolower($directory ?? "");
+		$name = strtolower($name ?? "");
+		if (!isset(\_::$Appends[$directory]))
+			\_::$Appends[$directory] = array();
+		if (!isset(\_::$Appends[$directory][$name]))
+			\_::$Appends[$directory][$name] = array();
+		array_push(\_::$Appends[$directory][$name], $value);
 	}
 }
-function applyPrepends($toCase, string|null $name = null)
+function renderPrepends($directory, string|null $name = null)
 {
-	$toCase = strtoupper($toCase ?? "");
-	$name = strtoupper($name ?? "");
-	if (isset(\_::$PREPENDS[$toCase][$name]))
-		$value = \_::$PREPENDS[$toCase][$name];
-	elseif (isset(\_::$PREPENDS[$toCase . $name]))
-		$value = \_::$PREPENDS[$toCase . $name];
-	else
-		return;
-	if (is_string($value))
-		echo $value;
-	else
-		return ($value)();
+	$directory = strtolower($directory ?? "");
+	$name = strtolower($name ?? "");
+	if (isset(\_::$Prepends[$directory][$name]))
+		\Res::Render(\_::$Prepends[$directory][$name]);
+	elseif (isset(\_::$Prepends[$directory . $name]))
+		\Res::Render(\_::$Prepends[$directory . $name]);
 }
-function applyAppends($toCase, string|null $name = null)
+function renderAppends($directory, string|null $name = null)
 {
-	$toCase = strtoupper($toCase ?? "");
-	$name = strtoupper($name ?? "");
-	if (isset(\_::$PREPENDS[$toCase][$name]))
-		$value = \_::$PREPENDS[$toCase][$name];
-	elseif (isset(\_::$PREPENDS[$toCase . $name]))
-		$value = \_::$PREPENDS[$toCase . $name];
-	else
-		return;
-	if (is_string($value))
-		echo $value;
-	else
-		return ($value)();
+	$directory = strtolower($directory ?? "");
+	$name = strtolower($name ?? "");
+	if (isset(\_::$Appends[$directory][$name]))
+		\Res::Render(\_::$Appends[$directory][$name]);
+	elseif (isset(\_::$Appends[$directory . $name]))
+		\Res::Render(\_::$Appends[$directory . $name]);
 }
 
 /**
  * To interprete, the specified file in all sequences
  * @param non-empty-string $name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function RUNALL(string|null $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function runAll(string|null $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("RUN", $name);
-		$count = min($count, count(\_::$SEQUENCES)+1);
-		for(;$fromSeq<$count; $fromSeq++) forceUSING($dir ?? \_::$DIR, \_::$BASE_DIR, $name, $print, $variables, $fromSeq, 1, $defaultName, $default);
-	} finally {
-		applyAppends("RUN", $name);
-	}
+	$depth = min($depth, count(\_::$Sequences)) - 1;
+	$res = [];
+	for (; $origin <= $depth; $depth--)
+		$res[] = using(\_::$Address->Directory, $name, $data, $print, $depth, 1, $alternative, $default);
+	return $res;
 }
 /**
  * To interprete, the specified path
  * @param non-empty-string $name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function RUN(string|null $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function run(string|null $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("RUN", $name);
-		return forceUSING($dir ?? \_::$DIR, \_::$BASE_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("RUN", $name);
-	}
+	return using(\_::$Address->Directory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified ModelName
  * @param non-empty-string $Name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function MODEL(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function model(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("MODEL", $name);
-		return forceUSING($dir ?? \_::$MODEL_DIR, \_::$BASE_MODEL_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("MODEL", $name);
-	}
+	return using(\_::$Address->ModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified LibraryName
  * @param non-empty-string $Name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function LIBRARY(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function library(string $Name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("LIBRARY", $Name);
-		return forceUSING($dir ?? \_::$LIBRARY_DIR, \_::$BASE_LIBRARY_DIR, $Name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("LIBRARY", $Name);
-	}
+	return using(\_::$Address->LibraryDirectory, $Name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified ComponentName
  * @param non-empty-string $Name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function COMPONENT(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function component(string $Name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("COMPONENT", $Name);
-		return forceUSING($dir ?? \_::$COMPONENT_DIR, \_::$BASE_COMPONENT_DIR, $Name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("COMPONENT", $Name);
-	}
+	return using(\_::$Address->ComponentDirectory, $Name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified TemplateName
  * @param non-empty-string $Name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function MODULE(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function module(string $Name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("MODULE", $Name);
-		return forceUSING($dir ?? \_::$MODULE_DIR, \_::$BASE_MODULE_DIR, $Name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("MODULE", $Name);
-	}
+	return using(\_::$Address->ModuleDirectory, $Name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified TemplateName
  * @param non-empty-string $Name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function TEMPLATE(string $Name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function template(string $Name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("TEMPLATE", $Name);
-		return forceUSING($dir ?? \_::$TEMPLATE_DIR, \_::$BASE_TEMPLATE_DIR, $Name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("TEMPLATE", $Name);
-	}
+	return using(\_::$Address->TemplateDirectory, $Name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified viewname
  * @param non-empty-lowercase-string $name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function VIEW(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function view(string|null $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("VIEW", $name);
-		$output = executeCommands(forceUSING($dir ?? \_::$VIEW_DIR, \_::$BASE_VIEW_DIR, $name, false, $variables, $fromSeq, $count, $defaultName, $default));
-		if ($print){
-			echo $output = (\_::$CONFIG->AllowReduceSize ? ReduceSize($output) : $output);
-			return $output;
-	    }else
-			return \_::$CONFIG->AllowReduceSize ? ReduceSize($output) : $output;
-	} finally {
-		applyAppends("VIEW", $name);
-	}
+	return using(\_::$Address->ViewDirectory, $name ?? \_::$Config->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified pagename
  * @param non-empty-lowercase-string $name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function PAGE(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function page(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("PAGE", $name);
-		return forceUSING($dir ?? \_::$PAGE_DIR, \_::$BASE_PAGE_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("PAGE", $name);
-	}
+	return using(\_::$Address->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified regionname
  * @param non-empty-lowercase-string $name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function REGION(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function region(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("REGION", $name);
-		return forceUSING($dir ?? \_::$REGION_DIR, \_::$BASE_REGION_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("REGION", $name);
-	}
+	return using(\_::$Address->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified partname
  * @param non-empty-lowercase-string $name
- * @param array $variables
+ * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function PART(string $name, bool $print = true, string|null $dir = null, array $variables = [], int $fromSeq = 0, int $count = 999999999, string|null $defaultName = null, $default = null)
+function part(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	try {
-		applyPrepends("PART", $name);
-		return forceUSING($dir ?? \_::$PART_DIR, \_::$BASE_PART_DIR, $name, $print, $variables, $fromSeq, $count, $defaultName, $default);
-	} finally {
-		applyAppends("PART", $name);
-	}
+	return using(\_::$Address->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+}
+/**
+ * To interprete, the specified logicname
+ * @param non-empty-lowercase-string $name
+ * @param mixed $data
+ * @param bool $print
+ * @return mixed
+ */
+function logic(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+{
+	return using(\_::$Address->LogicDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+}
+/**
+ * To interprete, the specified routename
+ * @param non-empty-lowercase-string $name
+ * @param mixed $data
+ * @param bool $print
+ * @return mixed
+ */
+function route(string|null $name, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+{
+	return using(\_::$Address->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data??\_::$Back->Router, $print, $origin, $depth, $alternative, $default);
+}
+/**
+ * To get a Table from the DataBase
+ * @param string $name The raw table name (Without any prefix)
+ * @return \MiMFa\Library\DataTable
+ */
+function table(string $name, bool $prefix = true, int $origin = 0, int $depth = 99, \MiMFa\Library\DataBase $source = null, $default = null)
+{
+	return new \MiMFa\Library\DataTable(
+		$source ?? \_::$Back->DataBase,
+		$prefix ? (\_::$Config->DataBasePrefix . $name) : $name
+	);
 }
 
 /**
- * Process and convert to string everythings
- * @param mixed $textOrObject The target object tot do process
- * @param bool $translation Do translation
+ * Convert to string and process everythings
+ * @param mixed $value The target object tot do process
+ * @param bool $translating Do translation
  * @param bool $styling Do style and strongify the keywords
  * @param bool $refering Refering tags and categories to their links
  * @return string|null
  */
-function __(mixed $textOrObject, bool $translation = true, bool $styling = true, bool|null $refering = null): string|null
+function __(mixed $value, bool $translating = true, bool $styling = true, bool|null $refering = null): string|null
 {
-	$textOrObject = \MiMFa\Library\Convert::ToString($textOrObject);
-	if ($translation && \_::$CONFIG->AllowTranslate)
-		$textOrObject = \MiMFa\Library\Translate::Get($textOrObject);
+	$value = MiMFa\Library\Convert::ToString($value);
+	if ($translating && \_::$Config->AllowTranslate)
+		$value = \_::$Back->Translate->Get($value);
 	if ($styling)
-		$textOrObject = \MiMFa\Library\Style::DoStyle(
-			$textOrObject,
-			\_::$INFO->KeyWords
+		$value = MiMFa\Library\Style::DoStyle(
+			$value,
+			\_::$Info->KeyWords
 		);
 	if ($refering ?? $styling) {
-		if (\_::$CONFIG->AllowContentRefering)
-			$textOrObject = \MiMFa\Library\Style::DoProcess(
-				$textOrObject,
+		if (\_::$Config->AllowContentRefering)
+			$value = \MiMFa\Library\Style::DoProcess(
+				$value,
 				process: function ($k, $v, $i) {
-					return \MiMFa\Library\HTML::Link($v, "/post/" . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->ContentPath . strtolower($k));
 				},
-				keyWords: \MiMFa\Library\DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix . "Content", "Name", "Title", "ORDER BY LENGTH(`Title`) DESC"),
-				both: true,
-				caseSensitive: false
-			);
-		if (\_::$CONFIG->AllowCategoryRefering)
-			$textOrObject = \MiMFa\Library\Style::DoProcess(
-				$textOrObject,
-				process: function ($k, $v, $i) {
-					return \MiMFa\Library\HTML::Link($v, "/cat/" . strtolower($k));
-				},
-				keyWords: \MiMFa\Library\DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix . "Category", "Name", "Title", "ORDER BY LENGTH(`Title`) DESC"),
+				keyWords: table("Content")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
-		if (\_::$CONFIG->AllowTagRefering)
-			$textOrObject = \MiMFa\Library\Style::DoProcess(
-				$textOrObject,
+		if (\_::$Config->AllowCategoryRefering)
+			$value = \MiMFa\Library\Style::DoProcess(
+				$value,
 				process: function ($k, $v, $i) {
-					return \MiMFa\Library\HTML::Link($v, "/tag/" . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->CategoryPath . strtolower($k));
 				},
-				keyWords: \MiMFa\Library\DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix . "Tag", "Name", "Title", "ORDER BY LENGTH(`Title`) DESC"),
+				keyWords: table("Category")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
-			if (\_::$CONFIG->AllowUserRefering)
-				$textOrObject = \MiMFa\Library\Style::DoProcess(
-					$textOrObject,
-					process: function ($k, $v, $i) {
-						return \MiMFa\Library\HTML::Link($v, "/user/" . strtolower($k));
-					},
-					keyWords: \MiMFa\Library\DataBase::DoSelectPairs(\_::$CONFIG->DataBasePrefix . "User", "Name", "Name", "ORDER BY LENGTH(`Name`) DESC"),
-					both: false,
-					caseSensitive: true
-				);
+		if (\_::$Config->AllowTagRefering)
+			$value = \MiMFa\Library\Style::DoProcess(
+				$value,
+				process: function ($k, $v, $i) {
+					return \MiMFa\Library\Html::Link($v, \_::$Address->TagPath . strtolower($k));
+				},
+				keyWords: table("Tag")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
+				both: true,
+				caseSensitive: true
+			);
+		if (\_::$Config->AllowUserRefering)
+			$value = \MiMFa\Library\Style::DoProcess(
+				$value,
+				process: function ($k, $v, $i) {
+					return \MiMFa\Library\Html::Link($v, \_::$Address->UserPath . strtolower($k));
+				},
+				keyWords: table("User")->DoSelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
+				both: false,
+				caseSensitive: true
+			);
 	}
-	return $textOrObject;
+	return $value;
 }
 
-function go($url)
-{
-	echo "<html><head><script>window.location.assign(" . (isValid($url) ? "'" . \MiMFa\Library\Local::GetUrl($url) . "'" : "location.href") . ");</script></head></html>";
-}
-function reload()
-{
-	load(\_::$URL);
-}
-function load($url = null)
-{
-	echo "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>";
-}
-function open($url = null, $target = "_blank")
-{
-	echo "<script>window.open(" . (isValid($url) ? "'" . \MiMFa\Library\Local::GetUrl($url) . "'" : "location.href") . ", '$target');</script>";
-}
-function share($urlOrText = null, $path = null)
-{
-	echo "<script>window.open('sms://$path?body='+" . (isValid($urlOrText) ? "'" . __($urlOrText, styling: false) . "'" : "location.href") . ", '_blank');</script>";
-}
-function alert($message)
-{
-	echo "<script>alert(`" . __($message, styling: false) . "`);</script>";
-}
 
 /**
  * Do a loop action by a callable function on a countable element
@@ -1096,7 +777,7 @@ function encrypt($plain)
 		return null;
 	if (empty($plain))
 		return $plain;
-	return \MiMFa\Library\HashCrypt::Encrypt($plain, \_::$CONFIG->SecretKey, true);
+	return \_::$Back->Cryptograph->Encrypt($plain, \_::$Config->SecretKey, true);
 }
 function decrypt($cipher)
 {
@@ -1104,7 +785,7 @@ function decrypt($cipher)
 		return null;
 	if (empty($cipher))
 		return $cipher;
-	return \MiMFa\Library\HashCrypt::Decrypt($cipher, \_::$CONFIG->SecretKey, true);
+	return \_::$Back->Cryptograph->Decrypt($cipher, \_::$Config->SecretKey, true);
 }
 
 function startsWith(string|null $haystack, string|null ...$needles): bool
@@ -1125,7 +806,7 @@ function endsWith(string|null $haystack, string|null ...$needles): bool
 function getId($random = false): int
 {
 	if (!$random)
-		return ++\_::$DYNAMIC_ID;
+		return ++\_::$DynamicId;
 	list($usec, $sec) = explode(" ", microtime());
 	return (int) ($usec * 10000000 + $sec);
 }
@@ -1250,8 +931,8 @@ function getRequest(string|null $path = null): string|null
 {
 	if ($path == null)
 		$path = getUrl();
-	if (startsWith($path, \_::$BASE_DIR))
-		$path = substr($path, strlen(\_::$BASE_DIR));
+	if (startsWith($path, \_::$Base->Directory))
+		$path = substr($path, strlen(\_::$Base->Directory));
 	return PREG_Replace("/(^\w+:\/*[^\/]+)/", "", $path);
 }
 /**
@@ -1263,8 +944,8 @@ function getRelative(string|null $path = null): string|null
 {
 	if ($path == null)
 		$path = getUrl();
-	if (startsWith($path, \_::$BASE_DIR))
-		return substr($path, strlen(\_::$BASE_DIR));
+	if (startsWith($path, \_::$Base->Directory))
+		return substr($path, strlen(\_::$Base->Directory));
 	return PREG_Replace("/^\w+:\/*[^\/]+/", "", $path);
 }
 /**
@@ -1276,8 +957,8 @@ function getDirection(string|null $path = null): string|null
 {
 	if ($path == null)
 		$path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
-	if (startsWith($path, \_::$BASE_DIR))
-		$path = substr($path, strlen(\_::$BASE_DIR));
+	if (startsWith($path, \_::$Base->Directory))
+		$path = substr($path, strlen(\_::$Base->Directory));
 	return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/", "", $path);
 }
 /**
@@ -1307,6 +988,82 @@ function getFragment(string|null $path = null): string|null
 {
 	return PREG_Find("/((?<=#)[^\?]*($|\?))/", $path ?? getUrl());
 }
+
+function  getMethodName(string|int|null $method = null)
+{
+	switch (strtoupper($method ?? "")) {
+		case 1:
+		case "GET":
+			return "GET";
+		case 2:
+		case "SET":
+		case "POST":
+		case "ADD":
+			return "POST";
+		case 3:
+		case "EDIT":
+		case "MODIFY":
+		case "UPDATE":
+		case "PUT":
+			return "PUT";
+		case 4:
+		case "BIN":
+		case "BINARY":
+		case "FILES":
+		case "FILE":
+			return "POST";
+		case 5:
+		case "PATCH":
+		case "VALUE":
+		case "VAL":
+			return "PATCH";
+		case 6:
+		case "REMOVE":
+		case "DELETE":
+		case "DEL":
+			return "DELETE";
+		default:
+			return $method ?? $_SERVER['REQUEST_METHOD'];
+	}
+}
+function  getMethodIndex(string|int|null $method = null)
+{
+	switch (strtoupper($method ?? $_SERVER['REQUEST_METHOD'])) {
+		case 1:
+		case "GET":
+			return 1;
+		case 2:
+		case "SET":
+		case "ADD":
+		case "POST":
+			return 2;
+		case 3:
+		case "EDIT":
+		case "MODIFY":
+		case "UPDATE":
+		case "PUT":
+			return 3;
+		case 4:
+		case "BIN":
+		case "BINARY":
+		case "FILES":
+		case "FILE":
+			return 4;
+		case 5:
+		case "PATCH":
+		case "VALUE":
+		case "VAL":
+			return 5;
+		case 6:
+		case "REMOVE":
+		case "DELETE":
+		case "DEL":
+			return 6;
+		default:
+			return 0;
+	}
+}
+
 /**
  * Create an email account
  * @example: "do-not-reply@mimfa.net"
@@ -1383,7 +1140,7 @@ function setSession($key, $val)
 }
 function getSession($key)
 {
-	return getValid($_SESSION, $key);
+	return get($_SESSION, $key);
 }
 function hasSession($key)
 {
@@ -1399,18 +1156,14 @@ function flushSessions($key)
 		unset($_SESSION[$key]);
 }
 
-function getClientIP($version = null): string|null
+function getClientIp($version = null): string|null
 {
 	foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
 		if (array_key_exists($key, $_SERVER) === true) {
-			foreach (explode(',', $_SERVER[$key]) as $ip) {
+			foreach (explode(',', $_SERVER[$key]) as $ip)
 				$ip = trim($ip); // just to be safe
-				if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-					if ($version == 6)
-						return gethostbyaddr($ip);
-					return $ip;
-				}
-			}
+			if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false)
+				return $version == 6 ? gethostbyaddr($ip) : $ip;
 		}
 	}
 	return null;
@@ -1419,10 +1172,7 @@ function getClientIP($version = null): string|null
 function getValue(string $source, string|null $key = null, bool $ismultiline = true)
 {
 	if ($key == null)
-		if (is_string($source))
-			return $source;
-		else
-			return ($source)();
+		return is_string($source) ? $source : ($source)();
 	else
 		return fetchValue($source, $key, $ismultiline);
 }
@@ -1452,11 +1202,13 @@ function fetchValue(string|null $source, string|null $key, bool $ismultiline = t
 function isEmpty($obj): bool
 {
 	return !isset($obj) || is_null($obj) || (is_string($obj) && (trim($obj . "", " \n\r\t\v\f'\"") === "")) || (is_array($obj) && count($obj) === 0);
+	//return $obj?(is_string($obj) && (trim($obj . "", " \n\r\t\v\f'\"") === "")):true;
 }
 function isValid($obj, string|null $item = null): bool
 {
 	if ($item === null)
 		return isset($obj) && !is_null($obj) && (!is_string($obj) || !(trim($obj) == "" || trim($obj, "'\"") == ""));
+	//return $obj?true:false;
 	elseif (is_array($obj))
 		return isValid($obj) && isValid($item) && isset($obj[$item]) && isValid($obj[$item]);
 	else
@@ -1467,27 +1219,105 @@ function getValid($obj, string|null $item = null, $defultValue = null)
 	if (isValid($obj, $item))
 		if ($item === null)
 			return $obj;
-		else if (is_array($obj))
+		elseif (is_array($obj))
 			return $obj[$item];
 		else
 			return $obj->$item;
 	else
 		return $defultValue;
 }
-function doValid(callable $func, $obj, string|null $item = null, $defultValue = null)
+function findValid($obj, string|null $item = null, $defultValue = null, &$key = null)
+{
+	if ($item == null)
+		return isValid($obj) ? $obj : $defultValue;
+	elseif (is_array($obj)) {
+		if (isset($obj[$item]))
+			return isValid($obj[$item]) ? $obj[$item] : $defultValue;
+		$item = strtolower($item);
+		foreach ($obj as $k => $v)
+			if ($item === strtolower($k)) {
+				$key = $k;
+				return isValid($v) ? $v : $defultValue;
+			}
+	} else {
+		$res =
+			($obj->{$key = $item} ??
+				$obj->{$key = strtoproper($item)} ??
+				$obj->{$key = strtolower($item)} ??
+				$obj->{$key = strtoupper($item)} ??
+				($key = null));
+		return isValid($res) ? $res : $defultValue;
+	}
+	return $defultValue;
+}
+function grabValid(&$obj, string|null $item = null, $defultValue = null)
 {
 	if (isValid($obj, $item))
 		if ($item === null)
-			return $func($obj);
-		else
-			return $func($obj[$item]);
-	else
-		$defultValue;
+			return $obj;
+		elseif (is_array($obj)) {
+			$res = $obj[$item];
+			unset($obj[$item]);
+			return $res;
+		} else {
+			$res = $obj->$item;
+			unset($obj->$item);
+			return $res;
+		} else
+		return $defultValue;
+}
+function grabFindValid(&$obj, string|null $item = null, $defultValue = null, &$key = null)
+{
+	if ($item == null)
+		return isValid($obj) ? $obj : $defultValue;
+	elseif (is_array($obj)) {
+		if (isset($obj[$item])) {
+			$res = $obj[$item] ?? $defultValue;
+			unset($obj[$item]);
+			return isValid($res) ? $res : $defultValue;
+		}
+		$item = strtolower($item);
+		foreach ($obj as $k => $v)
+			if ($item === strtolower($k)) {
+				$key = $k;
+				unset($obj[$k]);
+				return isValid($v) ? $v : $defultValue;
+			}
+	} else {
+		$res =
+			$obj->{$key = $item} ??
+			$obj->{$key = strtoproper($item)} ??
+			$obj->{$key = strtolower($item)} ??
+			$obj->{$key = strtoupper($item)} ??
+			($key = null) ?? $defultValue;
+		if ($key !== null)
+			unset($obj->$key);
+		return isValid($res) ? $res : $defultValue;
+	}
+	return $defultValue;
+}
+function doValid(callable $func, $obj, string|null $item = null, $defultValue = null)
+{
+	return isValid($obj, $item) ? $func(getValid($obj, $item)) : $defultValue;
 }
 function getBetween($obj, ...$items)
 {
 	foreach ($items as $value)
 		if (($value = getValid($obj, $value, null)) !== null)
+			return $value;
+	return null;
+}
+function findBetween($obj, ...$items)
+{
+	foreach ($items as $value)
+		if (($value = findValid($obj, $value, null)) !== null)
+			return $value;
+	return null;
+}
+function grabBetween(&$obj, ...$items)
+{
+	foreach ($items as $value)
+		if (($value = grabValid($obj, $value, null)) !== null)
 			return $value;
 	return null;
 }
@@ -1504,8 +1334,7 @@ function isASEQ(string|null $directory): bool
 	return !\MiMFa\Library\Local::FileExists($directory . "global/ConfigurationBase.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "global.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "Information.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "initialize.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "static.php");
+		&& \MiMFa\Library\Local::FileExists($directory . "initialize.php");
 }
 function isBASE(string|null $directory): bool
 {
@@ -1513,25 +1342,24 @@ function isBASE(string|null $directory): bool
 		&& \MiMFa\Library\Local::FileExists($directory . "global/ConfigurationBase.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "Information.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "global/InformationBase.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "Template.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "global/TemplateBase.php")
+		&& \MiMFa\Library\Local::FileExists($directory . "Front.php")
+		&& \MiMFa\Library\Local::FileExists($directory . "global/FrontBase.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "global.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "initialize.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "static.php");
+		&& \MiMFa\Library\Local::FileExists($directory . "initialize.php");
 }
 function isInASEQ(string|null $filePath): bool
 {
-	$filePath = preg_replace("/^\\\\/", \_::$DIR, str_replace(\_::$DIR, "", trim($filePath ?? getUrl())));
-	if (isFormat($filePath, \_::$EXTENSION))
+	$filePath = preg_replace("/^\\\\/", \_::$Aseq->Directory, str_replace(\_::$Aseq->Directory, "", trim($filePath ?? getUrl())));
+	if (isFormat($filePath, \_::$Extension))
 		return file_exists($filePath);
-	return is_dir($filePath) || file_exists($filePath . \_::$EXTENSION);
+	return is_dir($filePath) || file_exists($filePath . \_::$Extension);
 }
 function isInBASE(string|null $filePath): bool
 {
-	$filePath = \_::$BASE_DIR . preg_replace("/^\\\\/", "", str_replace(\_::$BASE_DIR, "", trim($filePath ?? getUrl())));
-	if (isFormat($filePath, \_::$EXTENSION))
+	$filePath = \_::$Base->Directory . preg_replace("/^\\\\/", "", str_replace(\_::$Base->Directory, "", trim($filePath ?? getUrl())));
+	if (isFormat($filePath, \_::$Extension))
 		return file_exists($filePath);
-	return is_dir($filePath) || file_exists($filePath . \_::$EXTENSION);
+	return is_dir($filePath) || file_exists($filePath . \_::$Extension);
 }
 
 /**
@@ -1544,7 +1372,7 @@ function isFormat(string|null $path, string|array ...$formats)
 {
 	$p = getPath(strtolower($path));
 	foreach ($formats as $format)
-		if (is_countable($format)) {
+		if (is_array($format)) {
 			foreach ($format as $forma)
 				if ($forma = isFormat($p, $forma))
 					return $forma;
@@ -1561,7 +1389,7 @@ function isFormat(string|null $path, string|array ...$formats)
 function isFile(string|null $url, string ...$formats): bool
 {
 	if (count($formats) == 0)
-		array_push($formats, \_::$CONFIG->AcceptableFileFormats, \_::$CONFIG->AcceptableDocumentFormats, \_::$CONFIG->AcceptableImageFormats, \_::$CONFIG->AcceptableAudioFormats, \_::$CONFIG->AcceptableVideoFormats);
+		array_push($formats, \_::$Config->AcceptableFileFormats, \_::$Config->AcceptableDocumentFormats, \_::$Config->AcceptableImageFormats, \_::$Config->AcceptableAudioFormats, \_::$Config->AcceptableVideoFormats);
 	return isUrl($url) && isFormat($url, $formats);
 }
 /**
@@ -1602,6 +1430,17 @@ function isScript(string|null $script): bool
 		&& !preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/", $script)
 		&& !preg_match("/^[A-z0-9\-]+\:\/*([\/\?\#][^\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/", $script)
 		&& preg_match("/[\{\}\|\^\[\]\"\`\;\r\n\t\f]|((^\s*[\w\$][\w\d\$\_\.]+\s*\([\s\S]*\)\s*)+;?\s*$)/", $script);
+}
+/**
+ * To check if the string is a JSON or not
+ * @param null|string $json The json string
+ * @return bool
+ */
+function isJson($json)
+{
+	if (isEmpty($json))
+		return 0;
+	return preg_match("/^\s*[\{|\[][\s\S]*[\}\]]\s*$/", $json);
 }
 /**
  * Check if the string is a relative or absolute URL
@@ -1654,7 +1493,7 @@ function deleteFromString(string $mainstr, int $index, int $length = 1): string
 }
 
 /**
- * Execute the Command Comments (Commands by the pattern <!---Name:Command---> <!---Name--->)
+ * Execute the Command Comments (Commands by the pattern <!---name:Command---> <!---name--->)
  * @param string|null $page The source document
  * @return string|null
  */
@@ -1663,8 +1502,8 @@ function executeCommands(string|null $page, string|null $name = null): string|nu
 	if ($page == null)
 		return $page;
 	if ($name == null) {
-		//$page = executeCommands($page, "append");
-		//$page = executeCommands($page, "prepend");
+		//$page = executeCommands($page, "Append");
+		//$page = executeCommands($page, "Prepend");
 	} else {
 		$name = strtolower($name);
 		$patfull = "/<!-{3}$name:[\w\W]*-{3}>[\w\W]*<!-{3}$name-{3}>/i";
@@ -1692,6 +1531,17 @@ function executeCommands(string|null $page, string|null $name = null): string|nu
 		$page = preg_replace($pat, "", $page);
 	}
 	return $page;
+}
+/**
+ * Make a string to proper case
+ * @param string $string — The input string.
+ * @return string — the propercased string.
+ */
+function strToProper($string)
+{
+	if (empty($string))
+		return $string;
+	return preg_replace_callback("/\b[a-z]/", fn($v) => strtoupper($v[0]), $string);
 }
 
 /**
@@ -1773,7 +1623,8 @@ function array_insert(&$array, $position, $insert)
 function array_find_keys($array, callable $searching)
 {
 	return array_filter($array, function ($k, $v) use ($searching) {
-		return $searching($v, $k); }, ARRAY_FILTER_USE_BOTH);
+		return $searching($v, $k);
+	}, ARRAY_FILTER_USE_BOTH);
 }
 
 //Test Region
@@ -1806,32 +1657,37 @@ function test_server()
 	// echo "<br>"."SCRIPT_NAME: ".$_SERVER['SCRIPT_NAME'];
 	// echo "<br>"."SCRIPT_URI: ".$_SERVER['SCRIPT_URI'];
 }
-function test_path()
+function test_address($directory = null, string $name = "Configuration")
 {
-	echo "<br>ASEQ: " . _::$ASEQ;
-	echo "<br>BASE: " . _::$BASE;
-	echo "<br>ROOT: " . _::$ROOT;
-	echo "<br>DIR: " . _::$DIR;
-	echo "<br>BASE_ROOT: " . _::$BASE_ROOT;
-	echo "<br>BASE_DIR: " . _::$BASE_DIR;
-	echo "<br>LOG_DIR: " . _::$LOG_DIR;
-	echo "<br>TMP_DIR: " . _::$TMP_DIR;
+	echo addressing($directory ?? \_::$Address->Directory, $name);
+	echo "<br>ASEQ: " . \_::$Aseq->Name;
+	echo "<br>ASEQ->Path: " . \_::$Aseq->Path;
+	echo "<br>ASEQ->Dir: " . \_::$Aseq->Directory;
+	echo "<br>OTHER ASEQ: <br>";
+	var_dump(\_::$Aseq);
+	echo "<br>BASE: " . \_::$Base->Name;
+	echo "<br>BASE->Path: " . \_::$Base->Path;
+	echo "<br>BASE->Dir: " . \_::$Base->Directory;
+	echo "<br>OTHER BASE: <br>";
+	var_dump(\_::$Base);
+	echo "<br><br>ADDRESSES: <br>";
+	var_dump(\_::$Address);
 }
 function test_url()
 {
-	echo "<br>URL: " . _::$URL;
-	echo "<br>HOST: " . _::$HOST;
-	echo "<br>SITE: " . _::$SITE;
-	echo "<br>PATH: " . _::$PATH;
-	echo "<br>REQUEST: " . _::$REQUEST;
-	echo "<br>DIRECTION: " . _::$DIRECTION;
-	echo "<br>QUERY: " . _::$QUERY;
-	echo "<br>FRAGMENT: " . _::$FRAGMENT;
+	echo "<br>URL: " . \Req::$Url;
+	echo "<br>HOST: " . \Req::$Host;
+	echo "<br>SITE: " . \Req::$Site;
+	echo "<br>PATH: " . \Req::$Path;
+	echo "<br>REQUEST: " . \Req::$Request;
+	echo "<br>DIRECTION: " . \Req::$Direction;
+	echo "<br>QUERY: " . \Req::$Query;
+	echo "<br>FRAGMENT: " . \Req::$Fragment;
 }
 function test_access($func, $res = null)
 {
 	$r = null;
-	if (ACCESS(0, false, false)) {
+	if (inspect(0, false, false)) {
 		if ($r = $func())
 			echo "<b>TRUE: " . ($r ?? $res) . "</b><br>";
 		else

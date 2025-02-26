@@ -34,7 +34,7 @@ class Contact{
 
 			return mail($to,
 			$subject,
-			$message,
+			Convert::ToHtml($message),
 			$header);
 		} catch (\Exception $ex){
 			return false;

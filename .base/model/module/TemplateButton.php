@@ -2,7 +2,6 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 class TemplateButton extends Module{
-	public $Capturable = true;
 	public $LightIcon = "sun";
 	public $DarkIcon = "moon";
 	public $LightLabel = "";
@@ -11,7 +10,7 @@ class TemplateButton extends Module{
 	public $DarkRequest = "DarkMode";
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
             .{$this->Name} i {
 				cursor: pointer;
 				padding: 8px;
@@ -21,9 +20,9 @@ class TemplateButton extends Module{
 
 	public function Get(){
 		return $this->GetTitle().$this->GetDescription().
-		(\_::$TEMPLATE->DarkMode?
-			HTML::Media($this->LightLabel, $this->LightIcon,["onclick"=>"load(`?{$this->LightRequest}=true&{$this->DarkRequest}=!`);"])
-			:HTML::Media($this->DarkLabel, $this->DarkIcon,["onclick"=>"load(`?{$this->DarkRequest}=true&{$this->LightRequest}=!`);"])
+		(\_::$Front->DarkMode?
+			Html::Media($this->LightLabel, $this->LightIcon,["onclick"=>"load(`?{$this->LightRequest}=true&{$this->DarkRequest}=!`);"])
+			:Html::Media($this->DarkLabel, $this->DarkIcon,["onclick"=>"load(`?{$this->DarkRequest}=true&{$this->LightRequest}=!`);"])
 	    ).
 		$this->GetContent();
     }

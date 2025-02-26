@@ -1,12 +1,11 @@
 <?php namespace MiMFa\Module;
 use \MiMFa\Library\HTML;
 class FixedScreen extends Module{
-	public $Capturable = true;
 	public $Image = null;
 	public $BlurSize = "0px";
 	
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			body{
 				padding: 0px;
 			}
@@ -32,7 +31,7 @@ class FixedScreen extends Module{
 	}
 
 	public function Get(){
-		return HTML::Division(null,["class"=>"background","style"=>"background-image: url('{$this->Image}');"]).parent::Get();
+		return Html::Division(null,["class"=>"background","style"=>"background-image: url('{$this->Image}');"]).parent::Get();
 	}
 }
 ?>

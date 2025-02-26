@@ -1,7 +1,7 @@
-<?php
-namespace MiMFa\Module;
-LIBRARY("Style");
-LIBRARY("Convert");
+<?php namespace MiMFa\Module;
+library("Style");
+library("Convert");
+use MiMFa\Library\HTML;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 /**
@@ -11,10 +11,10 @@ use MiMFa\Library\Convert;
  * Guide for Documentations
  *
  *○ Use @var {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
-	enum-string: to indicate the legal string name for a variable
-	class-string: to indicate the exist class name
-	interface-string: to indicate the exist interface name
-	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
+ *    enum-string: to indicate the legal string name for a variable
+ *    class-string: to indicate the exist class name
+ *    interface-string: to indicate the exist interface name
+ *    lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
  *○ Use @param datatype $paramname [description]: to indicate comments of a function parameter
  *○ Use @small, @medium, @large: to indicate the size of input box
  *○ Use @category categoryname: to specify a category to organize the documented element's package into
@@ -34,472 +34,375 @@ use MiMFa\Library\Convert;
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  *@example Image.php
  */
-class Module extends \Base{
-	/**
-     * The custom classes for the module
-     * @var enum-string
-     * @small
-     * @category
-     */
-	public $Id = null;
-	/**
-     * The custom classes for the module
-     * @var enum-string
-     * @small
-     */
-	public $Name = null;
-	/**
-     * The custom classes for the module
-     * @var string
-     * @medium
-     */
-	public $Class = null;
-	/**
-     * The special string/html for the Title of the module
-     * @var string
-     * @medium
-     * @
-     */
-	public $Title = null;
-	/**
-     * The special string/html for the Description of the module
-     * @var string
-     * @large
-     */
-	public $Description = null;
-	/**
-     * The special string/html for the Content of the module
-     * @var string
-     * @large
-     */
-	public $Content = null;
-	/**
-     * The specific tag name to add Module
-     * @var enum-string
-     * @small
-     */
-	public $Tag = "div";
-	/**
-     * The specific tag name to add Title
-     * @var enum-string
-     * @small
-     */
-	public $TitleTag = "h3";
-	/**
-     * The specific tag name to add Description
-     * @var enum-string
-     * @small
-     */
-	public $DescriptionTag = "div";
-	/**
-     * The specific tag name to add Content
-	 * @var enum-string
-     * @small
-     */
-	public $ContentTag = null;
-	/**
-     * Attached Attributes of the main tag of this module
-	 * @var array<string>|string
-     * @medium
-     */
-	public $Attributes = null;
-	/**
-     * To replace the custom Styles with the defaults if true, otherwise append them to the defaults
-     * @var bool
-     */
-	public $AllowDefaultStyles = true;
-	/**
-     * The Module Style
-     * @var Style
-     */
-	public null|string|Style $Style = null;
-	/**
-     * To custom Styles
-     * @var string
-     * @code CSS
-     */
-	public $Styles = null;
-	/**
-     * To replace the custom Scripts with the defaults if true, otherwise append them to the defaults
-     * @var bool
-	 */
-	public $AllowDefaultScripts = true;
-	/**
-     * To custom Scripts
-     * @var string
-     * @code JS
-     */
-	public $Scripts = null;
-	/**
-     * Show this module when the screen size is one of the options \ScreenSize
-     * @var \ScreenSize|string
-	 */
-	public $ShowFromScreenSize = null;
-	/**
-     * Hide this module when the screen size is one of the options \ScreenSize
-     * @var \ScreenSize|string
-     */
-	public $HideFromScreenSize = null;
-	/**
-     * Visible this module when the screen size is one of the options \ScreenSize
-     * @var \ScreenSize|string
-     */
-	public $VisibleFromScreenSize = null;
-	/**
-     * Invisible this module when the screen size is one of the options \ScreenSize
-     * @var \ScreenSize|string
-     */
-	public $InvisibleFromScreenSize = null;
+class Module extends \Base
+{
+     /**
+      * The custom classes for the module
+      * @var enum-string
+      * @small
+      * @category
+      */
+     public $Id = null;
+     /**
+      * The custom classes for the module
+      * @var enum-string
+      * @small
+      */
+     public $Name = null;
+     /**
+      * The custom classes for the module
+      * @var string
+      * @medium
+      */
+     public $Class = null;
+     /**
+      * The special string/html for the Title of the module
+      * @var string
+      * @medium
+      * @
+      */
+     public $Title = null;
+     /**
+      * The special string/html for the Description of the module
+      * @var string
+      * @large
+      */
+     public $Description = null;
+     /**
+      * The special string/html for the Content of the module
+      * @var string
+      * @large
+      */
+     public $Content = null;
+     /**
+      * The specific tag name to add Module
+      * @var enum-string
+      * @small
+      */
+     public $Tag = "div";
+     /**
+      * The specific tag name to add Title
+      * @var enum-string
+      * @small
+      */
+     public $TitleTag = "h3";
+     /**
+      * The specific tag name to add Description
+      * @var enum-string
+      * @small
+      */
+     public $DescriptionTag = "div";
+     /**
+      * The specific tag name to add Content
+      * @var enum-string
+      * @small
+      */
+     public $ContentTag = null;
+     /**
+      * Attached Attributes of the main tag of this module
+      * @var array<string>|string
+      * @medium
+      */
+     public $Attributes = null;
+     /**
+      * The Module Style
+      * @var Style
+      */
+     public null|string|Style $Style = null;
+     /**
+      * To custom Styles
+      * @var string
+      * @code CSS
+      */
+     public $Styles = null;
+     /**
+      * To custom Scripts
+      * @var string
+      * @code JS
+      */
+     public $Scripts = null;
+     /**
+      * Show this module when the screen size is one of the options \ScreenSize
+      * @var \ScreenSize|string
+      */
+     public $ShowFromScreenSize = null;
+     /**
+      * Hide this module when the screen size is one of the options \ScreenSize
+      * @var \ScreenSize|string
+      */
+     public $HideFromScreenSize = null;
+     /**
+      * Visible this module when the screen size is one of the options \ScreenSize
+      * @var \ScreenSize|string
+      */
+     public $VisibleFromScreenSize = null;
+     /**
+      * Invisible this module when the screen size is one of the options \ScreenSize
+      * @var \ScreenSize|string
+      */
+     public $InvisibleFromScreenSize = null;
 
-	/**
-     * Allow to analyze all text and signing them, to improve the website SEO
-     * @var bool
-     * @category Optimization
-     */
-	public $AllowTextAnalyzing = true;
-	/**
-     * Allow to translate all text by internal algorithms
-     * @var bool
-     * @category Optimization
-     */
-	public $AllowTranslate = true;
+     /**
+      * Allow to analyze all text and signing them, to improve the website SEO
+      * @var bool
+      * @category Optimization
+      */
+     public $AllowTextAnalyzing = true;
+     /**
+      * Allow to translate all text by internal algorithms
+      * @var bool
+      * @category Optimization
+      */
+     public $AllowTranslate = true;
 
-	public $OneTimeStyle = false;
-	public $OneTimeScript = false;
-	public $Drawn = false;
-	public $Captured = false;
+     public $Visual = true;
 
-	public function __construct(){
-        parent::__construct();
+     public function __construct()
+     {
+          parent::__construct();
+          $this->Router->Get()->Unset()->Set(fn ()  => Convert::ToString(function () {
+               if ($this->Styles === null)
+                    yield $this->GetStyle();
+               elseif(!isEmpty($this->Styles))
+                    yield Html::Style($this->Styles);
+               yield $this->GetOpenTag().$this->Get().$this->GetCloseTag();
+               if ($this->Scripts === null)
+                    yield $this->GetScript();
+               elseif(!isEmpty($this->Scripts))
+                    yield Html::Script($this->Scripts);
+          }));
+     }
+
+     /**
+      * Get the Open tag of the element
+      * @param string|null The specific TagName, set null for default
+      */
+     public function GetOpenTag($tag = null)
+     {
+          $st = null;
+          if (isValid($this->Style))
+               $st = is_string($this->Style) ? $this->Style : $this->Style->Get();
+          if (isValid($tag ?? $this->Tag))
+               return join("", ["<", ($tag ?? $this->Tag ?? "div"), " ", $this->GetDefaultAttributes(), isValid($st) ? " style=\"{$st}\"" : "", ">"]);
+          elseif (isValid($st))
+               return "<style>.{$this->Name}{ $st }</style>";
+          return null;
+     }
+     /**
+      * Get the Close tag of the element
+      * @param string|null The specific TagName, set null for default
+      */
+     public function GetCloseTag($tag = null)
+     {
+          if (isValid($tag ?? $this->Tag))
+               return "</" . ($tag ?? $this->Tag ?? "div") . ">";
+          return null;
+     }
+
+     /**
+      * Get the default module Attributes
+      * @return string
+      */
+     public function GetDefaultAttributes()
+     {
+          return
+               $this->GetAttribute("id" , $this->Id) .
+               $this->GetAttribute(" class", $this->Name . ' ' . $this->Class . $this->GetScreenClass()) .
+               (isValid($this->Attributes) ? " " . Convert::ToString($this->Attributes, " ", "=", "{0}={1} ") : "") .
+               (count($this) > 0 ? " " . Convert::ToString($this->__toArray(), " ", "=", "{0}={1} ") : "");
+     }
+     /**
+      * Get the default module Screen Attributes
+      * @return string
+      */
+     public function GetScreenClass()
+     {
+          return (isValid($this->VisibleFromScreenSize) ? " " . $this->VisibleFromScreenSize . "-visible" : "") .
+               (isValid($this->InvisibleFromScreenSize) ? " " . $this->InvisibleFromScreenSize . "-invisible" : "") .
+               (isValid($this->ShowFromScreenSize) ? " " . $this->ShowFromScreenSize . "-show" : "") .
+               (isValid($this->HideFromScreenSize) ? " " . $this->HideFromScreenSize . "-hide" : "");
+     }
+     /**
+      * Create a standard Attribute and its value for a tag
+      * @param string $name
+      * @param string|null $value
+      * @return string
+      */
+     public function GetAttribute($name, $value)
+     {
+          return isValid($value) ? ("$name=\"$value\"") : "";
+     }
+
+     /**
+      * Get the default module Styles
+      */
+     public function GetStyle()
+     {
+          return null;
+     }
+     /**
+      * Get the default module Scripts
+      */
+     public function GetScript()
+     {
+          return null;
+     }
+
+     public function GetTitle($attrs = null)
+     {
+          return Convert::ToString(function () use ($attrs) {
+               $attrs = Html::Attributes($attrs, $atcm);
+               if (isValid($this->Title)) {
+                    yield (isValid($this->TitleTag) ? "<" . $this->TitleTag . " $attrs>" : "");
+                    if (is_string($this->Title))
+                         yield __($this->Title, styling: false);
+                    elseif (is_callable($this->Title))
+                         ($this->Title)($attrs);
+                    else
+                         yield $this->Title;
+                    yield (isValid($this->TitleTag) ? "</" . $this->TitleTag . ">" : "");
+               }
+          });
+     }
+     public function GetDescription($attrs = null)
+     {
+          return Convert::ToString(function () use ($attrs) {
+               $attrs = Html::Attributes($attrs, $atcm);
+               if (isValid($this->Description)) {
+                    yield (isValid($this->DescriptionTag) ? "<" . $this->DescriptionTag . " $attrs>" : "");
+                    if (is_string($this->Description))
+                         yield __($this->Description);
+                    elseif (is_callable($this->Description))
+                         ($this->Description)($attrs);
+                    else
+                         yield $this->Description;
+                    yield (isValid($this->DescriptionTag) ? "</" . $this->DescriptionTag . ">" : "");
+               }
+          });
+     }
+     public function GetContent($attrs = null)
+     {
+          return Convert::ToString(function () use ($attrs) {
+               $attrs = Html::Attributes($attrs, $atcm);
+               if (isValid($this->Content)) {
+                    yield (isValid($this->ContentTag) ? "<" . $this->ContentTag . " $attrs>" : "");
+                    if (is_string($this->Content))
+                         yield __($this->Content);
+                    elseif (is_callable($this->Content))
+                         ($this->Content)($attrs);
+                    else
+                         yield $this->Content;
+                    yield (isValid($this->ContentTag) ? "</" . $this->ContentTag . ">" : "");
+               }
+               yield Convert::ToString($this->Children);
+          });
+     }
+
+     /**
+      * Get all the HTML document and elements of the Module
+      * @return string
+      */
+     public function Get()
+     {
+          return join("", [$this->GetTitle(), $this->GetDescription(), $this->GetContent()]);
+     }
+     public function Handler($received = null)
+     {
+          return null;
+     }
+
+     public function Handle(){
+          $translate = \_::$Config->AllowTranslate;
+          $analyze = \_::$Config->AllowTextAnalyzing;
+          \_::$Config->AllowTranslate = $translate && $this->AllowTranslate;
+          \_::$Config->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
+          $output = $this->BeforeHandle().parent::Handle().$this->AfterHandle();
+          \_::$Config->AllowTranslate = $translate;
+          \_::$Config->AllowTextAnalyzing = $analyze;
+          return $output;
+     }
+     /**
+      * Get in the handle function to call before everything.
+      */
+     public function BeforeHandle()
+     {
+          return null;
+     }
+     /**
+      * Get in the handle function to call after everything.
+      */
+     public function AfterHandle()
+     {
+          return null;
+     }
+     /**
+      * Get whole the Document contains Elements except Styles and Scripts.
+      */
+     public function ReHandle()
+     {
+          $style = $this->Styles;
+          $script = $this->Scripts;
+          $this->Styles = "";
+          $this->Scripts = "";
+          $output = $this->Handle();
+          $this->Styles = $style;
+          $this->Scripts = $script;
+          return $output;
+     }
+     /**
+      * Handle Or ReHandle if is Handled.
+      */
+     public function DoHandle()
+     {
+          if ($this->Handled)
+               return $this->ReHandle();
+          else
+               return $this->Handle();
+     }
+
+     /**
+      * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
+      */
+      public function Render()
+      {
+           if ($this->Visual){
+               \Res::Render($this->Handle());
+               $this->Rendered++;
+               return null;
+           }
+           return $this->Handle();
+      }
+     /**
+      * Echo whole the Document contains Elements except Styles and Scripts.
+      */
+     public function ReRender()
+     {
+          if ($this->Visual){
+               \Res::Render($this->ReHandle());
+               $this->Rendered++;
+               return null;
+          }
+          return $this->ReHandle();
+     }
+     /**
+      * Draw Or ReDraw if is Rendered.
+      */
+     public function DoRender()
+     {
+          if ($this->Rendered)
+               return $this->ReRender();
+          else
+               return $this->Render();
+     }
+
+     
+	public function ToString()
+	{
+		 ob_start();
+           if ($this->Rendered || $this->Handled)
+               $output = $this->ReRender();
+           else
+               $output = $this->Render();
+		 return ob_get_clean()??$output;
 	}
-
-	/**
-     * Echo the Open tag of the element
-     * @param string|null The specific TagName, set null for default
-     */
-	public function EchoOpenTag($tag=null){
-        echo $this->GetOpenTag($tag);
-    }
-	/**
-     * Get the Open tag of the element
-     * @param string|null The specific TagName, set null for default
-     */
-	public function GetOpenTag($tag=null){
-		$st = null;
-		if(isValid($this->Style)) $st = is_string($this->Style)?$this->Style:$this->Style->Get();
-		if(isValid($tag??$this->Tag)) return join("", ["<",($tag??$this->Tag??"div"), " ", $this->GetDefaultAttributes(), isValid($st)?" style=\"{$st}\"":"", ">"]);
-		elseif(isValid($st)) return "<style>.{$this->Name}{ $st }</style>";
-        return null;
-    }
-	/**
-     * Echo the Close tag of the element
-     * @param string|null The specific TagName, set null for default
-     */
-	public function EchoCloseTag($tag=null){
-		echo $this->GetCloseTag($tag);
-	}
-	/**
-     * Get the Close tag of the element
-     * @param string|null The specific TagName, set null for default
-     */
-	public function GetCloseTag($tag=null){
-		if(isValid($tag??$this->Tag)) return "</".($tag??$this->Tag??"div").">";
-        return null;
-	}
-
-	/**
-     * Get the default module Attributes
-     * @return string
-     */
-	public function GetDefaultAttributes(){
-		return
-			$this->GetAttribute("id",$this->Id).
-			$this->GetAttribute(" class",$this->Name.' '.$this->Class.$this->GetScreenClass()).
-			(isValid($this->Attributes)?" ".Convert::ToString($this->Attributes," ","=","{0}={1} "):"").
-			(count($this)>0?" ".Convert::ToString($this->ToArray()," ","=","{0}={1} "):"");
-	}
-    /**
-     * Get the default module Screen Attributes
-     * @return string
-     */
-	public function GetScreenClass(){
-		return (isValid($this->VisibleFromScreenSize)?" ".$this->VisibleFromScreenSize."-visible":"").
-				(isValid($this->InvisibleFromScreenSize)?" ".$this->InvisibleFromScreenSize."-invisible":"").
-				(isValid($this->ShowFromScreenSize)?" ".$this->ShowFromScreenSize."-show":"").
-				(isValid($this->HideFromScreenSize)?" ".$this->HideFromScreenSize."-hide":"");
-	}
-	/**
-     * Create a standard Attribute and its value for a tag
-     * @param string $name
-     * @param string|null $value
-	 * @return string
-	 */
-	public function GetAttribute($name,$value){
-		return isValid($value)?("$name=\"$value\""):"";
-	}
-
-	/**
-     * Echo the default module Styles
-     */
-	public function EchoStyle(){
-        echo $this->GetStyle();
-    }
-	/**
-     * Get the default module Styles
-     */
-	public function GetStyle(){
-        return null;
-    }
-
-	/**
-     * Echo the default module Scripts
-     */
-	public function EchoScript(){
-        echo $this->GetScript();
-    }
-	/**
-     * Get the default module Scripts
-     */
-	public function GetScript(){
-        return null;
-    }
-
-	public function EchoTitle($attrs = null){
-		echo $b = $this->GetTitle($attrs);
-        return $b != "";
-    }
-	public function GetTitle($attrs = null){
-		return Convert::ToString(function()use($attrs){
-            $attrs = \MiMFa\Library\HTML::Attributes($attrs,$atcm);
-			if(isValid($this->Title)){
-				yield (isValid($this->TitleTag)?"<".$this->TitleTag." $attrs>":"");
-				if(is_string($this->Title))
-					yield __($this->Title, styling:false);
-				elseif(is_callable($this->Title))
-					($this->Title)($attrs);
-				else yield $this->Title;
-				yield (isValid($this->TitleTag)?"</".$this->TitleTag.">":"");
-			}
-        });
-    }
-	public function EchoDescription($attrs = null){
-		echo $b = $this->GetDescription($attrs);
-        return $b != "";
-    }
-	public function GetDescription($attrs = null){
-		return Convert::ToString(function()use($attrs){
-            $attrs = \MiMFa\Library\HTML::Attributes($attrs, $atcm);
-			if(isValid($this->Description)){
-				yield (isValid($this->DescriptionTag)?"<".$this->DescriptionTag." $attrs>":"");
-				if(is_string($this->Description))
-					yield __($this->Description);
-				elseif(is_callable($this->Description))
-					($this->Description)($attrs);
-				else yield $this->Description;
-				yield (isValid($this->DescriptionTag)?"</".$this->DescriptionTag.">":"");
-			}
-        });
-    }
-	public function EchoContent($attrs = null){
-		echo $b = $this->GetContent($attrs);
-        return $b != "";
-    }
-    public function GetContent($attrs = null){
-		return Convert::ToString(function()use($attrs){
-            $attrs = \MiMFa\Library\HTML::Attributes($attrs,$atcm);
-            if(isValid($this->Content)){
-                yield (isValid($this->ContentTag)?"<".$this->ContentTag." $attrs>":"");
-                if(is_string($this->Content))
-                    yield __($this->Content);
-                elseif(is_callable($this->Content))
-                    ($this->Content)($attrs);
-                else yield $this->Content;
-                yield (isValid($this->ContentTag)?"</".$this->ContentTag.">":"");
-            }
-            yield Convert::ToString($this->Children);
-        });
-    }
-
-	public function ToString(){
-		return $this->Capture();
-    }
-
-	/**
-     * Get all the HTML document and elements of the Module
-     * @return string
-     */
-	public function Get(){
-        $this->Captured = true;
-		return join("",[$this->GetTitle(),$this->GetDescription(),$this->GetContent()]);
-	}
-	/**
-     * Get all the HTML document and elements of the Module
-     * @return string
-     */
-	public function Fetch(){
-        if($this->Capturable){
-            $this->Get();
-        }
-        else {
-            ob_start();
-			$this->Draw();
-			ob_clean();
-        }
-        return null;
-	}
-
-	/**
-     * Capture and return whole the Document contains Elements, Styles, Scripts, etc. completely.
-     * @return string
-     */
-    public function Capture(){
-        $this->Captured = true;
-        if($this->Capturable) return Convert::ToString(function(){
-            $translate = \_::$CONFIG->AllowTranslate;
-            $analyze = \_::$CONFIG->AllowTextAnalyzing;
-            \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
-            \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-            yield $this->PreCapture();
-            if($this->OneTimeStyle !== null){
-                $this->OneTimeStyle = $this->OneTimeStyle?null:$this->OneTimeStyle;
-                if($this->AllowDefaultStyles) yield $this->GetStyle();
-                if(!isEmpty($this->Styles))
-                    yield join(PHP_EOL,["<style>",Convert::ToString($this->Styles),"</style>"]);
-            }
-            yield $this->GetOpenTag();
-            yield $this->Get();
-            yield $this->GetCloseTag();
-            if($this->OneTimeScript !== null){
-                $this->OneTimeScript = $this->OneTimeScript?null:$this->OneTimeScript;
-                if(!isEmpty($this->Scripts))
-                    yield join(PHP_EOL,["<script>", Convert::ToString($this->Scripts),"</script>"]);
-                if($this->AllowDefaultScripts) yield $this->GetScript();
-            }
-            yield $this->PostCapture();
-            \_::$CONFIG->AllowTranslate = $translate;
-            \_::$CONFIG->AllowTextAnalyzing = $analyze;
-        });
-        else {
-            ob_start();
-			$this->Draw();
-			return ob_get_clean();
-        }
-    }
-	/**
-     * Capture and return whole the Document contains Elements except Styles and Scripts.
-     * @return string
-     */
-    public function ReCapture(){
-        $this->Captured = true;
-		if($this->Capturable) return Convert::ToString(function(){
-            $translate = \_::$CONFIG->AllowTranslate;
-            $analyze = \_::$CONFIG->AllowTextAnalyzing;
-            \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
-            \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-            yield $this->PreCapture();
-            yield $this->GetOpenTag();
-            yield $this->Get();
-            yield $this->GetCloseTag();
-            yield $this->PostCapture();
-            \_::$CONFIG->AllowTranslate = $translate;
-            \_::$CONFIG->AllowTextAnalyzing = $analyze;
-        });
-        else {
-            ob_start();
-			$this->ReDraw();
-			return ob_get_clean();
-        }
-    }
-	/**
-     * Capture Or Recapture if is Captured.
-     * @return string
-     */
-    public function DoCapture(){
-        if($this->Captured) return $this->ReCapture();
-        else return $this->Capture();
-    }
-
-    public function Render($print = true, $force = false){
-        if($print)
-            if($this->Drawn) return $this->ReDraw();
-            else return $this->Draw();
-        elseif($this->Captured) return $this->ReCapture();
-        else return $this->Capture();
-    }
-
-	/**
-     * Echo all the HTML document and elements of the Module
-     * @return bool
-     */
-	public function Echo(){
-        $this->Drawn = true;
-        if($this->Capturable) echo $this->Get();
-        else{
-            $this->Drawn = $this->EchoTitle() && $this->Drawn;
-            $this->Drawn = $this->EchoDescription() && $this->Drawn;
-            $this->Drawn = $this->EchoContent() && $this->Drawn;
-        }
-        return $this->Drawn;
-	}
-
-	/**
-     * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
-     */
-	public function Draw(){
-        if($this->Capturable) echo $this->Capture();
-        else{
-            $translate = \_::$CONFIG->AllowTranslate;
-            $analyze = \_::$CONFIG->AllowTextAnalyzing;
-            \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
-            \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-            $this->PreDraw();
-            if($this->OneTimeStyle !== null){
-                $this->OneTimeStyle = $this->OneTimeStyle?null:$this->OneTimeStyle;
-                if($this->AllowDefaultStyles) $this->EchoStyle();
-                if(!isEmpty($this->Styles))
-                    echo join(PHP_EOL,["<style>",Convert::ToString($this->Styles),"</style>"]);
-            }
-            $this->EchoOpenTag();
-            $this->Echo();
-            $this->EchoCloseTag();
-            if($this->OneTimeScript !== null){
-                $this->OneTimeScript = $this->OneTimeScript?null:$this->OneTimeScript;
-                if(!isEmpty($this->Scripts))
-                    echo join(PHP_EOL,["<script>", Convert::ToString($this->Scripts),"</script>"]);
-                if($this->AllowDefaultScripts) $this->EchoScript();
-            }
-            $this->PostDraw();
-            \_::$CONFIG->AllowTranslate = $translate;
-            \_::$CONFIG->AllowTextAnalyzing = $analyze;
-        }
-        return $this->Drawn = true;
-	}
-	/**
-     * Echo whole the Document contains Elements except Styles and Scripts.
-     */
-	public function ReDraw(){
-        if($this->Capturable) echo $this->ReCapture();
-        else{
-            $translate = \_::$CONFIG->AllowTranslate;
-            $analyze = \_::$CONFIG->AllowTextAnalyzing;
-            \_::$CONFIG->AllowTranslate = $translate && $this->AllowTranslate;
-            \_::$CONFIG->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-            $this->PreDraw();
-            $this->EchoOpenTag();
-            $this->Echo();
-            $this->EchoCloseTag();
-            $this->PostDraw();
-            \_::$CONFIG->AllowTranslate = $translate;
-            \_::$CONFIG->AllowTextAnalyzing = $analyze;
-        }
-        return $this->Drawn = true;
-	}
-	/**
-     * Draw Or ReDraw if is Drawn.
-     */
-    public function DoDraw(){
-        if($this->Drawn) return $this->DoDraw();
-        else return $this->Draw();
-    }
-
-}?>
+} ?>

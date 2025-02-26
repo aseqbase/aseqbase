@@ -2,9 +2,8 @@
 namespace MiMFa\Module;
 use MiMFa\Library\HTML;
 use MiMFa\Library\Convert;
-MODULE("Player");
+module("Player");
 class Modal extends Player{
-	public $Capturable = true;
 	public $Class = "hide";
 	public $ButtonsContent = null;
 	public $AllowClose = true;
@@ -14,12 +13,12 @@ class Modal extends Player{
 	public $BackgroundShadow = "#00000099";
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name} {
-				background-Color: var(--BackColor-3);
-				Color: var(--ForeColor-3);
-				border-radius: var(--Radius-2);
-				border: var(--Border-1) var(--ForeColor-0);
+				background-Color: var(--back-color-3);
+				Color: var(--fore-color-3);
+				border-radius: var(--radius-2);
+				border: var(--border-1) var(--fore-color-0);
 				height: {$this->Height};
 				width: {$this->Width};
 				position: fixed;
@@ -29,45 +28,45 @@ class Modal extends Player{
 				right: calc((100% - {$this->Width})/2);
 				z-index: 999999999;
 				overflow:hidden;
-				box-shadow: var(--Shadow-5);
+				box-shadow: var(--shadow-5);
 			}
 			/* Expanding image detail */
 			.{$this->Name}>.body>.detail {
 				opacity:0;
-				Color: var(--ForeColor-0);
+				Color: var(--fore-color-0);
 				position: absolute;
 				bottom: 0px;
 				width: 100%;
 				z-index: 1;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)).";
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)).";
 			}
 
 			.{$this->Name}:hover>.body>.detail {
 				opacity: 1;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1)).";
+				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)).";
 			}
 
 			.{$this->Name}>.body>.detail>.title {
-				border-top: var(--Border-1) var(--ForeColor-0);
-				border-right: var(--Border-1) var(--ForeColor-0);
-				background-Color: ".\_::$TEMPLATE->BackColor(0)."ee;
-				Color: var(--ForeColor-0);
-				font-size: var(--Size-1);
+				border-top: var(--border-1) var(--fore-color-0);
+				border-right: var(--border-1) var(--fore-color-0);
+				background-Color: ".\_::$Front->BackColor(0)."ee;
+				Color: var(--fore-color-0);
+				font-size: var(--size-1);
 				text-align: unset;
 			    margin-bottom: -2vmin;
  			    width: fit-content;
 				position:relative;
  			    padding: 1vmin 3vmax;
-				box-shadow: var(--Shadow-1);
+				box-shadow: var(--shadow-1);
 			}
 
 			/* Expanding image text */
 			.{$this->Name}>.body>.detail>.description {
-				background-Color: ".\_::$TEMPLATE->BackColor(0)."ee;
-				Color: var(--ForeColor-0);
-				font-size: var(--Size-1);
-				border-top: var(--Border-2) var(--ForeColor-0);
-				border-radius: var(--Radius-2);
+				background-Color: ".\_::$Front->BackColor(0)."ee;
+				Color: var(--fore-color-0);
+				font-size: var(--size-1);
+				border-top: var(--border-2) var(--fore-color-0);
+				border-radius: var(--radius-2);
 				width: 100%;
 				padding: 3vmin;
 				text-align: justify;
@@ -98,7 +97,7 @@ class Modal extends Player{
 	}
 
 	public function GetScript(){
-		return parent::GetScript().HTML::Script("
+		return parent::GetScript().Html::Script("
 			function {$this->Name}_Show(title = null, description = null, content = null, buttonsContent = null, source = null){
 				if(content === null) {
 					content = title;
@@ -111,22 +110,22 @@ class Modal extends Player{
 				else $('.{$this->Name}>.body>.detail>.description').show().text(description);
 				if(buttonsContent !== null) $('.{$this->Name}>.buttons').html({$this->ButtonsScript("buttonsContent")});
 				$('.{$this->Name},.{$this->Name}-background-screen').removeClass('hide');
-				$('.{$this->Name},.{$this->Name}-background-screen').fadeIn(".\_::$TEMPLATE->AnimationSpeed.");
+				$('.{$this->Name},.{$this->Name}-background-screen').fadeIn(".\_::$Front->AnimationSpeed.");
 				scrollTo('.{$this->Name}');
 			}
 			function {$this->Name}_Hide(){
 				{$this->ClearScript()};
-				$('.{$this->Name},.{$this->Name}-background-screen').fadeOut(".\_::$TEMPLATE->AnimationSpeed.");
+				$('.{$this->Name},.{$this->Name}-background-screen').fadeOut(".\_::$Front->AnimationSpeed.");
 				$('.{$this->Name}>.body>.detail>.title').text('');
 				$('.{$this->Name}>.body>.detail>.description').text('');
 				$('.{$this->Name}>.buttons').html('');
 			}
 			function {$this->Name}_ModalFocus(){
-				$('.{$this->Name}>.body>.detail').slideToggle(".\_::$TEMPLATE->AnimationSpeed.");
+				$('.{$this->Name}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
 				{$this->FocusScript()};
 			}
 			function {$this->Name}_ModalInfo(){
-				$('.{$this->Name}>.body>.detail').slideToggle(".\_::$TEMPLATE->AnimationSpeed.");
+				$('.{$this->Name}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
 			}
 		");
 	}
@@ -144,7 +143,7 @@ class Modal extends Player{
 		return "<div class=\"buttons\">".$buttonsContent."</div>";
 	}
 
-	public function PreCapture(){
+	public function BeforeHandle(){
 		if(isValid($this->BackgroundShadow)) return "<div class=\"background-screen ".$this->Name."-background-screen hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
 	}
 

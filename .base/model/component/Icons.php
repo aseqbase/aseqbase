@@ -1,65 +1,54 @@
 <?php
 namespace MiMFa\Component;
 use MiMFa\Library\HTML;
-class Icons extends Component{
-    public $DefaultRoot = "body";
-    public $Version = "6.4.2";
+class Icons
+{
+	public static $Initialized = false;
+	public static $DefaultRoot = "body";
 
-	public function __construct(){
-		parent::__construct();
-		append("REGION", "initial", "<script src='https://kit.fontawesome.com/e557f8d9f4.js' crossorigin='anonymous'></script>");
-        //append("REGION", "initial", "
-        //    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/css/all.min.css' integrity='sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==' crossorigin='anonymous' referrerpolicy='no-referrer' />
-        //    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/css/fontawesome.min.css' integrity='sha512-siarrzI1u3pCqFG2LEzi87McrBmq6Tp7juVsdmGY1Dr8Saw+ZBAzDzrGwX3vgxX1NkioYNCFOVC0GpDPss10zQ==' crossorigin='anonymous' referrerpolicy='no-referrer' />
-        //    <script src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/js/all.min.js' integrity='sha512-uKQ39gEGiyUJl4AI6L+ekBdGKpGw4xJ55+xyJG7YFlJokPNYegn9KwQ3P8A7aFQAUtUsAQHep+d/lrGqrbPIDQ==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
-        //    <script src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/js/fontawesome.min.js' integrity='sha512-64O4TSvYybbO2u06YzKDmZfLj/Tcr9+oorWhxzE3yDnmBRf7wvDgQweCzUf5pm2xYTgHMMyk5tW8kWU92JENng==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
-        //    <script src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/{$this->Version}/js/conflict-detection.min.js' integrity='sha512-tOK04OMrEtOhHdTJSiClQ6wlAHB4BizsjbKbt8KRLLfN1xeCl84CdOW0B++kTNYPp+VDlgJg+jrWX6FuCDx7kg==' crossorigin='anonymous' referrerpolicy='no-referrer'></script>
-        //    ");
+	public static function Render($root = null)
+	{
+		echo (self::$Initialized?"":self::GetInitial()).self::GetStyle($root) . self::GetTechnologyStyle($root);
 	}
 
-	public function Echo($root=null){
-		echo $this->Get($root);
+	public static function GetInitial()
+	{
+		self::$Initialized = true;
+		return HTML::Script(null, \_::$Address->ScriptPath . "Icons.js", "crossorigin='anonymous'");
 	}
-	public function Get($root=null){
-		return $this->GetStyle($root).$this->GetTechnologyStyle($root);
-	}
-
-	public function EchoStyle($root=null){
-		echo $this->GetStyle($root);
-    }
-	public function GetStyle($root=null){
-		$root = $root??$this->DefaultRoot;
-		return HTML::Style("
+	public static function GetStyle($root = null)
+	{
+		$root = $root ?? self::$DefaultRoot;
+		return Html::Style("
 			$root .fa {
+				aspect-ratio: 1;
 				padding: 20px;
 				min-width: 60px;
 				text-align: center;
 				text-decoration: none;
 				margin: 5px 2px;
 				opacity: 0.9;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 
 			$root .fa:hover {
 				opacity: 0.95;
-				color: var(--BackColor-1);
-				background-color: var(--ForeColor-1);
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				color: var(--back-color-1);
+				background-color: var(--fore-color-1);
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 		");
 	}
 
-	public function EchoTechnologyStyle($root=null){
-		echo $this->GetTechnologyStyle($root);
-    }
-	public function GetTechnologyStyle($root=null){
-		$root = $root??$this->DefaultRoot;
-		return HTML::Style("
+	public static function GetTechnologyStyle($root = null)
+	{
+		$root = $root ?? self::$DefaultRoot;
+		return Html::Style("
 			$root .fa:hover {
 				opacity: 1;
-				color: var(--BackColor-1);
-				background-color: var(--ForeColor-1);
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+				color: var(--back-color-1);
+				background-color: var(--fore-color-1);
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 
 			$root .fa-facebook:hover {
@@ -169,4 +158,6 @@ class Icons extends Component{
 		");
 	}
 }
+
+after(\_::$Address->RegionDirectory, "initial", fn()=>Icons::GetInitial());
 ?>

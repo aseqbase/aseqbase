@@ -5,19 +5,19 @@
 </style>
 
 <div class="page-home">
-	<?php PART("small-header"); ?>
-	<!--<?php //if(ACCESS("sign")){ ?>
+	<?php part("small-header"); ?>
+	<!--<?php //if(inspect("sign")){ ?>
 		<div class="row sign">
 			<div class="col-sm" data-aos="zoom-out" data-aos-duration="600">
-				<a class="btn" href="<?php echo GETURL('sign-in') ?>">Sign In</a>
-				<a class="btn" href="<?php echo GETURL('sign-up') ?>">Sign Up</a>
+				<a class="btn" href="<?php echo GETUrl('sign-in') ?>">Sign In</a>
+				<a class="btn" href="<?php echo GETUrl('sign-up') ?>">Sign Up</a>
 			</div>
 		</div>
 	<?php //} ?>-->
-<?php MODULE("RingSlide");
+<?php module("RingSlide");
 $module = new \MiMFa\Module\RingSlide();
-$module->Image = \_::$INFO->LogoPath;
-$module->Items = \_::$INFO->Services;
-$module->Draw();
+$module->Image = \_::$Info->LogoPath;
+$module->Items = \_::$Info->Services;
+$module->Render();
 ?>
 </div>

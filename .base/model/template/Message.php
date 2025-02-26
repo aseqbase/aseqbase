@@ -12,38 +12,38 @@ class Message extends Template{
 	public $SubDescription = null;
 	public $Image = null;
 
-	public function DrawInitial(){?>
+	public function RenderInitial(){?>
 		<!DOCTYPE html>
 		<html>
 			<head>
-				<meta charset="<?php echo \_::$CONFIG->Encoding; ?>">
+				<meta charset="<?php echo \_::$Config->Encoding; ?>">
 				<!--[if lt IE 9]>
 				<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
 				<![endif]-->
 				<meta name="viewport" content="width=device-width, initial-scale=1, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" >
 				<meta name="poweredby" content="http://www.MiMFa.net">
-				<meta name="owner" content="<?php echo \_::$INFO->FullOwner; ?>">
-				<title><?php echo $this->WindowTitle??\_::$INFO->FullName; ?></title>
-				<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??\_::$INFO->LogoPath); ?>">
-				<?php echo join(PHP_EOL, \_::$TEMPLATE->Basics); ?>
-				<?php echo \_::$TEMPLATE->GetInitial(); ?>
+				<meta name="owner" content="<?php echo \_::$Info->FullOwner; ?>">
+				<title><?php echo $this->WindowTitle??\_::$Info->FullName; ?></title>
+				<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??\_::$Info->LogoPath); ?>">
+				<?php echo join(PHP_EOL, \_::$Front->Libraries); ?>
+				<?php echo \_::$Front->GetInitial(); ?>
 				<style>
 					body {
-						font-family: var(--Font-1);
-						background-color: var(--BackColor-1);
+						font-family: var(--font-1);
+						background-color: var(--back-color-1);
 						background-image: url('<?php echo $this->Image; ?>');
 						background-size: cover;
 						background-position: center;
 						background-repeat: no-repeat;
-						color: var(--ForeColor-1);
+						color: var(--fore-color-1);
 						height: 100vh;
 						width: 100vw;
 						margin: 0px;
 						padding: 0px;
 						position: fixed;
 						z-index: 999999999;
-						line-height: var(--Size-3);
-						font-size: var(--Size-3);
+						line-height: var(--size-3);
+						font-size: var(--size-3);
 					}
 					.restriction-view {
 						text-align: center;
@@ -93,19 +93,19 @@ class Message extends Template{
 						margin: 0px;
 					}
 					.restriction-view .frame-2 {
-						font-size: var(--Size-1);
+						font-size: var(--size-1);
 					}
 					.restriction-view .frame-2 p{
-						font-size: var(--Size-0);
-						color: var(--ForeColor-4);
+						font-size: var(--size-0);
+						color: var(--fore-color-4);
 					}
 				</style>
         <?php }
-	public function DrawMain(){?>
+	public function RenderMain(){?>
 		</head>
 		<body>
     <?php }
-    public function DrawContent(){?>
+    public function RenderContent(){?>
 			<div class='restriction-view'>
 				<div class='content'>
 					<div class='frame frame-1'>
@@ -122,7 +122,7 @@ class Message extends Template{
 				<div class="logo"></div>
 			</div>
     <?php }
-    public function DrawFinal(){?>
+    public function RenderFinal(){?>
 		</body>
 	</html>
 <?php }

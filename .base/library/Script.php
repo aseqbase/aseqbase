@@ -50,7 +50,7 @@ class Script
         return isEmpty($arr) ? "" :
             (is_iterable($arr) ? join("", ["[", join(", ", loop($arr, function($i, $o) { return self::Parameters($o);})), "]"]) :
                 (is_string($arr) ? "`$arr`" :
-                    (is_object($arr) ? Convert::ToJSON($arr) :
+                    (is_object($arr) ? Convert::ToJson($arr) :
                         Convert::ToString($arr))));
     }
     public static function Numbers($arr) {
@@ -62,5 +62,16 @@ class Script
                         join(", ", is_array($arr) ? $arr : Convert::ToSequence($arr)))))))) : $arr;
         return isEmpty($val) ? "0" : ($isarr ? "[" + $val + "]" : $val);
     }
+
+    public static function Alert($message = "") {
+        return "alert(`" . __($message, styling: false) . "`)";
+    }
+    public static function Confirm($message = "") {
+        return "confirm(`" . __($message, styling: false) . "`)";
+    }
+    public static function Prompt($message = "", $value = null) {
+        return "prompt(`" . __($message, styling: false) . "`, `" . __($value, styling: false) . "`)";
+    }
+
 }
 ?>

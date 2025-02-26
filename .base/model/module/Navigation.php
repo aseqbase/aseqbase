@@ -13,8 +13,6 @@ use \MiMFa\Library\Convert;
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Navigation extends Module{
-	public $Capturable = true;
-
 	/**
      * The source of items
      * @var mixed
@@ -115,7 +113,7 @@ class Navigation extends Module{
 
 	public function __construct($itemsOrQuery = null, $count = null, $queryParameters = null, $defaultItems = null){
 		parent::__construct();
-		$query = GET($_REQUEST)??array();
+		$query = \Req::Get()??array();
 		$this->Page = (int)getValid($query,$this->PageRequest,-1);
 		$this->Limit = (int)getValid($query,$this->LimitRequest, -12);
 		$this->Count = (int)getValid($query,$this->CountRequest, -1);
@@ -140,7 +138,7 @@ class Navigation extends Module{
 			if($this->LiveCount || $this->Count <= 0)
 				if(isValid($count)) $this->Count = $count;
 				elseif($this->AllowCount)
-                    $this->Count = count(between(DataBase::Select($this->Query, $this->QueryParameters), $this->DefaultItems));
+                    $this->Count = count(between(\_::$Back->DataBase->Select($this->Query, $this->QueryParameters), $this->DefaultItems));
 				else $this->Count = 12;
         }
 		else {
@@ -161,7 +159,7 @@ class Navigation extends Module{
      */
 	public function GetItems($iterator=null){
 		if(isValid($iterator??$this->Items)) return array_slice(Convert::ToItems($iterator??$this->Items), $this->GetFromItem(), $this->GetLimit());
-		else return between(DataBase::Select($this->Query." LIMIT ".$this->GetFromItem().", ".$this->GetLimit(),$this->QueryParameters),array_slice($this->DefaultItems, $this->GetFromItem(), $this->GetLimit()));
+		else return between(\_::$Back->DataBase->Select($this->Query." LIMIT ".$this->GetFromItem().", ".$this->GetLimit(),$this->QueryParameters),array_slice($this->DefaultItems, $this->GetFromItem(), $this->GetLimit()));
 	}
 	public function GetFromItem(){
 		return min($this->Count, max(0, ($this->Page-1) * $this->Limit));
@@ -180,7 +178,7 @@ class Navigation extends Module{
 	}
 
 	public function GetStyle(){
-		return parent::GetStyle().HTML::Style("
+		return parent::GetStyle().Html::Style("
 			.{$this->Name}{
 				padding: 10px;
 				margin: 0px;
@@ -208,70 +206,70 @@ class Navigation extends Module{
 				".($this->AllowCount?"min-width: 70%;max-width: 95%;":"width: 100%;")."
 			}
 			.{$this->Name} .rangepanel span{
-				font-size: var(--Size-0);
+				font-size: var(--size-0);
 				padding: 0px 5px;
 			}
 
 			/*Chrome*/
 			@media screen and (-webkit-min-device-pixel-ratio:0) {
 				.{$this->Name} input[type='range'] {
-					height: var(--Size-1);
+					height: var(--size-1);
 					overflow: hidden;
 					-webkit-appearance: none;
-					border-color: var(--BackColor-0);
-					background-color: var(--ForeColor-1);
-					".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+					border-color: var(--back-color-0);
+					background-color: var(--fore-color-1);
+					".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 				}
 				.{$this->Name} input[type='range']::-webkit-slider-runnable-track {
 					height: 100%;
 					-webkit-appearance: none;
-					color: var(--BackColor-2);
-					background-color: var(--BackColor-1);
+					color: var(--back-color-2);
+					background-color: var(--back-color-1);
 				}
 				.{$this->Name} input[type='range']::-webkit-slider-thumb {
 					aspect-ratio: 1;
 					-webkit-appearance: none;
 					height: 100%;
 					cursor: pointer;
-					border-radius: var(--Radius-5);
-					border: var(--Border-1) var(--ForeColor-1);
-					background-color: var(--BackColor-1);
-					box-shadow: ".(Translate::$Direction=="RTL"?"":"-")."100vw 0 0 calc(100vw - var(--Size-1) / 2) var(--ForeColor-1);
-					".Style::UniversalProperty("transition",\_::$TEMPLATE->Transition(1))."
+					border-radius: var(--radius-5);
+					border: var(--border-1) var(--fore-color-1);
+					background-color: var(--back-color-1);
+					box-shadow: ".(\_::$Back->Translate->Direction=="RTL"?"":"-")."100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-1);
+					".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 				}
 				.{$this->Name} input[type='range']:hover::-webkit-slider-thumb {
-					border-color: var(--ForeColor-2);
-					background-color: var(--BackColor-2);
+					border-color: var(--fore-color-2);
+					background-color: var(--back-color-2);
 				}
 			}
 			/*FF*/
 			.{$this->Name} input[type='range']::-moz-range-progress {
-				background-color: var(--BackColor-1);
+				background-color: var(--back-color-1);
 			}
 			.{$this->Name} input[type='range']::-moz-range-track {
-				background-color: var(--ForeColor-1);
+				background-color: var(--fore-color-1);
 			}
 			/*IE*/
 			.{$this->Name} input[type='range']::-ms-fill-lower {
-				background-color: var(--BackColor-1);
+				background-color: var(--back-color-1);
 			}
 			.{$this->Name} input[type='range']::-ms-fill-upper {
-				background-color: var(--ForeColor-1);
+				background-color: var(--fore-color-1);
 			}
 			":"").
 			"
 			.{$this->Name} .item{
-				font-size: var(--Size-2);
+				font-size: var(--size-2);
 				font-weight: bold;
 				padding: 0px 5px;
 				margin: 5px;
 			}
 			.{$this->Name} .item.active{
-				color: ".\_::$TEMPLATE->ForeColor(1)."88;
+				color: ".\_::$Front->ForeColor(1)."88;
 			}
 
 			.{$this->Name} :is(.item.next, .item.back){
-				font-size: var(--Size-1);
+				font-size: var(--size-1);
 				font-weight: normal;
 			}
 		");
@@ -280,45 +278,45 @@ class Navigation extends Module{
 	public function Get(){
 		return Convert::ToString(function(){
 			yield parent::Get();
-			$url = \_::$PATH."?";
+			$url = \Req::$Path."?";
 			$fromP = $this->GetFromPage();
 			$toP = $this->GetToPage();
-			$query = GET($_REQUEST)??array();
+			$query = \Req::Get()??array();
 			if(isset($query[$this->CountRequest])) $query[$this->CountRequest] = $this->Count."";
-			$right = Translate::$Direction=="RTL"?"left":"right";
-			$left = Translate::$Direction=="RTL"?"right":"left";
+			$right = \_::$Back->Translate->Direction=="RTL"?"left":"right";
+			$left = \_::$Back->Translate->Direction=="RTL"?"right":"left";
 
 			yield "<div class='contents'>";
 				$maxLimit = $this->AllowCount?min($this->Count,$this->MaxLimit):$this->MaxLimit;
 				if($this->MinLimit < $maxLimit)
-					yield HTML::Division(
-						HTML::RangeInput(null,$this->Limit, $this->MinLimit, $maxLimit, ["onchange"=>"load('/".\_::$DIRECTION."?".preg_replace("/\&{$this->LimitRequest}\=\d+/","",\_::$QUERY??"")."&{$this->LimitRequest}='+this.value);"]).
-						($this->AllowCount?HTML::Span($this->Count):0)
+					yield Html::Division(
+						Html::RangeInput(null,$this->Limit, $this->MinLimit, $maxLimit, ["onchange"=>"load('/".\Req::$Direction."?".preg_replace("/\&{$this->LimitRequest}\=\d+/","",\Req::$Query??"")."&{$this->LimitRequest}='+this.value);"]).
+						($this->AllowCount?Html::Span($this->Count):0)
 					,["class"=>"rangepanel"]);
 
-				if(isValid($this->BackLink)) yield HTML::Link(HTML::Icon("arrow-$left",null,["class"=>"item"]),$this->BackLink,["class"=>"item back"]);
+				if(isValid($this->BackLink)) yield Html::Link(Html::Icon("arrow-$left",null,["class"=>"item"]),$this->BackLink,["class"=>"item back"]);
 				elseif($this->Page > 1){
 					if($this->AllowFirst && $fromP > 1)
-						yield HTML::Link($query[$this->PageRequest] = 1,$url.http_build_query($query),["class"=>"item first"]);
+						yield Html::Link($query[$this->PageRequest] = 1,$url.http_build_query($query),["class"=>"item first"]);
 					$query[$this->PageRequest] = $this->Page-1;
-					yield HTML::Link(HTML::Icon("arrow-$left",null,["class"=>"item"]),$url.http_build_query($query),["class"=>"item back"]);
+					yield Html::Link(Html::Icon("arrow-$left",null,["class"=>"item"]),$url.http_build_query($query),["class"=>"item back"]);
 				}
 
 				if($this->Numbers > 1)
 					for($i = $fromP; $i <= $toP; $i++)
 						if($i == $this->Page)
-							yield HTML::Span($i,null,["class"=>"item active"]);
+							yield Html::Span($i,null,["class"=>"item active"]);
 						else {
 							$query[$this->PageRequest] = $i."";
-							yield HTML::Link($i,$url.http_build_query($query),["class"=>"item"]);
+							yield Html::Link($i,$url.http_build_query($query),["class"=>"item"]);
 						}
 
-				if(isValid($this->NextLink)) yield HTML::Link(HTML::Icon("arrow-$right",null,["class"=>"item"]),$this->NextLink,["class"=>"item next"]);
+				if(isValid($this->NextLink)) yield Html::Link(Html::Icon("arrow-$right",null,["class"=>"item"]),$this->NextLink,["class"=>"item next"]);
 				elseif($this->Page*$this->Limit < $this->Count){
 					$query[$this->PageRequest] = $this->Page+1;
-					yield HTML::Link(HTML::Icon("arrow-$right",null,["class"=>"item"]),$url.http_build_query($query),["class"=>"item next"]);
+					yield Html::Link(Html::Icon("arrow-$right",null,["class"=>"item"]),$url.http_build_query($query),["class"=>"item next"]);
 					if($this->AllowLast && $toP < $this->Numbers)
-						yield HTML::Link($query[$this->PageRequest] = $this->Numbers,$url.http_build_query($query),["class"=>"item last"]);
+						yield Html::Link($query[$this->PageRequest] = $this->Numbers,$url.http_build_query($query),["class"=>"item last"]);
 				}
 			yield "</div>";
         });
