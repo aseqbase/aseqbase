@@ -112,10 +112,10 @@ class Revise{
         module("Field");
         foreach ($reflection->getProperties() as $value){
             $pars = self::GetCommentParameters($value->getDocComment());
-            $mod = $value->getModifiers();
+            $module = $value->getModifiers();
             if(
-                $mod != T_PRIVATE &&
-                $mod != T_PROTECTED &&
+                $module != T_PRIVATE &&
+                $module != T_PROTECTED &&
                 !isValid($pars,"internal") &&
                 !isValid($pars,"private")
             )

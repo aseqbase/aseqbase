@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Module;
 
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 
 class SearchForm extends Module{
 	public $Path = null;

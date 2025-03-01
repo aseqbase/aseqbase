@@ -71,13 +71,9 @@ class Router extends \ArrayObject
      * To handle routing for the received request
      * @param string|null|int $alternative An alternative route name
      */
-    public function Handle($alternative = null)
+    public function Handle()
     {
-        foreach ($this->Handlers() as $handler)
-        {
-            if(is_string($handler) || isEmpty($handler)) $this->Result = route($handler, $this, alternative:$alternative);
-            else $this->Result = Convert::By($handler, $this);
-        }
+        foreach ($this->Handlers() as $handler) $this->Result = $handler();
         return $this;
     }
 
@@ -114,13 +110,18 @@ class Router extends \ArrayObject
      * @param mixed $handler A route name or handeler function
      * @return Router
      */
-    public function Set($handler): Router
+    public function Set($handler, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive && isValid($handler)) {
             $method = $this->Method;
             $pattern = $this->Pattern;
-            if (isset($this[$method][$pattern])) $this[$method][$pattern][] = $handler;
-            else $this[$method][$pattern] = [$handler];
+            $h = function() use($handler, $data, $print, $origin, $depth, $alternative, $default){
+                return (is_string($handler) || isEmpty($handler))? 
+                route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default):
+                Convert::By($handler, $this);
+            };
+            if (isset($this[$method][$pattern])) $this[$method][$pattern][] = $h;
+            else $this[$method][$pattern] = [$h];
         }
         return $this;
     }
@@ -139,13 +140,17 @@ class Router extends \ArrayObject
      * @param mixed $handler A route name or handeler function, Leave null to clear other requests
      * @return Router
      */
-    public function Reset($handler = null): Router
+    public function Reset($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) {
                 $pattern = $this->Pattern;
                 for ($method = 0; $method < count($this); $method++)
                     unset($this[$method][$pattern]);
-                if(isValid($handler)) $this[$this->Method][$pattern] = [$handler];
+                if(isValid($handler)) $this[$this->Method][$pattern] = [function() use($handler, $data, $print, $origin, $depth, $alternative, $default){
+                    return (is_string($handler) || isEmpty($handler))? 
+                    route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default):
+                    Convert::By($handler, $this);
+                }];
             }
         return $this;
     }
@@ -155,16 +160,21 @@ class Router extends \ArrayObject
      * @param mixed $handler A route name or handeler function, Leave null to clear other requests
      * @return Router
      */
-    public function Rest($handler = null): Router
+    public function Rest($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) 
             if(isValid($handler)){
                 $m = $this->Method;
                 $pattern = $this->Pattern;
+                $h = function() use($handler, $data, $print, $origin, $depth, $alternative, $default){
+                    return (is_string($handler) || isEmpty($handler))? 
+                    route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default):
+                    Convert::By($handler, $this);
+                };
                 for ($method = 1; $method < count($this); $method++)
                     if ($m !== $method)
-                        if(isset($this[$method][$pattern])) $this[$method][$pattern][] = $handler;
-                        else $this[$method][$pattern] = [$handler];
+                        if(isset($this[$method][$pattern])) $this[$method][$pattern][] = $h;
+                        else $this[$method][$pattern] = [$h];
             }
             else {
                 $m = $this->Method;
@@ -178,17 +188,24 @@ class Router extends \ArrayObject
     /**
      * Add new handler for ALL requests, to handle if specified methods could not handle before
      * @param string|null|callable $handler A route name or a handeler function
+     * @param mixed $data The passed data 
      * @param string|null|int $alternative An alternative route name
      * @return Router
      */
-    public function Default($handler = null, $alternative = null): Router
+    public function Default($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive) return $this->All(function($router) use($handler, $alternative){
-            if($router->Point <= 1 || $router->Global)
-                if(is_string($handler) || isEmpty($handler)) return route($handler, $this, alternative:$alternative);
-                else return Convert::By($handler, $this);
-            return null;
-        });
+        if ($this->IsActive){
+            $pattern = $this->Pattern;
+            $h = function() use($handler, $data, $print, $origin, $depth, $alternative, $default){
+                if($this->Point <= 1 || $this->Global)
+                    if(is_string($handler) || isEmpty($handler)) return route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default);
+                    else return Convert::By($handler, $this);
+                return null;
+            };
+            for ($method = 1; $method < count($this); $method++)
+                if(isset($this[$method][$pattern])) $this[$method][$pattern][] = $h;
+                else $this[$method][$pattern] = [$h];
+        }
         return $this;
     }
     /**
@@ -266,70 +283,70 @@ class Router extends \ArrayObject
      * @param string|callable $handler A route name or a handeler function
      * @return Router
      */
-    public function All($handler = null): Router
+    public function All($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) $this->Method = 0;
-        return $this->Set($handler);
+        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the GET requests
      * @param string|callable $handler A route name or a handeler function
      * @return Router
      */
-    public function Get($handler = null): Router
+    public function Get($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) $this->Method = 1;
-        return $this->Set($handler);
+        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the POST requests
      * @param string|callable $handler A route name or a handeler function
      * @return Router
      */
-    public function Post($handler = null): Router
+    public function Post($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) $this->Method = 2;
-        return $this->Set($handler);
+        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the PUT requests
      * @param string|callable $handler A route name or a handeler function
      * @return Router
      */
-    public function Put($handler = null): Router
+    public function Put($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) $this->Method = 3;
-        return $this->Set($handler);
+        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the FILES requests
      * @param string|callable $handler A route name or a handeler function
      * @return Router
      */
-    public function File($handler = null): Router
+    public function File($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) $this->Method = 4;
-        return $this->Set($handler);
+        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the PATCH requests
      * @param string|callable $handler A route name or a handeler function
      * @return Router
      */
-    public function Patch($handler = null): Router
+    public function Patch($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) $this->Method = 5;
-        return $this->Set($handler);
+        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the DEL requests
      * @param string|callable $handler A route name or a handeler function
      * @return Router
      */
-    public function Delete($handler = null): Router
+    public function Delete($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) $this->Method = 6;
-        return $this->Set($handler);
+        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
 
 

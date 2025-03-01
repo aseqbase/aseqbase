@@ -18,10 +18,7 @@ class Session
 	public function __construct(DataTable $dataTable, Cryptograph $cryptograph){
 		$this->DataTable = $dataTable;
 		$this->Cryptograph = $cryptograph;
-        if(!$this->isAlive())
-			session_start([
-				'cookie_lifetime' => $this->Time
-			]);
+        if(!$this->isAlive()) $this->Start();
     }
     /**
     * Stores datas in the session.

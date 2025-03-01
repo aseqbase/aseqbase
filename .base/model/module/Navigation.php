@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use \MiMFa\Library\DataBase;
-use \MiMFa\Library\HTML;
+use \MiMFa\Library\Html;
 use \MiMFa\Library\Style;
 use \MiMFa\Library\Translate;
 use \MiMFa\Library\Convert;

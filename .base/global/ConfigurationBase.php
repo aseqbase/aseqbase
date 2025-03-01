@@ -167,7 +167,7 @@ abstract class ConfigurationBase
       * @var int
       * @category Content
       */
-     public $WriteCommentAccess = 0;
+     public $WriteCommentAccess = 1;
      /**
       * Allow to read comments on posts
       * @var bool
@@ -282,25 +282,25 @@ abstract class ConfigurationBase
      public $GuestAccess = 0;
      /**
       * The lowest group that registered user will be on
-      * @default 1000000000
-      * @var int
-      * @category Security
-      */
-     public $UserAccess = 1000000000;
-     /**
-      * The lowest group of administrators
-      * @default 10
-      * @var int
-      * @category Security
-      */
-     public $AdminAccess = 10;
-     /**
-      * The highest group of administrators
       * @default 1
       * @var int
       * @category Security
       */
-     public $SuperAccess = 1;
+     public $UserAccess = 1;
+     /**
+      * The lowest group of administrators
+      * @default 100000000
+      * @var int
+      * @category Security
+      */
+     public $AdminAccess = 100000000;
+     /**
+      * The highest group of administrators
+      * @default 999999999
+      * @var int
+      * @category Security
+      */
+     public $SuperAccess = 999999999;
      /**
       * Minimum accessibility needs to visit the website
       * @default 0
@@ -476,6 +476,11 @@ abstract class ConfigurationBase
       * @category DataBase
       */
      public $DataBaseAddNameToPrefix = false;
+	/**
+	 * An array of RegExPattern=>Replacement to convert all requested table names
+      * @var array
+	 */
+	public $DataTableNameConvertors = [];
 
      public function __construct()
      {

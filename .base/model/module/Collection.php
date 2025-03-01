@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 /**
  * The main and basic module to implement any other collection module
  *@copyright All rights are reserved for MiMFa Development Group

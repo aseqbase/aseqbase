@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 class Objects extends Module{
 	public $Class = "container";
 	public $Items = null;

@@ -33,7 +33,7 @@ function findContent($direction){
     ->Default(function ($router) {
             $doc = findContent($router->Direction);
             if (isEmpty($doc)) \Res::Render(__("Could not find related document"));
-            elseif(logic("comment/handle", $doc)) \Res::Load();
+            elseif(logic("comment/handle", $doc)) \Res::Reload();
         })
     ->Handle();
 ?>

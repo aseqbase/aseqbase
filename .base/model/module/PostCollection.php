@@ -1,9 +1,7 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-use MiMFa\Library\DataBase;
-use MiMFa\Library\Translate;
 module("Collection");
 /**
  * To show data as posts

@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 use MiMFa\Library\User;
 module("Form");
@@ -111,7 +111,7 @@ class SignInForm extends Form{
 			$received = \Req::Post();
 			$signature = get($received,"Signature" );
 			$password = get($received,"Password" );
-			if(isValid($signature) && isValid($password)){
+			if(isValid($signature) && isValid($password)) {
 				$res = $this->SignUp && isEmail($signature)?
 						\_::$Back->User->SignInOrSignUp($signature, $password, $signature):
 						\_::$Back->User->SignIn($signature, $password);

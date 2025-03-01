@@ -8,9 +8,9 @@
 			AOS.init({
 				easing: 'ease-in-out-sine'
 			});
-			$(function(){
+			$(document).ready(function(){
 				Evaluate.URL();
-			})();
+			});
 		</script>
 ";
 ?>

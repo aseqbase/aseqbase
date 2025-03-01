@@ -3,7 +3,7 @@ namespace MiMFa\Module;
 module("SearchForm");
 module("UserMenu");
 module("TemplateButton");
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 class MainMenu extends Module

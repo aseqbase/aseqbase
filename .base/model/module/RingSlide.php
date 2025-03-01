@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\User;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 class RingSlide extends Module{
 	public $Name = "RingSlide";

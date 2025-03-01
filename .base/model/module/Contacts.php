@@ -1,13 +1,15 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
-class Contacts extends Module{
+use MiMFa\Library\Html;
+class Contacts extends Module
+{
 	public $Class = "container";
 	public $Items = null;
 	public $Location = null;
 
-	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+	public function GetStyle()
+	{
+		return parent::GetStyle() . Html::Style("
 			.{$this->Name} ul.contacts{
 				margin:0px !important;
 			}
@@ -18,12 +20,12 @@ class Contacts extends Module{
 			.{$this->Name} a.badge, a.badge:visited {
 				background-color: var(--back-color-1);
 				color: var(--fore-color-1);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} a.badge:hover {
 				background-color: var(--fore-color-1);
 				color: var(--back-color-1);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .map{
 				border: 10px solid var(--back-color-3);
@@ -37,29 +39,30 @@ class Contacts extends Module{
 				min-height: 200px;
 				padding:0px;
 				margin:0px;
-				".(\_::$Front->DarkMode? \MiMFa\Library\Style::UniversalProperty("filter","invert(90%)"):"")."
+				" . (\_::$Front->DarkMode ? \MiMFa\Library\Style::UniversalProperty("filter", "invert(90%)") : "") . "
 			}
 		");
 	}
-	public function Get(){
-		return parent::Get().join(PHP_EOL, iterator_to_array((function(){
+	public function Get()
+	{
+		return parent::Get() . join(PHP_EOL, iterator_to_array((function () {
 			$count = count($this->Items);
-			if($count > 0){
-			yield '<div class="row">';
+			if ($count > 0) {
+				yield '<div class="row">';
 				yield '<ul class="contacts col-lg">';
-					for($i = 0; $i < $count; $i++){
-						$item = $this->Items[$i];
-						yield '<li class="d-flex justify-content-between align-items-center">';
-							yield Html::Image(" ".findBetween($item,'Name' ,'Title' ), findBetween($item,'Icon','Image' ));
-							yield '<a href="'.findBetween($item,'Path' ,'Url','Link').'" target="_blank" class="badge badge-pill">';
-                            yield findBetween($item,'Value' ,'Title' ,'Path' ,'Url','Link','Name' );
-							yield '</a>';
-						yield '</li>';
-					}
+				for ($i = 0; $i < $count; $i++) {
+					$item = $this->Items[$i];
+					yield '<li class="d-flex justify-content-between align-items-center">';
+					yield Html::Image(" " . findBetween($item, 'Name', 'Title'), findBetween($item, 'Icon', 'Image'));
+					yield '<a href="' . findBetween($item, 'Path', 'Url', 'Link') . '" target="_blank" class="badge badge-pill">';
+					yield findBetween($item, 'Value', 'Title', 'Path', 'Url', 'Link', 'Name');
+					yield '</a>';
+					yield '</li>';
+				}
 				yield '</ul>';
-				if(isValid($this->Location)) {
+				if (isValid($this->Location)) {
 					yield '<div class="col-lg-8 map">';
-						yield "<iframe src='$this->Location'
+					yield "<iframe src='$this->Location'
 							data-aos='filp-left'
 							data-src='$this->Location'
 							frameborder='0'
@@ -67,10 +70,10 @@ class Contacts extends Module{
 							>
 						</iframe>
 					</div>";
+				}
+				yield '</div>';
 			}
-			yield '</div>';
-		}
-        })()));
+		})()));
 	}
 }
 ?>

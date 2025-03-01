@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 class Copyright extends Module{
 	public $Title = "MiMFa";
 	public $Description = "Powered By: ";

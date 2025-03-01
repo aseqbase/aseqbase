@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 module("SearchForm");
 module("UserMenu");
@@ -142,7 +142,7 @@ class SideMenu extends Module
 			}
 			$activeselector .main-items .item.active{
 				border: none;
-				border-block-start: 2vmin solid var(--back-color-2);
+				border-inline-start: 2vmin solid var(--back-color-2);
 			}
 			.{$this->Name} .main-items .item :is(a, a:visited, a:active){
 				display: flex;

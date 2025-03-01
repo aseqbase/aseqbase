@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Module;
-use \MiMFa\Library\HTML;
+use \MiMFa\Library\Html;
 class FixedScreen extends Module{
 	public $Image = null;
 	public $BlurSize = "0px";

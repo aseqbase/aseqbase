@@ -1,5 +1,6 @@
+<?php $dp = grab($data, "Path")??\_::$Info->DownloadPath; ?>
 <div class="page page-download">
-<script>load('<?php echo \_::$Info->DownloadPath; ?>'); </script>
+<script>load('<?php echo $dp; ?>'); </script>
 <?php
 	module("PrePage");
 	$module = new MiMFa\Module\PrePage();
@@ -10,8 +11,9 @@
 	$module->Class = "horizontal-center";
 	$module->Content = "
 	<div class='vertical-middle'>
-		<a class='btn btn-primary' href='".\_::$Info->DownloadPath."'>".__("If you do not redirected automatically, Click on this button to Download")."</a>
+		<a class='btn btn-primary' href='$dp'>".__(grab($data, "Message")??"If you do not redirected automatically, Click on this button to Download")."</a>
 	</div>";
+    swap($module, $data);
 	$module->Render();
 ?>
 </div>

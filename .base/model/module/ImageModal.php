@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 module("Modal");
 class ImageModal extends Modal{
 	public $Image = null;

@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 
 use DateTime;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Router;
 use MiMFa\Library\Style;

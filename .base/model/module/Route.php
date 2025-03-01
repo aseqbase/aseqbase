@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 /**
  * Automatic crate route map through url or item iterations
  *@copyright All rights are reserved for MiMFa Development Group

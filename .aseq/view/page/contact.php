@@ -7,6 +7,7 @@
 	$module = new MiMFa\Module\Contacts();
 	$module->Items = \_::$Info->Contacts;
 	$module->Location = \_::$Info->Location;
+    swap($module, $data);
 	$module->Render();
 	page("message");
 ?>

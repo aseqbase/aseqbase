@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 class PrePage extends Module{
 	public $Class = "container";
 	public $Image = null;

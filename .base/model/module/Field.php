@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 class Field extends Module{
 	public $Class = "field";
 	public $Template = null;

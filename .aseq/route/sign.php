@@ -12,25 +12,25 @@ $isuser = auth(\_::$Config->UserAccess);
             else return view("part", ["Name" => "access"]);
         })
         ->Default(function(){
-            if(logic("sign/out")) \Res::Load();
+            if(logic("sign/out")) \Res::Reload();
             else \Res::Load(\MiMFa\Library\User::$InHandlerPath);
         })
     ->if(!isEmpty(\Req::$Direction))
     ->Route()->Get(fn()=> view("part", ["Name" => \Req::$Direction]))
     ->if(!$isuser && \Req::Receive("username"))
     ->Route("sign/up")->Default(function(){
-        if(logic("sign/up")) \Res::Load();
+        if(logic("sign/up")) \Res::Reload();
     })
     ->if(!$isuser)
     ->Route("sign/in")->Default(function(){
-        if(logic("sign/in")) \Res::Load();
+        if(logic("sign/in")) \Res::Reload();
     })
     ->Route("sign/recover")->Default(function(){
-        if(logic("sign/recover")) \Res::Load();
+        if(logic("sign/recover")) \Res::Reload();
     })
     ->else()
     ->Route("sign/edit")->Default(function(){
-        if(logic("sign/edit")) \Res::Load();
+        if(logic("sign/edit")) \Res::Reload();
     })
     ->if(!isEmpty(\Req::$Direction))
     ->Route()->Default(fn()=> logic(\Req::$Direction))

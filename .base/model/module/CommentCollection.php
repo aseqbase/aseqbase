@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 module("Collection");
 /**
@@ -313,12 +313,22 @@ class CommentCollection extends Collection{
 		    $i = 0;
 		    yield $this->GetTitle();
 		    yield $this->GetDescription();
+            $adminaccess = auth(\_::$Config->AdminAccess);
 		    foreach(Convert::ToItems($items??$this->Items) as $k=>$item) {
                 $p_userid = get($item,"UserId" );
                 $p_groupid = get($item,"GroupId" );
                 $p_status = get($item,"Status" );
-                if(isValid($item,"ReplyId" ) || ((!$p_status || (isValid($p_groupid) && $p_groupid != \_::$Back->User->GroupId)) && $p_userid != \_::$Back->User->Id)) continue;
-                $p_access = findValid($item,'Access' ,0);
+                if(
+                    isValid($item,"ReplyId" ) || 
+                    (
+                        (
+                            !$p_status 
+                            || (isValid($p_groupid) && $p_groupid != \_::$Back->User->GroupId)
+                        )
+                        && !$adminaccess && (!$p_userid || $p_userid != \_::$Back->User->Id)
+                    )
+                ) continue;
+                $p_access = findValid($item, 'Access' ,0);
                 if(!auth($p_access)) continue;
                 if(isValid($this->Relation) && $this->Relation != get($item,'Relation' )) continue;
 			    $p_id = get($item,'Id' );
@@ -491,7 +501,7 @@ class CommentCollection extends Collection{
                         {Id:forid},
                         selector,
                         (data, err)=>{
-                            if(!err) document.querySelector(selector).innerHTML = data;
+                            if(!err) $(selector).html(data);
                         }
                     );
             }".
@@ -504,7 +514,11 @@ class CommentCollection extends Collection{
                         {Reply:forid},
                         selector,
                         (data, err)=>{
-                            rbox.innerHTML = data;
+                            $(rbox).html(data);
+                            if(rbox.querySelector('form')) btn.innerHTML = `$this->CancelButtonLabel`;
+                        },
+                        (data, err)=>{
+                            $(rbox).html(data);
                             if(rbox.querySelector('form')) btn.innerHTML = `$this->CancelButtonLabel`;
                         }
                     );

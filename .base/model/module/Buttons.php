@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 module("Collection");
-use \MiMFa\Library\HTML;
+use \MiMFa\Library\Html;
 use \MiMFa\Library\Convert;
 /**
  * To show a gallery of images

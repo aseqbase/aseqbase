@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\User;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 class UserMenu extends Module{
 	public $Items = null;
@@ -90,10 +90,10 @@ class UserMenu extends Module{
 			else
 				$this->Items = array(
 					array("Name" =>getValid(\_::$Back->User,"Name" ,"Profile"), "Path" =>User::$RoutePath),
-					array("Name" =>Convert::ToExcerpt(getValid(\_::$Back->User,"Bio" , null)??getValid(\_::$Back->User->GetValue("Bio" ), null, "New User..."))),
+					array("Name" =>Convert::ToExcerpt(getValid(\_::$Back->User,"Bio" , null)??getValid(\_::$Back->User->GetValue("Bio" ), null, "New User...")), "Attributes"=>["class"=>"bio"]),
 					array("Name" =>"Dashboard", "Path" =>User::$DashboardHandlerPath),
 					array("Name" =>"Edit Profile", "Path" =>User::$EditHandlerPath),
-					array("Name" =>"Sign Out", "Path" =>User::$OutHandlerPath)
+					array("Name" =>"Sign Out", "Path" =>"sendDelete(`".User::$OutHandlerPath."`, null, 'body');")
 				);
         }
 		$count = count($this->Items);
@@ -104,13 +104,12 @@ class UserMenu extends Module{
                     if(isValid($item,'Path' ))
 						yield Html::Button(
 							Html::Division(__(findBetween($item,"Name" , "Title" ), styling:false),["style"=>(isValid($item,'Image' )?("background-image: url('".$item['Image' ]."')"):"")]),
-							get($item,'Path' ),
+							get($item,'Path'),
 							get($item,"Attributes"));
 					else
 						yield Html::Span(
 							Html::Division(__(findBetween($item,"Name" , "Title" ), styling:false),["style"=>(isValid($item,'Image' )?("background-image: url('".$item['Image' ]."')"):"")]),
 							null,
-							["class"=>"bio"],
 							get($item,"Attributes"));
             },["class"=>"submenu"]).$this->GetContent();
 		}

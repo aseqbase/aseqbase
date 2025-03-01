@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Component;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 
 class JsonLD{
@@ -57,5 +57,7 @@ class JsonLD{
 		, ['type' =>'application/ld+json'])."<!---prepend--->";
 	}
 }
+
 JsonLD::Create($data??null);
+\_::$Front->Libraries[] = \MiMFa\Component\JsonLD::Website();
 ?>

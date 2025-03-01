@@ -1,6 +1,10 @@
 <?php
-\_::$Front->Initials[] = "
-<style>
+
+use MiMFa\Library\Html;
+\_::$Front->Libraries[] = Html::Style(null, forceFullUrl('/view/style/reset.css'));
+\_::$Front->Libraries[] = Html::Style(null, forceFullUrl('/view/style/general.css'));
+\_::$Front->Libraries[] = Html::Style(null, forceFullUrl('/view/style/be.css'));
+\_::$Front->Libraries[] = Html::Style("
 :root{
 	--color-0: " . \_::$Front->Color(0) . ";
 	--color-1: " . \_::$Front->Color(1) . ";
@@ -113,5 +117,10 @@
 	--process-symbol-path-url: URL(\"" . \MiMFa\Library\Local::GetUrl(\_::$Info->ProcessSymbolPath) . "\");
 	--error-symbol-path-url: URL(\"" . \MiMFa\Library\Local::GetUrl(\_::$Info->ErrorSymbolPath) . "\");
 }
-</style>";
+");
+\_::$Front->Libraries[] = Html::Script(null, forceFullUrl('/view/script/general.js'));
+\_::$Front->Libraries[] = Html::Script(null, forceFullUrl('/view/script/Math.js'));
+\_::$Front->Libraries[] = Html::Script(null, forceFullUrl('/view/script/Array.js'));
+\_::$Front->Libraries[] = Html::Script(null, forceFullUrl('/view/script/Evaluate.js'));
+\_::$Front->Libraries[] = Html::Script(null, forceFullUrl('/view/script/Html.js'));
 ?>

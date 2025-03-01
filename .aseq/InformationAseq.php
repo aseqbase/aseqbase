@@ -44,10 +44,10 @@ class InformationAseq extends InformationBase
 
 	public $Shortcuts = array(
 		array("Name" => "Menu", "Link"=> "", "Image" => "/asset/symbol/menu.png", "Attributes" => "onclick='viewSideMenu()'"),
-		array("Name" => "Market", "Link"=> "#embed", "Image" => "/asset/symbol/market.png", "Attributes" => "class='embed-link' onclick='viewEmbed(\"https://github.com/aseqbase/aseqbase\",\"fade\"); viewSideMenu(false);'"),
+		array("Name" => "Posts", "Link"=> "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
 		array("Name" => "Home", "Link"=> "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
-		array("Name" => "Forum", "Link"=> "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "Posts", "Link"=> "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'")
+		array("Name" => "Contact", "Link"=> "/contact", "Image" => "/asset/symbol/amplifier.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "About", "Link"=> "/about", "Image" => "/asset/symbol/info.png", "Attributes" => "class='menu-link'")
 	);
 
 	public $Services = array(

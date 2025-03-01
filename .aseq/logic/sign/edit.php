@@ -1,5 +1,5 @@
 <?php
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\User;
 use MiMFa\Library\Local;
 
@@ -46,7 +46,7 @@ try {
             $img = \_::$Back->User->TemporaryImage;
             \_::$Back->User->Refresh();
             if (isValid($img) != isValid(\_::$Back->User->TemporaryImage))
-                \Res::Load();
+                \Res::Reload();
             else
                 \Res::Script("
 $(\"form .content img\").attr('src','" . \_::$Back->User->TemporaryImage . "');

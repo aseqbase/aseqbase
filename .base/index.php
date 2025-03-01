@@ -1,4 +1,3 @@
-
 <?php //MiMFa aseqbase	http://aseqbase.ir
 require_once(__DIR__."/initialize.php");
 if(

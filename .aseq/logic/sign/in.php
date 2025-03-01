@@ -1,6 +1,7 @@
 <?php
 module("SignInForm");
-$mod = new \MiMFa\Module\SignInForm();
-$mod->Render();
-return $mod->Result;
+$module = new \MiMFa\Module\SignInForm();
+swap($module, $data);
+$module->Render();
+return $module->Result;
 ?>

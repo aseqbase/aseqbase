@@ -1,22 +1,23 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\HTML;
-use MiMFa\Library\Convert;
-
+use MiMFa\Library\Html;
 class Members extends Module
 {
-	public $Items = null;
-	public $DefaultIcon = null;
-	public $DefaultName = null;
-	public $DefaultDescription = null;
-	public $DefaultDetails = null;
-	public $DefaultLink = null;
-	public $MoreButtonLabel = "Read More...";
+    public $Items = null;
+    public $DefaultIcon = null;
+    public $DefaultName = null;
+    public $DefaultDescription = null;
+    public $DefaultDetails = null;
+    public $DefaultLink = null;
+    public $MoreButtonLabel = "Read More...";
 
-	public function GetStyle()
-	{
-		return Html::Style("
+    public function GetStyle()
+    {
+        return Html::Style("
+            .{$this->Name} .items {
+                gap: var(--size-1);
+            }
             .{$this->Name} .teammember {
                 background-color: " . \_::$Front->BackColor(0) . "99 var(--overlay-url-0);
                 background-size: 100% auto;
@@ -115,69 +116,59 @@ class Members extends Module
                 color: var(--fore-color-2);
             }
         ");
-	}
+    }
 
-	public function Get()
-	{
-		$menu = $this->Items;
-		$count = count($menu);
-		if ($count > 0) {
-			// Start the container div
-			return Html::Container(
-				Html::Rack(function () use ($menu, $count) {
-				$rowContent = "";
-				for ($i = 0; $i < $count; $i++) {
-					// Start a column for each team member
-					$rowContent .= Html::MediumSlot(function () use ($menu, $i) {
-						$memberContent = "";
+    public function Get()
+    {
+        $menu = $this->Items;
+        $count = count($menu);
+        if ($count > 0) {
+            // Start the container div
+            return Html::Container(
+                Html::Rack(function () use ($menu, $count) {
+                    for ($i = 0; $i < $count; $i++) {
+                        // Start a column for each team member
+                        yield Html::MediumSlot(function () use ($menu, $i) {
+                            // Image
+                            yield Html::Division(Html::Image(get($menu[$i], 'Image')), ["class" => "image"]);
 
-						// Image
-						$memberContent .= Html::Division(Html::Image(get($menu[$i], 'Image' )), ["class"=> "image"]);
+                            // Title (Name and Titles)
+                            yield Html::Division(function () use ($menu, $i) {
+                                yield Html::Super(__(get($menu[$i], 'PreName'), styling: false));
+                                yield Html::Division(
+                                    Html::Strong(__(get($menu[$i], 'FirstName'), styling: false) . " " . __(get($menu[$i], 'MiddleName'), styling: false) . " " . __(get($menu[$i], 'LastName'), styling: false))
+                                );
+                                yield Html::Sub(__(get($menu[$i], 'PostName'), styling: false));
+                            }, ["class" => "title"]);
 
-						// Title (Name and Titles)
-						$memberContent .= Html::Division(function () use ($menu, $i) {
-							$titleContent = "";
-							$titleContent .= Html::Super(__(get($menu[$i], 'PreName'), styling: false));
-							$titleContent .= Html::Division(
-								Html::Strong(__(get($menu[$i], 'FirstName'), styling: false) . " " . __(get($menu[$i], 'MiddleName'), styling: false) . " " . __(get($menu[$i], 'LastName'), styling: false))
-							);
-							$titleContent .= Html::Sub(__(get($menu[$i], 'PostName'), styling: false));
-							return $titleContent;
-						}, ["class"=> "title"]);
+                            // Features (Assignees)
+                            yield Html::Division(function () use ($menu, $i) {
+                                foreach (findValid($menu[$i], 'Assignees', []) as $assignee)
+                                    yield Html::Division(__($assignee, styling: false)) . Html::$NewLine;
+                            }, ["class" => "features"]);
 
-						// Features (Assignees)
-						$memberContent .= Html::Division(function () use ($menu, $i) {
-							$featuresContent = "";
-							foreach (findValid($menu[$i], 'Assignees', []) as $assignee) {
-								$featuresContent .= Html::Division(__($assignee, styling:false)) . Html::$NewLine;
-							}
-							return $featuresContent;
-						}, ["class"=> "features"]);
+                            // List of Items (Details)
+                            yield Html::Items(function () use ($menu, $i) {
+                                foreach (findValid($menu[$i], 'Items', []) as $item) {
+                                    yield Html::Item(
+                                        Html::Italic(
+                                            __(get($item, 'Key'), styling: false) . __(":", styling: false),
+                                            null,
+                                            ["class" => 'fa ' . get($item, "class"), "aria-hidden" => 'true']
+                                        ) . __(findValid($item, 'Value', ''), styling: false),
+                                        ["class" => "list-item d-flex justify-content-between align-items-center"]
+                                    );
+                                }
+                            }, ["class" => "list-group"]);
 
-						// List of Items (Details)
-						$memberContent .= Html::Items(function () use ($menu, $i) {
-							$listContent = "";
-							foreach (findValid($menu[$i], 'Items', []) as $item) {
-								$listContent .= Html::Item(
-									Html::Italic(
-										__(get($item, 'Key' ), styling: false) . __(":", styling: false) . __(findValid($item, 'Value' , ''), styling:false),
-										null,[ "class"=>'fa ' . get($item, "class"), "aria-hidden"=>'true']),
-									["class"=> "list-item d-flex justify-content-between align-items-center"]);
-							}
-							return $listContent;
-						}, ["class"=> "list-group"]);
-
-						// "Read More" Link
-						$memberContent .= Html::Link(__($this->MoreButtonLabel, false), get($menu[$i], 'Link'), ["class"=> "btn", "target" => "blank"]);
-
-						return $memberContent;
-					}, ["data-aos" => "down"]); // Close the column div
-				}
-				return $rowContent; // Return the generated row content
-				})
-			);
-		}
-		return null;
-	}
+                            // "Read More" Link
+                            yield Html::Link(__($this->MoreButtonLabel, false), get($menu[$i], 'Link'), ["class" => "btn", "target" => "blank"]);
+                        }, ["class" => "teammember", "data-aos" => "down"]); // Close the column div
+                    }
+                }, ["class"=>"items"])
+            );
+        }
+        return null;
+    }
 }
 ?>

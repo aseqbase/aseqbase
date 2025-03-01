@@ -1,9 +1,11 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
+use MiMFa\Library\User;
+
 class Form extends Module
 {
 	/**
@@ -44,7 +46,7 @@ class Form extends Module
 	public $AllowFooter = true;
 	public $Class = "container";
 	public $ContentClass = "col-lg-6";
-	public $UseAJAX = true;
+	public $UseAjax = true;
 
 	/**
 	 * A function to check received values before accepting
@@ -53,6 +55,12 @@ class Form extends Module
 	 */
 	public $FieldsChecker = null;
 	public $FieldsTypes = [];
+	public $SigningLabel = "Sign in or create an account to access this form";
+	/**
+	 * Allow signing or a callback handler for signing
+	 * @var mixed
+	 */
+	public $Signing = null;
 
 	public $FieldsForeColor = "var(--fore-color-1)";
 	public $FieldsBackColor = "var(--back-color-1)";
@@ -74,6 +82,7 @@ class Form extends Module
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
 		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
+		$this->Signing = fn()=>part(User::$InHandlerPath, ["Router"=>["DefaultMethod"=>1], "AllowHeader"=>false, "ContentClass" => "col-lg"], print:false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethod > 1) \Res::Status($this->Status);
 		// });
@@ -81,10 +90,10 @@ class Form extends Module
 
 	public function CheckAccess($access = 0, $blocking = true, $reaction = false, &$message = null)
 	{
-		if (!inspect($access, die: false)) {
+		if (!auth($access)) {
 			$message = $this->GetError("You have not enough access!");
 			if ($reaction)
-				\Res::Send($message, 403);
+				\Res::Send($this->GetSigning());
 			return false;
 		}
 		if (($message = $this->CheckBlock()) === false) {
@@ -92,7 +101,7 @@ class Form extends Module
 				$this->MakeBlock();
 		} else {
 			if ($reaction)
-				\Res::Send($message, $this->Status);
+				\Res::Send($message);
 			return false;
 		}
 		if (isValid($this->ReCaptchaSiteKey)) {
@@ -100,7 +109,7 @@ class Form extends Module
 			if (!\MiMFa\Library\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey)) {
 				$message = $this->GetError("Do something to denied access!");
 				if ($reaction)
-					\Res::Send($message, 403);
+					\Res::Send($message);
 				return false;
 			}
 		}
@@ -173,7 +182,7 @@ class Form extends Module
 					bottom: 0px;
 					padding: var(--size-1);
 				}
-				.{$this->Name} .header :is(.image, .image:before) {
+				.{$this->Name} .header :is(.form-image, .form-image:before) {
 					color: var(--fore-color-3);
 					font-size: 300%;
 					margin: 0px 5%;
@@ -182,7 +191,7 @@ class Form extends Module
 					height: auto;
 					text-align: center;
 				}
-				.{$this->Name} .header :not(i):is(.image, .image:before) {
+				.{$this->Name} .header :not(i):is(.form-image, .form-image:before) {
 					background-size: cover;
 					background-repeat: no-repeat;
 					border-radius: 100%;
@@ -191,13 +200,11 @@ class Form extends Module
 				.{$this->Name} .header .form-title {
 					text-align: center;
 				}
-				" . ($this->Description ? "" :
-				".{$this->Name} .header .back-button {
+				.{$this->Name} .header .back-button {
 					text-align: center;
 					display: block;
 					width: 100%;
-				}"
-			) . "
+				}
 				.{$this->Name} .content {
 					background-color: var(--back-color-0);
 					color: var(--fore-color-0);
@@ -694,7 +701,7 @@ class Form extends Module
 				return
 					Html::Rack(
 						($this->AllowHeader ? Html::LargeSlot(
-							Html::Media(null, $this->Image, ["class"=> "image"]) .
+							Html::Media(null, $this->Image, ["class"=> "form-image"]) .
 							$this->GetHeader() .
 							$this->GetTitle(["class"=> "form-title"]) .
 							$this->GetDescription(["class"=> "form-description"]) .
@@ -770,8 +777,8 @@ class Form extends Module
 	public function GetScript()
 	{
 		return parent::GetScript() . Html::Script("
-			$(function () {
-				" . ($this->UseAJAX ? "handleForm('.{$this->Name} form', null,null,null,null, {$this->Timeout});" : "") . "
+			$(document).ready(function () {
+				" . ($this->UseAjax ? "handleForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
 					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
 				});
@@ -879,6 +886,14 @@ class Form extends Module
 		} catch (\Exception $ex) {
 			return Html::Error($ex);
 		}
+	}
+
+	public function GetSigning(){
+		if($this->Signing) 
+			return Html::Center(
+				($this->SigningLabel?Html::SubHeading($this->SigningLabel, User::$InHandlerPath):"")
+				.Convert::By($this->Signing)
+			);
 	}
 }
 ?>

@@ -1,6 +1,7 @@
 <?php
 module("SignInForm");
-$mod = new \MiMFa\Module\SignInForm();
-view(\_::$Config->DefaultViewName, ["Content" => $mod->Delete()]);
-return $mod->Result;
+$module = new \MiMFa\Module\SignInForm();
+swap($module, $data);
+view(\_::$Config->DefaultViewName, ["Content" => $module->Delete()]);
+return $module->Result;
 ?>

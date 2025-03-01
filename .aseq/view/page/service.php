@@ -8,7 +8,7 @@
     <?php
 	part("small-header");
 	part("access" );
-	part("service");
+	part("service", $data);
     ?>
 
 </div>

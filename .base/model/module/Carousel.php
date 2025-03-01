@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 module("Collection");
 /**
  * To show everythings as a slideshow

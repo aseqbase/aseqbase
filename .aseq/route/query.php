@@ -1,12 +1,12 @@
 <?php
 $query = \Req::Receive("q") ?? \Req::Receive("Query");
-$args = iterator_to_array(logic("content/all", [
+$args = logic("content/all", [
     "Filter" => [
         "Query" => $query,
         "Cat" => implode("/", array_slice(explode("/",\Req::$Direction),1))
     ],
     "Order" => null
-]));
+]);
 
 view("contents", [
     "Title" => "Query Results",

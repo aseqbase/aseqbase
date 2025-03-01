@@ -191,13 +191,15 @@ CREATE TABLE IF NOT EXISTS `aseq_UserGroup` (
 --
 
 INSERT INTO `aseq_UserGroup` (`Id` , `Name` , `Image` , `Title` , `Description` , `Access` , `Status` , `MetaData` ) VALUES
-(1000, 'guest', NULL, 'Guest', 'The Guest Group', 0, '', ''),
-(2, 'super', NULL, 'Super', 'The Super User Group', 1, '1', ''),
-(5, 'manager', NULL, 'Manager', 'The Manager User Group', 5, '1', ''),
-(8, 'author', NULL, 'Author', 'The Author User Group', 8, '1', ''),
-(9, 'editor', NULL, 'Editor', 'The Editor User Group', 9, '1', ''),
-(11, 'special', NULL, 'Special', 'The Special User Group', 11, '1', ''),
-(100, 'registered', NULL, 'Registered', 'The Registered User Group', 100, '1', '');
+(1, 'ban', NULL, 'Ban', 'The Ban Group', -1, '-1', ''),
+(2, 'guest', NULL, 'Guest', 'The Guest Group', 0, '', ''),
+(3, 'registered', NULL, 'Registered', 'The Registered User Group', 1, '1', ''),
+(4, 'special', NULL, 'Special', 'The Special User Group', 10, '1', ''),
+(5, 'editor', NULL, 'Editor', 'The Editor User Group', 100, '1', ''),
+(6, 'author', NULL, 'Author', 'The Author User Group', 1000, '1', ''),
+(7, 'manager', NULL, 'Manager', 'The Manager User Group', 1000000, '1', ''),
+(8, 'administrator', NULL, 'Administrator', 'The Administrator User Group', 100000000, '1', ''),
+(9, 'super', NULL, 'Super', 'The Super User Group', 999999999, '1', '');
 
 -- --------------------------------------------------------
 

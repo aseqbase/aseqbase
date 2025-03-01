@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Component;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 class Icons
 {
 	public static $Initialized = false;
@@ -14,7 +14,7 @@ class Icons
 	public static function GetInitial()
 	{
 		self::$Initialized = true;
-		return HTML::Script(null, \_::$Address->ScriptPath . "Icons.js", "crossorigin='anonymous'");
+		return HTML::Script(null, \_::$Address->ScriptPath . "Icons.js");
 	}
 	public static function GetStyle($root = null)
 	{
@@ -159,5 +159,5 @@ class Icons
 	}
 }
 
-after(\_::$Address->RegionDirectory, "initial", fn()=>Icons::GetInitial());
+if(!Icons::$Initialized) \_::$Front->Libraries[] = Icons::GetInitial();
 ?>

@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Template;
 use MiMFa\Library\Convert;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 /**
  * Pre-designed layouts that allow you to arrange content onto a web page to quickly create a well-designed website.
  *
@@ -76,7 +76,9 @@ class Template extends \Base{
 
 	public function __construct($setDefaults = true, $setRevises = true){
         parent::__construct($setDefaults, $setRevises);
+        component("JsonLD");
 		component("Global");
+		component("Live");
 		component("Icons");
     }
 

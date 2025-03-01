@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 class IFrame extends Module{
 	public $Name = "IFrame";
 	public $Source = null;

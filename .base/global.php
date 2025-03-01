@@ -609,7 +609,9 @@ function table(string $name, bool $prefix = true, int $origin = 0, int $depth = 
 {
 	return new \MiMFa\Library\DataTable(
 		$source ?? \_::$Back->DataBase,
-		$prefix ? (\_::$Config->DataBasePrefix . $name) : $name
+		$prefix ? 
+		(\_::$Config->DataBasePrefix . (\_::$Config->DataBaseAddNameToPrefix? preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_":"") . $name) 
+		: $name
 	);
 }
 
@@ -968,7 +970,7 @@ function getDirection(string|null $path = null): string|null
  */
 function getPage(string|null $path = null): string|null
 {
-	return last(explode(DIRECTORY_SEPARATOR, getDirection($path)));
+	return last(preg_split("/[\\\\\/]/i", getDirection($path)));
 }
 /**
  * Get the query part of a url

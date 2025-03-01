@@ -1,7 +1,7 @@
 <?php namespace MiMFa\Module;
 library("Style");
 library("Convert");
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 /**

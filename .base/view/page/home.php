@@ -1,23 +1,34 @@
-<style>
+<?php
+use \MiMFa\Library\Html;
+use \MiMFa\Library\User;
+\Res::Style("
 	.page-home {
 		padding: 10px 10px 50px;
 	}
-</style>
+");
 
-<div class="page-home">
-	<?php part("small-header"); ?>
-	<!--<?php //if(inspect("sign")){ ?>
-		<div class="row sign">
-			<div class="col-sm" data-aos="zoom-out" data-aos-duration="600">
-				<a class="btn" href="<?php echo GETUrl('sign-in') ?>">Sign In</a>
-				<a class="btn" href="<?php echo GETUrl('sign-up') ?>">Sign Up</a>
-			</div>
-		</div>
-	<?php //} ?>-->
-<?php module("RingSlide");
+module("RingSlide");
 $module = new \MiMFa\Module\RingSlide();
 $module->Image = \_::$Info->LogoPath;
 $module->Items = \_::$Info->Services;
-$module->Render();
+swap($module, $data);
+\Res::Render(
+	Html::Page(
+		part("small-header", print: false) .
+		$module->Handle().
+		(!\_::$Config->AllowSigning || auth(\_::$Config->UserAccess) ? "" :
+			Html::Center(
+				Html::SmallSlot(
+					Html::Button("Sign In", User::$InHandlerPath) .
+					Html::Button("Sign up", User::$UpHandlerPath)
+					,
+					["data-aos" => "zoom-out", "data-aos-duration" => "600"]
+				),
+				["class" => "sign"]
+			)
+		)
+		,
+		["class" => "page-home"]
+	)
+);
 ?>
-</div>

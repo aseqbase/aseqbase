@@ -1,7 +1,7 @@
 <?php
 $templ = \_::$Front->CreateTemplate("Main");
-$templ->WindowTitle = grab($data, "WindowTitle")??get($data, 'Title' )??get($data, 'Name' );
 $Name = grab($data, "Name") ?? \Req::$Direction;
+$templ->WindowTitle = grab($data, "WindowTitle")??get($data, 'Title' )??between($Name, \_::$Info->Name);
 $alternative = grab($data, "Alternative") ?? "404";
 $Content = grab($data, "Content");
 $templ->Content = isValid($Content)?

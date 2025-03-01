@@ -3,5 +3,5 @@
 	$module = new MiMFa\Module\PrePage();
 	$module->Title = "Message Us";
 	$module->Render();
-	part("message");
+	part("message", $data);
 ?>

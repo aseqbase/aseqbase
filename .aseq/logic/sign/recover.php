@@ -1,6 +1,7 @@
 <?php
 module("SignRecoverForm");
-$mod = new \MiMFa\Module\SignRecoverForm();
-$mod->Render();
-return $mod->Result;
+$module = new \MiMFa\Module\SignRecoverForm();
+swap($module, $data);
+$module->Render();
+return $module->Result;
 ?>

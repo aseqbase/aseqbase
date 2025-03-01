@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 use MiMFa\Library\DataBase;
 use MiMFa\Library\Convert;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 /**
  * To show data as pages
  *@copyright All rights are reserved for MiMFa Development Group

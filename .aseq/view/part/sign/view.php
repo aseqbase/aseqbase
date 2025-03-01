@@ -1,6 +1,6 @@
 <?php
 use MiMFa\Library\User;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 $user = \_::$Back->User->Get();
 if (isValid($user)) {
     module("Form");

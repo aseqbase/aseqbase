@@ -19,21 +19,6 @@
 		<!-- LICENCE PART: Don`t remove this part -->
 		<meta name="framwork" content="aseqbase">
 		<!-- LICENCE PART -->
-		<?php component("JsonLD"); \MiMFa\Component\JsonLD::Website(); ?>
-		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/reset.css'); ?>'>
-		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/general.css'); ?>'>
-		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/be.css'); ?>'>
-		<script src='<?php echo forceFullUrl('/view/script/general.js'); ?>'></script>
-		<!--<script src='<?php echo forceFullUrl('/view/script/Live.js'); ?>'></script>-->
-		<script src='<?php echo forceFullUrl('/view/script/Math.js'); ?>'></script>
-		<script src='<?php echo forceFullUrl('/view/script/Array.js'); ?>'></script>
-		<script src='<?php echo forceFullUrl('/view/script/Evaluate.js'); ?>'></script>
-		<script src='<?php echo forceFullUrl('/view/script/Html.js'); ?>'></script>
-		<?php
-		if(isValid(\_::$Config->ReCaptchaSiteKey)) {
-			library("recaptcha");
-			echo \MiMFa\Library\reCaptcha::GetScript(\_::$Config->ReCaptchaSiteKey);
-        }?>
 		<?php echo join(PHP_EOL, \_::$Front->Libraries); ?>
 		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/view.css'); ?>'>
 		<?php echo \_::$Front->GetInitial(); ?>

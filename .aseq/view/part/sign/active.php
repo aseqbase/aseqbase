@@ -1,6 +1,6 @@
 <?php
 use MiMFa\Library\Convert;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 echo "<center class='page'>";
 try{
     try{ \_::$Back->User->ReceiveActivationEmail();}

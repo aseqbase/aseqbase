@@ -1,6 +1,6 @@
 <?php
 use MiMFa\Library\User;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 if(auth(\_::$Config->GuestAccess)){
     if(auth(\_::$Config->UserAccess))
         echo Html::Center([

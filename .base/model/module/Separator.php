@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Module;
 
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 
 /**
  * This module creates a visual separator element, optionally with a background image.

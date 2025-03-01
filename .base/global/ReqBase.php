@@ -118,15 +118,15 @@ abstract class ReqBase
 							$source = \MiMFa\Library\Convert::FromFormData($res, $_FILES) ?? $source;
 						else
 							parse_str($res, $source);
-						$_REQUEST = $source;
 					}
+					$_REQUEST = $source = is_array($source)? $source:[$source];
 					break;
 				default:
 					$source = $_REQUEST;
 					break;
 			}
 		if (is_null($key))
-			return count($source) > 0 ? $source : $default ?? [];
+			return (count($source) > 0 ? $source : $default) ?? [];
 		else
 			return findValid($source, $key, $default);
 	}

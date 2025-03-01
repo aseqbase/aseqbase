@@ -2,7 +2,7 @@
 
 namespace MiMFa\Module;
 
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 
 module("Collection");
 

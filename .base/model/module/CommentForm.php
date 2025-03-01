@@ -2,11 +2,9 @@
 namespace MiMFa\Module;
 
 use MiMFa\Library\Contact;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 use MiMFa\Library\User;
-
-use function PHPSTORM_META\argumentsSet;
 
 module("Form");
 class CommentForm extends Form
@@ -31,11 +29,10 @@ class CommentForm extends Form
 	public $SubjectPlaceHolder = "The subject of your message";
 	public $MessagePlaceHolder = "Leave your message...";
 	public $AttachPlaceHolder = "Attached link";
-	public $SignInOrUpLabel = "Log in or create an account to leave your message";
 	public $IncompleteWarning = "Please fill all fields correctly!";
 	public $SuccessHandler = 'Thank you very much, Your message received successfully!';
 	public $ErrorHandler = 'There a problem is occured in processing your message!';
-	public $SignUpIfNotRegistered = false;
+	public $SigningLabel = "Log in or create an account to leave your message";
 	public $BlockTimeout = 60000;
 	public $ResponseView = null;
 	public $ReplyId = null;
@@ -82,8 +79,7 @@ class CommentForm extends Form
 	{
 		if (auth($this->Access ?? \_::$Config->UserAccess))
 			return parent::GetHeader();
-		else
-			return Html::Link($this->SignInOrUpLabel, User::$InHandlerPath);
+		else return $this->GetSigning();
 	}
 	public function GetFields()
 	{
@@ -136,7 +132,7 @@ class CommentForm extends Form
 	{
 		return $this->AllowHeader || (\_::$Back->User && \_::$Back->User->Email) ? "" : parent::GetFooter()
 			. Html::LargeSlot(
-				Html::Link($this->SignInOrUpLabel, User::$InHandlerPath)
+				$this->GetSigning()
 				,
 				["class"=> "col-lg-12"]
 			);
@@ -175,8 +171,8 @@ class CommentForm extends Form
 					return $this->GetWarning($this->IncompleteWarning);
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);
-			} else
-			return Html::Link($this->SignInOrUpLabel, User::$InHandlerPath);
+			}
+		return $this->GetSigning();
 	}
 
 	public function Put()
@@ -208,8 +204,8 @@ class CommentForm extends Form
 					return $this->GetWarning($this->IncompleteWarning);
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);
-			} else
-			return Html::Link($this->SignInOrUpLabel, User::$InHandlerPath);
+			}
+		return $this->GetSigning();
 	}
 
 	public function Patch()
@@ -226,7 +222,8 @@ class CommentForm extends Form
 				$this->ReplyId = get($received, "Reply");
 				$this->Router->Renew()->Get()->Switch();
 				return $this->Handle();
-			} else return Html::Link($this->SignInOrUpLabel, User::$InHandlerPath);
+			}
+		return $this->GetSigning();
 	}
 
 	public function Delete()
@@ -246,7 +243,8 @@ class CommentForm extends Form
 				return $this->GetError("Could not remove this comment!");
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);
-			} else return Html::Link($this->SignInOrUpLabel, User::$InHandlerPath);
+			}
+		return $this->GetSigning();
 	}
 }
 ?>

@@ -1,9 +1,10 @@
 <?php
 module("SignInForm");
-$mod = new \MiMFa\Module\SignInForm();
-$mod->Title = "Sign In";
-$mod->Image = "sign-in";
-$mod->Class = "container";
-$mod->ContentClass = "col-lg-5";
-$mod->Render();
+$module = new \MiMFa\Module\SignInForm();
+$module->Title = "Sign In";
+$module->Image = "sign-in";
+$module->Class = "container";
+$module->ContentClass = "col-lg-5";
+swap($module, $data);
+$module->Render();
 ?>

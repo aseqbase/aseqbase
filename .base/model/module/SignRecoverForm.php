@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 module("Form");
 class SignRecoverForm extends Form{
 	public $Action = null;

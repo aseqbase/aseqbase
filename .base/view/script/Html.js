@@ -30,7 +30,7 @@ Html.newLine = "<br/>";
 
 Html.toText = (obj) => textConvertor.Done(obj);
 Html.tryToText = (obj) => textConvertor.TryDone(obj);
-Html.subject = (content, attributes = {}) => Html(content, "Title" , attributes);
+Html.subject = (content, attributes = {}) => Html(content, "Title", attributes);
 Html.source = (source, attributes = {}) => {
     const srci = Html("", "script", { ...{ SRC: source }, ...attributes });
     Html.usedHeadItems.push(srci);
@@ -41,6 +41,13 @@ Html.script = (content, source = null, attributes = {}) => {
     const srci = Html(content, "script", source === null ? attributes : { ...{ SRC: source }, ...attributes });
     Html.usedHeadItems.push(srci);
     return srci;
+}
+Html.script.load = (content, source = null, attributes = {}) => {
+    var script = document.createElement('script');
+    script.src = source;
+    script.innerHTML = content;
+    for (const item in attributes) script.setAttribute(item, attributes[item]);
+    document.head.appendChild(script);
 }
 Html.script.code = (value = null, attributes = {}) => {
     Html.script(value == null ? "" : value + ";", null, attributes);
@@ -61,6 +68,21 @@ Html.style = (content, source = null, attributes = {}) => {
     const srci = Html("Link", { ...{ REL: "stylesheet", HREF: source ?? content }, ...attributes });
     Html.usedHeadItems.push(srci);
     return srci;
+}
+Html.style.load = (content, source = null, attributes = {}) => {
+    if (source) {
+        var style = document.createElement('link');
+        style.rel = 'stylesheet';
+        style.href = source;
+        for (const item in attributes) style.setAttribute(item, attributes[item]);
+        document.head.appendChild(style);
+    }
+    if (content) {
+        var style = document.createElement('style');
+        style.innerHTML = content;
+        for (const item in attributes) style.setAttribute(item, attributes[item]);
+        document.head.appendChild(style);
+    }
 }
 Html.style.code = (value = null, attributes = {}) => {
     Html.style(value == null ? "" : value + "", null, attributes);
@@ -205,10 +227,10 @@ Html.italic = (content, attributes = {}) => Html(content, "i", { ...{ CLASS: "it
 Html.big = (content, attributes = {}) => Html(content, "span", { ...{ CLASS: "big" }, ...attributes });
 Html.small = (content, attributes = {}) => Html(content, "span", { ...{ CLASS: "small" }, ...attributes });
 Html.result = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result", ondblclick: "this.style.display = 'none'" }, ...attributes });
-Html.message = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result message" , ondblclick: "this.style.display = 'none'"}, ...attributes });
-Html.success = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result success" , ondblclick: "this.style.display = 'none'"}, ...attributes });
-Html.error = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result error" , ondblclick: "this.style.display = 'none'"}, ...attributes });
-Html.warning = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result warning" , ondblclick: "this.style.display = 'none'"}, ...attributes });
+Html.message = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result message", ondblclick: "this.style.display = 'none'" }, ...attributes });
+Html.success = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result success", ondblclick: "this.style.display = 'none'" }, ...attributes });
+Html.error = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result error", ondblclick: "this.style.display = 'none'" }, ...attributes });
+Html.warning = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result warning", ondblclick: "this.style.display = 'none'" }, ...attributes });
 
 Html.link = (link, anchor = null, attributes = {}) => Html(anchor ?? link, "a", { ...{ HREF: link, CLASS: "Link" }, ...attributes });
 
@@ -491,7 +513,7 @@ Html.parameters = (arr) => {
 
 Html.handle = (data, selector = "body :nth-child(1)", reload = false) => {
     if (data.includes('result')) {
-        $(selector+` .result`).remove();
+        $(selector + ` .result`).remove();
         $(selector).prepend(data);
         if (reload) load();
     }

@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Template;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 class General extends Template{
 	public $WindowTitle = null;
 	public $WindowLogo = null;
@@ -11,6 +11,7 @@ class General extends Template{
 		component("JQuery");
 		component("Bootstrap");
 		component("AOS");
+		component("reCaptcha");
     }
 
 	public function RenderInitial(){

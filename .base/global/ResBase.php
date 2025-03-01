@@ -18,7 +18,7 @@ abstract class ResBase
 	public static function Header($key, $value)
 	{
 		if (isValid($key) && !headers_sent()) {
-			header("$key $value");
+			header("$key: $value");
 			return true;
 		}
 		return false;
@@ -64,6 +64,20 @@ abstract class ResBase
 		return $output;
 	}
 	/**
+	 * Read a file from the client side
+	 * @param mixed $path The data that is ready to print
+	 * @param mixed $status The header status
+	 */
+	public static function SetFile($path = null, $status = null)
+	{
+		header('Content-Type: application/pdf');
+		header('Content-Disposition: inline; filename="' . basename($path) . '"');
+		header('Content-Length: ' . filesize($path));
+		self::Status($status);
+		// Read and output the file
+		return readfile($path);
+	}
+	/**
 	 * Print only this output on the client side
 	 * @param mixed $output The data that is ready to print
 	 * @param mixed $status The header status
@@ -73,7 +87,17 @@ abstract class ResBase
 		ob_clean();
 		if (self::Status($status))
 			flush();
-		die(\MiMFa\Library\Convert::ToString($output));
+		exit(\MiMFa\Library\Convert::ToString($output));
+	}
+	/**
+	 * Send a file to the client side
+	 * @param mixed $path The data that is ready to print
+	 * @param mixed $status The header status
+	 */
+	public static function SendFile($path = null, $status = null)
+	{
+		if($res = self::SetFile($path, $status)) exit;
+		else $res;
 	}
 	/**
 	 * Print only this output on the client side then reload the page
@@ -85,7 +109,7 @@ abstract class ResBase
 		ob_clean();
 		if (self::Status($status))
 			flush();
-		die(\MiMFa\Library\Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
+		exit(\MiMFa\Library\Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
 	}
 	/**
 	 * Print only this output on the client side
@@ -97,9 +121,9 @@ abstract class ResBase
 		if (self::Status($status))
 			flush();
 		if ($output)
-			die(\MiMFa\Library\Convert::ToString($output));
+			exit(\MiMFa\Library\Convert::ToString($output));
 		else
-			die();
+			exit();
 	}
 
 	/**
@@ -263,6 +287,10 @@ abstract class ResBase
 	{
 		self::End("<html><head><script>window.location.assign(" . (isValid($url) ? "'" . \MiMFa\Library\Local::GetUrl($url) . "'" : "location.href") . ");</script></head></html>");
 	}
+	public static function Reload()
+	{
+		self::End(\MiMFa\Library\Html::Script("window.location.assign(location.href);"));
+	}
 	public static function Load($url = null)
 	{
 		self::End(\MiMFa\Library\Html::Script("window.location.assign(" . (empty($url) ? "location.href" : "`" . forceUrl($url) . "`") . ");"));
@@ -337,7 +365,7 @@ abstract class ResBase
 		echo $output = \MiMFa\Library\Html::Style($output);
 		return $output;
 	}
-	
+
 	/**
 	 * Enclosure codes
 	 * @param mixed $codes The data that is ready to print
@@ -354,12 +382,14 @@ abstract class ResBase
 	 */
 	public static function EnclosureDialogScript($codes = null, $name = null)
 	{
-		return self::EnclosureScript("sendInternal(null,{".($name??"response").":$codes});");
+		return self::EnclosureScript("sendInternal(null,{" . ($name ?? "response") . ":$codes});");
 	}
 	public static function Alert($message = null)
 	{
-		self::Render(self::EnclosureScript(
-			\MiMFa\Library\Script::Alert($message))
+		self::Render(
+			self::EnclosureScript(
+				\MiMFa\Library\Script::Alert($message)
+			)
 		);
 	}
 	public static function Confirm($message = null)
@@ -367,7 +397,7 @@ abstract class ResBase
 		$res = \Req::Confirm(null);
 		if ($res === null)
 			self::End(self::EnclosureDialogScript(
-				\MiMFa\Library\Script::Confirm($message), 
+				\MiMFa\Library\Script::Confirm($message),
 				"confirmed"
 			));
 		else

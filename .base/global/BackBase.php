@@ -59,9 +59,6 @@ abstract class BackBase
 	{
 		\MiMFa\Library\Revise::Load($this);
 
-		if (\_::$Config->DataBaseAddNameToPrefix)
-			\_::$Config->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_";
-
 		$this->Router = new \MiMFa\Library\Router();
 		$this->DataBase = new \MiMFa\Library\DataBase();
 		$this->Cryptograph = new \MiMFa\Library\HashCrypt();
@@ -72,8 +69,7 @@ abstract class BackBase
 
 		\MiMFa\Library\Revise::Decode($this, getValid($this->User->GetGroup(), "MetaData" , "[]"));
 		\MiMFa\Library\Revise::Decode($this, getValid($this->User->Get(), "MetaData" , "[]"));
-
-		$this->Session->Start();
+	
 		if (\_::$Config->AllowTranslate) {
 			$this->Translate->Language = \_::$Config->DefaultLanguage;
 			$this->Translate->Direction = \_::$Config->DefaultDirection;

@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 use MiMFa\Library\Contact;
 use MiMFa\Library\Cryptograph;
 use MiMFa\Library\SpecialCrypt;
@@ -39,7 +39,7 @@ class PaymentForm extends Form{
 	 */
 	public function __construct(Transaction ...$types) {
         parent::__construct();
-		$this->UseAJAX = false;
+		$this->UseAjax = false;
 		$this->Cryptograph = new SpecialCrypt();
 		$this->QRCodeBox = new QRCodeBox();
 		$this->QRCodeBox->Height = "30vmin";
@@ -97,8 +97,8 @@ class PaymentForm extends Form{
 		$trans = $this->Transaction;
 		$id = "_".getId();
         module("Field");
-		$mod = new Field();
-        yield ($mod->Set(
+		$module = new Field();
+        yield ($module->Set(
 					type:"text",
 					key:"SourceContent" ,
 					title:"Source" ,
@@ -108,7 +108,7 @@ class PaymentForm extends Form{
 				)
 			)->ToString();
         yield (
-			$mod->Set(
+			$module->Set(
 					type:"float",
 					key:"Value" ,
 					value:$trans->Value??0,
@@ -120,7 +120,7 @@ class PaymentForm extends Form{
 				)
 			)->ToString();
 		yield (
-			$mod->Set(
+			$module->Set(
 				type:"text",
 				key:"Transaction" ,
 				value:$trans->Transaction,
@@ -135,7 +135,7 @@ class PaymentForm extends Form{
         yield Html::Division(
 			Html::Rack(
 				Html::SmallSlot(
-					$mod->Set(
+					$module->Set(
 						type:"text",
 						key:"Source" ,
 						title:"From",
@@ -145,7 +145,7 @@ class PaymentForm extends Form{
 					)
 					->ToString()).
 				Html::SmallSlot(
-					$mod->Set(
+					$module->Set(
 						type:"text",
 						key:"Destination" ,
 						title:"To",
@@ -155,7 +155,7 @@ class PaymentForm extends Form{
 					)
 					->ToString())
 				).
-				$mod->Set(
+				$module->Set(
 					type:"text",
 					key:"Identifier" ,
 					value:$trans->Identifier,
@@ -163,7 +163,7 @@ class PaymentForm extends Form{
 					lock:!is_null($trans->Identifier)
 				)
 				->ToString().
-				$mod->Set(
+				$module->Set(
 					type:"Email",
 					key:"Email",
 					value:$trans->SourceEmail,
@@ -171,7 +171,7 @@ class PaymentForm extends Form{
 					lock:!is_null($trans->SourceEmail)
 				)
 				->ToString().
-				$mod->Set(
+				$module->Set(
 					type:"text",
 					key:"Contact",
 					value:$this->Contact,

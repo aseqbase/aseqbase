@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 class TemplateButton extends Module{
 	public $LightIcon = "sun";
 	public $DarkIcon = "moon";

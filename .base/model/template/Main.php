@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Template;
-use MiMFa\Library\HTML;
+use MiMFa\Library\Html;
 template("General");
 class Main extends General{
 	public $AllowHeader = true;
