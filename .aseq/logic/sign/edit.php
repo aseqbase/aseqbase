@@ -12,7 +12,7 @@ if ($imgObj = \Req::File("Image")) {
         if (isValid(\_::$Back->User->TemporaryImage) && !Local::DeleteFile(\_::$Back->User->TemporaryImage))
             \Res::Error("Could not delete your previous picture!");
         else {
-            $img = Local::UploadImage($imgObj, \_::$Aseq->PublicDirectory . "images/");
+            $img = Local::UploadImage($imgObj, \_::$Aseq->PublicDirectory . "image/");
             if (!is_null($img)) {
                 $received["Image"] = $img;
                 $imgchange = true;
@@ -48,7 +48,7 @@ try {
             if (isValid($img) != isValid(\_::$Back->User->TemporaryImage))
                 \Res::Reload();
             else
-                \Res::Script("
+                \_::$Front->Script("
 $(\"form .content img\").attr('src','" . \_::$Back->User->TemporaryImage . "');
 $('input[type=file]').val(null);
 ");

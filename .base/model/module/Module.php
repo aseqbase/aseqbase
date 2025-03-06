@@ -208,8 +208,8 @@ class Module extends \Base
           return
                $this->GetAttribute("id" , $this->Id) .
                $this->GetAttribute(" class", $this->Name . ' ' . $this->Class . $this->GetScreenClass()) .
-               (isValid($this->Attributes) ? " " . Convert::ToString($this->Attributes, " ", "=", "{0}={1} ") : "") .
-               (count($this) > 0 ? " " . Convert::ToString($this->__toArray(), " ", "=", "{0}={1} ") : "");
+               (isValid($this->Attributes) ? " " . Convert::ToString($this->Attributes, " ",  "{0}={1} ") : "") .
+               (count($this) > 0 ? " " . Convert::ToString($this->__toArray(), " ", "{0}={1} ") : "");
      }
      /**
       * Get the default module Screen Attributes

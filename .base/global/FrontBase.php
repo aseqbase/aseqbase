@@ -1,4 +1,3 @@
-
 <?php
 library("Revise");
 /**
@@ -52,14 +51,14 @@ abstract class FrontBase
 	 * @template array [normal, input, buttton, hover, inside, outside]
 	 * @var mixed
 	 */
-	public $ForeColorPalette = array("#151515","#202020","#101010", "#040506", "#3aa3e9", "#fdfeff");
+	public $ForeColorPalette = array("#151515", "#202020", "#101010", "#040506", "#3aa3e9", "#fdfeff");
 	/**
 	 * Back Colors Palette
 	 * @field array<color>
 	 * @template array [normal, input, buttton, hover, inside, outside]
 	 * @var mixed
 	 */
-	public $BackColorPalette = array("#fdfeff","#fafbfc","#fdfeff", "#fafcfd", "#fdfeff", "#3aa3e9");
+	public $BackColorPalette = array("#fdfeff", "#fafbfc", "#fdfeff", "#fafcfd", "#fdfeff", "#3aa3e9");
 	/**
 	 * Fonts Palette
 	 * @field array<font>
@@ -181,13 +180,15 @@ abstract class FrontBase
 			$this->DarkMode = true;
 		else
 			$this->DarkMode = false;
-		$lm = \Req::Receive("LightMode") ? changeMemo("LightMode", \Req::Receive("LightMode")) : false;
-		$dm = \Req::Receive("DarkMode") ? changeMemo("DarkMode", \Req::Receive("DarkMode")) : false;
+		$lm = \Req::Receive("LightMode");
+		$lm = $lm ? setMemo("LightMode", $lm) : false;
+		$dm = \Req::Receive("DarkMode");
+		$dm = $dm ? setMemo("DarkMode", $dm) : false;
 		if (
 			$this->DetectMode && (
-				($this->DarkMode && (!empty($lm) || getMemo("LightMode")))
+				($this->DarkMode && ($lm || getMemo("LightMode")))
 				||
-				(!$this->DarkMode && (!empty($dm) || getMemo("DarkMode")))
+				(!$this->DarkMode && ($dm || getMemo("DarkMode")))
 			)
 		) {
 			$middle = $this->ForeColorPalette;
@@ -195,19 +196,6 @@ abstract class FrontBase
 			$this->BackColorPalette = $middle;
 			$this->DarkMode = !$this->DarkMode;
 		}
-	}
-
-	public function GetInitial(): string|null
-	{
-		return join(PHP_EOL, $this->Initials);
-	}
-	public function GetMain(): string|null
-	{
-		return join(PHP_EOL, $this->Mains);
-	}
-	public function GetFinal(): string|null
-	{
-		return join(PHP_EOL, $this->Finals);
 	}
 
 	public function CreateTemplate($name = null, $data = [])
@@ -241,6 +229,166 @@ abstract class FrontBase
 		elseif ($sc > 382)
 			return false;
 		return null;
+	}
+
+
+	public function GetInitial(): string|null
+	{
+		return join(PHP_EOL, $this->Initials);
+	}
+	public function GetMain(): string|null
+	{
+		return join(PHP_EOL, $this->Mains);
+	}
+	public function GetFinal(): string|null
+	{
+		return join(PHP_EOL, $this->Finals);
+	}
+
+	/**
+	 * Get and Set special part of client side
+	 * @param mixed $script The front JS codes
+	 * @param mixed $callback The call back handler
+	 * @example: Interact('$("body").html', function(selectedHtml)=>{ //do somework })
+	 */
+	public static function Interact($script = null, $callback = null)
+	{
+        $selector = "'body'";
+        $callbackScript = "(data,err)=>$($selector).append(data??err)";
+        $progressScript = "null";
+		$timeout = 60000;
+		$id = "S_".getID(true);
+		if(isStatic($callback)) echo "<script id='$id'>$(document).ready(()=>{(".$callbackScript.")(".
+				\MiMFa\Library\Script::Convert($callback).
+			",$script);document.getElementById('$id').remove();});</script>";
+		else echo "<script id='$id'>" .(
+				$callback ? '$(document).ready(()=>{'.
+					'sendInternal(null,{"' .
+						\MiMFa\Library\Internal::Set($callback) . '":JSON.stringify('. $script .
+					")},$selector,$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();});"
+				: $script
+			). "</script>";
+	}
+	/**
+	 * Get a special part of client side
+	 * @param mixed $selector The source selector
+	 * @param mixed $callback The call back handler
+	 * @example: Get("body", function(selectedHtml)=>{ //do somework })
+	 */
+	public static function Get($selector = null, $callback = null)
+	{
+		self::Interact("$(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").prop('outerHTML')", $callback);
+	}
+	/**
+	 * Set output instead if a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public static function Set($selector = null, $handler = null, ...$args)
+	{
+		echo "<script>" .
+			\MiMFa\Library\Internal::MakeScript(
+				$handler,
+				$args,
+				"(data,err)=> $(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").replaceWith(data??err)"
+			)
+			. "</script>";
+	}
+	/**
+	 * Print output inside a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public static function Fill($selector = "body", $handler = null, ...$args)
+	{
+		echo "<script>" .
+			\MiMFa\Library\Internal::MakeScript(
+				$handler,
+				$args,
+				"(data,err)=> $(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").html(data??err)"
+			)
+			. "</script>";
+	}
+	/**
+	 * Append output on a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public static function Append($selector = "body", $handler = null, ...$args)
+	{
+		echo "<script>" .
+			\MiMFa\Library\Internal::MakeScript(
+				$handler,
+				$args,
+				"(data,err)=>$(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").append(data??err)"
+			)
+			. "</script>";
+	}
+	/**
+	 * Prepend output on a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public static function Prepend($selector = "body", $handler = null, ...$args)
+	{
+		echo "<script>" .
+			\MiMFa\Library\Internal::MakeScript(
+				$handler,
+				$args,
+				"(data,err)=>$(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").prepend(data??err)"
+			)
+			. "</script>";
+	}
+	/**
+	 * Forget a special part of client side
+	 * @param mixed $selector The destination selector
+	 */
+	public static function Forget($selector = "body")
+	{
+		echo "<script>$(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").remove()</script>";
+	}
+
+	/**
+	 * Render Scripts in the client side
+	 * @param mixed $output The data that is ready to print
+	 */
+	public static function Script($content, $source = null, ...$attributes)
+	{
+		self::Append("head", \MiMFa\Library\Html::Script($content, $source, ...$attributes));
+	}
+	/**
+	 * Render Styles in the client side
+	 * @param mixed $output The data that is ready to print
+	 */
+	public static function Style($content, $source = null, ...$attributes)
+	{
+		self::Append("head", \MiMFa\Library\Html::Style($content, $source, ...$attributes));
+	}
+
+	public static function Alert($message = null, $callback = null)
+	{
+		self::Interact(
+			\MiMFa\Library\Script::Alert($message)."??true",
+			$callback
+		);
+	}
+	public static function Confirm($message = null, $callback = null)
+	{
+		self::Interact(
+			\MiMFa\Library\Script::Confirm($message),
+			$callback
+		);
+	}
+	public static function Prompt($message = null, $callback = null, $default = null)
+	{
+		self::Interact(
+			\MiMFa\Library\Script::Prompt($message, $default),
+			$callback
+		);
 	}
 }
 ?>

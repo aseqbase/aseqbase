@@ -7,7 +7,7 @@ library("Revise");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
  */
-abstract class InformationBase{
+abstract class InformationBase extends ArrayObject{
 	/**
 	 * The website owner name
 	 * @var mixed
@@ -171,7 +171,7 @@ abstract class InformationBase{
      * @var array
 	 */
 	public $MainMenus = array(
-		array("Name" =>"HOME","Link"=>"/home","Image" =>"/asset/symbol/home.png","Attributes"=> "class='menu-link'")
+		array("Name" =>"HOME","Path"=>"/home","Image" =>"/asset/symbol/home.png","Attributes"=> "class='menu-link'")
 	);
 
 	/**
@@ -237,5 +237,14 @@ abstract class InformationBase{
 		$this->Contacts = forceUrls($this->Contacts);
 	}
 
+	public function __get($name) {
+        return $this[$this->PropertyName($name)];
+    }
+    public function __set($name, $value) {
+        $this[$this->PropertyName($name)] = $value;
+    }
+    public function PropertyName($name) {
+        return preg_replace("/\W+/", "", strToProper($name));
+    }
 }
 ?>

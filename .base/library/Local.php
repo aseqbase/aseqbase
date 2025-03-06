@@ -129,7 +129,7 @@ class Local
 			$dir .= DIRECTORY_SEPARATOR . $d;
 			if (!file_exists($dir)) {
 				mkdir($dir, 0777, true);
-				self::CreateFile($dir . DIRECTORY_SEPARATOR . "index.html");
+				self::CreateFile($dir . DIRECTORY_SEPARATOR . "index.html", "<!--Silence is the Best-->");
 			}
 		}
 		return $dir . DIRECTORY_SEPARATOR;
@@ -185,9 +185,12 @@ class Local
 	{
 		return file_exists(self::GetPath($path));
 	}
-	public static function CreateFile($path)
+	public static function CreateFile($path, $content = null)
 	{
-		return fopen(self::GetPath($path), "w");
+		$res = fopen($path, "w");
+		if($content) fwrite($res, $content);
+		fclose($res);
+		return $res;
 	}
 	public static function DeleteFile($path)
 	{
@@ -303,26 +306,32 @@ class Local
 		foreach ($extensions ?? \_::$Config->GetAcceptableFormats() as $ext)
 			if ($allow = $fileType === $ext || "." . $fileType === $ext)
 				break;
+		$sourceFile = $fileObject["tmp_name"];
 		if (!$allow) {
-			if($deleteSource) unlink($fileObject["tmp_name"]);
+			if($deleteSource) unlink($sourceFile);
 			throw new \Exception("The file format is not acceptable!");
 		}
 		// Check file size
 		$minSize = $minSize ?? \_::$Config->MinimumFileSize;
 		$maxSize = $maxSize ?? \_::$Config->MaximumFileSize;
 		if ($fileObject["size"] < $minSize) {
-			if($deleteSource) unlink($fileObject["tmp_name"]);
+			if($deleteSource) unlink($sourceFile);
 			throw new \Exception("The file size is very small!");
 		} elseif ($fileObject["size"] > $maxSize) {
-			if($deleteSource) unlink($fileObject["tmp_name"]);
+			if($deleteSource) unlink($sourceFile);
 			throw new \Exception("The file size is very big!");
 		}
-		$sourceFile = self::NewUniquePath($fileName, ".$fileType", $dir);
-		$destFile = $fileObject["tmp_name"];
-		if (is_uploaded_file($destFile) && move_uploaded_file($destFile, $sourceFile))
-			return self::GetUrl($sourceFile);
-		if (rename($destFile, $sourceFile))
-			return self::GetUrl($sourceFile);
+		if(!$dir) { 
+			$dir = \_::$Aseq->TempDirectory;
+			$t = preg_find("/^[\w-]+\b/", $fileObject["type"]??"");
+			if($t) $dir .= $dir.DIRECTORY_SEPARATOR;
+		}
+		$destFile = self::NewUniquePath($fileName, ".$fileType", $dir);
+		if (is_uploaded_file($sourceFile) && move_uploaded_file($sourceFile, $destFile))
+			return self::GetUrl($destFile);
+		if (rename($sourceFile, $destFile))
+			return self::GetUrl($destFile);
+		if($deleteSource) unlink($sourceFile);
 		throw new \Exception("Sorry, there was an error uploading your file.");
 	}
 	/**

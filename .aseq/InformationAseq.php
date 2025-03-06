@@ -20,34 +20,34 @@ class InformationAseq extends InformationBase
 	public $KeyWords = array("MiMFa aseqbase Framework", "MiMFa", "aseqbase", "Web Development", "Development", "Web Framework", "Website", "Framework");
 
 	public $MainMenus = array(
-		array("Name" => "HOME", "Link"=> "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "POSTS", "Link"=> "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "FORUMS", "Link"=> "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "INTRODUCTION", "Link"=> "/introduction", "Image" => "/asset/symbol/introduction.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "GIT", "Link"=> "http://github.com/mimfa/aseqbase", "Image" => "/asset/symbol/market.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "PRODUCTS", "Link"=> "http://github.com/mimfa", "Image" => "/asset/symbol/product.png", "Attributes" => "class='menu-link'"),
-		array("Name" =>"ABOUT","Link"=>"/about","Image" =>"/asset/symbol/about.png","Attributes"=> "class='menu-link'","Items"=> array(
-			array("Name" =>"CONTACTS","Link"=>"/contact","Image" =>"/asset/symbol/contact.png","Attributes"=> "class='menu-link'"),
-			array("Name" =>"ABOUT","Link"=>"/about","Image" =>"/asset/symbol/about.png","Attributes"=> "class='menu-link'"),
-			array("Name" =>"TEAM","Link"=>"/team","Image" =>"/asset/symbol/team.png","Attributes"=> "class='menu-link'")
+		array("Name" => "HOME", "Path"=> "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "POSTS", "Path"=> "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "FORUMS", "Path"=> "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "INTRODUCTION", "Path"=> "/introduction", "Image" => "/asset/symbol/introduction.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "GIT", "Path"=> "http://github.com/mimfa/aseqbase", "Image" => "/asset/symbol/market.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "PRODUCTS", "Path"=> "http://github.com/mimfa", "Image" => "/asset/symbol/product.png", "Attributes" => "class='menu-link'"),
+		array("Name" =>"ABOUT","Path"=>"/about","Image" =>"/asset/symbol/about.png","Attributes"=> "class='menu-link'","Items"=> array(
+			array("Name" =>"CONTACTS","Path"=>"/contact","Image" =>"/asset/symbol/contact.png","Attributes"=> "class='menu-link'"),
+			array("Name" =>"ABOUT","Path"=>"/about","Image" =>"/asset/symbol/about.png","Attributes"=> "class='menu-link'"),
+			array("Name" =>"TEAM","Path"=>"/team","Image" =>"/asset/symbol/team.png","Attributes"=> "class='menu-link'")
 		)),	);
 
 	public $SideMenus = array(
-		array("Name" => "HOME", "Link"=> "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "POSTS", "Link"=> "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "FORUMS", "Link"=> "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "SERVICE", "Link"=> "#embed", "Image" => "/asset/symbol/service.png", "Attributes" => "class='embed-link' data-target='.page' onclick='viewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); viewSideMenu(false);'"),
-		array("Name" => "ABOUT", "Link"=> "/about", "Image" => "/asset/symbol/about.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "CONTACTS", "Link"=>"/contact", "Image" => "/asset/symbol/contact.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "TEAM", "Link"=> "/team", "Image" => "/asset/symbol/team.png", "Attributes" => "class='menu-link'")
+		array("Name" => "HOME", "Path"=> "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "POSTS", "Path"=> "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "FORUMS", "Path"=> "/forums", "Image" => "/asset/symbol/forum.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "SERVICE", "Path"=> "#embed", "Image" => "/asset/symbol/service.png", "Attributes" => "class='embed-link' data-target='.page' onclick='viewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); viewSideMenu(false);'"),
+		array("Name" => "ABOUT", "Path"=> "/about", "Image" => "/asset/symbol/about.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "CONTACTS", "Path"=>"/contact", "Image" => "/asset/symbol/contact.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "TEAM", "Path"=> "/team", "Image" => "/asset/symbol/team.png", "Attributes" => "class='menu-link'")
 	);
 
 	public $Shortcuts = array(
-		array("Name" => "Menu", "Link"=> "", "Image" => "/asset/symbol/menu.png", "Attributes" => "onclick='viewSideMenu()'"),
-		array("Name" => "Posts", "Link"=> "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "Home", "Link"=> "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
-		array("Name" => "Contact", "Link"=> "/contact", "Image" => "/asset/symbol/amplifier.png", "Attributes" => "class='menu-link'"),
-		array("Name" => "About", "Link"=> "/about", "Image" => "/asset/symbol/info.png", "Attributes" => "class='menu-link'")
+		array("Name" => "Menu", "Path"=> "", "Image" => "/asset/symbol/menu.png", "Attributes" => "onclick='viewSideMenu()'"),
+		array("Name" => "Posts", "Path"=> "/posts", "Image" => "/asset/symbol/document.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "Home", "Path"=> "/home", "Image" => "/asset/symbol/home.png", "Attributes" => "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
+		array("Name" => "Contact", "Path"=> "/contact", "Image" => "/asset/symbol/amplifier.png", "Attributes" => "class='menu-link'"),
+		array("Name" => "About", "Path"=> "/about", "Image" => "/asset/symbol/info.png", "Attributes" => "class='menu-link'")
 	);
 
 	public $Services = array(
@@ -57,11 +57,11 @@ class InformationAseq extends InformationBase
 	);
 
 	public $Contacts = array(
-		array("Name" => "Instagram", "Link"=> "/?page=https://www.instagram.com/aseqbase", "Icon"=> "fa fa-instagram"),
-		array("Name" => "Telegram", "Link"=> "https://t.me/aseqbase", "Icon"=> "fa fa-telegram"),
-		array("Name" => "Email", "Link"=> "mailto:aseqbase@mimfa.net", "Icon"=> "fa fa-envelope"),
-		array("Name" => "Github", "Link"=> "http://github.com/mimfa", "Icon"=> "fa fa-github"),
-		array("Name" => "Forum", "Link"=> "/chat", "Image" => "/asset/symbol/chat.png", "Icon"=> "fa fa-comments")
+		array("Name" => "Instagram", "Path"=> "/?page=https://www.instagram.com/aseqbase", "Icon"=> "fa fa-instagram"),
+		array("Name" => "Telegram", "Path"=> "https://t.me/aseqbase", "Icon"=> "fa fa-telegram"),
+		array("Name" => "Email", "Path"=> "mailto:aseqbase@mimfa.net", "Icon"=> "fa fa-envelope"),
+		array("Name" => "Github", "Path"=> "http://github.com/mimfa", "Icon"=> "fa fa-github"),
+		array("Name" => "Forum", "Path"=> "/chat", "Image" => "/asset/symbol/chat.png", "Icon"=> "fa fa-comments")
 	);
 }
 ?>

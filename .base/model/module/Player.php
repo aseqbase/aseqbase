@@ -2,7 +2,10 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-class Player extends Module{
+use MiMFa\Library\Script;
+
+class Player extends Module
+{
 	public $Content = null;
 	public $Source = null;
 	public $AllowZoom = true;
@@ -18,23 +21,26 @@ class Player extends Module{
 	public $MaxWidth = "100vw";
 
 	/**
-     * Create the module
-     * @param array|string|null $source The module source
-     */
-	public function __construct($source =  null){
-        parent::__construct();
+	 * Create the module
+	 * @param array|string|null $source The module source
+	 */
+	public function __construct($source = null)
+	{
+		parent::__construct();
 		$this->Set($source);
-    }
+	}
 	/**
-     * Set the main properties of module
-     * @param string|null $source The module source
-     */
-	public function Set($source =  null){
+	 * Set the main properties of module
+	 * @param string|null $source The module source
+	 */
+	public function Set($source = null)
+	{
 		$this->Source = $source;
 		return $this;
-    }
+	}
 
-	public function GetStyle(){
+	public function GetStyle()
+	{
 		return Html::Style("
 			.{$this->Name}>.controls{
 				opacity: 0;
@@ -45,8 +51,8 @@ class Player extends Module{
 				font-size: var(--size-1);
 				color: var(--fore-color-3);
 				z-index: 1;
-				".\MiMFa\Library\Style::UniversalProperty("text-stroke","1px var(--back-color-3)")."
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("text-stroke", "1px var(--back-color-3)") . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name}>.controls>.button {
 				aspect-ratio: 1;
@@ -54,26 +60,26 @@ class Player extends Module{
 				display: inline;
 				padding: 1vh;
 				cursor: pointer;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name}>.controls>.button:hover {
 				background-color: var(--back-color-3);
-				".\MiMFa\Library\Style::UniversalProperty("text-stroke","0px")."
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("text-stroke", "0px") . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 
 			.{$this->Name}:hover>.controls{
 				opacity: 1;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 
 			.{$this->Name}>.content {
-				".\MiMFa\Library\Style::DoProperty("min-width",$this->MinWidth)."
-				".\MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight)."
-				".\MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth)."
-				".\MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight)."
-				".\MiMFa\Library\Style::DoProperty("width", $this->Width)."
-				".\MiMFa\Library\Style::DoProperty("height", $this->Height)."
+				" . \MiMFa\Library\Style::DoProperty("min-width", $this->MinWidth) . "
+				" . \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight) . "
+				" . \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth) . "
+				" . \MiMFa\Library\Style::DoProperty("max-height", $this->MaxHeight) . "
+				" . \MiMFa\Library\Style::DoProperty("width", $this->Width) . "
+				" . \MiMFa\Library\Style::DoProperty("height", $this->Height) . "
 				padding: 0px;
 				position: relative;
 				text-align: center;
@@ -84,7 +90,7 @@ class Player extends Module{
 				background: var(--back-color-3);
 				width: 0px;
 				height: 0px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name}:hover>.content::-webkit-scrollbar {
 				width: 5px;
@@ -94,25 +100,25 @@ class Player extends Module{
 				//background: var(--back-color-1);
 				width: 10px;
 				height: 10px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-track {
 				border-radius: 1px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-track:hover {
 				border-radius: 0px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-thumb {
 				background: var(--fore-color-3);
 				border-radius: 5px;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-thumb:hover {
 				background: var(--fore-color-1);
-				".($this->AllowZoom?"cursor: grab;":"")."
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				" . ($this->AllowZoom ? "cursor: grab;" : "") . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name}>.content>:not(.page,html,head,body,style,script,link,meta,title) {
 				min-width: auto;
@@ -130,42 +136,50 @@ class Player extends Module{
 		");
 	}
 
-	public function Get(){
+	public function Get()
+	{
 		return Convert::ToString($this->GetElements($this->Content, $this->Source));
 	}
 
-	public function GetElements($content = null, $source = null){
-        $this->Source = $source??$this->Source;
-        $this->Content = $content??$this->Content;
-        yield "<div class=\"controls\">";
-        yield Convert::ToString($this->PrependControls);
-        foreach($this->GetControls() as $btn) yield $btn;
-        yield Convert::ToString($this->AppendControls);
-        yield "</div>";
-        yield self::ToElement($this->Source);
-        yield $this->GetContents($this->Content);
-    }
-	public function ToElement($source){
-		return join("\r\n",iterator_to_array(self::ToElements($source)));
-	}
-	public function ToElements($source){
-		yield "<div class=\"content\">";
-		if(isValid($source))
-			if(is_array($source))
-				foreach ($source as $value)
-				    yield from self::ToElements($value);
-			elseif(isFormat($source,".mpg",".mpeg", ".mp4",".avi",".mkv",".mov",".wmv",".flv",".webm"))
-				yield Html::Video(null,$source, "controls");
-			elseif(isFormat($source,".wav",".mp3",".aac",".amr",".ogg",".flac",".wma",".m4a"))
-				yield Html::Audio($source, "controls");
-			elseif(isFormat($source,".png",".jpg",".jpeg",".jiff",".gif",".tif",".tiff",".bmp",".ico",".svg", ".webp"))
-				yield Html::Image($source);
-			else yield Html::Embed($source);
+	public function GetElements($content = null, $source = null)
+	{
+		$this->Source = $source ?? $this->Source;
+		$this->Content = $content ?? $this->Content;
+		yield "<div class=\"controls\">";
+		yield Convert::ToString($this->PrependControls);
+		foreach ($this->GetControls() as $btn)
+			yield $btn;
+		yield Convert::ToString($this->AppendControls);
 		yield "</div>";
+		yield self::ToElement($this->Source);
+		yield $this->GetContents($this->Content);
+	}
+	public function ToElement($source)
+	{
+		return join("\r\n", iterator_to_array(self::ToElements($source)));
+	}
+	public function ToElements($source)
+	{
+		if (isValid($source)) {
+			yield "<div class=\"content\">";
+			if (is_array($source))
+				foreach ($source as $value)
+					yield from self::ToElements($value);
+			elseif (isFormat($source, ".mpg", ".mpeg", ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm"))
+				yield Html::Video(null, $source, "controls");
+			elseif (isFormat($source, ".wav", ".mp3", ".aac", ".amr", ".ogg", ".flac", ".wma", ".m4a"))
+				yield Html::Audio($source, "controls");
+			elseif (isFormat($source, ".png", ".jpg", ".jpeg", ".jiff", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp"))
+				yield Html::Image($source);
+			else
+				yield Html::Embed($source);
+			yield "</div>";
+		}
 	}
 
-	public function GetScript(){
-		return Html::Script(($this->AllowZoom?"
+	public function GetScript()
+	{
+		return Html::Script(($this->AllowZoom ? "
 			let {$this->Name}slider = null;
 			let {$this->Name}mouseDown = false;
 			let {$this->Name}startX, {$this->Name}scrollLeft;
@@ -206,18 +220,18 @@ class Player extends Module{
 					{$this->Name}slider.addEventListener('dblclick', (e) => { {$this->Name}_Zoom(); });
 				}
 			);
-		":"")."
-			let {$this->Name}_Source = ".(isValid($this->Source)?("`".$this->Source."`"):"null")."
+		" : "") . "
+			let {$this->Name}_Source = " . (isValid($this->Source) ? Script::Convert($this->Source) : "null") . "
 
 			function {$this->Name}_Set(content, source = null){
 				{$this->Name}_Source = source??{$this->Name}_Source??content;
-				if(content !== null) $('.{$this->Name}>.content').html(".$this->ContentScript("content" ).");
+				if(content !== null) $('.{$this->Name}>.content').html(" . $this->ContentScript('${content}') . ");
 			}
 			function {$this->Name}_Clear(){
 				$('.{$this->Name}>.content').html('');
 			}
 			function {$this->Name}_Focus(){
-				$('.{$this->Name}>.controls').toggle(".\_::$Front->AnimationSpeed.");
+				$('.{$this->Name}>.controls').toggle(" . \_::$Front->AnimationSpeed . ");
 			}
 			function {$this->Name}_Reset(){
 				let box = document.querySelector('.{$this->Name}>.content>*');
@@ -261,54 +275,70 @@ class Player extends Module{
 		");
 	}
 
-	public function GetContents($content){
-		if(isValid($content)) return "<div class='content' ondblclick=\"".$this->FocusScript()."\">".$content."</div>";
+	public function GetContents($content)
+	{
+		if (isValid($content))
+			return "<div class='content' ondblclick=\"" . $this->FocusScript() . "\">" .
+				Convert::ToString($content) .
+				"</div>";
 		return null;
-    }
-	public function GetControls(){
-		if($this->AllowDownload)  yield '<div class="fa fa-download button" onclick="'.$this->DownloadScript().'"></div>';
-		if($this->AllowShare)  yield '<div class="fa fa-share-alt button" onclick="'.$this->ShareScript().'"></div>';
-		if($this->AllowZoom)  yield '<div class="fa fa-minus button" onclick="'.$this->ZoomOutScript().'"></div>';
-		if($this->AllowZoom)  yield '<div class="fa fa-plus button" onclick="'.$this->ZoomInScript().'"></div>';
-		if($this->AllowZoom)  yield '<div class="fa fa-refresh button" onclick="'.$this->ResetScript().'"></div>';
+	}
+	public function GetControls()
+	{
+		if ($this->AllowDownload)
+			yield '<div class="fa fa-download button" onclick="' . $this->DownloadScript() . '"></div>';
+		if ($this->AllowShare)
+			yield '<div class="fa fa-share-alt button" onclick="' . $this->ShareScript() . '"></div>';
+		if ($this->AllowZoom)
+			yield '<div class="fa fa-minus button" onclick="' . $this->ZoomOutScript() . '"></div>';
+		if ($this->AllowZoom)
+			yield '<div class="fa fa-plus button" onclick="' . $this->ZoomInScript() . '"></div>';
+		if ($this->AllowZoom)
+			yield '<div class="fa fa-refresh button" onclick="' . $this->ResetScript() . '"></div>';
 	}
 
-	public function ContentScript($content){
-		return $content;
+	public function ContentScript($content)
+	{
+		return Script::Convert($content);
 	}
 
-	public function SetScript($content = "``", $source = "null"){
-		return $this->Name."_Set(".
-		$this->ReadyToScript($content).", ".
-		$this->ReadyToScript($source).");";
+	public function SetScript($content = "", $source = null)
+	{
+		return $this->Name . "_Set(" .
+			Script::Convert($content ?? $this->Content) . ", " .
+			Script::Convert($source ?? $this->Source) . ");";
 	}
-	public function ClearScript(){
-		return $this->Name."_Clear();";
+	public function ClearScript()
+	{
+		return $this->Name . "_Clear();";
 	}
-	public function FocusScript(){
-		return $this->Name."_Focus();";
+	public function FocusScript()
+	{
+		return $this->Name . "_Focus();";
 	}
-	public function ResetScript(){
-		return $this->Name."_Reset();";
+	public function ResetScript()
+	{
+		return $this->Name . "_Reset();";
 	}
-	public function ZoomScript(){
-		return $this->Name."_Zoom();";
+	public function ZoomScript()
+	{
+		return $this->Name . "_Zoom();";
 	}
-	public function ZoomInScript(){
-		return $this->Name."_ZoomIn();";
+	public function ZoomInScript()
+	{
+		return $this->Name . "_ZoomIn();";
 	}
-	public function ZoomOutScript(){
-		return $this->Name."_ZoomOut();";
+	public function ZoomOutScript()
+	{
+		return $this->Name . "_ZoomOut();";
 	}
-	public function DownloadScript(){
-		return $this->Name."_Download();";
+	public function DownloadScript()
+	{
+		return $this->Name . "_Download();";
 	}
-	public function ShareScript(){
-		return $this->Name."_Share();";
-	}
-
-	public function ReadyToScript($text){
-		return str_replace("'","&#8216;", str_replace("\"","&#8220;", $text??""));
+	public function ShareScript()
+	{
+		return $this->Name . "_Share();";
 	}
 }
 ?>

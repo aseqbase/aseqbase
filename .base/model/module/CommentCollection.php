@@ -227,9 +227,8 @@ class CommentCollection extends Collection{
 			}
 			.{$this->Name} .item .sidebtn{
                 position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
+                margin: calc(-1 * var(--size-2));
+                margin-bottom: 0;
                 width: 100%;
 				text-align: end;
 				opacity: 0;
@@ -441,12 +440,12 @@ class CommentCollection extends Collection{
                                     'Contact'
                                 );
                         if($p_showexcerpt) yield "<div class='excerpt hover-hide'>$p_excerpt</div>";
-                        if($p_showmessage && !isEmpty($p_message)) yield "<div class='full hover-show'>".__(Convert::ToHtml($p_message), refering:$p_refering)."</div>";
+                        if($p_showmessage && !isEmpty($p_message)) yield "<div class='full hover-show'>".__(Html::Convert($p_message), refering:$p_refering)."</div>";
                         if($p_showmeta && isValid($p_meta)) yield "<div class='metadata'>$p_meta</div>";
                         if($p_showimage && isValid($p_image))
                             yield "<div class='col-lg-3'>".$img->ToString()."</div>";
                         if($p_showattach && isValid($p_attach))
-                            yield "<div class='attach'>".Convert::ToHtml($p_attach)."</div>";
+                            yield "<div class='attach'>".Html::Convert($p_attach)."</div>";
                     yield "</div>";
                     if(!isEmpty($p_replyes))
                         yield Html::Division(Html::Division("",["class"=>"reply-box"]).$this->Get($p_replyes), ["class"=>"replies"]);

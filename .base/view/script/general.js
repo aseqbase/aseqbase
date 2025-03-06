@@ -1,4 +1,4 @@
-const isNull = function (obj) {
+let isNull = function (obj) {
 	return obj === null;
 };
 
@@ -6,56 +6,56 @@ const isNull = function (obj) {
 // 	return typeof obj != "string" && obj + "" === "NaN";
 // }
 
-const isEmpty = function (obj) {
+let isEmpty = function (obj) {
 	return obj === null || obj === "" || obj == {} || obj == [];
 };
 
 
-const isDefined = function (obj) {
+let isDefined = function (obj) {
 	return !isUndefined(obj);
 };
 
-const isUndefined = function (obj) {
+let isUndefined = function (obj) {
 	return obj === undefined;
 };
 
-const isHollow = function (obj) {
+let isHollow = function (obj) {
 	return obj === undefined || isNaN(obj) || isEmpty(obj) || (obj + "").trim() === "";
 };
 
-const isSet = function (obj) {
+let isSet = function (obj) {
 	return !isUnset(obj);
 };
 
-const isUnset = function (obj) {
+let isUnset = function (obj) {
 	return obj === undefined || obj === null || isNaN(obj);
 };
 
-const isString = function (obj) {
+let isString = function (obj) {
 	return typeof obj === 'string';
 };
 
-const isText = function (obj) {
+let isText = function (obj) {
 	return isString(obj) && !obj.trimStart().startsWith("<");
 };
 
-const isObject = function (obj) {
+let isObject = function (obj) {
 	return typeof obj === 'object';
 };
 
-const isNumber = function (obj) {
+let isNumber = function (obj) {
 	return parseFloat(obj) + "" === obj + "";
 };
 
-const isInt = function (n) {
+let isInt = function (n) {
 	return Number(n) === n && n % 1 === 0;
 };
 
-const isFloat = function (n) {
+let isFloat = function (n) {
 	return Number(n) === n && n % 1 !== 0;
 };
 
-const isArray = function (obj, dim = 1) {
+let isArray = function (obj, dim = 1) {
 	if (isHollow(obj)) return false;
 	let objt = typeof obj;
 	if (objt === 'string') return false;
@@ -65,13 +65,13 @@ const isArray = function (obj, dim = 1) {
 	return false;
 };
 
-const isIterable = function (obj) {
+let isIterable = function (obj) {
 	// checks for null and undefined
 	if (obj == null) return false;
 	return typeof obj[Symbol.iterator] === 'function';
 }
 
-const apply = function (func, args, maxArgsNum = 1) {
+let apply = function (func, args, maxArgsNum = 1) {
 	if (isArray(args))
 		if (count(args) > maxArgsNum)
 			return each(args, item => apply(func, item, maxArgsNum));
@@ -79,13 +79,13 @@ const apply = function (func, args, maxArgsNum = 1) {
 	else return func(args);
 };
 
-const between = function () {
+let between = function () {
 	for (const val of arguments)
 		if (isSet(val)) return val;
 	return arguments[arguments.length - 1];
 };
 
-const expand = function* () {
+let expand = function* () {
 	for (const val of arguments)
 		if (Array.isArray(val))
 			for (const v of expand.apply(null, val))
@@ -96,7 +96,7 @@ const expand = function* () {
 		else yield val;
 };
 
-const array = function (arr) {
+let array = function (arr) {
 	if (isArray(arr))
 		if (count(arr) === 1)
 			return array(arr[0]);
@@ -105,7 +105,7 @@ const array = function (arr) {
 	else return [arr];
 };
 
-const each = function (arr, func = (o, i) => o) {
+let each = function (arr, func = (o, i) => o) {
 	if (isArray(arr))
 		return Array.from(
 			(function* () {
@@ -117,7 +117,7 @@ const each = function (arr, func = (o, i) => o) {
 	else return [func(arr, 0)];
 };
 
-const eachIn = function (arr, func = (o, i) => o) {
+let eachIn = function (arr, func = (o, i) => o) {
 	return Array.from(
 		(function* () {
 			let i = 0;
@@ -127,7 +127,7 @@ const eachIn = function (arr, func = (o, i) => o) {
 	);
 };
 
-const where = function (arr, condition = (o, i) => true, func = null) {
+let where = function (arr, condition = (o, i) => true, func = null) {
 	if (func === null) {
 		if (isArray(arr))
 			return Array.from(
@@ -153,7 +153,7 @@ const where = function (arr, condition = (o, i) => true, func = null) {
 	return [];
 };
 
-const any = function (arr, condition = (o, i) => true, func = null) {
+let any = function (arr, condition = (o, i) => true, func = null) {
 	if (func === null) {
 		if (isArray(arr))
 			for (const item of arr)
@@ -170,12 +170,12 @@ const any = function (arr, condition = (o, i) => true, func = null) {
 	}
 };
 
-const select = function (arr, func = (o, i) => o) {
+let select = function (arr, func = (o, i) => o) {
 	if (isArray(arr)) return each(arr, func);
 	else return eachIn(arr, func);
 };
 
-const loop = function (i, len = null, func = i => i) {
+let loop = function (i, len = null, func = i => i) {
 	if (len == null) {
 		len = i;
 		i = 0;
@@ -188,11 +188,11 @@ const loop = function (i, len = null, func = i => i) {
 	);
 };
 
-const count = function () {
+let count = function () {
 	return each.apply(null, arguments).length;
 };
 
-const first = function () {
+let first = function () {
 	if (arguments.length == 0) return null;
 	if (arguments.length == 1)
 		if (isArray(arguments[0])) return arguments[0][0];
@@ -200,7 +200,7 @@ const first = function () {
 	if (arguments.length > 1) return arguments[0];
 }
 
-const last = function () {
+let last = function () {
 	if (arguments.length == 0) return null;
 	if (arguments.length == 1)
 		if (isArray(arguments[0])) return arguments[0][arguments[0].length - 1];
@@ -208,7 +208,7 @@ const last = function () {
 	if (arguments.length > 1) return arguments[0];
 }
 
-const sort = function () {
+let sort = function () {
 	if (arguments.length > 2) {
 		let func = arguments[2];
 		return each.apply(null, arguments).sort((a, b) => func(a) < func(b) ? -1 : func(a) > func(b));
@@ -216,28 +216,28 @@ const sort = function () {
 	return each.apply(null, arguments).sort((a, b) => a < b ? -1 : a > b);
 };
 
-const distinct = function () {
+let distinct = function () {
 	if (arguments.length > 2) return each.apply(null, arguments).filter((v, i, a) => arguments[2](v, i, a));
 	return each.apply(null, arguments).filter((v, i, a) => a.indexOf(v) === i);
 };
 
-const tryParseFloat = function (val) {
+let tryParseFloat = function (val) {
 	return isEmpty(val) ? 0 : between(parseFloat(val), val);
 };
 
-const tryParseInt = function (val) {
+let tryParseInt = function (val) {
 	return isEmpty(val) ? 0 : between(parseInt(val), val);
 };
 
-const forceParseFloat = function (val, def = 0) {
+let forceParseFloat = function (val, def = 0) {
 	return parseFloat(val ?? def) ?? def;
 };
 
-const forceParseInt = function (val, def = 0) {
+let forceParseInt = function (val, def = 0) {
 	return parseInt(val ?? def) ?? def;
 };
 
-const wait = function (milliseconds) {
+let wait = function (milliseconds) {
 	const date = Date.now();
 	let currentDate = null;
 	do {
@@ -245,15 +245,15 @@ const wait = function (milliseconds) {
 	} while (currentDate - date < milliseconds);
 };
 
-const copy = function (val) {
+let copy = function (val) {
 	navigator.clipboard.writeText(val);
 };
-const paste = function () {
+let paste = function () {
 	var val = null;
 	navigator.clipboard.readText().then(v => val = v);
 	return val;
 };
-const copyFrom = function (id) {
+let copyFrom = function (id) {
 	var input = document.getElementById(id);
 	const color = input.style.color;
 	const bcolor = input.style.backgroundColor;
@@ -265,7 +265,7 @@ const copyFrom = function (id) {
 	input.style.color = color;
 	input.style.backgroundColor = bcolor;
 };
-const pasteInto = function (id) {
+let pasteInto = function (id) {
 	var input = document.getElementById(id);
 	const color = input.style.color;
 	const bcolor = input.style.backgroundColor;
@@ -277,7 +277,7 @@ const pasteInto = function (id) {
 	input.style.color = color;
 	input.style.backgroundColor = bcolor;
 };
-const clearText = function (id, focus = false) {
+let clearText = function (id, focus = false) {
 	var input = document.getElementById(id);
 	const color = input.style.color;
 	const bcolor = input.style.backgroundColor;
@@ -290,7 +290,7 @@ const clearText = function (id, focus = false) {
 	input.style.color = color;
 	input.style.backgroundColor = bcolor;
 };
-const isVisible = (element, partiallyVisible = true) => {
+let isVisible = (element, partiallyVisible = true) => {
 	const { top, left, bottom, right } = element.getBoundingClientRect();
 	const { innerHeight, innerWidth } = window;
 	return partiallyVisible
@@ -299,35 +299,97 @@ const isVisible = (element, partiallyVisible = true) => {
 		((left > 0 && left < innerWidth) || (right > 0 && right < innerWidth))
 		: top >= 0 && left >= 0 && bottom <= innerHeight && right <= innerWidth;
 };
-const isFocused = (element) => document.activeElement === element;
+let isFocused = (element) => document.activeElement === element;
 
-const scrollTo = function (selector = "body :nth-child(1)", time = 1000) {
+// Function to generate a unique Path selector for an element
+let getPath = (element) => {
+	let tagName = element.tagName;
+	if(!tagName) return null;
+	tagName = tagName.toLowerCase();
+    if (tagName === 'html') return 'html';
+    if (element.parentElement) return `${getPath(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
+    return tagName;
+}
+// Function to generate a unique XPath selector for an element
+let getXPath = (element) => {
+	let tagName = element.tagName;
+	if(!tagName) return null;
+	tagName = tagName.toLowerCase();
+    if (tagName === 'html') return 'html';
+    if (element.parentElement) return `${getPath(element.parentElement)}/${tagName}[${(Array.from(element.parentElement.children).indexOf(element))}]`;
+    return tagName;
+}
+// Function to generate a unique CSS selector for an element
+let getQuery = (element) => {
+	if(element.id) return "#"+element.id;
+	let tagName = element.tagName;
+	if(!tagName) return null;
+	tagName = tagName.toLowerCase();
+    if (tagName === 'html') return 'html';
+    if (element.parentElement) return `${getPath(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
+    return tagName;
+}
+
+let scrollTo = function (selector = "body :nth-child(1)", time = 1000) {
 	$('html, body').animate({
 		scrollTop: parseInt($(selector).offset().top)
 	}, time);
 };
 
-const reload = function () {
+let reload = function () {
 	window.location.assign(location.href);
 };
-const load = function (url = null) {
+let load = function (url = null) {
 	window.location.assign(url ?? location.href);
 };
-const open = function (url = null, target = '_blank') {
+let open = function (url = null, target = '_blank') {
 	window.open(url ?? location.href, target);
 };
-const share = function (url = null, path = null) {
+let share = function (url = null, path = null) {
 	open('sms://' + path + '?body=' + (url ?? location.href), '_blank');
 };
-const message = function (url = null, path = null) {
+let message = function (url = null, path = null) {
 	open('sms://' + path + '?body=' + (url ?? location.href), '_blank');
 };
 
-const mailTo = function (email) {
+let mailTo = function (email) {
 	open('mailto:' + email, '_blank');
 };
 
-const sendRequest = function (
+
+let setMemo = function (key, value, expires = 0, path = "/") {
+	time = "";
+	if (expires) {
+		var date = new Date();
+		date.setTime(date.getTime() + expires);
+		time = "; expires=" + date.toUTCString();
+	}
+	document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value || "")}${time}; path=${path}`;
+};
+let getMemo = function (key) {
+    let nameEQ = encodeURIComponent(key) + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+    }
+    return null;
+};
+let forgetMemo = function (key, path = "/") {
+    document.cookie = `${encodeURIComponent(key)}=; Max-Age=-99999999; path=${path}`;
+};
+let flushMemos = function () {
+    let cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i];
+        let eqPos = cookie.indexOf("=");
+        let key = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = key + "=; Max-Age=-99999999; path=/";
+    }
+};
+
+let sendRequest = function (
 	method = 'POST',
 	url = null,
 	data = null,
@@ -458,22 +520,22 @@ const sendRequest = function (
 	return xhr;
 };
 
-const sendGet = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendGet = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('GET', url, data, selector, success, error, ready, progress, timeout);
 };
-const sendPost = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPost = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
 };
-const sendPut = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPut = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('PUT', url, data, selector, success, error, ready, progress, timeout);
 };
-const sendPatch = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPatch = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('PATCH', url, data, selector, success, error, ready, progress, timeout);
 };
-const sendDelete = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendDelete = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('DELETE', url, data, selector, success, error, ready, progress, timeout);
 };
-const sendFile = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendFile = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	if (data) return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
 	else {
 		input.setAttribute('type', 'file');
@@ -492,16 +554,16 @@ const sendFile = function (url = null, data = null, selector = 'body :nth-child(
 		return res;
 	}
 };
-const sendInternal = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendInternal = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
 };
 
-const submitForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
+let submitForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
 	form = document.querySelector(selector);
 	if (!form) return null;
 	return sendRequest(form.getAttribute('method'), form.getAttribute('action'), new FormData(form), selector, success, error, ready, progress, timeout);
 };
-const handleForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
+let handleForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
 	form = document.querySelector(selector);
 	if (form) form.onsubmit = function (e) {
 		e.preventDefault();

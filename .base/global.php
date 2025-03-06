@@ -1,7 +1,5 @@
 <?php
 
-use MiMFa\Library\Convert;
-
 /**
  * The Global Static Variables
  * It contains the most useful objects along developments
@@ -18,7 +16,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 2.00000;
+	public static float $Version = 1.90000;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -117,15 +115,15 @@ run("Address");
 	$GLOBALS["BASE_ROOT"]
 );
 
-unset($GLOBALS["ASEQ"]);
-unset($GLOBALS["BASE"]);
-unset($GLOBALS["ASEQBASE"]);
-unset($GLOBALS["DIR"]);
-unset($GLOBALS["ROOT"]);
-unset($GLOBALS["BASE_DIR"]);
-unset($GLOBALS["BASE_ROOT"]);
-unset($GLOBALS["NEST"]);
-unset($GLOBALS["SEQUENCES"]);
+// unset($GLOBALS["ASEQ"]);
+// unset($GLOBALS["BASE"]);
+// unset($GLOBALS["ASEQBASE"]);
+// unset($GLOBALS["DIR"]);
+// unset($GLOBALS["ROOT"]);
+// unset($GLOBALS["BASE_DIR"]);
+// unset($GLOBALS["BASE_ROOT"]);
+// unset($GLOBALS["NEST"]);
+// unset($GLOBALS["SEQUENCES"]);
 
 run("global/ReqBase");
 run("Req");
@@ -139,6 +137,7 @@ library("Convert");
 library("Html");
 library("Style");
 library("Script");
+library("Internal");
 
 run("global/ConfigurationBase");
 run("Configuration");
@@ -156,17 +155,18 @@ run("global/FrontBase");
 run("Front");
 \_::$Front = new Front();
 
-\MiMFa\Library\Local::CreateDirectory(\_::$Aseq->TempDirectory);
 \MiMFa\Library\Local::CreateDirectory(\_::$Aseq->LogDirectory);
+\MiMFa\Library\Local::CreateDirectory(\_::$Aseq->TempDirectory);
+register_shutdown_function('cleanupTemp', false);
 
 
 /**
  * To get Features of an object from an array
  * @param mixed $object
  */
-function get($object, $data){
-	if(!is_array($data))
-	{
+function get($object, $data)
+{
+	if (!is_array($data)) {
 		if (is_array($object)) {
 			if (isset($object[$data]))
 				return $object[$data];
@@ -174,19 +174,23 @@ function get($object, $data){
 			foreach ($object as $k => $v)
 				if ($data === strtolower($k))
 					return $v;
-		} else return $object->{$data} ??
-					$object->{strtoproper($data)} ??
-					$object->{strtolower($data)} ??
-					$object->{strtoupper($data)} ?? null;
-	} elseif(is_numeric(array_key_first($data))){
+		} else
+			return $object->{$data} ??
+				$object->{strtoproper($data)} ??
+				$object->{strtolower($data)} ??
+				$object->{strtoupper($data)} ?? null;
+	} elseif (is_numeric(array_key_first($data))) {
 		$res = [];
 		foreach ($data as $k)
-			if(($val = get($object, $k)) !== null) $res[$k] = $val;
+			if (($val = get($object, $k)) !== null)
+				$res[$k] = $val;
 		return $res;
 	} else {
-		foreach ($data as $k=>$v)
-			if(($val = get($object, $k)) === null) $res[$k] = $v;
-			else $res[$k] = $val;
+		foreach ($data as $k => $v)
+			if (($val = get($object, $k)) === null)
+				$res[$k] = $v;
+			else
+				$res[$k] = $val;
 		return $res;
 	}
 }
@@ -195,43 +199,46 @@ function get($object, $data){
  * Then unset that key of the $data
  * @param mixed $object
  */
-function grab(&$object, $data){
+function grab(&$object, $data)
+{
 	$res = null;
-	if(!is_array($data)) {
+	if (!is_array($data)) {
 		if (is_array($object)) {
 			if (isset($object[$data])) {
 				$res = $object[$data];
 				unset($object[$data]);
-			}
-			else {
-			$data = strtolower($data);
-			foreach ($object as $k => $v)
-				if ($data === strtolower($k)){
-					$res = $v;
-					unset($object[$k]);
-					break;
-				}
+			} else {
+				$data = strtolower($data);
+				foreach ($object as $k => $v)
+					if ($data === strtolower($k)) {
+						$res = $v;
+						unset($object[$k]);
+						break;
+					}
 			}
 		} else {
 			$key = null;
 			$res = $object->{$key = $data} ??
 				$object->{$key = strtoproper($data)} ??
 				$object->{$key = strtolower($data)} ??
-				$object->{$key = strtoupper($data)} ?? 
+				$object->{$key = strtoupper($data)} ??
 				($key = null);
-			if($key !== null) unset($object->$key);
+			if ($key !== null)
+				unset($object->$key);
 		}
 	} else {
 		$res = [];
 		$val = null;
-		if(is_numeric(array_key_first($data))){
+		if (is_numeric(array_key_first($data))) {
 			foreach ($data as $k)
-				if(($val = grab($object, $k)) !== null) $res[$k] = $val;
-		}
-		else 
-			foreach ($data as $k=>$v)
-				if(($val = grab($object, $k)) === null) $res[$k] = $v;
-				else $res[$k] = $val;
+				if (($val = grab($object, $k)) !== null)
+					$res[$k] = $val;
+		} else
+			foreach ($data as $k => $v)
+				if (($val = grab($object, $k)) === null)
+					$res[$k] = $v;
+				else
+					$res[$k] = $val;
 	}
 	return $res;
 }
@@ -240,11 +247,16 @@ function grab(&$object, $data){
  * To set Features of an object from an array or other object
  * @param mixed $object
  */
-function set(&$object, $data){
-	if(!is_array($data) || is_array($object)) try{ return $object = $data; } catch(Exception $ex) {}
-	else foreach ($data as $k=>$v)
-		if((findValid($object, $k, null, $key)) !== null)
-			set($object->$key, $v);
+function set(&$object, $data)
+{
+	if (!is_array($data) || is_array($object))
+		try {
+			return $object = $data;
+		} catch (Exception $ex) {
+		} else
+		foreach ($data as $k => $v)
+			if ((findValid($object, $k, null, $key)) !== null)
+				set($object->$key, $v);
 	return $object;
 }
 /**
@@ -252,17 +264,19 @@ function set(&$object, $data){
  * Then unset that key of the $data
  * @param mixed $object
  */
-function swap(&$object, &$data){
-	if(!is_array($data) || is_array($object))
-		try{ 
+function swap(&$object, &$data)
+{
+	if (!is_array($data) || is_array($object))
+		try {
 			$object = $data;
 			unset($data);
-		} catch(Exception $ex) {}
-	else foreach ($data as $k=>$v)
-		if((findValid($object, $k, null, $key)) !== null) {
-			set($object->$key, $v);
-			unset($data[$k]);
-		}
+		} catch (Exception $ex) {
+		} else
+		foreach ($data as $k => $v)
+			if ((findValid($object, $k, null, $key)) !== null) {
+				set($object->$key, $v);
+				unset($data[$k]);
+			}
 	return $object;
 }
 
@@ -275,17 +289,17 @@ function swap(&$object, &$data){
  * @return bool The client has accessibility bigger than $minaccess or not
  * @return int|mixed The user accessibility group
  */
-function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|null $die = true): mixed
+function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|null $exit = true): mixed
 {
 	if (isValid(\_::$Config->StatusMode)) {
 		if ($assign) {
 			if (is_string($assign))
 				\Res::Go($assign);
 			else
-				route(\_::$Config->StatusMode??\_::$Config->RestrictionRouteName, alternative:"403");
+				route(\_::$Config->StatusMode ?? \_::$Config->RestrictionRouteName, alternative: "403");
 		}
-		if ($die !== false)
-			die($die);
+		if ($exit !== false)
+			exit($exit);
 		return false;
 	} elseif (isValid(\_::$Config->AccessMode)) {
 		$ip = getClientIp();
@@ -298,10 +312,10 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 				if (is_string($assign))
 					\Res::Go($assign);
 				else
-					route(\_::$Config->RestrictionRouteName, alternative:"401");
+					route(\_::$Config->RestrictionRouteName, alternative: "401");
 			}
-			if ($die !== false)
-				die($die);
+			if ($exit !== false)
+				exit($exit);
 			return false;
 		}
 	}
@@ -314,8 +328,8 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 		else
 			\Res::Go(\MiMFa\Library\User::$InHandlerPath);
 	}
-	if ($die !== false)
-		die($die);
+	if ($exit !== false)
+		exit($exit);
 	return $b;
 }
 /**
@@ -339,8 +353,10 @@ function including(string $path, mixed $data = [], bool $print = true, $default 
 		// 	extract($data);
 		$res = include_once $path;
 		$output = ob_get_clean();
-		if ($print) echo $output;
-		else return $output;
+		if ($print)
+			echo $output;
+		else
+			return $output;
 		return $res;
 	}
 	if (is_callable($default) || $default instanceof \Closure)
@@ -370,7 +386,8 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 {
 	$file = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $file ?? "");
 	$extension = $extension ?? \_::$Extension;
-	if (!endsWith($file, $extension)) $file .= $extension;
+	if (!endsWith($file, $extension))
+		$file .= $extension;
 	$path = null;
 	$toSeq = $depth < 0 ? (count(\_::$Sequences) + $depth) : ($origin + $depth);
 	$seqInd = -1;
@@ -389,10 +406,12 @@ function using(string|null $directory, string|null $name = null, mixed $data = [
 {
 	try {
 		renderPrepends($directory, $name);
-		if($path = 
-			addressing("$directory$name", $extension, $origin, $depth) ?? 
+		if (
+			$path =
+			addressing("$directory$name", $extension, $origin, $depth) ??
 			addressing("$directory$alternative", $extension, $origin, $depth)
-		) return including($path, $data, $print, $default);
+		)
+			return including($path, $data, $print, $default);
 	} finally {
 		renderAppends($directory, $name);
 	}
@@ -598,7 +617,7 @@ function logic(string $name, mixed $data = [], bool $print = true, int $origin =
  */
 function route(string|null $name, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data??\_::$Back->Router, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data ?? \_::$Back->Router, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To get a Table from the DataBase
@@ -609,8 +628,8 @@ function table(string $name, bool $prefix = true, int $origin = 0, int $depth = 
 {
 	return new \MiMFa\Library\DataTable(
 		$source ?? \_::$Back->DataBase,
-		$prefix ? 
-		(\_::$Config->DataBasePrefix . (\_::$Config->DataBaseAddNameToPrefix? preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_":"") . $name) 
+		$prefix ?
+		(\_::$Config->DataBasePrefix . (\_::$Config->DataBaseAddNameToPrefix ? preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_" : "") . $name)
 		: $name
 	);
 }
@@ -991,7 +1010,7 @@ function getFragment(string|null $path = null): string|null
 	return PREG_Find("/((?<=#)[^\?]*($|\?))/", $path ?? getUrl());
 }
 
-function  getMethodName(string|int|null $method = null)
+function getMethodName(string|int|null $method = null)
 {
 	switch (strtoupper($method ?? "")) {
 		case 1:
@@ -1024,11 +1043,14 @@ function  getMethodName(string|int|null $method = null)
 		case "DELETE":
 		case "DEL":
 			return "DELETE";
+		case 7:
+		case "INTERNAL":
+			return "INTERNAL";
 		default:
 			return $method ?? $_SERVER['REQUEST_METHOD'];
 	}
 }
-function  getMethodIndex(string|int|null $method = null)
+function getMethodIndex(string|int|null $method = null)
 {
 	switch (strtoupper($method ?? $_SERVER['REQUEST_METHOD'])) {
 		case 1:
@@ -1061,6 +1083,9 @@ function  getMethodIndex(string|int|null $method = null)
 		case "DELETE":
 		case "DEL":
 			return 6;
+		case 7:
+		case "INTERNAL":
+			return 7;
 		default:
 			return 0;
 	}
@@ -1076,31 +1101,60 @@ function createEmail($name = "do-not-reply", string|null $path = null): string|n
 	return $name . "@" . getDomain($path);
 }
 
-function changeMemo($key, $val)
+/**
+ * To cleanup all Temporary files, or received files in this request
+ * @param mixed $full True to cleanup all Temporary files, false to cleanup only received files in this request
+ */
+function cleanupTemp($full = true)
 {
-	if ($val == "!" || is_null($val)) {
-		popMemo($key);
-		return null;
-	} else
-		setMemo($key, $val);
-	return $val;
+	if ($full)
+		return cleanup(\_::$Address->TempDirectory);
+	$i = 0;
+	foreach ($_FILES as $file)
+		if (isset($file["tmp_name"]) && is_file($file["tmp_name"]) && ++$i)
+			unlink($file["tmp_name"]);
+	return $i;
 }
-function popMemo($key)
+/**
+ * Iterate through the files of the directory and delete them
+ * @param mixed $directory
+ */
+function cleanup($directory = null)
+{
+	$i = 0;
+	if ($directory) {
+		foreach (glob("$directory*") as $file)
+			if (is_file($file) && ++$i)
+				unlink($file);
+	} else {
+		$i += cleanup(\_::$Address->TempDirectory);
+		$i += cleanup(\_::$Aseq->TempDirectory);
+		$i += cleanup(\_::$Base->TempDirectory);
+		$i += cleanup(\_::$Address->LogDirectory);
+		$i += cleanup(\_::$Aseq->LogDirectory);
+		$i += cleanup(\_::$Base->LogDirectory);
+		flushSessions();
+		\_::$Back->Session->Flush();
+	}
+	return $i;
+}
+
+function grabMemo($key)
 {
 	$val = getMemo($key);
 	forgetMemo($key);
 	return $val;
 }
-function setMemo($key, $val)
+function setMemo($key, $value, $expires = 0, $path = "/")
 {
-	if ($val == null)
+	if ($value == null)
 		return false;
-	return setcookie($key, $val, 0, "/");
+	return setcookie(urlencode($key), urlencode($value), ceil($expires/1000), $path);
 }
 function getMemo($key)
 {
 	if (isset($_COOKIE[$key]))
-		return $_COOKIE[$key];
+		return urldecode($_COOKIE[$key]);
 	else
 		return null;
 }
@@ -1110,10 +1164,10 @@ function hasMemo($key)
 }
 function forgetMemo($key)
 {
-	unset($_COOKIE[$key]);
-	return setcookie($key, "", 0, "/");
+	unset($_COOKIE[urlencode($key)]);
+	return setcookie(urlencode($key), "", 0, "/");
 }
-function flushMemos($key)
+function flushMemos()
 {
 	foreach ($_COOKIE as $key => $val) {
 		unset($_COOKIE[$key]);
@@ -1121,24 +1175,15 @@ function flushMemos($key)
 	}
 }
 
-function changeSession($key, $val)
-{
-	if ($val == "!" || is_null($val)) {
-		popSession($key);
-		return null;
-	} else
-		setSession($key, $val);
-	return $val;
-}
-function popSession($key)
+function grabSession($key)
 {
 	$val = getSession($key);
 	forgetSession($key);
 	return $val;
 }
-function setSession($key, $val)
+function setSession($key, $value)
 {
-	return $_SESSION[$key] = $val;
+	return $_SESSION[$key] = $value;
 }
 function getSession($key)
 {
@@ -1152,7 +1197,7 @@ function forgetSession($key)
 {
 	unset($_SESSION[$key]);
 }
-function flushSessions($key)
+function flushSessions()
 {
 	foreach ($_SESSION as $key => $val)
 		unset($_SESSION[$key]);
@@ -1426,12 +1471,13 @@ function isAbsoluteUrl(string|null $url): bool
  * @param null|string $script The url string
  * @return bool
  */
-function isScript(string|null $script): bool
+function isScript(mixed $script): bool
 {
-	return (!empty($script))
+	return !is_string($script) ||
+	((!empty($script))
 		&& !preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/", $script)
 		&& !preg_match("/^[A-z0-9\-]+\:\/*([\/\?\#][^\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/", $script)
-		&& preg_match("/[\{\}\|\^\[\]\"\`\;\r\n\t\f]|((^\s*[\w\$][\w\d\$\_\.]+\s*\([\s\S]*\)\s*)+;?\s*$)/", $script);
+		&& preg_match("/[\{\}\|\^\[\]\"\`\;\r\n\t\f]|((^\s*[\w\$][\w\d\$\_\.]+\s*\([\s\S]*\)\s*)+;?\s*$)/", $script));
 }
 /**
  * To check if the string is a JSON or not
@@ -1451,7 +1497,7 @@ function isJson($json)
  */
 function isEmail(string|null $email): bool
 {
-	return (!empty($url)) && preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/", $url);
+	return (!empty($email)) && preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/", $email);
 }
 
 /**
@@ -1462,6 +1508,16 @@ function isEmail(string|null $email): bool
 function isIdentifier(string|null $text): bool
 {
 	return (!empty($text)) && preg_match("/^[A-z_\$][A-z0-9_\-\$]*$/", $text);
+}
+
+/**
+ * Check if the value is a static type like string or number or other static types
+ * @param null|string $value Desired value
+ * @return bool
+ */
+function isStatic($value): bool
+{
+	return is_string($value) || is_numeric($value) || is_bool($value) || is_null($value);
 }
 
 /**

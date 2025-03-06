@@ -8,12 +8,12 @@
 */
 class Style extends \ArrayObject{
 	public function __get($name) {
-        return get($this, self::NormalizeProperty($name));
+        return get($this, self::PropertyName($name));
     }
     public function __set($name, $value) {
-        $this[self::NormalizeProperty($name)] = $value;
+        $this[self::PropertyName($name)] = $value;
     }
-    public static function NormalizeProperty($name) {
+    public static function PropertyName($name) {
         return strtolower(preg_replace_callback("/(?<=[^A-Z\-\b^])[A-Z]/", fn($mts)=> "-".strtolower($mts[0]), $name));
     }
 
@@ -84,7 +84,7 @@ class Style extends \ArrayObject{
 	}
 
 	public static function DoStyle($text, $keyWords=null){
-		return self::DoStrong(Convert::ToHtml($text), $keyWords);
+		return self::DoStrong(Html::Convert($text), $keyWords);
 	}
 
 	/**

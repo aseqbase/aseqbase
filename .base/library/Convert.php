@@ -31,7 +31,7 @@ class Convert
      * @param mixed $value
      * @return string
      */
-    public static function ToStatic($value, $separator = PHP_EOL, $spacer = ":", $assignFormat = "{0}:{\t{1}},")
+    public static function ToStatic($value, $separator = PHP_EOL, $assignFormat = "{0}:{\t{1}},")
     {
         if (!is_null($value)) {
             if (is_string($value) || is_numeric($value))
@@ -41,7 +41,7 @@ class Convert
             if (is_countable($value) || is_iterable($value)) {
                 $texts = array();
                 foreach ($value as $key => $val) {
-                    $item = self::ToStatic($val, $separator, $spacer);
+                    $item = self::ToStatic($val, $separator, $assignFormat);
                     if (is_numeric($key))
                         array_push($texts, $item);
                     elseif (is_countable($val) || is_iterable($val))
@@ -51,19 +51,19 @@ class Convert
                         if (is_string($item))
                             if (str_contains($item, '"')) {
                                 if (str_contains($item, "'")) {
-                                    $item = str_replace("'", "`", $item);
+                                    $item = str_replace("'", "\'", $item);
                                     $sp = "'";
                                 } else
                                     $sp = "'";
                             } else
                                 $sp = '"';
-                        array_push($texts, "$key$spacer$sp$item$sp");
+                        array_push($texts, str_replace(["{0}", "{1}"], [$key, "$sp$item$sp"], $assignFormat));
                     }
                 }
                 return join($separator, $texts);
             }
             if (is_callable($value) || $value instanceof \Closure)
-                return self::ToStatic($value(), $separator, $spacer);
+                return self::ToStatic($value(), $separator, $assignFormat);
             if ($value instanceof \DateTime)
                 return self::ToShownDateTimeString($value);
             return $value;
@@ -75,9 +75,9 @@ class Convert
      * @param mixed $value
      * @return string
      */
-    public static function ToString($value, $separator = PHP_EOL, $spacer = ":", $assignFormat = "{0}:{\t{1}},")
+    public static function ToString($value, $separator = PHP_EOL, $assignFormat = "{0}:{\t{1}},")
     {
-        return self::ToStatic($value, $separator, $spacer, $assignFormat) . "";
+        return self::ToStatic($value, $separator, $assignFormat) . "";
     }
 
     /**
@@ -129,79 +129,6 @@ class Convert
             return $excerptedSign . substr($text, max(0, $len - $from - $maxlength), max(0, $maxlength - strlen($excerptedSign))) . ($from > strlen($excerptedSign) ? $excerptedSign : "");
         else
             return ($from > strlen($excerptedSign) ? $excerptedSign : "") . substr($text, $from, $maxlength - strlen($excerptedSign)) . $excerptedSign;
-    }
-
-    /**
-     * Convert everything to a simple HTML format
-     * @param mixed $value
-     * @return string
-     */
-    public static function ToHtml($value)
-    {
-        if (!is_null($value)) {
-            if (is_string($value)) {
-                if (preg_match("/\<[^\>]+\>/i", $value))
-                    return $value;
-                else {
-                    $value = preg_replace("/\b\"(\S[^\r\n]+\S)\"\b/i", "<quote ondblclick='copy(this.innerText)'>$1</quote>", $value);
-                    $value = preg_replace("/^\#\s(.*)/im", "<h1>$1</h1>", $value);
-                    $value = preg_replace("/^\#{2}\s(.*)/im", "<h2>$1</h2>", $value);
-                    $value = preg_replace("/^\#{3}\s(.*)/im", "<h3>$1</h3>", $value);
-                    $value = preg_replace("/^\#{4}\s(.*)/im", "<h4>$1</h4>", $value);
-                    $value = preg_replace("/^\#{5}\s(.*)/im", "<h5>$1</h5>", $value);
-                    $value = preg_replace("/^\#{6}\s(.*)/im", "<h6>$1</h6>", $value);
-                    $value = preg_replace("/((\r?\n\r?\s*(\+|(\d+\.?))\s.*)(\r?\n\r?\s*([\+\*•○\-]|(\d+\.?))\s.*)*)/i", "<ol>" . PHP_EOL . "$1" . PHP_EOL . "</ol>", $value);
-                    $value = preg_replace("/^\s*(?:[\+]|(?:\d+\.?))\s(.*)/im", "<li>$1</li>", $value);
-                    $value = preg_replace("/((\r?\n\r?\s*[\*•○\-]\s.*)+)/i", "<ul>" . PHP_EOL . "$1" . PHP_EOL . "</ul>", $value);
-                    $value = preg_replace("/^\s*[\*•○\-]\s(.*)/im", "<li>$1</li>", $value);
-                    $value = preg_replace("/^\-{6,}$/im", "<hr/>", $value);
-                    $value = preg_replace("/\b\@image:([^\s\[\]\{\}]+)\b/i", "<img src=\"$1\"/>", $value);
-                    $value = preg_replace("/\b\@\[([^\]]*)\]:([^\s\[\]\{\}]+)\b/i", "<a href=\"$2\">$1</a>", $value);
-                    $value = preg_replace("/\b([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", "<a href=\"$1\">$1</a>", $value);
-                    $value = preg_replace("/\b([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", "<a href=\"mailto:$1\">$1</a>", $value);
-                    $value = preg_replace("/\*\*(\S[^\*\r\n]+\S)\*\*/i", "<strong>$1</strong>", $value);
-                    $value = preg_replace("/\___(\S[^\*\r\n]+\S)\__/i", "<i>$1</i>", $value);
-                    $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<)/i", "<br/>", trim($value));
-                    // Additional patterns for code blocks, inline code, and blockquotes
-                    $value = preg_replace('/```(.+?)```/s', '<pre><code>$1</code></pre>', $value); // Code blocks
-                    $value = preg_replace('/`(.+?)`/s', '<code>$1</code>', $value); // Inline code
-                    $value = preg_replace('/^\>(.*)/im', '<blockquote>$1</blockquote>', $value); // Blockquotes
-                    return $value;
-                }
-            }
-            if (is_subclass_of($value, "\Base"))
-                return $value->ToString();
-            if (is_countable($value) || is_iterable($value)) {
-                $texts = array();
-                if (is_numeric(array_key_first($value))) {
-                    foreach ($value as $val)
-                        $texts[] = Html::Item(self::ToHtml($val));
-                    return Html::List(join(PHP_EOL, $texts));
-                } elseif ($args = findBetween($value, "Arguments", "Item")) {
-                    $key = get($value, "Key");
-                    $val = get($value, "Value");
-                    $ops = get($value, "Options");
-                    $type = get($value, "Type");
-                    $title = get($value, "Title");
-                    return Html::Interactor(
-                        $key,
-                        $val,
-                        $type,
-                        $ops,
-                        $title,
-                        $args
-                    );
-                } else {
-                    foreach ($value as $key => $val)
-                        $texts[] = Html::Item(Html::Span($key) . ":" . self::ToHtml($val));
-                    return Html::Items(join(PHP_EOL, $texts));
-                }
-            }
-            if (is_callable($value) || $value instanceof \Closure)
-                return self::ToHtml($value());
-            return Html::Division(self::ToString($value));
-        }
-        return "";
     }
 
     /**
@@ -549,7 +476,7 @@ class Convert
     public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true)
     {
         if ($addDefaultKeys) {
-            $email = createEmail("info");
+            $email = \_::$Info->ReceiverEmail;
             if (!isset($additionalKeys['$HOSTEMAILLINK']))
                 $additionalKeys['$HOSTEMAILLINK'] = Html::Link($email, "mailto:$email");
             if (!isset($additionalKeys['$HOSTEMAIL']))
@@ -563,10 +490,10 @@ class Convert
             if (!isset($additionalKeys['$URL']))
                 $additionalKeys['$URL'] = \Req::$Url;
             if (isValid(\_::$Back->User->Id)) {
-                $person = \_::$Back->User->Get(get($additionalKeys, '$SIGNATURE'));
-                if (!isset($additionalKeys['$SIGNATURE']))
+                $person = \_::$Back->User->Get(getValid($additionalKeys, '$SIGNATURE'));
+                if (!isValid($additionalKeys, '$SIGNATURE'))
                     $additionalKeys['$SIGNATURE'] = get($person, "Signature") ?? \_::$Back->User->TemporarySignature;
-                if (!isset($additionalKeys['$NAME']))
+                if (!isValid($additionalKeys, '$NAME'))
                     $additionalKeys['$NAME'] = get($person, "Name") ?? \_::$Back->User->TemporaryName;
                 $email = get($person, "Email") ?? \_::$Back->User->TemporaryEmail;
                 if (!isset($additionalKeys['$EMAILLINK']))

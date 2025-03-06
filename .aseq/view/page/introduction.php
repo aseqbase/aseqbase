@@ -39,7 +39,7 @@
             <?php
             foreach (\_::$Info->Services as $value) {
                 $module->Image = get($value, "Image");
-                $p = findBetween($value, "Path", "Link");
+                $p = get($value, "Path");
                 $isp = isValid($p);
                 ?>
                 <div class="col-md">

@@ -170,7 +170,7 @@ class Gallery extends Collection{
                 $p_path = findValid($item,'Path' , $this->DefaultPath)??$p_link;
                 $p_buttons = findValid($item,'ButtonsContent', $this->DefaultButtons);
                 $img->Source = $p_image;
-                $clickact = $viewer->ShowScript("`$p_title`","$(`.".$this->Name.">*>.item-$i>.description>:last-child`).html()","`".($p_link??$p_path??$p_image)."`","`$p_buttons`", "`".getFullUrl($p_download??$p_path??$p_link??$p_image)."`");
+                $clickact = $viewer->ShowScript($p_title, $p_description, ($p_link??$p_path??$p_image),$p_buttons, getFullUrl($p_download??$p_path??$p_link??$p_image));
                 $img->Attributes = ["onclick"=>$clickact];
 			yield Html::Division(
 				$img->ToString().

@@ -82,7 +82,7 @@ class Form extends Module
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
 		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
-		$this->Signing = fn()=>part(User::$InHandlerPath, ["Router"=>["DefaultMethod"=>1], "AllowHeader"=>false, "ContentClass" => "col-lg"], print:false);
+		$this->Signing = fn() => part(User::$InHandlerPath, ["Router" => ["DefaultMethod" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethod > 1) \Res::Status($this->Status);
 		// });
@@ -123,7 +123,7 @@ class Form extends Module
 		if (hasSession($key)) {
 			$remains = getSession($key) - time();
 			if ($remains <= 0) {
-				popSession($key);
+				grabSession($key);
 				return false;
 			} else {
 				$dt = new \DateTime("@0");
@@ -142,7 +142,7 @@ class Form extends Module
 	}
 	public function UnBlock()
 	{
-		return popSession(getClientIp() . getDirection());
+		return grabSession(getClientIp() . getDirection());
 	}
 
 	/**
@@ -659,18 +659,21 @@ class Form extends Module
 			$this->Children = isEmpty($this->FieldsTypes)
 				? iteration($this->Children, function ($k, $v) use ($attr) {
 					if (is_integer($k))
-						if($v instanceof \MiMFa\Module\Field) return $v;
-						elseif(is_array($v)) return Html::Field(
-							type: grab($v, "Type"),
-							key: grab($v, "Key"),
-							value: grab($v, "Value"),
-							description: grab($v, "Description"),
-							options: grab($v, "Option"),
-							title: grab($v, "Title"),
-							scope: grab($v, "Scope")??[],
-							attributes: [...(grab($v, "Attributes")??[]), ...$v]
-						);
-						else return $v;
+						if ($v instanceof \MiMFa\Module\Field)
+							return $v;
+						elseif (is_array($v))
+							return Html::Field(
+								type: grab($v, "Type"),
+								key: grab($v, "Key"),
+								value: grab($v, "Value"),
+								description: grab($v, "Description"),
+								options: grab($v, "Option"),
+								title: grab($v, "Title"),
+								scope: grab($v, "Scope") ?? [],
+								attributes: [...(grab($v, "Attributes") ?? []), ...$v]
+							);
+						else
+							return $v;
 					else
 						return Html::Field(
 							type: null,
@@ -695,58 +698,58 @@ class Form extends Module
 				});
 		}
 
-		if (isValid($src)){
+		if (isValid($src)) {
 			$this->Status = $this->Status ?? 200;
 			if ($this->HasDecoration)
 				return
 					Html::Rack(
 						($this->AllowHeader ? Html::LargeSlot(
-							Html::Media(null, $this->Image, ["class"=> "form-image"]) .
+							Html::Media(null, $this->Image, ["class" => "form-image"]) .
 							$this->GetHeader() .
-							$this->GetTitle(["class"=> "form-title"]) .
-							$this->GetDescription(["class"=> "form-description"]) .
-							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class"=> "back-button"]) : "")
+							$this->GetTitle(["class" => "form-title"]) .
+							$this->GetDescription(["class" => "form-description"]) .
+							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class" => "back-button"]) : "")
 							,
-							["class"=> "header"]
+							["class" => "header"]
 						) : "") .
 						Html::LargeSlot(
 							Html::Form(
 								Html::Rack(
 									($this->AllowContent ? $this->GetContent() : "") .
 									Convert::ToString($this->GetFields()),
-									["class"=> "group fields"]
+									["class" => "group fields"]
 								) .
-								Html::Rack(Convert::ToString($this->GetButtons()), ["class"=> "group buttons"])
+								Html::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
 								,
 								$src,
 								["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
 							) .
 							($this->AllowFooter ? $this->GetFooter() : "")
 							,
-							["class"=> "{$this->ContentClass} content"]
+							["class" => "{$this->ContentClass} content"]
 						)
 					);
 			else
 				return
 					(
 						$this->AllowHeader ?
-						Html::Media(null, $this->Image, ["class"=> "image"]) .
+						Html::Media(null, $this->Image, ["class" => "image"]) .
 						$this->GetHeader() .
-						$this->GetTitle(["class"=> "form-title"]) .
-						$this->GetDescription(["class"=> "form-description"]) .
-						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class"=> "back-button"]) : "")
+						$this->GetTitle(["class" => "form-title"]) .
+						$this->GetDescription(["class" => "form-description"]) .
+						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class" => "back-button"]) : "")
 						: ""
 					) .
 					Html::Form(
 						($this->AllowContent ? $this->GetContent() : "") .
 						Convert::ToString($this->GetFields()) .
-						Html::Rack(Convert::ToString($this->GetButtons()), ["class"=> "group buttons"])
+						Html::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
 						,
 						$src,
 						["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
 					) .
 					($this->AllowFooter ? $this->GetFooter() : "");
-				}
+		}
 		return null;
 	}
 	public function GetHeader()
@@ -855,7 +858,7 @@ class Form extends Module
 						)
 							return $this->GetWarning("Could not send data successfully!");
 					}
-					return $this->GetSuccess("The form submitted successfully!", ["class"=> "page"]);
+					return $this->GetSuccess("The form submitted successfully!", ["class" => "page"]);
 				} else
 					return $this->GetWarning("There a problem is occured!");
 			} catch (\Exception $ex) {
@@ -880,7 +883,7 @@ class Form extends Module
 					)
 						return Html::Warning("Could not send data successfully!");
 				}
-				return Html::Success("The form submitted successfully!", ["class"=> "page"]);
+				return Html::Success("The form submitted successfully!", ["class" => "page"]);
 			} else
 				return Html::Warning("There a problem is occured!");
 		} catch (\Exception $ex) {
@@ -888,11 +891,38 @@ class Form extends Module
 		}
 	}
 
-	public function GetSigning(){
-		if($this->Signing) 
+	public function GetSigning()
+	{
+		if ($this->Signing === true) {
+			module("Modal");
+			$module = new \MiMFa\Module\Modal();
+			$module->Style = new Style();
+			$module->Style->Width = 
+			$module->Width = "fit-content";
+			$module->Style->Height = 
+			$module->Height = "fit-content";
+			$module->Style->Position = "sticky";
+			$module->Style->Margin = "auto";
+			$module->Style->Top = "initial";
+			$module->Style->Left = "initial";
+			$module->Style->Right = "initial";
+			$module->AllowFocus =
+				$module->AllowShare =
+				$module->AllowZoom =
+				$module->AllowDownload = false;
+			$module->Content = part(User::$InHandlerPath, ["ContentClass"=>""], print: false);
+			if ($this->SigningLabel)
+				return $module->Handle() . Html::Center(
+					Html::Button(
+						$this->SigningLabel,
+						$module->ShowScript()
+					),
+					["style" => "padding: var(--size-5); background-color: #88888808;"]
+				);
+		} elseif ($this->Signing)
 			return Html::Center(
-				($this->SigningLabel?Html::SubHeading($this->SigningLabel, User::$InHandlerPath):"")
-				.Convert::By($this->Signing)
+				($this->SigningLabel ? Html::SubHeading($this->SigningLabel, User::$InHandlerPath) : "")
+				. (is_bool($this->Signing) ? "" : Convert::By($this->Signing))
 			);
 	}
 }

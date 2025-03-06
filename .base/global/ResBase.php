@@ -47,36 +47,6 @@ abstract class ResBase
 		echo $output = \MiMFa\Library\Convert::ToString($output);
 		return $output;
 	}
-
-	/**
-	 * Echo output on the client side
-	 * @param mixed $output The data that is ready to print
-	 * @param mixed $status The header status
-	 * @return mixed Printed data
-	 */
-	public static function Set($output = null, $status = null)
-	{
-		ob_clean();
-		self::Status($status);
-		echo $output = \MiMFa\Library\Convert::ToString($output);
-		flush();
-		ob_start();
-		return $output;
-	}
-	/**
-	 * Read a file from the client side
-	 * @param mixed $path The data that is ready to print
-	 * @param mixed $status The header status
-	 */
-	public static function SetFile($path = null, $status = null)
-	{
-		header('Content-Type: application/pdf');
-		header('Content-Disposition: inline; filename="' . basename($path) . '"');
-		header('Content-Length: ' . filesize($path));
-		self::Status($status);
-		// Read and output the file
-		return readfile($path);
-	}
 	/**
 	 * Print only this output on the client side
 	 * @param mixed $output The data that is ready to print
@@ -96,8 +66,13 @@ abstract class ResBase
 	 */
 	public static function SendFile($path = null, $status = null)
 	{
-		if($res = self::SetFile($path, $status)) exit;
-		else $res;
+		header('Content-Type: application/pdf');
+		header('Content-Disposition: inline; filename="' . basename($path) . '"');
+		header('Content-Length: ' . filesize($path));
+		self::Status($status);
+		// Read and output the file
+		readfile($path);
+		exit();
 	}
 	/**
 	 * Print only this output on the client side then reload the page
@@ -304,7 +279,7 @@ abstract class ResBase
 		self::Render(\MiMFa\Library\Html::Script("window.open('sms://$path?body='+" . (isValid($urlOrText) ? "'" . __($urlOrText, styling: false) . "'" : "location.href") . ", '_blank');"));
 	}
 
-
+	
 	/**
 	 * Render a message result output to the client side
 	 * @param mixed $output The data that is ready to print
@@ -344,77 +319,6 @@ abstract class ResBase
 	{
 		echo $output = \MiMFa\Library\Html::Error($output);
 		return $output;
-	}
-	/**
-	 * Render Scripts in the client side
-	 * @param mixed $output The data that is ready to print
-	 * @return mixed Printed data
-	 */
-	public static function Script($output = null)
-	{
-		echo $output = \MiMFa\Library\Html::Script($output);
-		return $output;
-	}
-	/**
-	 * Render Styles in the client side
-	 * @param mixed $output The data that is ready to print
-	 * @return mixed Printed data
-	 */
-	public static function Style($output = null)
-	{
-		echo $output = \MiMFa\Library\Html::Style($output);
-		return $output;
-	}
-
-	/**
-	 * Enclosure codes
-	 * @param mixed $codes The data that is ready to print
-	 * @return mixed Printed data
-	 */
-	public static function EnclosureScript($codes = null)
-	{
-		return "<script>$codes</script>";
-	}
-	/**
-	 * Enclosure dialog codes
-	 * @param mixed $codes The data that is ready to print
-	 * @return mixed Printed data
-	 */
-	public static function EnclosureDialogScript($codes = null, $name = null)
-	{
-		return self::EnclosureScript("sendInternal(null,{" . ($name ?? "response") . ":$codes});");
-	}
-	public static function Alert($message = null)
-	{
-		self::Render(
-			self::EnclosureScript(
-				\MiMFa\Library\Script::Alert($message)
-			)
-		);
-	}
-	public static function Confirm($message = null)
-	{
-		$res = \Req::Confirm(null);
-		if ($res === null)
-			self::End(self::EnclosureDialogScript(
-				\MiMFa\Library\Script::Confirm($message),
-				"confirmed"
-			));
-		else
-			return $res;
-		return null;
-	}
-	public static function Prompt($message = null, $default = null)
-	{
-		$res = \Req::Confirm(null);
-		if ($res === null)
-			self::End(self::EnclosureDialogScript(
-				\MiMFa\Library\Script::Prompt($message, $default),
-				"prompted"
-			));
-		else
-			return $res;
-		return null;
 	}
 }
 ?>

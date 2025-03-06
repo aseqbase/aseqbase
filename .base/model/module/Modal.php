@@ -2,6 +2,8 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
+use MiMFa\Library\Script;
+
 module("Player");
 class Modal extends Player{
 	public $Class = "hide";
@@ -75,6 +77,7 @@ class Modal extends Player{
 			isValid($this->BackgroundShadow)?"
 			.{$this->Name}-background-screen {
 				background-color: {$this->BackgroundShadow};
+				width: 100%;
 				z-index:1;
 			}
 			":"")
@@ -108,7 +111,7 @@ class Modal extends Player{
 				else $('.{$this->Name}>.body>.detail>.title').show().text(title);
 				if(isEmpty(description)) $('.{$this->Name}>.body>.detail>.description').hide();
 				else $('.{$this->Name}>.body>.detail>.description').show().text(description);
-				if(buttonsContent !== null) $('.{$this->Name}>.buttons').html({$this->ButtonsScript("buttonsContent")});
+				if(buttonsContent !== null) $('.{$this->Name}>.buttons').html({$this->ButtonsScript('${buttonsContent}')});
 				$('.{$this->Name},.{$this->Name}-background-screen').removeClass('hide');
 				$('.{$this->Name},.{$this->Name}-background-screen').fadeIn(".\_::$Front->AnimationSpeed.");
 				scrollTo('.{$this->Name}');
@@ -132,7 +135,9 @@ class Modal extends Player{
 
 
 	public function GetContents($content){
-		return "<div class=\"content\" ".($this->AllowZoom?("onclick=\"".$this->ModalFocusScript()."\" ondblclick=\"".$this->ZoomScript()."\""):("ondblclick=\"".$this->ModalFocusScript()."\"")).">".$content."</div>";
+		return "<div class=\"content\" ".($this->AllowZoom?("onclick=\"".$this->ModalFocusScript()."\" ondblclick=\"".$this->ZoomScript()."\""):("ondblclick=\"".$this->ModalFocusScript()."\"")).">".
+		Convert::ToString($content).
+		"</div>";
 	}
 	public function GetControls(){
 		if($this->AllowClose) yield '<div class="fa fa-close button" onclick="'.$this->HideScript().'"></div>';
@@ -140,7 +145,7 @@ class Modal extends Player{
 		yield from parent::GetControls();
 	}
 	public function GetButtons($buttonsContent){
-		return "<div class=\"buttons\">".$buttonsContent."</div>";
+		return "<div class=\"buttons\">".Convert::ToString($buttonsContent)."</div>";
 	}
 
 	public function BeforeHandle(){
@@ -148,16 +153,16 @@ class Modal extends Player{
 	}
 
 	public function ButtonsScript($buttonsContent){
-		return $buttonsContent;
+		return Script::Convert($buttonsContent);
 	}
 
-	public function ShowScript($title = "``", $description = "``", $content = "``", $buttonsContent = "``", $source = "null"){
+	public function ShowScript($title = null, $description = null, $content = null, $buttonsContent = null, $source = null){
 		return $this->Name."_Show(".
-		$this->ReadyToScript($title).", ".
-		$this->ReadyToScript($description).", ".
-		$this->ReadyToScript($content).", ".
-		$this->ReadyToScript($buttonsContent).", ".
-		$this->ReadyToScript($source).");";
+		Script::Convert($title??$this->Title).", ".
+		Script::Convert($description??$this->Description).", ".
+		Script::Convert($content??$this->Content).", ".
+		Script::Convert($buttonsContent??$this->ButtonsContent).", ".
+		Script::Convert($source??$this->Source).");";
 	}
 	public function HideScript(){
 		return $this->Name."_Hide();";

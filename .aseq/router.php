@@ -8,6 +8,6 @@
 \_::$Back->Router->Route("sign")->Default("sign");
 \_::$Back->Router->Route("user")->Default("user");
 \_::$Back->Router->Route("group")->Default("group");
-\_::$Back->Router->Route("public|asset")->Default(fn()=>\Res::SendFile(normalizePath(\Req::$Direction)));
+//\_::$Back->Router->Route("public|asset")->Default(fn()=>\Res::SendFile(normalizePath(\Req::$Direction)));
 \_::$Back->Router->Route()->Default(\_::$Config->DefaultRouteName);
 ?>

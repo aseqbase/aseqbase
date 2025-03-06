@@ -236,7 +236,7 @@ class Page extends Module{
         $item = $this->Item;
         $p_access = get($item, 'Access' );
 
-        if (!inspect($p_access, die: false)) return null; // Or return an appropriate empty HTML string
+        if (!inspect($p_access, exit: false)) return null; // Or return an appropriate empty HTML string
 
         module("Image" ); // Assuming this function makes the Image class available
         $img = new \MiMFa\Module\Image(); // Make sure the correct namespace is used

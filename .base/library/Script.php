@@ -9,69 +9,116 @@ namespace MiMFa\Library;
  */
 class Script
 {
-    public static function Point($row, $index = 0) {
-        $cc = is_array($row)? count($row):0;
+    
+    public static function Convert($obj)
+    {
+        if (is_null($obj))
+            return "null";
+        else {
+            if (is_string($obj)) {
+                if($res = preg_find("/(?<=^\$\{)\w+(?=\}$)/i", $obj)) return $res;
+                $sp = "`";
+                if(preg_match("/\n|(\$\{)/",$obj))
+                    $obj = str_replace([$sp = "`". "$"], ["\\`", "\\$"], $obj);
+                else
+                    $obj = str_replace($sp = "\"", "\\\"", $obj);
+                $obj = str_replace("</script>", "<\/script>", $obj);
+                return "$sp$obj$sp";
+            }
+            if (is_numeric($obj))
+                return $obj;
+            if (is_subclass_of($obj, "\Base"))
+                return $obj->ToString();
+            if (is_countable($obj) || is_iterable($obj)) 
+                return join("", ["[", join(", ", loop($obj, fn ($i, $o) => self::Convert($o))), "]"]);
+            if (is_callable($obj) || $obj instanceof \Closure)
+                return Internal::MakeScript($obj);
+            return json_encode($obj, flags: JSON_OBJECT_AS_ARRAY);
+        }
+    }
+
+    
+    public static function Point($row, $index = 0)
+    {
+        $cc = is_array($row) ? count($row) : 0;
         if ($cc > 3) {
             $res = [];
             $res[] = "{ ";
-            $res[] = "label: ".self::Parameters($row[0]);
-            $res[] = ",x:".self::Numbers($row[1]);
-            $res[] = ",y:".self::Numbers($row[2]);
+            $res[] = "label: " . self::Parameters($row[0]);
+            $res[] = ",x:" . self::Numbers($row[1]);
+            $res[] = ",y:" . self::Numbers($row[2]);
             $len = count($row);
-            for ($i = 3; $i < $len; $i++) $res[] = ",{$row[$i]}";
+            for ($i = 3; $i < $len; $i++)
+                $res[] = ",{$row[$i]}";
             $res[] = " }";
             return join("", $res);
-        }
-        else if ($cc > 2)
+        } else if ($cc > 2)
             return join("", [
-                "{ label: ", self::Parameters(first($row)),
-                ",x:", self::Numbers($row[1]),
-                ",y:", self::Numbers(last($row)),
+                "{ label: ",
+                self::Parameters(first($row)),
+                ",x:",
+                self::Numbers($row[1]),
+                ",y:",
+                self::Numbers(last($row)),
                 "}"
             ]);
         else if ($cc > 1)
             return join("", [
-                "{x:", self::Numbers(first($row)),
-                ",y:", self::Numbers(last($row)),
+                "{x:",
+                self::Numbers(first($row)),
+                ",y:",
+                self::Numbers(last($row)),
                 "}"
             ]);
-        else{
+        else {
             return join("", [
-                "{x:", self::Numbers($index),
-                ",y:", self::Numbers($row),
+                "{x:",
+                self::Numbers($index),
+                ",y:",
+                self::Numbers($row),
                 "}"
             ]);
         }
     }
-    public static function Points($content) {
-        return join(",", loop($content, function($i, $row) { return self::Point($row, $i); }));
+    public static function Points($content)
+    {
+        return join(",", loop($content, function ($i, $row) {
+            return self::Point($row, $i); }));
     }
-    public static function Parameters($arr) {
-        return isEmpty($arr) ? "" :
-            (is_iterable($arr) ? join("", ["[", join(", ", loop($arr, function($i, $o) { return self::Parameters($o);})), "]"]) :
-                (is_string($arr) ? "`$arr`" :
-                    (is_object($arr) ? Convert::ToJson($arr) :
-                        Convert::ToString($arr))));
+    public static function Parameters($arr)
+    {
+        return isEmpty($arr) ? "" : self::Convert($arr);
     }
-    public static function Numbers($arr) {
+    public static function Numbers($arr)
+    {
         $isarr = is_iterable($arr);
         $val = $isarr ?
-            (preg_replace("/,\s+,/m", ", 0,",
-                (preg_replace("/,\s*$/m", ", 0",
-                    (preg_replace("/^\s*,\s+/m", "0, ",
-                        join(", ", is_array($arr) ? $arr : Convert::ToSequence($arr)))))))) : $arr;
+            (preg_replace(
+                "/,\s+,/m",
+                ", 0,",
+                (preg_replace(
+                    "/,\s*$/m",
+                    ", 0",
+                    (preg_replace(
+                        "/^\s*,\s+/m",
+                        "0, ",
+                        join(", ", is_array($arr) ? $arr : Convert::ToSequence($arr))
+                    ))
+                ))
+            )) : $arr;
         return isEmpty($val) ? "0" : ($isarr ? "[" + $val + "]" : $val);
     }
-
-    public static function Alert($message = "") {
-        return "alert(`" . __($message, styling: false) . "`)";
+    public static function Alert($message = "")
+    {
+        return "alert(" . self::Convert(__($message, styling: false)) . ")";
     }
-    public static function Confirm($message = "") {
-        return "confirm(`" . __($message, styling: false) . "`)";
+    public static function Confirm($message = "")
+    {
+        return "confirm(" . self::Convert(__($message, styling: false)) . ")";
     }
-    public static function Prompt($message = "", $value = null) {
-        return "prompt(`" . __($message, styling: false) . "`, `" . __($value, styling: false) . "`)";
+    public static function Prompt($message = "", $default = null)
+    {
+        return "prompt(" . self::Convert(__($message, styling: false)) . ", " . self::Convert(__($default, styling: false)) . ")";
     }
-
 }
 ?>

@@ -1,7 +1,7 @@
 <?php
 use \MiMFa\Library\Html;
 use \MiMFa\Library\User;
-\Res::Style("
+\_::$Front->Style("
 	.page-home {
 		padding: 10px 10px 50px;
 	}

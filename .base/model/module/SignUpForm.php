@@ -252,7 +252,7 @@ class SignUpForm extends Form
 						return $this->GetSuccess("Dear '" . \_::$Back->User->TemporaryName . "', You registered successfully") .
 							($this->SendActivationEmail ? part(User::$ActiveHandlerPath, print: false) : "");
 					} else
-						return $this->GetError("The user with these email or username could not register!");
+						return $this->GetError("The user cannot register with this email or username!");
 				} else
 					return $this->GetWarning("Please fill all required fields correctly!");
 			} catch (\Exception $ex) {

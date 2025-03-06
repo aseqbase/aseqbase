@@ -603,28 +603,28 @@ class Table extends Module
 				function {$this->Modal->Name}_View(key){
 					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`,
 						(data, err)=>{
-							{$this->Modal->ShowScript("null", "null", "data")}
+							{$this->Modal->ShowScript(null, null, '${data}')}
 						}
 					);
 				}" . ($this->Updatable ? (auth($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(){
 					sendPatch(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->Name}`,
 						(data, err)=>{
-							{$this->Modal->ShowScript("null", "null", "data")}
+							{$this->Modal->ShowScript(null, null, '${data}')}
 						}
 					);
 				}" : "") . (auth($this->ModifyAccess) ? "
 				function {$this->Modal->Name}_Modify(key){
 					sendPatch(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`,
 						(data, err)=>{
-							{$this->Modal->ShowScript("null", "null", "data")}
+							{$this->Modal->ShowScript(null, null, '${data}')}
 						}
 					);
 				}" : "") . (auth($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
 					sendPatch(null, 'secret={$this->DuplicateSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`,
 						(data, err)=>{
-							{$this->Modal->ShowScript("null", "null", "data")}
+							{$this->Modal->ShowScript(null, null, '${data}')}
 						}
 					);
 				}" : "") . (auth($this->RemoveAccess) ? "

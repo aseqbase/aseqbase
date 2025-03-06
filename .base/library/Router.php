@@ -32,7 +32,7 @@ class Router extends \ArrayObject
         $global = false
         )
     {
-        parent::__construct([[/*ALL*/], [/*GET*/], [/*POST*/], [/*PUT*/], [/*FILE*/], [/*PATCH*/], [/*DELETE*/]]);
+        parent::__construct([[/*ALL*/], [/*GET*/], [/*POST*/], [/*PUT*/], [/*FILE*/], [/*PATCH*/], [/*DELETE*/], [/*INTERNAL*/]]);
         $this->Global = $global;
         $this->Renew($pattern, $method)->Set($handler);
     }
@@ -65,7 +65,7 @@ class Router extends \ArrayObject
                     }
                     if ($this->Point > 0 && !$this->Global) continue;
                 }
-        while ($this->Method !== 0 && ($this->Method = 0) == 0);
+        while ($this->Method > 0 && ($this->Method = 0) == 0);
     }
     /**
      * To handle routing for the received request
@@ -346,6 +346,17 @@ class Router extends \ArrayObject
     public function Delete($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) $this->Method = 6;
+        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+    }
+    
+    /**
+     * Add new route to the DEL requests
+     * @param string|callable $handler A route name or a handeler function
+     * @return Router
+     */
+    public function Internal($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
+    {
+        if ($this->IsActive) $this->Method = 7;
         return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
 

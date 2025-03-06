@@ -1,4 +1,7 @@
 <?php
+
+use MiMFa\Library\Internal;
+
 /**
  * The Global Static Variables and Functions
  * You need to indicate and handle requests
@@ -247,15 +250,6 @@ abstract class ReqBase
 		if (is_string($key ?? ""))
 			return self::Receive($key, "internal", $default);
 		return $default;
-	}
-
-	public static function Confirm($default = null)
-	{
-		return self::Internal("confirmed", $default);
-	}
-	public static function Prompt($default = null)
-	{
-		return self::Internal("prompted", $default);
 	}
 }
 

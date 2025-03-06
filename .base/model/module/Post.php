@@ -433,10 +433,8 @@ class Post extends Module
                $p_tagsorder = $p_showtags ? Convert::FromSwitch($this->TagsOrder, $p_type) : "";
                $p_showattaches = $this->ShowAttaches && !isEmpty($p_attaches);
                $p_attachestext = $p_showattaches ? __(Convert::FromSwitch($this->AttachesLabel, $p_type)) : "";
-               $p_showcommentsaccess = $this->ShowCommentsAccess;
-               $p_showcomments = auth($p_showcommentsaccess) && $this->ShowComments;
-               $p_leavecommentaccess = $this->LeaveCommentAccess;
-               $p_leavecomment = auth($p_leavecommentaccess) && $this->LeaveComment;
+               $p_showcomments = auth($this->ShowCommentsAccess) && $this->ShowComments;
+               $p_leavecomment = $this->LeaveComment;
                $p_showrelateds = $this->ShowRelateds && !isEmpty($p_tags);
                $p_relatedstext = $p_showrelateds ? __(Convert::FromSwitch($this->RelatedsLabel, $p_type)) : "";
                $p_relatedscount = $p_showrelateds ? Convert::FromSwitch($this->RelatedsCount, $p_type) : "";
@@ -562,7 +560,7 @@ class Post extends Module
                          break;
                }
                if ($p_showattaches)
-                    yield Html::Division($p_attachestext . Convert::ToHtml($p_attaches));
+                    yield Html::Division($p_attachestext . Html::Convert($p_attaches));
                if ($p_showtags) {
                     $tags = table("Tag")->DoSelectPairs("Name" , "Title" , "`Id` IN (" . join(",", $p_tags) . ") " . (isEmpty($p_tagsorder) ? "" : "ORDER BY $p_tagsorder") . " LIMIT $p_tagscount");
                     if (count($tags) > 0)
@@ -639,11 +637,12 @@ class Post extends Module
           module("CommentForm");
           $cc = new CommentForm();
           $cc->MessageType = $this->CommentType;
+          $cc->Access = $this->LeaveCommentAccess;
           $cc->Relation = $relatedId;
           $cc->SubjectLabel =
                $cc->AttachLabel =
                null;
-          return Html::$HorizontalBreak . $cc->ToString();
+          return Html::$HorizontalBreak . $cc->Handle();
      }
 }
 ?>

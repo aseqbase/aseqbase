@@ -162,7 +162,7 @@ class Base extends \ArrayObject
 
 	public function Handler($received = null)
 	{
-		return MiMFa\Library\Convert::ToHtml($received ?? $this->Children) . MiMFa\Library\Convert::ToHtml($this->__toArray());
+		return MiMFa\Library\Html::Convert($received ?? $this->Children) . MiMFa\Library\Html::Convert($this->__toArray());
 	}
 
 	/**

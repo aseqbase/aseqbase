@@ -25,6 +25,79 @@ class Html
     public static $HorizontalBreak = "<hr/>";
 
     /**
+     * Convert everything to a simple HTML format
+     * @param mixed $value
+     * @return string
+     */
+    public static function Convert($value)
+    {
+        if (!is_null($value)) {
+            if (is_string($value)) {
+                if (preg_match("/\<[^\>]+\>/i", $value))
+                    return $value;
+                else {
+                    $value = preg_replace("/\b\"(\S[^\r\n]+\S)\"\b/i", "<quote ondblclick='copy(this.innerText)'>$1</quote>", $value);
+                    $value = preg_replace("/^\#\s(.*)/im", "<h1>$1</h1>", $value);
+                    $value = preg_replace("/^\#{2}\s(.*)/im", "<h2>$1</h2>", $value);
+                    $value = preg_replace("/^\#{3}\s(.*)/im", "<h3>$1</h3>", $value);
+                    $value = preg_replace("/^\#{4}\s(.*)/im", "<h4>$1</h4>", $value);
+                    $value = preg_replace("/^\#{5}\s(.*)/im", "<h5>$1</h5>", $value);
+                    $value = preg_replace("/^\#{6}\s(.*)/im", "<h6>$1</h6>", $value);
+                    $value = preg_replace("/((\r?\n\r?\s*(\+|(\d+\.?))\s.*)(\r?\n\r?\s*([\+\*•○\-]|(\d+\.?))\s.*)*)/i", "<ol>" . PHP_EOL . "$1" . PHP_EOL . "</ol>", $value);
+                    $value = preg_replace("/^\s*(?:[\+]|(?:\d+\.?))\s(.*)/im", "<li>$1</li>", $value);
+                    $value = preg_replace("/((\r?\n\r?\s*[\*•○\-]\s.*)+)/i", "<ul>" . PHP_EOL . "$1" . PHP_EOL . "</ul>", $value);
+                    $value = preg_replace("/^\s*[\*•○\-]\s(.*)/im", "<li>$1</li>", $value);
+                    $value = preg_replace("/^\-{6,}$/im", "<hr/>", $value);
+                    $value = preg_replace("/\b\@image:([^\s\[\]\{\}]+)\b/i", "<img src=\"$1\"/>", $value);
+                    $value = preg_replace("/\b\@\[([^\]]*)\]:([^\s\[\]\{\}]+)\b/i", "<a href=\"$2\">$1</a>", $value);
+                    $value = preg_replace("/\b([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", "<a href=\"$1\">$1</a>", $value);
+                    $value = preg_replace("/\b([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", "<a href=\"mailto:$1\">$1</a>", $value);
+                    $value = preg_replace("/\*\*(\S[^\*\r\n]+\S)\*\*/i", "<strong>$1</strong>", $value);
+                    $value = preg_replace("/\___(\S[^\*\r\n]+\S)\__/i", "<i>$1</i>", $value);
+                    $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<)/i", "<br/>", trim($value));
+                    // Additional patterns for code blocks, inline code, and blockquotes
+                    $value = preg_replace('/```(.+?)```/s', '<pre><code>$1</code></pre>', $value); // Code blocks
+                    $value = preg_replace('/`(.+?)`/s', '<code>$1</code>', $value); // Inline code
+                    $value = preg_replace('/^\>(.*)/im', '<blockquote>$1</blockquote>', $value); // Blockquotes
+                    return $value;
+                }
+            }
+            if (is_subclass_of($value, "\Base"))
+                return $value->ToString();
+            if (is_countable($value) || is_iterable($value)) {
+                $texts = array();
+                if (is_numeric(array_key_first($value))) {
+                    foreach ($value as $val)
+                        $texts[] = Html::Item(self::Convert($val));
+                    return Html::List(join(PHP_EOL, $texts));
+                } elseif ($args = findBetween($value, "Arguments", "Item")) {
+                    $key = get($value, "Key");
+                    $val = get($value, "Value");
+                    $ops = get($value, "Options");
+                    $type = get($value, "Type");
+                    $title = get($value, "Title");
+                    return Html::Interactor(
+                        $key,
+                        $val,
+                        $type,
+                        $ops,
+                        $title,
+                        $args
+                    );
+                } else {
+                    foreach ($value as $key => $val)
+                        $texts[] = Html::Item(Html::Span($key) . ":" . self::Convert($val));
+                    return Html::Items(join(PHP_EOL, $texts));
+                }
+            }
+            if (is_callable($value) || $value instanceof \Closure)
+                return self::Convert($value());
+            return Html::Division(Convert::ToString($value));
+        }
+        return "";
+    }
+
+    /**
      * Create standard html element
      * @param mixed $content The content of the Tag, send tagname to create single tag
      * @param string|null|array $tagName The HTML tag name, send attributes to create single tag, Or other custom attributes of the single Tag
@@ -96,6 +169,8 @@ class Html
                                 case "oninput":
                                 case "onmouseover":
                                 case "onmouseout":
+                                    if (is_callable($value) || $value instanceof \Closure)
+                                        $value = Internal::MakeScript($value);
                                     $attrdic[$key] .= PHP_EOL . $value;
                                     break;
                                 default:
@@ -142,6 +217,8 @@ class Html
                                     $id = "_" . getId(true);
                                     $attrs .= " id='$id'";
                                 }
+                                if (is_callable($value) || $value instanceof \Closure)
+                                    $value = Internal::MakeScript($value);
                                 $scripts[] = "document.getElementById('$id').$key = function(e){{$value}};";
                             } else
                                 $attrs .= " " . self::Attribute($key, $value);
@@ -167,11 +244,12 @@ class Html
         }
         return $attrs;
     }
-    public static function Attribute($key, $value = null)
+    public static function Attribute($key, $value = null): mixed
     {
         if (is_null($value)) {
             return $key;
         } else {
+            $value = Convert::ToString($value);
             if (str_contains($value, '"'))
                 if (str_contains($value, "'")) {
                     $value = str_replace("'", "`", $value);
@@ -1332,7 +1410,7 @@ class Html
     /**
      * The \<HR\> HTML Tag
      * @param mixed $content The content of the Tag
-     * @param string|null|array $reference The hyper destination tag id
+     * @param string|null|array|callable $reference The hyper destination tag id, (Use class names with full namespaces in callable references)
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
@@ -1556,7 +1634,7 @@ class Html
     /**
      * The \<BUTTON\> or \<A\> HTML Tag
      * @param mixed $content The content of the Tag
-     * @param string|null|array $reference The source path or onclick event script
+     * @param string|null|array|callable $reference The source path or onclick event script, (Use class names with full namespaces in callable references)
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
@@ -1569,7 +1647,7 @@ class Html
     /**
      * The \<BUTTON\> or \<A\> HTML Tag
      * @param mixed $content The source icon image or the regular name
-     * @param string|null|array $reference The source path or onclick event script
+     * @param string|null|array|callable $reference The source path or onclick event script, (Use class names with full namespaces in callable references)
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
@@ -1852,7 +1930,7 @@ class Html
                 break;
             case 'disable':
             case 'disabled':
-                $content = self::DisabledInput($title, $value, $attributes);
+                $content = self::DisabledInput($key, $value, $attributes);
                 break;
             case 'label':
             case 'key':
@@ -1861,23 +1939,23 @@ class Html
                 $content = self::Label($value ?? $titleOrKey, $id, $attributes);
                 break;
             case 'object':
-                $content = self::ObjectInput($title, Convert::ToString($value), $attributes);
+                $content = self::ObjectInput($key, Convert::ToString($value), $attributes);
                 break;
             case 'countable':
             case 'iterable':
             case 'array':
             case 'collection'://A collection of Base based objects
-                $content = self::CollectionInput($title, $value, $options, $attributes);
+                $content = self::CollectionInput($key, $value, $options, $attributes);
                 break;
             case 'lines':
             case 'texts':
             case 'strings':
             case 'multiline':
             case 'textarea':
-                $content = self::TextInput($title, $value, $attributes);
+                $content = self::TextInput($key, $value, $attributes);
                 break;
             case 'content':
-                $content = self::ContentInput($title, $value, $attributes);
+                $content = self::ContentInput($key, $value, $attributes);
                 break;
             case 'size':
             case 'font':
@@ -1888,7 +1966,7 @@ class Html
             case 'string':
             case 'singleline':
             case 'text':
-                $content = self::ValueInput($title, $value, $attributes);
+                $content = self::ValueInput($key, $value, $attributes);
                 break;
             case 'type':
             case 'types':
@@ -1897,12 +1975,12 @@ class Html
             case 'dropdown':
             case 'combobox':
             case 'select':
-                $content = self::SelectInput($title, $value, $options, $attributes);
+                $content = self::SelectInput($key, $value, $options, $attributes);
                 break;
             case 'radio':
             case 'radiobox':
             case 'radiobutton':
-                $content = self::RadioInput($titleOrKey, $value, $attributes);
+                $content = self::RadioInput($key, $value, $attributes);
                 break;
             case '1':
             case '0':
@@ -1911,7 +1989,7 @@ class Html
             case 'check':
             case 'checkbox':
             case 'checkbutton':
-                $content = self::CheckInput($titleOrKey, $value, $attributes);
+                $content = self::CheckInput($key, $value, $attributes);
                 break;
             case 'int':
             case 'integer':
@@ -1921,7 +1999,7 @@ class Html
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::NumberInput($title, $value, ['min' => $min, 'max' => $max], $attributes);
+                $content = self::NumberInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
                 break;
             case 'short':
                 $min = -255;
@@ -1930,7 +2008,7 @@ class Html
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::NumberInput($title, $value, ['min' => $min, 'max' => $max], $attributes);
+                $content = self::NumberInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
                 break;
             case 'number':
             case 'long':
@@ -1940,7 +2018,7 @@ class Html
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::NumberInput($title, $value, ['min' => $min, 'max' => $max], $attributes);
+                $content = self::NumberInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
                 break;
             case 'range':
                 $min = 0;
@@ -1949,7 +2027,7 @@ class Html
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::RangeInput($title, $value, $min, $max, $attributes);
+                $content = self::RangeInput($key, $value, $min, $max, $attributes);
                 break;
             case 'float':
             case 'double':
@@ -1960,50 +2038,50 @@ class Html
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::FloatInput($title, $value, ['min' => $min, 'max' => $max], $attributes);
+                $content = self::FloatInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
                 break;
             case 'phone':
             case 'tel':
             case 'telephone':
-                $content = self::TelInput($title, $value, $attributes);
+                $content = self::TelInput($key, $value, $attributes);
                 break;
             case 'url':
-                $content = self::UrlInput($title, $value, $attributes);
+                $content = self::UrlInput($key, $value, $attributes);
                 break;
             case 'map':
             case 'location':
             case 'path':
-                $content = self::ValueInput($title, $value, $attributes);
+                $content = self::ValueInput($key, $value, $attributes);
                 break;
             case 'calendar':
             case 'calendarinput':
             case 'datetime-local':
             case 'cal':
-                $content = self::CalendarInput($title, $value, $attributes);
+                $content = self::CalendarInput($key, $value, $attributes);
                 break;
             case 'datetime':
-                $content = self::DateTimeInput($title, $value, $attributes);
+                $content = self::DateTimeInput($key, $value, $attributes);
                 break;
             case 'date':
-                $content = self::DateInput($title, $value, $attributes);
+                $content = self::DateInput($key, $value, $attributes);
                 break;
             case 'time':
-                $content = self::TimeInput($title, $value, $attributes);
+                $content = self::TimeInput($key, $value, $attributes);
                 break;
             case 'week':
-                $content = self::WeekInput($title, $value, $attributes);
+                $content = self::WeekInput($key, $value, $attributes);
                 break;
             case 'month':
-                $content = self::MonthInput($title, $value, $attributes);
+                $content = self::MonthInput($key, $value, $attributes);
                 break;
             case 'hidden':
             case 'hide':
-                $content = self::HiddenInput($title, $value, $attributes);
+                $content = self::HiddenInput($key, $value, $attributes);
                 break;
             case 'secret':
             case 'pass':
             case 'password':
-                $content = self::SecretInput($title, $value, $attributes);
+                $content = self::SecretInput($key, $value, $attributes);
                 break;
             case 'doc':
             case 'document':
@@ -2011,7 +2089,7 @@ class Html
             case 'audio':
             case 'video':
             case 'file':
-                $content = self::FileInput($title, $value, $attributes);
+                $content = self::FileInput($key, $value, $attributes);
                 break;
             case 'docs':
             case 'documents':
@@ -2019,24 +2097,24 @@ class Html
             case 'audios':
             case 'videos':
             case 'files':
-                $content = self::FileInput($title, $value, 'multiple', $attributes);
+                $content = self::FileInput($key, $value, 'multiple', $attributes);
                 break;
             case 'dir':
             case 'directory':
             case 'folder':
-                $content = self::FileInput($title, $value, 'webkitdirectory multiple', $attributes);
+                $content = self::FileInput($key, $value, 'webkitdirectory multiple', $attributes);
                 break;
             case 'submitbutton':
             case 'submit':
-                $content = self::SubmitButton($title, $value, $attributes);
+                $content = self::SubmitButton($key, $value, $attributes);
                 break;
             case 'resetbutton':
             case 'reset':
-                $content = self::ResetButton($title, $value, $attributes);
+                $content = self::ResetButton($key, $value, $attributes);
                 break;
             case 'imagesubmit':
             case 'imgsubmit':
-                $content = self::Input($title, $title, 'image', ['src' => Convert::ToString($value)], $attributes);
+                $content = self::Input($key, $title, 'image', ['src' => Convert::ToString($value)], $attributes);
                 break;
             case 'json':
             case 'javascript':
@@ -2044,23 +2122,23 @@ class Html
             case 'html':
             case 'css':
             case 'codes':
-                $content = self::ScriptInput($title, $value, $attributes);
+                $content = self::ScriptInput($key, $value, $attributes);
                 break;
             case 'mail':
             case 'email':
-                $content = self::EmailInput($title, $value, $attributes);
+                $content = self::EmailInput($key, $value, $attributes);
                 break;
             case 'color':
-                $content = self::ColorInput($title, $value, $attributes);
+                $content = self::ColorInput($key, $value, $attributes);
                 break;
             case 'search':
-                $content = self::SearchInput($title, $value, $attributes);
+                $content = self::SearchInput($key, $value, $attributes);
                 break;
             default:
                 if (is_string($type))
                     $content = self::Element($value, $type, $attributes);
                 else
-                    $content = self::Input($title, $value, $type, $attributes);
+                    $content = self::Input($key, $value, $type, $attributes);
                 break;
         }
         if (is_null($prepend) && is_null($content) && is_null($append))

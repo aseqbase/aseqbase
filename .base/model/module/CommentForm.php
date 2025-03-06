@@ -55,14 +55,14 @@ class CommentForm extends Form
 			Contact::SendHTMLEmail(
 				\_::$Info->SenderEmail,
 				$row["Contact"],
-				$subject ?? __($this->MailSubject ?? ("$notification " . findValid($row, "Subject" , "Your Comment"))),
+				$subject ?? __($this->MailSubject ?? ("$notification " . findValid($row, "Subject", "Your Comment"))),
 				$message ?? [
-					$notification => Html::Link(findValid($row, "Subject" , "Your Comment"), \Req::$Path),
-					"Subject" => get($data, "Subject" ),
-					"Name" => findValid($data, "Name" , \_::$Back->User ? \_::$Back->User->Name : null),
-					"Contact"=> findValid($data, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
-					"Content" => get($data, "Content" ),
-					"Attach" => get($data, "Attach" )
+					$notification => Html::Link(findValid($row, "Subject", "Your Comment"), \Req::$Path),
+					"Subject" => get($data, "Subject"),
+					"Name" => findValid($data, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
+					"Contact" => findValid($data, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
+					"Content" => get($data, "Content"),
+					"Attach" => get($data, "Attach")
 				]
 			);
 		} catch (\Exception $ex) {
@@ -71,61 +71,58 @@ class CommentForm extends Form
 
 	public function Get()
 	{
-		if (!$this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: false))
-			return $this->GetHeader();
+		if (!$this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: false)) {
+			$this->Signing = true;
+			return $this->GetSigning();
+		}
 		return parent::Get();
-	}
-	public function GetHeader()
-	{
-		if (auth($this->Access ?? \_::$Config->UserAccess))
-			return parent::GetHeader();
-		else return $this->GetSigning();
 	}
 	public function GetFields()
 	{
 		if (!(\_::$Back->User && \_::$Back->User->Email)) {
 			if (isValid($this->NameLabel))
 				yield Html::Field(
-						key: "Name",
-						value: null,
-						type: "text",
-						title: $this->NameLabel,
-						attributes: ["placeholder" => $this->NamePlaceHolder, "required" => "required", "autocomplete" => "Name"]
-					);
+					key: "Name",
+					value: null,
+					type: "text",
+					title: $this->NameLabel,
+					attributes: ["placeholder" => $this->NamePlaceHolder, "required" => "required", "autocomplete" => "Name"]
+				);
 			if (isValid($this->ContactLabel))
 				yield Html::Field(
-						key: "Contact",
-						value: null,
-						type: "email",
-						title: $this->ContactLabel,
-						attributes: ["placeholder" => $this->ContactPlaceHolder, "required" => "required", "autocomplete" => "Email"]
-					);
+					key: "Contact",
+					value: null,
+					type: "email",
+					title: $this->ContactLabel,
+					attributes: ["placeholder" => $this->ContactPlaceHolder, "required" => "required", "autocomplete" => "Email"]
+				);
 		}
 		if (isValid($this->SubjectLabel))
 			yield Html::Field(
-					key: "Subject",
-					value: null,
-					type: "text",
-					title: $this->SubjectLabel,
-					attributes: ["placeholder" => $this->SubjectPlaceHolder, "required" => "required", "autocomplete" => "Subject"]
-				);
+				key: "Subject",
+				value: null,
+				type: "text",
+				title: $this->SubjectLabel,
+				attributes: ["placeholder" => $this->SubjectPlaceHolder, "required" => "required", "autocomplete" => "Subject"]
+			);
 		if (isValid($this->MessageLabel))
 			yield Html::Field(
-					key: "Content",
-					value: null,
-					type: $this->MessageType,
-					title: $this->MessageLabel,
-					attributes: ["placeholder" => $this->MessagePlaceHolder, "required" => "required"]
-				);
+				key: "Content",
+				value: null,
+				type: $this->MessageType,
+				title: $this->MessageLabel,
+				attributes: ["placeholder" => $this->MessagePlaceHolder, "required" => "required"]
+			);
 		if (isValid($this->AttachLabel))
 			yield Html::Field(
-					key: "Attach",
-					value: null,
-					type: $this->AttachType,
-					title: $this->AttachLabel,
-					attributes: ["placeholder" => $this->AttachPlaceHolder, "autocomplete" => "Attach"]
-				);
-		if($this->ReplyId) yield Html::HiddenInput("Reply", $this->ReplyId);
+				key: "Attach",
+				value: null,
+				type: $this->AttachType,
+				title: $this->AttachLabel,
+				attributes: ["placeholder" => $this->AttachPlaceHolder, "autocomplete" => "Attach"]
+			);
+		if ($this->ReplyId)
+			yield Html::HiddenInput("Reply", $this->ReplyId);
 		yield from parent::GetFields();
 	}
 	public function GetFooter()
@@ -134,16 +131,16 @@ class CommentForm extends Form
 			. Html::LargeSlot(
 				$this->GetSigning()
 				,
-				["class"=> "col-lg-12"]
+				["class" => "col-lg-12"]
 			);
 	}
 
 	public function Post()
 	{
-		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking:true, reaction: true))
+		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: true, reaction: true))
 			try {
 				$received = \Req::Post();
-				if (isValid($received, "Name" ) || isValid($received, "Content" ) || isValid($received, "Subject" ) || isValid($received, "Attach" )) {
+				if (isValid($received, "Name") || isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
 					$rid = get($received, "Reply");
 					if ((\_::$Back->User && \_::$Back->User->Email) || isValid($received, "Contact"))
@@ -151,11 +148,11 @@ class CommentForm extends Form
 							"ReplyId" => $rid,
 							"Relation" => $this->Relation,
 							"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
-							"Name" => findValid($received, "Name" , \_::$Back->User ? \_::$Back->User->Name : null),
-							"Contact"=> findValid($received, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
-							"Subject" => get($received, "Subject" ),
-							"Content" => get($received, "Content" ),
-							"Attach" => Convert::ToString(get($received, "Attach" )),
+							"Name" => findValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
+							"Contact" => findValid($received, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
+							"Subject" => get($received, "Subject"),
+							"Content" => get($received, "Content"),
+							"Attach" => Convert::ToString(get($received, "Attach")),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
 						]);
@@ -177,20 +174,20 @@ class CommentForm extends Form
 
 	public function Put()
 	{
-		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking:true, reaction: true))
+		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: true, reaction: true))
 			try {
 				$received = \Req::Put();
-				if (isValid($received, "Content" ) || isValid($received, "Subject" ) || isValid($received, "Attach" )) {
+				if (isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
-					$cid = get($received, "Id" );
+					$cid = get($received, "Id");
 					if (isValid($cid))
 						$res = table("Comment")->DoUpdate("`Id`=:Id AND (`UserId`=:UserId OR `Contact`=:Contact)", [
 							":Id" => $cid,
 							":UserId" => \_::$Back->User->Id,
 							":Contact" => \_::$Back->User->Email,
-							"Subject" => get($received, "Subject" ),
-							"Content" => get($received, "Content" ),
-							"Attach" => Convert::ToString(get($received, "Attach" )),
+							"Subject" => get($received, "Subject"),
+							"Content" => get($received, "Content"),
+							"Attach" => Convert::ToString(get($received, "Attach")),
 							"UpdateTime" => Convert::ToDateTimeString(),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
@@ -211,7 +208,7 @@ class CommentForm extends Form
 	public function Patch()
 	{
 		$received = \Req::Patch();
-		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking:false, reaction: true))
+		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: false, reaction: true))
 			if (isValid($received, "Reply")) {
 				$this->UnBlock();
 				$this->AllowHeader =
@@ -231,15 +228,16 @@ class CommentForm extends Form
 		if (auth(\_::$Config->UserAccess))
 			try {
 				$received = \Req::Delete();
-				$cid = get($received, "Id" );
+				$cid = get($received, "Id");
 				if (isValid($cid))
-					if (isValid($cid) && \_::$Back->User->Id && 
-						table("Comment")->DoDelete("`Id`=:Id AND (`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$Back->User->Id, ":UE" => \_::$Back->User->Email]))
-						{
-							$this->Status = 200;
-							return $this->GetWarning("This comment removed successfuly!");
-						}
-					else return $this->GetError("You have not enough access to remove this comment!");
+					if (
+						isValid($cid) && \_::$Back->User->Id &&
+						table("Comment")->DoDelete("`Id`=:Id AND (`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$Back->User->Id, ":UE" => \_::$Back->User->Email])
+					) {
+						$this->Status = 200;
+						return $this->GetWarning("This comment removed successfuly!");
+					} else
+						return $this->GetError("You have not enough access to remove this comment!");
 				return $this->GetError("Could not remove this comment!");
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);

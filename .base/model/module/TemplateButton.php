@@ -21,8 +21,8 @@ class TemplateButton extends Module{
 	public function Get(){
 		return $this->GetTitle().$this->GetDescription().
 		(\_::$Front->DarkMode?
-			Html::Media($this->LightLabel, $this->LightIcon,["onclick"=>"load(`?{$this->LightRequest}=true&{$this->DarkRequest}=!`);"])
-			:Html::Media($this->DarkLabel, $this->DarkIcon,["onclick"=>"load(`?{$this->DarkRequest}=true&{$this->LightRequest}=!`);"])
+			Html::Media($this->LightLabel, $this->LightIcon,["onclick"=>"setMemo(`{$this->LightRequest}`,true);setMemo(`{$this->DarkRequest}`,false);reload();"])
+			:Html::Media($this->DarkLabel, $this->DarkIcon,["onclick"=>"setMemo(`{$this->DarkRequest}`,true);setMemo(`{$this->LightRequest}`,false);reload();"])
 	    ).
 		$this->GetContent();
     }

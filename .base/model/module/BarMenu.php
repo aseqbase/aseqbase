@@ -153,7 +153,7 @@ class BarMenu extends Module{
                         //    )
                         //    , get($this->Items[$i],'Path' )??get($this->Items[$i],'Link'), get($this->Items[$i],"Attributes")
                         //);
-						$hr = findBetween($item, "Link", 'Path' );
+						$hr = findBetween($item, 'Path', "Link" );
                         yield
                             "<a ".get($item,"Attributes").(isValid($hr)?" href='$hr'":"").">
 								<div class='button $cls' style='width:".($ism?$msize:$size)."vw;'>

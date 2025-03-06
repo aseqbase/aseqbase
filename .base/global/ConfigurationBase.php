@@ -7,7 +7,7 @@ library("Revise");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
  */
-abstract class ConfigurationBase
+abstract class ConfigurationBase extends ArrayObject
 {
      /**
       * The website Encoding
@@ -469,7 +469,7 @@ abstract class ConfigurationBase
       * @var string
       * @category DataBase
       */
-     public $DataBasePrefix = 'qb_';
+     public $DataBasePrefix = 'aseq_';
      /**
       * Add the website name to the selected DataBasePrefix for strongest privacy
       * @var string
