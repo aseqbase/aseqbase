@@ -417,7 +417,7 @@ class Post extends Module
                $p_showimage = $this->ShowImage;
                $p_showtitle = $this->ShowTitle;
                $p_showmeta = $this->ShowMetaData;
-               $p_inselflink = $this->RootPath . ($p_name ?? $p_id);
+               $p_inselflink = $this->RootPath . ($p_id??$p_name);
                if (!$this->CompressPath) {
                     $catDir = \_::$Back->Query->GetContentCategoryDirection($item);
                     if (isValid($catDir))

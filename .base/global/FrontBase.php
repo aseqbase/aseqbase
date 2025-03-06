@@ -9,6 +9,8 @@ library("Revise");
  */
 abstract class FrontBase
 {
+	public $DefaultSourceSelector = "body";
+	public $DefaultDestinationSelector = "body";
 	public $AnimationSpeed = 250;
 	public $DetectMode = true;
 	public $DarkMode = null;
@@ -118,59 +120,59 @@ abstract class FrontBase
 	 */
 	public $PatternPalette = array("/asset/pattern/main.svg", "/asset/pattern/doddle.png", "/asset/pattern/doddle-fantasy.png", "/asset/pattern/triangle.png", "/asset/pattern/slicksline.png", "/asset/pattern/doddle-mess.png");
 
-	public static function LoopPalette($palette, int $ind = 0)
+	public function LoopPalette($palette, int $index = 0)
 	{
-		$ind %= count($palette);
-		return $palette[$ind];
+		$index %= count($palette);
+		return $palette[$index];
 	}
-	public static function LimitPalette($palette, int $ind = 0)
+	public function LimitPalette($palette, int $index = 0)
 	{
-		return $palette[$ind >= count($palette) ? count($palette) - 1 : max(0, $ind)];
+		return $palette[$index >= count($palette) ? count($palette) - 1 : max(0, $index)];
 	}
 
-	public function Color(int $ind = 0)
+	public function Color(int $index = 0)
 	{
-		return self::LoopPalette($this->ColorPalette, $ind);
+		return $this->LoopPalette($this->ColorPalette, $index);
 	}
-	public function ForeColor(int $ind = 0)
+	public function ForeColor(int $index = 0)
 	{
-		return self::LoopPalette($this->ForeColorPalette, $ind);
+		return $this->LoopPalette($this->ForeColorPalette, $index);
 	}
-	public function BackColor(int $ind = 0)
+	public function BackColor(int $index = 0)
 	{
-		return self::LoopPalette($this->BackColorPalette, $ind);
+		return $this->LoopPalette($this->BackColorPalette, $index);
 	}
-	public function Font(int $ind = 0)
+	public function Font(int $index = 0)
 	{
-		return self::LoopPalette($this->FontPalette, $ind);
+		return $this->LoopPalette($this->FontPalette, $index);
 	}
-	public function Size(int $ind = 0)
+	public function Size(int $index = 0)
 	{
-		return self::LimitPalette($this->SizePalette, $ind);
+		return $this->LimitPalette($this->SizePalette, $index);
 	}
-	public function Shadow(int $ind = 0)
+	public function Shadow(int $index = 0)
 	{
-		return self::LimitPalette($this->ShadowPalette, $ind);
+		return $this->LimitPalette($this->ShadowPalette, $index);
 	}
-	public function Border(int $ind = 0)
+	public function Border(int $index = 0)
 	{
-		return self::LimitPalette($this->BorderPalette, $ind);
+		return $this->LimitPalette($this->BorderPalette, $index);
 	}
-	public function Radius(int $ind = 0)
+	public function Radius(int $index = 0)
 	{
-		return self::LimitPalette($this->RadiusPalette, $ind);
+		return $this->LimitPalette($this->RadiusPalette, $index);
 	}
-	public function Transition(int $ind = 0)
+	public function Transition(int $index = 0)
 	{
-		return self::LimitPalette($this->TransitionPalette, $ind);
+		return $this->LimitPalette($this->TransitionPalette, $index);
 	}
-	public function Overlay(int $ind = 0)
+	public function Overlay(int $index = 0)
 	{
-		return \MiMFa\Library\Local::GetUrl(self::LoopPalette($this->OverlayPalette, $ind));
+		return \MiMFa\Library\Local::GetUrl($this->LoopPalette($this->OverlayPalette, $index));
 	}
-	public function Pattern(int $ind = 0)
+	public function Pattern(int $index = 0)
 	{
-		return \MiMFa\Library\Local::GetUrl(self::LoopPalette($this->PatternPalette, $ind));
+		return \MiMFa\Library\Local::GetUrl($this->LoopPalette($this->PatternPalette, $index));
 	}
 
 	public function __construct()
@@ -246,38 +248,75 @@ abstract class FrontBase
 	}
 
 	/**
-	 * Get and Set special part of client side
+	 * Interact with all specific parts of the client side
 	 * @param mixed $script The front JS codes
 	 * @param mixed $callback The call back handler
 	 * @example: Interact('$("body").html', function(selectedHtml)=>{ //do somework })
 	 */
-	public static function Interact($script = null, $callback = null)
+	public function Interact($script = null, $callback = null)
 	{
-        $selector = "'body'";
-        $callbackScript = "(data,err)=>$($selector).append(data??err)";
+        $callbackScript = "(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($this->DefaultDestinationSelector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
         $progressScript = "null";
 		$timeout = 60000;
 		$id = "S_".getID(true);
-		if(isStatic($callback)) echo "<script id='$id'>$(document).ready(()=>{(".$callbackScript.")(".
-				\MiMFa\Library\Script::Convert($callback).
-			",$script);document.getElementById('$id').remove();});</script>";
+		if(isStatic($callback)) echo "<script id='$id'>document.addEventListener('DOMContentLoaded',()=>{(".$callbackScript.")(".
+				\MiMFa\Library\Script::Convert($callback) . ",$script);document.getElementById('$id').remove();});</script>";
 		else echo "<script id='$id'>" .(
-				$callback ? '$(document).ready(()=>{'.
-					'sendInternal(null,{"' .
-						\MiMFa\Library\Internal::Set($callback) . '":JSON.stringify('. $script .
-					")},$selector,$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();});"
+				$callback ? "document.addEventListener('DOMContentLoaded',()=>{".
+					'sendInternal(null,{"' . \MiMFa\Library\Internal::Set($callback) . '":JSON.stringify('. $script . ")},".
+						\MiMFa\Library\Script::Convert($this->DefaultSourceSelector).
+						",$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();});"
 				: $script
 			). "</script>";
 	}
 	/**
-	 * Get a special part of client side
+	 * Interact with all specific parts of the client side one by one
+	 * @param mixed $script The front JS codes
+	 * @param mixed $callback The call back handler
+	 * @example: Get("body", function(selectedHtml)=>{ //do somework })
+	 */
+	public function Iterate($script = null, $callback = null)
+	{
+        $callbackScript = "(data,err)=>{el=document.createElement('qb');el.innerHTML=data??err;item.before(...el.childNodes);item.remove();}";
+        $progressScript = "null";
+		$timeout = 60000;
+		$id = "S_".getID(true);
+		if(isStatic($callback)) echo "<script id='$id'>document.addEventListener('DOMContentLoaded',()=>{for(item of $script)(".$callbackScript.")(".
+				\MiMFa\Library\Script::Convert($callback) . ",item);document.getElementById('$id').remove();});</script>";
+		else echo "<script id='$id'>" .(
+				$callback ? "document.addEventListener('DOMContentLoaded',()=>{".
+					"for(item of $script)sendInternal(null,{\"" . \MiMFa\Library\Internal::Set($callback) . '":item.outerHTML},'.
+						"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();});"
+				: $script
+			). "</script>";
+	}
+	/**
+	 * Interact with all specific parts of the client side one by one
 	 * @param mixed $selector The source selector
 	 * @param mixed $callback The call back handler
 	 * @example: Get("body", function(selectedHtml)=>{ //do somework })
 	 */
-	public static function Get($selector = null, $callback = null)
+	public function Each($selector = null, $callback = null)
 	{
-		self::Interact("$(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").prop('outerHTML')", $callback);
+		$this->Iterate("document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ")", $callback);
+	}
+	/**
+	 * Get all specific parts of the client side
+	 * @param mixed $selector The source selector
+	 * @param mixed $callback The call back handler
+	 * @example: Get("body", function(selectedHtml)=>{ //do somework })
+	 */
+	public function Get($selector = null, $callback = null)
+	{
+		$this->Interact("Array.from(document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
+	}
+	/**
+	 * Forget a special part of client side
+	 * @param mixed $selector The destination selector
+	 */
+	public function Forget($selector = "body")
+	{
+		echo "<script>document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").forEach(el=>el.remove()));</script>";
 	}
 	/**
 	 * Set output instead if a special part of client side
@@ -285,13 +324,45 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public static function Set($selector = null, $handler = null, ...$args)
+	public function Set($selector = null, $handler = null, ...$args)
 	{
 		echo "<script>" .
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
-				"(data,err)=> $(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").replaceWith(data??err)"
+				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.remove();})"
+			)
+			. "</script>";
+	}
+	/**
+	 * Insert output before a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public function Before($selector = "body", $handler = null, ...$args)
+	{
+		echo "<script>" .
+			\MiMFa\Library\Internal::MakeScript(
+				$handler,
+				$args,
+				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
+			)
+			. "</script>";
+	}
+	/**
+	 * Insert output after a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public function After($selector = "body", $handler = null, ...$args)
+	{
+		echo "<script>" .
+			\MiMFa\Library\Internal::MakeScript(
+				$handler,
+				$args,
+				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			)
 			. "</script>";
 	}
@@ -301,29 +372,13 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public static function Fill($selector = "body", $handler = null, ...$args)
+	public function Fill($selector = "body", $handler = null, ...$args)
 	{
 		echo "<script>" .
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
-				"(data,err)=> $(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").html(data??err)"
-			)
-			. "</script>";
-	}
-	/**
-	 * Append output on a special part of client side
-	 * @param mixed $selector The destination selector
-	 * @param mixed $handler The data that is ready to print
-	 * @param mixed $args Handler input arguments
-	 */
-	public static function Append($selector = "body", $handler = null, ...$args)
-	{
-		echo "<script>" .
-			\MiMFa\Library\Internal::MakeScript(
-				$handler,
-				$args,
-				"(data,err)=>$(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").append(data??err)"
+				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			)
 			. "</script>";
 	}
@@ -333,59 +388,67 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public static function Prepend($selector = "body", $handler = null, ...$args)
+	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
 		echo "<script>" .
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
-				"(data,err)=>$(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").prepend(data??err)"
+				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			)
 			. "</script>";
 	}
 	/**
-	 * Forget a special part of client side
+	 * Append output on a special part of client side
 	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
 	 */
-	public static function Forget($selector = "body")
+	public function Append($selector = "body", $handler = null, ...$args)
 	{
-		echo "<script>$(" . ($selector ? \MiMFa\Library\Script::Convert($selector) : '"body"') . ").remove()</script>";
+		echo "<script>" .
+			\MiMFa\Library\Internal::MakeScript(
+				$handler,
+				$args,
+				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
+			)
+			. "</script>";
 	}
 
 	/**
 	 * Render Scripts in the client side
 	 * @param mixed $output The data that is ready to print
 	 */
-	public static function Script($content, $source = null, ...$attributes)
+	public function Script($content, $source = null, ...$attributes)
 	{
-		self::Append("head", \MiMFa\Library\Html::Script($content, $source, ...$attributes));
+		$this->Append("head", \MiMFa\Library\Html::Script($content, $source, ...$attributes));
 	}
 	/**
 	 * Render Styles in the client side
 	 * @param mixed $output The data that is ready to print
 	 */
-	public static function Style($content, $source = null, ...$attributes)
+	public function Style($content, $source = null, ...$attributes)
 	{
-		self::Append("head", \MiMFa\Library\Html::Style($content, $source, ...$attributes));
+		$this->Append("head", \MiMFa\Library\Html::Style($content, $source, ...$attributes));
 	}
 
-	public static function Alert($message = null, $callback = null)
+	public function Alert($message = null, $callback = null)
 	{
-		self::Interact(
+		$this->Interact(
 			\MiMFa\Library\Script::Alert($message)."??true",
 			$callback
 		);
 	}
-	public static function Confirm($message = null, $callback = null)
+	public function Confirm($message = null, $callback = null)
 	{
-		self::Interact(
+		$this->Interact(
 			\MiMFa\Library\Script::Confirm($message),
 			$callback
 		);
 	}
-	public static function Prompt($message = null, $callback = null, $default = null)
+	public function Prompt($message = null, $callback = null, $default = null)
 	{
-		self::Interact(
+		$this->Interact(
 			\MiMFa\Library\Script::Prompt($message, $default),
 			$callback
 		);

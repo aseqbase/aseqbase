@@ -52,10 +52,10 @@ class Internal
     public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000)
     {
         $selector = 'getQuery(this)??"body"';
-        $callbackScript = $callbackScript??"(data,err)=> $($selector).html(data)";
+        $callbackScript = $callbackScript??"(data,err)=>document.querySelector($selector).replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
         $progressScript = $progressScript??"null";
-		if(isStatic($handler)) return "$(document).ready(()=>($callbackScript)(".Script::Convert($handler).",".Script::Convert($args)."));";
-		return '$(document).ready(()=>'.
+		if(isStatic($handler)) return "document.addEventListener('DOMContentLoaded',()=>($callbackScript)(".Script::Convert($handler).",".Script::Convert($args)."));";
+		return "document.addEventListener('DOMContentLoaded',()=>".
                 'sendInternal(null,{"' . 
                     self::Set($handler) . '":JSON.stringify('. Script::Convert($args) . 
                 ")},$selector,$callbackScript,$callbackScript,null,$progressScript,$timeout));";

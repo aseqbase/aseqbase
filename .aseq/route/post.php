@@ -15,6 +15,11 @@ function findContent($direction)
         ]
     ]);
 }
+
+\_::$Front->Each("a",
+//"$path:sadfsa"
+    fn($data)=>"<h1>{$data}:AAAAAA</h1>"
+    );
 (new Router())
     ->Route("posts")->Get(function () {
         view("contents", [

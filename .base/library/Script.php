@@ -19,7 +19,7 @@ class Script
                 if($res = preg_find("/(?<=^\$\{)\w+(?=\}$)/i", $obj)) return $res;
                 $sp = "`";
                 if(preg_match("/\n|(\$\{)/",$obj))
-                    $obj = str_replace([$sp = "`". "$"], ["\\`", "\\$"], $obj);
+                    $obj = str_replace(["`", '$'], ["\\`", '\\$'], $obj);
                 else
                     $obj = str_replace($sp = "\"", "\\\"", $obj);
                 $obj = str_replace("</script>", "<\/script>", $obj);
