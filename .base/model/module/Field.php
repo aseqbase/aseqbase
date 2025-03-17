@@ -315,7 +315,7 @@ class Field extends Module{
             $placeHolderAttr = isValid($placeHolder)?"placeholder='$placeHolder'":"";
             $attrs = "class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." ".Convert::ToString($this->Attributes, " ");
 			$startTag = "<div class=\"field\">";
-            $id = $this->Key.getId();
+            $id = grab($this->Attributes, "id")??Convert::ToID($this->Key);
             if(isValid($this->Title)) $startTag .= Html::Label($this->Title, $id, ["class"=>"title" ]);
 			$endTag = "";
             if(isValid($this->Description)) $endTag .= Html::Label($this->Description, $id, ["class"=>"description" ]);
@@ -385,7 +385,7 @@ class Field extends Module{
                                 $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-					yield Html::FileInput($this->Key, $this->Value, ["Id" =>$id, "Name" =>$this->Key], $placeHolderAttr, $accept, $attrs)
+					yield Html::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput"], $placeHolderAttr, $accept, $attrs)
 						.$others;
 					yield $endTag;
                     break;
@@ -452,8 +452,8 @@ class Field extends Module{
                                 $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-					yield Html::FilesInput($this->Key, $this->Value, ["Id" =>$id, "Name" =>$this->Key], $placeHolderAttr, $accept, $attrs)
-						.$others;
+					yield Html::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput", "multiple" => null], $placeHolderAttr, $accept, $attrs)
+					.$others;
 					yield $endTag;
                     break;
                 default:

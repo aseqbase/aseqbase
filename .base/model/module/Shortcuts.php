@@ -33,8 +33,8 @@ class Shortcuts extends Module{
 				for($i = 0; $i < $count; $i++){
 					$item = $this->Items[$i];
 					yield Html::Link(
-						$this->AllowTitle?(findBetween($item,'Title','Name' )??""):"",
-						$link = findBetween($item,'Path','Link'),
+						$this->AllowTitle?(getBetween($item,'Title','Name' )??""):"",
+						$link = getBetween($item,'Path','Link'),
 						["class"=>"item".(endsWith(\Req::$Url,$link)?' active':'').(($this->AllowIcon && isValid($item,'Icon'))?' '.$item['Icon']:'')],
 						get($item,"Attributes")
 					);

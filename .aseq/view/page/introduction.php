@@ -23,7 +23,7 @@
         <?php if (isValid(\_::$Info, "IntroductionVideoPath")) {
             module("EmbededYoutube");
             $ytm = new MiMFa\Module\EmbededYoutube();
-            $ytm->Source = getValid(\_::$Info, "IntroductionVideoPath");
+            $ytm->Source = takeValid(\_::$Info, "IntroductionVideoPath");
             $ytm->Render();
         } ?>
         <div class="description content">
@@ -45,20 +45,20 @@
                 <div class="col-md">
                     <?php
                     if ($isp)
-                        echo "<a href=\"$p\">";
+                        echo \MiMFa\Library\Html::OpenTag("a", ["href"=>$p]);
                     if ($v = get($value, "Icon"))
                         echo "<i class='$v'></i>";
                     if (isValid($module->Image))
                         $module->ReRender();
                     ?>
                     <h3 class="title">
-                        <?php echo findBetween($value, "Title", "Name"); ?>
+                        <?php echo getBetween($value, "Title", "Name"); ?>
                     </h3>
                     <?php if ($isp)
-                        echo "</a>"; ?>
+                        echo \MiMFa\Library\Html::CloseTag(); ?>
                     <div class="description">
                         <?php echo get($value, "Description"); ?>
-                        <?php echo findBetween($value, "Button", "More"); ?>
+                        <?php echo getBetween($value, "Button", "More"); ?>
                     </div>
                 </div>
             <?php } ?>

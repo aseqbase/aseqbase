@@ -4,7 +4,6 @@ namespace MiMFa\Module;
 use DateTime;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Router;
 use MiMFa\Library\Style;
 use MiMFa\Library\Local;
 use MiMFa\Library\DataTable;
@@ -47,12 +46,12 @@ class Table extends Module
      */
     public $KeyColumns = [];
     /**
-     * An array of column Keys which should show in the table
+     * An array of column Keys which should not show in the table
      * @var null|array<mixed>
      */
     public $ExcludeColumns = null;
     /**
-     * An array of column Keys which should not show in the table
+     * An array of column Keys which should show in the table
      * @var null|array<mixed>
      */
     public $IncludeColumns = null;
@@ -160,6 +159,7 @@ class Table extends Module
     public $HoverableRows = true;
     public $HoverableCells = true;
 
+    protected $ExclusiveMethod = "Table";
     public $Controlable = true;
     public $Updatable = false;
     public $UpdateAccess = 0;
@@ -217,6 +217,7 @@ class Table extends Module
         $this->AddSecret = sha1("$a-Add");
         $this->RemoveSecret = sha1("$a-Remove");
         $this->ModifySecret = sha1("$a-Modify");
+        $this->Router->On($this->ExclusiveMethod, fn(&$router)=> $this->Exclusive());
     }
     /**
      * Set the main properties of module
@@ -237,17 +238,16 @@ class Table extends Module
         return $this;
     }
 
-    public function GetDefaultAttributes()
-    {
-        return parent::GetDefaultAttributes() . $this->GetAttribute(" border", $this->BorderSize);
-    }
-
     public function GetStyle()
     {
         return Html::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
 			backgroound-color: var(--back-color-1);
 			color: var(--fore-color-1);
+		}
+		.{$this->Name} :is(tr, td, th){
+			border-size: {$this->BorderSize};
+            border-collapse:collapse;
 		}
 		.{$this->Name} tr th{
 			font-weight: bold;
@@ -376,13 +376,13 @@ class Table extends Module
                     ), defaultItems: $this->Items);
                 $this->Items = $this->NavigationBar->GetItems();
             } else {
-                $this->NavigationBar = isValid($this->SelectQuery) ? $this->DataTable->DataBase->TrySelect($this->SelectQuery, $this->SelectParameters, $this->Items) :
+                $this->NavigationBar = new Navigation(isValid($this->SelectQuery) ? $this->DataTable->DataBase->TrySelect($this->SelectQuery, $this->SelectParameters, $this->Items) :
                     $this->DataTable->DoSelect(
                         isEmpty($this->IncludeColumns) ? "*" : (in_array($this->KeyColumn, $this->IncludeColumns) ? $this->IncludeColumns : [$this->KeyColumn, ...$this->IncludeColumns]),
                         [$this->SelectCondition, isEmpty($this->IncludeRows) ? null : ("{$this->KeyColumn} IN('" . join("', '", $this->IncludeRows) . "')")],
                         [],
                         $this->Items
-                    );
+                    ));
                 $this->Items = $this->NavigationBar->GetItems();
             }
         } else {
@@ -433,7 +433,7 @@ class Table extends Module
             $cells = [];
             foreach ($this->Items as $rkey => $row)
                 if (!isEmpty($row)) {
-                    $rowid = findValid($row, $this->KeyColumn, null);
+                    $rowid = getValid($row, $this->KeyColumn, null);
                     if (
                         (!$irk || in_array($rkey, $irks)) &&
                         (!$erk || !in_array($rkey, $erks)) &&
@@ -542,6 +542,30 @@ class Table extends Module
         return ($isc ? $this->HandleModal() : "") . parent::Get();
     }
 
+    public function GetCell($cel, $key, $isHead = false, $row = [])
+    {
+        if (!$isHead || $cel !== $key)
+            $cel = Convert::ToString(Convert::By(get($this->CellsValues, $key), $cel, $key, $row) ?? $cel);
+        if ($isHead) {
+            $cel = Convert::ToString($cel);
+            if (isFile($cel))
+                return "<th>" . Html::Media($cel) . "</th>";
+            else
+                return "<th>" . __($cel, translating: $this->AllowLabelTranslation, styling: false) . "</th>";
+        }
+        //if($this->Updatable && !$isHead && $key > 1){
+        //    $cel = new Field(key:$key, value: $cel, lock: true, type:getValid($this->CellsTypes,$key, null));
+        //    $cel->MinWidth = $this->MediaWidth;
+        //    $cel->MaxHeight = $this->MediaHeight;
+        //    return "<td>".Convert::ToString($cel)."</td>";
+        //}
+        if (isFile($cel))
+            return "<td>" . Html::Media($cel) . "</td>";
+        $cel = __($cel, translating: $this->AllowDataTranslation, styling: false);
+        if (!$this->TextWrap && !startsWith($cel, "<"))
+            return "<td>" . Convert::ToExcerpt($cel, 0, $this->TextLength, "..." . Html::Tooltip($cel)) . "</td>";
+        return "<td>$cel</td>";
+    }
     public function GetScript()
     {
         $localPaging = is_null($this->NavigationBar);
@@ -601,36 +625,36 @@ class Table extends Module
 			});") . ($this->Controlable ?
                 (is_null($this->Modal) ? "" : ("
 				function {$this->Modal->Name}_View(key){
-					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->ViewSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
-							{$this->Modal->ShowScript(null, null, '${data}')}
+							" . $this->Modal->ShowScript(null, null, '${data}') . "
 						}
 					);
 				}" . ($this->Updatable ? (auth($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(){
-					sendPatch(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->AddSecret}',{$this->KeyColumn}:'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
-							{$this->Modal->ShowScript(null, null, '${data}')}
+							" . $this->Modal->ShowScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (auth($this->ModifyAccess) ? "
 				function {$this->Modal->Name}_Modify(key){
-					sendPatch(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->ModifySecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
-							{$this->Modal->ShowScript(null, null, '${data}')}
+							" . $this->Modal->ShowScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (auth($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
-					sendPatch(null, 'secret={$this->DuplicateSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->DuplicateSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
-							{$this->Modal->ShowScript(null, null, '${data}')}
+							" . $this->Modal->ShowScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (auth($this->RemoveAccess) ? "
 				function {$this->Modal->Name}_Delete(key){
 					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?", styling: false) . "`))" : "") . "
-						sendDelete(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->Name}`,
+						sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->RemoveSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
 							load();
 						});
@@ -639,30 +663,6 @@ class Table extends Module
         );
     }
 
-    public function GetCell($cel, $key, $isHead = false, $row = [])
-    {
-        if (!$isHead || $cel !== $key)
-            $cel = Convert::ToString(Convert::By(get($this->CellsValues, $key), $cel, $key, $row) ?? $cel);
-        if ($isHead) {
-            $cel = Convert::ToString($cel);
-            if (isFile($cel))
-                return "<th>" . Html::Media($cel) . "</th>";
-            else
-                return "<th>" . __($cel, translating: $this->AllowLabelTranslation, styling: false) . "</th>";
-        }
-        //if($this->Updatable && !$isHead && $key > 1){
-        //    $cel = new Field(key:$key, value: $cel, lock: true, type:findValid($this->CellsTypes,$key, null));
-        //    $cel->MinWidth = $this->MediaWidth;
-        //    $cel->MaxHeight = $this->MediaHeight;
-        //    return "<td>".Convert::ToString($cel)."</td>";
-        //}
-        if (isFile($cel))
-            return "<td>" . Html::Media($cel) . "</td>";
-        $cel = __($cel, translating: $this->AllowDataTranslation, styling: false);
-        if (!$this->TextWrap && !startsWith($cel, "<"))
-            return "<td>" . Convert::ToExcerpt($cel, 0, $this->TextLength, "..." . Html::Tooltip($cel)) . "</td>";
-        return "<td>$cel</td>";
-    }
     public function AfterHandle()
     {
         if (!$this->BottomNavigation || is_null($this->NavigationBar))
@@ -671,38 +671,39 @@ class Table extends Module
             return parent::AfterHandle() . ($this->TopNavigation ? $this->NavigationBar->ToString() : $this->NavigationBar->ToString());
     }
 
-    // public function ToString(){
-    // 	if(
-    // 		isValid($this->DataTable)
-    // 		&& isValid($this->KeyColumn)
-    // 		&& $this->Controlable
-    //         && $this->CreateModal()){
-    //             $res = $this->Handler();
-    //             if(!isEmpty($res)) return $res;
-    //             return $this->Modal->ToString().parent::ToString();
-    //         }
-    // 	return parent::ToString();
-    // }
-
-
-    public function Patch()
+    public function Handler($received = null)
     {
-        $key = \Req::Patch($this->KeyColumn);
-        $secret = \Req::Patch("secret") ?? "view";
-        if ($secret === $this->ViewSecret)
-            return $this->GetViewForm($key);
-        elseif ($secret === $this->DuplicateSecret)
-            return $this->GetDuplicateForm($key);
-        elseif ($secret === $this->AddSecret)
-            return $this->GetAddForm($key);
-        elseif ($secret === $this->ModifySecret)
-            return $this->GetModifyForm($key);
+        if($this->ExclusiveMethod == getMethodName())
+            $this->Exclusive();
+        else parent::Handler($received);
     }
+
+    public function Exclusive()
+    {
+        $values = \Req::Receive(null, $this->ExclusiveMethod)??[];
+        $value = get($values, $this->KeyColumn);
+        $secret = grab($values, "secret") ?? "view";
+        $recievedData = count($values) > 1;
+        if ($secret === $this->ViewSecret)
+            return $this->GetViewForm($value);
+        elseif ($secret === $this->DuplicateSecret)
+            return $this->GetDuplicateForm($value);
+        elseif ($secret === $this->AddSecret)
+            if($recievedData) return $this->AddRow($values);
+            else return $this->GetAddForm($value);
+        elseif ($secret === $this->ModifySecret)
+            if($recievedData) return $this->ModifyRow($values);
+            else return $this->GetModifyForm($value);
+        elseif ($secret === $this->RemoveSecret)
+            return $this->RemoveRow($value);
+    }
+
     public function GetForm()
     {
         module("Form");
         $form = new Form();
         $form->Router->Get()->Switch();
+        $form->Method = $this->ExclusiveMethod;
         $form->BlockTimeout = $this->FormBlockTimeout;
         $form->Template = "b";
         $form->Class = "container-fluid";
@@ -710,7 +711,8 @@ class Table extends Module
         if ($this->Modal) {
             $form->CancelPath = $this->Modal->HideScript();
             $form->CancelLabel = "Cancel";
-        } else $form->CancelLabel = null;
+        } else
+            $form->CancelLabel = null;
         $form->SuccessPath = \Req::$Url;
         $form->BackPath = \Req::$Url;
         $form->BackLabel = null;
@@ -728,13 +730,13 @@ class Table extends Module
             return Html::Error("You can not see this item!");
         $form = $this->GetForm();
         $form->Set(
-            title: findBetween($record, "Title", "Name"),
+            title: getBetween($record, "Title", "Name"),
             description: get($record, "Description"),
             action: '#',
             method: "",
             children: (function () use ($record) {
                 foreach ($record as $k => $cell) {
-                    $type = findValid($this->CellsTypes, $k, "");
+                    $type = getValid($this->CellsTypes, $k, "");
                     if (is_string($type)) {
                         $type = strtolower($type);
                         switch ($type) {
@@ -769,17 +771,18 @@ class Table extends Module
                 }
             })()
         );
-        $form->Image = findValid($record, "Image", "eye");
+        $form->Image = getValid($record, "Image", "eye");
         $form->Template = "b";
         $form->SubmitLabel = null;
         $form->ResetLabel = null;
         if ($this->Modal) {
             $form->CancelLabel = "Cancel";
             $form->CancelPath = $this->Modal->HideScript();
-        } else $form->CancelLabel = null;
+        } else
+            $form->CancelLabel = null;
         return $form->Handle();
     }
-    public function GetAddForm($value){
+    public function GetAddForm($value) {
         if (is_null($value))
             return null;
         if (!auth($this->AddAccess))
@@ -792,7 +795,7 @@ class Table extends Module
         $form->Set(
             title: "Add {$this->Title}",
             description: $this->Description,
-            method: "post",
+            method: null,
             children: (function () use ($record, $value) {
                 $schemas = $this->DataTable->DataBase->TrySelect(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
@@ -812,7 +815,7 @@ class Table extends Module
                         }
             })()
         );
-        $form->Image = findValid($record, "Image", "plus");
+        $form->Image = getValid($record, "Image", "plus");
         return $form->Handle();
     }
     public function GetDuplicateForm($value)
@@ -828,7 +831,7 @@ class Table extends Module
         $form->Set(
             title: "Add {$this->Title}",
             description: $this->Description,
-            method: "post",
+            method: null,
             children: (function () use ($record, $value) {
                 $schemas = $this->DataTable->DataBase->TrySelect(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
@@ -845,7 +848,7 @@ class Table extends Module
                         }
             })()
         );
-        $form->Image = findValid($record, "Image", "plus");
+        $form->Image = getValid($record, "Image", "plus");
         return $form->Handle();
     }
     public function GetModifyForm($value)
@@ -859,9 +862,9 @@ class Table extends Module
             return Html::Error("You can not modify this item!");
         $form = $this->GetForm();
         $form->Set(
-            title: findBetween($record, "Title", "Name"),
+            title: getBetween($record, "Title", "Name"),
             description: get($record, "Description"),
-            method: "Put",
+            method: null,
             children: (function () use ($record, $value) {
                 $schemas = $this->DataTable->DataBase->TrySelect(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
@@ -878,55 +881,52 @@ class Table extends Module
                         }
             })()
         );
-        $form->Image = findValid($record, "Image", "edit");
+        $form->Image = getValid($record, "Image", "edit");
         return $form->Handle();
     }
 
-    public function Post()
+    public function AddRow($values)
     {
         if (!auth($this->AddAccess))
             return Html::Error("You have not access to modify!");
-        $vals = $this->NormalizeFormValues(\Req::Post());
-        if(!is_array($vals )) return $vals;
-        unset($vals[$this->KeyColumn]);
-        foreach ($vals as $k => $v) if (isEmpty($v)) unset($vals[$k]);
-        if ($this->DataTable->DoInsert($this->AddCondition, $vals))
+        unset($values[$this->KeyColumn]);
+        $values = $this->NormalizeFormValues($values);
+        if (!is_array($values))
+            return $values;
+        foreach ($values as $k => $v)
+            if (isEmpty($v))
+                unset($values[$k]);
+        if ($this->DataTable->DoInsert($this->AddCondition, $values))
             return \Res::Flip(Html::Success("The information added successfully!"));
         return Html::Error("You can not add this item!");
     }
-
-    public function Put()
+    public function ModifyRow($values)
     {
         if (!auth(minaccess: $this->ModifyAccess))
             return Html::Error("You have not access to modify!");
-        $received = \Req::Put();
-        if (isValid($received, $this->KeyColumn)) {
-            $vals = $this->NormalizeFormValues($received);
-            if(!is_array($vals )) return $vals;
-            if ($this->DataTable->DoUpdate([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
+        if (isValid($values, $this->KeyColumn)) {
+            $values = $this->NormalizeFormValues($values);
+            if (!is_array($values))
+                return $values;
+            if ($this->DataTable->DoUpdate([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $values))
                 return \Res::Flip(Html::Success("The information updated successfully!"));
             return Html::Error("You can not update this item!");
         }
     }
-
-    public function Delete()
+    public function RemoveRow($value)
     {
-        $value = \Req::Delete($this->KeyColumn);
-        $secret = \Req::Delete("secret") ?? "view";
-        if ($secret === $this->RemoveSecret && isValid($value)) {
-            if (is_null($value))
-                return null;
-            if (!auth($this->RemoveAccess))
-                return Html::Error("You have not access to delete!");
-            if ($this->DataTable->DoDelete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
-                return \Res::Flip(Html::Success("The items removed successfully!"));
-            return Html::Error("You can not remove this item!");
-        }
+        if (is_null($value))
+            return null;
+        if (!auth($this->RemoveAccess))
+            return Html::Error("You have not access to delete!");
+        if ($this->DataTable->DoDelete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
+            return \Res::Flip(Html::Success("The items removed successfully!"));
+        return Html::Error("You can not remove this item!");
     }
 
     public function PrepareDataToShow(&$key, &$value, &$record, $schema)
     {
-        $type = findValid($this->CellsTypes, $key, $schema["DATA_TYPE"]);
+        $type = getValid($this->CellsTypes, $key, $schema["DATA_TYPE"]);
         $options = null;
         $def = $schema["COLUMN_DEFAULT"] ?? "";
         if (is_null($value))
@@ -951,20 +951,20 @@ class Table extends Module
                         if ($this->CryptPassword)
                             $value = \_::$Back->User->DecryptPassword($value);
                         break;
-                    case "file":
-                    case "files":
-                    case "doc":
-                    case "docs":
-                    case "document":
-                    case "documents":
-                    case "image":
-                    case "images":
-                    case "video":
-                    case "videos":
-                    case "audio":
-                    case "audios":
-                        $value = null;
-                        break;
+                    // case "file":
+                    // case "files":
+                    // case "doc":
+                    // case "docs":
+                    // case "document":
+                    // case "documents":
+                    // case "image":
+                    // case "images":
+                    // case "video":
+                    // case "videos":
+                    // case "audio":
+                    // case "audios":
+                    //     $value = null;
+                    //break;
                     case "type":
                     case "types":
                     case "enum":
@@ -991,22 +991,23 @@ class Table extends Module
     {
         try {
             $received = \Req::File();
-            if($received) {
-            $clearPrev = isValid($values[$this->KeyColumn]) && $this->DataTable;
-            foreach ($received as $k => $v)
-                if (Local::IsFileObject($v)) {
-                    $values[$k] = $clearPrev?$this->DataTable->DoSelectValue("`$k`", "`$this->KeyColumn`=:$this->KeyColumn", [":$this->KeyColumn"=>$values[$this->KeyColumn]]):null;
-                    if(isValid($values[$k])) Local::DeleteFile($values[$k]);
-                    unset($values[$k]);
-                    $type = findValid($this->CellsTypes, $k, "");
-                    if (is_string($type))
-                        $type = \_::$Config->GetAcceptableFormats($type);
-                    else
-                        $type = \_::$Config->GetAcceptableFormats();
-                    $values[$k] = Local::UploadFile($v, extensions: $type);
-                } elseif(isEmpty($v)) unset($values[$k]);
-                else $values[$k] = $v;
-            } 
+            if ($received) {
+                $clearPrev = isValid($values, $this->KeyColumn) && $this->DataTable;
+                foreach ($received as $k => $v)
+                    if (Local::IsFileObject($v)) {
+                        $values[$k] = $clearPrev ? $this->DataTable->DoSelectValue("`$k`", "`$this->KeyColumn`=:$this->KeyColumn", [":$this->KeyColumn" => $values[$this->KeyColumn]]) : null;
+                        if (isValid($values[$k]))
+                            Local::DeleteFile($values[$k]);
+                        unset($values[$k]);
+                        $type = getValid($this->CellsTypes, $k, "");
+                        if (is_string($type))
+                            $type = \_::$Config->GetAcceptableFormats($type);
+                        else
+                            $type = \_::$Config->GetAcceptableFormats();
+                        $values[$k] = Local::GetUrl(Local::StoreFile($v, extensions: $type));
+                    } elseif (isEmpty($v))
+                        unset($values[$k]);
+            }
         } catch (\Exception $ex) {
             return Html::Error($ex);
         }
@@ -1014,7 +1015,7 @@ class Table extends Module
             if ($k !== $this->KeyColumn) {
                 if ($v === '')
                     $values[$k] = null;
-                $type = findValid($this->CellsTypes, $k, "");
+                $type = getValid($this->CellsTypes, $k, "");
                 if (is_string($type)) {
                     switch (strtolower($type)) {
                         case "pass":

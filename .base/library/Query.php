@@ -95,6 +95,15 @@ class Query
     {
         $params = array();
         $condit = User::GetAccessCondition();
+        if (isValid($name)) {
+            $params[":Name"] = $name;
+            $params[":Id"] = $name;
+            $condit .= " AND (`Name`=:Name OR `Id`=:Id)";
+        }
+        if (isValid($type)) {
+            $params[":Type"] = $type;
+            $condit .= " AND `Type`=:Type";
+        }
         $id = $this->FindCategoryId($direction);
         if (!is_null($id)) {
             $condit .= " AND CategoryIds REGEXP '\"$id\"'";
@@ -102,15 +111,6 @@ class Query
         $tid = $this->FindTagId($tag);
         if (!is_null($tid)) {
             $condit .= " AND TagIds REGEXP '\"$tid\"'";
-        }
-        if (isValid($type)) {
-            $params[":Type"] = $type;
-            $condit .= " AND `Type`=:Type";
-        }
-        if (isValid($name)) {
-            $params[":Name"] = $name;
-            $params[":Id"] = $name;
-            $condit .= " AND (`Name`=:Name OR `Id`=:Id)";
         }
         return table($table ?? "Content" , source:$this->DataBase)->DoSelectRow("*", $condit . " ORDER BY `Priority` DESC, `UpdateTime` DESC", $params);
     }
@@ -192,7 +192,7 @@ class Query
         $content = is_array($content) ? $content : $this->FindContent($content, null, table: $table);
         if (isEmpty($content))
             return $default;
-        return Convert::FromJson(getValid($content, "CategoryIds" , "{}")) ?? $default;
+        return Convert::FromJson(takeValid($content, "CategoryIds" , "{}")) ?? $default;
     }
     public function GetContentCategoryId(array|string $content, string|null $default = null, string|null $table = null)
     {
@@ -211,7 +211,7 @@ class Query
         $content = is_array($content) ? $content : $this->FindContent($content, null, table: $table);
         if (isEmpty($content))
             return $default;
-        return Convert::FromJson(getValid($content, "TagIds" , "{}")) ?? $default;
+        return Convert::FromJson(takeValid($content, "TagIds" , "{}")) ?? $default;
     }
     public function GetContentTagId(array|string $content, string|null $default = null, string|null $table = null)
     {
@@ -235,7 +235,7 @@ class Query
         $cat = is_array($category) ? $category : table($table ?? "Category", source:$this->DataBase)->DoSelectRow("*", "(`Name`=:Name OR `Id`=:Id) AND " . User::GetAccessCondition(), [":Name" => $category, ":Id" => $category]);
         if (isEmpty($cat))
             return $default;
-        return $this->Cache_CategoryDirection[$category] = $this->GetCategoryDirection(getValid($cat,  "ParentId" ), null) . "/" . getBetween($cat, "Name" , "Id" );
+        return $this->Cache_CategoryDirection[$category] = $this->GetCategoryDirection(takeValid($cat,  "ParentId" ), null) . "/" . takeBetween($cat, "Name" , "Id" );
     }
 
 

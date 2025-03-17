@@ -1,6 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
+use MiMFa\Library\User;
 module("Form");
 class SignRecoverForm extends Form{
 	public $Action = null;
@@ -10,21 +11,27 @@ class SignRecoverForm extends Form{
 	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
 	public $PasswordLabel = "<i class='fa fa-lock'></i>";
 	public $PasswordConfirmationLabel = "<i class='fa fa-lock'></i>";
+	public $SignInLabel = "I remembered my password!";
+	public $SignUpLabel = "I don't have an account!";
 	public $SignaturePlaceHolder = "Email/Phone";
 	public $PasswordPlaceHolder = "Password";
 	public $PasswordConfirmationPlaceHolder = "Confirm Password";
+
+	public $PasswordPattern = "/[^\"'`]{8,100}/";
+	public $PasswordTip = "Your password should be strong and between 8-100 characters!";
+
 	public $BlockTimeout = 30000;
 	public $ResponseView = null;
 
 	public function __construct(){
         parent::__construct();
-		$this->Action = \MiMFa\Library\User::$RecoverHandlerPath;
-		$this->SuccessPath = \MiMFa\Library\User::$InHandlerPath;
+		$this->Action = User::$RecoverHandlerPath;
+		$this->SuccessPath = User::$InHandlerPath;
 	}
 
 	public function GetFields(){
-		if(!is_null($rrk = \Req::Receive(\MiMFa\Library\User::$RecoveryRequestKey))){
-			yield Html::HiddenInput(\MiMFa\Library\User::$RecoveryRequestKey, $rrk);
+		if(!is_null($rrk = \Req::Receive(User::$RecoveryTokenKey))){
+			yield Html::HiddenInput(User::$RecoveryTokenKey, $rrk);
 			yield Html::Rack(
 				Html::LargeSlot(
 					Html::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
@@ -48,31 +55,47 @@ class SignRecoverForm extends Form{
 		yield from parent::GetFields();
     }
 
-	public function GetScript(){
-        return Html::Script("
+	public function GetScript()
+	{
+		return Html::Script("
 			$(function () {
                 $('.{$this->Name} form').submit(function(e) {
-					if ($('.{$this->Name} form #PasswordConfirmation').val() == $('.{$this->Name} form #Password').val()) return true;
-					$('.{$this->Name} form result').remove();
-					$('.{$this->Name} form').append(Html.error('New password and confirm password does not match!'));
-					e.preventDefault();
+					let error = null;
+					if (!$('.{$this->Name} form #Password').val().match({$this->PasswordPattern})) 
+						error = Html.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
+					else if ($('.{$this->Name} form #PasswordConfirmation').val() != $('.{$this->Name} form #Password').val()) 
+						error = Html.error('New password and confirm password does not match!');
+					if(error) {
+						$('.{$this->Name} form .result').remove();
+						$('.{$this->Name} form').append(error);
+						e.preventDefault();
+						return false;
+					}
 					return false;
                 });
 			});
-		").parent::GetScript();
+		") . parent::GetScript();
+	}
+	public function GetFooter(){
+		if(auth(\_::$Config->UserAccess)) return parent::GetFooter();
+        else return parent::GetFooter()
+			.Html::LargeSlot(
+				Html::Link($this->SignInLabel, User::$InHandlerPath)
+			, ["class"=>"col-lg-12"])
+			.Html::LargeSlot(
+				Html::Link($this->SignUpLabel, User::$UpHandlerPath)
+			, ["class"=>"col-lg-12"]);
     }
 
 	public function Post(){
 		try {
 			$received = \Req::Post();
-			if(isValid($received, "Password" ) && \Req::Receive(\MiMFa\Library\User::$RecoveryRequestKey)){
-				$res = \_::$Back->User->ReceiveRecoveryLink();
-				if($res === true)
+			if(isValid($received, "Password" ) && \Req::Receive(User::$RecoveryTokenKey)){
+				$res = \_::$Back->User->ReceiveRecoveryEmail();
+				if($res)
                 	return $this->GetSuccess("Dear '".\_::$Back->User->TemporaryName."', your password changed successfully!");
-				elseif($res === false)
-					return $this->GetError("There a problem is occured!");
 				else
-					return $this->GetError($res);
+					return $this->GetError("There a problem is occured!");
 			}
 			elseif(isValid($received,"Signature" )){
 				\_::$Back->User->Find(get($received,"Signature" ));

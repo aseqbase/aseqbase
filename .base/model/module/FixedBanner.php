@@ -150,12 +150,13 @@ class FixedBanner extends Module{
                                 yield "<div class='row'>";
 								foreach($this->Items as $item){
 									yield "<div class='col-md' data-aos='fade-down' data-aos-offset='-500' data-aos-delay='".($i++*300)."'>";
-									if(isValid($item,'Link')) yield "<a href='{$item['Link']}'>";
-									if(isValid($item,'Image' )) yield "<img class='image' src='{$item['Image' ]}'>";
+									$p = getBetween($item,'Path', 'Url', 'Link');
+									if($p) yield Html::OpenTag("a", ["href"=>$p]);
+									if(isValid($item,'Image' )) yield Html::Image(null, get($item, "Image" ));
 									if(isValid($item,'Icon')) yield "<i class='icon {$item['Icon']}' aria-hidden='true'></i>";
 									if(isValid($item,'Name' )) yield "<div class='title'>".__($item['Name' ],true,false)."</div>";
 									if(isValid($item,'More')) yield "<div class='more'>".__($item['More'],true,false)."</div>";
-									if(isValid($item,'Link')) yield "</a>";
+									if($p) yield Html::CloseTag();
 									yield "</div>";
 								}
 								yield "</div>";

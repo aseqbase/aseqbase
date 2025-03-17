@@ -162,15 +162,15 @@ class Buttons extends Collection
 			foreach ($this->Items as $item) {
 				if ($i % $this->MaximumColumns === 0)
 					yield "<div class='row'>";
-				$p_image = findValid($item, 'Image' , $this->DefaultImage);
-				$p_name = findBetween($item, 'Name', 'Title')?? $this->DefaultTitle;
-				$p_title = findValid($item, 'Title' , $p_name);
-				$p_description = findValid($item, 'Description' , $this->DefaultDescription);
-				$p_content = findValid($item, 'Content' , $this->DefaultContent) ?? $p_description;
+				$p_image = getValid($item, 'Image' , $this->DefaultImage);
+				$p_name = getBetween($item, 'Name', 'Title')?? $this->DefaultTitle;
+				$p_title = getValid($item, 'Title' , $p_name);
+				$p_description = getValid($item, 'Description' , $this->DefaultDescription);
+				$p_content = getValid($item, 'Content' , $this->DefaultContent) ?? $p_description;
 				$p_download = get($item, 'Download');
-				$p_link = findValid($item, 'Link', $this->DefaultLink) ?? (isEmpty($this->MoreButtonLabel) ? null : $p_download ?? $p_image);
-				$p_path = findValid($item, 'Path' , $this->DefaultPath) ?? $p_link;
-				$p_buttons = findValid($item, 'ButtonsContent', $this->DefaultButtons);
+				$p_link = getValid($item, 'Link', $this->DefaultLink) ?? (isEmpty($this->MoreButtonLabel) ? null : $p_download ?? $p_image);
+				$p_path = getValid($item, 'Path' , $this->DefaultPath) ?? $p_link;
+				$p_buttons = getValid($item, 'ButtonsContent', $this->DefaultButtons);
 				$img->Source = $p_image;
 				$clickact = $viewer->ShowScript($p_title, $p_description, ($p_link ?? $p_path ?? $p_image), $p_buttons, getFullUrl($p_download ?? $p_path ?? $p_link ?? $p_image));
 				$img->Attributes = ["onclick" => $clickact];

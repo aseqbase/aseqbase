@@ -11,7 +11,7 @@ module("Collection");
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class PostCollection extends Collection{
-     public $RootPath = null;
+     public $RootRoute = null;
      public $TitleTag = "h1";
 
 	public $MaximumColumns = 2;
@@ -179,7 +179,7 @@ class PostCollection extends Collection{
 
 	function __construct(){
         parent::__construct();
-          $this->RootPath = $this->RootPath??\_::$Address->ContentPath;
+          $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
     }
 
 	public function GetStyle(){
@@ -290,38 +290,42 @@ class PostCollection extends Collection{
 		    yield $this->GetTitle();
 		    yield $this->GetDescription();
 		    foreach(Convert::ToItems($this->Items) as $k=>$item) {
-                $p_access = findValid($item,'Access' ,0);
+                $p_access = getValid($item,'Access' ,0);
                 if(!auth($p_access)) continue;
+                $p_meta = getValid($item,'MetaData' ,null);
+			    if($p_meta !==null) {
+                    $p_meta = Convert::FromJson($p_meta);
+                    swap( $this, $p_meta);
+                }
+                $p_meta = null;
 			    $p_id = get($item,'Id' );
 			    $p_type = get($item,'Type' );
-			    $p_image = findValid($item,'Image' , $this->DefaultImage);
-			    $p_name = findBetween($item,'Name','Title')?? $this->DefaultTitle;
-			    $p_title = findValid($item,'Title' , $p_name);
-			    $p_description = findValid($item,'Description' , $this->DefaultDescription);
-			    $p_content = findValid($item,'Content' ,$this->DefaultContent);
+			    $p_image = getValid($item,'Image' , $this->DefaultImage);
+			    $p_name = getBetween($item,'Name','Title')?? $this->DefaultTitle;
+			    $p_title = getValid($item,'Title' , $p_name);
+			    $p_description = getValid($item,'Description' , $this->DefaultDescription);
+			    $p_content = getValid($item,'Content' ,$this->DefaultContent);
 			    $p_class = get($item,'Class');
 
-			    $p_meta = findValid($item,'MetaData' ,null);
-			    if($p_meta !==null) $p_meta = Convert::FromJson($p_meta);
-			    $p_showexcerpt = findValid($p_meta,"ShowExcerpt",$this->ShowExcerpt);
-			    $p_showcontent = findValid($p_meta,"ShowContent",$this->ShowContent);
-			    $p_showdescription = findValid($p_meta,"ShowDescription",$this->ShowDescription);
-			    $p_showimage = findValid($p_meta,"ShowImage", $this->ShowImage);
-			    $p_showtitle = findValid($p_meta,"ShowTitle",$this->ShowTitle);
-                $p_showmeta = findValid($p_meta,"ShowMetaData", $this->ShowMetaData);
-                $p_refering = findValid($p_meta,"AutoRefering", $this->AutoRefering);
-                $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (findBetween($item, "Reference")??$this->RootPath.findValid($item,'Name' ,$p_id)):null;
+			    $p_showexcerpt = $this->ShowExcerpt;
+			    $p_showcontent = $this->ShowContent;
+			    $p_showdescription = $this->ShowDescription;
+			    $p_showimage =  $this->ShowImage;
+			    $p_showtitle = $this->ShowTitle;
+                $p_showmeta =$this->ShowMetaData;
+                $p_refering =$this->AutoRefering;
+                $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->RootRoute.getValid($item,'Name' ,$p_id)):null;
                 if(!$this->CompressPath) {
                     $catDir = \_::$Back->Query->GetContentCategoryDirection($item);
-                    if(isValid($catDir)) $p_inselflink = $this->RootPath.trim($catDir,"/\\")."/".($p_name??$p_id);
+                    if(isValid($catDir)) $p_inselflink = $this->RootRoute.trim($catDir,"/\\")."/".($p_name??$p_id);
                 }
-                $p_path = first(Convert::FromJson(findValid($item,'Path' , $this->DefaultPath)));
+                $p_path = first(Convert::FromJson(getValid($item,'Path' , $this->DefaultPath)));
                 if($this->ShowRoute) $rout->SetValue($p_inselflink);
 			    $hasl = isValid($p_inselflink);
-			    $p_showmorebutton = $hasl && findValid($p_meta,"ShowMoreButton",$this->ShowMoreButton );
-                $p_morebuttontext = __(Convert::FromSwitch(findValid($p_meta,"MoreButtonLabel",$this->MoreButtonLabel), $p_type));
-			    $p_showpathbutton = isValid($p_path) && findValid($p_meta,"ShowPathButton",$this->ShowPathButton);
-                $p_pathbuttontext = __(Convert::FromSwitch(findValid($p_meta,"PathButtonLabel",$this->PathButtonLabel), $p_type));
+			    $p_showmorebutton = $hasl && $this->ShowMoreButton;
+                $p_morebuttontext = Convert::FromSwitch($this->MoreButtonLabel, $p_type);
+			    $p_showpathbutton = isValid($p_path) && $this->ShowPathButton;
+                $p_pathbuttontext = Convert::FromSwitch($this->PathButtonLabel, $p_type);
 
                 $p_excerpt = null;
 			    if($this->AutoExcerpt){
@@ -341,13 +345,12 @@ class PostCollection extends Collection{
                 }
                 else $p_description = __($p_description, refering:$p_refering);
 
-			    $p_meta = null;
 			    if($p_showmeta){
 				    if($this->ShowAuthor)
                         doValid(
                             function($val) use(&$p_meta){
                                 $authorName = table("User")->DoSelectRow("Signature , Name","Id=:Id",[":Id"=>$val]);
-                                if(!isEmpty($authorName)) $p_meta .=  " ".Html::Link($authorName["Name" ],\_::$Address->UserPath.$authorName["Signature" ],["class"=>"author"]);
+                                if(!isEmpty($authorName)) $p_meta .=  " ".Html::Link($authorName["Name" ],\_::$Address->UserRoute.$authorName["Signature" ],["class"=>"author"]);
                             },
                             $item,
                             'AuthorId'
@@ -392,7 +395,7 @@ class PostCollection extends Collection{
                 yield "<div class='head row'>";
                     yield "<div class='col-lg'>";
                         $lt = $this->LinkedTitle && $hasl;
-                        if($p_showtitle) yield ($lt?"<a href='$p_inselflink'>":"")."<h2 class='title'>".__($p_title, styling:false)."</h2>".($lt?"</a>":"");
+                        if($p_showtitle) yield Html::SuperHeading($p_title, $lt?$p_inselflink:null, ['class'=>'title']);
                         if($p_showmeta && isValid($p_meta)) {
                             yield "<sub class='metadata'>";
                             if($this->ShowRoute) yield $rout->ToString();
@@ -402,9 +405,9 @@ class PostCollection extends Collection{
                     if($p_showmorebutton || $p_showpathbutton) {
                         yield "<div class='more col-sm col-3 md-hide'>";
                         if($p_showmorebutton)
-                            yield "<a class='btn btn-outline' href='$p_inselflink'>".$p_morebuttontext."</a>";
+                            yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn btn-outline']);
                         if($p_showpathbutton)
-                            yield "<a class='btn btn-outline' href='$p_path'>".$p_pathbuttontext."</a>";
+                            yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn btn-outline']);
                         yield "</div>";
                     }
                 yield "</div>";
@@ -421,9 +424,9 @@ class PostCollection extends Collection{
                 if($p_showmorebutton || $p_showpathbutton) {
                     yield "<div class='more md-show'>";
                     if($p_showmorebutton)
-                        yield "<a class='btn btn-outline' href='$p_inselflink'>".$p_morebuttontext."</a>";
+                        yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn btn-outline']);
                     if($p_showpathbutton)
-                        yield "<a class='btn btn-outline' href='$p_path'>".$p_pathbuttontext."</a>";
+                        yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn btn-outline']);
                     yield "</div>";
                 }
                 yield "</article>";

@@ -16,7 +16,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 1.90000;
+	public static float $Version = 1.90010;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -35,7 +35,7 @@ class _
 	public static array $Appends = array();
 
 	/**
-	 * All sequences either $ASEQ and $BASE
+	 * All sequences from aseq to base
 	 * @example: [
 	 *	'home/domain/aseq/' => 'https://aseq.domain.tld/',
 	 *	'home/domain/1stseq/' => 'https://1stseq.domain.tld/',
@@ -106,7 +106,7 @@ run("Address");
 \_::$Aseq = new Address(
 	$GLOBALS["ASEQBASE"],
 	$GLOBALS["DIR"],
-	$GLOBALS["ROOT"]
+	getHost() . "/"//??$GLOBALS["ROOT"]
 );
 
 \_::$Base = new Address(
@@ -255,7 +255,7 @@ function set(&$object, $data)
 		} catch (Exception $ex) {
 		} else
 		foreach ($data as $k => $v)
-			if ((findValid($object, $k, null, $key)) !== null)
+			if ((getValid($object, $k, null, $key)) !== null)
 				set($object->$key, $v);
 	return $object;
 }
@@ -273,7 +273,7 @@ function swap(&$object, &$data)
 		} catch (Exception $ex) {
 		} else
 		foreach ($data as $k => $v)
-			if ((findValid($object, $k, null, $key)) !== null) {
+			if ((getValid($object, $k, null, $key)) !== null) {
 				set($object->$key, $v);
 				unset($data[$k]);
 			}
@@ -624,12 +624,12 @@ function route(string|null $name, mixed $data = null, bool $print = true, int $o
  * @param string $name The raw table name (Without any prefix)
  * @return \MiMFa\Library\DataTable
  */
-function table(string $name, bool $prefix = true, int $origin = 0, int $depth = 99, \MiMFa\Library\DataBase $source = null, $default = null)
+function table(string $name, bool $prefix = true, int $origin = 0, int $depth = 99, ?\MiMFa\Library\DataBase $source = null, $default = null)
 {
 	return new \MiMFa\Library\DataTable(
 		$source ?? \_::$Back->DataBase,
 		$prefix ?
-		(\_::$Config->DataBasePrefix . (\_::$Config->DataBaseAddNameToPrefix ? preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_" : "") . $name)
+		(\_::$Config->DataBasePrefix . $name)
 		: $name
 	);
 }
@@ -657,7 +657,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
 				process: function ($k, $v, $i) {
-					return \MiMFa\Library\Html::Link($v, \_::$Address->ContentPath . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->ContentRoute . strtolower($k));
 				},
 				keyWords: table("Content")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -667,7 +667,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
 				process: function ($k, $v, $i) {
-					return \MiMFa\Library\Html::Link($v, \_::$Address->CategoryPath . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->CategoryRoute . strtolower($k));
 				},
 				keyWords: table("Category")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -677,7 +677,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
 				process: function ($k, $v, $i) {
-					return \MiMFa\Library\Html::Link($v, \_::$Address->TagPath . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->TagRoute . strtolower($k));
 				},
 				keyWords: table("Tag")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -687,7 +687,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
 				process: function ($k, $v, $i) {
-					return \MiMFa\Library\Html::Link($v, \_::$Address->UserPath . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->UserRoute . strtolower($k));
 				},
 				keyWords: table("User")->DoSelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
 				both: false,
@@ -832,52 +832,6 @@ function getId($random = false): int
 	return (int) ($usec * 10000000 + $sec);
 }
 
-function getDomainUrl(): string|null
-{
-	// server protocol
-	$protocol = empty($_SERVER['HTTPS']) ? 'http' : 'https';
-	// domain name
-	$domain = $_SERVER['SERVER_NAME'];
-
-	// server port
-	$port = $_SERVER['SERVER_PORT'];
-	$disp_port = ($protocol == 'http' && $port == 80 || $protocol == 'https' && $port == 443) ? '' : ":$port";
-
-	// put em all together to get the complete base URL
-	return $protocol . "://" . $domain . $disp_port;
-}
-
-function forceFullUrl(string|null $path, bool $optimize = true)
-{
-	return \MiMFa\Library\Local::GetFullUrl($path, $optimize);
-}
-function forceUrl(string|null $path)
-{
-	return \MiMFa\Library\Local::GetUrl($path);
-}
-function forceUrls($items): array
-{
-	$c = count($items);
-	if ($c > 0)
-		if (is_array($items[0])) {
-			for ($i = 0; $i < $c; $i++) {
-				if (isset($items[$i]["Source"]))
-					$items[$i]["Source"] = \MiMFa\Library\Local::GetUrl($items[$i]["Source"]);
-				if (isset($items[$i]["Image"]))
-					$items[$i]["Image"] = \MiMFa\Library\Local::GetUrl($items[$i]["Image"]);
-				if (isset($items[$i]["Url"]))
-					$items[$i]["Url"] = \MiMFa\Library\Local::GetUrl($items[$i]["Url"]);
-			}
-		} else
-			for ($i = 0; $i < $c; $i++)
-				$items[$i] = \MiMFa\Library\Local::GetUrl($items[$i]);
-	return $items;
-}
-function forcePath(string|null $path): string|null
-{
-	return \MiMFa\Library\Local::GetPath($path);
-}
-
 /**
  * Get the full part of a url pointed to catch status
  * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp"
@@ -887,7 +841,9 @@ function getFullUrl(string|null $path = null, bool $optimize = true): string|nul
 {
 	if ($path === null)
 		$path = getUrl();
-	return \MiMFa\Library\Local::GetFullUrl($path, $optimize);
+	if ($optimize)
+		return \MiMFa\Library\Local::OptimizeUrl(\MiMFa\Library\Local::GetUrl($path));
+	return \MiMFa\Library\Local::GetUrl($path);
 }
 /**
  * Get the full part of a url
@@ -898,9 +854,9 @@ function getUrl(string|null $path = null): string|null
 {
 	if ($path === null)
 		$path = (
-			getValid($_SERVER, 'SCRIPT_URI') ??
+			takeValid($_SERVER, 'SCRIPT_URI') ??
 			(((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http") .
-			"://" . $_SERVER["HTTP_HOST"] . getBetween($_SERVER, "REQUEST_URI", "PHP_SELF")
+			"://" . $_SERVER["HTTP_HOST"] . takeBetween($_SERVER, "REQUEST_URI", "PHP_SELF")
 		);//.($_SERVER['QUERY_STRING']?"?".$_SERVER['QUERY_STRING']:"");
 	return preg_replace("/^([\/\\\])/", rtrim(GetHost(), "/\\") . "$1", $path);
 }
@@ -957,19 +913,6 @@ function getRequest(string|null $path = null): string|null
 	return PREG_Replace("/(^\w+:\/*[^\/]+)/", "", $path);
 }
 /**
- * Get the relative address from a url
- * @example: "Category/mimfa/service/web.php?p=3&l=10#serp"
- * @return string|null
- */
-function getRelative(string|null $path = null): string|null
-{
-	if ($path == null)
-		$path = getUrl();
-	if (startsWith($path, \_::$Base->Directory))
-		return substr($path, strlen(\_::$Base->Directory));
-	return PREG_Replace("/^\w+:\/*[^\/]+/", "", $path);
-}
-/**
  * Get the direction part of a url from the root
  * @example: "Category/mimfa/service/web.php"
  * @return string|null
@@ -1010,6 +953,21 @@ function getFragment(string|null $path = null): string|null
 	return PREG_Find("/((?<=#)[^\?]*($|\?))/", $path ?? getUrl());
 }
 
+/**
+ * Get the request method name =>
+ * GET:1,
+ * POST:2,
+ * PUT:3,
+ * FILE:4,
+ * PATCH:5,
+ * DELETE:6,
+ * STREAM:7,
+ * INTERNAL:8,
+ * EXTERNAL:9,
+ * OTHER:0
+ * @param string|int|null $method
+ * @return int|string
+ */
 function getMethodName(string|int|null $method = null)
 {
 	switch (strtoupper($method ?? "")) {
@@ -1044,12 +1002,36 @@ function getMethodName(string|int|null $method = null)
 		case "DEL":
 			return "DELETE";
 		case 7:
+		case "STREAM":
+			return "STREAM";
+		case 8:
+		case "INTER":
 		case "INTERNAL":
 			return "INTERNAL";
+		case 9:
+		case "EXTER":
+		case "EXTERNAL":
+			return "EXTERNAL";
 		default:
-			return $method ?? $_SERVER['REQUEST_METHOD'];
+			return strtoupper($method ?? $_SERVER['REQUEST_METHOD'] ?? "OTHER");
 	}
 }
+/**
+ * Get the request method index =>
+ * All:0
+ * GET:1,
+ * POST:2,
+ * PUT:3,
+ * FILE:4,
+ * PATCH:5,
+ * DELETE:6,
+ * STREAM:7,
+ * INTERNAL:8,
+ * EXTERNAL:9,
+ * OTHER:10
+ * @param string|int|null $method
+ * @return int|string
+ */
 function getMethodIndex(string|int|null $method = null)
 {
 	switch (strtoupper($method ?? $_SERVER['REQUEST_METHOD'])) {
@@ -1084,10 +1066,18 @@ function getMethodIndex(string|int|null $method = null)
 		case "DEL":
 			return 6;
 		case 7:
-		case "INTERNAL":
+		case "STREAM":
 			return 7;
+		case 8:
+		case "INTER":
+		case "INTERNAL":
+			return 8;
+		case 9:
+		case "EXTER":
+		case "EXTERNAL":
+			return 9;
 		default:
-			return 0;
+			return 10;
 	}
 }
 
@@ -1149,7 +1139,7 @@ function setMemo($key, $value, $expires = 0, $path = "/")
 {
 	if ($value == null)
 		return false;
-	return setcookie(urlencode($key), urlencode($value), ceil($expires/1000), $path);
+	return setcookie(urlencode($key), urlencode($value), ceil($expires / 1000), $path, "", true, true);
 }
 function getMemo($key)
 {
@@ -1165,13 +1155,13 @@ function hasMemo($key)
 function forgetMemo($key)
 {
 	unset($_COOKIE[urlencode($key)]);
-	return setcookie(urlencode($key), "", 0, "/");
+	return setcookie(urlencode($key), "", 0, "/", "", true, true);
 }
 function flushMemos()
 {
 	foreach ($_COOKIE as $key => $val) {
 		unset($_COOKIE[$key]);
-		return setcookie($key, "", 0, "/");
+		return setcookie($key, "", 0, "/", "", true, true);
 	}
 }
 
@@ -1216,16 +1206,11 @@ function getClientIp($version = null): string|null
 	return null;
 }
 
-function getValue(string $source, string|null $key = null, bool $ismultiline = true)
-{
-	if ($key == null)
-		return is_string($source) ? $source : ($source)();
-	else
-		return fetchValue($source, $key, $ismultiline);
-}
+/**
+ * @deprecated
+ */
 function fetchValue(string|null $source, string|null $key, bool $ismultiline = true)
 {
-	$source = getValue($source);
 	$arr = is_array($source) ? $source : explode("\n", $source);
 	$f = false;
 	$res = "";
@@ -1261,7 +1246,7 @@ function isValid($obj, string|null $item = null): bool
 	else
 		return isValid($obj) && isset($obj->$item) && isValid($obj->$item);
 }
-function getValid($obj, string|null $item = null, $defultValue = null)
+function takeValid($obj, string|null $item = null, $defultValue = null)
 {
 	if (isValid($obj, $item))
 		if ($item === null)
@@ -1273,7 +1258,7 @@ function getValid($obj, string|null $item = null, $defultValue = null)
 	else
 		return $defultValue;
 }
-function findValid($obj, string|null $item = null, $defultValue = null, &$key = null)
+function getValid($obj, string|null $item = null, $defultValue = null, &$key = null)
 {
 	if ($item == null)
 		return isValid($obj) ? $obj : $defultValue;
@@ -1297,23 +1282,7 @@ function findValid($obj, string|null $item = null, $defultValue = null, &$key = 
 	}
 	return $defultValue;
 }
-function grabValid(&$obj, string|null $item = null, $defultValue = null)
-{
-	if (isValid($obj, $item))
-		if ($item === null)
-			return $obj;
-		elseif (is_array($obj)) {
-			$res = $obj[$item];
-			unset($obj[$item]);
-			return $res;
-		} else {
-			$res = $obj->$item;
-			unset($obj->$item);
-			return $res;
-		} else
-		return $defultValue;
-}
-function grabFindValid(&$obj, string|null $item = null, $defultValue = null, &$key = null)
+function grabValid(&$obj, string|null $item = null, $defultValue = null, &$key = null)
 {
 	if ($item == null)
 		return isValid($obj) ? $obj : $defultValue;
@@ -1347,17 +1316,17 @@ function doValid(callable $func, $obj, string|null $item = null, $defultValue = 
 {
 	return isValid($obj, $item) ? $func(getValid($obj, $item)) : $defultValue;
 }
-function getBetween($obj, ...$items)
+function takeBetween($obj, ...$items)
 {
 	foreach ($items as $value)
 		if (($value = getValid($obj, $value, null)) !== null)
 			return $value;
 	return null;
 }
-function findBetween($obj, ...$items)
+function getBetween($obj, ...$items)
 {
 	foreach ($items as $value)
-		if (($value = findValid($obj, $value, null)) !== null)
+		if (($value = getValid($obj, $value, null)) !== null)
 			return $value;
 	return null;
 }
@@ -1474,10 +1443,10 @@ function isAbsoluteUrl(string|null $url): bool
 function isScript(mixed $script): bool
 {
 	return !is_string($script) ||
-	((!empty($script))
-		&& !preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/", $script)
-		&& !preg_match("/^[A-z0-9\-]+\:\/*([\/\?\#][^\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/", $script)
-		&& preg_match("/[\{\}\|\^\[\]\"\`\;\r\n\t\f]|((^\s*[\w\$][\w\d\$\_\.]+\s*\([\s\S]*\)\s*)+;?\s*$)/", $script));
+		((!empty($script))
+			&& !preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/", $script)
+			&& !preg_match("/^[A-z0-9\-]+\:\/*([\/\?\#][^\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/", $script)
+			&& preg_match("/[\{\}\|\^\[\]\"\`\;\r\n\t\f]|((^\s*[\w\$][\w\d\$\_\.]+\s*\([\s\S]*\)\s*)+;?\s*$)/", $script));
 }
 /**
  * To check if the string is a JSON or not
@@ -1521,14 +1490,24 @@ function isStatic($value): bool
 }
 
 /**
- * Remove all changeable command signs from a path (such as ../ or /./.)
- * Change all slashes/backslashes to the DIRECTORY_SEPARATOR
- * @param string|null $path The source path
+ * Remove all changeable command signs from a url (such as ../ or /./.)
+ * Change all backslashes to the slash
+ * @param string $path The source path
  * @return array|string|null
  */
-function normalizePath(string|null $path): string|null
+function normalizeUrl(string $path): string|null
 {
-	return str_replace(["\\", "/"], DIRECTORY_SEPARATOR, preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path ?? getUrl()));
+	return str_replace("\\", "/", preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
+}
+/**
+ * Remove all changeable command signs from a path (such as ../ or /./.)
+ * Change all slashes/backslashes to the DIRECTORY_SEPARATOR
+ * @param string $path The source path
+ * @return array|string|null
+ */
+function normalizePath(string $path): string|null
+{
+	return str_replace(["\\", "/"], DIRECTORY_SEPARATOR, preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
 }
 
 /**
@@ -1553,6 +1532,7 @@ function deleteFromString(string $mainstr, int $index, int $length = 1): string
 /**
  * Execute the Command Comments (Commands by the pattern <!---name:Command---> <!---name--->)
  * @param string|null $page The source document
+ * @deprecated
  * @return string|null
  */
 function executeCommands(string|null $page, string|null $name = null): string|null
@@ -1685,72 +1665,72 @@ function array_find_keys($array, callable $searching)
 	}, ARRAY_FILTER_USE_BOTH);
 }
 
-//Test Region
-function test_server()
-{
-	foreach ($_SERVER as $k => $v)
-		echo "<br>" . "$k: " . $v;
-	// echo "<br>"."PHP_SELF: ".$_SERVER['PHP_SELF'];
-	// echo "<br>"."GATEWAY_INTERFACE: ".$_SERVER['GATEWAY_INTERFACE'];
-	// echo "<br>"."SERVER_ADDR: ".$_SERVER['SERVER_ADDR'];
-	// echo "<br>"."SERVER_NAME: ".$_SERVER['SERVER_NAME'];
-	// echo "<br>"."SERVER_SOFTWARE: ".$_SERVER['SERVER_SOFTWARE'];
-	// echo "<br>"."SERVER_PROTOCOL: ".$_SERVER['SERVER_PROTOCOL'];
-	// echo "<br>"."REQUEST_METHOD: ".$_SERVER['REQUEST_METHOD'];
-	// echo "<br>"."REQUEST_TIME: ".$_SERVER['REQUEST_TIME'];
-	// echo "<br>"."QUERY_STRING: ".$_SERVER['QUERY_STRING'];
-	// echo "<br>"."HTTP_ACCEPT: ".$_SERVER['HTTP_ACCEPT'];
-	// echo "<br>"."HTTP_ACCEPT_CHARSET: ".$_SERVER['HTTP_ACCEPT_CHARSET'];
-	// echo "<br>"."HTTP_HOST: ".$_SERVER['HTTP_HOST'];
-	// echo "<br>"."HTTP_REFERER: ".$_SERVER['HTTP_REFERER'];
-	// echo "<br>"."HTTPS: ".$_SERVER['HTTPS'];
-	// echo "<br>"."REMOTE_ADDR: ".$_SERVER['REMOTE_ADDR'];
-	// echo "<br>"."REMOTE_HOST: ".$_SERVER['REMOTE_HOST'];
-	// echo "<br>"."REMOTE_PORT: ".$_SERVER['REMOTE_PORT'];
-	// echo "<br>"."SCRIPT_FILENAME: ".$_SERVER['SCRIPT_FILENAME'];
-	// echo "<br>"."SERVER_ADMIN: ".$_SERVER['SERVER_ADMIN'];
-	// echo "<br>"."SERVER_PORT: ".$_SERVER['SERVER_PORT'];
-	// echo "<br>"."SERVER_SIGNATURE: ".$_SERVER['SERVER_SIGNATURE'];
-	// echo "<br>"."PATH_TRANSLATED: ".$_SERVER['PATH_TRANSLATED'];
-	// echo "<br>"."SCRIPT_NAME: ".$_SERVER['SCRIPT_NAME'];
-	// echo "<br>"."SCRIPT_URI: ".$_SERVER['SCRIPT_URI'];
-}
-function test_address($directory = null, string $name = "Configuration")
-{
-	echo addressing($directory ?? \_::$Address->Directory, $name);
-	echo "<br>ASEQ: " . \_::$Aseq->Name;
-	echo "<br>ASEQ->Path: " . \_::$Aseq->Path;
-	echo "<br>ASEQ->Dir: " . \_::$Aseq->Directory;
-	echo "<br>OTHER ASEQ: <br>";
-	var_dump(\_::$Aseq);
-	echo "<br>BASE: " . \_::$Base->Name;
-	echo "<br>BASE->Path: " . \_::$Base->Path;
-	echo "<br>BASE->Dir: " . \_::$Base->Directory;
-	echo "<br>OTHER BASE: <br>";
-	var_dump(\_::$Base);
-	echo "<br><br>ADDRESSES: <br>";
-	var_dump(\_::$Address);
-}
-function test_url()
-{
-	echo "<br>URL: " . \Req::$Url;
-	echo "<br>HOST: " . \Req::$Host;
-	echo "<br>SITE: " . \Req::$Site;
-	echo "<br>PATH: " . \Req::$Path;
-	echo "<br>REQUEST: " . \Req::$Request;
-	echo "<br>DIRECTION: " . \Req::$Direction;
-	echo "<br>QUERY: " . \Req::$Query;
-	echo "<br>FRAGMENT: " . \Req::$Fragment;
-}
-function test_access($func, $res = null)
-{
-	$r = null;
-	if (inspect(0, false, false)) {
-		if ($r = $func())
-			echo "<b>TRUE: " . ($r ?? $res) . "</b><br>";
-		else
-			echo "FALSE: " . $res . "<br>";
-	}
-}
-//End Test Region
+// //Test Region
+// function test_server()
+// {
+// 	foreach ($_SERVER as $k => $v)
+// 		echo "<br>" . "$k: " . $v;
+// 	// echo "<br>"."PHP_SELF: ".$_SERVER['PHP_SELF'];
+// 	// echo "<br>"."GATEWAY_INTERFACE: ".$_SERVER['GATEWAY_INTERFACE'];
+// 	// echo "<br>"."SERVER_ADDR: ".$_SERVER['SERVER_ADDR'];
+// 	// echo "<br>"."SERVER_NAME: ".$_SERVER['SERVER_NAME'];
+// 	// echo "<br>"."SERVER_SOFTWARE: ".$_SERVER['SERVER_SOFTWARE'];
+// 	// echo "<br>"."SERVER_PROTOCOL: ".$_SERVER['SERVER_PROTOCOL'];
+// 	// echo "<br>"."REQUEST_METHOD: ".$_SERVER['REQUEST_METHOD'];
+// 	// echo "<br>"."REQUEST_TIME: ".$_SERVER['REQUEST_TIME'];
+// 	// echo "<br>"."QUERY_STRING: ".$_SERVER['QUERY_STRING'];
+// 	// echo "<br>"."HTTP_ACCEPT: ".$_SERVER['HTTP_ACCEPT'];
+// 	// echo "<br>"."HTTP_ACCEPT_CHARSET: ".$_SERVER['HTTP_ACCEPT_CHARSET'];
+// 	// echo "<br>"."HTTP_HOST: ".$_SERVER['HTTP_HOST'];
+// 	// echo "<br>"."HTTP_REFERER: ".$_SERVER['HTTP_REFERER'];
+// 	// echo "<br>"."HTTPS: ".$_SERVER['HTTPS'];
+// 	// echo "<br>"."REMOTE_ADDR: ".$_SERVER['REMOTE_ADDR'];
+// 	// echo "<br>"."REMOTE_HOST: ".$_SERVER['REMOTE_HOST'];
+// 	// echo "<br>"."REMOTE_PORT: ".$_SERVER['REMOTE_PORT'];
+// 	// echo "<br>"."SCRIPT_FILENAME: ".$_SERVER['SCRIPT_FILENAME'];
+// 	// echo "<br>"."SERVER_ADMIN: ".$_SERVER['SERVER_ADMIN'];
+// 	// echo "<br>"."SERVER_PORT: ".$_SERVER['SERVER_PORT'];
+// 	// echo "<br>"."SERVER_SIGNATURE: ".$_SERVER['SERVER_SIGNATURE'];
+// 	// echo "<br>"."PATH_TRANSLATED: ".$_SERVER['PATH_TRANSLATED'];
+// 	// echo "<br>"."SCRIPT_NAME: ".$_SERVER['SCRIPT_NAME'];
+// 	// echo "<br>"."SCRIPT_URI: ".$_SERVER['SCRIPT_URI'];
+// }
+// function test_address($directory = null, string $name = "Configuration")
+// {
+// 	echo addressing($directory ?? \_::$Address->Directory, $name);
+// 	echo "<br>ASEQ: " . \_::$Aseq->Name;
+// 	echo "<br>ASEQ->Path: " . \_::$Aseq->Path;
+// 	echo "<br>ASEQ->Dir: " . \_::$Aseq->Directory;
+// 	echo "<br>OTHER ASEQ: <br>";
+// 	var_dump(\_::$Aseq);
+// 	echo "<br>BASE: " . \_::$Base->Name;
+// 	echo "<br>BASE->Path: " . \_::$Base->Path;
+// 	echo "<br>BASE->Dir: " . \_::$Base->Directory;
+// 	echo "<br>OTHER BASE: <br>";
+// 	var_dump(\_::$Base);
+// 	echo "<br><br>ADDRESSES: <br>";
+// 	var_dump(\_::$Address);
+// }
+// function test_url()
+// {
+// 	echo "<br>URL: " . \Req::$Url;
+// 	echo "<br>HOST: " . \Req::$Host;
+// 	echo "<br>SITE: " . \Req::$Site;
+// 	echo "<br>PATH: " . \Req::$Path;
+// 	echo "<br>REQUEST: " . \Req::$Request;
+// 	echo "<br>DIRECTION: " . \Req::$Direction;
+// 	echo "<br>QUERY: " . \Req::$Query;
+// 	echo "<br>FRAGMENT: " . \Req::$Fragment;
+// }
+// function test_access($func, $res = null)
+// {
+// 	$r = null;
+// 	if (inspect(0, false, false)) {
+// 		if ($r = $func())
+// 			echo "<b>TRUE: " . ($r ?? $res) . "</b><br>";
+// 		else
+// 			echo "FALSE: " . $res . "<br>";
+// 	}
+// }
+// //End Test Region
 ?>

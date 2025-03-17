@@ -9,23 +9,51 @@ class SignUpForm extends Form
 	public $Action = null;
 	public $Title = "Sign Up";
 	public $Image = "user";
-	public $SubmitLabel = "register";
+	public $SubmitLabel = "Register";
 	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
 	public $FirstNameLabel = "<i class='fa fa-user'></i>";
 	public $LastNameLabel = "<i class='fa fa-user'></i>";
 	public $EmailLabel = "<i class='fa fa-envelope'></i>";
+	public $GroupLabel = "<i class='fa fa-group'></i>";
+	public $RouteLabel = "<i class='fa fa-route'></i>";
 	public $ContactLabel = "<i class='fa fa-phone-square'></i>";
-	public $RouteLabel = null;//"<i class='fa fa-route'></i>";
 	public $PasswordLabel = "<i class='fa fa-lock'></i>";
 	public $PasswordConfirmationLabel = "<i class='fa fa-lock'></i>";
-	public $SignaturePlaceHolder = "UserName";
-	public $FirstNamePlaceHolder = "First Name";
-	public $LastNamePlaceHolder = "Last Name";
-	public $EmailPlaceHolder = "Email Address";
-	public $ContactPlaceHolder = "Phone Number";
-	public $PasswordPlaceHolder = "Password";
-	public $PasswordConfirmationPlaceHolder = "Confirm Password";
-	public $RoutePlaceHolder = "Introduction Method";
+	public $SignaturePlaceHolder = "Indicate a unique username";
+	public $FirstNamePlaceHolder = "Your first name";
+	public $LastNamePlaceHolder = "Your last name";
+	public $EmailPlaceHolder = "Your valid email address";
+	public $GroupPlaceHolder = null;
+	public $RoutePlaceHolder = null;//"<i class='fa fa-route'></i>";
+	public $ContactPlaceHolder = "A valid phone number";
+	public $PasswordPlaceHolder = "A strong password";
+	public $PasswordConfirmationPlaceHolder = "Confirm your password";
+	/**
+	 * Indicate all available groups for each new registerant
+	 * @var array|null
+	 */
+	public $GroupOptions = null;/*[
+		"2", "Guest",
+		"3", "Registered",
+		"4", "Student"
+	];*/
+	/**
+	 * All available route options
+	 * @var array|null
+	 */
+	public $RouteOptions = null;/*[
+		"None" => "How you meet us?",
+		"Metting" => "Metting",
+		"Card" => "Visit Card",
+		"Advertisement" => "Advertisement",
+		"Search" => "Search Engine",
+		"Social" => "Social Media",
+		"Other" => "Other"
+	];*/
+	public $SignaturePattern = "/[^\"'`]{5,100}/";
+	public $SignatureTip = "Your username should be unique and between 5-100 characters!";
+	public $PasswordPattern = "/[^\"'`]{8,100}/";
+	public $PasswordTip = "Your password should be strong and between 8-100 characters!";
 	public $SignInLabel = "Do you have an account?";
 	public $Welcome = null;
 	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
@@ -34,12 +62,7 @@ class SignUpForm extends Form
 	public $HasExternalMethod = false;
 	public $MultipleSignIn = false;
 	public $UpdateMode = false;
-	/**
-	 * Account needs to confirm throght activation email way
-	 * @var bool
-	 */
-	public $SendActivationEmail = true;
-	public $GroupId = null;
+	public $DefaultGroupId = null;
 	/**
 	 * Initial User Status:
 	 *		true/1:		Activated
@@ -56,7 +79,6 @@ class SignUpForm extends Form
 		parent::__construct();
 		$this->Action = User::$UpHandlerPath;
 		$this->InitialStatus = User::$InitialStatus;
-		$this->SendActivationEmail = User::$InitialStatus < User::$ActiveStatus;
 		$this->Welcome = function(){ return part(User::$DashboardHandlerPath, print:false); };
 	}
 
@@ -123,14 +145,12 @@ class SignUpForm extends Form
 			yield Html::Rack(
 				(isValid($this->FirstNameLabel) ? Html::LargeSlot(
 					Html::Label($this->FirstNameLabel, "FirstName", ["class"=> "prepend"]) .
-					Html::ValueInput("FirstName", ["placeholder" => $this->FirstNamePlaceHolder])
-					,
+					Html::ValueInput("FirstName", ["placeholder" => $this->FirstNamePlaceHolder]),
 					["class"=> "field"]
 				) : "") .
 				(isValid($this->LastNameLabel) ? Html::LargeSlot(
 					Html::Label($this->LastNameLabel, "LastName", ["class"=> "prepend"]) .
-					Html::ValueInput("LastName", ["placeholder" => $this->LastNamePlaceHolder])
-					,
+					Html::ValueInput("LastName", ["placeholder" => $this->LastNamePlaceHolder]),
 					["class"=> "field"]
 				) : "")
 			);
@@ -138,8 +158,7 @@ class SignUpForm extends Form
 				yield Html::Rack(
 					Html::LargeSlot(
 						Html::Label($this->EmailLabel, "Email", ["class"=> "prepend"]) .
-						Html::EmailInput("Email", ["placeholder" => $this->EmailPlaceHolder])
-						,
+						Html::EmailInput("Email", ["placeholder" => $this->EmailPlaceHolder]),
 						["class"=> "field"]
 					)
 				);
@@ -155,34 +174,31 @@ class SignUpForm extends Form
 									yield "<option value='+$i'" . ($this->ContactCountryCode == $i ? " selected" : "") . ">+$i</option>"; }
 						)
 							: "") .
-						Html::TelInput("Phone", ["placeholder" => $this->ContactPlaceHolder])
-						,
+						Html::TelInput("Phone", ["placeholder" => $this->ContactPlaceHolder]),
 						["class"=> "field"]
 					)
 				);
-			if (isValid($this->RouteLabel))
+			if (isValid($this->GroupLabel) && !isEmpty($this->GroupOptions))
+				yield Html::Rack(
+					Html::LargeSlot(
+						Html::Label($this->GroupLabel, "Group", ["class"=> "prepend"]) .
+						Html::SelectInput("Group", $this->GroupPlaceHolder, $this->GroupOptions),
+						["class"=> "field"]
+					)
+				);
+			if (isValid($this->RouteLabel) && !isEmpty($this->RouteOptions))
 				yield Html::Rack(
 					Html::LargeSlot(
 						Html::Label($this->RouteLabel, "Route", ["class"=> "prepend"]) .
-						Html::SelectInput("Route", "None", [
-							"None" => $this->RoutePlaceHolder,
-							"Metting" => "Metting",
-							"Card" => "Visit Card",
-							"Advertisement" => "Advertisement",
-							"Search" => "Search Engine",
-							"Social" => "Social Media",
-							"Other" => "Other"
-						])
-						,
+						Html::SelectInput("Route", $this->RoutePlaceHolder, $this->RouteOptions),
 						["class"=> "field"]
 					)
 				);
 			if (isValid($this->SignatureLabel))
 				yield Html::Rack(
 					Html::LargeSlot(
-						Html::Label($this->SignatureLabel, "username", ["class"=> "prepend"]) .
-						Html::ValueInput("username", ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "username"])
-						,
+						Html::Label($this->SignatureLabel, "Signature", ["class"=> "prepend"]) .
+						Html::ValueInput("Signature", ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "UserName"]),
 						["class"=> "field"]
 					)
 				);
@@ -190,14 +206,12 @@ class SignUpForm extends Form
 				yield Html::Rack(
 					Html::LargeSlot(
 						Html::Label($this->PasswordLabel, "Password" , ["class"=> "prepend"]) .
-						Html::SecretInput("Password" , ["placeholder" => $this->PasswordPlaceHolder, "autocomplete" => "Password"])
-						,
+						Html::SecretInput("Password" , ["placeholder" => $this->PasswordPlaceHolder, "autocomplete" => "Password"]),
 						["class"=> "field"]
 					) .
 					Html::LargeSlot(
 						Html::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=> "prepend"]) .
-						Html::SecretInput("PasswordConfirmation", ["placeholder" => $this->PasswordConfirmationPlaceHolder, "autocomplete" => "Password"])
-						,
+						Html::SecretInput("PasswordConfirmation", ["placeholder" => $this->PasswordConfirmationPlaceHolder, "autocomplete" => "Password"]),
 						["class"=> "field"]
 					)
 				);
@@ -220,10 +234,19 @@ class SignUpForm extends Form
 		return Html::Script("
 			$(function () {
                 $('.{$this->Name} form').submit(function(e) {
-					if ($('.{$this->Name} form #PasswordConfirmation').val() == $('.{$this->Name} form #Password').val()) return true;
-					$('.{$this->Name} form result').remove();
-					$('.{$this->Name} form').append(Html.error('New password and confirm password does not match!'));
-					e.preventDefault();
+					let error = null;
+					if (!$('.{$this->Name} form #Password').val().match({$this->PasswordPattern})) 
+						error = Html.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
+					else if (!$('.{$this->Name} form #Signature').val().match({$this->SignaturePattern})) 
+						error = Html.error(".\MiMFa\Library\Script::Convert($this->SignatureTip).");
+					else if ($('.{$this->Name} form #PasswordConfirmation').val() != $('.{$this->Name} form #Password').val()) 
+						error = Html.error('New password and confirm password does not match!');
+					if(error) {
+						$('.{$this->Name} form .result').remove();
+						$('.{$this->Name} form').append(error);
+						e.preventDefault();
+						return false;
+					}
 					return false;
                 });
 			});
@@ -236,23 +259,34 @@ class SignUpForm extends Form
 			try {
 				$received = \Req::Post();
 				if (isValid($received, "Email") || isValid($received, "Password" )) {
+					$signature = get($received, "Signature");
+					if (!preg_match($this->SignaturePattern,$signature))
+						return $this->GetError($this->SignatureTip);
+					$password = get($received, "Password" );
+					if (!preg_match($this->PasswordPattern, $password)) 
+						return $this->GetError($this->PasswordTip);
+					$route = get($received, "Route");
+					$group = get($received, "Group");
+					if(!isset($this->GroupOptions[$group])) $group = $this->DefaultGroupId;
+				
 					if (
 						\_::$Back->User->SignUp(
-							signature: get($received, "username"),
-							password: get($received, "Password" ),
+							signature: $signature,
+							password: $password,
 							email: get($received, "Email"),
 							name: null,
 							firstName: get($received, "FirstName"),
 							lastName: get($received, "LastName"),
-							phone: findValid($received, "CountryCode", "0") . get($received, "Phone"),
-							groupId: $this->GroupId,
-							status: $this->InitialStatus
+							phone: (get($received, "CountryCode")??"0") . get($received, "Phone"),
+							groupId: $group,
+							status: $this->InitialStatus,
+							metadata: $route?["Route"=>$route]:null
 						)
 					) {
-						return $this->GetSuccess("Dear '" . \_::$Back->User->TemporaryName . "', You registered successfully") .
-							($this->SendActivationEmail ? part(User::$ActiveHandlerPath, print: false) : "");
+						$this->Result = true;
+						return $this->GetSuccess("Dear '" . \_::$Back->User->TemporaryName . "', You registered successfully");
 					} else
-						return $this->GetError("The user cannot register with this email or username!");
+						return $this->GetError("The user can not register with this email or username!");
 				} else
 					return $this->GetWarning("Please fill all required fields correctly!");
 			} catch (\Exception $ex) {

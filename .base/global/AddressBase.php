@@ -28,24 +28,24 @@ class AddressBase
 	public string $ScriptDirectory;
 	public string $StyleDirectory;
 
-	public string|null $Path;
-	public string $ViewPath;
-	public string $PagePath;
-	public string $RegionPath;
-	public string $PartPath;
-	public string $ScriptPath;
-	public string $StylePath;
+	public string|null $Route;
+	public string $ViewRoute;
+	public string $PageRoute;
+	public string $RegionRoute;
+	public string $PartRoute;
+	public string $ScriptRoute;
+	public string $StyleRoute;
 	
-	public string $ContentPath;
-	public string $CategoryPath;
-	public string $TagPath;
-	public string $UserPath;
+	public string $ContentRoute;
+	public string $CategoryRoute;
+	public string $TagRoute;
+	public string $UserRoute;
 
 
-	public function __construct(string $name = null, string $rootDir = null, string $rootPath = null)
+	public function __construct(?string $name = null, ?string $rootDir = null, ?string $rootRoute = null)
 	{
 		$this->Name = $name;
-		$this->Directory = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $rootDir ?? DIRECTORY_SEPARATOR);
+		$this->Directory = str_replace(["\\", "/"], [DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR], $rootDir ?? DIRECTORY_SEPARATOR);
 		$this->ModelDirectory = $this->Directory . "model" . DIRECTORY_SEPARATOR;
 		$this->ViewDirectory = $this->Directory . "view" . DIRECTORY_SEPARATOR;
 		$this->LogicDirectory = $this->Directory . "logic" . DIRECTORY_SEPARATOR;
@@ -66,18 +66,18 @@ class AddressBase
 		$this->ScriptDirectory = $this->ViewDirectory . "script" . DIRECTORY_SEPARATOR;
 		$this->StyleDirectory = $this->ViewDirectory . "style" . DIRECTORY_SEPARATOR;
 
-		$this->Path = str_replace(["\\", "/"], "/", $rootPath ?? "/");
-		$this->ViewPath = $this->Path . "view/";
-		$this->PagePath = $this->ViewPath . "page/";
-		$this->RegionPath = $this->ViewPath . "region/";
-		$this->PartPath = $this->ViewPath . "part/";
-		$this->ScriptPath = $this->ViewPath . "script/";
-		$this->StylePath = $this->ViewPath . "style/";
+		$this->Route = str_replace(["\\", "/"], ["/", "/"], $rootRoute ?? "/");
+		$this->ViewRoute = $this->Route . "view/";
+		$this->PageRoute = $this->ViewRoute . "page/";
+		$this->RegionRoute = $this->ViewRoute . "region/";
+		$this->PartRoute = $this->ViewRoute . "part/";
+		$this->ScriptRoute = $this->ViewRoute . "script/";
+		$this->StyleRoute = $this->ViewRoute . "style/";
 
-		$this->ContentPath = "/post/";
-		$this->CategoryPath = "/cat/";
-		$this->TagPath = "/tag/";
-		$this->UserPath = "/user/";
+		$this->ContentRoute = "/post/";
+		$this->CategoryRoute = "/cat/";
+		$this->TagRoute = "/tag/";
+		$this->UserRoute = "/user/";
 	}
 }
 ?>

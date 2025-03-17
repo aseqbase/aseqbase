@@ -55,12 +55,12 @@ class CommentForm extends Form
 			Contact::SendHTMLEmail(
 				\_::$Info->SenderEmail,
 				$row["Contact"],
-				$subject ?? __($this->MailSubject ?? ("$notification " . findValid($row, "Subject", "Your Comment"))),
+				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),
 				$message ?? [
-					$notification => Html::Link(findValid($row, "Subject", "Your Comment"), \Req::$Path),
+					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \Req::$Path),
 					"Subject" => get($data, "Subject"),
-					"Name" => findValid($data, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
-					"Contact" => findValid($data, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
+					"Name" => getValid($data, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
+					"Contact" => getValid($data, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
 					"Content" => get($data, "Content"),
 					"Attach" => get($data, "Attach")
 				]
@@ -148,8 +148,8 @@ class CommentForm extends Form
 							"ReplyId" => $rid,
 							"Relation" => $this->Relation,
 							"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
-							"Name" => findValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
-							"Contact" => findValid($received, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
+							"Name" => getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
+							"Contact" => getValid($received, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
 							"Subject" => get($received, "Subject"),
 							"Content" => get($received, "Content"),
 							"Attach" => Convert::ToString(get($received, "Attach")),
@@ -217,7 +217,7 @@ class CommentForm extends Form
 				$this->SubjectLabel = null;
 				$this->SubmitLabel = $this->ReplyLabel;
 				$this->ReplyId = get($received, "Reply");
-				$this->Router->Renew()->Get()->Switch();
+				$this->Router->Refresh()->Get()->Switch();
 				return $this->Handle();
 			}
 		return $this->GetSigning();

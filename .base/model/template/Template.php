@@ -123,7 +123,7 @@ class Template extends \Base{
         .tooltip {
             position: absolute;
             opacity: 0;
-            font-family: inherit;
+            font-family: var(--font-0);
             font-size: var(--size-0);
             font-weight: lighter;
             max-width: 70vw;
@@ -133,7 +133,7 @@ class Template extends \Base{
             color: var(--back-color-0);
             border: var(--border-1);
             border-radius: var(--radius-1);
-            box-shadow: var(--shadow-4);
+            box-shadow: var(--shadow-5);
             padding: 9px 9px;
             z-index: -999;
             transition: var(--transition-0);

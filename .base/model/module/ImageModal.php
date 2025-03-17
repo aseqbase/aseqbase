@@ -22,9 +22,11 @@ class ImageModal extends Modal{
 		$content = $content??$this->Image;
 		if(isValid($content))
 			if($this->AllowOriginal)
-				if(isFormat($content,".svg")) return parent::GetContents("<iframe class=\"image\" style=\"height: 100%;width: auto;\" src=\"".$content."\"></iframe>");
-				else return parent::GetContents("<div class=\"image\" style=\"background-image: url('".$content."');\"/>");
-			else return parent::GetContents("<div class=\"image\" style=\"background-image: url('".$content."');\"/>");
+				if(isFormat($content,".svg")) 
+					return Html::Embed(null,$content, ["class"=>"image", "style"=>"height: 100%;width: auto;"]);
+					//return parent::GetContents("<iframe class=\"image\" style=\"height: 100%;width: auto;\" src=\"".$content."\"></iframe>");
+				else return Html::Media(null,$content, ["class"=>"image"]);
+			else return Html::Media(null,$content, ["class"=>"image"]);
 		else return parent::GetContents($content??$this->Content);
 	}
 

@@ -8,7 +8,7 @@ class QRCodeBox extends Module{
 	public $Height = "100%";
 
 	public function Get(){
-		$val = getValue($this->Content);
+		$val = \MiMFa\Library\Convert::ToString($this->Content);
 		module("Image" );
 		$this->ContentBox = new Image();
 		$this->ContentBox->Source = "https://api.qrserver.com/v1/create-qr-code/?data=".$val;

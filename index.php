@@ -10,7 +10,7 @@
 // $relativePath = __DIR__;//str_replace(str_replace(["\\","/"], DIRECTORY_SEPARATOR, $_SERVER['DOCUMENT_ROOT']), "", subject: __DIR__);
 // $dirs = preg_split("/[\/\\\]/", trim($relativePath, "/\\"));
 $GLOBALS["ASEQ"] = null;//end($dirs);//join(".", $dirs);/* Change it to null if the file is in the root directory */
-$GLOBALS["BASE"] = ".aseq";/* Change it to the base directory if deferents */
+$GLOBALS["BASE"] = "administrator";/* Change it to the base directory if deferents */
 
 /*
     Change \_::$Sequences

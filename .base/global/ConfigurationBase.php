@@ -195,12 +195,6 @@ abstract class ConfigurationBase extends ArrayObject
       */
      public $SecretKey = '~a!s@e#q$b%a^s&e*';
      /**
-      * The prefix to use in sessions and public whare!
-      * @var string
-      * @category DataBase
-      */
-     public $PublicPrefix = 'qb';
-     /**
       * Allow to set sessions on the client side (false for default)
       * @var bool
       * @category Security
@@ -267,6 +261,20 @@ abstract class ConfigurationBase extends ArrayObject
       */
      public $ReCaptchaSiteKey = null;
      /**
+      * The minimum group id available to choice by user
+      * @default 100
+      * @var int
+      * @category Security
+      */
+     public $MinimumGroupId = 100;
+     /**
+      * The maximum group id available to choice by user
+      * @default 999999999
+      * @var int
+      * @category Security
+      */
+     public $MaximumGroupId = 999999999;
+     /**
       * The minimum group of banned user
       * @default -1
       * @var int
@@ -289,11 +297,11 @@ abstract class ConfigurationBase extends ArrayObject
      public $UserAccess = 1;
      /**
       * The lowest group of administrators
-      * @default 100000000
+      * @default 988888888
       * @var int
       * @category Security
       */
-     public $AdminAccess = 100000000;
+     public $AdminAccess = 988888888;
      /**
       * The highest group of administrators
       * @default 999999999
@@ -488,7 +496,17 @@ abstract class ConfigurationBase extends ArrayObject
 		ini_set('display_errors', $this->DisplayError);
 		ini_set('display_startup_errors', $this->DisplayStartupError);
 		error_reporting($this->ReportError);
+		if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_" ;
      }
+	public function __get($name) {
+        return $this[$this->PropertyName($name)];
+    }
+    public function __set($name, $value) {
+        $this[$this->PropertyName($name)] = $value;
+    }
+    public function PropertyName($name) {
+        return preg_replace("/\W+/", "", strToProper($name));
+    }
 
 
      public function IsLatestVersion(): bool|null

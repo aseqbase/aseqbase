@@ -171,7 +171,7 @@ abstract class InformationBase extends ArrayObject{
      * @var array
 	 */
 	public $MainMenus = array(
-		array("Name" =>"HOME","Path"=>"/home","Image" =>"/asset/symbol/home.png","Attributes"=> "class='menu-link'")
+		array("Name" =>"HOME","Path"=>"/home","Image" =>"home","Attributes"=> "class='menu-link'")
 	);
 
 	/**
@@ -215,28 +215,12 @@ abstract class InformationBase extends ArrayObject{
 		$this->ReceiverEmail = createEmail("info");
 		\MiMFa\Library\Revise::Load($this);
 		
-		$this->LogoPath = forceUrl($this->LogoPath);
-		$this->FullLogoPath = forceUrl($this->FullLogoPath);
-		$this->BannerPath = forceUrl($this->BannerPath);
-		$this->FullBannerPath = forceUrl($this->FullBannerPath);
-		$this->WaitSymbolPath = forceUrl($this->WaitSymbolPath);
-		$this->ProcessSymbolPath = forceUrl($this->ProcessSymbolPath);
-		$this->ErrorSymbolPath = forceUrl($this->ErrorSymbolPath);
-
 		$menu = between($this->MainMenus,$this->SideMenus,$this->Shortcuts,$this->Services);
 		if(!isValid($this->MainMenus)) $this->MainMenus = $menu;
 		if(!isValid($this->SideMenus)) $this->SideMenus = $menu;
 		if(!isValid($this->Shortcuts)) $this->Shortcuts = $menu;
 		if(!isValid($this->Services)) $this->Services = $menu;
-
-		$this->MainMenus = forceUrls($this->MainMenus);
-		$this->SideMenus = forceUrls($this->SideMenus);
-		$this->Shortcuts = forceUrls($this->Shortcuts);
-		$this->Services = forceUrls($this->Services);
-		$this->Members = forceUrls($this->Members);
-		$this->Contacts = forceUrls($this->Contacts);
 	}
-
 	public function __get($name) {
         return $this[$this->PropertyName($name)];
     }

@@ -90,7 +90,7 @@ class Reflect{
                 $start = preg_find('/^[\w\W]+(\s*class[\s\b]+\w+[\s\b]*[\w\W]*\{[\w\W]*\s+?)(?=\$'.$name.'\W)/', $content);
                 if(!is_null($start) && strlen($start) > 8) {
                     $content = $start.
-                        ("$".$name." = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??getValid($prop->Vars, 0)??$prop->Var).";").
+                        ("$".$name." = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??takeValid($prop->Vars, 0)??$prop->Var).";").
                         preg_replace('/^\s*\$'.$name.'\s*\=?(?:(?:(\"|\')[\W\w]*\1)|(?:\/\/.*\r?\n\r?)|(?:\/\*[\W\w]*\*\/)|[^;"\']|\s)*;/U',
                             "",
                             substr($content, strlen($start))
@@ -107,7 +107,7 @@ class Reflect{
                             (count($prop->Modifires)<1?null:(implode(" ", $prop->Modifires)." ")).
                             //(count($prop->Vars)<1?null:(implode("|", $prop->Vars)." ")).
                             (is_null($prop->Name)?null:("$".$prop->Name)).
-                            (is_null($prop->Value)?null:(" = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??getValid($prop->Vars, 0)??$prop->Var))).
+                            (is_null($prop->Value)?null:(" = ".Convert::ToValue($prop->Value, $prop->Type??$prop->Field??takeValid($prop->Vars, 0)??$prop->Var))).
                             ";".PHP_EOL.
                             $indention.substr($content, strlen($start));
                         $uc++;
@@ -167,7 +167,7 @@ class Reflect{
                 title:$value->Title,
                 //description:"$value->Field;$value->Type;$value->Var:".implode("|", $value->Vars),
                 description:$value->Description,
-                type:($value->Field??$value->Type??getValid($value->Vars, 0)??$value->Var)
+                type:($value->Field??$value->Type??takeValid($value->Vars, 0)??$value->Var)
             );
     }
     /**
@@ -450,7 +450,7 @@ class Reflected extends \ArrayObject{
             if($arr) array_push($this->Vars, ...$arr);
         }
         $this->Vars = array_unique(array_filter($this->Vars, function($var){ return $var !== "mixed" && !isEmpty($var);}));
-        if(isEmpty($this->Field)) $this->Field = findValid($comments, "field", null);
+        if(isEmpty($this->Field)) $this->Field = getValid($comments, "field", null);
         if(isEmpty($this->Size)) {
             $size = get($comments, "size");
             switch ($size) {

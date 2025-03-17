@@ -67,8 +67,8 @@ abstract class BackBase
 		$this->User = new \MiMFa\Library\User(table("User", source:$this->DataBase), table("UserGroup", source:$this->DataBase), $this->Session);
 		$this->Translate = new \MiMFa\Library\Translate(table("Translate_Lexicon", prefix:false, source:$this->DataBase));
 
-		\MiMFa\Library\Revise::Decode($this, getValid($this->User->GetGroup(), "MetaData" , "[]"));
-		\MiMFa\Library\Revise::Decode($this, getValid($this->User->Get(), "MetaData" , "[]"));
+		\MiMFa\Library\Revise::Decode($this, takeValid($this->User->GetGroup(), "MetaData" , "[]"));
+		\MiMFa\Library\Revise::Decode($this, takeValid($this->User->Get(), "MetaData" , "[]"));
 	
 		if (\_::$Config->AllowTranslate) {
 			$this->Translate->Language = \_::$Config->DefaultLanguage;

@@ -88,6 +88,11 @@ abstract class ReqBase
 			else $source = $_REQUEST;
 		if (is_string($source))
 			switch (trim(strtolower($source))) {
+				case "bin":
+				case "binary":
+				case "file":
+				case "files":
+					$source = $_FILES;
 				case "public":
 				case "get":
 					$source = $_GET;
@@ -97,11 +102,6 @@ abstract class ReqBase
 				case "post":
 					$source = $_POST;
 					break;
-				case "bin":
-				case "binary":
-				case "file":
-				case "files":
-					$source = $_FILES;
 				case "put":
 				case "modify":
 				case "update":
@@ -112,7 +112,12 @@ abstract class ReqBase
 				case "remove":
 				case "delete":
 				case "del":
+				case "stream":
+				case "inter":
 				case "internal":
+				case "exter":
+				case "external":
+				default:
 					$res = file_get_contents('php://input');
 					if (!isEmpty($res)) {
 						if (isJson($res))
@@ -124,14 +129,14 @@ abstract class ReqBase
 					}
 					$_REQUEST = $source = is_array($source)? $source:[$source];
 					break;
-				default:
-					$source = $_REQUEST;
-					break;
+				// default:
+				// 	//$source = $_REQUEST;
+				// 	break;
 			}
 		if (is_null($key))
 			return (count($source) > 0 ? $source : $default) ?? [];
 		else
-			return findValid($source, $key, $default);
+			return getValid($source, $key, $default);
 	}
 	/**
 	 * Receive requests from the client side then remove it
@@ -241,6 +246,17 @@ abstract class ReqBase
 		return $default;
 	}
 	/**
+	 * Received stream values from the client side
+	 * @param mixed $key The internal data key
+	 * @return mixed Received data
+	 */
+	public static function Stream($key = null, $default = null)
+	{
+		if (is_string($key ?? ""))
+			return self::Receive($key, "stream", $default);
+		return $default;
+	}
+	/**
 	 * Received internal values from the client side
 	 * @param mixed $key The internal data key
 	 * @return mixed Received data
@@ -249,6 +265,17 @@ abstract class ReqBase
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "internal", $default);
+		return $default;
+	}
+	/**
+	 * Received external values from the client side
+	 * @param mixed $key The internal data key
+	 * @return mixed Received data
+	 */
+	public static function External($key = null, $default = null)
+	{
+		if (is_string($key ?? ""))
+			return self::Receive($key, "external", $default);
 		return $default;
 	}
 }

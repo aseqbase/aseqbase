@@ -100,12 +100,12 @@ class Cards extends Collection
             if ($i % $this->MaximumColumns === 0)
                 $itemsHtml .= Html::OpenTag("div", ["class"=> "row items"]);
 
-            $p_image = findValid($item, 'Image' , $this->DefaultImage);
-            $p_name = __(findBetween($item, 'Title', 'Name')??$this->DefaultTitle, true, false);
-            $p_description = __(findValid($item, 'Description' , $this->DefaultDescription));
-            $p_content = __(findValid($item, 'Content' , $this->DefaultContent));
-            $p_link = findBetween($item, 'Link', 'Path')?? $this->DefaultLink;
-            $p_buttons = findValid($item, 'ButtonsContent', $this->DefaultButtons);
+            $p_image = getValid($item, 'Image' , $this->DefaultImage);
+            $p_name = __(getBetween($item, 'Title', 'Name')??$this->DefaultTitle, true, false);
+            $p_description = __(getValid($item, 'Description' , $this->DefaultDescription));
+            $p_content = __(getValid($item, 'Content' , $this->DefaultContent));
+            $p_link = getBetween($item, 'Link', 'Path')?? $this->DefaultLink;
+            $p_buttons = getValid($item, 'ButtonsContent', $this->DefaultButtons);
             $img->Source = $p_image;
 
             $itemsHtml .= Html::Division(function() use ($img, $p_name, $p_description, $p_content, $p_buttons, $p_link){

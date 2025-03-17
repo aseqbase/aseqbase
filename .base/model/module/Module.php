@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
 library("Style");
 library("Convert");
 use MiMFa\Library\Html;
@@ -105,6 +106,12 @@ class Module extends \Base
       */
      public $Attributes = null;
      /**
+      * Attachments of the main tag of this module
+      * @var mixed
+      * @medium
+      */
+     public $Attachments = null;
+     /**
       * The Module Style
       * @var Style
       */
@@ -160,15 +167,15 @@ class Module extends \Base
      public function __construct()
      {
           parent::__construct();
-          $this->Router->Get()->Unset()->Set(fn ()  => Convert::ToString(function () {
+          $this->Router->Get()->Unset()->Set(fn() => Convert::ToString(function () {
                if ($this->Styles === null)
                     yield $this->GetStyle();
-               elseif(!isEmpty($this->Styles))
+               elseif (!isEmpty($this->Styles))
                     yield Html::Style($this->Styles);
-               yield $this->GetOpenTag().$this->Get().$this->GetCloseTag();
+               yield $this->GetOpenTag() . $this->Get() . $this->GetCloseTag();
                if ($this->Scripts === null)
                     yield $this->GetScript();
-               elseif(!isEmpty($this->Scripts))
+               elseif (!isEmpty($this->Scripts))
                     yield Html::Script($this->Scripts);
           }));
      }
@@ -183,7 +190,7 @@ class Module extends \Base
           if (isValid($this->Style))
                $st = is_string($this->Style) ? $this->Style : $this->Style->Get();
           if (isValid($tag ?? $this->Tag))
-               return join("", ["<", ($tag ?? $this->Tag ?? "div"), " ", $this->GetDefaultAttributes(), isValid($st) ? " style=\"{$st}\"" : "", ">"]);
+               return join("", ["<", ($tag ?? $this->Tag ?? "div"), " ", Html::Attributes($this->GetDefaultAttributes(), $this->Attachments), isValid($st) ? " style=\"{$st}\"" : "", ">"]);
           elseif (isValid($st))
                return "<style>.{$this->Name}{ $st }</style>";
           return null;
@@ -195,21 +202,24 @@ class Module extends \Base
      public function GetCloseTag($tag = null)
      {
           if (isValid($tag ?? $this->Tag))
-               return "</" . ($tag ?? $this->Tag ?? "div") . ">";
+               return "</" . ($tag ?? $this->Tag ?? "div") . ">" . Convert::ToString($this->Attachments);
           return null;
      }
 
      /**
       * Get the default module Attributes
-      * @return string
+      * @return array
       */
      public function GetDefaultAttributes()
      {
-          return
-               $this->GetAttribute("id" , $this->Id) .
-               $this->GetAttribute(" class", $this->Name . ' ' . $this->Class . $this->GetScreenClass()) .
-               (isValid($this->Attributes) ? " " . Convert::ToString($this->Attributes, " ",  "{0}={1} ") : "") .
-               (count($this) > 0 ? " " . Convert::ToString($this->__toArray(), " ", "{0}={1} ") : "");
+          return [
+               [
+                    "id" => $this->Id,
+                    "class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass()
+               ],
+               (isEmpty($this->Attributes) ? [] : (is_array($this->Attributes) ? $this->Attributes : [Convert::ToString($this->Attributes, " ", "{0}={1} ")])),
+               (count($this) < 1 ? [] : $this->__toArray())
+          ];
      }
      /**
       * Get the default module Screen Attributes
@@ -221,16 +231,6 @@ class Module extends \Base
                (isValid($this->InvisibleFromScreenSize) ? " " . $this->InvisibleFromScreenSize . "-invisible" : "") .
                (isValid($this->ShowFromScreenSize) ? " " . $this->ShowFromScreenSize . "-show" : "") .
                (isValid($this->HideFromScreenSize) ? " " . $this->HideFromScreenSize . "-hide" : "");
-     }
-     /**
-      * Create a standard Attribute and its value for a tag
-      * @param string $name
-      * @param string|null $value
-      * @return string
-      */
-     public function GetAttribute($name, $value)
-     {
-          return isValid($value) ? ("$name=\"$value\"") : "";
      }
 
      /**
@@ -311,12 +311,13 @@ class Module extends \Base
           return null;
      }
 
-     public function Handle(){
+     public function Handle()
+     {
           $translate = \_::$Config->AllowTranslate;
           $analyze = \_::$Config->AllowTextAnalyzing;
           \_::$Config->AllowTranslate = $translate && $this->AllowTranslate;
           \_::$Config->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-          $output = $this->BeforeHandle().parent::Handle().$this->AfterHandle();
+          $output = $this->BeforeHandle() . parent::Handle() . $this->AfterHandle();
           \_::$Config->AllowTranslate = $translate;
           \_::$Config->AllowTextAnalyzing = $analyze;
           return $output;
@@ -363,21 +364,21 @@ class Module extends \Base
      /**
       * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
       */
-      public function Render()
-      {
-           if ($this->Visual){
+     public function Render()
+     {
+          if ($this->Visual) {
                \Res::Render($this->Handle());
                $this->Rendered++;
                return null;
-           }
-           return $this->Handle();
-      }
+          }
+          return $this->Handle();
+     }
      /**
       * Echo whole the Document contains Elements except Styles and Scripts.
       */
      public function ReRender()
      {
-          if ($this->Visual){
+          if ($this->Visual) {
                \Res::Render($this->ReHandle());
                $this->Rendered++;
                return null;
@@ -395,14 +396,14 @@ class Module extends \Base
                return $this->Render();
      }
 
-     
-	public function ToString()
-	{
-		 ob_start();
-           if ($this->Rendered || $this->Handled)
+
+     public function ToString()
+     {
+          ob_start();
+          if ($this->Rendered || $this->Handled)
                $output = $this->ReRender();
-           else
+          else
                $output = $this->Render();
-		 return ob_get_clean()??$output;
-	}
+          return ob_get_clean() ?? $output;
+     }
 } ?>

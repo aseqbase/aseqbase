@@ -48,31 +48,56 @@ abstract class ResBase
 		return $output;
 	}
 	/**
-	 * Print only this output on the client side
+	 * Print only this output on the client side, Clear before then end
 	 * @param mixed $output The data that is ready to print
 	 * @param mixed $status The header status
 	 */
 	public static function Send($output = null, $status = null)
 	{
-		ob_clean();
-		if (self::Status($status))
-			flush();
-		exit(\MiMFa\Library\Convert::ToString($output));
+		if (ob_get_level())
+			ob_end_clean(); // Clean any remaining output buffers
+		self::End($output, $status);
 	}
 	/**
-	 * Send a file to the client side
-	 * @param mixed $path The data that is ready to print
-	 * @param mixed $status The header status
+	 * Sends a file to the client side.
+	 * @param string $path The absolute or relative path to the file.
+	 * @param int|null $status The HTTP status code (e.g., 200, 404).
+	 * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
+	 * @param bool $attachment Whether to display the file inline in the browser or as an attachment.
+	 * @param string|null $name Optional filename to force download with a specific name.
+	 * @throws \Exception If the file path is invalid or the file cannot be read.
 	 */
-	public static function SendFile($path = null, $status = null)
+	public static function SendFile($path = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
 	{
-		header('Content-Type: application/pdf');
-		header('Content-Disposition: inline; filename="' . basename($path) . '"');
+		// Clear output buffer if active
+		if (ob_get_level()) ob_clean();
+		
+		$path = \MiMFa\Library\Local::GetFile($path);
+		if ($path)
+			self::Status($status);
+		else {
+			self::Status(404);
+			exit;
+		}
+		if ($type)
+			header("Content-Type: $type");
+		else {
+			// Attempt to guess content type if not provided
+			$finfo = finfo_open(FILEINFO_MIME_TYPE);
+			$type = finfo_file($finfo, $path);
+			finfo_close($finfo);
+			header("Content-Type: " . $type);
+		}
+		// Sanitize the filename
+		$n = explode("/", $path);
+		$name = preg_replace('/[^\w\-.]/', '_', $name??end($n));
+		$disposition = $attachment ? 'attachment' : 'inline';
+		header("Content-Disposition: $disposition; filename=\"" . ($name ?? basename($path)) . '"');
 		header('Content-Length: ' . filesize($path));
-		self::Status($status);
-		// Read and output the file
+		//header("Etag: " . md5_file($path)); // Simple ETag (entity tag) response header is an identifier for a specific version of a resource. It lets caches be more efficient and save
+		//Read and output the file
 		readfile($path);
-		exit();
+		exit;
 	}
 	/**
 	 * Print only this output on the client side then reload the page
@@ -82,8 +107,7 @@ abstract class ResBase
 	public static function Flip($output = null, $status = null, $url = null)
 	{
 		ob_clean();
-		if (self::Status($status))
-			flush();
+		self::Status($status);
 		exit(\MiMFa\Library\Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
 	}
 	/**
@@ -93,12 +117,26 @@ abstract class ResBase
 	 */
 	public static function End($output = null, $status = null)
 	{
-		if (self::Status($status))
-			flush();
+		self::Status($status);
 		if ($output)
 			exit(\MiMFa\Library\Convert::ToString($output));
 		else
-			exit();
+			exit;
+	}
+
+	/**
+	 * Replace the output with document in the client side
+	 * @param mixed $output The data that is ready to print
+	 */
+	public static function Set($output = null)
+	{
+		\Res::Render(\MiMFa\Library\Html::Script(
+			\MiMFa\Library\Internal::MakeScript(
+				$output,
+				null,
+				"(data,err)=>{document.open();document.write(data??err);document.close();}"
+			)
+		));
 	}
 
 	/**
@@ -237,6 +275,34 @@ abstract class ResBase
 		return false;
 	}
 	/**
+	 * Send stream values to the client side
+	 * @param mixed $path The Url to send STREAM data to that
+	 * @param mixed $data Desired data to STREAM
+	 * @return bool|string Is sent or received response
+	 */
+	public static function Stream($path = null, ...$data)
+	{
+		if (isEmpty($path))
+			$path = getPath();
+		if (is_string($path) && isAbsoluteUrl($path)) {
+				$ch = curl_init($path);
+				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "STREAM"); // Custom "STREAM" request
+				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Encode data
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return response as string
+				curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Set a timeout to avoid hanging indefinitely
+				$response = curl_exec($ch);
+				if (curl_errno($ch)) {
+					$errorMessage = curl_error($ch);
+					curl_close($ch);
+					trigger_error("cURL Error: $errorMessage", E_USER_WARNING);
+					return false;
+				}
+				curl_close($ch);
+				return $response;
+		}
+		return false;
+	}
+	/**
 	 * Send internal values to the client side
 	 * @param mixed $path The Url to send INTERNAL data to that
 	 * @param mixed $data Desired data to INTERNAL
@@ -257,6 +323,27 @@ abstract class ResBase
 		}
 		return false;
 	}
+	/**
+	 * Send external values to the client side
+	 * @param mixed $path The Url to send EXTERNAL data to that
+	 * @param mixed $data Desired data to EXTERNAL
+	 * @return bool|string Is sent or received response
+	 */
+	public static function External($path = null, ...$data)
+	{
+		if (isEmpty($path))
+			$path = getPath();
+		if (is_string($path) && isAbsoluteUrl($path)) {
+			$ch = curl_init($path);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "EXTERNAL");
+			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+			$response = curl_exec($ch);
+			curl_close($ch);
+			return $response;
+		}
+		return false;
+	}
 
 	public static function Go($url)
 	{
@@ -268,18 +355,18 @@ abstract class ResBase
 	}
 	public static function Load($url = null)
 	{
-		self::End(\MiMFa\Library\Html::Script("window.location.assign(" . (empty($url) ? "location.href" : "`" . forceUrl($url) . "`") . ");"));
+		self::End(\MiMFa\Library\Html::Script("window.location.assign(" . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");"));
 	}
 	public static function Open($url = null, $target = "_blank")
 	{
-		self::End(\MiMFa\Library\Html::Script("window.open(" . (isValid($url) ? "'" . forceUrl($url) . "'" : "location.href") . ", '$target');"));
+		self::End(\MiMFa\Library\Html::Script("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '$target');"));
 	}
 	public static function Share($urlOrText = null, $path = null)
 	{
 		self::Render(\MiMFa\Library\Html::Script("window.open('sms://$path?body='+" . (isValid($urlOrText) ? "'" . __($urlOrText, styling: false) . "'" : "location.href") . ", '_blank');"));
 	}
 
-	
+
 	/**
 	 * Render a message result output to the client side
 	 * @param mixed $output The data that is ready to print

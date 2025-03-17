@@ -6,7 +6,7 @@ module("Navigation");
 $nav = new \MiMFa\Module\Navigation($Items);
 module("PostCollection");
 $module = new \MiMFa\Module\PostCollection();
-$module->Title = !isEmpty($Title) && !isEmpty($Name) && strtolower(preg_replace("/\W*/", "", $Name)) != strtolower(preg_replace("/\W*/", "", $Title)) ? "$Title ".($Name?"($Name)":"") : between($Title, $Name);
+$module->Title = !isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strlen($Title)) > 3 ? "$Title ".($Name?"($Name)":"") : between($Title, $Name);
 $module->DefaultImage = \_::$Info->FullLogoPath;
 $module->ShowRoute = false;
 $module->Description = grab($data, "Description");

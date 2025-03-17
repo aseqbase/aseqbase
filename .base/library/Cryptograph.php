@@ -28,9 +28,7 @@ class Cryptograph
 
         // Now let's pack the IV and the ciphertext together
         // Naively, we can just concatenate
-        if ($encode) {
-            return base64_encode($nonce.$ciphertext);
-        }
+        if ($encode) return base64_encode($nonce.$ciphertext);
         return $nonce.$ciphertext;
     }
 
@@ -42,13 +40,11 @@ class Cryptograph
      * @param boolean $encoded - are we expecting an encoded string?
      * @return string
      */
-    public function Decrypt($message, $key, $encoded = false)
+    public function Decrypt($message, $key, $decode = false)
     {
-        if ($encoded) {
+        if ($decode) {
             $message = base64_decode($message, true);
-            if ($message === false) {
-                throw new \Exception('Decoding failure');
-            }
+            if ($message === false) throw new \Exception('Decoding failure');
         }
 
         $nonceSize = openssl_cipher_iv_length($this->Method);

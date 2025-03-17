@@ -14,7 +14,7 @@ class Icons
 	public static function GetInitial()
 	{
 		self::$Initialized = true;
-		return HTML::Script(null, \_::$Address->ScriptPath . "Icons.js");
+		return HTML::Script(null, \_::$Address->ScriptRoute . \MiMFa\Library\Local::OptimizeUrl("Icons.js"));
 	}
 	public static function GetStyle($root = null)
 	{

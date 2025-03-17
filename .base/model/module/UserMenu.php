@@ -89,8 +89,8 @@ class UserMenu extends Module{
 				);
 			else
 				$this->Items = array(
-					array("Name" =>getValid(\_::$Back->User,"Name" ,"Profile"), "Path" =>User::$RoutePath),
-					array("Name" =>Convert::ToExcerpt(getValid(\_::$Back->User,"Bio" , null)??getValid(\_::$Back->User->GetValue("Bio" ), null, "New User...")), "Attributes"=>["class"=>"bio"]),
+					array("Name" =>takeValid(\_::$Back->User,"Name" ,"Profile"), "Path" =>User::$RoutePath),
+					array("Name" =>Convert::ToExcerpt(takeValid(\_::$Back->User,"Bio" , null)??takeValid(\_::$Back->User->GetValue("Bio" ), null, "New User...")), "Attributes"=>["class"=>"bio"]),
 					array("Name" =>"Dashboard", "Path" =>User::$DashboardHandlerPath),
 					array("Name" =>"Edit Profile", "Path" =>User::$EditHandlerPath),
 					array("Name" =>"Sign Out", "Path" =>"sendDelete(`".User::$OutHandlerPath."`, null, 'body');")
@@ -98,17 +98,17 @@ class UserMenu extends Module{
         }
 		$count = count($this->Items);
 		if($count > 0){
-            return Html::Icon(getValid(\_::$Back->User,"Image" ,"user"), $this->Path,["class"=>"menu"]).
+            return Html::Icon(takeValid(\_::$Back->User,"Image" ,"user"), $this->Path,["class"=>"menu"]).
 				Html::Division(function(){
 				foreach($this->Items as $item)
                     if(isValid($item,'Path' ))
 						yield Html::Button(
-							Html::Division(__(findBetween($item,"Name" , "Title" ), styling:false),["style"=>(isValid($item,'Image' )?("background-image: url('".$item['Image' ]."')"):"")]),
+							Html::Division(__(getBetween($item,"Name" , "Title" ), styling:false),["style"=>(isValid($item,'Image' )?("background-image: url('".$item['Image' ]."')"):"")]),
 							get($item,'Path'),
 							get($item,"Attributes"));
 					else
 						yield Html::Span(
-							Html::Division(__(findBetween($item,"Name" , "Title" ), styling:false),["style"=>(isValid($item,'Image' )?("background-image: url('".$item['Image' ]."')"):"")]),
+							Html::Division(__(getBetween($item,"Name" , "Title" ), styling:false),["style"=>(isValid($item,'Image' )?("background-image: url('".$item['Image' ]."')"):"")]),
 							null,
 							get($item,"Attributes"));
             },["class"=>"submenu"]).$this->GetContent();

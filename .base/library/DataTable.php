@@ -14,7 +14,8 @@ class DataTable
 	public function __construct(\MiMFa\Library\DataBase $dataBase, $name)
 	{
 		$this->DataBase = $dataBase;
-		foreach (\_::$Config->DataTableNameConvertors as $key => $value) $name = preg_replace($key, $value, $name);
+		foreach (\_::$Config->DataTableNameConvertors as $key => $value)
+			$name = preg_replace($key, $value, $name);
 		$this->Name = $name;
 	}
 

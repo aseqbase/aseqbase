@@ -16,8 +16,7 @@ class User extends \Base
 	public static $EditHandlerPath = "/sign/edit.php";
 	public static $DashboardHandlerPath = "/sign/dashboard.php";
 	public static $RecoverHandlerPath = "/sign/recover.php";
-	public static $DefaultImagePath = "/asset/symbol/user.png";
-
+	public static $DefaultImagePath = "user";
 	public static $RecoverEmailSubject = 'Account Recovery Request';
 	public static $RecoverEmailContent = 'Hello dear $NAME,<br><br>
 We received an account recovery request on $HOSTLINK for $EMAILLINK.<br>
@@ -34,15 +33,13 @@ Please $HYPERLINK or the below link to active your account!<br>$LINK<br><br>
 With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $ActiveLinkAnchor = "CLICK ON THIS LINK";
 
-	public static $RecoveryRequestKey = "rk";
-	public static $ActiveRequestKey = "ak";
+	public static $RecoveryTokenKey = "rt";
+	public static $ActivationTokenKey = "at";
 
 	public static $PasswordSecure = true;
-	public static $PasswordPattern = "/([\w\W]+){8,64}/";
-	public static $PasswordTips = "The password should be more than eigh and less than 64 alphabetic and numeric characters.";
 
-	public static $SeparatorSign = "�";
-	public static $DateTimeSignFormat = "Y/m/d";
+	public static $TokenDelimiter = "�";
+	public static $TokenDateTimeFormat = "Y/m/d";
 
 	/**
 	 * Direct activeate or deactivate the user abilities
@@ -65,18 +62,16 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	protected $Access = 0;
 	protected $Accesses = array();
 
-	private $Password = null;
 	public $Signature = null;
 	public $Image = null;
 	public $Name = null;
 	public $Email = null;
 
 	public $TemporarySignature = null;
+	private $TemporaryPassword = null;
 	public $TemporaryImage = null;
 	public $TemporaryName = null;
 	public $TemporaryEmail = null;
-
-	public $Profile = null;
 
 	public DataTable $DataTable;
 	public DataTable $GroupDataTable;
@@ -94,31 +89,44 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			$this->Refresh();
 	}
 
-	public function Load()
-	{
-		$this->Refresh();
-		return $this->Profile = getValid($this->DataTable->DoSelect("*", "`Id`=:Id", [":Id" => $this->Id]), 0);
-	}
 	public function Refresh()
 	{
-		$this->Signature = $this->Session->GetSecure("Signature");
-		$this->Password = $this->Session->GetSecure("Password");
-		$signature = $this->Session->GetData("Signature_" . $this->Signature);
-		$person = null;
+		$this->TemporarySignature = $this->Session->GetSecure("Signature") ?? $this->TemporarySignature;
+		$this->TemporaryPassword = $this->Session->GetSecure("Password") ?? $this->TemporaryPassword;
 		try {
-			if ($signature === $this->Signature && isValid($this->Signature) && isValid($this->Password))
-				$person = $this->Find($this->Signature, $this->Password, false);
-			$this->Session->SetSecure("Signature", $this->Signature = getValid($person, "Signature"));
-			$this->Session->SetSecure("Id", $this->Id = getValid($person, "Id"));
-			$this->Session->SetSecure("GroupId", $this->GroupId = getValid($person, "GroupId"));
-			$this->Session->SetSecure("Image", $this->Image = getValid($person, "Image"));
-			$this->Session->SetSecure("Name", $this->Name = getValid($person, "Name"));
-			$this->Session->SetSecure("Email", $this->Email = getValid($person, "Email"));
-			$this->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->DoSelectValue("`Access`", "`Id`=" . $this->GroupId));
+			if (
+				$this->TemporarySignature === $this->Session->GetData($this->TemporarySignature . "_" . getClientIp()) &&
+				isValid($this->TemporarySignature) &&
+				isValid($this->TemporaryPassword)
+			)
+				$this->Load($this->Find($this->TemporarySignature, $this->TemporaryPassword, false));
+			else
+				$this->Load(null);
 		} catch (\Exception $ex) {
 			$this->SignOut();
 		}
 		return !is_null($this->Id);
+	}
+	public function Load($profile = null)
+	{
+		$this->Session->SetSecure("Signature", $this->Signature = $this->TemporarySignature = takeValid($profile, "Signature"));
+		$this->Session->SetSecure("Password", $this->TemporaryPassword = takeValid($profile, "Password"));
+		$this->Session->SetSecure("Id", $this->Id = takeValid($profile, "Id"));
+		$this->Session->SetSecure("GroupId", $this->GroupId = takeValid($profile, "GroupId"));
+		$this->Session->SetSecure("Image", $this->Image = $this->TemporaryImage = takeValid($profile, "Image"));
+		$this->Session->SetSecure("Name", $this->Name = $this->TemporaryName = takeValid($profile, "Name"));
+		$this->Session->SetSecure("Email", $this->Email = $this->TemporaryEmail = takeValid($profile, "Email"));
+		$this->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->DoSelectValue("`Access`", "`Id`=" . $this->GroupId));
+		if (!$profile) {
+			$this->Session->ForgetSecure("Password");
+			$this->Session->ForgetSecure("Signature");
+			$this->Session->ForgetSecure("Id");
+			$this->Session->ForgetSecure("GroupId");
+			$this->Session->ForgetSecure("Image");
+			$this->Session->ForgetSecure("Name");
+			$this->Session->ForgetSecure("Email");
+			$this->Session->ForgetSecure("Access");
+		}
 	}
 
 	/**
@@ -161,7 +169,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$acc = auth();
 		return " " . join(" AND ", [
 			...($checkStatus ? ["(`Status` IS NULL OR `Status` IN ('','1',1)) "] : []),
-			...($checkAccess ? ["`Access`>=".\_::$Config->VisitAccess, "`Access`<=" . $acc] : []),
+			...($checkAccess ? ["`Access`>=" . \_::$Config->VisitAccess, "`Access`<=" . $acc] : []),
 			...(\_::$Config->AllowTranslate ? ["(`MetaData` IS NULL OR `MetaData` NOT REGEXP '/\s*([\"\\']?)lang\1\s*\:/i' OR `MetaData` REGEXP '/\s*([\"\\']?)lang\1\s*\:[\s\S]*([\"\\'])" . \_::$Back->Translate->Language . "\2/i')"] : [])
 		]);
 	}
@@ -170,54 +178,44 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if (!self::$Active)
 			return [];
-		$signature = $signature ?? $this->Signature ?? $this->Session->GetSecure("Signature") ?? $this->TemporarySignature;
-		if (!isValid($signature)) {
-			//$this->SignOut($signature);
+		if (!isValid($signature = $signature ?? $this->Signature ?? $this->TemporarySignature)) {
+			$this->SignOut($signature);
 			return [];
 		}
 		if (isValid($password)) {
 			if ($hashPassword)
 				$password = $this->EncryptPassword($password);
-			$person = $this->DataTable->DoSelect(
+			$person = $this->DataTable->DoSelectRow(
 				"`Signature` , `Id` , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
 				"(`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
 				[":Id" => $signature, ":Signature" => $signature, ":Email" => $signature, ":Contact" => $signature, ":Password" => $password]
 			);
-			if (is_null($person)) {
-				$this->SignOut($signature);
-				throw new \ErrorException("There a problem is occured!");
-			}
-			if (count($person) < 1) {
+			if (isEmpty($person)) {
 				$this->SignOut($signature);
 				throw new \ErrorException("The username or password is incorrect!");
 			}
 		} else {
-			$person = $this->DataTable->DoSelect(
+			$person = $this->DataTable->DoSelectRow(
 				"`Signature` , `Id` , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
-				"(`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact))",
+				"`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)",
 				[":Id" => $signature, ":Signature" => $signature, ":Email" => $signature, ":Contact" => $signature]
 			);
-			if (is_null($person)) {
-				$this->SignOut($signature);
-				throw new \ErrorException("There a problem is occured!");
-			}
-			if (count($person) < 1) {
+			if (isEmpty($person)) {
 				$this->SignOut($signature);
 				throw new \ErrorException("The username is incorrect!");
 			}
 		}
-		$person = $person[0];
-		$this->TemporarySignature = getValid($person, "Signature");
-		$this->TemporaryImage = getValid($person, "Image");
-		$this->TemporaryName = getValid($person, "Name");
-		$this->TemporaryEmail = getValid($person, "Email");
+		$this->TemporarySignature = takeValid($person, "Signature");
+		$this->TemporaryImage = takeValid($person, "Image");
+		$this->TemporaryName = takeValid($person, "Name");
+		$this->TemporaryEmail = takeValid($person, "Email");
 		return $person;
 	}
 	public function Get($signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
-			$id = getValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : getValid($this->DataTable->DoSelect("*", "`Id`=:Id", [":Id" => $id]), 0);
+			$id = takeValid($this->Find($signature, $password), "Id");
+		return is_null($id) ? null : takeValid($this->DataTable->DoSelect("*", "`Id`=:Id", [":Id" => $id]), 0);
 	}
 	public function Set($fieldsDictionary, $signature = null, $password = null)
 	{
@@ -225,62 +223,62 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$email = $this->Email;
 		if (!is_null($signature) || is_null($id) || is_null($email)) {
 			$person = $this->Find($signature, $password);
-			$id = getValid($person, "Id");
-			$email = getValid($person, "Email");
+			$id = takeValid($person, "Id");
+			$email = takeValid($person, "Email");
 		}
 		if (is_null($id))
 			return null;
-		if (getValid($fieldsDictionary, "Email", $email) != $email)
+		if (takeValid($fieldsDictionary, "Email", $email) != $email)
 			$fieldsDictionary["Status"] = self::$InitialStatus;
 		return $this->DataTable->DoUpdate("`Id`='$id'", $fieldsDictionary);
 	}
 	public function GetValue($key, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
-			$id = getValid($this->Find($signature, $password), "Id");
+			$id = takeValid($this->Find($signature, $password), "Id");
 		return is_null($id) ? null : $this->DataTable->DoSelectValue($key, "`Id`=$id");
 	}
 	public function SetValue($key, $value, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
-			$id = getValid($this->Find($signature, $password), "Id");
+			$id = takeValid($this->Find($signature, $password), "Id");
 		return is_null($id) ? null : $this->DataTable->DoUpdate("`Id`=$id", [$key => $value]);
 	}
 
 	public function GetGroup($signature = null, $password = null)
 	{
 		if (is_null($id = $this->GroupId) || !is_null($signature))
-			$id = getValid($this->Find($signature, $password), "GroupId");
-		return is_null($id) ? null : getValid($this->GroupDataTable->DoSelect("*", "`Id`=:Id", [":Id" => $id]), 0);
+			$id = takeValid($this->Find($signature, $password), "GroupId");
+		return is_null($id) ? null : takeValid($this->GroupDataTable->DoSelect("*", "`Id`=:Id", [":Id" => $id]), 0);
 	}
 	public function SetGroup($fieldsDictionary, $signature = null, $password = null)
 	{
 		$id = $this->GroupId;
 		if (!is_null($signature) || is_null($id)) {
 			$person = $this->Find($signature, $password);
-			$id = getValid($person, "GroupId");
+			$id = takeValid($person, "GroupId");
 		}
 		if (is_null($id))
 			return null;
 		return $this->GroupDataTable->DoUpdate("`Id`='$id'", $fieldsDictionary);
 	}
 
-	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupId = null, $status = null)
+	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupId = null, $status = null, $metadata = null)
 	{
-		$password = $this->CheckPassword($password);
 		$this->TemporaryImage = null;
 		return $this->DataTable->DoInsert(
 			null,
 			[
 				":Signature" => $this->TemporarySignature = $signature ?? $email,
 				":Email" => $this->TemporaryEmail = $email,
-				":Password" => $password,
+				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password),
 				":Name" => $this->TemporaryName = $name ?? trim($firstName . " " . $lastName),
 				":FirstName" => $firstName,
 				":LastName" => $lastName,
 				":Contact" => $phone,
-				":GroupId" => $groupId ?? $this->GroupDataTable->DoSelectValue("`Id`", "Access=" . \_::$Config->UserAccess)??0,
-				":Status" => $status
+				":GroupId" => $groupId ?? $this->GroupDataTable->DoSelectValue("`Id`", "Access=" . \_::$Config->UserAccess) ?? 0,
+				":Status" => $status,
+				":MetaData" => $metadata ? (is_string($metadata) ? $metadata : json_encode($metadata)) : null,
 			]
 		);
 	}
@@ -289,21 +287,11 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if (!isValid($password))
 			return false;
 		$person = $this->Find($signature, $password);
-		$status = getValid($person, "Status", self::$InitialStatus);
+		$status = takeValid($person, "Status", self::$InitialStatus);
 		if ($status === false || ((int) $status) < self::$ActiveStatus)
-			throw new \ErrorException(
-				"This account is not active yet!<br>" .
-				"<a href='" . self::$ActiveHandlerPath . "?signature=$signature'>" . __("Try to send the activation email again!") . "</a>"
-			);
-		$this->Session->SetData("Signature_" . ($this->Signature = getValid($person, "Signature")), $this->Signature = getValid($person, "Signature"));
-		$this->Session->SetSecure("Signature", $this->Signature);
-		$this->Session->SetSecure("Password", $this->Password = getValid($person, "Password"));
-		$this->Session->SetSecure("Id", $this->Id = getValid($person, "Id"));
-		$this->Session->SetSecure("GroupId", $this->GroupId = getValid($person, "GroupId"));
-		$this->Session->SetSecure("Image", $this->Image = getValid($person, "Image"));
-		$this->Session->SetSecure("Name", $this->Name = getValid($person, "Name"));
-		$this->Session->SetSecure("Email", $this->Email = getValid($person, "Email"));
-		$this->Session->SetSecure("Access", $this->Access = $this->GroupDataTable->DoSelectValue("`Access`", "`Id`=" . $this->GroupId));
+			return \Res::Flip(Html::Error("This account is not active yet!"), null, self::$ActiveHandlerPath . "?signature=$signature");
+		$this->Load($person);
+		$this->Session->SetData($this->Signature . "_" . getClientIp(), $this->Signature);
 		return true;
 	}
 	public function SignInOrSignUp($signature, $password, $email = null)
@@ -313,31 +301,17 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 	public function SignOut($signature = null)
 	{
-		if ($signature === null || $signature === $this->Signature) {
-			$this->Session->ForgetData("Signature");
-			$this->Session->ForgetSecure("Password");
-			$this->Session->ForgetSecure("Signature");
-			$this->Session->ForgetSecure("Id");
-			$this->Session->ForgetSecure("GroupId");
-			$this->Session->ForgetSecure("Image");
-			$this->Session->ForgetSecure("Name");
-			$this->Session->ForgetSecure("Email");
-			$this->Session->ForgetSecure("Access");
-			$this->Load();
+		if ($signature === null || $signature === $this->Signature){
+			$this->Session->ForgetData($signature . "_" . getClientIp());
+			$this->Load(null);
 		} else
-			$this->Session->ForgetData($signature);
+			$this->Session->ForgetData($signature . "_" . getClientIp());
 		return !self::Access(\_::$Config->UserAccess);
 	}
 
 	public function ResetPassword($signature = null, $password = null)
 	{
-		return $this->SetValue("Password", $this->CheckPassword($password), $signature);
-	}
-	public function CheckPassword($password)
-	{
-		if (preg_match(self::$PasswordPattern, $password))
-			return self::EncryptPassword($password);
-		throw new \ErrorException(self::$PasswordTips);
+		return $this->SetValue("Password", $this->EncryptPassword($password), $signature);
 	}
 	public function EncryptPassword($password)
 	{
@@ -354,14 +328,6 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			return $password;
 	}
 
-	public function ManageRequests()
-	{
-		if (\Req::Receive(self::$ActiveRequestKey))
-			return $this->ReceiveActivationLink();
-		if (\Req::Receive(self::$RecoveryRequestKey))
-			return $this->ReceiveRecoveryLink();
-	}
-
 	/**
 	 * Send an Activation Email
 	 * @param string $emailFrom Sender
@@ -375,25 +341,17 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 * $IMAGE: for the user image path
 	 * @return bool
 	 */
-	public function SendActivationEmail($emailFrom = null, $emailTo = null, $subject = null, $content = null, $linkAnchor = null)
+	public function SendActivationEmail($receiverEmail = null, $subject = null, $content = null, $linkAnchor = null)
 	{
-		return $this->SendEmail($emailFrom ?? \_::$Info->SenderEmail, $emailTo ?? $this->TemporaryEmail, $subject ?? self::$ActiveEmailSubject, $content ?? self::$ActiveEmailContent, $linkAnchor ?? self::$ActiveLinkAnchor, self::$ActiveHandlerPath, self::$ActiveRequestKey);
+		return $this->SendTokenEmail(\_::$Info->SenderEmail, $receiverEmail ?? $this->TemporaryEmail, $subject ?? self::$ActiveEmailSubject, $content ?? self::$ActiveEmailContent, $linkAnchor ?? self::$ActiveLinkAnchor, self::$ActiveHandlerPath, self::$ActivationTokenKey);
 	}
 	/**
-	 * Receive the Activation Email and return the basic data of user
-	 * @return array<string>|null return the user Signature or false otherwise
+	 * Receive the Activation Email
+	 * @return bool|null return true if user activated, null if request is not received or false otherwise
 	 */
 	public function ReceiveActivationEmail()
 	{
-		return $this->ReceiveEmail(self::$ActiveRequestKey);
-	}
-	/**
-	 * Receive the Activation Link and return the user Signature
-	 * @return bool|string return the user Signature or false otherwise
-	 */
-	public function ReceiveActivationLink()
-	{
-		$sign = $this->ReceiveLink(self::$ActiveRequestKey);
+		$sign = $this->DecryptToken(self::$ActivationTokenKey, \Req::Receive(self::$ActivationTokenKey));
 		if (empty($sign))
 			return null;
 		return $this->DataTable->DoUpdate(
@@ -402,7 +360,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				":Signature" => $sign,
 				":Status" => self::$ActiveStatus
 			]
-		);
+		) ? true : false;
 	}
 
 	/**
@@ -418,83 +376,80 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 * $IMAGE: for the user image path
 	 * @return bool
 	 */
-	public function SendRecoveryEmail($emailFrom = null, $emailTo = null, $subject = null, $content = null, $linkAnchor = null)
+	public function SendRecoveryEmail($receiverEmail = null, $subject = null, $content = null, $linkAnchor = null)
 	{
-		return $this->SendEmail($emailFrom ?? \_::$Info->SenderEmail, $emailTo ?? $this->TemporaryEmail, $subject ?? self::$RecoverEmailSubject, $content ?? self::$RecoverEmailContent, $linkAnchor ?? self::$RecoverLinkAnchor, self::$RecoverHandlerPath, self::$RecoveryRequestKey);
+		return $this->SendTokenEmail(\_::$Info->SenderEmail, $receiverEmail ?? $this->TemporaryEmail, $subject ?? self::$RecoverEmailSubject, $content ?? self::$RecoverEmailContent, $linkAnchor ?? self::$RecoverLinkAnchor, self::$RecoverHandlerPath, self::$RecoveryTokenKey);
 	}
 	/**
-	 * Receive the Recovery Email and return the basic data of user
-	 * @return array<string>|null return the user Signature or false otherwise
+	 * Receive the Recovery Email
+	 * @return bool|null return true if user activated, null if request is not received or false otherwise
 	 */
 	public function ReceiveRecoveryEmail()
 	{
-		return $this->ReceiveEmail(self::$RecoveryRequestKey);
-	}
-	/**
-	 * Receive the Recovery Link and return the user Signature
-	 * @return bool|string return the user Signature or false otherwise
-	 */
-	public function ReceiveRecoveryLink()
-	{
 		$newPass = \Req::Receive("Password");
-		if ($newPass != \Req::Receive("PasswordConfirmation", $newPass))
-			throw new \ErrorException("New password and its confirmation does not match!");
-		else if (isValid($newPass)) {
-			$this->CheckPassword($newPass);
-			$sign = $this->ReceiveLink(self::$RecoveryRequestKey);
+		if (isValid($newPass)) {
+			$this->EncryptPassword($newPass);
+			$sign = $this->DecryptToken(self::$RecoveryTokenKey, \Req::Receive(self::$RecoveryTokenKey));
 			if (empty($sign))
 				return null;
-			return self::ResetPassword($sign, $newPass);
+			return self::ResetPassword($sign, $newPass) ? true : false;
 		}
-		return false;
+		return null;
 	}
 
 
-	public function SendEmail($emailFrom, $emailTo, $subject, $content, $linkAnchor = "Click Here", $handlerPath = null, $requestKey = "Key")
+	public function SendTokenEmail($from, $to, $subject, $content, $linkAnchor = "Click Here", $handlerPath = null, $tokenKey = "sign")
 	{
-		$person = getValid($this->DataTable->DoSelect("Signature", "`Email`=:Email", [":Email" => $emailTo]), 0);
-		if (is_null($person))
+		if (!$to)
+			throw new \ErrorException("Please indicate your email address!");
+		$person = $this->DataTable->DoSelectRow("*", "`Email`=:Email", [":Email" => $to]);
+		if (isEmpty($person))
 			throw new \ErrorException("Unfortunately the email address is incorrect!");
-		$sign = getValid($person, "Signature");
-		$this->Session->SetData($sign, $requestKey);
-		$path = \Req::$Host . ($handlerPath ?? self::$HandlerPath) . "?" . $requestKey . "=" . urlencode($this->Cryptograph->Encrypt($sign . self::$SeparatorSign . date(self::$DateTimeSignFormat), \_::$Config->SecretKey, true));
+		$this->TemporaryEmail = takeValid($person, "Email");
+		$this->TemporarySignature = takeValid($person, "Signature");
+		$this->TemporaryName = takeValid($person, "Name");
+		$this->TemporaryImage = takeValid($person, "Image");
+		$this->TemporaryPassword = takeValid($person, "Password");
+		$path = \Req::$Host . ($handlerPath ?? self::$HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
 		$dic = array();
-		$dic['$HYPERLINK'] = "<a href='$path'>" . __($linkAnchor) . "</a>";
-		$dic['$LINK'] = "<a href='$path'>$path</a>";
+		$dic['$HYPERLINK'] = Html::Link($linkAnchor, $path);
+		$dic['$LINK'] = Html::Link($path, $path);
 		$dic['$PATH'] = $path;
-		$dic['$SIGNATURE'] = $sign;
+		$dic['$SIGNATURE'] = $this->TemporarySignature;
 		$subject = Convert::FromDynamicString($subject ?? "", $dic, true);
 		$content = Convert::FromDynamicString($content ?? "", $dic, false);
-		return Contact::SendHTMLEmail($emailFrom, $emailTo, __($subject), __($content));
+		return Contact::SendHTMLEmail($from, $this->TemporaryEmail, __($subject), __($content));
 	}
-	public function ReceiveEmail($requestKey)
+
+	/**
+	 * To create and store a new token from the value
+	 * @param mixed $key A special key to store token
+	 * @param mixed $value The desired value to tokenize
+	 * @return string The created token
+	 */
+	public function EncryptToken($key, $value)
 	{
-		$rp = \Req::Receive($requestKey);
-		if (is_null($rp))
-			throw new \ErrorException("It is not a valid request!");
-		$sign = $this->Cryptograph->Decrypt($rp, \_::$Config->SecretKey, true);
-		list($sign, $date) = explode(self::$SeparatorSign, $sign);
-		if ($this->Session->GetData($sign) != $requestKey)
-			throw new \ErrorException("Your request is invalid or used before!");
-		if ($date != date(self::$DateTimeSignFormat))
-			throw new \ErrorException("Your request is expired!");
-		$person = self::Find($sign);
-		return $person;
+		$this->Session->SetData($value, $key);
+		return $this->Cryptograph->Encrypt($value . self::$TokenDelimiter . date(self::$TokenDateTimeFormat), \_::$Config->SecretKey, true);
 	}
-	public function ReceiveLink($requestKey)
+	/**
+	 * To get the value hided in the token, then forget stored data
+	 * @param mixed $key A special key to store token
+	 * @param mixed $token The created token
+	 * @throws \ErrorException
+	 * @return mixed The desired value inside the token
+	 */
+	public function DecryptToken($key, $token)
 	{
-		$rp = \Req::Receive($requestKey);
-		if (is_null($rp))
-			return false;
-		$sign = $this->Cryptograph->Decrypt($rp, \_::$Config->SecretKey, true);
-		list($sign, $date) = explode(self::$SeparatorSign, $sign);
-		if ($this->Session->GetData($sign) != $requestKey)
+		if (!$key || !$token)
+			return null;
+		list($sign, $date) = explode(self::$TokenDelimiter, $this->Cryptograph->Decrypt($token, \_::$Config->SecretKey, true));
+		if ($this->Session->GetData($sign) != $key)
 			throw new \ErrorException("Your request is invalid or used before!");
-		if ($date != date(self::$DateTimeSignFormat))
+		if ($date != date(self::$TokenDateTimeFormat))
 			throw new \ErrorException("Your request is expired!");
 		$this->Session->ForgetData($sign);
-		$person = self::Find($sign);
-		return $person["Signature"];
+		return get(self::Find($sign), "Signature");
 	}
 }
 ?>

@@ -11,7 +11,6 @@ class General extends Template{
 		component("JQuery");
 		component("Bootstrap");
 		component("AOS");
-		component("reCaptcha");
     }
 
 	public function RenderInitial(){

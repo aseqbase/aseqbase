@@ -31,7 +31,7 @@ ExpiresDefault  "access plus 7 days"
 </IfModule>
 #
 <IfModule mod_headers.c>
-<FilesMatch "\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm)$">
+<FilesMatch "\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm|webp)$">
 Header append Cache-Control "public"
 </FilesMatch>
 <FilesMatch "\.(txt|html)$">
@@ -93,6 +93,10 @@ deny from all
 RewriteEngine on
 RewriteCond %{HTTP_USER_AGENT} ^msnbot
 RewriteRule ^.* - [F,L]
+#
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^(PUT|DELETE|PATCH|STREAM|INTERNAL|EXTERNAL|[A-Za-z])$
+RewriteRule .* - [L]
 #
 #Alternate default index pages
 DirectoryIndex index.php index.htm index.html static.php

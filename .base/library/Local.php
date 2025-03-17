@@ -10,85 +10,125 @@ namespace MiMFa\Library;
 class Local
 {
 	/**
-	 * Get or Find a file, then get the external url pointed to catch status
-	 * @param mixed $path Probable file external url or path
-	 * @return mixed
-	 */
-	public static function GetFullUrl($path, $optimize = true)
-	{
-		if ($optimize)
-			return self::OptimizeUrl(self::GetUrl($path));
-		return self::GetUrl($path);
-	}
-	/**
 	 * Get or Find a file, then get the external url
-	 * @param string|null $path Probable file external url or path
+	 * @param string|null $address Probable file external url or path
 	 * @return mixed
 	 */
-	public static function GetUrl($path)
+	public static function GetUrl($address)
 	{
-		if ((!isValid($path)) || isAbsoluteUrl($path))
-			return $path;
-		$dir = $path;
-		if (DIRECTORY_SEPARATOR != "/") {
-			$dir = str_replace("/", DIRECTORY_SEPARATOR, $path);
-			$path = str_replace(DIRECTORY_SEPARATOR, "/", $path);
-		}
-		if (startsWith($dir, \_::$Aseq->Directory))
-			return \_::$Aseq->Path . substr($path, strlen(\_::$Aseq->Directory));
-		if (startsWith($dir, \_::$Base->Directory))
-			return \_::$Base->Path . substr($path, strlen(\_::$Base->Directory));
-		if (!startsWith($path, "/")) {
-			$dirs = explode("/", \Req::$Direction);
-			$dirs = implode("/", array_slice($dirs, 0, count($dirs) - 1));
-			if (strlen($dirs) !== 0)
-				$path = "$dirs/$path";
-		}
-		$d = ltrim(getRelative($dir), DIRECTORY_SEPARATOR);
-		$p = ltrim(getRelative($path), "/");
+		if ((!isValid($address)) || isAbsoluteUrl($address))
+			return $address;
+		$address = self::GetRelativePath(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $address));
+		$p = ltrim(str_replace(DIRECTORY_SEPARATOR, "/", $address), "/");
+		$d = ltrim(preg_replace("/[\?#@].*$/", "", $address), DIRECTORY_SEPARATOR);
 		foreach (\_::$Sequences as $dir => $root)
 			if (file_exists($dir . $d))
 				return $root . $p;
-		return $path;
+		$address = str_replace(DIRECTORY_SEPARATOR, "/", $address);
+		if (!startsWith($address, "/")) {
+			$dirs = explode("/", \Req::$Direction);
+			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)),"/");
+			if (strlen($dirs) !== 0)
+				$address = "$dirs/$address";
+		}
+		return $address;
 	}
 	/**
-	 * Get or Find a file, then get the internal path
-	 * @param mixed $path Probable file internal path
+	 * Get the external absolute url
+	 * @param string|null $url Probable file external url or path
 	 * @return mixed
 	 */
-	public static function GetPath($path)
+	public static function GetAbsoluteUrl($url)
 	{
-		if (!isValid($path))
-			return $path;
-		elseif (startsWith($path, \_::$Aseq->Path))
-			$path = \_::$Aseq->Directory . substr($path, strlen(\_::$Aseq->Path));
-		elseif (startsWith($path, \_::$Base->Path))
-			$path = \_::$Base->Directory . substr($path, strlen(\_::$Base->Path));
+		if ((!isValid($url)) || isAbsoluteUrl($url))
+			return $url;
+		if (startsWith($url, "/")) 
+			return \Req::$Host.$url;
 		else {
-			$path = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $path);
-			$p = ltrim(getRelative($path), "/\\");
-			foreach (\_::$Sequences as $dir => $pth)
-				if (file_exists($dir . $p))
-					return realpath($pth . $p);
+			$dirs = explode("/", \Req::$Url);
+			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
+			return "$dirs/$url";
 		}
-		$path = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $path);
-		return realpath($path);
+	}
+	/**
+	 * Get the relative address from a url
+	 * @example: "Category/mimfa/service/web.php?p=3&l=10#serp"
+	 * @return string|null
+	 */
+	public static function GetRelativeUrl($url): string|null
+	{
+		if (!isValid($url)) return null;
+		foreach (\_::$Sequences as $dir => $root)
+			if (startsWith($url, $root))
+				return substr($url, strlen($root));
+		return PREG_Replace("/^\w+:\/*[^\/]+/", "", $url);
 	}
 	/**
 	 * Get the external url pointed to catch status
-	 * @param mixed $path The external url or path
+	 * @param mixed $url The external url
 	 * @return mixed
 	 */
-	public static function OptimizeUrl($path)
+	public static function OptimizeUrl($url)
 	{
 		if (!\_::$Config->CachePeriod)
-			return $path;
-		if (strpos($path, "?") > 0)
-			$path .= "&";
+			return $url;
+		if (strpos($url, "?") > 0)
+			$url .= "&";
 		else
-			$path .= "?";
-		return $path . "v=" . (\_::$Config->CachePeriod == "v" ? \_::$Version : date(\_::$Config->CachePeriod));
+			$url .= "?";
+		return $url . "v=" . (\_::$Config->CachePeriod == "v" ? \_::$Version : date(\_::$Config->CachePeriod));
 	}
+
+	/**
+	 * Get or Find a file, then return the internal path
+	 * @param mixed $address Probable file internal path
+	 * @return
+	 */
+	public static function GetPath($address)
+	{
+		if (!isValid($address)) return null;
+		return
+			ltrim(
+				str_replace(
+					["\\", "/"],
+					DIRECTORY_SEPARATOR,
+					preg_replace(
+						"/(^\w+:\/*[^\/]+\/?)|([\?#@].*$)/",
+						"",
+						$address
+					)
+				),
+				DIRECTORY_SEPARATOR
+			);
+	}
+	/**
+	 * Get absolute path from a relative one
+	 * @param  $path The relative path
+	 * @return string|null
+	 */
+	public static function GetAbsolutePath($path): string|null
+	{
+		if (!isValid($path)) return null;
+		foreach (\_::$Sequences as $dir => $root)
+			if (startsWith($path, $dir))
+				return $path;
+		return \_::$Aseq->Directory.ltrim($path, DIRECTORY_SEPARATOR);
+	}
+	/**
+	 * Get the relative address from a path
+	 * @param  $path The path
+	 * @example: "Category/mimfa/service/web.php?p=3&l=10#serp"
+	 * @return string|null
+	 */
+	public static function GetRelativePath($path): string|null
+	{
+		if (!isValid($path)) return null;
+		foreach (\_::$Sequences as $dir => $root)
+			if (startsWith($path, $dir))
+				return substr($path, strlen($dir));
+		return $path;
+	}
+
 	/**
 	 * Create a new unique address
 	 * @param string $dir Root directory, leave null for a temp directory
@@ -96,7 +136,7 @@ class Local
 	 * @param int $random Pass 0 or false to get the name sequential from the number 1 to infinity
 	 * @return string
 	 */
-	public static function NewUniquePath(string $fileName = "new", string $format = "", string $dir = null, bool $random = true): string
+	public static function CreatePath(string $fileName = "new", string $format = "", ?string $dir = null, bool $random = true): string
 	{
 		$dir = $dir ?? \_::$Aseq->TempDirectory;
 		do
@@ -105,14 +145,21 @@ class Local
 		return $path;
 	}
 
+	/**
+	 * Find an exists directory, then get the internal path
+	 * @param mixed $path Probable file internal path
+	 * @return string|null
+	 */
 	public static function GetDirectory($path)
 	{
-		if (is_dir($path))
+		$path = self::GetPath($path);
+		if (!$path || is_dir($path))
 			return $path;
-		$path = ltrim(getRelative($path), "/\/");
-		foreach (\_::$Sequences as $aseq)
-			if (is_dir($aseq . $path))
-				return $aseq . $path;
+		if (startsWith($path, \_::$Aseq->Directory))
+			$path = substr($path, strlen(\_::$Aseq->Directory));
+		foreach (\_::$Sequences as $dir => $p)
+			if (is_dir($dir . $path))
+				return $dir . $path;
 		return null;
 	}
 	public static function DirectoryExists($path): bool
@@ -121,31 +168,30 @@ class Local
 	}
 	public static function CreateDirectory($destPath)
 	{
+		$dir = "";
 		if (startsWith($destPath, \_::$Aseq->Directory))
-			$destPath = substr($destPath, strlen(\_::$Aseq->Directory));
+			$destPath = substr($destPath, strlen($dir = \_::$Aseq->Directory));
 		$dirs = explode(DIRECTORY_SEPARATOR, trim($destPath, DIRECTORY_SEPARATOR));
-		$dir = rtrim(\_::$Aseq->Directory, DIRECTORY_SEPARATOR);
-		foreach ($dirs as $d) {
-			$dir .= DIRECTORY_SEPARATOR . $d;
-			if (!file_exists($dir)) {
+		foreach ($dirs as $d)
+			if (!file_exists($dir .= $d)) {
 				mkdir($dir, 0777, true);
-				self::CreateFile($dir . DIRECTORY_SEPARATOR . "index.html", "<!--Silence is the Best-->");
-			}
-		}
-		return $dir . DIRECTORY_SEPARATOR;
+				self::CreateFile(($dir .= DIRECTORY_SEPARATOR) . "index.html", "<!--Silence is the Best-->");
+			} else
+				$dir .= DIRECTORY_SEPARATOR;
+		return $dir;
 	}
 	public static function DeleteDirectory($destPath)
 	{
 		$dir = trim($destPath, DIRECTORY_SEPARATOR);
 		return unlink($dir);
 	}
-	public static function MoveDirectory($sourceDir, $destDir, $recursive = true)
+	public static function MoveDirectory($sourceDir, $directory, $recursive = true)
 	{
-		if (self::CopyDirectory($sourceDir, $destDir, $recursive))
+		if (self::CopyDirectory($sourceDir, $directory, $recursive))
 			return self::DeleteDirectory($sourceDir);
 		return false;
 	}
-	public static function CopyDirectory($sourceDir, $destDir, $recursive = true): bool
+	public static function CopyDirectory($sourceDir, $directory, $recursive = true): bool
 	{
 		set_time_limit(24 * 60 * 60);
 		$b = true;
@@ -154,48 +200,56 @@ class Local
 			foreach ($sourcePaths as $source) {
 				$bn = basename($source);
 				if (is_dir($source)) {
-					self::CreateDirectory($destDir . $bn);
-					$b = self::CopyDirectory($source, $destDir . $bn) && $b;
+					self::CreateDirectory($directory . $bn);
+					$b = self::CopyDirectory($source, $directory . $bn) && $b;
 				} else
-					$b = self::CopyFile($source, $destDir . $bn) && $b;
+					$b = self::CopyFile($source, $directory . $bn) && $b;
 			}
 		return $b;
 	}
-	public static function CopyDirectories($sourceDirs, $destDirs, $recursive = true): bool
+	public static function CopyDirectories($sourceDirs, $directorys, $recursive = true): bool
 	{
 		set_time_limit(24 * 60 * 60);
 		$b = true;
-		foreach ($sourceDirs as $s_dir) foreach ($destDirs as $d_dir)
+		foreach ($sourceDirs as $s_dir) foreach ($directorys as $d_dir)
 				$b = self::CopyDirectory($s_dir, $d_dir, $recursive) && $b;
 		return $b;
 	}
 
 
+	/**
+	 * Find an exists file, then get the internal path
+	 * @param mixed $path Probable file internal path
+	 * @return string|null
+	 */
 	public static function GetFile($path)
 	{
-		if (file_exists($path))
+		$path = self::GetPath($path);
+		if (!$path || file_exists($path))
 			return $path;
-		$path = ltrim(getRelative($path), "/\/");
-		foreach (\_::$Sequences as $aseq)
-			if (file_exists($aseq . $path))
-				return $aseq . $path;
+		if (startsWith($path, \_::$Aseq->Directory))
+			$path = substr($path, strlen(\_::$Aseq->Directory));
+		foreach (\_::$Sequences as $dir => $p)
+			if (file_exists($dir . $path))
+				return $dir . $path;
 		return null;
 	}
 	public static function FileExists($path): bool
 	{
-		return file_exists(self::GetPath($path));
+		return !empty(self::GetFile($path));
 	}
 	public static function CreateFile($path, $content = null)
 	{
 		$res = fopen($path, "w");
-		if($content) fwrite($res, $content);
+		if ($content)
+			fwrite($res, $content);
 		fclose($res);
 		return $res;
 	}
 	public static function DeleteFile($path)
 	{
-		$path = self::GetPath($path);
-		return (!file_exists($path)) || unlink($path);
+		$path = self::GetFile($path);
+		return empty($path) || unlink($path);
 	}
 	public static function MoveFile($sourcePath, $destPath): bool
 	{
@@ -207,7 +261,7 @@ class Local
 	{
 		set_time_limit(24 * 60 * 60);
 		$b = false;
-		$sourcePath = self::GetPath($sourcePath);
+		$sourcePath = self::GetFile($sourcePath);
 		$destPath = self::GetPath($destPath);
 		$s_file = fopen($sourcePath, "rb");
 		if ($s_file) {
@@ -240,25 +294,17 @@ class Local
 
 	public static function ReadText($path): null|string
 	{
-		$res = file_get_contents(self::GetPath($path));
+		$res = file_get_contents(self::GetFile($path));
 		if ($res === false)
 			return null;
 		return $res;
 	}
 	public static function WriteText($path, string|null $text)
 	{
-		return file_put_contents(self::GetPath($path), $text);
+		return file_put_contents(self::GetFile($path) ?? self::GetPath($path), $text);
 	}
 
 
-	public static function GetForceImage($path = "/asset/image/image.png", array $extensions = null)
-	{
-		$filepath = self::GetPath(preg_replace("/\.[^\.\\/\\\]+$/", "", $path));
-		foreach ($extensions ?? \_::$Config->AcceptableImageFormats as $format)
-			if (file_exists(self::GetUrl("$filepath$format")))
-				return self::GetUrl("$filepath$format");
-		return $filepath;
-	}
 	/**
 	 * Get the fileobject by file key name
 	 * @param mixed $inputName Posted file key name
@@ -270,168 +316,187 @@ class Local
 	}
 	/**
 	 * Check if the fileobject is not null or empty
-	 * @param mixed $fileObject Posted file key name or object
+	 * @param mixed $content Posted file key name or object
 	 * @return mixed
 	 */
-	public static function IsFileObject($fileObject)
+	public static function IsFileObject($content)
 	{
-		if (is_string($fileObject))
-			$fileObject = \Req::Receive($fileObject);
-		return get($fileObject, "name") ? true : false;
+		if (is_string($content))
+			$content = \Req::Receive($content);
+		return get($content, "name") ? true : false;
 	}
 
 	/**
-	 * Upload File
-	 * @param mixed $fileObject A file object or posted file key name
-	 * @param mixed $destDir Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
+	 * Save (Upload from the client side) something to the local storage
+	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $directory Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
-	 * @return string Return the uploaded file url, else return null
+	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function Upload($fileObject, $destDir = null, $minSize = null, $maxSize = null, array $extensions = null, $deleteSource = true)
+	public static function Store($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null, $deleteSource = true)
 	{
-		if (is_string($fileObject))
-			$fileObject = self::GetFileObject($fileObject);
-		if (!get($fileObject, "name"))
+		if (is_string($content))
+			$content = self::GetFileObject($content);
+		if (!get($content, "name"))
 			throw new \Exception("There is not any file!");
-		$destDir = $destDir ?? \_::$Aseq->PublicDirectory;
+		$directory = $directory ?? \_::$Aseq->PublicDirectory;
 
-		$fileType = strtolower(pathinfo($fileObject["name"], PATHINFO_EXTENSION));
-		$dir = self::CreateDirectory(trim($destDir, DIRECTORY_SEPARATOR));
-		$fileName = strtolower(pathinfo($fileObject["name"], PATHINFO_FILENAME)) . "_";
+		$fileType = strtolower(pathinfo($content["name"], PATHINFO_EXTENSION));
+		$dir = self::CreateDirectory($directory);
+		$fileName = strtolower(pathinfo($content["name"], PATHINFO_FILENAME)) . "_";
 
 		// Allow certain file formats
 		$allow = true;
 		foreach ($extensions ?? \_::$Config->GetAcceptableFormats() as $ext)
 			if ($allow = $fileType === $ext || "." . $fileType === $ext)
 				break;
-		$sourceFile = $fileObject["tmp_name"];
+		$sourceFile = $content["tmp_name"];
 		if (!$allow) {
-			if($deleteSource) unlink($sourceFile);
+			if ($deleteSource)
+				unlink($sourceFile);
 			throw new \Exception("The file format is not acceptable!");
 		}
 		// Check file size
 		$minSize = $minSize ?? \_::$Config->MinimumFileSize;
 		$maxSize = $maxSize ?? \_::$Config->MaximumFileSize;
-		if ($fileObject["size"] < $minSize) {
-			if($deleteSource) unlink($sourceFile);
+		if ($content["size"] < $minSize) {
+			if ($deleteSource)
+				unlink($sourceFile);
 			throw new \Exception("The file size is very small!");
-		} elseif ($fileObject["size"] > $maxSize) {
-			if($deleteSource) unlink($sourceFile);
+		} elseif ($content["size"] > $maxSize) {
+			if ($deleteSource)
+				unlink($sourceFile);
 			throw new \Exception("The file size is very big!");
 		}
-		if(!$dir) { 
+		if (!$dir) {
 			$dir = \_::$Aseq->TempDirectory;
-			$t = preg_find("/^[\w-]+\b/", $fileObject["type"]??"");
-			if($t) $dir .= $dir.DIRECTORY_SEPARATOR;
+			$t = preg_find("/^[\w-]+\b/", $content["type"] ?? "");
+			if ($t)
+				$dir .= $t . DIRECTORY_SEPARATOR;
 		}
-		$destFile = self::NewUniquePath($fileName, ".$fileType", $dir);
+		$destFile = self::CreatePath($fileName, ".$fileType", $dir);
 		if (is_uploaded_file($sourceFile) && move_uploaded_file($sourceFile, $destFile))
-			return self::GetUrl($destFile);
+			return $destFile;
 		if (rename($sourceFile, $destFile))
-			return self::GetUrl($destFile);
-		if($deleteSource) unlink($sourceFile);
+			return $destFile;
+		if ($deleteSource)
+			unlink($sourceFile);
 		throw new \Exception("Sorry, there was an error uploading your file.");
 	}
 	/**
-	 * Upload File
-	 * @param mixed $fileObject A file object or posted file key name
-	 * @param mixed $destDir Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
+	 * Save (Upload from the client side) file to the local storage
+	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $directory Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
-	 * @return string Return the uploaded file url, else return null
+	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function UploadFile($fileObject, $destDir = null, $minSize = null, $maxSize = null, array $extensions = null)
+	public static function StoreFile($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Upload($fileObject, $destDir, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableFileFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableFileFormats);
 	}
 	/**
-	 * Upload Image
-	 * @param mixed $fileObject An image object or posted file key name
-	 * @param mixed $destDir Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
+	 * Save (Upload from the client side) image to the local storage
+	 * @param mixed $content An image object or posted file key name
+	 * @param mixed $directory Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum image size in byte
 	 * @param mixed $maxSize Maximum image size in byte
 	 * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
-	 * @return string Return the uploaded image url, else return null
+	 * @return string Return the uploaded image path, else return null
 	 */
-	public static function UploadImage($fileObject, $destDir = null, $minSize = null, $maxSize = null, array $extensions = null)
+	public static function StoreImage($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		if (is_string($fileObject))
-			$fileObject = self::GetFileObject($fileObject);
-		if (!get($fileObject, "name"))
+		if (is_string($content))
+			$content = self::GetFileObject($content);
+		if (!get($content, "name"))
 			throw new \Exception("There is not any file!");
 
 		// Check if image file is an actual image or fake image
-		if (getimagesize($fileObject["tmp_name"]) === false)
+		if (getimagesize($content["tmp_name"]) === false)
 			throw new \Exception("The image file is not an actual image!");
-		return self::Upload($fileObject, $destDir, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableImageFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableImageFormats);
 	}
 	/**
-	 * Upload audio
-	 * @param mixed $fileObject A file object or posted file key name
-	 * @param mixed $destDir Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
+	 * Save (Upload from the client side) audio to the local storage
+	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $directory Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
-	 * @return string Return the uploaded file url, else return null
+	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function UploadAudio($fileObject, $destDir = null, $minSize = null, $maxSize = null, array $extensions = null)
+	public static function StoreAudio($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Upload($fileObject, $destDir, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableAudioFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableAudioFormats);
 	}
 	/**
-	 * Upload video
-	 * @param mixed $fileObject A file object or posted file key name
-	 * @param mixed $destDir Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
+	 * Save (Upload from the client side) video to the local storage
+	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $directory Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
-	 * @return string Return the uploaded file url, else return null
+	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function UploadVideo($fileObject, $destDir = null, $minSize = null, $maxSize = null, array $extensions = null)
+	public static function StoreVideo($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Upload($fileObject, $destDir, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableVideoFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableVideoFormats);
 	}
 	/**
-	 * Upload document
-	 * @param mixed $fileObject A file object or posted file key name
-	 * @param mixed $destDir Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
+	 * Save (Upload from the client side) document to the local storage
+	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $directory Leave null if you want to use \_::$Aseq->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
-	 * @return string Return the uploaded file url, else return null
+	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function UploadDocument($fileObject, $destDir = null, $minSize = null, $maxSize = null, array $extensions = null)
+	public static function StoreDocument($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Upload($fileObject, $destDir, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableDocumentFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableDocumentFormats);
 	}
 	/**
+	 * Load (Download from the client side) something from the local storage,
 	 * Send somthing to download
 	 * @param mixed $content
-	 * @param mixed $fileName
-	 * @param mixed $contentType
+	 * @param string $name Optional filename to force download with a specific name.
+	 * @param string $type The file content type (e.g., "application/pdf", "image/jpeg").
 	 */
-	public static function Download($content, $fileName = "Export.txt", $contentType = "text/plain")
+	public static function Load($content, $name = "Export.txt", $type = "text/plain")
 	{
-		ob_clean();
-		flush();
+		// Sanitize the filename
+		$name = preg_replace('/[^\w\-.]/', '_', $name);
+		// Clear output buffer if active
+		if (ob_get_level()) ob_clean();
 
-		ini_set('mbstring.internal_encoding', \_::$Config->Encoding);
-		ini_set('mbstring.http_input', 'auto');
-		ini_set('mbstring.http_output', \_::$Config->Encoding);
+		// ini_set('mbstring.internal_encoding', \_::$Config->Encoding);//deprecated
+		// ini_set('mbstring.http_input', 'auto');//deprecated
+		// ini_set('mbstring.http_output', \_::$Config->Encoding);//deprecated
 		ini_set('mbstring.detect_order', 'auto');
 		ini_set('default_charset', \_::$Config->Encoding);
 
-		header("Content-Disposition: attachment; filename=\"$fileName\"");
+		header("Content-Disposition: attachment; filename=\"$name\"");
 		header("Content-Type: application/force-download");
+		header("Content-Type: $type; charset=" . \_::$Config->Encoding);
 		header('Expires: 0');
 		header('Cache-Control: must-revalidate');
 		header('Pragma: public');
-		header("Content-Type: $contentType; charset=" . \_::$Config->Encoding);
 
-		\Res::Send("\xEF\xBB\xBF" . $content);
+		\Res::Render("\xEF\xBB\xBF");
+		\Res::End($content);
+	}
+	/**
+	 * Load (Download from the client side) file from the local storage,
+	 * Send somthing to download
+	 * @param string $path The absolute or relative path to the file.
+	 * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
+	 * @param string|null $name Optional filename to force download with a specific name.
+	 */
+	public static function LoadFile($path, $name = null, $type = null){
+		\Res::SendFile($path, null, $type, true, $name);
 	}
 }
 

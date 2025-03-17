@@ -373,20 +373,20 @@ class SideMenu extends Module
 					$ll = 999999999;
 					$i = 0;
 					foreach ($this->Items as $item) {
-						if (auth(findValid($item, "Access", \_::$Config->VisitAccess))) {
-							$sl = findValid($item, 'Layer', 1);
+						if (auth(getValid($item, "Access", \_::$Config->VisitAccess))) {
+							$sl = getValid($item, 'Layer', 1);
 							if ($sl <= $ll) {
 								if ($sl <= $ll && $i !== 0)
 									$menuTags .= "</div>";
 								$menuTags .= "<div class='row'>";
 							}
 							$ll = $sl;
-							$link = findBetween($item, 'Path', 'Link') ?? "";
+							$link = getBetween($item, 'Path', 'Link') ?? "";
 							$menuTags .= Html::Item(
 								Html::Link(
-									($this->HasImages ? Html::Image(findBetween($item, "Image", "Icon", "Logo")) : "") .
+									($this->HasImages ? Html::Image(getBetween($item, "Image", "Icon", "Logo")) : "") .
 									($this->HasTitles ? Html::Division(
-										__(findBetween($item, 'Name', 'Title'), true, false)
+										__(getBetween($item, 'Name', 'Title'), true, false)
 										,
 										["class" => "box"]
 									) : ""),

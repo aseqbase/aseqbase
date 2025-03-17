@@ -114,9 +114,9 @@ class Navigation extends Module{
 	public function __construct($itemsOrQuery = null, $count = null, $queryParameters = null, $defaultItems = null){
 		parent::__construct();
 		$query = \Req::Get()??array();
-		$this->Page = (int)getValid($query,$this->PageRequest,-1);
-		$this->Limit = (int)getValid($query,$this->LimitRequest, -12);
-		$this->Count = (int)getValid($query,$this->CountRequest, -1);
+		$this->Page = (int)takeValid($query,$this->PageRequest,-1);
+		$this->Limit = (int)takeValid($query,$this->LimitRequest, -12);
+		$this->Count = (int)takeValid($query,$this->CountRequest, -1);
 
 		$this->SetItems($itemsOrQuery, $count, $queryParameters, $defaultItems);
 	}

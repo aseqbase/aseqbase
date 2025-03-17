@@ -14,7 +14,7 @@ use MiMFa\Library\Convert;
 module("Post");
 class Forum extends Post
 {
-     public $RootPath = "/forum/";
+     public $RootRoute = "/forum/";
 
      public $CommentTitle = "Leave Your Thought";
      public $CommentDescription = "Tell us what is your idea!";
@@ -24,23 +24,6 @@ class Forum extends Post
      public DateTime|null $ShowCommentEndTime = null;
      public DateTime|null $LeaveCommentStartTime = null;
      public DateTime|null $LeaveCommentEndTime = null;
-
-     public function UpdateOptions($relatedId, $metadata){
-          parent::UpdateOptions($relatedId, $metadata);
-          $this->LeaveComment = findValid($metadata,"LeaveComment", $this->LeaveComment);
-          $this->LeaveCommentAccess = findValid($metadata,"LeaveCommentAccess", $this->LeaveCommentAccess);
-          $this->ShowComments = findValid($metadata,"ShowComments", $this->ShowComments);
-          $this->ShowCommentsAccess = findValid($metadata,"ShowCommentsAccess", $this->ShowCommentsAccess);
-
-          $this->ShowCommentStartTime = findValid($metadata,"ShowCommentStartTime", $this->ShowCommentStartTime);
-          $this->ShowCommentEndTime = findValid($metadata,"ShowCommentEndTime", $this->ShowCommentEndTime);
-          $this->LeaveCommentStartTime = findValid($metadata,"LeaveCommentStartTime", $this->LeaveCommentStartTime);
-          $this->LeaveCommentEndTime = findValid($metadata,"LeaveCommentEndTime", $this->LeaveCommentEndTime);
-     
-          $this->CommentTitle = findValid($metadata,"CommentTitle", $this->CommentTitle);
-          $this->CommentDescription = findValid($metadata,"CommentDescription", $this->CommentDescription);
-          $this->CommentAttachType = findValid($metadata,"CommentAttachType", $this->CommentAttachType);
-     }
 
      public function GetCommentsCollection($relatedId)
      {

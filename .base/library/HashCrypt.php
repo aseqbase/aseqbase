@@ -24,9 +24,7 @@ class HashCrypt extends Cryptograph
         // Calculate a MAC of the IV and ciphertext
         $mac = hash_hmac($this->Algorithm, $ciphertext, $authKey, true);
 
-        if ($encode) {
-            return base64_encode($mac.$ciphertext);
-        }
+        if ($encode) return base64_encode($mac.$ciphertext);
         // Prepend MAC to the ciphertext and return to caller
         return $mac.$ciphertext;
     }
@@ -39,15 +37,14 @@ class HashCrypt extends Cryptograph
      * @param boolean $encoded - are we expecting an encoded string?
      * @return string (raw binary)
      */
-    public function Decrypt($message, $key, $encoded = false)
+    public function Decrypt($message, $key, $decode = false)
     {
         if(!isValid($message)) return $message;
         list($encKey, $authKey) = $this->SplitKeys($key);
-        if ($encoded) {
+        if ($decode) {
             $message = base64_decode($message, true);
-            if ($message === false) {
+            if ($message === false)
                 throw new \Exception('Encryption failure');
-            }
         }
 
         // Hash Size -- in case HASH_ALGO is changed

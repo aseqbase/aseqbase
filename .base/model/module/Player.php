@@ -151,12 +151,12 @@ class Player extends Module
 			yield $btn;
 		yield Convert::ToString($this->AppendControls);
 		yield "</div>";
-		yield self::ToElement($this->Source);
+		yield $this->ToElement($this->Source);
 		yield $this->GetContents($this->Content);
 	}
 	public function ToElement($source)
 	{
-		return join("\r\n", iterator_to_array(self::ToElements($source)));
+		return join("\r\n", iterator_to_array($this->ToElements($source)));
 	}
 	public function ToElements($source)
 	{
@@ -164,7 +164,7 @@ class Player extends Module
 			yield "<div class=\"content\">";
 			if (is_array($source))
 				foreach ($source as $value)
-					yield from self::ToElements($value);
+					yield from $this->ToElements($value);
 			elseif (isFormat($source, ".mpg", ".mpeg", ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm"))
 				yield Html::Video(null, $source, "controls");
 			elseif (isFormat($source, ".wav", ".mp3", ".aac", ".amr", ".ogg", ".flac", ".wma", ".m4a"))
@@ -177,8 +177,7 @@ class Player extends Module
 		}
 	}
 
-	public function GetScript()
-	{
+	public function GetScript(){
 		return Html::Script(($this->AllowZoom ? "
 			let {$this->Name}slider = null;
 			let {$this->Name}mouseDown = false;
@@ -225,7 +224,7 @@ class Player extends Module
 
 			function {$this->Name}_Set(content, source = null){
 				{$this->Name}_Source = source??{$this->Name}_Source??content;
-				if(content !== null) $('.{$this->Name}>.content').html(" . $this->ContentScript('${content}') . ");
+				if(content !== null) $('.{$this->Name}>.content').html(content);
 			}
 			function {$this->Name}_Clear(){
 				$('.{$this->Name}>.content').html('');
@@ -295,11 +294,6 @@ class Player extends Module
 			yield '<div class="fa fa-plus button" onclick="' . $this->ZoomInScript() . '"></div>';
 		if ($this->AllowZoom)
 			yield '<div class="fa fa-refresh button" onclick="' . $this->ResetScript() . '"></div>';
-	}
-
-	public function ContentScript($content)
-	{
-		return Script::Convert($content);
 	}
 
 	public function SetScript($content = "", $source = null)

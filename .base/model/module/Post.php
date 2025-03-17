@@ -1,8 +1,10 @@
 <?php
 namespace MiMFa\Module;
+module("CommentForm");
 use MiMFa\Library\Html;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
+use MiMFa\Module\CommentForm;
 /**
  * To show data as posts
  *@copyright All rights are reserved for MiMFa Development Group
@@ -12,9 +14,10 @@ use MiMFa\Library\Convert;
  */
 class Post extends Module
 {
-     public $RootPath = null;
+     public $RootRoute = null;
 
      public $Tag = "article";
+     public $CommentForm = null;
 
      /**
       * The whole document Item
@@ -153,6 +156,7 @@ class Post extends Module
       */
      public $RelatedsCount = ["News" => 10, "Default" => 5];
 
+     public $LeaveComment = true;
      /**
       * @var bool
       * @category Parts
@@ -163,22 +167,11 @@ class Post extends Module
       * @category Parts
       */
      public $ShowCommentsAccess = 0;
-     /**
-      * @var bool
-      * @category Parts
-      */
-     public $LeaveComment = true;
-     /**
-      * @var bool
-      * @category Parts
-      */
-     public $LeaveCommentAccess = 0;
 	/**
      * @var string|null
      * @category Management
      */
 	public $CommentsLimitation = "ORDER BY `CreateTime` DESC";
-     public $CommentType = "texts";
 
      /**
       * @var bool
@@ -279,10 +272,15 @@ class Post extends Module
      {
           parent::__construct();
           $this->LeaveComment = \_::$Config->AllowWriteComment;
-          $this->LeaveCommentAccess = \_::$Config->WriteCommentAccess;
           $this->ShowComments = \_::$Config->AllowReadComment;
           $this->ShowCommentsAccess = \_::$Config->ReadCommentAccess;
-          $this->RootPath = $this->RootPath??\_::$Address->ContentPath;
+          $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
+          $this->CommentForm = new CommentForm();
+          $this->CommentForm->MessageType = "texts";
+          $this->CommentForm->Access = \_::$Config->WriteCommentAccess;
+          $this->CommentForm->SubjectLabel =
+               $this->CommentForm->AttachLabel =
+               null;
      }
 
      public function GetStyle()
@@ -389,41 +387,40 @@ class Post extends Module
      {
           return Convert::ToString(function () {
                $item = $this->Item;
-               $p_access = findValid($item, 'Access' , 0);
-               $p_status = intval(findValid($item, 'Status' , 1));
-               if ($p_status < 1 || !auth($p_access))
-                    return;
+               $p_access = getValid($item, 'Access' , 0);
+               $p_status = intval(getValid($item, 'Status' , 1));
+               if ($p_status < 1 || !auth($p_access)) return;
+               $p_meta = getValid($item, 'MetaData' , null);
+               if ($p_meta !== null){
+                    $p_meta = Convert::FromJson($p_meta);
+                    swap( $this, $p_meta);
+               }
+               $p_meta = null;
                module("Image" );
                $p_type = get($item, 'Type' );
                $p_id = get($item, 'Id' );
-               $p_image = findValid($item, 'Image' , $this->Image);
-               $p_name = findBetween($item, 'Name', 'Title')?? $this->Title;
-               $p_title = findValid($item, 'Title' , $p_name);
-               $p_description = findValid($item, 'Description' , $this->Description);
-               $p_content = findValid($item, 'Content' , $this->Content);
+               $p_image = getValid($item, 'Image' , $this->Image);
+               $p_name = getValid($item, 'Name')??$p_id?? $this->Title;
+               $p_title = getValid($item, 'Title' , $p_name);
+               $p_description = getValid($item, 'Description' , $this->Description);
+               $p_content = getValid($item, 'Content' , $this->Content);
                $p_tags = Convert::FromJson(get($item, 'TagIds' ));
                $p_attaches = Convert::FromJson(get($item, 'Attach' ));
 
-               if ($this->ShowRoute)
-                    module("Route");
-               $p_meta = findValid($item, 'MetaData' , null);
-               if ($p_meta !== null)
-                    $p_meta = Convert::FromJson($p_meta);
-               $this->UpdateOptions($p_id, $p_meta);
-               $p_meta = null;
+               if ($this->ShowRoute) module("Route");
                $p_showexcerpt = $this->ShowExcerpt;
                $p_showcontent = $this->ShowContent;
                $p_showdescription = $this->ShowDescription;
                $p_showimage = $this->ShowImage;
                $p_showtitle = $this->ShowTitle;
                $p_showmeta = $this->ShowMetaData;
-               $p_inselflink = $this->RootPath . ($p_id??$p_name);
+               $p_inselflink = $this->RootRoute . ($p_id??$p_name);
                if (!$this->CompressPath) {
                     $catDir = \_::$Back->Query->GetContentCategoryDirection($item);
                     if (isValid($catDir))
-                         $p_inselflink = $this->RootPath . trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
+                         $p_inselflink = $this->RootRoute . trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
                }
-               $p_path = (!$p_showcontent && (!$p_showexcerpt || !$p_showdescription)) ? [$p_inselflink] : Convert::FromJson(findValid($item, 'Path' , $this->Path));
+               $p_path = (!$p_showcontent && (!$p_showexcerpt || !$p_showdescription)) ? [$p_inselflink] : Convert::FromJson(getValid($item, 'Path' , $this->Path));
                $hasl = !isEmpty($p_path);
                $p_showmorebutton = $hasl && $this->ShowMoreButton;
                $p_morebuttontext = $p_showmorebutton ? __(Convert::FromSwitch($this->MoreButtonLabel, $p_type)) : "";
@@ -459,7 +456,7 @@ class Post extends Module
                               function ($val) use (&$p_meta) {
                                    $authorName = table("User")->DoSelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
                                    if (!isEmpty($authorName))
-                                        $p_meta .= " " . Html::Link($authorName["Name" ], \_::$Address->UserPath . $authorName["Signature" ], ["class"=> "author"]);
+                                        $p_meta .= " " . Html::Link($authorName["Name" ], \_::$Address->UserRoute . $authorName["Signature" ], ["class"=> "author"]);
                               },
                               $item,
                               'AuthorId'
@@ -572,7 +569,7 @@ class Post extends Module
                                         ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v, styling: false)
                                         : $k
                                         ,
-                                        \_::$Address->TagPath.$k,
+                                        \_::$Address->TagRoute.$k,
                                         ["class"=> "btn"]
                                    );
                               }
@@ -580,48 +577,22 @@ class Post extends Module
                }
                if ($p_showcomments)
                     yield $this->GetCommentsCollection($p_id);
-               if ($p_leavecomment)
-                    yield $this->GetCommentForm($p_id);
+               if ($p_leavecomment){
+                    $this->CommentForm->Relation = $p_id;
+                    yield Html::$HorizontalBreak . $this->CommentForm->Handle();
+               }
                if ($p_showrelateds) {
                     $rels = table("Content" )->DoSelectPairs("Id" , "Title" , "`Id`!=$p_id AND (`Title` IS NOT NULL AND `Title`!='') AND `TagIds` REGEXP '\\D(" . join("|", $p_tags) . ")\\D'" . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
                     if (count($rels) > 0)
                          yield Html::$HorizontalBreak . Html::Division($p_relatedstext . join(PHP_EOL, loop(
                               $rels,
                               function ($k, $v, $i) {
-                                   return Html::Link(isValid($v) ? $v : $k, $this->RootPath.$k, ["class"=> "btn"]); }
+                                   return Html::Link(isValid($v) ? $v : $k, $this->RootRoute.$k, ["class"=> "btn"]); }
                          )), ["class"=> "relateds"]);
                }
           });
      }
 
-     public function UpdateOptions($relatedId, $metadata)
-     {
-          $this->ShowExcerpt = findValid($metadata, "ShowExcerpt", $this->ShowExcerpt);
-          $this->ShowContent = findValid($metadata, "ShowContent", $this->ShowContent);
-          $this->ShowDescription = findValid($metadata, "ShowDescription", $this->ShowDescription);
-          $this->ShowImage = findValid($metadata, "ShowImage", $this->ShowImage);
-          $this->ShowTitle = findValid($metadata, "ShowTitle", $this->ShowTitle);
-          $this->ShowMetaData = findValid($metadata, "ShowMetaData", $this->ShowMetaData);
-          $this->ShowMoreButton = findValid($metadata, "ShowMoreButton", $this->ShowMoreButton);
-          $this->MoreButtonLabel = findValid($metadata, "MoreButtonLabel", $this->MoreButtonLabel);
-          $this->ShowTags = findValid($metadata, "ShowTags", $this->ShowTags);
-          $this->TagsLabel = findValid($metadata, "TagsLabel", $this->TagsLabel);
-          $this->TagsCount = findValid($metadata, "TagsCount", $this->TagsCount);
-          $this->TagsOrder = findValid($metadata, "TagsOrder", $this->TagsOrder);
-          $this->ShowAttaches = findValid($metadata, "ShowAttaches", $this->ShowAttaches);
-          $this->AttachesLabel = findValid($metadata, "AttachesLabel", $this->AttachesLabel);
-          $this->ShowCommentsAccess = findValid($metadata, "ShowCommentsAccess", $this->ShowCommentsAccess);
-          $this->ShowComments = findValid($metadata, "ShowComments", $this->ShowComments);
-          $this->LeaveCommentAccess = findValid($metadata, "LeaveCommentAccess", $this->LeaveCommentAccess);
-          $this->LeaveComment = findValid($metadata, "LeaveComment", $this->LeaveComment);
-          $this->CommentType = findValid($metadata, "CommentType", $this->CommentType);
-          $this->ShowRelateds = findValid($metadata, "ShowRelateds", $this->ShowRelateds);
-          $this->RelatedsLabel = findValid($metadata, "RelatedsLabel", $this->RelatedsLabel);
-          $this->RelatedsCount = findValid($metadata, "RelatedsCount", $this->RelatedsCount);
-          $this->RelatedsOrder = findValid($metadata, "RelatedsOrder", $this->RelatedsOrder);
-          $this->AutoRefering = findValid($metadata, "AutoRefering", $this->AutoRefering);
-          $this->Template = findValid($metadata, "Template", $this->Template);
-     }
      public function GetCommentsCollection($relatedId)
      {
           module("CommentCollection");
@@ -631,18 +602,6 @@ class Post extends Module
           if (count($cc->Items) > 0)
                return Html::$HorizontalBreak . $cc->ToString();
           return null;
-     }
-     public function GetCommentForm($relatedId)
-     {
-          module("CommentForm");
-          $cc = new CommentForm();
-          $cc->MessageType = $this->CommentType;
-          $cc->Access = $this->LeaveCommentAccess;
-          $cc->Relation = $relatedId;
-          $cc->SubjectLabel =
-               $cc->AttachLabel =
-               null;
-          return Html::$HorizontalBreak . $cc->Handle();
      }
 }
 ?>

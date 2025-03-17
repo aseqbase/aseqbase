@@ -364,15 +364,15 @@ class MainMenu extends Module
 
 	protected function CreateItem($item, $ind = 1)
 	{
-		if (!auth(findValid($item, "Access", \_::$Config->VisitAccess)))
+		if (!auth(getValid($item, "Access", \_::$Config->VisitAccess)))
 			return null;
-		$path = findBetween($item, "Path", "Link", "Url");
+		$path = getBetween($item, "Path", "Link", "Url");
 		$act = endsWith(\Req::$Path, $path) ? 'active' : '';
 		$ind++;
-		$count = count(findValid($item, "Items", []));
+		$count = count(getValid($item, "Items", []));
 		return Html::Item(
 			Html::Button(
-				__(findBetween($item, "Title", "Name"), true, false),
+				__(getBetween($item, "Title", "Name"), true, false),
 				$path,
 				get($item, "Attributes")
 			) .

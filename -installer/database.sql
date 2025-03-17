@@ -195,10 +195,10 @@ INSERT INTO `aseq_UserGroup` (`Id` , `Name` , `Image` , `Title` , `Description` 
 (2, 'guest', NULL, 'Guest', 'The Guest Group', 0, '', ''),
 (3, 'registered', NULL, 'Registered', 'The Registered User Group', 1, '1', ''),
 (4, 'special', NULL, 'Special', 'The Special User Group', 10, '1', ''),
-(5, 'editor', NULL, 'Editor', 'The Editor User Group', 100, '1', ''),
-(6, 'author', NULL, 'Author', 'The Author User Group', 1000, '1', ''),
-(7, 'manager', NULL, 'Manager', 'The Manager User Group', 1000000, '1', ''),
-(8, 'administrator', NULL, 'Administrator', 'The Administrator User Group', 100000000, '1', ''),
+(5, 'editor', NULL, 'Editor', 'The Editor User Group', 955555555, '1', ''),
+(6, 'author', NULL, 'Author', 'The Author User Group', 966666666, '1', ''),
+(7, 'manager', NULL, 'Manager', 'The Manager User Group', 977777777, '1', ''),
+(8, 'administrator', NULL, 'Administrator', 'The Administrator User Group', 988888888, '1', ''),
 (9, 'super', NULL, 'Super', 'The Super User Group', 999999999, '1', '');
 
 -- --------------------------------------------------------

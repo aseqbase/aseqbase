@@ -28,8 +28,8 @@ class Translator extends Module{
 		foreach ($this->Items as $lng=>$value)
             if($lng != $cur)
                 $langs[] = Html::Button(
-					Html::Media("", findBetween($value,"Image","Icon")).
-					findBetween($value,"Title","Name" ),
+					Html::Media("", getBetween($value,"Image","Icon")).
+					getBetween($value,"Title","Name" ),
 					"load(\"?lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding")."\");");
 		return $this->GetTitle().$this->GetDescription().
 			join(PHP_EOL, $langs).

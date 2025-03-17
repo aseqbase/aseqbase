@@ -134,43 +134,43 @@ class CommentCollection extends Collection{
      * @var array|string|null
      * @category Management
      */
-	public $UpdateButtonLabel = "<i class='fa fa-save'></i>";
+	public $UpdateButtonLabel = "<i class='fa fa-save'><span class='tooltip'>Save the changes</span></i>";
 	/**
      * The label text of cancel button
      * @var array|string|null
      * @category Management
      */
-	public $CancelButtonLabel = "<i class='fa fa-close'></i>";
+	public $CancelButtonLabel = "<i class='fa fa-close'><span class='tooltip'>Cancel the process</span></i>";
 	/**
      * The label text of Reply button
      * @var array|string|null
      * @category Management
      */
-	public $ReplyButtonLabel = "<i class='fa fa-reply'></i>";
+	public $ReplyButtonLabel = "<i class='fa fa-reply'><span class='tooltip'>Reply to this message</span></i>";
 	/**
      * The label text of Edit button
      * @var array|string|null
      * @category Management
      */
-	public $EditButtonLabel = "<i class='fa fa-pencil'></i>";
+	public $EditButtonLabel = "<i class='fa fa-pencil'><span class='tooltip'>Edit the message</span></i>";
 	/**
      * The label text of Delete button
      * @var array|string|null
      * @category Management
      */
-	public $DeleteButtonLabel = "<i class='fa fa-trash'></i>";
+	public $DeleteButtonLabel = "<i class='fa fa-trash'><span class='tooltip'>Remove the message for ever</span></i>";
     /**
      * The label text of waiting to approve message
      * @var array|string|null
      * @category Management
      */
-	public $WaitingLabel = "<i class='fa fa-spinner'></i>";
+	public $WaitingLabel = "<i class='fa fa-check'><span class='tooltip'>Your message is received but not showed</span></i>";
     /**
      * The label text of approved message
      * @var array|string|null
      * @category Management
      */
-	public $PublishedLabel = "<i class='fa fa-eye'></i>";
+	public $PublishedLabel = "<i class='fa fa-eye'><span class='tooltip'>Your message is shown</span></i>";
 
 	function __construct(){
         parent::__construct();
@@ -327,28 +327,32 @@ class CommentCollection extends Collection{
                         && !$adminaccess && (!$p_userid || $p_userid != \_::$Back->User->Id)
                     )
                 ) continue;
-                $p_access = findValid($item, 'Access' ,0);
+                $p_access = getValid($item, 'Access' ,0);
                 if(!auth($p_access)) continue;
                 if(isValid($this->Relation) && $this->Relation != get($item,'Relation' )) continue;
+                $p_meta = getValid($item,'MetaData' ,null);
+			    if($p_meta !==null) {
+                    $p_meta = Convert::FromJson($p_meta);
+                    swap( $this, $p_meta);
+                }
+                $p_meta = null;
 			    $p_id = get($item,'Id' );
 			    $p_name = get($item,'Name');
-			    $p_image = findValid($item,'Image' , $this->DefaultImage);
-			    $p_subject = findValid($item,'Subject' , $this->DefaultTitle);
-			    $p_message = findValid($item,'Content' , $this->DefaultDescription);
-			    $p_attach = findValid($item,'Attach' ,$this->DefaultContent);
+			    $p_image = getValid($item,'Image' , $this->DefaultImage);
+			    $p_subject = getValid($item,'Subject' , $this->DefaultTitle);
+			    $p_message = getValid($item,'Content' , $this->DefaultDescription);
+			    $p_attach = getValid($item,'Attach' ,$this->DefaultContent);
 			    $p_email = get($item,'Contact');
-
-			    $p_meta = findValid($item,'MetaData' ,null);
-			    if($p_meta !==null) $p_meta = Convert::FromJson($p_meta);
-			    $p_showexcerpt = isValid($p_message) && findValid($p_meta,"AutoExcerpt",$this->AutoExcerpt);
-			    $p_showsubject = isValid($p_subject) && findValid($p_meta,"ShowSubject",$this->ShowSubject);
-			    $p_showmessage = findValid($p_meta,"ShowMessage",$this->ShowMessage);
-			    $p_showattach = findValid($p_meta,"ShowAttach",$this->ShowAttach);
-			    $p_showimage = isValid($p_image) && findValid($p_meta,"ShowImage", $this->ShowImage);
-                $p_showmeta = findValid($p_meta,"ShowMetaData", $this->ShowMetaData);
-                $p_showauthor = findValid($p_meta,"ShowAuthor", $this->ShowAuthor);
+                
+			    $p_showexcerpt = isValid($p_message) && $this->AutoExcerpt;
+			    $p_showsubject = isValid($p_subject) && $this->ShowSubject;
+			    $p_showmessage = $this->ShowMessage;
+			    $p_showattach = $this->ShowAttach;
+			    $p_showimage = isValid($p_image) && $this->ShowImage;
+                $p_showmeta = $this->ShowMetaData;
+                $p_showauthor = $this->ShowAuthor;
                
-                $p_replyes = findValid($p_meta,"ShowReplies", $this->ShowReplies);
+                $p_replyes = $this->ShowReplies;
                 if($p_replyes) {
                     $p_replyes = [];
                     foreach(Convert::ToItems($this->Items) as $k1=>$item1)
@@ -357,15 +361,15 @@ class CommentCollection extends Collection{
                             $p_replyes[count($p_replyes)-1]["ReplyId" ] = null;
                         }
                 } else $p_replyes = [];
-                $p_refering = findValid($p_meta,"AutoRefering", $this->AutoRefering);
+                $p_refering = $this->AutoRefering;
                 $updateaccess = ($p_email && get(\_::$Back->User, "Email") == $p_email) || ($p_userid && get(\_::$Back->User, "UserId" ) == $p_userid);
-                $p_replybuttontext = !$this->ShowButtons?null:__(findValid($p_meta,"ReplyButtonLabel",$this->ReplyButtonLabel));
+                $p_replybuttontext = !$this->ShowButtons?null:__($this->ReplyButtonLabel);
 			    $p_showreplybutton = isValid($p_replybuttontext);
-                $p_editbuttontext = !$updateaccess || !$this->ShowButtons?null:__(findValid($p_meta,"EditButtonLabel",$this->EditButtonLabel));
+                $p_editbuttontext = !$updateaccess || !$this->ShowButtons?null:__($this->EditButtonLabel);
 			    $p_showeditbutton = isValid($p_editbuttontext);
-                $p_deletebuttontext = !$updateaccess || !$this->ShowButtons?null:__(findValid($p_meta,"DeleteButtonLabel",$this->DeleteButtonLabel));
+                $p_deletebuttontext = !$updateaccess || !$this->ShowButtons?null:__($this->DeleteButtonLabel);
 			    $p_showdeletebutton = isValid($p_deletebuttontext);
-                $p_statustext = !$updateaccess || !$this->ShowStatus?null:__($p_status?findValid($p_meta,"PublishedLabel",$this->PublishedLabel):findValid($p_meta,"WaitingLabel",$this->WaitingLabel));
+                $p_statustext = !$updateaccess || !$this->ShowStatus?null:__($p_status?$this->PublishedLabel:$this->WaitingLabel);
                 $p_showstatus = isValid($p_statustext);
                 $uid = "c_".getId();
 
@@ -378,7 +382,6 @@ class CommentCollection extends Collection{
                         ):
                     $p_message;
 
-			    $p_meta = null;
 			    if($p_showmeta){
                     if($this->ShowCreateTime)
                         doValid(
@@ -432,9 +435,9 @@ class CommentCollection extends Collection{
                             yield doValid(
                                     function($val) use($p_name){
                                         $author = table("User")->DoSelectRow("Signature , Name","Email=:Email",[":Email"=>$val]);
-                                        $au = findValid($author,"Name", $p_name);
+                                        $au = getValid($author,"Name", $p_name);
                                         if(isEmpty($author)) return  Html::Span($au, null, ["class"=>"author"]);
-                                        return Html::Link($au,\_::$Address->UserPath.get($author,"Signature" ),["class"=>"author"]);
+                                        return Html::Link($au,\_::$Address->UserRoute.get($author,"Signature" ),["class"=>"author"]);
                                     },
                                     $item,
                                     'Contact'

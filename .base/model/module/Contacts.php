@@ -53,23 +53,22 @@ class Contacts extends Module
 				for ($i = 0; $i < $count; $i++) {
 					$item = $this->Items[$i];
 					yield '<li class="d-flex justify-content-between align-items-center">';
-					yield Html::Image(" " . findBetween($item, 'Name', 'Title'), findBetween($item, 'Icon', 'Image'));
-					yield '<a href="' . findBetween($item, 'Path', 'Url', 'Link') . '" target="_blank" class="badge badge-pill">';
-					yield findBetween($item, 'Value', 'Title', 'Path', 'Url', 'Link', 'Name');
-					yield '</a>';
+					yield Html::Image(" " . getBetween($item, 'Name', 'Title'), getBetween($item, 'Icon', 'Image'));
+					yield Html::Link(
+						getBetween($item, 'Value', 'Title', 'Path', 'Url', 'Link', 'Name'),
+						getBetween($item, 'Path', 'Url', 'Link'),
+						["target"=>"_blank", "class"=>"badge badge-pill"]);
 					yield '</li>';
 				}
 				yield '</ul>';
 				if (isValid($this->Location)) {
-					yield '<div class="col-lg-8 map">';
-					yield "<iframe src='$this->Location'
-							data-aos='filp-left'
-							data-src='$this->Location'
-							frameborder='0'
-							allowfullscreen='true'
-							>
-						</iframe>
-					</div>";
+					yield Html::Division(
+						Html::Embed(null,$this->Location,[
+							'data-aos'=>'filp-left',
+							'data-src'=>'$this->Location',
+							'frameborder'=>'0',
+							'allowfullscreen'=>'true'
+					]), ["class"=>"col-lg-8 map"]);
 				}
 				yield '</div>';
 			}

@@ -8,36 +8,40 @@ $imgchange = false;
 $received = \Req::Post();
 if ($imgObj = \Req::File("Image")) {
     if (isValid($imgObj, "size") && Local::IsFileObject($imgObj)) {
+        $img = \_::$Back->User->GetValue("Image");
         \Res::Message("Trying to change the profile picture!");
-        if (isValid(\_::$Back->User->TemporaryImage) && !Local::DeleteFile(\_::$Back->User->TemporaryImage))
+        if (isValid($img) && !Local::DeleteFile($img))
             \Res::Error("Could not delete your previous picture!");
         else {
-            $img = Local::UploadImage($imgObj, \_::$Aseq->PublicDirectory . "image/");
+            $img = Local::StoreImage($imgObj, \_::$Aseq->PublicDirectory . "image".DIRECTORY_SEPARATOR."profile".DIRECTORY_SEPARATOR);
             if (!is_null($img)) {
-                $received["Image"] = $img;
+                $received["Image"] = Local::GetUrl($img);
                 $imgchange = true;
             }
         }
     } else
         unset($received["Image"]);
 } else {
-    \Res::Message("Trying to remove the profile picture!");
-    if (isValid(\_::$Back->User->TemporaryImage) && !Local::DeleteFile(\_::$Back->User->TemporaryImage)) {
-        \Res::Error("Could not delete the profile picture!");
-        unset($received["Image" ]);
-    } else {
-        $received["Image" ] = null;
-        $imgchange = true;
-    }
+    //if(\_::$Front->Confirm("Are you sure to remove your profile picture?")){
+        $img = \_::$Back->User->GetValue("Image");
+        \Res::Message("Trying to remove the profile picture!");
+        if (isValid($img) && !Local::DeleteFile($img)) {
+            \Res::Error("Could not delete the profile picture!");
+            unset($received["Image" ]);
+        } else {
+            $received["Image" ] = null;
+            $imgchange = true;
+        }
+    //}
 }
 try {
     if (\_::$Back->User->Set($received)) {
-        if (findValid($received, "Email", \_::$Back->User->TemporaryEmail) != \_::$Back->User->TemporaryEmail) {
+        if (getValid($received, "Email", \_::$Back->User->TemporaryEmail) != \_::$Back->User->TemporaryEmail) {
             \Res::Success("The email address modifyed successfully!");
             \_::$Back->User->SignOut();
             \_::$Back->User->TemporaryEmail = $received["Email"];
             \Res::Load(User::$ActiveHandlerPath);
-        } elseif (findValid($received, "Signature" , \_::$Back->User->Signature) != \_::$Back->User->Signature) {
+        } elseif (getValid($received, "Signature" , \_::$Back->User->Signature) != \_::$Back->User->Signature) {
             \Res::Success("The signature modifyed successfully!");
             \_::$Back->User->SignOut();
             \Res::Load(User::$InHandlerPath);

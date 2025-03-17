@@ -151,8 +151,8 @@ class Style extends \ArrayObject{
 		");
 	}
 
-	public static function ToggleFilter(){
-		return \_::$Front->DarkMode? self::LightFilter():self::DarkFilter();
+	public static function ToggleFilter($light = null){
+		return $light??\_::$Front->DarkMode? self::LightFilter():self::DarkFilter();
 	}
 	public static function DarkFilter(){
 		return self::UniversalProperty("filter","brightness(-1000%) opacity(1) grayscale(100%)");

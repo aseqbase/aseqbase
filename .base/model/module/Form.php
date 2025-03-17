@@ -82,9 +82,9 @@ class Form extends Module
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
 		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
-		$this->Signing = fn() => part(User::$InHandlerPath, ["Router" => ["DefaultMethod" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
+		$this->Signing = fn() => part(User::$InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
-		// 	if($this->Status && $this->Router->DefaultMethod > 1) \Res::Status($this->Status);
+		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \Res::Status($this->Status);
 		// });
 	}
 
@@ -93,7 +93,7 @@ class Form extends Module
 		if (!auth($access)) {
 			$message = $this->GetError("You have not enough access!");
 			if ($reaction)
-				\Res::Send($this->GetSigning());
+				\Res::End($this->GetSigning());
 			return false;
 		}
 		if (($message = $this->CheckBlock()) === false) {
@@ -101,15 +101,15 @@ class Form extends Module
 				$this->MakeBlock();
 		} else {
 			if ($reaction)
-				\Res::Send($message);
+				\Res::End($message);
 			return false;
 		}
 		if (isValid($this->ReCaptchaSiteKey)) {
-			library("recaptcha");
-			if (!\MiMFa\Library\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey)) {
+			component("reCaptcha");
+			if (!\MiMFa\Component\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey)) {
 				$message = $this->GetError("Do something to denied access!");
 				if ($reaction)
-					\Res::Send($message);
+					\Res::End($message);
 				return false;
 			}
 		}
@@ -683,7 +683,7 @@ class Form extends Module
 						);
 				})
 				: iteration($this->FieldsTypes, function ($k, $type) use ($attr) {
-					$v = findValid($this->Children, $k, null);
+					$v = getValid($this->Children, $k, null);
 					if ($type === false)
 						return null;
 					if (is_integer($k) && isEmpty($type))
@@ -759,8 +759,8 @@ class Form extends Module
 	public function GetFields()
 	{
 		if (isValid($this->ReCaptchaSiteKey)) {
-			library("recaptcha");
-			yield \MiMFa\Library\reCaptcha::GetHtml($this->ReCaptchaSiteKey);
+			component("reCaptcha");
+			yield \MiMFa\Component\reCaptcha::GetHtml($this->ReCaptchaSiteKey);
 		}
 	}
 	public function GetButtons()

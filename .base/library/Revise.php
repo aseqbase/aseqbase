@@ -91,7 +91,7 @@ class Revise{
         $reflection = new \ReflectionClass($object);
         $form = new \MiMFa\Module\Form(
             title: "Edit {$reflection->getName()}",
-            description: findBetween(self::GetCommentParameters($reflection->getDocComment()),"Abstract","Description" ),
+            description: getBetween(self::GetCommentParameters($reflection->getDocComment()),"Abstract","Description" ),
             method: "POST",
             image:"edit",
             children: self::GetFields($reflection, $object)
@@ -120,14 +120,14 @@ class Revise{
                 !isValid($pars,"private")
             )
                 yield new \MiMFa\Module\Field(
-                    type:findBetween($pars,"Field","Type" )??($value->getType()??get($pars,"Var")),
+                    type:getBetween($pars,"Field","Type" )??($value->getType()??get($pars,"Var")),
                     key:$value->getName(),
                     value:$value->getValue($object),
-                    title:findValid($pars,"Title" , null),
-                    description:findBetween($pars,"Abstract","Description" ),
-                    required:findValid($pars,"Required", null),
-                    options:findValid($pars,"Options", null),
-                    attributes:findValid($pars,"Attributes", null)
+                    title:getValid($pars,"Title" , null),
+                    description:getBetween($pars,"Abstract","Description" ),
+                    required:getValid($pars,"Required", null),
+                    options:getValid($pars,"Options", null),
+                    attributes:getValid($pars,"Attributes", null)
             );
         }
     }

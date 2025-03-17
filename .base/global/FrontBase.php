@@ -1,4 +1,7 @@
 <?php
+
+use MiMFa\Library\Convert;
+
 library("Revise");
 /**
  *All the basic website front-end settings and functions
@@ -18,6 +21,7 @@ abstract class FrontBase
 	/**
 	 * Default page head Packages
 	 * @field html
+	 * @internal
 	 * @var array
 	 */
 	public $Libraries = [];
@@ -77,7 +81,7 @@ abstract class FrontBase
 	public $SizePalette = array("2.3vh", "2.4vh", "2.6vh", "3vh", "3.6vh", "4.4vh", "5.4vh");
 	/**
 	 * Shadows Palette
-	 * @field array<{'size', 'size', 'size', 'color'}>
+	 * @field array<{'size' 'size' 'size' 'color'}>
 	 * @field array<text>
 	 * @template array [minimum, normal, medium, maximum, ...]
 	 * @var mixed
@@ -225,7 +229,7 @@ abstract class FrontBase
 			return $this->IsDark($this->BackColor(0)) === false;
 		$l = strlen($color);
 		$rgba = preg_find_all($l > 6 ? '/\w\w/' : '/\w/', $color);
-		$sc = hexdec(findValid($rgba, 0, 0)) + hexdec(findValid($rgba, 1, 0)) + hexdec(findValid($rgba, 2, 0));
+		$sc = hexdec(getValid($rgba, 0, 0)) + hexdec(getValid($rgba, 1, 0)) + hexdec(getValid($rgba, 2, 0));
 		if ($sc < 127)
 			return true;
 		elseif ($sc > 382)
@@ -258,16 +262,38 @@ abstract class FrontBase
         $callbackScript = "(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($this->DefaultDestinationSelector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
         $progressScript = "null";
 		$timeout = 60000;
+		$start = "";
+		$end = "";
+		if(\_::$Back->Router->DefaultMethodIndex === 1){
+			$start = "document.addEventListener('DOMContentLoaded',()=>{";
+			$end = "});";
+		}
 		$id = "S_".getID(true);
-		if(isStatic($callback)) echo "<script id='$id'>document.addEventListener('DOMContentLoaded',()=>{(".$callbackScript.")(".
-				\MiMFa\Library\Script::Convert($callback) . ",$script);document.getElementById('$id').remove();});</script>";
-		else echo "<script id='$id'>" .(
-				$callback ? "document.addEventListener('DOMContentLoaded',()=>{".
+		if(isStatic($callback)) \Res::Render(\MiMFa\Library\Html::Script("$start(".$callbackScript.")(".
+				\MiMFa\Library\Script::Convert($callback) . ",$script);document.getElementById('$id').remove();$end",null, ["id"=>$id]));
+		else \Res::Render(\MiMFa\Library\Html::Script(
+				$callback ? "$start".
 					'sendInternal(null,{"' . \MiMFa\Library\Internal::Set($callback) . '":JSON.stringify('. $script . ")},".
 						\MiMFa\Library\Script::Convert($this->DefaultSourceSelector).
-						",$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();});"
+						",$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
 				: $script
-			). "</script>";
+		,null, ["id"=>$id]));
+	}
+	/**
+	 * Have a dialog with the client side
+	 * @param mixed $script The front JS codes
+	 * @param mixed $callback The call back handler
+	 * @example: Dialog('$("body").html', function(selectedHtml)=>{ //do somework })
+	 * @return string|null The result of the client side
+	 */
+	public function Dialog($script = null, $callback = null)
+	{
+		$id = "Dialog_".getId(true);
+		$this->Interact(
+			"setMemo('$id', $script, 60000)",
+			$callback
+		);
+		return grabMemo($id);
 	}
 	/**
 	 * Interact with all specific parts of the client side one by one
@@ -280,15 +306,21 @@ abstract class FrontBase
         $callbackScript = "(data,err)=>{el=document.createElement('qb');el.innerHTML=data??err;item.before(...el.childNodes);item.remove();}";
         $progressScript = "null";
 		$timeout = 60000;
+		$start = "";
+		$end = "";
+		if(\_::$Back->Router->DefaultMethodIndex === 1){
+			$start = "document.addEventListener('DOMContentLoaded',()=>{";
+			$end = "});";
+		}
 		$id = "S_".getID(true);
-		if(isStatic($callback)) echo "<script id='$id'>document.addEventListener('DOMContentLoaded',()=>{for(item of $script)(".$callbackScript.")(".
-				\MiMFa\Library\Script::Convert($callback) . ",item);document.getElementById('$id').remove();});</script>";
-		else echo "<script id='$id'>" .(
-				$callback ? "document.addEventListener('DOMContentLoaded',()=>{".
+		if(isStatic($callback)) \Res::Render(\MiMFa\Library\Html::Script("$start for(item of $script)(".$callbackScript.")(".
+				\MiMFa\Library\Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id"=>$id]));
+		else \Res::Render(\MiMFa\Library\Html::Script(
+				$callback ? "$start".
 					"for(item of $script)sendInternal(null,{\"" . \MiMFa\Library\Internal::Set($callback) . '":item.outerHTML},'.
-						"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();});"
+						"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
 				: $script
-			). "</script>";
+		,null, ["id"=>$id]));
 	}
 	/**
 	 * Interact with all specific parts of the client side one by one
@@ -316,23 +348,23 @@ abstract class FrontBase
 	 */
 	public function Forget($selector = "body")
 	{
-		echo "<script>document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").forEach(el=>el.remove()));</script>";
+		\Res::Render(\MiMFa\Library\Html::Script("document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").forEach(el=>el.remove()));"));
 	}
 	/**
-	 * Set output instead if a special part of client side
+	 * Replace the output with a special part of client side
 	 * @param mixed $selector The destination selector
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
 	public function Set($selector = null, $handler = null, ...$args)
 	{
-		echo "<script>" .
+		\Res::Render(\MiMFa\Library\Html::Script(
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
 				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.remove();})"
 			)
-			. "</script>";
+		));
 	}
 	/**
 	 * Insert output before a special part of client side
@@ -342,13 +374,13 @@ abstract class FrontBase
 	 */
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
-		echo "<script>" .
+		\Res::Render(\MiMFa\Library\Html::Script(
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
 				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			)
-			. "</script>";
+		));
 	}
 	/**
 	 * Insert output after a special part of client side
@@ -358,13 +390,13 @@ abstract class FrontBase
 	 */
 	public function After($selector = "body", $handler = null, ...$args)
 	{
-		echo "<script>" .
+		\Res::Render(\MiMFa\Library\Html::Script(
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
 				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			)
-			. "</script>";
+		));
 	}
 	/**
 	 * Print output inside a special part of client side
@@ -374,13 +406,13 @@ abstract class FrontBase
 	 */
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
-		echo "<script>" .
+		\Res::Render(\MiMFa\Library\Html::Script(
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
 				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			)
-			. "</script>";
+		));
 	}
 	/**
 	 * Prepend output on a special part of client side
@@ -390,13 +422,13 @@ abstract class FrontBase
 	 */
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
-		echo "<script>" .
+		\Res::Render(\MiMFa\Library\Html::Script(
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
 				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			)
-			. "</script>";
+		));
 	}
 	/**
 	 * Append output on a special part of client side
@@ -406,13 +438,13 @@ abstract class FrontBase
 	 */
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
-		echo "<script>" .
+		\Res::Render(\MiMFa\Library\Html::Script(
 			\MiMFa\Library\Internal::MakeScript(
 				$handler,
 				$args,
 				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			)
-			. "</script>";
+		));
 	}
 
 	/**
@@ -421,7 +453,13 @@ abstract class FrontBase
 	 */
 	public function Script($content, $source = null, ...$attributes)
 	{
-		$this->Append("head", \MiMFa\Library\Html::Script($content, $source, ...$attributes));
+		\Res::Render(\MiMFa\Library\Html::Script(
+			\MiMFa\Library\Internal::MakeScript(
+				\MiMFa\Library\Html::Script($content, $source, ...$attributes),
+				null,
+				"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			)
+		));
 	}
 	/**
 	 * Render Styles in the client side
@@ -429,7 +467,13 @@ abstract class FrontBase
 	 */
 	public function Style($content, $source = null, ...$attributes)
 	{
-		$this->Append("head", \MiMFa\Library\Html::Style($content, $source, ...$attributes));
+		\Res::Render(\MiMFa\Library\Html::Script(
+			\MiMFa\Library\Internal::MakeScript(
+				\MiMFa\Library\Html::Style($content, $source, ...$attributes),
+				null,
+				"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			)
+		));
 	}
 
 	public function Alert($message = null, $callback = null)
@@ -441,14 +485,14 @@ abstract class FrontBase
 	}
 	public function Confirm($message = null, $callback = null)
 	{
-		$this->Interact(
+		return $this->Dialog(
 			\MiMFa\Library\Script::Confirm($message),
 			$callback
 		);
 	}
 	public function Prompt($message = null, $callback = null, $default = null)
 	{
-		$this->Interact(
+		return $this->Dialog(
 			\MiMFa\Library\Script::Prompt($message, $default),
 			$callback
 		);

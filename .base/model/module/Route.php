@@ -63,7 +63,7 @@ class Route extends Module{
 	public function Get(){
 		return parent::Get().join(PHP_EOL, iterator_to_array((function(){
 			yield parent::Get();
-			$this->Items = getValid($this->Items,null,array());
+			$this->Items = takeValid($this->Items,null,array());
 			if(count($this->Items)<1 && isValid($this->Path)){
 				$host = "";
 				$paths = preg_split("/(?<=[^\\/\\\])\\//i",$this->Path);
@@ -83,21 +83,21 @@ class Route extends Module{
 						elseif($i >= $e){ $i = $key; break;}
 					$this->Items[$i] = $this->ItemsLimitSign;
 				}
-				$route = "<a href='".array_values($this->Items)[0]."'>".__($this->RootLabel??array_keys($this->Items)[0],true,false)."</a>";
+				$route = Html::Link($this->RootLabel??array_keys($this->Items)[0], array_values($this->Items)[0]);
 				if($this->AllowProperCase)
 					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
-						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:"<a href='".$value."'>".ucwords(__($key,true,false))."</a>");
+						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link(ucwords($key, $value)));
 				else
 					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
-						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:"<a href='".$value."'>".__($key,true,false)."</a>");
-				yield $route;
+						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link($key, $value));
+						yield $route;
 			}
         })()));
 	}
 
 	public function SetValue($itemsOrpath = null){
 		if(is_null($itemsOrpath)){
-            $this->Path = getValid("/".getDirection(\Req::$Url),null,"/".\Req::$Direction);
+            $this->Path = takeValid("/".getDirection(\Req::$Url),null,"/".\Req::$Direction);
             $this->Items = null;
         }elseif(is_array($itemsOrpath)){
             $this->Path = null;

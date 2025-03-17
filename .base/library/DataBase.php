@@ -137,7 +137,7 @@ class DataBase
 		return $query;
 	}
 
-	public function ReturnArray($result, $defaultValue = [])
+	public function ReturnArray($result, array|null $defaultValue = []): array|null
 	{
 		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
 	}
@@ -227,7 +227,7 @@ class DataBase
 		return "SELECT " . $this->ColumnNameNormalization($columns ?? "*") . " FROM " . $this->TableNameNormalization($tableName) . " " . $this->ConditionNormalization($condition) . " LIMIT 1";
 	}
 
-	public function SelectColumn($query, $params = [])
+	public function SelectColumn($query, $params = []): array|null
 	{
 		$Connection = $this->Connection();
 		$stmt = $Connection->prepare($query);
@@ -240,7 +240,7 @@ class DataBase
 		else
 			return null;
 	}
-	public function TrySelectColumn($query, $params = [], $defaultValue = array())
+	public function TrySelectColumn($query, $params = [], array|null $defaultValue = array())
 	{
 		try {
 			return $this->ReturnArray($this->SelectColumn($query, $params), $defaultValue);
@@ -258,7 +258,7 @@ class DataBase
 		return "SELECT " . $this->ColumnNameNormalization($column ?? "Id" ) . " FROM " . $this->TableNameNormalization($tableName) . " " . $this->ConditionNormalization($condition);
 	}
 
-	public function SelectPairs($query, $params = [])
+	public function SelectPairs($query, $params = []): array
 	{
 		$res = [];
 		$k = $v = null;
@@ -266,7 +266,7 @@ class DataBase
 			$res[count($row) < 2 ? $i : $row[$k = $k ?? array_key_first($row)]] = $row[$v = $v ?? array_key_last($row)];
 		return $res;
 	}
-	public function TrySelectPairs($query, $params = [], $defaultValue = array())
+	public function TrySelectPairs($query, $params = [], array|null $defaultValue = array()): array|null
 	{
 		try {
 			return $this->ReturnArray($this->SelectPairs($query, $params), $defaultValue);
@@ -275,7 +275,7 @@ class DataBase
 			return $defaultValue;
 		}
 	}
-	public function DoSelectPairs($tableName, $key = "`Id`", $value = "`Name`", $condition = null, $params = [], $defaultValue = array())
+	public function DoSelectPairs($tableName, $key = "`Id`", $value = "`Name`", $condition = null, $params = [], array|null $defaultValue = array()): array|null
 	{
 		return $this->TrySelectPairs($this->MakeSelectPairsQuery($tableName, $key, $value, $condition), $params, $defaultValue);
 	}
@@ -284,14 +284,14 @@ class DataBase
 		return "SELECT " . $this->ColumnNameNormalization([$key ?? "`Id`", $value ?? "`Name`"]) . " FROM " . $this->TableNameNormalization($tableName) . " " . $this->ConditionNormalization($condition);
 	}
 
-	public function Insert($query, $params = [])
+	public function Insert($query, $params = []): bool|int
 	{
 		$Connection = $this->Connection();
 		$stmt = $Connection->prepare($query);
 		$isdone = $stmt->execute($this->ParametersNormalization($params));
 		return $isdone ? $stmt->rowCount() : false;
 	}
-	public function TryInsert($query, $params = [], $defaultValue = false)
+	public function TryInsert($query, $params = [], bool|int $defaultValue = false): bool|int
 	{
 		try {
 			return $this->Insert($query, $params) ?? $defaultValue;
@@ -300,9 +300,8 @@ class DataBase
 			return $defaultValue;
 		}
 	}
-	public function DoInsert($tableName, $condition = null, $params = [], $defaultValue = false)
+	public function DoInsert($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
 	{
-
 		return $this->TryInsert($this->MakeInsertQuery($tableName, $condition, $params), $params, $defaultValue);
 	}
 	public function MakeInsertQuery($tableName, $condition, &$params)
@@ -311,7 +310,7 @@ class DataBase
 		$sets = array();
 		$args = array();
 		foreach ($this->ParametersNormalization($params) as $key => $value) {
-			$k = trim($key, ":`");
+			$k = trim($key, ":`[]");
 			$sets[] = "`$k`";
 			$vals[] = ":$k";
 			$args[":$k"] = $value;
@@ -320,14 +319,14 @@ class DataBase
 		return "INSERT INTO " . $this->TableNameNormalization($tableName) . " (" . implode(", ", $sets) . ") VALUES (" . implode(", ", $vals) . ") " . $this->ConditionNormalization($condition);
 	}
 
-	public function Replace($query, $params = [])
+	public function Replace($query, $params = []): bool|int
 	{
 		$Connection = $this->Connection();
 		$stmt = $Connection->prepare($query);
 		$isdone = $stmt->execute($this->ParametersNormalization($params));
 		return $isdone ? $stmt->rowCount() : false;
 	}
-	public function TryReplace($query, $params = [], $defaultValue = false)
+	public function TryReplace($query, $params = [], bool|int $defaultValue = false): bool|int
 	{
 		try {
 			return $this->Replace($query, $params) ?? $defaultValue;
@@ -336,7 +335,7 @@ class DataBase
 			return $defaultValue;
 		}
 	}
-	public function DoReplace($tableName, $condition = null, $params = [], $defaultValue = false)
+	public function DoReplace($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
 	{
 		return $this->TryReplace($this->MakeReplaceQuery($tableName, $condition, $params), $params, $defaultValue);
 	}
@@ -346,7 +345,7 @@ class DataBase
 		$sets = array();
 		$args = array();
 		foreach ($this->ParametersNormalization($params) as $key => $value) {
-			$k = trim($key, ":`");
+			$k = trim($key, ":`[]");
 			$sets[] = "`$k`";
 			$vals[] = ":$k";
 			$args[":$k"] = $value;
@@ -355,14 +354,14 @@ class DataBase
 		return "REPLACE INTO " . $this->TableNameNormalization($tableName) . " (" . implode(", ", $sets) . ") VALUES (" . implode(", ", $vals) . ") " . $this->ConditionNormalization($condition);
 	}
 
-	public function Update($query, $params = [])
+	public function Update($query, $params = []): bool|int
 	{
 		$Connection = $this->Connection();
 		$stmt = $Connection->prepare($query);
 		$isdone = $stmt->execute($this->ParametersNormalization($params));
 		return $isdone ? $stmt->rowCount() : false;
 	}
-	public function TryUpdate($query, $params = [], $defaultValue = false)
+	public function TryUpdate($query, $params = [], bool|int $defaultValue = false):bool|int
 	{
 		try {
 			return $this->Update($query, $params) ?? $defaultValue;
@@ -371,7 +370,7 @@ class DataBase
 			return $defaultValue;
 		}
 	}
-	public function DoUpdate($tableName, $condition = null, $params = [], $defaultValue = false)
+	public function DoUpdate($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
 	{
 		return $this->TryUpdate($this->MakeUpdateQuery($tableName, $condition, $params), $params, $defaultValue);
 	}
@@ -379,23 +378,24 @@ class DataBase
 	{
 		$sets = array();
 		$args = array();
+		$condition = $this->ConditionNormalization($condition)." ";
 		foreach ($this->ParametersNormalization($params) as $key => $value) {
-			$k = trim($key, ":`");
-			$sets[] = "`$k`=:$k";
+			$k = trim($key, ":`[]");
+			if(strpos($condition, ":$k ")<=0) $sets[] = "`$k`=:$k";
 			$args[":$k"] = $value;
 		}
 		$params = $args;
-		return "UPDATE " . $this->TableNameNormalization($tableName) . " SET " . implode(", ", $sets) . " " . $this->ConditionNormalization($condition);
+		return "UPDATE " . $this->TableNameNormalization($tableName) . " SET " . implode(", ", $sets) . " " . $condition;
 	}
 
-	public function Delete($query, $params = [])
+	public function Delete($query, $params = []): bool|int
 	{
 		$Connection = $this->Connection();
 		$stmt = $Connection->prepare($query);
 		$isdone = $stmt->execute($this->ParametersNormalization($params));
 		return $isdone ? $stmt->rowCount() : false;
 	}
-	public function TryDelete($query, $params = [], $defaultValue = false)
+	public function TryDelete($query, $params = [], bool|int $defaultValue = false): bool|int
 	{
 		try {
 			return $this->Delete($query, $params) ?? $defaultValue;
@@ -404,7 +404,7 @@ class DataBase
 			return $defaultValue;
 		}
 	}
-	public function DoDelete($tableName, $condition = null, $params = [], $defaultValue = false)
+	public function DoDelete($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
 	{
 		return $this->TryDelete($this->MakeDeleteQuery($tableName, $condition), $params, $defaultValue);
 	}
@@ -434,7 +434,7 @@ class DataBase
 		return $this->TrySelectValue($this->MakeSelectValueQuery($tableName, "MIN($column)", $condition), $params);
 	}
 
-	public function Exists($tableName, $column = null, $condition = null, $params = [])
+	public function Exists($tableName, $column = null, $condition = null, $params = []): bool
 	{
 		$result = null;
 		try {
@@ -457,7 +457,7 @@ class DataBase
 				echo $query.Html::Error($ex);
 				break;
 			case 3:
-				echo $query, HTML::Items($params), Html::Error($ex);
+				echo $query, Html::Error($ex), "PARAMS{".($params?count($params):0)."}: ", Convert::ToString($params, arrayFormat:"{{0}}");
 				break;
 			default:
 				throw $ex;

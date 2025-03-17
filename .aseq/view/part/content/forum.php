@@ -1,8 +1,9 @@
 <?php
 module("Forum");
 $module = new \MiMFa\Module\Forum();
-grab($data, "Name");// To do not change the name of module
+$name = $module->Name;
 $module->Item = $data;
 set($module, $data);
+$module->Name = $name;// To do not change the name of module
 $module->Render();
 ?>

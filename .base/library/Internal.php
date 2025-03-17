@@ -21,13 +21,13 @@ class Internal
      */
     public static function Handle($name = null)
     {
-        $received = $name?[\Req::Internal($name)]:\Req::Internal();
+        $received = $name ? [\Req::Internal($name)] : \Req::Internal();
         $reses = [];
-        foreach ($received as $name=>$args){
+        foreach ($received as $name => $args) {
             $args = json_decode($args);
-            $reses[] =  Convert::By(self::Get($name, fn($a=null)=>$a), $args);
+            $reses[] = Convert::By(self::Get($name, fn($a = null) => $a), $args);
         }
-        return join("",$reses);
+        return join("", $reses);
     }
     /**
      * To handle and render internal requests
@@ -52,13 +52,20 @@ class Internal
     public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000)
     {
         $selector = 'getQuery(this)??"body"';
-        $callbackScript = $callbackScript??"(data,err)=>document.querySelector($selector).replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
-        $progressScript = $progressScript??"null";
-		if(isStatic($handler)) return "document.addEventListener('DOMContentLoaded',()=>($callbackScript)(".Script::Convert($handler).",".Script::Convert($args)."));";
-		return "document.addEventListener('DOMContentLoaded',()=>".
-                'sendInternal(null,{"' . 
-                    self::Set($handler) . '":JSON.stringify('. Script::Convert($args) . 
-                ")},$selector,$callbackScript,$callbackScript,null,$progressScript,$timeout));";
+        $callbackScript = $callbackScript ?? "(data,err)=>document.querySelector($selector).replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
+        $progressScript = $progressScript ?? "null";
+        $start = "";
+        $end = "";
+        if (\_::$Back->Router->DefaultMethodIndex === 1) {
+            $start = "document.addEventListener('DOMContentLoaded',()=>";
+            $end = ");";
+        }
+        if (isStatic($handler))
+            return "$start($callbackScript)(" . Script::Convert($handler) . "," . Script::Convert($args) . ")$end";
+        return $start .
+            'sendInternal(null,{"' .
+            self::Set($handler) . '":JSON.stringify(' . Script::Convert($args) .
+            ")},$selector,$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
     }
     /**
      * Get the handler encripted name
@@ -76,7 +83,7 @@ class Internal
      */
     public static function Content($handler)
     {
-        return '<?php return ' . self::Code($handler). ';?>';
+        return '<?php return ' . self::Code($handler) . ';?>';
     }
     /**
      * Convert Objects to source PHP codes
@@ -85,13 +92,18 @@ class Internal
      */
     public static function Code($handler)
     {
-        if(is_null($handler)) return 'fn($args=null)=>$args';
-        if(is_string($handler)) return 'fn($args=null)=>"'.str_replace("\"", "\\\"", $handler).'"';
-        if(is_numeric($handler)) return "fn(\$args=null)=>$handler";
-        if(is_bool($handler)) return $handler?'fn($args=null)=>true':'fn($args=null)=>false';
-        if(is_array($handler) || is_iterable($handler)) return 'fn($args=null)=>'.Convert::ToString($handler, ", ", "{0}=>{1}");
+        if (is_null($handler))
+            return 'fn($args=null)=>$args';
+        if (is_string($handler))
+            return 'fn($args=null)=>"' . str_replace("\"", "\\\"", $handler) . '"';
+        if (is_numeric($handler))
+            return "fn(\$args=null)=>$handler";
+        if (is_bool($handler))
+            return $handler ? 'fn($args=null)=>true' : 'fn($args=null)=>false';
+        if (is_array($handler) || is_iterable($handler))
+            return 'fn($args=null)=>' . Convert::ToString($handler, ", ", "\"{0}\"=>{1}", "[{0}]", "null");
         $source = '';
-        if(is_callable($handler) || $handler instanceof \Closure){
+        if (is_callable($handler) || $handler instanceof \Closure) {
             $reflection = new \ReflectionFunction($handler);
             $file = new \SplFileObject($reflection->getFileName());
             $file->seek($reflection->getStartLine() - 1);
@@ -100,7 +112,7 @@ class Internal
                 $file->next();
             }
             return preg_find("/(fn|function)\s*\([\s\S]+$/", trim($source, ";() \n\r\t\v\x00"));
-        } elseif(is_object($handler)) {
+        } elseif (is_object($handler)) {
             $reflection = new \ReflectionObject($handler);
             $source = 'fn($args=null)=>';
             $file = new \SplFileObject($reflection->getFileName());
@@ -110,8 +122,8 @@ class Internal
                 $file->next();
             }
             return trim($source);
-        }
-        else return Convert::ToStatic($handler);
+        } else
+            return Convert::ToStatic($handler);
     }
     /**
      * To set a new internal Handler and get the encripted name
@@ -123,7 +135,8 @@ class Internal
         $s = self::Content($handler);
         $default = $default ?? md5($s);
         $path = self::$Directory . $default;
-        if(!file_exists($path)) file_put_contents($path, $s);
+        if (!file_exists($path))
+            file_put_contents($path, $s);
         return encrypt($default);
     }
     /**
@@ -134,7 +147,8 @@ class Internal
     public static function Get($name, $default = null)
     {
         $file = self::$Directory . decrypt($name);
-        if($file) return including($file);
+        if ($file)
+            return including($file);
         return $default;
     }
     /**
@@ -145,7 +159,8 @@ class Internal
     public static function Forget($name)
     {
         $path = self::$Directory . decrypt($name);
-        if(!file_exists($path)) unlink($path);
+        if (!file_exists($path))
+            unlink($path);
     }
     /**
      * To clear all internal handlers of this client

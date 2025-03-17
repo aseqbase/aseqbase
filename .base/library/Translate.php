@@ -40,7 +40,7 @@ class Translate
      * Change the Default Language of translator
      * Default language is EN
 	 */
-	public function Initialize(Session $session, string $lang = null, string $direction = null, string $encoding = null){
+	public function Initialize(Session $session, ?string $lang = null, ?string $direction = null, ?string $encoding = null){
 		$session->SetCookie("Lang", $this->Language = strtoupper($lang??\Req::Grab("lang", "get")??$session->GetCookie("Lang")??$this->Language));
 		$session->SetCookie("Direction", $this->Direction = strtoupper($direction??\Req::Grab("direction", "get")??$session->GetCookie("Direction")??$this->Direction));
 		$session->SetCookie("Encoding", $this->Encoding = strtoupper($encoding??\Req::Grab("encoding", "get")??$session->GetCookie("Encoding")??$this->Encoding));
@@ -58,7 +58,7 @@ class Translate
 		for($i = 0; $i < $len; $i++){
 			$data = Convert::FromJson($rows[$i]["ValueOptions"]);
 			if(!isset($data[$lang])){
-				$data[$lang] = $data["x"];
+				$data[$lang] = $data["X"];
 				$args[":KeyCode$i"]= $rows[$i]["KeyCode"];
 				$args[":ValueOptions$i"]= Convert::ToJson($data);
 				$query .= "UPDATE ".$this->DataTable->Name." SET `ValueOptions`=:ValueOptions$i WHERE `KeyCode`=:KeyCode$i;";
@@ -83,12 +83,12 @@ class Translate
 			[":KeyCode"=>$code]);
         if($data){
 			$data = Convert::FromJson($data);
-			$text = isset($data[$lang??$this->Language])? $data[$lang??$this->Language] : $data["x"];
+			$text = isset($data[$lang??$this->Language])? $data[$lang??$this->Language] : $data["X"];
 		}else {
 			if($this->AutoUpdate)
 				$this->DataTable->DoInsert(
 				null,
-				[":KeyCode"=>$code,":ValueOptions"=>Convert::ToJson(array('x'=>$text))]);
+				[":KeyCode"=>$code,":ValueOptions"=>Convert::ToJson(array("X"=>$text))]);
         }
 		foreach($replacements as $key=>$val) $text = str_replace($key,$val,$text);
 		return Decode($text, $dic);
@@ -98,7 +98,7 @@ class Translate
 		$rows = $this->DataTable->DoSelect("*", $condition, $params);
 		foreach ($rows as $value){
 			$row = [];
-			$row["Key" ]=$value["KeyCode"];
+			$row["KEY" ]=$value["KeyCode"];
 			foreach(Convert::FromJson($value["ValueOptions"]) as $k => $v)
 				$row[$k]=$v;
 			yield $row;
@@ -118,7 +118,7 @@ class Translate
 			"ValueOptions", 
 			$this->CaseSensitive?"`KeyCode`=:KeyCode":"LOWER(`KeyCode`)=LOWER(:KeyCode)",
 			[":KeyCode"=>$code]);
-		$data = array('x'=>$text);
+		$data = array("X"=>$text);
 		if(!is_null($val)) $data[$lang??$this->Language] = Code($val, $dic, $this->CodeStart, $this->CodeEnd, $this->CodePattern);
 		return $this->DataTable->DoReplace(
 			null, 
@@ -130,10 +130,10 @@ class Translate
 		$args = [];
 		foreach ($values as $i=>$value){
             $queries[] = "REPLACE INTO ".$this->DataTable->Name." (`KeyCode`, `ValueOptions`) VALUES(:KeyCode$i,:ValueOptions$i);";
-			$args[":KeyCode$i"] = $value["Key" ];
+			$args[":KeyCode$i"] = $value["KEY"];
 			$vals = [];
 			foreach ($value as $key=>$val)
-				if($key !== "Key" && !isEmpty($key))
+				if($key !== "KEY" && !isEmpty($key))
 					$vals[$key] = $val;
 			$args[":ValueOptions$i"] = Convert::ToJson($vals);
         }

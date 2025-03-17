@@ -48,10 +48,10 @@ class Html
                     $value = preg_replace("/((\r?\n\r?\s*[\*•○\-]\s.*)+)/i", "<ul>" . PHP_EOL . "$1" . PHP_EOL . "</ul>", $value);
                     $value = preg_replace("/^\s*[\*•○\-]\s(.*)/im", "<li>$1</li>", $value);
                     $value = preg_replace("/^\-{6,}$/im", "<hr/>", $value);
-                    $value = preg_replace("/\b\@image:([^\s\[\]\{\}]+)\b/i", "<img src=\"$1\"/>", $value);
-                    $value = preg_replace("/\b\@\[([^\]]*)\]:([^\s\[\]\{\}]+)\b/i", "<a href=\"$2\">$1</a>", $value);
-                    $value = preg_replace("/\b([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", "<a href=\"$1\">$1</a>", $value);
-                    $value = preg_replace("/\b([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", "<a href=\"mailto:$1\">$1</a>", $value);
+                    $value = preg_replace("/\b\@image:([^\s\[\]\{\}]+)\b/i", self::Image(null, "$1"), $value);
+                    $value = preg_replace("/\b\@\[([^\]]*)\]:([^\s\[\]\{\}]+)\b/i", self::Link("$1", "$2"), $value);
+                    $value = preg_replace("/\b([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", self::Link("$1", "$1"), $value);
+                    $value = preg_replace("/\b([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", self::Link("$1", "mailto:$1"), $value);
                     $value = preg_replace("/\*\*(\S[^\*\r\n]+\S)\*\*/i", "<strong>$1</strong>", $value);
                     $value = preg_replace("/\___(\S[^\*\r\n]+\S)\__/i", "<i>$1</i>", $value);
                     $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<)/i", "<br/>", trim($value));
@@ -70,7 +70,7 @@ class Html
                     foreach ($value as $val)
                         $texts[] = Html::Item(self::Convert($val));
                     return Html::List(join(PHP_EOL, $texts));
-                } elseif ($args = findBetween($value, "Arguments", "Item")) {
+                } elseif ($args = getBetween($value, "Arguments", "Item")) {
                     $key = get($value, "Key");
                     $val = get($value, "Value");
                     $ops = get($value, "Options");
@@ -134,10 +134,9 @@ class Html
         else
             return join("", ["<$tagName$attrs>", Convert::ToString($content), "</$tagName>$attachments"]);
     }
-    public static function Attributes($attributes, &$attachments, $optimization = false)
+    public static function Attributes($attributes, &$attachments = "", $optimization = false)
     {
         $attrs = "";
-        $attachments = "";
         if ($attributes) {
             if (is_countable($attributes) || is_iterable($attributes)) {
                 $attrdic = [];
@@ -213,7 +212,7 @@ class Html
                         case "onmouseover":
                         case "onmouseout":
                             if (self::$AttributesOptimization && $optimization) {
-                                if (!isValid(obj: $id)) {
+                                if (!isValid($id)) {
                                     $id = "_" . getId(true);
                                     $attrs .= " id='$id'";
                                 }
@@ -226,12 +225,17 @@ class Html
                         case "alt":
                         case "content":
                         case "text":
+                        case "title":
+                        case "description":
                         case "placeholder":
                             $attrs .= " " . self::Attribute($key, __($value, styling: false));
                             break;
                         case "href":
+                            if(get($attrdic,"rel")) $attrs .= " " . self::Attribute($key, \MiMFa\Library\Local::GetUrl($value));
+                            else $attrs .= " " . self::Attribute($key, $value);
+                            break;
                         case "src":
-                            $attrs .= " " . self::Attribute($key, Local::GetUrl($value));
+                            $attrs .= " " . self::Attribute($key, \MiMFa\Library\Local::GetUrl($value));
                             break;
                         default:
                             $attrs .= " " . self::Attribute($key, $value);
@@ -326,19 +330,11 @@ class Html
     /**
      * Create standard html open tag element
      * @param string|null $tagName The HTML tag name, send attributes to create single tag
-     * @param mixed $content The content of the Tag, send false to create single tag, Send false to create single tag otherwise send your content of double tag
      * @param array|string|null $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function OpenTag(string|array|null $tagName = null, $content = null, ...$attributes)
+    public static function OpenTag(string|array|null $tagName = null, ...$attributes)
     {
-        $isSingle = $content === false;
-        if ($isSingle) {
-            $attributes = [$tagName, $attributes];
-            $tagName = $content;
-            $content = null;
-        } elseif ($content === null)
-            return null;
         $tagName = trim(strtolower($tagName));
         $allowMA = true;
         switch ($tagName) {
@@ -353,12 +349,8 @@ class Html
         }
         $attachments = "";
         $attrs = self::Attributes($attributes, $attachments, $allowMA);
-        if ($isSingle)
-            return "<$tagName$attrs data-single/>$attachments";
-        else {
-            self::$TagStack[] = $tagName;
-            return join("", ["$attachments<$tagName$attrs>", Convert::ToString($content)]);
-        }
+        self::$TagStack[] = $tagName;
+        return "$attachments<$tagName$attrs>";
     }
     /**
      * Create standard html close tag element
@@ -555,10 +547,10 @@ class Html
         if (isIdentifier($source))
             return self::Element("", "i", ["class" => "media fa fa-" . strtolower($source)], $attributes);
         else
-            return self::Element(__($content ?? "", styling: false), "div", ["style" => "background-image: url('" . Local::GetUrl($source) . "'); background-position: center; background-repeat: no-repeat; background-size: contain;", "class" => "media"], $attributes);
+            return self::Element(__($content ?? "", styling: false), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "'); background-position: center; background-repeat: no-repeat; background-size: contain;", "class" => "media"], $attributes);
     }
     /**
-     * The \<IFRAME\> HTML Tag
+     * The \<IFRAME\> or \<EMBED\> HTML Tag
      * @param mixed $content The default content of the Tag
      * @param array $source other custom attributes of the Tag
      * @param string|null|array $source The source path or document to show
@@ -576,8 +568,12 @@ class Html
             $content = null;
         }
         if (isUrl($source))
-            return self::Element($content ?? "", "iframe", ["src" => $source, "class" => "embed"], $attributes);
-        return self::Element($content ?? "", "iframe", ["srcdoc" => str_replace("\"", "&quot;", Convert::ToString($source)), "class" => "embed"], $attributes);
+            if (isFormat($source, ".svg"))
+                return self::Element($content ?? "", "embed", ["src" => $source, "class" => "embed"], $attributes);
+            else
+                return self::Element($content ?? "", "iframe", ["src" => $source, "class" => "embed"], $attributes);
+        return self::Element($content ?? $source ??"", "embed", ["class" => "embed"], $attributes);
+        //return self::Element($content ?? "", "iframe", ["srcdoc" => str_replace("\"", "&quot;", Convert::ToString($source)), "class" => "embed"], $attributes);
     }
     /**
      * The \<IFRAME\> HTML Tag devided in a page
@@ -1640,7 +1636,7 @@ class Html
      */
     public static function Button($content, $reference = null, ...$attributes)
     {
-        if (isScript($reference) || !isUrl($reference))
+        if (isEmpty($reference) || isScript($reference) || !isUrl($reference))
             return self::Element(__($content, styling: false), "button", ["class" => "btn button", "type" => "button", "onclick" => $reference], $attributes);
         return self::Link($content, $reference, ["class" => "btn button"], $attributes);
     }
@@ -1655,7 +1651,7 @@ class Html
     {
         if (!isValid($content))
             return null;
-        if (isScript($reference) || !isUrl($reference))
+        if (isEmpty($reference) || isScript($reference) || !isUrl($reference))
             return self::Media("", $content, ["class" => "icon", "onclick" => $reference], $attributes);
         return self::Link(self::Media("", $content), $reference, ["class" => "icon"], $attributes);
 
@@ -1725,7 +1721,7 @@ class Html
         elseif (is_callable($type) || ($type instanceof \Closure))
             return self::InputDetector($type($type, $value), $value);
         elseif (is_object($type) || ($type instanceof \stdClass))
-            return self::InputDetector(findValid($type, "Type", null), $value);
+            return self::InputDetector(getValid($type, "Type", null), $value);
         elseif (is_countable($type))
             return "select";
         elseif ($type === true)
@@ -1781,7 +1777,7 @@ class Html
             foreach ($attributes as $k => $v)
                 if ($isRequired = ((is_string($k) && preg_match("/\brequired\b/i", $k)) || (is_string($v) && preg_match("/\brequired\b/i", $v))))
                     break;
-        $id = get($attributes, "Id") ?? Convert::ToId($key) . getId();
+        $id = get($attributes, "Id") ?? Convert::ToId($key);
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
         $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey, styling: false) . ($isRequired ? self::Span("*") : ""), $id, ["class" => "title"]));
         $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description"]));
@@ -1834,7 +1830,7 @@ class Html
             $options = get($type, "Options") ?? $options;
             $prepend = get($type, "Prepend") ?? $prepend;
             $append = get($type, "Append") ?? $append;
-            $attributes = [...$attributes, ...(findValid($type, "Attributes", []))];
+            $attributes = [...$attributes, ...(getValid($type, "Attributes", []))];
             $type = self::InputDetector(get($type, "Type"), $value);
         } elseif (is_countable($type)) {
             if (is_null($options)) {
@@ -1846,7 +1842,7 @@ class Html
                 $options = get($type, "Options") ?? $options;
                 $prepend = get($type, "Prepend") ?? $prepend;
                 $append = get($type, "Append") ?? $append;
-                $attributes = [...$attributes, ...(findValid($type, "Attributes", []))];
+                $attributes = [...$attributes, ...(getValid($type, "Attributes", []))];
                 $type = self::InputDetector(get($type, "Type"), $value);
             }
         } else
@@ -1875,10 +1871,11 @@ class Html
                     $type = "text";
                 }
             }
-            $mt = preg_find("/(?<=\<)[\w\W]+(?=\>$)/i", trim($type), null);
+            $mt = preg_find("/(?<=[\w\W]\<)[\w\W]+(?=\>$)/i", trim($type), null);
+            $pos = strpos($type, "<");
             if (!isEmpty($mt)) {
                 $options = ["Type" => $mt, ...($options ?? [])];
-                $type = first(str_split($type, strpos($type, "<")));
+                $type = $pos > 0 ? first(str_split($type, $pos)) : "";
                 return self::Interactor(
                     key: $key,
                     value: $value,
@@ -1888,7 +1885,6 @@ class Html
                     attributes: $attributes
                 );
             }
-            $pos = 0;
             if ($pos = strpos($type, "|") > 0) {
                 $type = first(str_split($type, $pos));
                 return self::Interactor(
@@ -1903,7 +1899,7 @@ class Html
         }
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
         $key = Convert::ToKey(Convert::ToString($key ?? $title));
-        $id = get($attributes, "Id") ?? Convert::ToId($key) . getId();
+        $id = get($attributes, "Id") ?? Convert::ToId($key);
         $attributes = ["id" => $id, "name" => $key, ...$attributes];
         $options = $options ?? [];
         switch ($type) {
@@ -2188,7 +2184,7 @@ class Html
             $attributes = Convert::ToIteration($type);
             $type = "text";
         }
-        return self::Element("input", ["id" => Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key), styling: false), "type" => $type, "value" => $value, "class" => "input"], $attributes);
+        return self::Element("input", ["id" => grab($attributes, "id")??Convert::ToId($key), "name" => grab($attributes, "name")??Convert::ToKey($key), "placeholder" => grab($attributes, "placeholder")??Convert::ToTitle($key), "type" => $type, "value" => $value, "class" => "input"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2274,21 +2270,21 @@ class Html
         return self::Division(function () use ($key, $value, $options, $attributes) {
             $sample = null;
             $attributes = [...($options ?? []), ...($attributes ?? [])];
-            $add = grabFindValid($attributes, "Add", true);
-            //$edit = grabFindValid($attributes, "edit", true);
-            $rem = grabFindValid($attributes, "Remove", true);
-            $sep = grabFindValid($attributes, "Separator", null);
-            $type = self::InputDetector(grabFindValid($attributes, "Type"), grabFindValid($attributes, "Value"));
-            $key = grabFindValid($attributes, "Key", $key);
-            $attrs = grabFindValid($attributes, "Attributes", []);
-            $options = grabFindValid($attributes, "Options", null);
+            $add = grabValid($attributes, "Add", true);
+            //$edit = grabValid($attributes, "edit", true);
+            $rem = grabValid($attributes, "Remove", true);
+            $sep = grabValid($attributes, "Separator", null);
+            $type = self::InputDetector(grabValid($attributes, "Type"), grabValid($attributes, "Value"));
+            $key = grabValid($attributes, "Key", $key);
+            $attrs = grabValid($attributes, "Attributes", []);
+            $options = grabValid($attributes, "Options", null);
             if (isEmpty($value))
                 $value = [];
             elseif (is_string($value)) {
                 $value = is_null($sep) && startsWith($value, "[", "{") ? Convert::FromJson($value) ?? [] : explode($sep ?? "|", trim($value, $sep ?? "|"));
             }
             foreach ($value as $k => $item) {
-                $id = Convert::ToId($key) . getId();
+                $id = Convert::ToId($key);
                 if (is_null($sample))
                     $sample = $item;
                 yield self::Field(
@@ -2303,7 +2299,7 @@ class Html
                 );
             }
             if ($add) {
-                $id = Convert::ToId($key) . "_add_" . getId();
+                $id = Convert::ToId($key) . "_add";
                 $oc = "
                         let tag = document.getElementById(`$id`).cloneNode(true);
                         tag.id = `$key" . getId() . "`;
@@ -2480,7 +2476,11 @@ class Html
      */
     public static function UrlInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "url", ["class" => "urlinput"], $attributes);
+        return self::Input($key, $value, "text", [
+            "class" => "urlinput",
+            "pattern"=>"(^\/[^:]*$)|(^https?:\/\/.*$)",
+            "title"=>"Please enter a valid relative or absolute URL (e.g., /about or https://example.com)"
+        ], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2502,7 +2502,35 @@ class Html
      */
     public static function FileInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "file", ["class" => "fileinput"], $attributes);
+        $id1 = grab($attributes, "id")??Convert::ToId($key);
+        $id2 = Convert::ToId($key);
+        $key = Convert::ToKey($key);
+        return self::Input($key, null, "file", $attributes, ["class" => "fileinput", "id"=>$id1, "style"=>$value?"display:none;":"", ...($value?["name"=>""]:["name"=>"$key"]),
+        "oninput"=>"
+            elem = document.getElementById('$id2');
+            if(this.files.length>0){
+                this.setAttribute('name', '$key');
+                elem.removeAttribute('name');
+                elem.setAttribute('disabled', 'disabled');
+            } else {
+                this.removeAttribute('name');
+                elem.setAttribute('name', '$key');
+                elem.removeAttribute('disabled');
+            }"]).
+        self::Input($key, $value, "text", $attributes, ["class" => "fileinput", "id"=>$id2, ...($value?["name"=>"$key"]:["name"=>""]),
+        "oninput"=>"
+            elem = document.getElementById('$id1');
+            if(!isEmpty(this.value)){
+                this.setAttribute('name', '$key');
+                elem.removeAttribute('name');
+                elem.setAttribute('disabled', 'disabled');
+                elem.style.display='none';
+            } else {
+                this.removeAttribute('name');
+                elem.setAttribute('name', '$key');
+                elem.removeAttribute('disabled');
+                elem.style.display='inherit';
+            }"]);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2513,7 +2541,11 @@ class Html
      */
     public static function FilesInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "file", ["class" => "fileinput", "multiple" => null], $attributes);
+        return self::CollectionInput($key, $value, [
+            "Type"=>"file",
+            "Add"=>true,
+            "Remove"=>true
+        ], ["class" => "fileinput", "multiple" => null], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2636,8 +2668,8 @@ class Html
                 $f = false;
                 if ($f = isEmpty($value))
                     yield self::Element("", "option", ["value" => "", "selected" => "true"]);
-                else
-                    yield self::Element("", "option", ["value" => ""]);
+                // else
+                //     yield self::Element("", "option", ["value" => ""]);
                 foreach ($options as $k => $v)
                     if (!$f && ($f = ($k == $value)))
                         yield self::Element(__($v ?? "", styling: false), "option", ["value" => $k, "selected" => "true"]);
@@ -2750,50 +2782,50 @@ class Html
                         if (count($xs) > 0)
                             if (count($ys) > 0)
                                 foreach ($rows as $row) {
-                                    $arr[] = getValid($row, $l);
-                                    $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function ($i) use ($row) {
-                                        return floatval(getValid($row, $i));
+                                    $arr[] = takeValid($row, $l);
+                                    $arr[] = count($xs) == 1 ? floatval(takeValid($row, $xs[0])) : loop($xs, function ($i) use ($row) {
+                                        return floatval(takeValid($row, $i));
                                     });
-                                    $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function ($i) use ($row) {
-                                        return floatval(getValid($row, $i));
+                                    $arr[] = count($ys) == 1 ? floatval(takeValid($row, $ys[0])) : loop($ys, function ($i) use ($row) {
+                                        return floatval(takeValid($row, $i));
                                     });
                                 } else
                                 foreach ($rows as $row) {
-                                    $arr[] = getValid($row, $l);
-                                    $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function ($i) use ($row) {
-                                        return floatval(getValid($row, $i));
+                                    $arr[] = takeValid($row, $l);
+                                    $arr[] = count($xs) == 1 ? floatval(takeValid($row, $xs[0])) : loop($xs, function ($i) use ($row) {
+                                        return floatval(takeValid($row, $i));
                                     });
                                     $arr[] = $ct++;
                                 } else if (count($ys) > 0)
                             foreach ($rows as $row) {
-                                $arr[] = getValid($row, $l);
+                                $arr[] = takeValid($row, $l);
                                 $arr[] = $ct++;
-                                $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function ($i) use ($row) {
-                                    return floatval(getValid($row, $i));
+                                $arr[] = count($ys) == 1 ? floatval(takeValid($row, $ys[0])) : loop($ys, function ($i) use ($row) {
+                                    return floatval(takeValid($row, $i));
                                 });
                             } else
                             foreach ($rows as $row)
-                                $arr[] = getValid($row, $l);
+                                $arr[] = takeValid($row, $l);
                     else if (count($xs) > 0)
                         if (count($ys) > 0)
                             foreach ($rows as $row) {
-                                $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function ($i) use ($row) {
-                                    return floatval(getValid($row, $i));
+                                $arr[] = count($xs) == 1 ? floatval(takeValid($row, $xs[0])) : loop($xs, function ($i) use ($row) {
+                                    return floatval(takeValid($row, $i));
                                 });
-                                $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function ($i) use ($row) {
-                                    return floatval(getValid($row, $i));
+                                $arr[] = count($ys) == 1 ? floatval(takeValid($row, $ys[0])) : loop($ys, function ($i) use ($row) {
+                                    return floatval(takeValid($row, $i));
                                 });
                             } else
                             foreach ($rows as $row) {
-                                $arr[] = count($xs) == 1 ? floatval(getValid($row, $xs[0])) : loop($xs, function ($i) use ($row) {
-                                    return floatval(getValid($row, $i));
+                                $arr[] = count($xs) == 1 ? floatval(takeValid($row, $xs[0])) : loop($xs, function ($i) use ($row) {
+                                    return floatval(takeValid($row, $i));
                                 });
                                 $arr[] = $ct++;
                             } else if (count($ys) > 0)
                         foreach ($rows as $row) {
                             $arr[] = $ct++;
-                            $arr[] = count($ys) == 1 ? floatval(getValid($row, $ys[0])) : loop($ys, function ($i) use ($row) {
-                                return floatval(getValid($row, $i));
+                            $arr[] = count($ys) == 1 ? floatval(takeValid($row, $ys[0])) : loop($ys, function ($i) use ($row) {
+                                return floatval(takeValid($row, $i));
                             });
                         }
                     $content = $arr;
@@ -2821,7 +2853,7 @@ class Html
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading($title) .
-                self::Script(null, getFullUrl("/view/script/CanvasJS.min.js")) .
+                \_::$Front->Script(null, "/view/script/CanvasJS.min.js") .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {

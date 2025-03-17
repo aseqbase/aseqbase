@@ -16,8 +16,9 @@ class Script
             return "null";
         else {
             if (is_string($obj)) {
-                if($res = preg_find("/(?<=^\$\{)\w+(?=\}$)/i", $obj)) return $res;
+                if($res = preg_find('/(?<=^\${).+(?=}$)/', $obj)) return $res;
                 $sp = "`";
+                $obj = str_replace("\\", "\\\\", $obj);
                 if(preg_match("/\n|(\$\{)/",$obj))
                     $obj = str_replace(["`", '$'], ["\\`", '\\$'], $obj);
                 else

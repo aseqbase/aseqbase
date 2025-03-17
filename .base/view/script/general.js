@@ -364,7 +364,7 @@ let setMemo = function (key, value, expires = 0, path = "/") {
 		date.setTime(date.getTime() + expires);
 		time = "; expires=" + date.toUTCString();
 	}
-	document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value || "")}${time}; path=${path}`;
+	document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value || "")}${time}; Secure; path=${path}`;
 };
 let getMemo = function (key) {
     let nameEQ = encodeURIComponent(key) + "=";
@@ -377,7 +377,7 @@ let getMemo = function (key) {
     return null;
 };
 let forgetMemo = function (key, path = "/") {
-    document.cookie = `${encodeURIComponent(key)}=; Max-Age=-99999999; path=${path}`;
+    document.cookie = `${encodeURIComponent(key)}=; Max-Age=-99999999; Secure; path=${path}`;
 };
 let flushMemos = function () {
     let cookies = document.cookie.split(";");
@@ -385,7 +385,7 @@ let flushMemos = function () {
         let cookie = cookies[i];
         let eqPos = cookie.indexOf("=");
         let key = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        document.cookie = key + "=; Max-Age=-99999999; path=/";
+        document.cookie = key + "=; Max-Age=-99999999; Secure; path=/";
     }
 };
 
@@ -554,8 +554,14 @@ let sendFile = function (url = null, data = null, selector = 'body :nth-child(1)
 		return res;
 	}
 };
+let sendStream = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return sendRequest('STREAM', url, data, selector, success, error, ready, progress, timeout);
+};
 let sendInternal = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
+};
+let sendExternal = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return sendRequest('EXTERNAL', url, data, selector, success, error, ready, progress, timeout);
 };
 
 let submitForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {

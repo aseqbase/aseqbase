@@ -77,7 +77,7 @@ class Session
 	public function Start(){
         $this->StartSecure();
 		if(is_null($this->GetId())){
-			$this->SetId(\_::$Config->PublicPrefix);
+			$this->SetId(\_::$Aseq->Name);
             $this->Set("Ip" , getClientIp());
 			return true;
         }
@@ -98,7 +98,7 @@ class Session
 		return $_SESSION["SESSION_ID"] = $id;
     }
 	public function GetId(){
-		return getValid($_SESSION, "SESSION_ID", null);
+		return takeValid($_SESSION, "SESSION_ID", null);
     }
 	public function PopId(){
 		$val = $this->GetId();

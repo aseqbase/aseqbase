@@ -79,9 +79,9 @@ class Image extends Module{
 					preg_match('/^\s*<\w+/', $src)? preg_replace("/(^\s*<\w+)/", "$1 ".$this->GetDefaultAttributes(), $src):
 					(
 						$this->AllowOriginal? (
-								isFormat($src,".svg")? "<embed ".$this->GetDefaultAttributes()." src=\"".\MiMFa\Library\Local::GetUrl($src)."\"></embed>"
-									:"<img ".$this->GetDefaultAttributes()." src=\"".\MiMFa\Library\Local::GetUrl($src)."\"/>"
-						) :"<div ".$this->GetDefaultAttributes()." style=\"background-image: url('".\MiMFa\Library\Local::GetUrl($src)."');\"></div>"
+								isFormat($src,".svg")? Html::Embed(null, $src, $this->GetDefaultAttributes())
+									:Html::Image(null, $src, $this->GetDefaultAttributes())
+						) :Html::Media(null, $src, $this->GetDefaultAttributes())
 					)
 				) :null
 			);

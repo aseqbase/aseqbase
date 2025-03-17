@@ -9,6 +9,7 @@ class RingSlide extends Module{
 	public $Image = null;
 	public $Items = null;
 	public $AllowChangeColor = true;
+	public $HasTab = true;
 	public $CenterSize = 150;
 	public $ButtonsSize = 100;
 	public $Path = null;
@@ -157,26 +158,28 @@ class RingSlide extends Module{
 		if($count > 0)
 			return Convert::ToString(function() use($count){
 				yield parent::Get();
-				$btns = "";
-				$tags = "";
+				$btns = [];
+				$tags = [];
 				for($i = 0; $i < $count; $i++)
-					if(auth(findValid($this->Items[$i],"Access" ,\_::$Config->VisitAccess))) {
-						$btns .= Html::Link(
+					if(auth(getValid($this->Items[$i],"Access" ,\_::$Config->VisitAccess))) {
+						$desc = get($this->Items[$i], 'Description' );
+						$more = get($this->Items[$i], "Button")??get($this->Items[$i],"More");
+						$pa = getBetween($this->Items[$i],'Path' ,'Link');
+						$this->HasTab = $desc||$more;
+						$btns[] = Html::Link(
 							Html::Division(
-								Html::Media("", findBetween($this->Items[$i],'Image' , "Icon"))
-							,["class"=>"button"])
-						, "#tab$i", ["data-target"=>".tab", "data-toggle"=>'tab']);
-
-						$tags .= Html::Division(
-							Html::ExternalHeading(get($this->Items[$i],'Name' ), findBetween($this->Items[$i],'Path' ,'Link'), ["class"=>"title" ]).
-							Html::Division(
-								get($this->Items[$i], 'Description' ).
-								(get($this->Items[$i], "Button")??get($this->Items[$i],"More"))
-							, ["class"=>"description" ])
+								Html::Media("", getBetween($this->Items[$i],'Image' , "Icon"))
+							,["class"=>"button"]).
+							Html::Tooltip(getBetween($this->Items[$i],'Title' , "Name"))
+						, $this->HasTab?"#tab$i":$pa, $this->HasTab?["data-target"=>".tab", "data-toggle"=>'tab']:[]);
+						
+						if($this->HasTab) $tags[] = Html::Division(
+							Html::ExternalHeading(get($this->Items[$i],'Name' ), $pa, ["class"=>"title" ]).
+							Html::Division($desc, $more, ["class"=>"description" ])
 						, ["class"=>"tab fade".($i===0?' active show':''), "Id" =>"tab$i"]);
 					}
-				yield Html::Division(Html::Division(Html::Division($btns,["class"=>"center"]),["class"=>"menu"]),["class"=>"col-md-5", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]);
-				yield Html::Division(Html::Division($tags,["class"=>"tabs"]),["class"=>"col-md", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]);
+				yield Html::Division(Html::Division(Html::Division($btns,["class"=>"center"]),["class"=>"menu"]),["class"=>"col-md", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]);
+				if($tags) yield Html::Division(Html::Division($tags,["class"=>"tabs"]),["class"=>"col-md-7", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]);
 			});
 		else return null;
 	}
@@ -186,22 +189,6 @@ class RingSlide extends Module{
 			$(document).ready(function(){
 				".(isValid($this->Path)?"$('.{$this->Name} .menu>.center:before').click(function () { load('{$this->Path}'); });":"")."
 				const bselector = '.{$this->Name} .menu>.center>a';
-				$(bselector).click(function(evt){
-					const xn = $(this).attr('href');
-					const tar = $(this).attr('data-target');
-					const x = xn.replace('#', '');
-					$(tar).each(function(){
-						const y = $(this).attr('Id' );
-						if (x == y) $(this).addClass('active show');
-						else $(this).removeClass('active show');
-					});
-					$(bselector).each(function(){
-						const y = $(this).attr('href');
-						if (xn == y) $(this).addClass('active');
-						else $(this).removeClass('active');
-					});
-					evt.preventDefault();
-				});
 
 				const buttons = Array.from(document.querySelectorAll(bselector));
 				const count = buttons.length;
@@ -234,6 +221,22 @@ class RingSlide extends Module{
 					button.addEventListener('click', move);
 				});
 
+				$(bselector).click(function(evt){
+					const xn = $(this).attr('href');
+					const tar = $(this).attr('data-target');
+					const x = xn.replace('#', '');
+					$(tar).each(function(){
+						const y = $(this).attr('Id' );
+						if (x == y) $(this).addClass('active show');
+						else $(this).removeClass('active show');
+					});
+					$(bselector).each(function(){
+						const y = $(this).attr('href');
+						if (xn == y) $(this).addClass('active');
+						else $(this).removeClass('active');
+					});
+					if(".($this->HasTab?"true":"false").") evt.preventDefault();
+				});
 			});
 			"):"");
     }

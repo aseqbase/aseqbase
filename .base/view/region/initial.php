@@ -6,8 +6,8 @@
 		<!--[if lt IE 9]>
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
 		<![endif]-->
-		<meta name="viewport" content="width=device-width, initial-scale=1, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" >
-		<meta name="copyright" content="Copyright (C) 1996-2023 The MiMFa Group Software Foundation and contributors">
+		<meta name="viewport" content="width=device-width, initial-scale=1, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<meta name="copyright" content="Copyright (C) 2004-2025 The MiMFa Group Software Foundation and contributors">
 		<meta name="producer" content="http://www.MiMFa.net">
 		<meta name="product" content="http://www.aseqbase.ir">
 		<meta name="owner" content="<?php echo \_::$Info->FullOwner; ?>">
@@ -15,10 +15,8 @@
 		<meta name="abstract" content="<?php echo \_::$Info->FullDescription; ?>">
 		<meta name="description" content="<?php echo \_::$Info->FullDescription; ?>">
 		<meta name="twitter:Description" content="<?php echo \_::$Info->Description; ?>">
-		<meta name="twitter:Image" content="<?php echo forceFullUrl(\_::$Info->LogoPath); ?>">
+		<meta name="twitter:Image" content="<?php echo \MiMFa\Library\Local::GetUrl(\_::$Info->LogoPath); ?>">
 		<!-- LICENCE PART: Don`t remove this part -->
 		<meta name="framwork" content="aseqbase">
 		<!-- LICENCE PART -->
-		<?php echo join(PHP_EOL, \_::$Front->Libraries); ?>
-		<link rel='stylesheet' href='<?php echo forceFullUrl('/view/style/view.css'); ?>'>
-		<?php echo \_::$Front->GetInitial(); ?>
+		<?php echo join(PHP_EOL, \_::$Front->Libraries) . \_::$Front->GetInitial(); ?>

@@ -26,7 +26,7 @@ else
             "Access" =>function(){
                 $std = new stdClass();
                 $std->Type="number";
-                $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->UserAccess];
+                $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->SuperAccess];
                 return $std;
             },
             "Image" =>"Image" ,

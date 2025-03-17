@@ -14,7 +14,7 @@ class Convert
      */
     public static function By($converter, &...$args)
     {
-        if (is_null($converter) || is_string($converter))
+        if (isStatic($converter))
             return $converter;
         if (is_countable($converter) || is_iterable($converter))
             return iterator_to_array((function () use ($converter, &$args) {
@@ -31,7 +31,7 @@ class Convert
      * @param mixed $value
      * @return string
      */
-    public static function ToStatic($value, $separator = PHP_EOL, $assignFormat = "{0}:{\t{1}},")
+    public static function ToStatic($value, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", $default = null)
     {
         if (!is_null($value)) {
             if (is_string($value) || is_numeric($value))
@@ -48,7 +48,8 @@ class Convert
                         array_push($texts, str_replace(["{0}", "{1}"], [$key, $item], $assignFormat));
                     else {
                         $sp = "";
-                        if (is_string($item))
+                        if (!is_string($item)) $item = self::ToStatic($item, $separator, $assignFormat, $default);
+                        if (is_string($item)){
                             if (str_contains($item, '"')) {
                                 if (str_contains($item, "'")) {
                                     $item = str_replace("'", "\'", $item);
@@ -57,10 +58,12 @@ class Convert
                                     $sp = "'";
                             } else
                                 $sp = '"';
-                        array_push($texts, str_replace(["{0}", "{1}"], [$key, "$sp$item$sp"], $assignFormat));
+                            $item = "$sp$item$sp";
+                        }
+                        array_push($texts, str_replace(["{0}", "{1}"], [$key, $item], $assignFormat));
                     }
                 }
-                return join($separator, $texts);
+                return str_replace("{0}", join($separator, $texts), $arrayFormat);
             }
             if (is_callable($value) || $value instanceof \Closure)
                 return self::ToStatic($value(), $separator, $assignFormat);
@@ -68,16 +71,16 @@ class Convert
                 return self::ToShownDateTimeString($value);
             return $value;
         }
-        return null;
+        return $default;
     }
     /**
      * Convert everything to a simple string format
      * @param mixed $value
      * @return string
      */
-    public static function ToString($value, $separator = PHP_EOL, $assignFormat = "{0}:{\t{1}},")
+    public static function ToString($value, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", $default = null)
     {
-        return self::ToStatic($value, $separator, $assignFormat) . "";
+        return self::ToStatic($value, $separator, $assignFormat,  $arrayFormat , $default) . "";
     }
 
     /**
@@ -136,9 +139,9 @@ class Convert
      * @param string $text
      * @return string
      */
-    public static function ToId($text)
+    public static function ToId($text, $random = false)
     {
-        return self::ToKey($text, true, '/[^A-Za-z0-9\_\-\$]/');
+        return self::ToKey($text, true, '/[^A-Za-z0-9\_\-\$]/')."_".getId($random);
     }
     /**
      * Convert a text to a Key Name
@@ -312,7 +315,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'tmp_name' => Local::NewUniquePath($filename, ".tmp", \_::$Aseq->TempDirectory),
+                                'tmp_name' => Local::CreatePath($filename, ".tmp", \_::$Aseq->TempDirectory),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );
@@ -458,7 +461,7 @@ class Convert
 
     public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
-        $path = $path ?? Local::NewUniquePath("table", ".csv", random: false);
+        $path = $path ?? Local::CreatePath("table", ".csv", random: false);
         $fstream = fopen($path, 'r+b');
         foreach ($cells as $fields)
             fputcsv($fstream, $fields, $delimiter, $enclosure, "\\", $eol);
@@ -489,19 +492,26 @@ class Convert
                 $additionalKeys['$URLLINK'] = Html::Link(\Req::$Url, \Req::$Url);
             if (!isset($additionalKeys['$URL']))
                 $additionalKeys['$URL'] = \Req::$Url;
-            if (isValid(\_::$Back->User->Id)) {
-                $person = \_::$Back->User->Get(getValid($additionalKeys, '$SIGNATURE'));
-                if (!isValid($additionalKeys, '$SIGNATURE'))
-                    $additionalKeys['$SIGNATURE'] = get($person, "Signature") ?? \_::$Back->User->TemporarySignature;
-                if (!isValid($additionalKeys, '$NAME'))
-                    $additionalKeys['$NAME'] = get($person, "Name") ?? \_::$Back->User->TemporaryName;
-                $email = get($person, "Email") ?? \_::$Back->User->TemporaryEmail;
-                if (!isset($additionalKeys['$EMAILLINK']))
-                    $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
-                if (!isset($additionalKeys['$EMAIL']))
+            if (!isValid($additionalKeys, '$SIGNATURE'))
+                $additionalKeys['$SIGNATURE'] = \_::$Back->User->TemporarySignature;
+            if (!isValid($additionalKeys, '$NAME'))
+                $additionalKeys['$NAME'] = \_::$Back->User->TemporaryName;
+            $email = \_::$Back->User->TemporaryEmail;
+            if (!isset($additionalKeys['$EMAILLINK']))
+                $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
+            if (!isset($additionalKeys['$EMAIL']))
                     $additionalKeys['$EMAIL'] = $email;
-                if (!isset($additionalKeys['$IMAGE']))
-                    $additionalKeys['$IMAGE'] = get($person, "Image") ?? \_::$Back->User->TemporaryImage;
+            if (!isset($additionalKeys['$IMAGE']))
+                    $additionalKeys['$IMAGE'] = \_::$Back->User->TemporaryImage;
+
+            if (isValid(\_::$Back->User->Id)) {
+                $person = \_::$Back->User->Get(takeValid($additionalKeys, '$SIGNATURE'));
+                $additionalKeys['$SIGNATURE'] = get($person, "Signature") ?? \_::$Back->User->TemporarySignature;
+                $additionalKeys['$NAME'] = get($person, "Name") ?? \_::$Back->User->TemporaryName;
+                $email = get($person, "Email") ?? \_::$Back->User->TemporaryEmail;
+                $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
+                $additionalKeys['$EMAIL'] = $email;
+                $additionalKeys['$IMAGE'] = get($person, "Image") ?? \_::$Back->User->TemporaryImage;
                 if (!isset($additionalKeys['$IMAGETAG']))
                     $additionalKeys['$IMAGETAG'] = Html::Image($additionalKeys['$SIGNATURE'], get($person, "Image"));
                 if (!isset($additionalKeys['$ADDRESS']))
@@ -528,7 +538,7 @@ class Convert
             ? $obj
             : (
                 is_array($obj) || $obj instanceof \stdClass
-                ? (findBetween($obj, $key, "Default") ?? last($obj))
+                ? (getBetween($obj, $key, "Default") ?? last($obj))
                 : (
                     is_callable($obj) || $obj instanceof \Closure
                     ? self::FromSwitch($obj($key), $key, $defultValue)

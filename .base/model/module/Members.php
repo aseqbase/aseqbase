@@ -143,19 +143,19 @@ class Members extends Module
 
                             // Features (Assignees)
                             yield Html::Division(function () use ($menu, $i) {
-                                foreach (findValid($menu[$i], 'Assignees', []) as $assignee)
+                                foreach (getValid($menu[$i], 'Assignees', []) as $assignee)
                                     yield Html::Division(__($assignee, styling: false)) . Html::$NewLine;
                             }, ["class" => "features"]);
 
                             // List of Items (Details)
                             yield Html::Items(function () use ($menu, $i) {
-                                foreach (findValid($menu[$i], 'Items', []) as $item) {
+                                foreach (getValid($menu[$i], 'Items', []) as $item) {
                                     yield Html::Item(
                                         Html::Italic(
                                             __(get($item, 'Key'), styling: false) . __(":", styling: false),
                                             null,
                                             ["class" => 'fa ' . get($item, "class"), "aria-hidden" => 'true']
-                                        ) . __(findValid($item, 'Value', ''), styling: false),
+                                        ) . __(getValid($item, 'Value', ''), styling: false),
                                         ["class" => "list-item d-flex justify-content-between align-items-center"]
                                     );
                                 }

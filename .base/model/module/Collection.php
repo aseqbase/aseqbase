@@ -130,14 +130,20 @@ class Collection extends Module{
             foreach(Convert::ToItems($this->Items) as $item) {
                 if($i % $this->MaximumColumns === 0)  yield "<div class='row items'>";
 				if(is_string($item)) yield $item;
-				else if(auth(findValid($item,'Access' , \_::$Config->VisitAccess))){
-                    $p_image = findValid($item,'Image' , $this->DefaultImage);
-                    $p_name = __(findBetween($item,'Title', 'Name')?? $this->DefaultTitle,true,false);
-                    $p_content = findValid($item,'Content' , $this->DefaultContent);
-                    $p_description = findValid($item,'Description' , $this->DefaultDescription);
+				else if(auth(getValid($item,'Access' , \_::$Config->VisitAccess))){
+					$p_meta = getValid($item,'MetaData' ,null);
+					if($p_meta !==null) {
+						$p_meta = Convert::FromJson($p_meta);
+						swap( $this, $p_meta);
+					}
+					$p_meta = null;
+                    $p_image = getValid($item,'Image' , $this->DefaultImage);
+                    $p_name = __(getBetween($item,'Title', 'Name')?? $this->DefaultTitle,true,false);
+                    $p_content = getValid($item,'Content' , $this->DefaultContent);
+                    $p_description = getValid($item,'Description' , $this->DefaultDescription);
                     $p_description = is_null($p_description)?null:__($p_description);
-                    $p_link = findBetween($item,'Link','Path')?? $this->DefaultLink;
-                    $p_buttons = findValid($item,'Buttons', $this->DefaultButtons);
+                    $p_link = getBetween($item,'Link','Path')?? $this->DefaultLink;
+                    $p_buttons = getValid($item,'Buttons', $this->DefaultButtons);
                     $img->Source = $p_image;
 					if(is_null($p_description))
                         yield Html::Button(

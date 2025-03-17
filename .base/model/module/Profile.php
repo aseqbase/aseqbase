@@ -112,11 +112,7 @@ class Profile extends Form{
 		$this->RemoveSecret = encrypt("$a-Remove");
 		$this->ModifySecret = encrypt("$a-Modify");
     }
-
-	public function GetDefaultAttributes(){
-		return parent::GetDefaultAttributes().$this->GetAttribute(" border",$this->BorderSize);
-	}
-
+    
 	public function GetStyle(){
 		return Html::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
@@ -235,9 +231,9 @@ class Profile extends Form{
         ]).(new Router())
         ->if($secret === $this->ViewSecret)
         ->Default(function() use($key) { return $this->GetViewFields($key); })
-        ->if($secret === $this->AddSecret)
+        ->else($secret === $this->AddSecret)
         ->Default(function() use($key) { return $this->GetAddFields($key); })
-        ->if($secret === $this->ModifySecret)
+        ->else($secret === $this->ModifySecret)
         ->Default(function() use($key) { return $this->GetModifyFields($key); })
         ->Handle()->Result;
 	}
@@ -271,11 +267,11 @@ class Profile extends Form{
         return (new Router())
         ->if($secret === $this->ModifySecret)
         ->Patch(function() use($key) { return $this->GetModifyFields($key); })
-        ->if($secret === $this->RemoveSecret)
+        ->else($secret === $this->RemoveSecret)
         ->Delete(function() use($key) { return $this->DoRemoveHandle($key); })
-        ->if($key === $this->AddSecret)
+        ->else($key === $this->AddSecret)
         ->Post(function() use($key) { return $this->DoAddHandle($key); })
-        ->if($key !== null)
+        ->else($key !== null)
         ->Put(function() use($key) { return $this->DoModifyHandle($key); })
         ->Handle()->Result;
     }
@@ -285,13 +281,13 @@ class Profile extends Form{
         if(!auth($this->ViewAccess)) return Html::Error("You have not access to see datails!");
         if(isEmpty($this->Items)) return Html::Error("You can not see this item!");
         $this->Set(
-            title:findBetween($this->Items,"Title","Name" ),
+            title:getBetween($this->Items,"Title","Name" ),
             description:get($this->Items,"Description"),
             action:'#',
             method:"",
             children:(function(){
                 foreach ($this->Items as $k=>$cell){
-                    $type = findValid($this->CellsTypes, $k, "");
+                    $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)){
                         $type = strtolower($type);
                         switch($type){
@@ -324,7 +320,7 @@ class Profile extends Form{
                     );
                 }
             })());
-        $this->Image = findValid($this->Items,"Image" ,"eye");
+        $this->Image = getValid($this->Items,"Image" ,"eye");
         $this->Template = "b";
         $this->Class = "container";
         $this->SubmitLabel = null;
@@ -362,7 +358,7 @@ class Profile extends Form{
                             if(!isEmpty($res)) yield $res;
                         }
             })());
-        $this->Image = findValid($record,"Image" ,"plus");
+        $this->Image = getValid($record,"Image" ,"plus");
         $this->Template = "b";
         $this->Class = "container";
         $this->CancelLabel = "Cancel";
@@ -390,7 +386,7 @@ class Profile extends Form{
         module("Form");
         if(isEmpty($this->Items)) return Html::Error("You can not modify this item!");
         $this->Set(
-            title:findBetween($this->Items,"Title","Name"),
+            title:getBetween($this->Items,"Title","Name"),
             description:get($this->Items,"Description"),
             children:(function() use($value){
                 $schemas = $this->DataTable->DataBase->TrySelect(
@@ -406,7 +402,7 @@ class Profile extends Form{
                             break;
                         }
             })());
-        $this->Image = findValid($this->Items,"Image" ,"edit");
+        $this->Image = getValid($this->Items,"Image" ,"edit");
         $this->Template = "b";
         $this->Class = "container";
         $this->CancelLabel = "Cancel";
@@ -434,7 +430,7 @@ class Profile extends Form{
     }
 
 	public function PrepareDataToShow(&$key, &$value, &$record, $schema){
-        $type = findValid($this->CellsTypes, $key, $schema["DATA_TYPE"]);
+        $type = getValid($this->CellsTypes, $key, $schema["DATA_TYPE"]);
         $options = null;
         $def = $schema["COLUMN_DEFAULT"]??"";
         if(is_null($value))
@@ -500,17 +496,17 @@ class Profile extends Form{
         try{
             foreach (\Req::File()??[] as $k=>$v)
                 if(Local::IsFileObject($v)){
-                    $type = findValid($this->CellsTypes, $k, "");
+                    $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)) $type = \_::$Config->GetAcceptableFormats($type);
                     else $type = \_::$Config->GetAcceptableFormats();
-                    $values[$k] = Local::UploadFile($v, extensions:$type);
+                    $values[$k] = Local::GetUrl(Local::StoreFile($v, extensions:$type));
                 }
                 else unset($values[$k]);
         }catch(\Exception $ex){ return Html::Error($ex); }
         foreach ($values as $k=>$v)
             if($k !== $this->KeyColumn){
                 if($v === '') $values[$k] = null;
-                $type = findValid($this->CellsTypes, $k, "");
+                $type = getValid($this->CellsTypes, $k, "");
                 if(is_string($type)){
                     switch(strtolower($type)){
                         case "pass":

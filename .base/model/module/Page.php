@@ -244,31 +244,31 @@ class Page extends Module{
 
         $p_id = get($item, 'Id' );
         $p_type = get($item, 'Type' );
-        $p_image = findValid($item, 'Image' , $this->Image);
-        $p_name = findBetween($item, 'Name', 'Title')?? $this->Title;
-        $p_title = findValid($item, 'Title' , $p_name);
-        $p_description = findValid($item, 'Description' , $this->Description);
-        $p_content = findValid($item, 'Content' , $this->Content);
+        $p_image = getValid($item, 'Image' , $this->Image);
+        $p_name = getBetween($item, 'Name', 'Title')?? $this->Title;
+        $p_title = getValid($item, 'Title' , $p_name);
+        $p_description = getValid($item, 'Description' , $this->Description);
+        $p_content = getValid($item, 'Content' , $this->Content);
         $p_class = get($item, 'class');
 
         if ($this->ShowRoute) {
             module("Route"); // Assuming this makes the Route class available
         }
 
-        $p_meta = findValid($item, 'MetaData' , null);
+        $p_meta = getValid($item, 'MetaData' , null);
         if ($p_meta !== null) {
             $p_meta = Convert::FromJson($p_meta);
         }
 
-        $p_showcontent = $this->ShowContent || findValid($p_meta, "ShowContent", false);
-        $p_showdescription = $this->ShowDescription || findValid($p_meta, "ShowDescription", false);
-        $p_showimage = $this->ShowImage || findValid($p_meta, "ShowImage", false);
-        $p_showtitle = $this->ShowTitle || findValid($p_meta, "ShowTitle", false);
-        $p_showmeta = $this->ShowMetaData || findValid($p_meta, "ShowMeta", false);
-        $p_path = findValid($item, 'Path' , $this->Path);
+        $p_showcontent = $this->ShowContent || getValid($p_meta, "ShowContent", false);
+        $p_showdescription = $this->ShowDescription || getValid($p_meta, "ShowDescription", false);
+        $p_showimage = $this->ShowImage || getValid($p_meta, "ShowImage", false);
+        $p_showtitle = $this->ShowTitle || getValid($p_meta, "ShowTitle", false);
+        $p_showmeta = $this->ShowMetaData || getValid($p_meta, "ShowMeta", false);
+        $p_path = getValid($item, 'Path' , $this->Path);
         $hasl = isValid($p_path);
-        $p_showmorebutton = $hasl && ($this->ShowMoreButton || findValid($p_meta, "ShowMoreButton", false));
-        $p_morebuttontext = findValid($p_meta, "MoreButtonLabel", $this->MoreButtonLabel);
+        $p_showmorebutton = $hasl && ($this->ShowMoreButton || getValid($p_meta, "ShowMoreButton", false));
+        $p_morebuttontext = getValid($p_meta, "MoreButtonLabel", $this->MoreButtonLabel);
         $p_meta = null;
 
 

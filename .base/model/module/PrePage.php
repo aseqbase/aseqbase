@@ -8,6 +8,14 @@ class PrePage extends Module{
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
+			.{$this->Name}{
+				padding: 3vmax;
+			}
+			.{$this->Name} .title{
+				font-size: var(--size-1);
+				text-align: justify;
+				padding-top: 0px;
+			}
 			.{$this->Name} .description{
 				font-size: var(--size-1);
 				text-align: justify;
@@ -17,16 +25,21 @@ class PrePage extends Module{
 				background-size: cover;
 				background-position: center;
 				background-repeat: no-repeat;
-				font-size: var(--size-1);
+				font-size: calc(2 * var(--size-max));
+    			text-align: center;
 			}
 		");
 	}
 
 	public function Get(){
+		if(isValid($this->Description))
 		return $this->GetTitle().Html::Rack(
-			$this->GetDescription("class='col-md description'").
-			Html::Media("",$this->Image,["class"=>"blackwhite col-md-4"])
+			$this->GetDescription(["class"=>'description col-md']).
+			Html::Media("",$this->Image, ["class"=>"blackwhite col-md-4"])
 		).$this->GetContent("class='content'");
+		else return Html::Rack(
+			Html::Media("",$this->Image, ["class"=>"blackwhite col-md"])
+		).$this->GetTitle().$this->GetContent("class='content'");
 	}
 }
 ?>
