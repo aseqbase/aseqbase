@@ -159,7 +159,8 @@ class Table extends Module
     public $HoverableRows = true;
     public $HoverableCells = true;
 
-    protected $ExclusiveMethod = "Table";
+    protected $ExclusiveMethod = "OPTIONS";
+    protected $SecretKey = "_secret";
     public $Controlable = true;
     public $Updatable = false;
     public $UpdateAccess = 0;
@@ -217,7 +218,7 @@ class Table extends Module
         $this->AddSecret = sha1("$a-Add");
         $this->RemoveSecret = sha1("$a-Remove");
         $this->ModifySecret = sha1("$a-Modify");
-        $this->Router->On($this->ExclusiveMethod, fn(&$router)=> $this->Exclusive());
+        $this->Router->On($this->ExclusiveMethod, fn(&$router) => $this->Exclusive());
     }
     /**
      * Set the main properties of module
@@ -530,9 +531,9 @@ class Table extends Module
                 if (is_bool($this->Footer)) {
                     $cells[] = "<tfoot><tr>";
                     if (0 < $colCount)
-                        $cells[] = Html::Cell("", true, $isc || $hrn ? ["class" => "invisible"] : []);
+                        $cells[] = Html::Cell("", $isc || $hrn ? ["Type"=>"head", "class" => "invisible"] : ["Type"=>"head"]);
                     for ($i = 1; $i < $colCount; $i++)
-                        $cells[] = Html::Cell("", true/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
+                        $cells[] = Html::Cell("", ["Type"=>"head"]/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
                     $cells[] = "</tr></tfoot>";
                 } else
                     $cells[] = Convert::ToString($this->Footer);
@@ -548,10 +549,9 @@ class Table extends Module
             $cel = Convert::ToString(Convert::By(get($this->CellsValues, $key), $cel, $key, $row) ?? $cel);
         if ($isHead) {
             $cel = Convert::ToString($cel);
-            if (isFile($cel))
-                return "<th>" . Html::Media($cel) . "</th>";
-            else
-                return "<th>" . __($cel, translating: $this->AllowLabelTranslation, styling: false) . "</th>";
+            if (isFile($cel)) return "<th>" . Html::Media($cel) . "</th>";
+            else if (isAbsoluteUrl($cel)) return "<th>" . Html::Link(getPage($cel), $cel) . "</th>";
+            else return "<th>" . __($cel, translating: $this->AllowLabelTranslation, styling: false) . "</th>";
         }
         //if($this->Updatable && !$isHead && $key > 1){
         //    $cel = new Field(key:$key, value: $cel, lock: true, type:getValid($this->CellsTypes,$key, null));
@@ -559,8 +559,8 @@ class Table extends Module
         //    $cel->MaxHeight = $this->MediaHeight;
         //    return "<td>".Convert::ToString($cel)."</td>";
         //}
-        if (isFile($cel))
-            return "<td>" . Html::Media($cel) . "</td>";
+        if (isFile($cel)) return "<td>" . Html::Media($cel) . "</td>";
+        if (isAbsoluteUrl($cel)) return "<td>" . Html::Link(getPage($cel), $cel) . "</td>";
         $cel = __($cel, translating: $this->AllowDataTranslation, styling: false);
         if (!$this->TextWrap && !startsWith($cel, "<"))
             return "<td>" . Convert::ToExcerpt($cel, 0, $this->TextLength, "..." . Html::Tooltip($cel)) . "</td>";
@@ -625,28 +625,28 @@ class Table extends Module
 			});") . ($this->Controlable ?
                 (is_null($this->Modal) ? "" : ("
 				function {$this->Modal->Name}_View(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->ViewSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ViewSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->ShowScript(null, null, '${data}') . "
 						}
 					);
 				}" . ($this->Updatable ? (auth($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(){
-					sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->AddSecret}',{$this->KeyColumn}:'{$this->AddSecret}'}, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}',{$this->KeyColumn}:'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->ShowScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (auth($this->ModifyAccess) ? "
 				function {$this->Modal->Name}_Modify(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->ModifySecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->ShowScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (auth($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->DuplicateSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->ShowScript(null, null, '${data}') . "
 						}
@@ -654,7 +654,7 @@ class Table extends Module
 				}" : "") . (auth($this->RemoveAccess) ? "
 				function {$this->Modal->Name}_Delete(key){
 					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?", styling: false) . "`))" : "") . "
-						sendRequest('{$this->ExclusiveMethod}', null, {secret:'{$this->RemoveSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
+						sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
 							load();
 						});
@@ -671,31 +671,30 @@ class Table extends Module
             return parent::AfterHandle() . ($this->TopNavigation ? $this->NavigationBar->ToString() : $this->NavigationBar->ToString());
     }
 
-    public function Handler($received = null)
-    {
-        if($this->ExclusiveMethod == getMethodName())
-            $this->Exclusive();
-        else parent::Handler($received);
-    }
-
     public function Exclusive()
     {
-        $values = \Req::Receive(null, $this->ExclusiveMethod)??[];
+        $values = \Req::Receive(null, $this->ExclusiveMethod) ?? [];
         $value = get($values, $this->KeyColumn);
-        $secret = grab($values, "secret") ?? "view";
+        $secret = grab($values, $this->SecretKey);
         $recievedData = count($values) > 1;
-        if ($secret === $this->ViewSecret)
+        if (!$secret) return Html::Error("Your request is not valid!");
+        elseif ($secret === $this->ViewSecret)
             return $this->GetViewForm($value);
         elseif ($secret === $this->DuplicateSecret)
             return $this->GetDuplicateForm($value);
         elseif ($secret === $this->AddSecret)
-            if($recievedData) return $this->AddRow($values);
-            else return $this->GetAddForm($value);
+            if ($recievedData)
+                return $this->AddRow($values);
+            else
+                return $this->GetAddForm($value);
         elseif ($secret === $this->ModifySecret)
-            if($recievedData) return $this->ModifyRow($values);
-            else return $this->GetModifyForm($value);
+            if ($recievedData)
+                return $this->ModifyRow($values);
+            else
+                return $this->GetModifyForm($value);
         elseif ($secret === $this->RemoveSecret)
             return $this->RemoveRow($value);
+        else return Html::Error("There is not any response for your request!");
     }
 
     public function GetForm()
@@ -782,7 +781,7 @@ class Table extends Module
             $form->CancelLabel = null;
         return $form->Handle();
     }
-    public function GetAddForm($value) {
+    public function GetAddForm($value){
         if (is_null($value))
             return null;
         if (!auth($this->AddAccess))
@@ -813,6 +812,7 @@ class Table extends Module
                             if (!isEmpty($res))
                                 yield $res;
                         }
+                yield Html::HiddenInput($this->SecretKey, $this->AddSecret);
             })()
         );
         $form->Image = getValid($record, "Image", "plus");
@@ -846,6 +846,7 @@ class Table extends Module
                             if (!isEmpty($res))
                                 yield $res;
                         }
+                yield Html::HiddenInput($this->SecretKey, $this->AddSecret);
             })()
         );
         $form->Image = getValid($record, "Image", "plus");
@@ -879,6 +880,7 @@ class Table extends Module
                                 yield $res;
                             break;
                         }
+                yield Html::HiddenInput($this->SecretKey, $this->ModifySecret);
             })()
         );
         $form->Image = getValid($record, "Image", "edit");

@@ -384,7 +384,7 @@ class Transaction {
 			[__("Transaction" ,styling:false).":", $this->Transaction],
 			[__("Identifier" ,styling:false).":", $this->Identifier],
 			[__("Others" ,styling:false).":", $this->Others]
-		],[],[]);
+		],["RowHeaders"=> [],"ColHeaders"=> []]);
     }
 }
 ?>

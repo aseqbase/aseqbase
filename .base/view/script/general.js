@@ -403,9 +403,9 @@ let sendRequest = function (
 	const btns = document.querySelectorAll(selector + ' :is(button, .btn, .icon, input:is([type=button],[type=submit],[type=image],[type=reset]))');
 	const elems = document.querySelectorAll(selector);
 	const opacity = document.querySelector(selector).style.opacity;
-	url = url ?? location.href;
-	timeout = timeout ?? 30000;
-	method = (method ?? "POST").toUpperCase();
+	url = url || location.href;
+	timeout = timeout || 30000;
+	method = (method || "POST").toUpperCase();
 	let isForm = false;
 	let contentType = 'application/x-www-form-urlencoded; charset=utf-8';
 
@@ -413,17 +413,12 @@ let sendRequest = function (
 		if (isForm = data instanceof FormData) {
 			contentType = false;
 		} else if (method === "GET") {
-			url += (url.includes('?') ? '&' : '?');
-			if (typeof data === 'object' || Array.isArray(data))
-				url += new URLSearchParams(data).toString();
-			else url += data;
+			url += (url.includes('?') ? '&' : '?') + new URLSearchParams(data).toString();
 			contentType = false;
 			data = null;
 		} else if (typeof data === 'object' || Array.isArray(data)) {
 			data = JSON.stringify(data);
 			contentType = 'application/json; charset=utf-8';
-		} else if (typeof data === 'string') {
-			contentType = 'application/x-www-form-urlencoded; charset=utf-8';
 		}
 
 	success = success ?? function (result = null, err = null) {
@@ -486,7 +481,8 @@ let sendRequest = function (
 
 		if (xhr.status >= 200 && xhr.status < 300) {
 			try {
-				const response = xhr.getResponseHeader('Content-Type')?.includes('application/json') ? JSON.parse(xhr.response) : xhr.response;
+				let response = xhr.response;
+				try{response = JSON.parse(response);}catch{}
 				success(response);
 			} catch (e) {
 				error("There was a problem on retrieving data!<br>" + e.message, xhr.status);
@@ -514,8 +510,7 @@ let sendRequest = function (
 		elems.forEach(elem => elem.style.opacity = '.5');
 	};
 
-	if (data) xhr.send(data);
-	else xhr.send();
+	xhr.send(data || null);
 
 	return xhr;
 };

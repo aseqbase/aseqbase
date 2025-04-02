@@ -25,7 +25,8 @@ class Html
     public static $HorizontalBreak = "<hr/>";
 
     /**
-     * Convert everything to a simple HTML format
+     * Convert everything to a simple HTML format,
+     * Supports all MarkDown markups
      * @param mixed $value
      * @return string
      */
@@ -36,30 +37,67 @@ class Html
                 if (preg_match("/\<[^\>]+\>/i", $value))
                     return $value;
                 else {
-                    $value = preg_replace("/\b\"(\S[^\r\n]+\S)\"\b/i", "<quote ondblclick='copy(this.innerText)'>$1</quote>", $value);
-                    $value = preg_replace("/^\#\s(.*)/im", "<h1>$1</h1>", $value);
-                    $value = preg_replace("/^\#{2}\s(.*)/im", "<h2>$1</h2>", $value);
-                    $value = preg_replace("/^\#{3}\s(.*)/im", "<h3>$1</h3>", $value);
-                    $value = preg_replace("/^\#{4}\s(.*)/im", "<h4>$1</h4>", $value);
-                    $value = preg_replace("/^\#{5}\s(.*)/im", "<h5>$1</h5>", $value);
+                    $patt = '/(`\S[^`]*`)|("\S[^"]*")|(\'\S[^\']*\')|(\<\/?([A-Za-z\-_]+)[^>]*[^\\\\]?\>)/iU';
+                    // Codes and Quotes
+                    $value = preg_replace("/\B\"(\S[^\r\n\"]+\S)\"\B/i", self::Quote("$1"), $value);
+                    $value = preg_replace("/((((\r?\n\r?)|^)\>.*)+)/im", self::QuoteBlock("$1"), $value); // Blockquotes
+                    $value = preg_replace('/```(.+?)```/s', self::CodeBlock("$1"), $value); // Code blocks
+                    $value = preg_replace('/`(.+?)`/s', self::Code("$1"), $value); // Inline code
+                    // To keep all previous tags unchanged
+                    $value = code($value, $dic, pattern:$patt);
+                    // Headings
+                    $value = preg_replace("/^\#\s(.*)/im", self::ExternalHeading("$1"), $value);
+                    $value = preg_replace("/^\#{2}\s(.*)/im", self::SuperHeading("$1"), $value);
+                    $value = preg_replace("/^\#{3}\s(.*)/im", self::Heading("$1"), $value);
+                    $value = preg_replace("/^\#{4}\s(.*)/im", self::SubHeading("$1"), $value);
+                    $value = preg_replace("/^\#{5}\s(.*)/im", self::InternalHeading("$1"), $value);
                     $value = preg_replace("/^\#{6}\s(.*)/im", "<h6>$1</h6>", $value);
-                    $value = preg_replace("/((\r?\n\r?\s*(\+|(\d+\.?))\s.*)(\r?\n\r?\s*([\+\*•○\-]|(\d+\.?))\s.*)*)/i", "<ol>" . PHP_EOL . "$1" . PHP_EOL . "</ol>", $value);
-                    $value = preg_replace("/^\s*(?:[\+]|(?:\d+\.?))\s(.*)/im", "<li>$1</li>", $value);
-                    $value = preg_replace("/((\r?\n\r?\s*[\*•○\-]\s.*)+)/i", "<ul>" . PHP_EOL . "$1" . PHP_EOL . "</ul>", $value);
-                    $value = preg_replace("/^\s*[\*•○\-]\s(.*)/im", "<li>$1</li>", $value);
-                    $value = preg_replace("/^\-{6,}$/im", "<hr/>", $value);
-                    $value = preg_replace("/\b\@image:([^\s\[\]\{\}]+)\b/i", self::Image(null, "$1"), $value);
-                    $value = preg_replace("/\b\@\[([^\]]*)\]:([^\s\[\]\{\}]+)\b/i", self::Link("$1", "$2"), $value);
+                    // Lists
+                    $blts = "\*\-•○☐";
+                    $chs = "✓✔☑✅";
+                    $uchs = "⨯⨉❌❎";
+                    $value = preg_replace("/((\r?\n\r?[ \t\f]*(\+|(\d+\W?))\s+.*)(\r?\n\r?[ \t\f]*([+$blts$chs$uchs]|(\d+\W?))\s+.*)*)/iu", self::List("\n$1\n"), $value);
+                    $value = preg_replace("/^[ \t\f]*(?:\+|(?:\d+\W?))\s+(.*)/im", self::Item("$1"), $value);
+                    $value = preg_replace("/((\r?\n\r?[ \t\f]*[$blts$chs$uchs]\s+.*)+)/iu", self::Items("\n$1\n"), $value);
+                    // $value = preg_replace("/^\s*\[\s*x?\s*\]\s+(.*)/im", self::Item("$1", ["class"=>"checked"]), $value);
+                    // $value = preg_replace("/^\s*\[\s*\]\s+(.*)/im", self::Item("$1", ["class"=>"unchecked"]), $value);
+                    $value = preg_replace("/^[ \t\f]*[$chs]\s+(.*)/imu", self::Item("$1", ["class"=>"checked"]), $value);
+                    $value = preg_replace("/^[ \t\f]*[$uchs]\s+(.*)/imu", self::Item("$1", ["class"=>"unchecked"]), $value);
+                    $value = preg_replace("/^[ \t\f]*[$blts]\s+(.*)/imu", self::Item("$1"), $value);
+                    // Tables
+                    $value = preg_replace("/((\r?(\n|^)\r?[ \t\f]*(\|.+)((\|[ \t\f]*)|$))+)/im", self::Table("\n$1\n"), $value);
+                    $value = preg_replace("/^[ \t\f]*(\|.*\|?)[ \t\f]*$/im", self::Row("$1"), $value);
+                    $value = preg_replace("/[ \t\f]*\|\|([^\|\r\n]*)((\|\|$)|(?=\|\|)|$)/im", self::Cell("$1",["Type"=>"head"]), $value);
+                    $value = preg_replace("/[ \t\f]*\|([^\|\r\n]*)((\|$)|(?=\|)|$)/im", self::Cell("$1"), $value);
+                    // Footnotes
+                    $value = preg_replace("/^\[([a-z0-9_\-]+)\]:\s*(.*)/im", self::Division("[$1] $2", ["class"=>"footnote", "id"=>"fn-$1"]), $value);
+                    $value = preg_replace("/\[([a-z0-9_\-]+)\]/i", self::Span("[$1]", "#fn-$1"), $value);
+                    $value = preg_replace("/\[([\^~])([^\]]+)\]:\s*(.*)/i", self::Division("$1$2 $3", ["class"=>"footnote", "id"=>"fn-$2"]), $value);
+                    $value = preg_replace("/\[\^([^\]]+)\]/i", self::Super("[$1]", "#fn-$1"), $value);
+                    $value = preg_replace("/\[~([^\]]+)\]/i", self::Sub("[$1]", "#fn-$1"), $value);
+                    // Medias
+                    $value = preg_replace("/\!\[([^\]]+)\]\(([A-Za-z0-9\-_]+)\)/i", self::Image("$1", "$2"), $value);
+                    $value = preg_replace("/\!\[([^\]]+)\]\(([^\s]+)\)/i", self::Image("$1", " $2"), $value);
+                    $value = preg_replace("/@\[([^\]]+)\]\(([A-Za-z0-9\-_]+)\)/i", self::Media("$1", "$2"), $value);
+                    $value = preg_replace("/@\[([^\]]+)\]\(([^\s]+)\)/i", self::Media("$1", " $2"), $value);
+                    $value = preg_replace("/\[([^\]]+)\]\(([^\s]+)\)/i", self::Link("$1", "$2"), $value);
+                    $value = code($value, $dic, pattern:$patt);
                     $value = preg_replace("/\b([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", self::Link("$1", "$1"), $value);
                     $value = preg_replace("/\b([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", self::Link("$1", "mailto:$1"), $value);
-                    $value = preg_replace("/\*\*(\S[^\*\r\n]+\S)\*\*/i", "<strong>$1</strong>", $value);
-                    $value = preg_replace("/\___(\S[^\*\r\n]+\S)\__/i", "<i>$1</i>", $value);
-                    $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<)/i", "<br/>", trim($value));
-                    // Additional patterns for code blocks, inline code, and blockquotes
-                    $value = preg_replace('/```(.+?)```/s', '<pre><code>$1</code></pre>', $value); // Code blocks
-                    $value = preg_replace('/`(.+?)`/s', '<code>$1</code>', $value); // Inline code
-                    $value = preg_replace('/^\>(.*)/im', '<blockquote>$1</blockquote>', $value); // Blockquotes
-                    return $value;
+                    // Texts
+                    $value = preg_replace("/\*\*(\S[^\*\r\n\v]+)\*\*/i", self::Strong("$1"), $value);
+                    $value = preg_replace("/\*([^\*\r\n\v]+)\*/i", self::Bold("$1"), $value);
+                    $value = preg_replace("/__([^\r\n\v]+)__/i", self::Italic("$1"), $value);
+                    $value = preg_replace("/~~([^\r\n\v]+)~~/i", self::Strike("$1"), $value);
+                    $value = preg_replace("/(?<!\[)\^\(([^\)]+)\)/i", self::Super("$1"), $value); // Superscript
+                    $value = preg_replace("/(?<!\[)\~\(([^\)]+)\)/i", self::Sub("$1"), $value); // Superscript
+                    $value = preg_replace("/(?<!\[)\^([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", self::Super("$1"), $value); // Superscript
+                    $value = preg_replace("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", self::Sub("$1"), $value); // Subscript
+                    // Others
+                    $value = preg_replace("/^\-{6,}$/im", self::$HorizontalBreak, $value);
+                    $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<)/i", self::$NewLine, trim($value));
+                    return decode($value, $dic);
+                    //return $value;
                 }
             }
             if (is_subclass_of($value, "\Base"))
@@ -68,15 +106,15 @@ class Html
                 $texts = array();
                 if (is_numeric(array_key_first($value))) {
                     foreach ($value as $val)
-                        $texts[] = Html::Item(self::Convert($val));
-                    return Html::List(join(PHP_EOL, $texts));
+                        $texts[] = self::Item(self::Convert($val));
+                    return self::List(join(PHP_EOL, $texts));
                 } elseif ($args = getBetween($value, "Arguments", "Item")) {
                     $key = get($value, "Key");
                     $val = get($value, "Value");
                     $ops = get($value, "Options");
                     $type = get($value, "Type");
                     $title = get($value, "Title");
-                    return Html::Interactor(
+                    return self::Interactor(
                         $key,
                         $val,
                         $type,
@@ -86,13 +124,13 @@ class Html
                     );
                 } else {
                     foreach ($value as $key => $val)
-                        $texts[] = Html::Item(Html::Span($key) . ":" . self::Convert($val));
-                    return Html::Items(join(PHP_EOL, $texts));
+                        $texts[] = self::Item(self::Span($key . ": ") . self::Convert($val));
+                    return self::Items(join(PHP_EOL, $texts));
                 }
             }
             if (is_callable($value) || $value instanceof \Closure)
                 return self::Convert($value());
-            return Html::Division(Convert::ToString($value));
+            return self::Division(Convert::ToString($value));
         }
         return "";
     }
@@ -871,13 +909,13 @@ class Html
                 ) .
                 "<table class='grid$uniq hidden'>" .
                 "<tr>" . join(PHP_EOL, [
-                        self::Cell($weekDays[0], true),
-                        self::Cell($weekDays[1], true),
-                        self::Cell($weekDays[2], true),
-                        self::Cell($weekDays[3], true),
-                        self::Cell($weekDays[4], true),
-                        self::Cell($weekDays[5], true),
-                        self::Cell($weekDays[6], true)
+                        self::Cell($weekDays[0], ["Type"=>"head"]),
+                        self::Cell($weekDays[1], ["Type"=>"head"]),
+                        self::Cell($weekDays[2], ["Type"=>"head"]),
+                        self::Cell($weekDays[3], ["Type"=>"head"]),
+                        self::Cell($weekDays[4], ["Type"=>"head"]),
+                        self::Cell($weekDays[5], ["Type"=>"head"]),
+                        self::Cell($weekDays[6], ["Type"=>"head"])
                     ]) . "</tr>" .
                 join(
                     PHP_EOL,
@@ -889,9 +927,9 @@ class Html
                         $d = -$sw;
                         for ($i = 1; $i <= 49; $i++) {
                             if (++$d > 0 && $d <= $ed)
-                                $cel = self::Cell($d, false, ["class" => "clickable" . ($cd == $d ? " D$uniq selected" : ""), "onclick" => "{$uniq}_Click(this);"]);
+                                $cel = self::Cell($d, ["Type"=>"cell","class" => "clickable" . ($cd == $d ? " D$uniq selected" : ""), "onclick" => "{$uniq}_Click(this);"]);
                             else
-                                $cel = self::Cell("", false);
+                                $cel = self::Cell("", ["Type"=>"cell"]);
                             if (count($week) == 7) {
                                 yield "<tr class='week$uniq'>" . join(PHP_EOL, $week) . "</tr>";
                                 $week = [$cel];
@@ -1271,6 +1309,56 @@ class Html
     {
         return self::Element(Convert::ToString($content), "center", ["class" => "center"], $attributes);
     }
+    /**
+     * The \<PRE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Pre($content, ...$attributes)
+    {
+        return self::Element(Convert::ToString($content), "pre", ["class" => "pre", "ondblclick"=>'copy(this.innerText)'], $attributes);
+    }
+    /**
+     * The \<QOUTE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Quote($content, ...$attributes)
+    {
+        return self::Element(Convert::ToString($content), "quote", ["class" => "quote", "ondblclick"=>'copy(this.innerText)'], $attributes);
+    }
+    /**
+     * The \<BLOCKQOUTE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function QuoteBlock($content, ...$attributes)
+    {
+        return self::Element(Convert::ToString($content), "blockquote", ["class" => "quoteblock", "ondblclick"=>'copy(this.innerText)'], $attributes);
+    }
+    /**
+     * The \<CODE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Code($content, ...$attributes)
+    {
+        return self::Element(Convert::ToString($content), "code", ["class" => "code", "ondblclick"=>'copy(this.innerText)'], $attributes);
+    }
+    /**
+     * The \<BLOCKCODE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function CodeBlock($content, ...$attributes)
+    {
+        return self::Element(self::Element(Convert::ToString($content), "blockcode", ["ondblclick"=>'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
+    }
 
     /**
      * The Ordered List \<OL\> HTML Tag
@@ -1538,6 +1626,22 @@ class Html
         return self::Element(__($content, styling: false), "i", ["class" => "italic"], $attributes);
     }
     /**
+     * The \<STRIKE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Strike($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference) && count($attributes) === 0) {
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            } else return self::Element(self::Link($content, $reference), "strike", ["class" => "strike"], $attributes);
+        return self::Element(__($content, styling: false), "strike", ["class" => "strike"], $attributes);
+    }
+    /**
      * The \<SMALL\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param string|null|array $reference The hyper reference path
@@ -1550,8 +1654,7 @@ class Html
             if (is_array($reference) && count($attributes) === 0) {
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "small", ["class" => "small"], $attributes);
+            } else return self::Element(self::Link($content, $reference), "small", ["class" => "small"], $attributes);
         return self::Element(__($content, styling: false), "small", ["class" => "small"], $attributes);
     }
     /**
@@ -1561,9 +1664,14 @@ class Html
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Super($content, ...$attributes)
+    public static function Super($content, $reference = null, ...$attributes)
     {
-        return self::Element(__($content, styling: false), "sup", ["class" => "sup"], $attributes);
+        if (!is_null($reference))
+            if (is_array($reference) && count($attributes) === 0) {
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            } else return self::Element(self::Link($content, $reference), "sup", ["class" => "super"], $attributes);
+        return self::Element(__($content, styling: false), "sup", ["class" => "super"], $attributes);
     }
     /**
      * The \<sub\> HTML Tag
@@ -1572,8 +1680,13 @@ class Html
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Sub($content, ...$attributes)
+    public static function Sub($content, $reference = null, ...$attributes)
     {
+        if (!is_null($reference))
+            if (is_array($reference) && count($attributes) === 0) {
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            } else return self::Element(self::Link($content, $reference), "sub", ["class" => "sub"], $attributes);
         return self::Element(__($content, styling: false), "sub", ["class" => "sub"], $attributes);
     }
 
@@ -2691,15 +2804,17 @@ class Html
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Table($content = "", $rowHeads = [0], $colHeads = [0], ...$attributes)
+    public static function Table($content = "", ...$attributes)
     {
+        $rowHeaders = grab($attributes, "RowHeaders")??[intval(grab($attributes, "RowHeader")??0)];
+        $colHeaders = grab($attributes, "ColHeaders")??[intval(grab($attributes, "ColHeader")??0)];
         return self::Element(
-            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $rowHeads, $colHeads) {
+            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $rowHeaders, $colHeaders) {
                 foreach ($content as $k => $v) {
-                    if (in_array($k, $rowHeads))
+                    if (in_array($k, $rowHeaders))
                         yield self::Column($v);
                     else
-                        yield self::Row($v, false, $colHeads);
+                        yield self::Row($v, ["Type"=>in_array($k, $colHeaders)?"head":"cell"]);
                 }
             })())) : Convert::ToString($content),
             "table",
@@ -2717,7 +2832,7 @@ class Html
     {
         return self::Element(
             is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content) {
-                yield self::Row($content, true);
+                yield self::Row($content, ["type"=>"head"]);
             })())) : __($content, styling: false),
             "thead",
             ["class" => "table-column"],
@@ -2730,12 +2845,13 @@ class Html
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Row($content = "", $head = false, $colHeads = [0], ...$attributes)
+    public static function Row($content = "", ...$attributes)
     {
+        $head = grab($attributes, "Type");
         return self::Element(
-            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $head, $colHeads) {
+            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $head) {
                 foreach ($content as $k => $v)
-                    yield self::Cell($v, $head ? $head : in_array($k, $colHeads));
+                    yield self::Cell($v, ["Type"=>$head]);
             })())) : Convert::ToString($content),
             "tr",
             ["class" => "table-row"],
@@ -2748,9 +2864,10 @@ class Html
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Cell($content = "", $head = false, ...$attributes)
+    public static function Cell($content = "", ...$attributes)
     {
-        return self::Element(__($content, styling: false), $head ? "th" : "td", ["class" => "table-cell"], $attributes);
+        $tagName = strtolower(grab($attributes, "Type")??"") == "head" ? "th" : "td";
+        return self::Element(__($content, styling: false), $tagName, ["class" => "table-cell"], $attributes);
     }
 
     public static function Chart($type = "column", $content = null, $title = null, $description = null, $axisXTitle = "X", $axisYTitle = "Y", $attributes = [], $options = null, $color = null, $foreColor = null, $backColor = null, $font = "defaultFont", $height = "400px", $width = null, $axisXBegin = null, $axisYBegin = null, $axisXInterval = null, $axisYInterval = null)

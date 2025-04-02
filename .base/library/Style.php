@@ -117,10 +117,10 @@ class Style extends \ArrayObject{
 		$text = Code($text, $dic,
 			startCode:"<",
 			endCode:">",
-			pattern:'/((["\'`])\S+[\w\W]*\2)|(\<\/?[A-z]+[^>]*[^\\\\]?\>)/iU'
+			pattern:'/(`\S[^`]*`)|("\S[^"]*")|(\'\S[^\']*\')|(\<\/?[A-z]+[^>]*[^\\\\]?\>)/iU'
 		);
-        $start = "/\b(?<!\<)(";
-        $end = ")(?!\>)\b/".($caseSensitive?"":"i").($multiline?"m":"");
+        $start = "/(?<=[ \.,;]|^)(?<!\<)(";
+        $end = ")(?!\>)(?=[ \.,;]|^)/".($caseSensitive?"":"i").($multiline?"m":"");
 		$c = count($dic);
 		$i = 0;
         if($both) foreach ($keyWords as $key=>$value){

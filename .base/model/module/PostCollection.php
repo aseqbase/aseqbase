@@ -14,6 +14,11 @@ class PostCollection extends Collection{
      public $RootRoute = null;
      public $TitleTag = "h1";
 
+    /**
+    * A Check Access function
+    */
+    public $CheckAccess = null;
+
 	public $MaximumColumns = 2;
 
 	public $CompressPath = true;
@@ -179,7 +184,8 @@ class PostCollection extends Collection{
 
 	function __construct(){
         parent::__construct();
-          $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
+        $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
+        $this->CheckAccess = fn($item)=>auth(getValid($item, 'Access' , 0));
     }
 
 	public function GetStyle(){
@@ -290,8 +296,7 @@ class PostCollection extends Collection{
 		    yield $this->GetTitle();
 		    yield $this->GetDescription();
 		    foreach(Convert::ToItems($this->Items) as $k=>$item) {
-                $p_access = getValid($item,'Access' ,0);
-                if(!auth($p_access)) continue;
+                if(!($this->CheckAccess)($item)) continue;
                 $p_meta = getValid($item,'MetaData' ,null);
 			    if($p_meta !==null) {
                     $p_meta = Convert::FromJson($p_meta);

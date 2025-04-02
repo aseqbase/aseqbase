@@ -94,10 +94,6 @@ RewriteEngine on
 RewriteCond %{HTTP_USER_AGENT} ^msnbot
 RewriteRule ^.* - [F,L]
 #
-RewriteEngine On
-RewriteCond %{REQUEST_METHOD} ^(PUT|DELETE|PATCH|STREAM|INTERNAL|EXTERNAL|[A-Za-z])$
-RewriteRule .* - [L]
-#
 #Alternate default index pages
 DirectoryIndex index.php index.htm index.html static.php
 # No directory listings

@@ -18,6 +18,10 @@ class Post extends Module
 
      public $Tag = "article";
      public $CommentForm = null;
+     /**
+      * A Check Access function
+      */
+     public $CheckAccess = null;
 
      /**
       * The whole document Item
@@ -281,6 +285,7 @@ class Post extends Module
           $this->CommentForm->SubjectLabel =
                $this->CommentForm->AttachLabel =
                null;
+          $this->CheckAccess = fn($item)=>auth(getValid($item, 'Access' , 0));
      }
 
      public function GetStyle()
@@ -387,9 +392,8 @@ class Post extends Module
      {
           return Convert::ToString(function () {
                $item = $this->Item;
-               $p_access = getValid($item, 'Access' , 0);
                $p_status = intval(getValid($item, 'Status' , 1));
-               if ($p_status < 1 || !auth($p_access)) return;
+               if ($p_status < 1 || !($this->CheckAccess)($item)) return;
                $p_meta = getValid($item, 'MetaData' , null);
                if ($p_meta !== null){
                     $p_meta = Convert::FromJson($p_meta);
@@ -402,8 +406,8 @@ class Post extends Module
                $p_image = getValid($item, 'Image' , $this->Image);
                $p_name = getValid($item, 'Name')??$p_id?? $this->Title;
                $p_title = getValid($item, 'Title' , $p_name);
-               $p_description = getValid($item, 'Description' , $this->Description);
-               $p_content = getValid($item, 'Content' , $this->Content);
+               $p_description = Html::Convert(getValid($item, 'Description' , $this->Description));
+               $p_content = Html::Convert(getValid($item, 'Content' , $this->Content));
                $p_tags = Convert::FromJson(get($item, 'TagIds' ));
                $p_attaches = Convert::FromJson(get($item, 'Attach' ));
 

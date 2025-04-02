@@ -16,7 +16,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 1.90010;
+	public static float $Version = 1.90016;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -86,17 +86,13 @@ require_once(__DIR__ . "/global/AddressBase.php");
 
 \_::$Address = new AddressBase();
 
-\_::$Sequences = array_merge(
-	[
-		str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
-		=> str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? "")
-	],
-	$GLOBALS["SEQUENCES"],
-	[
-		str_replace(["\\", "/"], DIRECTORY_SEPARATOR, __DIR__ . DIRECTORY_SEPARATOR ?? "")
+\_::$Sequences = [
+	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
+		=> str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? ""),
+	...($GLOBALS["SEQUENCES"]??[]),
+	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, __DIR__ . DIRECTORY_SEPARATOR ?? "")
 		=> str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
-	]
-);
+];
 
 run("global/Base");
 run("global/EnumBase");
@@ -1406,7 +1402,7 @@ function isFile(string|null $url, string ...$formats): bool
 {
 	if (count($formats) == 0)
 		array_push($formats, \_::$Config->AcceptableFileFormats, \_::$Config->AcceptableDocumentFormats, \_::$Config->AcceptableImageFormats, \_::$Config->AcceptableAudioFormats, \_::$Config->AcceptableVideoFormats);
-	return isUrl($url) && isFormat($url, $formats);
+	return isUrl($url) && isFormat(getPath($url), $formats);
 }
 /**
  * Check if the string is a relative or absolute URL
@@ -1476,7 +1472,7 @@ function isEmail(string|null $email): bool
  */
 function isIdentifier(string|null $text): bool
 {
-	return (!empty($text)) && preg_match("/^[A-z_\$][A-z0-9_\-\$]*$/", $text);
+	return (!empty($text)) && preg_match("/^[A-Za-z_\$][A-Za-z0-9_\-\$]*$/", $text);
 }
 
 /**

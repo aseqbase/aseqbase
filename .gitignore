@@ -424,5 +424,6 @@ FodyWeavers.xsd
 /MiMFa aseqbase.sln
 *.zip
 *.rar
+/lms
 # temporary
 /-installer/*.php
