@@ -50,15 +50,25 @@
 		</table>
 
 <h3>Installations</h3>
-1. Install all dependencies
-
+  1. Install all dependencies
+ 
   #### To make the Main Domain of aseqbase website
-  2. Copy and replace all files and folders to the home directory (public_html) of the website
-  3. Use it through domain url (http://[my-domain-name].com)
+  2. Open a terminal in the home directory (public_html) of the website, then install the framework by:
+	
+ 	> composer create-project aseqbase/aseqbase
+  or
+	
+ 	> composer require aseqbase/aseqbase
+  3. Use it through the domain URL (http://[my-domain-name].com)
   4. Enjoy...
 
-  #### To make the Sub Domain of aseqbase website
-  2. Copy and replace all files and folders to your subdomain directory (public_html/[my-subdomain-name]/)
+  #### To make the subdomain of aseqbase website
+  2. Open a terminal in your subdomain directory (public_html/[my-subdomain-name]/), then install the framework by:
+	
+ 	> composer create-project aseqbase/aseqbase
+  or
+	
+ 	> composer require aseqbase/aseqbase
   3. Change the value of `$GLOBALS["ASEQ"]` located on `/index.php`, to the current subdomains sequence (like [my-subdomain-name]) or if this file is in the root directory, leave null for that
   4. Use it through its special url (http://[my-subdomain-name].[my-domain-name].com)
   5. Enjoy...
@@ -67,7 +77,7 @@
 <p>Contributions can take the form of new components or features, changes to existing features, tests, documentation (such as developer guides, user guides, examples, or specifications), bug fixes, optimizations, or just good suggestions.</p>
 
 <h3>License</h3>
-<p>aseqbase Core is released under the terms of the GNU general public license.</p>
+<p>aseqbase Core is released under the terms of the GNU General Public License.</p>
 
 <h3>Links</h3>
 	<ul>
