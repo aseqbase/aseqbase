@@ -2,7 +2,7 @@
     "name": "aseqbase/aseqbase",
     "description": "a sequence based web development framework",
     "type": "framework",
-    "license": "GNU GPL v3",
+    "license": "GPL-3.0-only",
     "authors": [
         {
             "name": "Mohammad Fathi",
