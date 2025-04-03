@@ -26,6 +26,11 @@
         "ext-pdo": "*"
     },
     "scripts": {
-        "start": "php index.php"
+        "start": "php -S localhost:8000 & net start MySQL & php index.php"
+    },
+    "extra": {
+        "installer-paths": {
+            "./": ["aseqbase/aseqbase"]
+        }
     }
 }

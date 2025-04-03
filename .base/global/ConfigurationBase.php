@@ -522,7 +522,7 @@ abstract class ConfigurationBase extends ArrayObject
      {
           return \Req::Get($this->LatestVersionSourcePath);
      }
-     public function GetAcceptableFormats(string $type = null)
+     public function GetAcceptableFormats(?string $type = null)
      {
           switch (strtolower($type ?? "")) {
                case "image":
