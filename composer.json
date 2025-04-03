@@ -22,8 +22,7 @@
     "minimum-stability": "stable",
     "require": {
         "php": "^8.2",
-        "ext-pdo": "*", 
-        "ext-mysqli": "*"
+        "ext-pdo": "*"
     },
     "scripts": {
         "start": "php index.php"
