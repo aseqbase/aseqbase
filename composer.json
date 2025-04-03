@@ -1,0 +1,31 @@
+{
+    "name": "mimfa/aseqbase",
+    "description": "a sequence based web development framework",
+    "type": "framework",
+    "license": "GNU GPL v3",
+    "authors": [
+        {
+            "name": "Mohammad Fathi",
+            "email": "i@mimfa.net",
+            "homepage": "https://mfathi.ir",
+            "role": "Lead Developers"
+        },
+        {
+            "name": "Martin Fixoni",
+            "role": "Back-end Developer"
+        },
+        {
+            "name": "Jacoob Del Pano",
+            "role": "UI/UX Designer"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.2",
+        "ext-pdo": "*", 
+        "ext-mysqli": "*"
+    },
+    "scripts": {
+        "start": "php index.php"
+    }
+}

@@ -64,13 +64,13 @@ class DataTable
 		return $this->DataBase->MakeSelectPairsQuery($this->Name, $key, $value, $condition);
 	}
 
-	public function DoInsert($condition = null, $params = [], $defaultValue = false)
+	public function DoInsert($params = [], $defaultValue = false)
 	{
-		return $this->DataBase->DoInsert($this->Name, $condition, $params, $defaultValue);
+		return $this->DataBase->DoInsert($this->Name, $params, $defaultValue);
 	}
-	public function MakeInsertQuery($condition, &$params)
+	public function MakeInsertQuery(&$params)
 	{
-		return $this->DataBase->MakeInsertQuery($this->Name, $condition, $params);
+		return $this->DataBase->MakeInsertQuery($this->Name, $params);
 	}
 
 	public function DoReplace($condition = null, $params = [], $defaultValue = false)

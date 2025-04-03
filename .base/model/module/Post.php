@@ -421,7 +421,7 @@ class Post extends Module
                $p_showmeta = $this->ShowMetaData;
                $p_inselflink = $this->RootRoute . ($p_id??$p_name);
                if (!$this->CompressPath) {
-                    $catDir = \_::$Back->Query->GetContentCategoryDirection($item);
+                    $catDir = \_::$Back->Query->GetContentCategoryRoute($item);
                     if (isValid($catDir))
                          $p_inselflink = $this->RootRoute . trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
                }

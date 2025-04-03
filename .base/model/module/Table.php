@@ -168,7 +168,6 @@ class Table extends Module
     public $ViewCondition = null;
     public $ViewSecret;
     public $AddAccess = 0;
-    public $AddCondition = null;
     public $AddSecret;
     public $ModifyAccess = 0;
     public $ModifyCondition = null;
@@ -898,7 +897,7 @@ class Table extends Module
         foreach ($values as $k => $v)
             if (isEmpty($v))
                 unset($values[$k]);
-        if ($this->DataTable->DoInsert($this->AddCondition, $values))
+        if ($this->DataTable->DoInsert($values))
             return \Res::Flip(Html::Success("The information added successfully!"));
         return Html::Error("You can not add this item!");
     }

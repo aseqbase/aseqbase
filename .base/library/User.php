@@ -266,9 +266,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupId = null, $status = null, $metadata = null)
 	{
 		$this->TemporaryImage = null;
-		return $this->DataTable->DoInsert(
-			null,
-			[
+		return $this->DataTable->DoInsert([
 				":Signature" => $this->TemporarySignature = $signature ?? $email,
 				":Email" => $this->TemporaryEmail = $email,
 				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password),

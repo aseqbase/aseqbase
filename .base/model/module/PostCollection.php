@@ -321,7 +321,7 @@ class PostCollection extends Collection{
                 $p_refering =$this->AutoRefering;
                 $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->RootRoute.getValid($item,'Name' ,$p_id)):null;
                 if(!$this->CompressPath) {
-                    $catDir = \_::$Back->Query->GetContentCategoryDirection($item);
+                    $catDir = \_::$Back->Query->GetContentCategoryRoute($item);
                     if(isValid($catDir)) $p_inselflink = $this->RootRoute.trim($catDir,"/\\")."/".($p_name??$p_id);
                 }
                 $p_path = first(Convert::FromJson(getValid($item,'Path' , $this->DefaultPath)));

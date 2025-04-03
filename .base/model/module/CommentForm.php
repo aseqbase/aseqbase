@@ -144,7 +144,7 @@ class CommentForm extends Form
 					$res = null;
 					$rid = get($received, "Reply");
 					if ((\_::$Back->User && \_::$Back->User->Email) || isValid($received, "Contact"))
-						$res = table("Comment")->DoInsert(null, [
+						$res = table("Comment")->DoInsert([
 							"ReplyId" => $rid,
 							"Relation" => $this->Relation,
 							"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,

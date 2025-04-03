@@ -225,6 +225,7 @@ CREATE TABLE IF NOT EXISTS `aseq_Payment` (
   `DestinationPath` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Others` text DEFAULT NULL,
   `CreateTime` datetime NOT NULL DEFAULT current_timestamp(),
+  `MetaData` longtext DEFAULT NULL,
   PRIMARY KEY (`Id` )
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 

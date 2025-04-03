@@ -86,9 +86,7 @@ class Translate
 			$text = isset($data[$lang??$this->Language])? $data[$lang??$this->Language] : $data["X"];
 		}else {
 			if($this->AutoUpdate)
-				$this->DataTable->DoInsert(
-				null,
-				[":KeyCode"=>$code,":ValueOptions"=>Convert::ToJson(array("X"=>$text))]);
+				$this->DataTable->DoInsert([":KeyCode"=>$code,":ValueOptions"=>Convert::ToJson(array("X"=>$text))]);
         }
 		foreach($replacements as $key=>$val) $text = str_replace($key,$val,$text);
 		return Decode($text, $dic);

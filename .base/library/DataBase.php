@@ -300,11 +300,11 @@ class DataBase
 			return $defaultValue;
 		}
 	}
-	public function DoInsert($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
+	public function DoInsert($tableName, $params = [], bool|int $defaultValue = false): bool|int
 	{
-		return $this->TryInsert($this->MakeInsertQuery($tableName, $condition, $params), $params, $defaultValue);
+		return $this->TryInsert($this->MakeInsertQuery($tableName, $params), $params, $defaultValue);
 	}
-	public function MakeInsertQuery($tableName, $condition, &$params)
+	public function MakeInsertQuery($tableName, &$params)
 	{
 		$vals = array();
 		$sets = array();
@@ -316,7 +316,7 @@ class DataBase
 			$args[":$k"] = $value;
 		}
 		$params = $args;
-		return "INSERT INTO " . $this->TableNameNormalization($tableName) . " (" . implode(", ", $sets) . ") VALUES (" . implode(", ", $vals) . ") " . $this->ConditionNormalization($condition);
+		return "INSERT INTO " . $this->TableNameNormalization($tableName) . " (" . implode(", ", $sets) . ") VALUES (" . implode(", ", $vals) . ") ";
 	}
 
 	public function Replace($query, $params = []): bool|int

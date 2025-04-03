@@ -82,7 +82,6 @@ class Profile extends Form{
 	public $ViewCondition = null;
 	public $ViewSecret;
 	public $AddAccess = 0;
-	public $AddCondition = null;
 	public $AddSecret;
 	public $ModifyAccess = 0;
 	public $ModifyCondition = null;
@@ -375,7 +374,7 @@ class Profile extends Form{
         unset($vals[$this->KeyColumn]);
         foreach ($vals as $k=>$v)
             if(isEmpty($v)) unset($vals[$k]);
-        if($this->DataTable->DoInsert($this->AddCondition, $vals))
+        if($this->DataTable->DoInsert($vals))
             return Html::Success("The information added successfully!");
         return Html::Error("You can not add this item!");
     }

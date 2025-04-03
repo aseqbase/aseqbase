@@ -147,8 +147,8 @@ class Query
             $parentId = $id;
             $id = table($table ?? "Category", source:$this->DataBase)->DoSelectValue(
                 "`Id`",
-                "`Name`=:Name AND " . (is_null($parentId) ? "" : "`ParentId`=" . $parentId . " AND ") . $condit,
-                [":Name" => $name],
+                "(`Id`=:Id OR `Name`=:Name) AND " . (is_null($parentId) ? "" : "`ParentId`=" . $parentId . " AND ") . $condit,
+                [":Id" => $name, ":Name" => $name],
                 null
             );
             if (is_null($id))
@@ -169,8 +169,8 @@ class Query
             return $default;
         $id = table($table ?? "Tag", source:$this->DataBase)->DoSelectValue(
             "`Id`",
-            "`Name`=:Name",
-            [":Name" => $tag],
+            "`Id`=:Id OR `Name`=:Name",
+            [":Id" => $tag, ":Name" => $tag],
             null
         );
         return $id?? $default;
@@ -183,9 +183,9 @@ class Query
     }
 
 
-    public function GetContentCategoryDirection(array|string $content, string|null $default = null, string|null $table = null)
+    public function GetContentCategoryRoute(array|string $content, string|null $default = null, string|null $table = null)
     {
-        return $this->GetCategoryDirection($this->GetContentCategoryId($content), $default, $table);
+        return $this->GetCategoryRoute($this->GetContentCategoryId($content), $default, $table);
     }
     public function GetContentCategoryIds(array|string $content, array|null $default = [], string|null $table = null)
     {
@@ -225,17 +225,17 @@ class Query
         return table($table ?? "Tag", source:$this->DataBase)->DoSelectRow("*", "`Id`=:Id", [":Id" => $id]);
     }
 
-    private array $Cache_CategoryDirection = [];
-    public function GetCategoryDirection(array|string|int|null $category, string|null $default = null, string|null $table = null)
+    private array $Cache_CategoryRoutes = [];
+    public function GetCategoryRoute(array|string|int|null $category, string|null $default = null, string|null $table = null)
     {
         if (isEmpty($category))
             return $default;
-        if (isset($this->Cache_CategoryDirection[$category]))
-            return $this->Cache_CategoryDirection[$category];
+        if (isset($this->Cache_CategoryRoutes[$category]))
+            return $this->Cache_CategoryRoutes[$category];
         $cat = is_array($category) ? $category : table($table ?? "Category", source:$this->DataBase)->DoSelectRow("*", "(`Name`=:Name OR `Id`=:Id) AND " . User::GetAccessCondition(), [":Name" => $category, ":Id" => $category]);
         if (isEmpty($cat))
             return $default;
-        return $this->Cache_CategoryDirection[$category] = $this->GetCategoryDirection(takeValid($cat,  "ParentId" ), null) . "/" . takeBetween($cat, "Name" , "Id" );
+        return $this->Cache_CategoryRoutes[$category] = $this->GetCategoryRoute(takeValid($cat,  "ParentId" ), null) . "/" . takeBetween($cat, "Name" , "Id" );
     }
 
 
