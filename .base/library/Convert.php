@@ -324,8 +324,13 @@ class Convert
                             file_put_contents($files[$key]['tmp_name'], $body);
                         }
                     }
-                } else
-                    $res[$key] = trim($body);// It's a regular form field
+                } elseif(preg_match("/\[(.*)\]/", $key, $matches)) {// It's an array field
+                    $key = preg_find("/^.*(?=\[)/", $key);
+                    if(!isset($res[$key])) $res[$key] = array();
+                    if($v=getValid($matches,1)) $res[$key][$v] = trim($body);
+                    else $res[$key][] = trim($body);
+                }
+                else $res[$key] = trim($body);// It's a regular form field
             }
         }
         return $res;

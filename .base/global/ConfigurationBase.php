@@ -30,6 +30,7 @@ abstract class ConfigurationBase extends ArrayObject
      /**
       * The Date Time Format
       * @var string
+      * @example: "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
       * @category Time
       */
      public $DateTimeFormat = "Y-m-d H:i:s";

@@ -398,6 +398,7 @@ class Post extends Module
                if ($p_meta !== null){
                     $p_meta = Convert::FromJson($p_meta);
                     swap( $this, $p_meta);
+                    swap( $this->CommentForm, $p_meta);
                }
                $p_meta = null;
                module("Image" );

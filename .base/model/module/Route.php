@@ -45,8 +45,21 @@ class Route extends Module{
 
 	public function __construct($itemsOrpath = null){
 		parent::__construct();
-		$this->SetValue($itemsOrpath);
+		$this->Set($itemsOrpath);
 	}
+
+	public function Set($itemsOrpath = null){
+		if(is_null($itemsOrpath)){
+            $this->Path = "/".\Req::$Direction;
+            $this->Items = null;
+        }elseif(is_array($itemsOrpath)){
+            $this->Path = null;
+            $this->Items = $itemsOrpath;
+        }else{
+			$this->Path = $itemsOrpath;
+            $this->Items = null;
+        }
+    }
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
@@ -63,14 +76,14 @@ class Route extends Module{
 	public function Get(){
 		return parent::Get().join(PHP_EOL, iterator_to_array((function(){
 			yield parent::Get();
-			$this->Items = takeValid($this->Items,null,array());
+			$this->Items = takeValid($this->Items, null, array());
 			if(count($this->Items)<1 && isValid($this->Path)){
 				$host = "";
-				$paths = preg_split("/(?<=[^\\/\\\])\\//i",$this->Path);
+				$paths = preg_split("/(?<=[^\\/\\\])\\//i", $this->Path);
 				$host = $paths[0];
-				$this->Items[trim($host,"/\\")] = $host;
-				foreach (array_slice($paths,1) as $value)
-					$this->Items[trim($value,"/\\")] = $host.= "/".$value;
+				$this->Items[trim($host, "/\\")] = $host;
+				foreach (array_slice($paths, 1) as $value)
+					$this->Items[trim($value, "/\\")] = $host = "$host/$value";
 			}
 			$c = count($this->Items);
 			if($c > 1){
@@ -86,7 +99,7 @@ class Route extends Module{
 				$route = Html::Link($this->RootLabel??array_keys($this->Items)[0], array_values($this->Items)[0]);
 				if($this->AllowProperCase)
 					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
-						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link(ucwords($key, $value)));
+						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link(ucwords($key), $value));
 				else
 					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
 						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link($key, $value));
@@ -95,17 +108,5 @@ class Route extends Module{
         })()));
 	}
 
-	public function SetValue($itemsOrpath = null){
-		if(is_null($itemsOrpath)){
-            $this->Path = takeValid("/".getDirection(\Req::$Url),null,"/".\Req::$Direction);
-            $this->Items = null;
-        }elseif(is_array($itemsOrpath)){
-            $this->Path = null;
-            $this->Items = $itemsOrpath;
-        }else{
-			$this->Path = $itemsOrpath;
-            $this->Items = null;
-        }
-    }
 }
 ?>

@@ -325,7 +325,7 @@ class PostCollection extends Collection{
                     if(isValid($catDir)) $p_inselflink = $this->RootRoute.trim($catDir,"/\\")."/".($p_name??$p_id);
                 }
                 $p_path = first(Convert::FromJson(getValid($item,'Path' , $this->DefaultPath)));
-                if($this->ShowRoute) $rout->SetValue($p_inselflink);
+                if($this->ShowRoute) $rout->Set($p_inselflink);
 			    $hasl = isValid($p_inselflink);
 			    $p_showmorebutton = $hasl && $this->ShowMoreButton;
                 $p_morebuttontext = Convert::FromSwitch($this->MoreButtonLabel, $p_type);

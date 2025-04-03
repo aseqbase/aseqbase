@@ -25,10 +25,44 @@ class Forum extends Post
      public DateTime|null $LeaveCommentStartTime = null;
      public DateTime|null $LeaveCommentEndTime = null;
 
+     function __construct()
+     {
+          parent::__construct();
+          $this->CommentForm->Access = \_::$Config->WriteCommentAccess;
+          $this->CommentForm->Title = $this->CommentTitle;
+          $this->CommentForm->Description = $this->CommentDescription;
+          $this->CommentForm->MessageType = $this->CommentType;
+          $this->CommentForm->AttachType = $this->CommentAttachType;
+          $this->CommentForm->NameLabel = "Name";
+          $this->CommentForm->ContactLabel = "Email";
+          $this->CommentForm->SubjectLabel = "Title";
+          $this->CommentForm->SubjectPlaceHolder = "The title of your thought";
+          $this->CommentForm->MessageLabel = "Description";
+          $this->CommentForm->MessagePlaceHolder = "Describe your thought details here...";
+          $this->CommentForm->AttachLabel = "Attachment";
+          $this->CommentForm->AttachPlaceHolder = "Attach something";
+     }
+
+     public function Get()
+     {
+          $val = parent::Get();
+          if($this->LeaveCommentStartTime && Convert::ToDateTime() < $this->LeaveCommentStartTime)
+               return $this->GetMessage(
+                    Convert::ToShownDateTimeString() ." < ". Convert::ToShownDateTimeString($this->LeaveCommentStartTime),
+                    "This forum will open later!"
+               );
+          if($this->LeaveCommentEndTime && Convert::ToDateTime() > $this->LeaveCommentEndTime)
+               return $this->GetMessage(
+                    Convert::ToShownDateTimeString() ." > ". Convert::ToShownDateTimeString($this->LeaveCommentEndTime),
+                    "This forum is not active anymore!"
+               );
+          return $val;
+     }
+
      public function GetCommentsCollection($relatedId)
      {
-          if($this->ShowCommentStartTime !== null && Convert::ToDateTime() < $this->ShowCommentStartTime) return null;
-          if($this->ShowCommentEndTime !== null && Convert::ToDateTime() > $this->ShowCommentEndTime) return null;
+          if($this->ShowCommentStartTime && Convert::ToDateTime() < $this->ShowCommentStartTime) return null;
+          if($this->ShowCommentEndTime && Convert::ToDateTime() > $this->ShowCommentEndTime) return null;
           module("CommentCollection");
           $cc = new CommentCollection();
           $cc->Items = table("Comment")->DoSelect("*",
@@ -37,26 +71,11 @@ class Forum extends Post
                return Html::$HorizontalBreak . $cc->ToString();
           return null;
      }
-     public function GetCommentForm($relatedId)
+
+     public function GetMessage($subject, $message, $icon = "clock")
      {
-          if($this->LeaveCommentStartTime !== null && Convert::ToDateTime() < $this->LeaveCommentStartTime) return null;
-          if($this->LeaveCommentEndTime !== null && Convert::ToDateTime() > $this->LeaveCommentEndTime) return null;
-          module("CommentForm");
-          $cc = new CommentForm();
-          $cc->Relation = $relatedId;
-          $cc->Title = $this->CommentTitle;
-          $cc->Description = $this->CommentDescription;
-          $cc->MessageType = $this->CommentType;
-          $cc->AttachType = $this->CommentAttachType;
-          $cc->NameLabel = "Name";
-          $cc->ContactLabel = "Email";
-          $cc->SubjectLabel = "Title";
-          $cc->SubjectPlaceHolder = "The title of your thought";
-          $cc->MessageLabel = "Description";
-          $cc->MessagePlaceHolder = "Describe your thought details here...";
-          $cc->AttachLabel = "Attachment";
-          $cc->AttachPlaceHolder = "Attach something";
-          return Html::$HorizontalBreak . $cc->ToString();
+          return Html::Division(Html::Image($icon).Html::Heading($subject).Html::Result($message), ["class"=>"be center"]);
      }
+
 }
 ?>
