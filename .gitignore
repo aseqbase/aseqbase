@@ -412,6 +412,7 @@ FodyWeavers.xsd
 /tmp
 /temp
 /ms
+/lms
 /ums
 /gms
 /erp
@@ -424,6 +425,5 @@ FodyWeavers.xsd
 /MiMFa aseqbase.sln
 *.zip
 *.rar
-/lms
 # temporary
 /-installer/*.php

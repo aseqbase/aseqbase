@@ -30,13 +30,13 @@ class InformationAseq extends InformationBase
 			array("Name" =>"CONTACTS","Path"=>"/contact","Image" =>"address-book","Attributes"=> "class='menu-link'"),
 			array("Name" =>"ABOUT","Path"=>"/about","Image" =>"info","Attributes"=> "class='menu-link'"),
 			array("Name" =>"TEAM","Path"=>"/team","Image" =>"group","Attributes"=> "class='menu-link'")
-		)),	);
+		))
+	);
 
 	public $SideMenus = array(
 		array("Name" => "HOME", "Path"=> "/home", "Image" => "home", "Attributes" => "class='menu-link'"),
 		array("Name" => "POSTS", "Path"=> "/posts", "Image" => "th-large", "Attributes" => "class='menu-link'"),
 		array("Name" => "FORUMS", "Path"=> "/forums", "Image" => "comments", "Attributes" => "class='menu-link'"),
-		array("Name" => "SERVICE", "Path"=> "#embed", "Image" => "puzzle-piece", "Attributes" => "class='embed-link' data-target='.page' onclick='viewEmbed(\"https://opensea.io/collection/punkyface\",\"fade\"); viewSideMenu(false);'"),
 		array("Name" => "ABOUT", "Path"=> "/about", "Image" => "info", "Attributes" => "class='menu-link'"),
 		array("Name" => "CONTACTS", "Path"=>"/contact", "Image" => "address-book", "Attributes" => "class='menu-link'"),
 		array("Name" => "TEAM", "Path"=> "/team", "Image" => "group", "Attributes" => "class='menu-link'")
@@ -44,16 +44,16 @@ class InformationAseq extends InformationBase
 
 	public $Shortcuts = array(
 		array("Name" => "Menu", "Path"=> "viewSideMenu()", "Image" => "bars"),
-		array("Name" => "Posts", "Path"=> "/posts", "Image" => "th-large", "Attributes" => "class='menu-link'"),
-		array("Name" => "Home", "Path"=> "/home", "Image" => "home", "Attributes" => "class='internal-link' onclick='viewInternal(\"home\",\"fade\"); viewSideMenu(false);'"),
-		array("Name" => "Contact", "Path"=> "/contact", "Image" => "phone", "Attributes" => "class='menu-link'"),
-		array("Name" => "About", "Path"=> "/about", "Image" => "quote-left", "Attributes" => "class='menu-link'")
+		array("Name" => "Posts", "Path"=> "/posts", "Image" => "th-large"),
+		array("Name" => "Home", "Path"=> "/home", "Image" => "home"),
+		array("Name" => "Contact", "Path"=> "/contact", "Image" => "phone"),
+		array("Name" => "About", "Path"=> "/about", "Image" => "quote-left")
 	);
 
 	public $Services = array(
-		array("Name" => "MiMFa Collection", "Description" => "<p class='md-hide'>A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>", "Image" => "phone", "More" => "<a class='btn' href='/about'>MORE</a>"),
-		array("Name" => "OUR TARGET", "Description" => "<p class='md-hide'>Develop websites by <u>a seq</u>uence-<u>base</u>d framework</p><p class='md-hide'>The privilege of using each of these graphic documents can be provided as NFT.</p>", "Image" => "/asset/symbol/target.png", "More" => "<a class='btn' href='/about'>MORE</a>"),
-		array("Name" => "WHAT IS WEB FRAMEWORK", "Description" => "<p class='md-hide'>A web development framework is a set of resources and tools for software developers to build and manage web applications, web services and websites.</p>", "Image" => "quote-left", "More" => "<a class=\"btn\" onclick=\"viewExternal('https://www.techtarget.com/searchcontentmanagement/definition/web-development-framework-WDF#:~:text=A%20web%20development%20framework%20is,applications%2C%20web%20services%20and%20websites.','fade');\" data-target=\".page\" href=\"#external\">READ ABOUT NFT</a>")
+		array("Name" => "MiMFa aseqbase", "Description" => "<p class='md-hide'>A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>", "Image" => "phone", "More" => "<a class='btn' href='/about'>MORE</a>"),
+		array("Name" => "OUR TARGET", "Description" => "<p class='md-hide'>Develop websites by <u>a seq</u>uence-<u>base</u>d framework</p>", "Image" => "bullseye", "More" => "<a class='btn' href='/about'>MORE</a>"),
+		array("Name" => "WHAT IS WEB FRAMEWORK", "Description" => "<p class='md-hide'>A web development framework is a set of resources and tools for software developers to build and manage web applications, web services and websites.</p>", "Image" => "quote-left", "More" => "<a href=\"introduction\">READ ABOUT ASEQBASE</a>")
 	);
 
 	public $Contacts = array(

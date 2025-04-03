@@ -163,23 +163,35 @@ class RingSlide extends Module{
 				for($i = 0; $i < $count; $i++)
 					if(auth(getValid($this->Items[$i],"Access" ,\_::$Config->VisitAccess))) {
 						$desc = get($this->Items[$i], 'Description' );
-						$more = get($this->Items[$i], "Button")??get($this->Items[$i],"More");
-						$pa = getBetween($this->Items[$i],'Path' ,'Link');
+						$more = getBetween($this->Items[$i], "Button","More");
+						$pa = getBetween($this->Items[$i], 'Path' ,'Url' ,'Link');
 						$this->HasTab = $desc||$more;
 						$btns[] = Html::Link(
 							Html::Division(
-								Html::Media("", getBetween($this->Items[$i],'Image' , "Icon"))
-							,["class"=>"button"]).
-							Html::Tooltip(getBetween($this->Items[$i],'Title' , "Name"))
-						, $this->HasTab?"#tab$i":$pa, $this->HasTab?["data-target"=>".tab", "data-toggle"=>'tab']:[]);
+								Html::Media("", getBetween($this->Items[$i],'Image' , "Icon")),
+								["class"=>"button"]
+							).Html::Tooltip(getBetween($this->Items[$i],'Title' , "Name")),
+							$this->HasTab?"#tab$i":$pa,
+							$this->HasTab?["data-target"=>".tab", "data-toggle"=>'tab']:[]
+						);
 						
 						if($this->HasTab) $tags[] = Html::Division(
 							Html::ExternalHeading(get($this->Items[$i],'Name' ), $pa, ["class"=>"title" ]).
-							Html::Division($desc, $more, ["class"=>"description" ])
-						, ["class"=>"tab fade".($i===0?' active show':''), "Id" =>"tab$i"]);
+								Html::Division($desc.$more, ["class"=>"description" ]), 
+							["class"=>"tab fade".($i===0?' active show':''), "Id" =>"tab$i"]
+						);
 					}
-				yield Html::Division(Html::Division(Html::Division($btns,["class"=>"center"]),["class"=>"menu"]),["class"=>"col-md", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]);
-				if($tags) yield Html::Division(Html::Division($tags,["class"=>"tabs"]),["class"=>"col-md-7", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]);
+				yield Html::Division(
+					Html::Division(
+						Html::Division($btns,["class"=>"center"]),
+						["class"=>"menu"]
+					),
+					["class"=>"col-md", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]
+				);
+				if($tags) yield Html::Division(
+					Html::Division($tags,["class"=>"tabs"]),
+					["class"=>"col-md-7", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]
+				);
 			});
 		else return null;
 	}
