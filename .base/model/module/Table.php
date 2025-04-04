@@ -562,7 +562,7 @@ class Table extends Module
         if (isAbsoluteUrl($cel)) return "<td>" . Html::Link(getPage($cel), $cel) . "</td>";
         $cel = __($cel, translating: $this->AllowDataTranslation, styling: false);
         if (!$this->TextWrap && !startsWith($cel, "<"))
-            return "<td>" . Convert::ToExcerpt($cel, 0, $this->TextLength, "..." . Html::Tooltip($cel)) . "</td>";
+            return "<td>" . Convert::ToExcerpt(Convert::ToText($cel), 0, $this->TextLength, "..." . Html::Tooltip($cel)) . "</td>";
         return "<td>$cel</td>";
     }
     public function GetScript()

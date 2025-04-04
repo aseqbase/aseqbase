@@ -446,7 +446,7 @@ class Post extends Module
                $p_template = Convert::FromSwitch($this->Template, $p_type) ?? $p_type;
                if ($p_showexcerpt && $this->AutoExcerpt)
                     $p_excerpt = __(Convert::ToExcerpt(
-                         $p_content,
+                         Convert::ToText($p_content),
                          0,
                          $this->ExcerptLength,
                          $this->ExcerptSign

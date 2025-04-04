@@ -23,7 +23,7 @@ class CodeBox extends Module
     public function GetStyle()
     {
         return Html::Style("
-            .{$this->Name} .{$this->ContentTag} {
+            .{$this->Name} {$this->ContentTag} {
                 background-Color: var(--back-color-4);
                 Color: var(--fore-color-4);
                 border-radius: var(--radius-1);

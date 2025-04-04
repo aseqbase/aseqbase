@@ -1,6 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
+use MiMFa\Library\Script;
 module("Modal");
 class ImageModal extends Modal{
 	public $Image = null;
@@ -30,11 +31,19 @@ class ImageModal extends Modal{
 		else return parent::GetContents($content??$this->Content);
 	}
 
+	public function ShowScript($title = null, $description = null, $content = null, $buttonsContent = null, $source = null){
+		return $this->Name."_Show(".
+		Script::Convert($title??$this->Title).", ".
+		Script::Convert($description??$this->Description).", ".
+		Script::Convert($this->GetContents($content??$this->Content)).", ".
+		Script::Convert($buttonsContent??$this->ButtonsContent).", ".
+		Script::Convert($source??$this->Source).");";
+	}
 	public function ContentScript($parameterName){
 		if($this->AllowOriginal) return "$parameterName.endsWith(\".svg\")?
 		(`<iframe class=\"image\" style=\"height: 100%; width: auto;\" src=\"`+$parameterName+`\"></iframe>`):
-		(`<div class=\"image\" style=\"background-image: url('`+$parameterName+`');\"/>`)";
-		else return "`<div class=\"image\" style=\"background-image: url('`+$parameterName+`');\"/>`";
+		(`<div class=\"image\" style=\"background-image: url('`+$parameterName+`');\"></div>`)";
+		else return "`<div class=\"image\" style=\"background-image: url('`+$parameterName+`');\"></div>`";
 	}
 }
 ?>

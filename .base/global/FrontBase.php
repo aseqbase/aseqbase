@@ -1,7 +1,5 @@
 <?php
 
-use MiMFa\Library\Convert;
-
 library("Revise");
 /**
  *All the basic website front-end settings and functions

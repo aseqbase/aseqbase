@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS `aseq_Content` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `CategoryIds` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `TagIds` text DEFAULT NULL COMMENT 'Separate each Tag Id between two ''|''',
-  `AuthorId` int(11) DEFAULT 0,
-  `EditorId` int(11) DEFAULT 0,
+  `AuthorId` int(11) DEFAULT NULL,
+  `EditorId` int(11) DEFAULT NULL,
   `Type` enum('Post','Text','Image' ,'Animation','Video','Audio','File','Service',"product",'News','Article','Document','Collection','Course','Query','Form','Advertisement','Forum') NOT NULL DEFAULT 'Post',
   `Name` varchar(256) DEFAULT NULL,
   `Image` varchar(1024) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
@@ -74,6 +74,32 @@ CREATE TABLE IF NOT EXISTS `aseq_Content` (
   PRIMARY KEY (`Id` ),
   UNIQUE KEY `Name` (`Name` )
 ) ENGINE=InnoDB AUTO_INCREMENT=1048 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `aseq_Comment`
+--
+
+CREATE TABLE IF NOT EXISTS `aseq_Comment` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `ReplyId` int(11) DEFAULT NULL,
+  `GroupId` int(11) DEFAULT NULL,
+  `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `UserId` int(11) DEFAULT NULL,
+  `Name` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Contact` varchar(256) NOT NULL,
+  `Subject` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Attach` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Priority` int(11) NOT NULL DEFAULT 0,
+  `Access` int(11) DEFAULT 0,
+  `Status` tinytext DEFAULT NULL,
+  `CreateTime` datetime NOT NULL DEFAULT current_timestamp(),
+  `UpdateTime` datetime NOT NULL DEFAULT current_timestamp(),
+  `MetaData` longtext DEFAULT NULL,
+  PRIMARY KEY (`Id` )
+) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
 
@@ -108,32 +134,6 @@ CREATE TABLE IF NOT EXISTS `aseq_Tag` (
   PRIMARY KEY (`Id` ),
   UNIQUE KEY `Name` (`Name` )
 ) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `aseq_Comment`
---
-
-CREATE TABLE IF NOT EXISTS `aseq_Comment` (
-  `Id` int(11) NOT NULL AUTO_INCREMENT,
-  `ReplyId` int(11) DEFAULT NULL,
-  `GroupId` int(11) DEFAULT NULL,
-  `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `UserId` int(11) DEFAULT NULL,
-  `Name` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Contact` varchar(256) NOT NULL,
-  `Subject` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Attach` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Priority` int(11) NOT NULL DEFAULT 0,
-  `Access` int(11) DEFAULT 0,
-  `Status` tinytext DEFAULT NULL,
-  `CreateTime` datetime NOT NULL DEFAULT current_timestamp(),
-  `UpdateTime` datetime NOT NULL DEFAULT current_timestamp(),
-  `MetaData` longtext DEFAULT NULL,
-  PRIMARY KEY (`Id` )
-) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
 
@@ -210,6 +210,7 @@ INSERT INTO `aseq_UserGroup` (`Id` , `Name` , `Image` , `Title` , `Description` 
 CREATE TABLE IF NOT EXISTS `aseq_Payment` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `TId` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Source` tinytext DEFAULT NULL,
   `SourceEmail` tinytext DEFAULT NULL,
   `SourceContent` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,

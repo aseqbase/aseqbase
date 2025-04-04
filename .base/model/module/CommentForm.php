@@ -152,7 +152,7 @@ class CommentForm extends Form
 							"Contact" => getValid($received, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
 							"Subject" => get($received, "Subject"),
 							"Content" => get($received, "Content"),
-							"Attach" => Convert::ToString(get($received, "Attach")),
+							"Attach" => Convert::ToJson(get($received, "Attach")),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
 						]);
@@ -187,7 +187,7 @@ class CommentForm extends Form
 							":Contact" => \_::$Back->User->Email,
 							"Subject" => get($received, "Subject"),
 							"Content" => get($received, "Content"),
-							"Attach" => Convert::ToString(get($received, "Attach")),
+							"Attach" => Convert::ToJson(get($received, "Attach")),
 							"UpdateTime" => Convert::ToDateTimeString(),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus

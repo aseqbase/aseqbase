@@ -19,7 +19,7 @@ class JsonLD{
 			"{
 			  '@context': 'https://schema.org/',
 			  '@type': 'WebSite',
-			  'name': `".($name??\_::$Info->FullName)."`,
+			  'name': `".Convert::ToText($name??\_::$Info->FullName)."`,
 			  'url': `".($url??\Req::$Host)."`,
 			  'potentialAction': {
 				'@type': 'SearchAction',
@@ -34,8 +34,8 @@ class JsonLD{
 			"{
 			  '@context': 'https://schema.org',
 			  '@type': `$type`,
-			  'headline': `".Convert::ToExcerpt($title??\_::$Info->FullName,0,110)."`,
-			  'description': `".($excerpt??\_::$Info->Description)."`,
+			  'headline': `".Convert::ToExcerpt(Convert::ToText($title??\_::$Info->FullName),0,110)."`,
+			  'description': `".Convert::ToText($excerpt??\_::$Info->Description)."`,
 			  'image': `".($image??\_::$Info->FullLogoPath)."`,
 			  'author': {
 				'@type': 'Person',

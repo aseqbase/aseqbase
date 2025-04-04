@@ -147,12 +147,12 @@ class Query
             $parentId = $id;
             $id = table($table ?? "Category", source:$this->DataBase)->DoSelectValue(
                 "`Id`",
-                "(`Id`=:Id OR `Name`=:Name) AND " . (is_null($parentId) ? "" : "`ParentId`=" . $parentId . " AND ") . $condit,
+                "(`Id`=:Id OR `Name`=:Name) AND " . (is_null($parentId) ? "" : ("`ParentId`=" . $parentId . " AND ")) . $condit,
                 [":Id" => $name, ":Name" => $name],
                 null
             );
             if (is_null($id))
-                return $default;
+                return $parentId??$default;
         }
         return $id?? $default;
     }

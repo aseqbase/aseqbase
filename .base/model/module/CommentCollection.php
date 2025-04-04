@@ -178,7 +178,7 @@ class CommentCollection extends Collection{
 
 	public function GetStyle(){
 		return Html::Style("
-			.{$this->Name} .item {
+			.{$this->Name} div.item {
 				height: fit-attach;
 				background-Color: #88888808;
                 margin: calc(var(--size-1) / 2);
@@ -189,14 +189,14 @@ class CommentCollection extends Collection{
             	border: var(--border-1) var(--back-color-5);
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .item:hover{
+			.{$this->Name} div.item:hover{
 				box-shadow: var(--shadow-2);
 				border-radius:  var(--radius-1);
 				border-color: var(--back-color-4);
 				background-Color: #88888818;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .item.deactive {
+			.{$this->Name} div.item.deactive {
 				background-Color: #88888844;
 				box-shadow: var(--shadow-0);
 				border-radius: var(--radius-0);
@@ -204,7 +204,7 @@ class CommentCollection extends Collection{
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
 
-			.{$this->Name} .item .subject{
+			.{$this->Name} div.item .subject{
                 padding: 0px;
                 margin: 0px;
 				font-size: var(--size-3);
@@ -214,21 +214,21 @@ class CommentCollection extends Collection{
                 z-index: 1;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .item:hover .subject{
+			.{$this->Name} div.item:hover .subject{
 				font-size: var(--size-3);
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .item .author{
+			.{$this->Name} div.item .author{
                 font-weight: bold;
 			}
-			.{$this->Name} .item .author::after{
+			.{$this->Name} div.item .author::after{
 				content: ': ';
 				padding-inline-end: calc(var(--size-0) / 2);
 			}
 			.{$this->Name} .item .sidebtn{
                 position: absolute;
-                margin: calc(-1 * var(--size-2));
-                margin-bottom: 0;
+                margin-top: calc(-1 * var(--size-3));
+                margin-inline-start: calc(-1 * var(--size-3));
                 width: 100%;
 				text-align: end;
 				opacity: 0;
@@ -256,7 +256,7 @@ class CommentCollection extends Collection{
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
 			/* Style the images inside the grid */
-			.{$this->Name} .item .image {
+			.{$this->Name} div.item .image {
 				opacity: 1;
 				width: {$this->ThumbnailWidth};
 				height: {$this->ThumbnailHeight};
@@ -267,33 +267,33 @@ class CommentCollection extends Collection{
 				overflow: hidden;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .item:hover .image{
+			.{$this->Name} div.item:hover .image{
 				opacity: 0.6;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .item .message{
+			.{$this->Name} div.item .message{
                 gap: var(--size-0);
             	font-size: var(--size-1);
 				position: relative;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .item .message .excerpt{
+			.{$this->Name} div.item .message :is(.excerpt, .full){
                 padding-inline-end: calc(var(--size-0) / 2);
 			}
-			.{$this->Name} .item .attach{
+			.{$this->Name} div.item .attach{
                 font-size: var(--size-1);
             	text-align: justify;
 			}
-			.{$this->Name} .item .metadata{
+			.{$this->Name} div.item .metadata{
 				font-size: calc(var(--size-0) * 0.8);
                 display: inline-block;
                 opacity: 0.8;
 			}
-			.{$this->Name} .item .metadata>*{
+			.{$this->Name} div.item .metadata>*{
 				padding-inline-end: calc(var(--size-0) / 2);
                 display: inline-block;
 			}
-			.{$this->Name} .item .replies{
+			.{$this->Name} div.item .replies{
                 gap: var(--size-0);
             	font-size: var(--size-1);
 				position: relative;
@@ -341,8 +341,8 @@ class CommentCollection extends Collection{
 			    $p_image = getValid($item,'Image' , $this->DefaultImage);
 			    $p_subject = getValid($item,'Subject' , $this->DefaultTitle);
 			    $p_message = getValid($item,'Content' , $this->DefaultDescription);
-			    $p_attach = getValid($item,'Attach' ,$this->DefaultContent);
-			    $p_email = get($item,'Contact');
+			    $p_attach = Convert::FromJson(getValid($item,'Attach' ,$this->DefaultContent));
+                $p_email = get($item,'Contact');
                 
 			    $p_showexcerpt = isValid($p_message) && $this->AutoExcerpt;
 			    $p_showsubject = isValid($p_subject) && $this->ShowSubject;
@@ -375,7 +375,7 @@ class CommentCollection extends Collection{
 
                 $p_excerpt = $p_showexcerpt?
                     Convert::ToExcerpt(
-                            $p_message,
+                        Convert::ToText($p_message),
                             0,
                             $this->ExcerptLength,
                             $this->ExcerptSign

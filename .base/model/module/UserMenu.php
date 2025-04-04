@@ -90,7 +90,7 @@ class UserMenu extends Module{
 			else
 				$this->Items = array(
 					array("Name" =>takeValid(\_::$Back->User,"Name" ,"Profile"), "Path" =>User::$RoutePath),
-					array("Name" =>Convert::ToExcerpt(takeValid(\_::$Back->User,"Bio" , null)??takeValid(\_::$Back->User->GetValue("Bio" ), null, "New User...")), "Attributes"=>["class"=>"bio"]),
+					array("Name" =>Convert::ToExcerpt(Convert::ToText(takeValid(\_::$Back->User,"Bio" , null)??between(\_::$Back->User->GetValue("Bio" ), "New User..."))), "Attributes"=>["class"=>"bio"]),
 					array("Name" =>"Dashboard", "Path" =>User::$DashboardHandlerPath),
 					array("Name" =>"Edit Profile", "Path" =>User::$EditHandlerPath),
 					array("Name" =>"Sign Out", "Path" =>"sendDelete(`".User::$OutHandlerPath."`, null, 'body');")

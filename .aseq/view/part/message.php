@@ -13,7 +13,7 @@ module("Form");
 			$form->SenderEmail = get($received, "Email") ?? get(\_::$Back->User, "Email");
 			table("Comment")->DoInsert([
 				"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
-				"Relation" => \Req::$Request,
+				"Relation" => \Req::$Url,
 				"Name" => getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
 				"Contact" => getValid($received, "Email", \_::$Back->User ? \_::$Back->User->Email : null),
 				"Subject" => get($received, "Subject"),

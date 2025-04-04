@@ -335,14 +335,14 @@ class PostCollection extends Collection{
                 $p_excerpt = null;
 			    if($this->AutoExcerpt){
                     $p_description = __(Convert::ToExcerpt(
-						    $p_description,
+                        Convert::ToText($p_description),
 						    0,
 						    $this->ExcerptLength,
 						    $this->ExcerptSign
 					    ), refering:$p_refering);
                     if($p_showexcerpt)
                         $p_excerpt = __(Convert::ToExcerpt(
-						    $p_content,
+						    Convert::ToText($p_content),
 						    0,
 						    $this->ExcerptLength,
 						    $this->ExcerptSign

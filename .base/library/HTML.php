@@ -46,12 +46,12 @@ class Html
                     // To keep all previous tags unchanged
                     $value = code($value, $dic, pattern:$patt);
                     // Headings
-                    $value = preg_replace("/^\#\s(.*)/im", self::ExternalHeading("$1"), $value);
-                    $value = preg_replace("/^\#{2}\s(.*)/im", self::SuperHeading("$1"), $value);
-                    $value = preg_replace("/^\#{3}\s(.*)/im", self::Heading("$1"), $value);
-                    $value = preg_replace("/^\#{4}\s(.*)/im", self::SubHeading("$1"), $value);
-                    $value = preg_replace("/^\#{5}\s(.*)/im", self::InternalHeading("$1"), $value);
-                    $value = preg_replace("/^\#{6}\s(.*)/im", "<h6>$1</h6>", $value);
+                    $value = preg_replace("/^[ \t\f]*\#\s(.*)/im", self::ExternalHeading("$1"), $value);
+                    $value = preg_replace("/^[ \t\f]*\#{2}\s(.*)/im", self::SuperHeading("$1"), $value);
+                    $value = preg_replace("/^[ \t\f]*\#{3}\s(.*)/im", self::Heading("$1"), $value);
+                    $value = preg_replace("/^[ \t\f]*\#{4}\s(.*)/im", self::SubHeading("$1"), $value);
+                    $value = preg_replace("/^[ \t\f]*\#{5}\s(.*)/im", self::InternalHeading("$1"), $value);
+                    $value = preg_replace("/^[ \t\f]*\#{6}\s(.*)/im", "<h6>$1</h6>", $value);
                     // Lists
                     $blts = "\*\-•○☐";
                     $chs = "✓✔☑✅";
@@ -70,7 +70,7 @@ class Html
                     $value = preg_replace("/[ \t\f]*\|\|([^\|\r\n]*)((\|\|$)|(?=\|\|)|$)/im", self::Cell("$1",["Type"=>"head"]), $value);
                     $value = preg_replace("/[ \t\f]*\|([^\|\r\n]*)((\|$)|(?=\|)|$)/im", self::Cell("$1"), $value);
                     // Footnotes
-                    $value = preg_replace("/^\[([a-z0-9_\-]+)\]:\s*(.*)/im", self::Division("[$1] $2", ["class"=>"footnote", "id"=>"fn-$1"]), $value);
+                    $value = preg_replace("/^[ \t\f]*\[([a-z0-9_\-]+)\]:\s*(.*)/im", self::Division("[$1] $2", ["class"=>"footnote", "id"=>"fn-$1"]), $value);
                     $value = preg_replace("/\[([a-z0-9_\-]+)\]/i", self::Span("[$1]", "#fn-$1"), $value);
                     $value = preg_replace("/\[([\^~])([^\]]+)\]:\s*(.*)/i", self::Division("$1$2 $3", ["class"=>"footnote", "id"=>"fn-$2"]), $value);
                     $value = preg_replace("/\[\^([^\]]+)\]/i", self::Super("[$1]", "#fn-$1"), $value);
@@ -94,7 +94,7 @@ class Html
                     $value = preg_replace("/(?<!\[)\^([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", self::Super("$1"), $value); // Superscript
                     $value = preg_replace("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", self::Sub("$1"), $value); // Subscript
                     // Others
-                    $value = preg_replace("/^\-{6,}$/im", self::$HorizontalBreak, $value);
+                    $value = preg_replace("/^[ \t\f]*\-{6,}$/im", self::$HorizontalBreak, $value);
                     $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<)/i", self::$NewLine, trim($value));
                     return decode($value, $dic);
                     //return $value;
