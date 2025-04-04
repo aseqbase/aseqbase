@@ -108,9 +108,30 @@ class General extends Template{
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
 				}
 				quote:hover{
-					background-color: #8882;
+					background-color: #8883;
 					font-weight: bold;
 				}
+				blockquote{
+					background-color: #8883;
+					padding: var(--size-1);
+				}
+
+				code{
+					background-color: #8883;
+					padding-left: var(--size-0);
+					padding-right: var(--size-0);
+					border-inline-start: 3px solid var(--back-color-2);
+				}
+				blockcode{
+					background-color: #8883;
+					padding: var(--size-0);
+					display: block;
+					max-height: 95vh;
+					overflow-y: scroll;
+					text-wrap: auto;
+					border-inline-start: 3px solid var(--back-color-2);
+				}
+
 
 				a, a:visited, a:active, a:hover{
 					color: inherit;

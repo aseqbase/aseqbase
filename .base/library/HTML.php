@@ -39,12 +39,14 @@ class Html
                 else {
                     $patt = '/(`\S[^`]*`)|("\S[^"]*")|(\'\S[^\']*\')|(\<\/?([A-Za-z\-_]+)[^>]*[^\\\\]?\>)/iU';
                     // Codes and Quotes
-                    $value = preg_replace("/\B\"(\S[^\r\n\"]+\S)\"\B/i", self::Quote("$1"), $value);
-                    $value = preg_replace("/((((\r?\n\r?)|^)\>.*)+)/im", self::QuoteBlock("$1"), $value); // Blockquotes
-                    $value = preg_replace('/```(.+?)```/s', self::CodeBlock("$1"), $value); // Code blocks
+                    $value = preg_replace('/\s?```?\s?(.+?)\s?```?\s?/s', self::CodeBlock("$1"), $value); // Code blocks
                     $value = preg_replace('/`(.+?)`/s', self::Code("$1"), $value); // Inline code
                     // To keep all previous tags unchanged
                     $value = code($value, $dic, pattern:$patt);
+                    $value = preg_replace("/(((\r?\n\r?)|^)[ \t\f]*\>.*)+\s?/im", self::CodeBlock("$1"), $value); // Blockquotes
+                    $value = code($value, $dic, pattern:$patt);
+                    $value = preg_replace("/\B\"(\S[^\r\n\"]+\S)\"\B/i", self::Quote("$1"), $value);
+                    $value = preg_replace("/\s?\"\"\"?\s?(.+?)\s?\"\"\"?\s?/s", self::QuoteBlock("$1"), $value); // Blockquotes
                     // Headings
                     $value = preg_replace("/^[ \t\f]*\#\s(.*)/im", self::ExternalHeading("$1"), $value);
                     $value = preg_replace("/^[ \t\f]*\#{2}\s(.*)/im", self::SuperHeading("$1"), $value);
@@ -56,7 +58,8 @@ class Html
                     $blts = "\*\-•○☐";
                     $chs = "✓✔☑✅";
                     $uchs = "⨯⨉❌❎";
-                    $value = preg_replace("/((\r?\n\r?[ \t\f]*(\+|(\d+\W?))\s+.*)(\r?\n\r?[ \t\f]*([+$blts$chs$uchs]|(\d+\W?))\s+.*)*)/iu", self::List("\n$1\n"), $value);
+                    $value = preg_replace("/((\r?\n\r?[ \t\f]*(\d+)\W?\s+.*)(\r?\n\r?[ \t\f]*([+$blts$chs$uchs]|(\d+\W?))\s+.*)*)/iu", self::List("\n$1\n", ["start"=>"$3"]), $value);
+                    $value = preg_replace("/((\r?\n\r?[ \t\f]*\+\s+.*)(\r?\n\r?[ \t\f]*([+$blts$chs$uchs]|(\d+\W?))\s+.*)*)/iu", self::List("\n$1\n"), $value);
                     $value = preg_replace("/^[ \t\f]*(?:\+|(?:\d+\W?))\s+(.*)/im", self::Item("$1"), $value);
                     $value = preg_replace("/((\r?\n\r?[ \t\f]*[$blts$chs$uchs]\s+.*)+)/iu", self::Items("\n$1\n"), $value);
                     // $value = preg_replace("/^\s*\[\s*x?\s*\]\s+(.*)/im", self::Item("$1", ["class"=>"checked"]), $value);
@@ -67,8 +70,8 @@ class Html
                     // Tables
                     $value = preg_replace("/((\r?(\n|^)\r?[ \t\f]*(\|.+)((\|[ \t\f]*)|$))+)/im", self::Table("\n$1\n"), $value);
                     $value = preg_replace("/^[ \t\f]*(\|.*\|?)[ \t\f]*$/im", self::Row("$1"), $value);
-                    $value = preg_replace("/[ \t\f]*\|\|([^\|\r\n]*)((\|\|$)|(?=\|\|)|$)/im", self::Cell("$1",["Type"=>"head"]), $value);
-                    $value = preg_replace("/[ \t\f]*\|([^\|\r\n]*)((\|$)|(?=\|)|$)/im", self::Cell("$1"), $value);
+                    $value = preg_replace("/[ \t\f]*\|\|[ \t\f]*([^\|\r\n]*)[ \t\f]*((?=(\|\|?$)|(\|\|?))|$)/im", self::Cell("$1",["Type"=>"head"]), $value);
+                    $value = preg_replace("/[ \t\f]*\|[ \t\f]*([^\|\r\n]*)[ \t\f]*((?=(\|$)|(\|))|$)/im", self::Cell("$1"), $value);
                     // Footnotes
                     $value = preg_replace("/^[ \t\f]*\[([a-z0-9_\-]+)\]:\s*(.*)/im", self::Division("[$1] $2", ["class"=>"footnote", "id"=>"fn-$1"]), $value);
                     $value = preg_replace("/\[([a-z0-9_\-]+)\]/i", self::Span("[$1]", "#fn-$1"), $value);
