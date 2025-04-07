@@ -108,6 +108,7 @@ class General extends Template{
 					".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
 				}
 				quote:hover{
+                    display: inline;
 					background-color: #8883;
 					font-weight: bold;
 				}
@@ -117,6 +118,7 @@ class General extends Template{
 				}
 
 				code{
+                    display: inline;
 					background-color: #8883;
 					padding-left: var(--size-0);
 					padding-right: var(--size-0);

@@ -19,7 +19,7 @@ module("Form");
 				"Subject" => get($received, "Subject"),
 				"Content" => get($received, "Message"),
 				"Access" => \_::$Config->AdminAccess,
-				"Status" => \_::$Config->DefaultCommentStatus
+				"Status" => -1
 			]);
 			swap($form, $data);
 			$form->Handle();

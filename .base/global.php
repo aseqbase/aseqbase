@@ -783,7 +783,7 @@ function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = 
 function decode($html, $dic)
 {
 	if (is_array($dic))
-		foreach ($dic as $k => $v)
+		foreach (array_reverse($dic) as $k => $v)
 			$html = str_replace($v, $k, $html);
 	return $html;
 }

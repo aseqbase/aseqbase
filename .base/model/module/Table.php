@@ -181,6 +181,16 @@ class Table extends Module
     public $SelectQuery = null;
     public $SelectParameters = null;
     public $SelectCondition = null;
+    /**
+     * To create Controls and Prepend them to the row management cell
+     * @var null|callable fn($id, $row)=>[control1, control2...]
+     */
+    public $PrependControlsCreator = null;
+    /**
+     * To create Controls and Append them to the row management cell
+     * @var null|callable fn($id, $row)=>[control1, control2...]
+     */
+    public $AppendControlsCreator = null;
 
     public $Options = ["deferRender: false", "select: true"];
 
@@ -448,10 +458,12 @@ class Table extends Module
                                 [
                                     $uck => Html::Division([
                                         ...[($hrn ? Html::Span($rn++, null, ['class' => 'number']) : "")],
+                                        ...Convert::ToSequence(Convert::By($this->PrependControlsCreator,$rowid, $row)??[]),
                                         ...($vaccess ? [Html::Icon("eye", "{$this->Modal->Name}_View(`$rowid`);", ["class" => "table-item-view"])] : []),
                                         ...($maccess ? [Html::Icon("edit", "{$this->Modal->Name}_Modify(`$rowid`);", ["class" => "table-item-modify"])] : []),
                                         ...($daccess ? [Html::Icon("copy", "{$this->Modal->Name}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate"])] : []),
-                                        ...($raccess ? [Html::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete"])] : [])
+                                        ...($raccess ? [Html::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete"])] : []),
+                                        ...Convert::ToSequence(Convert::By($this->AppendControlsCreator,$rowid, $row)??[])
                                     ]),
                                     ...$row
                                 ];
