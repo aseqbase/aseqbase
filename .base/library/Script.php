@@ -30,6 +30,8 @@ class Script
                 return $obj;
             if (is_subclass_of($obj, "\Base"))
                 return $obj->ToString();
+            if (is_array($obj) && count($obj) > 0 && !is_int(array_key_first($obj))) 
+                return join("", ["{", join(", ", loop($obj, fn ($k, $v) => Convert::ToStatic($k).":".self::Convert($v))), "}"]);
             if (is_countable($obj) || is_iterable($obj)) 
                 return join("", ["[", join(", ", loop($obj, fn ($i, $o) => self::Convert($o))), "]"]);
             if (is_callable($obj) || $obj instanceof \Closure)

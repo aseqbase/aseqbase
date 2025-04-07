@@ -44,7 +44,7 @@ class CommentForm extends Form
 	{
 		parent::__construct();
 		$this->Access = \_::$Config->WriteCommentAccess;
-		$this->DefaultStatus = \_::$Config->DefaultCommentStatus;
+		$this->DefaultStatus = \_::$Back->User->Access(\_::$Config->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
 		$this->Template = "b";
 	}
 
@@ -143,6 +143,7 @@ class CommentForm extends Form
 				if (isValid($received, "Name") || isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
 					$rid = get($received, "Reply");
+					$att = get($received, "Attach");
 					if ((\_::$Back->User && \_::$Back->User->Email) || isValid($received, "Contact"))
 						$res = table("Comment")->DoInsert([
 							"ReplyId" => $rid,
@@ -152,7 +153,7 @@ class CommentForm extends Form
 							"Contact" => getValid($received, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
 							"Subject" => get($received, "Subject"),
 							"Content" => get($received, "Content"),
-							"Attach" => Convert::ToJson(get($received, "Attach")),
+							"Attach" => isStatic($att) ? $att : Convert::ToJson($att),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
 						]);
@@ -161,9 +162,10 @@ class CommentForm extends Form
 						$this->Handler($received);
 						if (isValid($rid))
 							$this->NotifyCommander($rid, $received, "Reply to");
-						return $this->GetSuccess($this->SuccessHandler);
+						$this->Result = true;
+						return $this->GetSuccess();
 					} else
-						return $this->GetError($this->ErrorHandler);
+						return $this->GetError();
 				} else
 					return $this->GetWarning($this->IncompleteWarning);
 			} catch (\Exception $ex) {
@@ -180,23 +182,24 @@ class CommentForm extends Form
 				if (isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
 					$cid = get($received, "Id");
+					$att = get($received, "Attach");
 					if (isValid($cid))
-						$res = table("Comment")->DoUpdate("`Id`=:Id AND (`UserId`=:UserId OR `Contact`=:Contact)", [
+						$res = table("Comment")->DoUpdate("`Id`=:Id AND (" . (\_::$Back->User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
 							":Id" => $cid,
 							":UserId" => \_::$Back->User->Id,
 							":Contact" => \_::$Back->User->Email,
 							"Subject" => get($received, "Subject"),
 							"Content" => get($received, "Content"),
-							"Attach" => Convert::ToJson(get($received, "Attach")),
+							"Attach" => isStatic($att) ? $att : Convert::ToJson($att),
 							"UpdateTime" => Convert::ToDateTimeString(),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
 						]);
 					if ($res) {
 						$this->Result = 0;
-						return $this->GetSuccess($this->SuccessHandler);
+						return $this->GetSuccess();
 					} else
-						return $this->GetError($this->ErrorHandler);
+						return $this->GetError();
 				} else
 					return $this->GetWarning($this->IncompleteWarning);
 			} catch (\Exception $ex) {
@@ -219,6 +222,19 @@ class CommentForm extends Form
 				$this->ReplyId = get($received, "Reply");
 				$this->Router->Refresh()->Get()->Switch();
 				return $this->Handle();
+			} elseif (isValid($received, "Status") && \_::$Back->User->Access(\_::$Config->AdminAccess)) {
+				$res = null;
+				$cid = get($received, "Id");
+				if (isValid($cid))
+					$res = table("Comment")->DoUpdate("`Id`=:Id", [
+						":Id" => $cid,
+						"Status" => getValid($received, "Status", $this->DefaultStatus)
+					]);
+				if ($res) {
+					$this->Result = 0;
+					return $this->GetSuccess();
+				} else
+					return $this->GetError();
 			}
 		return $this->GetSigning();
 	}
@@ -232,7 +248,7 @@ class CommentForm extends Form
 				if (isValid($cid))
 					if (
 						isValid($cid) && \_::$Back->User->Id &&
-						table("Comment")->DoDelete("`Id`=:Id AND (`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$Back->User->Id, ":UE" => \_::$Back->User->Email])
+						table("Comment")->DoDelete("`Id`=:Id AND (" . (\_::$Back->User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$Back->User->Id, ":UE" => \_::$Back->User->Email])
 					) {
 						$this->Status = 200;
 						return $this->GetWarning("This comment removed successfuly!");

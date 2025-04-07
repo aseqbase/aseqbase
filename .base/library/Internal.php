@@ -39,13 +39,25 @@ class Internal
         \Res::Render(self::Handle($name));
     }
 
+    public static function MakeStartScript($multilines = false){
+        if (\_::$Back->Router->DefaultMethodName === "GET" && headers_sent()) {
+           return "document.addEventListener('DOMContentLoaded',()=>".($multilines?"{":"");
+        }
+        return "";
+    }
+    public static function MakeEndScript($multilines = false){
+        if (\_::$Back->Router->DefaultMethodName === "GET" && headers_sent()) {
+            return ($multilines?"}":"").");";
+        }
+        return "";
+    }
     /**
      * 
      * To convert a PHP handler to a JS codes
      * @param mixed $handler A handler function or data wants to print
      * @param mixed $args Handler input arguments
-     * @param mixed $script A JS code to handle received data // (data,err)=> received procedure
-     * @param mixed $progress A JS code to apply while getting data // (data,err)=> progrecing procedure
+     * @param mixed $callbackScript A JS code to handle received data // (data,err)=> received procedure
+     * @param mixed $progressScript A JS code to apply while getting data // (data,err)=> progrecing procedure
      * @param mixed $timeout The interaction timeout
      * @return string The interaction JS codes
      */
@@ -54,12 +66,8 @@ class Internal
         $selector = 'getQuery(this)??"body"';
         $callbackScript = $callbackScript ?? "(data,err)=>document.querySelector($selector).replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
         $progressScript = $progressScript ?? "null";
-        $start = "";
-        $end = "";
-        if (\_::$Back->Router->DefaultMethodIndex === 1) {
-            $start = "document.addEventListener('DOMContentLoaded',()=>";
-            $end = ");";
-        }
+        $start = self::MakeStartScript();
+        $end = self::MakeEndScript();
         if (isStatic($handler))
             return "$start($callbackScript)(" . Script::Convert($handler) . "," . Script::Convert($args) . ")$end";
         return $start .

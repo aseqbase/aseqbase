@@ -201,7 +201,7 @@ class PaymentForm extends Form{
 		}
 		else return parent::GetDescription();
     }
-	public function GetSuccess($msg, ...$attr){
+	public function GetSuccess($msg = null, ...$attr){
 		$doc = Html::Document(__($this->SuccessContent).$this->Transaction->ToHtml());
 		$res = "";
 		if(isValid($this->Transaction->DestinationEmail))
@@ -233,7 +233,7 @@ class PaymentForm extends Form{
         else $res .= Html::Error("We could not record your transaction details, please notify us!", $attr);
 		return Html::Center(
 			Html::Container(
-				Html::Heading(Html::Bold(parent::GetSuccess($msg))).
+				Html::Heading(Html::Bold(parent::GetSuccess($msg??$this->SuccessHandler))).
 				$this->Transaction->ToHtml().
 				$res
 				, ...$attr)

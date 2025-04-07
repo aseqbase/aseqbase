@@ -15,35 +15,31 @@
   visibility: hidden !important;
 }
 
-.hover-hide {
+.hover-hide, .parent-hover-hide {
   display: initial !important;
 }
-
-:hover>.hover-hide {
+:hover>.hover-hide, :hover>*>.parent-hover-hide {
   display: none !important;
 }
 
-.hover-show {
+.hover-show, .parent-hover-show {
   display: none !important;
 }
-
-:hover>.hover-show {
+:hover>.hover-show, :hover>*>.parent-hover-show {
   display: initial !important;
 }
 
-.hover-visible {
+.hover-visible, .parent-hover-visible {
   visibility: hidden !important;
 }
-
-:hover>.hover-visible {
+:hover>.hover-visible, :hover>*>.parent-hover-visible {
   visibility: visible !important;
 }
 
-.hover-invisible {
+.hover-invisible, .parent-hover-invisible {
   visibility: visible !important;
 }
-
-:hover>.hover-invisible {
+:hover>.hover-invisible, :hover>*>.parent-hover-invisible {
   visibility: hidden !important;
 }
 

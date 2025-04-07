@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
 /**
- * Automatic crate route map through url or item iterations
+ * Automatic create route map through url or item iterations
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase

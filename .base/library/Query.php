@@ -152,9 +152,9 @@ class Query
                 null
             );
             if (is_null($id))
-                return $parentId??$default;
+                return $default;
         }
-        return $id?? $default;
+        return $id ?? $default;
     }
     public function FindCategory(string|null $direction, array|null $default = null, string|null $table = null)
     {

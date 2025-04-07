@@ -154,11 +154,12 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if (is_integer($acceptableAccess))
 			return $access >= $acceptableAccess;
 		if (is_array($acceptableAccess) && count($acceptableAccess) > 0)
-			if (isset($acceptableAccess["min"]) || isset($acceptableAccess["max"]) || isset($acceptableAccess["except"]))
+			if (getBetween($acceptableAccess, "Min", "Max", "Include", "Exclude")??false)
 				return
-					(!isset($acceptableAccess["min"]) || $acceptableAccess["min"] <= $access)
-					&& (!isset($acceptableAccess["max"]) || $acceptableAccess["max"] >= $access)
-					&& (!isset($acceptableAccess["except"]) || $acceptableAccess["except"] != $access)
+					(get($acceptableAccess, "Min")??$access) <= $access
+					&& (get($acceptableAccess, "Max")??$access) >= $access
+					&& !in_array($access, get($acceptableAccess, "Exclude")??[])
+					&& in_array($access, get($acceptableAccess, "Include")??[$access])
 				;
 			else
 				return in_array($access, $acceptableAccess);
@@ -261,6 +262,18 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if (is_null($id))
 			return null;
 		return $this->GroupDataTable->DoUpdate("`Id`='$id'", $fieldsDictionary);
+	}
+
+	public function MakeSign($regards = "Kind Regards"){
+		return trim(join(PHP_EOL,[
+				$this->Access >= \_::$Config->AdminAccess?\_::$Info->Slogan:"",
+				$regards?"*$regards*":"",
+                "------",
+                "*".$this->Name."*",
+                get($this->GetGroup(), "Title")." at ".\_::$Info->Name,
+				$this->Access >= \_::$Config->AdminAccess?\_::$Info->ReceiverEmail??$this->Email:$this->Email,
+                "[".\_::$Info->FullName."](".\_::$Info->Path.")"
+			]));
 	}
 
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupId = null, $status = null, $metadata = null)

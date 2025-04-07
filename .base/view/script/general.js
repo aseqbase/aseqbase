@@ -10,7 +10,6 @@ let isEmpty = function (obj) {
 	return obj === null || obj === "" || obj == {} || obj == [];
 };
 
-
 let isDefined = function (obj) {
 	return !isUndefined(obj);
 };

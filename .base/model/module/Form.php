@@ -73,6 +73,9 @@ class Form extends Module
 	public $FieldsMaxWidth = "100vw";
 	public $Status = null;
 	public $Result = null;
+	public $SuccessHandler = "The form submitted successfully!";
+	public $ErrorHandler = "There a problem is occured!";
+	public $WarningHandler = "Please fill all required fields!";
 
 	/**
 	 * Create the module
@@ -86,6 +89,7 @@ class Form extends Module
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \Res::Status($this->Status);
 		// });
+		if(\_::$Back->User->Access(\_::$Config->AdminAccess)) $this->BlockTimeout = 500;
 	}
 
 	public function CheckAccess($access = 0, $blocking = true, $reaction = false, &$message = null)
@@ -797,23 +801,23 @@ class Form extends Module
 	{
 		return Html::Result($msg, ...$attr);
 	}
-	public function GetSuccess($msg, ...$attr)
+	public function GetSuccess($msg = null, ...$attr)
 	{
 		$this->Result = $this->Result ?? true;
 		$this->Status = $this->Status ?? 200;
-		return Html::Success($msg, ...$attr);
+		return Html::Success($msg ?? $this->SuccessHandler, ...$attr);
 	}
-	public function GetWarning($msg, ...$attr)
+	public function GetWarning($msg = null, ...$attr)
 	{
 		$this->Result = $this->Result ?? null;
 		$this->Status = $this->Status ?? 500;
-		return Html::Warning($msg, ...$attr);
+		return Html::Warning($msg ?? $this->WarningHandler, ...$attr);
 	}
-	public function GetError($msg, ...$attr)
+	public function GetError($msg = null, ...$attr)
 	{
 		$this->Result = $this->Result ?? false;
 		$this->Status = $this->Status ?? 400;
-		return Html::Error($msg, ...$attr);
+		return Html::Error($msg ?? $this->ErrorHandler, ...$attr);
 	}
 
 	public function Post()
@@ -845,22 +849,7 @@ class Form extends Module
 	{
 		if (!isEmpty($received))
 			try {
-				library("Contact");
-				if (count($received) > 0) {
-					if (isValid($this->ReceiverEmail)) {
-						if (
-							!\MiMFa\Library\Contact::SendHTMLEmail(
-								$this->SenderEmail ?? \_::$Info->SenderEmail,
-								$this->ReceiverEmail,
-								$this->MailSubject ?? \Req::$Domain . ": A new form submitted",
-								$received
-							)
-						)
-							return $this->GetWarning("Could not send data successfully!");
-					}
-					return $this->GetSuccess("The form submitted successfully!", ["class" => "page"]);
-				} else
-					return $this->GetWarning("There a problem is occured!");
+				return $this->Mail($received) ? $this->GetSuccess(null, ["class" => "page"]) : $this->GetError("Could not email data!");
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);
 			}
@@ -869,26 +858,24 @@ class Form extends Module
 
 	public function Mail($data)
 	{
-		try {
-			library("Contact");
-			if (count($data) > 0) {
-				if (isValid($this->ReceiverEmail)) {
-					if (
-						!\MiMFa\Library\Contact::SendHTMLEmail(
-							$this->SenderEmail ?? \_::$Info->SenderEmail,
-							$this->ReceiverEmail,
-							$this->MailSubject ?? \Req::$Domain . ": A new form submitted",
-							$data
-						)
-					)
-						return Html::Warning("Could not send data successfully!");
-				}
-				return Html::Success("The form submitted successfully!", ["class" => "page"]);
-			} else
-				return Html::Warning("There a problem is occured!");
-		} catch (\Exception $ex) {
-			return Html::Error($ex);
-		}
+		library("Contact");
+		$ex = null;
+		if (count($data) > 0 && get($data, "ReceiverEmail") ?? $this->ReceiverEmail)
+			if (
+				\MiMFa\Library\Contact::SendHTMLEmail(
+					grab($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
+					grab($data, "ReceiverEmail") ?? $this->ReceiverEmail,
+					grab($data, "MailSubject") ?? $this->MailSubject ?? (\Req::$Domain . ": A new form submitted"),
+					grab($data, "MailMessage") ?? $data,
+					exception: $ex
+				)
+			)
+				return true;
+			elseif ($ex)
+				throw $ex;
+			else
+				return false;
+		return null;
 	}
 
 	public function GetSigning()
@@ -897,10 +884,10 @@ class Form extends Module
 			module("Modal");
 			$module = new \MiMFa\Module\Modal();
 			$module->Style = new Style();
-			$module->Style->Width = 
-			$module->Width = "fit-content";
-			$module->Style->Height = 
-			$module->Height = "fit-content";
+			$module->Style->Width =
+				$module->Width = "fit-content";
+			$module->Style->Height =
+				$module->Height = "fit-content";
 			$module->Style->Position = "sticky";
 			$module->Style->Margin = "auto";
 			$module->Style->Top = "initial";
@@ -910,7 +897,7 @@ class Form extends Module
 				$module->AllowShare =
 				$module->AllowZoom =
 				$module->AllowDownload = false;
-			$module->Content = part(User::$InHandlerPath, ["ContentClass"=>""], print: false);
+			$module->Content = part(User::$InHandlerPath, ["ContentClass" => ""], print: false);
 			if ($this->SigningLabel)
 				return $module->Handle() . Html::Center(
 					Html::Button(

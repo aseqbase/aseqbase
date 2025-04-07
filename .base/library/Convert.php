@@ -69,6 +69,8 @@ class Convert
                 return self::ToStatic($value(), $separator, $assignFormat);
             if ($value instanceof \DateTime)
                 return self::ToShownDateTimeString($value);
+            if ($value instanceof \stdClass)
+                return self::ToStatic((array)$value);
             return $value;
         }
         return $default;

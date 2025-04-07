@@ -7,7 +7,7 @@
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#contact See the Library Documentation
 */
 class Contact{
-	public static function SendEmail($from,$to,$subject,$message,$reply=null,$cc=null)
+	public static function SendEmail($from,$to,$subject,$message,$reply=null,$cc=null, &$exception = null)
 	{
 		try{
 			$header = "From: $from\r\n";
@@ -19,11 +19,12 @@ class Contact{
 			$message,
 			$header);
 		} catch (\Exception $ex){
+			$exception = $ex;
 			return false;
 		}
 	}
 
-	public static function SendHTMLEmail($from,$to,$subject,$message,$reply=null,$cc=null)
+	public static function SendHTMLEmail($from,$to,$subject,$message,$reply=null,$cc=null, &$exception = null)
 	{
 		try{
 			$header = "From: $from\r\n";
@@ -37,6 +38,7 @@ class Contact{
 			Html::Convert($message),
 			$header);
 		} catch (\Exception $ex){
+			$exception = $ex;
 			return false;
 		}
 	}

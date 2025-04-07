@@ -42,40 +42,40 @@ class Html
                     $value = preg_replace('/\s?```?\s?(.+?)\s?```?\s?/s', self::CodeBlock("$1"), $value); // Code blocks
                     $value = preg_replace('/`(.+?)`/s', self::Code("$1"), $value); // Inline code
                     // To keep all previous tags unchanged
-                    $value = code($value, $dic, pattern:$patt);
-                    $value = preg_replace("/(((\r?\n\r?)|^)[ \t\f]*\>.*)+\s?/im", self::CodeBlock("$1"), $value); // Blockquotes
-                    $value = code($value, $dic, pattern:$patt);
-                    $value = preg_replace("/\B\"(\S[^\r\n\"]+\S)\"\B/i", self::Quote("$1"), $value);
+                    $value = code($value, $dic, pattern: $patt);
+                    $value = preg_replace("/(((\r?\n\r?)|^)[ \t\f]*\>.*)+\s?/i", self::CodeBlock("$1"), $value); // Blockquotes
+                    $value = code($value, $dic, pattern: $patt);
+                    $value = preg_replace("/\b\"(\S[^\r\n\"]+\S)\"\b/i", self::Quote("$1"), $value);
                     $value = preg_replace("/\s?\"\"\"?\s?(.+?)\s?\"\"\"?\s?/s", self::QuoteBlock("$1"), $value); // Blockquotes
                     // Headings
-                    $value = preg_replace("/^[ \t\f]*\#\s(.*)/im", self::ExternalHeading("$1"), $value);
-                    $value = preg_replace("/^[ \t\f]*\#{2}\s(.*)/im", self::SuperHeading("$1"), $value);
-                    $value = preg_replace("/^[ \t\f]*\#{3}\s(.*)/im", self::Heading("$1"), $value);
-                    $value = preg_replace("/^[ \t\f]*\#{4}\s(.*)/im", self::SubHeading("$1"), $value);
-                    $value = preg_replace("/^[ \t\f]*\#{5}\s(.*)/im", self::InternalHeading("$1"), $value);
-                    $value = preg_replace("/^[ \t\f]*\#{6}\s(.*)/im", "<h6>$1</h6>", $value);
+                    $value = preg_replace("/^\s?[ \t\f]*\#\s(.*)/im", self::ExternalHeading("$1"), $value);
+                    $value = preg_replace("/^\s?[ \t\f]*\#{2}\s(.*)/im", self::SuperHeading("$1"), $value);
+                    $value = preg_replace("/^\s?[ \t\f]*\#{3}\s(.*)/im", self::Heading("$1"), $value);
+                    $value = preg_replace("/^\s?[ \t\f]*\#{4}\s(.*)/im", self::SubHeading("$1"), $value);
+                    $value = preg_replace("/^\s?[ \t\f]*\#{5}\s(.*)/im", self::InternalHeading("$1"), $value);
+                    $value = preg_replace("/^\s?[ \t\f]*\#{6}\s(.*)/im", "<h6>$1</h6>", $value);
                     // Lists
                     $blts = "\*\-•○☐";
                     $chs = "✓✔☑✅";
                     $uchs = "⨯⨉❌❎";
-                    $value = preg_replace("/((\r?\n\r?[ \t\f]*(\d+)\W?\s+.*)(\r?\n\r?[ \t\f]*([+$blts$chs$uchs]|(\d+\W?))\s+.*)*)/iu", self::List("\n$1\n", ["start"=>"$3"]), $value);
-                    $value = preg_replace("/((\r?\n\r?[ \t\f]*\+\s+.*)(\r?\n\r?[ \t\f]*([+$blts$chs$uchs]|(\d+\W?))\s+.*)*)/iu", self::List("\n$1\n"), $value);
+                    $value = preg_replace("/((\r?\n\r?[ \t\f]*(\d+)\W?\s+.*)(\r?\n\r?[ \t\f]*([+$blts$chs$uchs]|(\d+\W?))\s+.*)*)/iu", self::List("$1", ["start" => "$3"]), $value);
+                    $value = preg_replace("/((\r?\n\r?[ \t\f]*\+\s+.*)(\r?\n\r?[ \t\f]*([+$blts$chs$uchs]|(\d+\W?))\s+.*)*)/iu", self::List("$1"), $value);
                     $value = preg_replace("/^[ \t\f]*(?:\+|(?:\d+\W?))\s+(.*)/im", self::Item("$1"), $value);
-                    $value = preg_replace("/((\r?\n\r?[ \t\f]*[$blts$chs$uchs]\s+.*)+)/iu", self::Items("\n$1\n"), $value);
+                    $value = preg_replace("/((\r?\n\r?[ \t\f]*[$blts$chs$uchs]\s+.*)+)/iu", self::Items("$1"), $value);
                     // $value = preg_replace("/^\s*\[\s*x?\s*\]\s+(.*)/im", self::Item("$1", ["class"=>"checked"]), $value);
                     // $value = preg_replace("/^\s*\[\s*\]\s+(.*)/im", self::Item("$1", ["class"=>"unchecked"]), $value);
-                    $value = preg_replace("/^[ \t\f]*[$chs]\s+(.*)/imu", self::Item("$1", ["class"=>"checked"]), $value);
-                    $value = preg_replace("/^[ \t\f]*[$uchs]\s+(.*)/imu", self::Item("$1", ["class"=>"unchecked"]), $value);
+                    $value = preg_replace("/^[ \t\f]*[$chs]\s+(.*)/imu", self::Item("$1", ["class" => "checked"]), $value);
+                    $value = preg_replace("/^[ \t\f]*[$uchs]\s+(.*)/imu", self::Item("$1", ["class" => "unchecked"]), $value);
                     $value = preg_replace("/^[ \t\f]*[$blts]\s+(.*)/imu", self::Item("$1"), $value);
                     // Tables
-                    $value = preg_replace("/((\r?(\n|^)\r?[ \t\f]*(\|.+)((\|[ \t\f]*)|$))+)/im", self::Table("\n$1\n"), $value);
+                    $value = preg_replace("/((\r?(\n|^)\r?[ \t\f]*(\|.+)((\|[ \t\f]*)|$))+)/im", self::Table("$1"), $value);
                     $value = preg_replace("/^[ \t\f]*(\|.*\|?)[ \t\f]*$/im", self::Row("$1"), $value);
-                    $value = preg_replace("/[ \t\f]*\|\|[ \t\f]*([^\|\r\n]*)[ \t\f]*((?=(\|\|?$)|(\|\|?))|$)/im", self::Cell("$1",["Type"=>"head"]), $value);
+                    $value = preg_replace("/[ \t\f]*\|\|[ \t\f]*([^\|\r\n]*)[ \t\f]*((?=(\|\|?$)|(\|\|?))|$)/im", self::Cell("$1", ["Type" => "head"]), $value);
                     $value = preg_replace("/[ \t\f]*\|[ \t\f]*([^\|\r\n]*)[ \t\f]*((?=(\|$)|(\|))|$)/im", self::Cell("$1"), $value);
                     // Footnotes
-                    $value = preg_replace("/^[ \t\f]*\[([a-z0-9_\-]+)\]:\s*(.*)/im", self::Division("[$1] $2", ["class"=>"footnote", "id"=>"fn-$1"]), $value);
+                    $value = preg_replace("/^[ \t\f]*\[([a-z0-9_\-]+)\]:\s*(.*)/im", self::Division("[$1] $2", ["class" => "footnote", "id" => "fn-$1"]), $value);
                     $value = preg_replace("/\[([a-z0-9_\-]+)\]/i", self::Span("[$1]", "#fn-$1"), $value);
-                    $value = preg_replace("/\[([\^~])([^\]]+)\]:\s*(.*)/i", self::Division("$1$2 $3", ["class"=>"footnote", "id"=>"fn-$2"]), $value);
+                    $value = preg_replace("/\[([\^~])([^\]]+)\]:\s*(.*)/i", self::Division("$1$2 $3", ["class" => "footnote", "id" => "fn-$2"]), $value);
                     $value = preg_replace("/\[\^([^\]]+)\]/i", self::Super("[$1]", "#fn-$1"), $value);
                     $value = preg_replace("/\[~([^\]]+)\]/i", self::Sub("[$1]", "#fn-$1"), $value);
                     // Medias
@@ -84,7 +84,7 @@ class Html
                     $value = preg_replace("/@\[([^\]]+)\]\(([A-Za-z0-9\-_]+)\)/i", self::Media("$1", "$2"), $value);
                     $value = preg_replace("/@\[([^\]]+)\]\(([^\s]+)\)/i", self::Media("$1", " $2"), $value);
                     $value = preg_replace("/\[([^\]]+)\]\(([^\s]+)\)/i", self::Link("$1", "$2"), $value);
-                    $value = code($value, $dic, pattern:$patt);
+                    $value = code($value, $dic, pattern: $patt);
                     $value = preg_replace("/\b([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", self::Link("$1", "$1"), $value);
                     $value = preg_replace("/\b([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", self::Link("$1", "mailto:$1"), $value);
                     // Texts
@@ -98,7 +98,7 @@ class Html
                     $value = preg_replace("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", self::Sub("$1"), $value); // Subscript
                     // Others
                     $value = preg_replace("/^[ \t\f]*\-{6,}$/im", self::$HorizontalBreak, $value);
-                    $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<)/i", self::$NewLine, trim($value));
+                    $value = preg_replace("/(?<!\>)\r?\n\r?(?!\<\/)/i", self::$NewLine, trim($value));
                     return decode($value, $dic);
                     //return $value;
                 }
@@ -202,19 +202,13 @@ class Html
                                 case "class":
                                     $attrdic[$key] .= " " . $value;
                                     break;
-                                case "onclick":
-                                case "ondblclick":
-                                case "onchange":
-                                case "onload":
-                                case "oninput":
-                                case "onmouseover":
-                                case "onmouseout":
-                                    if (is_callable($value) || $value instanceof \Closure)
-                                        $value = Internal::MakeScript($value);
-                                    $attrdic[$key] .= PHP_EOL . $value;
-                                    break;
                                 default:
-                                    $attrdic[$key] = $value;
+                                    if (startsWith($key, "on")) {
+                                        if (is_callable($value) || $value instanceof \Closure)
+                                            $value = Internal::MakeScript($value);
+                                        $attrdic[$key] .= PHP_EOL . $value;
+                                    } else
+                                        $attrdic[$key] = $value;
                                     break;
                             }
                         else
@@ -245,24 +239,6 @@ class Html
                             } else
                                 $attrs .= " " . self::Attribute($key, $value);
                             break;
-                        case "onclick":
-                        case "ondblclick":
-                        case "onchange":
-                        case "onload":
-                        case "oninput":
-                        case "onmouseover":
-                        case "onmouseout":
-                            if (self::$AttributesOptimization && $optimization) {
-                                if (!isValid($id)) {
-                                    $id = "_" . getId(true);
-                                    $attrs .= " id='$id'";
-                                }
-                                if (is_callable($value) || $value instanceof \Closure)
-                                    $value = Internal::MakeScript($value);
-                                $scripts[] = "document.getElementById('$id').$key = function(e){{$value}};";
-                            } else
-                                $attrs .= " " . self::Attribute($key, $value);
-                            break;
                         case "alt":
                         case "content":
                         case "text":
@@ -272,14 +248,28 @@ class Html
                             $attrs .= " " . self::Attribute($key, __($value, styling: false));
                             break;
                         case "href":
-                            if(get($attrdic,"rel")) $attrs .= " " . self::Attribute($key, \MiMFa\Library\Local::GetUrl($value));
-                            else $attrs .= " " . self::Attribute($key, $value);
+                            if (get($attrdic, "rel"))
+                                $attrs .= " " . self::Attribute($key, \MiMFa\Library\Local::GetUrl($value));
+                            else
+                                $attrs .= " " . self::Attribute($key, $value);
                             break;
                         case "src":
                             $attrs .= " " . self::Attribute($key, \MiMFa\Library\Local::GetUrl($value));
                             break;
                         default:
-                            $attrs .= " " . self::Attribute($key, $value);
+                            if (startsWith($key, "on")) {
+                                if (is_callable($value) || $value instanceof \Closure)
+                                    $value = Internal::MakeScript($value);
+                                if (self::$AttributesOptimization && $optimization) {
+                                    if (!isValid($id)) {
+                                        $id = "_" . getId(true);
+                                        $attrs .= " id='$id'";
+                                    }
+                                    $scripts[] = "document.getElementById('$id').$key = function(event){{$value}};";
+                                } else
+                                    $attrs .= " " . self::Attribute($key, $value);
+                            } else
+                                $attrs .= " " . self::Attribute($key, $value);
                             break;
                     }
                 if (count($scripts) > 0)
@@ -613,7 +603,7 @@ class Html
                 return self::Element($content ?? "", "embed", ["src" => $source, "class" => "embed"], $attributes);
             else
                 return self::Element($content ?? "", "iframe", ["src" => $source, "class" => "embed"], $attributes);
-        return self::Element($content ?? $source ??"", "embed", ["class" => "embed"], $attributes);
+        return self::Element($content ?? $source ?? "", "embed", ["class" => "embed"], $attributes);
         //return self::Element($content ?? "", "iframe", ["srcdoc" => str_replace("\"", "&quot;", Convert::ToString($source)), "class" => "embed"], $attributes);
     }
     /**
@@ -912,13 +902,13 @@ class Html
                 ) .
                 "<table class='grid$uniq hidden'>" .
                 "<tr>" . join(PHP_EOL, [
-                        self::Cell($weekDays[0], ["Type"=>"head"]),
-                        self::Cell($weekDays[1], ["Type"=>"head"]),
-                        self::Cell($weekDays[2], ["Type"=>"head"]),
-                        self::Cell($weekDays[3], ["Type"=>"head"]),
-                        self::Cell($weekDays[4], ["Type"=>"head"]),
-                        self::Cell($weekDays[5], ["Type"=>"head"]),
-                        self::Cell($weekDays[6], ["Type"=>"head"])
+                        self::Cell($weekDays[0], ["Type" => "head"]),
+                        self::Cell($weekDays[1], ["Type" => "head"]),
+                        self::Cell($weekDays[2], ["Type" => "head"]),
+                        self::Cell($weekDays[3], ["Type" => "head"]),
+                        self::Cell($weekDays[4], ["Type" => "head"]),
+                        self::Cell($weekDays[5], ["Type" => "head"]),
+                        self::Cell($weekDays[6], ["Type" => "head"])
                     ]) . "</tr>" .
                 join(
                     PHP_EOL,
@@ -930,9 +920,9 @@ class Html
                         $d = -$sw;
                         for ($i = 1; $i <= 49; $i++) {
                             if (++$d > 0 && $d <= $ed)
-                                $cel = self::Cell($d, ["Type"=>"cell","class" => "clickable" . ($cd == $d ? " D$uniq selected" : ""), "onclick" => "{$uniq}_Click(this);"]);
+                                $cel = self::Cell($d, ["Type" => "cell", "class" => "clickable" . ($cd == $d ? " D$uniq selected" : ""), "onclick" => "{$uniq}_Click(this);"]);
                             else
-                                $cel = self::Cell("", ["Type"=>"cell"]);
+                                $cel = self::Cell("", ["Type" => "cell"]);
                             if (count($week) == 7) {
                                 yield "<tr class='week$uniq'>" . join(PHP_EOL, $week) . "</tr>";
                                 $week = [$cel];
@@ -1320,7 +1310,7 @@ class Html
      */
     public static function Pre($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "pre", ["class" => "pre", "ondblclick"=>'copy(this.innerText)'], $attributes);
+        return self::Element(Convert::ToString($content), "pre", ["class" => "pre", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<QOUTE\> HTML Tag
@@ -1330,7 +1320,7 @@ class Html
      */
     public static function Quote($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "quote", ["class" => "quote", "ondblclick"=>'copy(this.innerText)'], $attributes);
+        return self::Element(Convert::ToString($content), "quote", ["class" => "quote", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<BLOCKQOUTE\> HTML Tag
@@ -1340,7 +1330,7 @@ class Html
      */
     public static function QuoteBlock($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "blockquote", ["class" => "quoteblock", "ondblclick"=>'copy(this.innerText)'], $attributes);
+        return self::Element(Convert::ToString($content), "blockquote", ["class" => "quoteblock", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<CODE\> HTML Tag
@@ -1350,7 +1340,7 @@ class Html
      */
     public static function Code($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "code", ["class" => "code", "ondblclick"=>'copy(this.innerText)'], $attributes);
+        return self::Element(Convert::ToString($content), "code", ["class" => "code", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<BLOCKCODE\> HTML Tag
@@ -1360,7 +1350,7 @@ class Html
      */
     public static function CodeBlock($content, ...$attributes)
     {
-        return self::Element(self::Element(Convert::ToString($content), "blockcode", ["ondblclick"=>'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
+        return self::Element(self::Element(Convert::ToString($content), "blockcode", ["ondblclick" => 'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
     }
 
     /**
@@ -1641,7 +1631,8 @@ class Html
             if (is_array($reference) && count($attributes) === 0) {
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
-            } else return self::Element(self::Link($content, $reference), "strike", ["class" => "strike"], $attributes);
+            } else
+                return self::Element(self::Link($content, $reference), "strike", ["class" => "strike"], $attributes);
         return self::Element(__($content, styling: false), "strike", ["class" => "strike"], $attributes);
     }
     /**
@@ -1657,7 +1648,8 @@ class Html
             if (is_array($reference) && count($attributes) === 0) {
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
-            } else return self::Element(self::Link($content, $reference), "small", ["class" => "small"], $attributes);
+            } else
+                return self::Element(self::Link($content, $reference), "small", ["class" => "small"], $attributes);
         return self::Element(__($content, styling: false), "small", ["class" => "small"], $attributes);
     }
     /**
@@ -1673,7 +1665,8 @@ class Html
             if (is_array($reference) && count($attributes) === 0) {
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
-            } else return self::Element(self::Link($content, $reference), "sup", ["class" => "super"], $attributes);
+            } else
+                return self::Element(self::Link($content, $reference), "sup", ["class" => "super"], $attributes);
         return self::Element(__($content, styling: false), "sup", ["class" => "super"], $attributes);
     }
     /**
@@ -1689,7 +1682,8 @@ class Html
             if (is_array($reference) && count($attributes) === 0) {
                 $attributes = Convert::ToIteration($reference);
                 $reference = null;
-            } else return self::Element(self::Link($content, $reference), "sub", ["class" => "sub"], $attributes);
+            } else
+                return self::Element(self::Link($content, $reference), "sub", ["class" => "sub"], $attributes);
         return self::Element(__($content, styling: false), "sub", ["class" => "sub"], $attributes);
     }
 
@@ -1712,13 +1706,24 @@ class Html
     }
     /**
      * The \<SPAN\> HTML Tag
-     * @param mixed $content The in tag tooltip
+     * @param mixed $content Main content of tag tooltip
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
     public static function Tooltip($content, ...$attributes)
     {
         return self::Element(__($content, styling: false), "div", ["class" => "tooltip"], $attributes);
+    }
+    /**
+     * The \<DATA\> HTML Tag
+     * @param mixed $content Main content of tag
+     * @param mixed $value A machine readable value
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Data($content, $value, ...$attributes)
+    {
+        return self::Element(__($content, styling: false), "data", ["class" => "data", "value" => $value], $attributes);
     }
 
     /**
@@ -1893,7 +1898,8 @@ class Html
             foreach ($attributes as $k => $v)
                 if ($isRequired = ((is_string($k) && preg_match("/\brequired\b/i", $k)) || (is_string($v) && preg_match("/\brequired\b/i", $v))))
                     break;
-        $id = get($attributes, "Id") ?? Convert::ToId($key);
+        $ma = first($attributes);
+        $id = grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key);
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
         $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey, styling: false) . ($isRequired ? self::Span("*") : ""), $id, ["class" => "title"]));
         $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description"]));
@@ -2015,7 +2021,8 @@ class Html
         }
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
         $key = Convert::ToKey(Convert::ToString($key ?? $title));
-        $id = get($attributes, "Id") ?? Convert::ToId($key);
+        $ma = first($attributes);
+        $id = grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key);
         $attributes = ["id" => $id, "name" => $key, ...$attributes];
         $options = $options ?? [];
         switch ($type) {
@@ -2270,7 +2277,8 @@ class Html
             $attributes = Convert::ToIteration($value);
             $value = null;
         }
-        return self::Element(__($value ?? $key, styling: false), "button", ["id" => Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit"], $attributes);
+        $ma = first($attributes);
+        return self::Element(__($value ?? $key, styling: false), "button", ["id" => grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit"], $attributes);
     }
     /**
      * The \<BUTTON\ TYPE="RESET"> HTML Tag
@@ -2285,7 +2293,8 @@ class Html
             $attributes = Convert::ToIteration($value);
             $value = null;
         }
-        return self::Element(__($value ?? $key, styling: false), "button", ["id" => Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset"], $attributes);
+        $ma = first($attributes);
+        return self::Element(__($value ?? $key, styling: false), "button", ["id" => grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2300,7 +2309,8 @@ class Html
             $attributes = Convert::ToIteration($type);
             $type = "text";
         }
-        return self::Element("input", ["id" => grab($attributes, "id")??Convert::ToId($key), "name" => grab($attributes, "name")??Convert::ToKey($key), "placeholder" => grab($attributes, "placeholder")??Convert::ToTitle($key), "type" => $type, "value" => $value, "class" => "input"], $attributes);
+        $ma = first($attributes);
+        return self::Element("input", ["id" => grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key), "name" => grab($attributes, "name") ?? Convert::ToKey($key), "placeholder" => grab($attributes, "placeholder") ?? Convert::ToTitle($key), "type" => $type, "value" => $value, "class" => "input"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2322,7 +2332,8 @@ class Html
      */
     public static function TextInput($key, $value = null, ...$attributes)
     {
-        return self::Element($value ?? "", "textarea", ["id" => Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key), styling: false), "class" => "input textinput"], $attributes);
+        $ma = first($attributes);
+        return self::Element($value ?? "", "textarea", ["id" => grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key), styling: false), "class" => "input textinput"], $attributes);
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -2333,16 +2344,37 @@ class Html
      */
     public static function ContentInput($key, $value = null, ...$attributes)
     {
-        return self::Element($value ?? "", "textarea", [
-            "id" => Convert::ToId($key),
-            "name" => Convert::ToKey($key),
-            "placeholder" => __(Convert::ToTitle($key), styling: false),
-            "class" => "input contentinput",
-            "rows" => "20",
-            // "role"=>"textbox", "contenteditable"=>"true",
-            // "aria-label"=>"comment-box", "aria-multiline"=>"true", "aria-readonly"=>"false",
-            "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"
-        ], $attributes);
+        $ma = first($attributes);
+        $eid = grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key);
+        $sid = "_" . getId();
+        return self::Tabs(
+            [
+                self::Icon("edit") =>
+                    self::Element($value ?? "", "textarea", [
+                        "id" => $eid,
+                        "name" => Convert::ToKey($key),
+                        "placeholder" => __(Convert::ToTitle($key), styling: false),
+                        "class" => "input contentinput",
+                        "rows" => "20",
+                        // "role"=>"textbox", "contenteditable"=>"true",
+                        // "aria-label"=>"comment-box", "aria-multiline"=>"true", "aria-readonly"=>"false",
+                        "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"
+                    ], $attributes),
+                    self::Icon(
+                    "eye",
+                    Internal::MakeScript(
+                        function ($args) {
+                            return \MiMFa\Library\Html::Convert($args);
+                        }
+                        ,
+                        "\${document.getElementById('$eid').value}",
+                        "(data,err)=>document.getElementById('$sid').innerHTML=data??err"
+                    )
+                ) =>
+                self::Division(self::Center(self::Media(\_::$Info->ProcessSymbolPath??"spinner")), ["id" => $sid])
+            ],
+            ["class" => "contentinput"]
+        );
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -2400,7 +2432,8 @@ class Html
                 $value = is_null($sep) && startsWith($value, "[", "{") ? Convert::FromJson($value) ?? [] : explode($sep ?? "|", trim($value, $sep ?? "|"));
             }
             foreach ($value as $k => $item) {
-                $id = Convert::ToId($key);
+        $ma = first($attributes);
+        $id = grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key);
                 if (is_null($sample))
                     $sample = $item;
                 yield self::Field(
@@ -2594,8 +2627,8 @@ class Html
     {
         return self::Input($key, $value, "text", [
             "class" => "urlinput",
-            "pattern"=>"(^\/[^:]*$)|(^https?:\/\/.*$)",
-            "title"=>"Please enter a valid relative or absolute URL (e.g., /about or https://example.com)"
+            "pattern" => "(^\/[^:]*$)|(^https?:\/\/.*$)",
+            "title" => "Please enter a valid relative or absolute URL (e.g., /about or https://example.com)"
         ], $attributes);
     }
     /**
@@ -2618,11 +2651,16 @@ class Html
      */
     public static function FileInput($key, $value = null, ...$attributes)
     {
-        $id1 = grab($attributes, "id")??Convert::ToId($key);
+        $ma = first($attributes);
+        $id1 = grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key);
         $id2 = Convert::ToId($key);
         $key = Convert::ToKey($key);
-        return self::Input($key, null, "file", $attributes, ["class" => "fileinput", "id"=>$id1, "style"=>$value?"display:none;":"", ...($value?["name"=>""]:["name"=>"$key"]),
-        "oninput"=>"
+        return self::Input($key, null, "file", $attributes, [
+            "class" => "fileinput",
+            "id" => $id1,
+            "style" => $value ? "display:none;" : "",
+            ...($value ? ["name" => ""] : ["name" => "$key"]),
+            "oninput" => "
             elem = document.getElementById('$id2');
             if(this.files.length>0){
                 this.setAttribute('name', '$key');
@@ -2632,9 +2670,13 @@ class Html
                 this.removeAttribute('name');
                 elem.setAttribute('name', '$key');
                 elem.removeAttribute('disabled');
-            }"]).
-        self::Input($key, $value, "text", $attributes, ["class" => "fileinput", "id"=>$id2, ...($value?["name"=>"$key"]:["name"=>""]),
-        "oninput"=>"
+            }"
+        ]) .
+            self::Input($key, $value, "text", $attributes, [
+                "class" => "fileinput",
+                "id" => $id2,
+                ...($value ? ["name" => "$key"] : ["name" => ""]),
+                "oninput" => "
             elem = document.getElementById('$id1');
             if(!isEmpty(this.value)){
                 this.setAttribute('name', '$key');
@@ -2646,7 +2688,8 @@ class Html
                 elem.setAttribute('name', '$key');
                 elem.removeAttribute('disabled');
                 elem.style.display='inherit';
-            }"]);
+            }"
+            ]);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2658,9 +2701,9 @@ class Html
     public static function FilesInput($key, $value = null, ...$attributes)
     {
         return self::CollectionInput($key, $value, [
-            "Type"=>"file",
-            "Add"=>true,
-            "Remove"=>true
+            "Type" => "file",
+            "Add" => true,
+            "Remove" => true
         ], ["class" => "fileinput", "multiple" => null], $attributes);
     }
     /**
@@ -2777,6 +2820,7 @@ class Html
      */
     public static function SelectInput($key, $value = null, $options = [], ...$attributes)
     {
+        $ma = first($attributes);
         return self::Element(
             is_iterable($options) || is_array($options) ?
             iterator_to_array((function () use ($options, $value) {
@@ -2795,11 +2839,59 @@ class Html
             : Convert::ToString($options, assignFormat: "<option value='{0}'>{1}</option>\r\n")
             ,
             "select",
-            ["id" => Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key), styling: false), "class" => "input selectinput"],
+            ["id" => grab($attributes, "Id") ?? get($ma, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key), styling: false), "class" => "input selectinput"],
             $attributes
         );
     }
 
+    /**
+     * The \<DIV\> HTML Tag to make a tab control
+     * @param array|callable $content The tabs array with the format [tab1Name=>tab1Content,tab2Name=>tab2Content]
+     * @param mixed $attributes Other custom attributes of the Tag, send ["SelectedIndex"=>KeyOrIndex] to set first active tab (default is 0)
+     * @return string
+     */
+    public static function Tabs($content = [], ...$attributes)
+    {
+        $content = Convert::ToSequence($content);
+        $active = grab($attributes, "SelectedIndex") ?? 0;
+        $id = grab($attributes, data: "Id") ?? "_" . getId();
+        return self::Style("
+        #$id>.tab-titles>.tab-title>:is(*,*:hover){border:none; outline:none;}
+        #$id>.tab-titles>.tab-title{display:inline-block; padding:calc(var(--size-1) / 5) calc(var(--size-1) / 2); border-bottom: var(--border-1) #8885;}
+        #$id>.tab-titles>.tab-title.active{border: var(--border-1) #8888; border-bottom: none;}
+        ") .
+            self::Division(
+                self::Division(
+                    join("", loop(
+                        $content,
+                        function ($k, $v, $i) use ($active, $id) {
+                            return self::Division($k, ["class" => "tab-title" . ($k === $active || $i === $active ? " active" : ""), "onclick" => "{$id}_openTab(this, '$id-tab-$i')"]);
+                        }
+                    )),
+                    ["class" => "tab-titles"]
+                ) .
+                self::Division(
+                    join("", loop(
+                        $content,
+                        function ($k, $v, $i) use ($active, $id) {
+                            return self::Element($v, "div", ["class" => "tab-content" . ($k === $active || $i === $active ? " show" : " hide"), "id" => "$id-tab-$i"]);
+                        }
+                    )),
+                    ["class" => "tab-contents"]
+                ),
+                ["class" => "tabs", "id" => $id],
+                $attributes
+            ) .
+            self::Script("function {$id}_openTab(tab, tabId){
+            let contents = document.querySelectorAll('#$id>.tab-contents>.tab-content');
+            contents.forEach(content => content.classList.remove('show') & content.classList.add('hide'));
+            let titles = document.querySelectorAll('#$id>.tab-titles>.tab-title');
+            titles.forEach(title => title.classList.remove('active'));
+            document.getElementById(tabId).classList.remove('hide');
+            document.getElementById(tabId).classList.add('show');
+            tab.classList.add('active');
+        }");
+    }
 
     /**
      * The \<TABLE\> HTML Tag
@@ -2809,15 +2901,15 @@ class Html
      */
     public static function Table($content = "", ...$attributes)
     {
-        $rowHeaders = grab($attributes, "RowHeaders")??[intval(grab($attributes, "RowHeader")??0)];
-        $colHeaders = grab($attributes, "ColHeaders")??[intval(grab($attributes, "ColHeader")??0)];
+        $rowHeaders = grab($attributes, "RowHeaders") ?? [intval(grab($attributes, "RowHeader") ?? 0)];
+        $colHeaders = grab($attributes, "ColHeaders") ?? [intval(grab($attributes, "ColHeader") ?? 0)];
         return self::Element(
             is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $rowHeaders, $colHeaders) {
                 foreach ($content as $k => $v) {
                     if (in_array($k, $rowHeaders))
                         yield self::Column($v);
                     else
-                        yield self::Row($v, ["Type"=>in_array($k, $colHeaders)?"head":"cell"]);
+                        yield self::Row($v, ["Type" => in_array($k, $colHeaders) ? "head" : "cell"]);
                 }
             })())) : Convert::ToString($content),
             "table",
@@ -2835,7 +2927,7 @@ class Html
     {
         return self::Element(
             is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content) {
-                yield self::Row($content, ["type"=>"head"]);
+                yield self::Row($content, ["type" => "head"]);
             })())) : __($content, styling: false),
             "thead",
             ["class" => "table-column"],
@@ -2854,7 +2946,7 @@ class Html
         return self::Element(
             is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $head) {
                 foreach ($content as $k => $v)
-                    yield self::Cell($v, ["Type"=>$head]);
+                    yield self::Cell($v, ["Type" => $head]);
             })())) : Convert::ToString($content),
             "tr",
             ["class" => "table-row"],
@@ -2869,7 +2961,7 @@ class Html
      */
     public static function Cell($content = "", ...$attributes)
     {
-        $tagName = strtolower(grab($attributes, "Type")??"") == "head" ? "th" : "td";
+        $tagName = strtolower(grab($attributes, "Type") ?? "") == "head" ? "th" : "td";
         return self::Element(__($content, styling: false), $tagName, ["class" => "table-cell"], $attributes);
     }
 

@@ -213,10 +213,8 @@ class Module extends \Base
      public function GetDefaultAttributes()
      {
           return [
-               [
-                    "id" => $this->Id,
-                    "class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass()
-               ],
+               ($this->Id?["id" => $this->Id]:[]),
+               ["class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass()],
                (isEmpty($this->Attributes) ? [] : (is_array($this->Attributes) ? $this->Attributes : [Convert::ToString($this->Attributes, " ", "{0}={1} ")])),
                (count($this) < 1 ? [] : $this->__toArray())
           ];

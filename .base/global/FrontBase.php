@@ -260,12 +260,8 @@ abstract class FrontBase
         $callbackScript = "(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($this->DefaultDestinationSelector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
         $progressScript = "null";
 		$timeout = 60000;
-		$start = "";
-		$end = "";
-		if(\_::$Back->Router->DefaultMethodIndex === 1){
-			$start = "document.addEventListener('DOMContentLoaded',()=>{";
-			$end = "});";
-		}
+		$start = \MiMFa\Library\Internal::MakeStartScript(true);
+		$end = \MiMFa\Library\Internal::MakeStartScript(true);
 		$id = "S_".getID(true);
 		if(isStatic($callback)) \Res::Render(\MiMFa\Library\Html::Script("$start(".$callbackScript.")(".
 				\MiMFa\Library\Script::Convert($callback) . ",$script);document.getElementById('$id').remove();$end",null, ["id"=>$id]));
@@ -304,12 +300,8 @@ abstract class FrontBase
         $callbackScript = "(data,err)=>{el=document.createElement('qb');el.innerHTML=data??err;item.before(...el.childNodes);item.remove();}";
         $progressScript = "null";
 		$timeout = 60000;
-		$start = "";
-		$end = "";
-		if(\_::$Back->Router->DefaultMethodIndex === 1){
-			$start = "document.addEventListener('DOMContentLoaded',()=>{";
-			$end = "});";
-		}
+		$start = \MiMFa\Library\Internal::MakeStartScript(true);
+		$end = \MiMFa\Library\Internal::MakeStartScript(true);
 		$id = "S_".getID(true);
 		if(isStatic($callback)) \Res::Render(\MiMFa\Library\Html::Script("$start for(item of $script)(".$callbackScript.")(".
 				\MiMFa\Library\Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id"=>$id]));
@@ -341,12 +333,12 @@ abstract class FrontBase
 		$this->Interact("Array.from(document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
 	}
 	/**
-	 * Forget a special part of client side
+	 * Delete a special part of client side
 	 * @param mixed $selector The destination selector
 	 */
 	public function Forget($selector = "body")
 	{
-		\Res::Render(\MiMFa\Library\Html::Script("document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").forEach(el=>el.remove()));"));
+		\Res::Render(\MiMFa\Library\Html::Script(\MiMFa\Library\Internal::MakeStartScript()."document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").forEach(el=>el.remove())".\MiMFa\Library\Internal::MakeEndScript()));
 	}
 	/**
 	 * Replace the output with a special part of client side
