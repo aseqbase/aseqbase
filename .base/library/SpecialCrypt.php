@@ -49,7 +49,7 @@ class SpecialCrypt extends HashCrypt
         if ($decode) {
             $message = base64_decode($message, true);
             if ($message === false)
-                throw new \Exception('Decoding failure');
+                throw new \SilentException('Decoding failure');
         }
 
         // Hash Size -- in case HASH_ALGO is changed
@@ -66,7 +66,7 @@ class SpecialCrypt extends HashCrypt
         );
 
         if (!$this->HashEquals($mac, $calculated)) {
-            throw new \Exception('Decryption failure');
+            throw new \SilentException('Decryption failure');
         }
 
         // Pass to Cryptograph::decrypt

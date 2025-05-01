@@ -19,106 +19,106 @@ class DataTable
 		$this->Name = $name;
 	}
 
-	public function DoSelectValue($columns = "*", $condition = null, $params = [], $defaultValue = null)
+	public function SelectValue($columns = "*", $condition = null, $params = [], $defaultValue = null)
 	{
-		return $this->DataBase->DoSelectValue($this->Name, $columns, $condition, $params, $defaultValue);
+		return $this->DataBase->SelectValue($this->Name, $columns, $condition, $params, $defaultValue);
 	}
-	public function MakeSelectValueQuery($columns = "*", $condition = null)
+	public function SelectValueQuery($columns = "*", $condition = null)
 	{
-		return $this->DataBase->MakeSelectValueQuery($this->Name, $columns, $condition);
-	}
-
-	public function DoSelect($columns = "*", $condition = null, $params = [], $defaultValue = array())
-	{
-		return $this->DataBase->DoSelect($this->Name, $columns, $condition, $params, $defaultValue);
-	}
-	public function MakeSelectQuery($columns = "*", $condition = null)
-	{
-		return $this->DataBase->MakeSelectQuery($this->Name, $columns, $condition);
+		return $this->DataBase->SelectValueQuery($this->Name, $columns, $condition);
 	}
 
-	public function DoSelectRow($columns = "*", $condition = null, $params = [], $defaultValue = array())
+	public function Select($columns = "*", $condition = null, $params = [], $defaultValue = array())
 	{
-		return $this->DataBase->DoSelectRow($this->Name, $columns, $condition, $params, $defaultValue);
+		return $this->DataBase->Select($this->Name, $columns, $condition, $params, $defaultValue);
 	}
-	public function MakeSelectRowQuery($columns = "*", $condition = null)
+	public function SelectQuery($columns = "*", $condition = null)
 	{
-		return $this->DataBase->MakeSelectRowQuery($this->Name, $columns, $condition);
-	}
-
-	public function DoSelectColumn($columns = "*", $condition = null, $params = [], $defaultValue = array())
-	{
-		return $this->DataBase->DoSelectColumn($this->Name, $columns, $condition, $params, $defaultValue);
-	}
-	public function MakeSelectColumnQuery($columns = "*", $condition = null)
-	{
-		return $this->DataBase->MakeSelectColumnQuery($this->Name, $columns, $condition);
+		return $this->DataBase->SelectQuery($this->Name, $columns, $condition);
 	}
 
-	public function DoSelectPairs($key = "`Id`", $value = "`Name`", $condition = null, $params = [], $defaultValue = array())
+	public function SelectRow($columns = "*", $condition = null, $params = [], $defaultValue = array())
 	{
-		return $this->DataBase->DoSelectPairs($this->Name, $key, $value, $condition, $params, $defaultValue);
+		return $this->DataBase->SelectRow($this->Name, $columns, $condition, $params, $defaultValue);
 	}
-	public function MakeSelectPairsQuery($key = "`Id`", $value = "`Name`", $condition = null)
+	public function SelectRowQuery($columns = "*", $condition = null)
 	{
-		return $this->DataBase->MakeSelectPairsQuery($this->Name, $key, $value, $condition);
-	}
-
-	public function DoInsert($params = [], $defaultValue = false)
-	{
-		return $this->DataBase->DoInsert($this->Name, $params, $defaultValue);
-	}
-	public function MakeInsertQuery(&$params)
-	{
-		return $this->DataBase->MakeInsertQuery($this->Name, $params);
+		return $this->DataBase->SelectRowQuery($this->Name, $columns, $condition);
 	}
 
-	public function DoReplace($condition = null, $params = [], $defaultValue = false)
+	public function SelectColumn($columns = "*", $condition = null, $params = [], $defaultValue = array())
 	{
-		return $this->DataBase->DoReplace($this->Name, $condition, $params, $defaultValue);
+		return $this->DataBase->SelectColumn($this->Name, $columns, $condition, $params, $defaultValue);
 	}
-	public function MakeReplaceQuery($condition, &$params)
+	public function SelectColumnQuery($columns = "*", $condition = null)
 	{
-		return $this->DataBase->MakeReplaceQuery($this->Name, $condition, $params);
-	}
-
-	public function DoUpdate($condition = null, $params = [], $defaultValue = false)
-	{
-		return $this->DataBase->DoUpdate($this->Name, $condition, $params, $defaultValue);
-	}
-	public function MakeUpdateQuery($condition, &$params)
-	{
-		return $this->DataBase->MakeUpdateQuery($this->Name, $condition, $params);
+		return $this->DataBase->SelectColumnQuery($this->Name, $columns, $condition);
 	}
 
-	public function DoDelete($condition = null, $params = [], $defaultValue = false)
+	public function SelectPairs($key = "`Id`", $value = "`Name`", $condition = null, $params = [], $defaultValue = array())
 	{
-		return $this->DataBase->DoDelete($this->Name, $condition, $params, $defaultValue);
+		return $this->DataBase->SelectPairs($this->Name, $key, $value, $condition, $params, $defaultValue);
 	}
-	public function MakeDeleteQuery($condition = null)
+	public function SelectPairsQuery($key = "`Id`", $value = "`Name`", $condition = null)
 	{
-		return $this->DataBase->MakeDeleteQuery($this->Name, $condition);
+		return $this->DataBase->SelectPairsQuery($this->Name, $key, $value, $condition);
 	}
 
-	public function GetCount($col = "`Id`", $condition = null, $params = [])
+	public function Insert($params = [], $defaultValue = false)
 	{
-		return $this->DataBase->GetCount($this->Name, $col, $condition, $params);
+		return $this->DataBase->Insert($this->Name, $params, $defaultValue);
 	}
-	public function GetSum($col = "`Id`", $condition = null, $params = [])
+	public function InsertQuery(&$params)
 	{
-		return $this->DataBase->GetSum($this->Name, $col, $condition, $params);
+		return $this->DataBase->InsertQuery($this->Name, $params);
 	}
-	public function GetAverage($col = "`Id`", $condition = null, $params = [])
+
+	public function Replace($condition = null, $params = [], $defaultValue = false)
 	{
-		return $this->DataBase->GetAverage($this->Name, $col, $condition, $params);
+		return $this->DataBase->Replace($this->Name, $condition, $params, $defaultValue);
 	}
-	public function GetMax($col = "`Id`", $condition = null, $params = [])
+	public function ReplaceQuery($condition, &$params)
 	{
-		return $this->DataBase->GetMax($this->Name, $col, $condition, $params);
+		return $this->DataBase->ReplaceQuery($this->Name, $condition, $params);
 	}
-	public function GetMin($col = "`Id`", $condition = null, $params = [])
+
+	public function Update($condition = null, $params = [], $defaultValue = false)
 	{
-		return $this->DataBase->GetMin($this->Name, $col, $condition, $params);
+		return $this->DataBase->Update($this->Name, $condition, $params, $defaultValue);
+	}
+	public function UpdateQuery($condition, &$params)
+	{
+		return $this->DataBase->UpdateQuery($this->Name, $condition, $params);
+	}
+
+	public function Delete($condition = null, $params = [], $defaultValue = false)
+	{
+		return $this->DataBase->Delete($this->Name, $condition, $params, $defaultValue);
+	}
+	public function DeleteQuery($condition = null)
+	{
+		return $this->DataBase->DeleteQuery($this->Name, $condition);
+	}
+
+	public function Count($col = "`Id`", $condition = null, $params = [])
+	{
+		return $this->DataBase->Count($this->Name, $col, $condition, $params);
+	}
+	public function Sum($col = "`Id`", $condition = null, $params = [])
+	{
+		return $this->DataBase->Sum($this->Name, $col, $condition, $params);
+	}
+	public function Average($col = "`Id`", $condition = null, $params = [])
+	{
+		return $this->DataBase->Average($this->Name, $col, $condition, $params);
+	}
+	public function Max($col = "`Id`", $condition = null, $params = [])
+	{
+		return $this->DataBase->Max($this->Name, $col, $condition, $params);
+	}
+	public function Min($col = "`Id`", $condition = null, $params = [])
+	{
+		return $this->DataBase->Min($this->Name, $col, $condition, $params);
 	}
 
 	public function Exists($col = null, $condition = null, $params = [])

@@ -2,8 +2,8 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
 class Copyright extends Module{
-	public $Title = "MiMFa";
-	public $Description = "Powered By: ";
+	public $Title = " MiMFa ";
+	public $Description = "Designed By:";
 	public $Source = "http://mimfa.net";
 
 	public function GetStyle(){

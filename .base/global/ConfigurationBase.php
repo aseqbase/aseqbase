@@ -500,7 +500,7 @@ abstract class ConfigurationBase extends ArrayObject
 		if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_" ;
      }
 	public function __get($name) {
-        return $this[$this->PropertyName($name)];
+        return $this[$this->PropertyName($name)]??null;
     }
     public function __set($name, $value) {
         $this[$this->PropertyName($name)] = $value;
@@ -516,11 +516,11 @@ abstract class ConfigurationBase extends ArrayObject
      }
      public function GetLatestVersion(): float|null
      {
-          return floatval(\Req::Get($this->CheckVersionSourcePath));
+          return floatval(\Req::ReceiveGet($this->CheckVersionSourcePath));
      }
      public function GetLatestVersionPath(): string|null
      {
-          return \Req::Get($this->LatestVersionSourcePath);
+          return \Req::ReceiveGet($this->LatestVersionSourcePath);
      }
      public function GetAcceptableFormats(?string $type = null)
      {

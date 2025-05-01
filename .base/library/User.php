@@ -12,10 +12,11 @@ class User extends \Base
 	public static $UpHandlerPath = "/sign/up.php";
 	public static $InHandlerPath = "/sign/in.php";
 	public static $OutHandlerPath = "/sign/out.php";
-	public static $RoutePath = "/sign/view.php";
+	public static $RouteHandlerPath = "/sign/profile.php";
 	public static $EditHandlerPath = "/sign/edit.php";
 	public static $DashboardHandlerPath = "/sign/dashboard.php";
 	public static $RecoverHandlerPath = "/sign/recover.php";
+	
 	public static $DefaultImagePath = "user";
 	public static $RecoverEmailSubject = 'Account Recovery Request';
 	public static $RecoverEmailContent = 'Hello dear $NAME,<br><br>
@@ -95,7 +96,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->TemporaryPassword = $this->Session->GetSecure("Password") ?? $this->TemporaryPassword;
 		try {
 			if (
-				$this->TemporarySignature === $this->Session->GetData($this->TemporarySignature . "_" . getClientIp()) &&
+				$this->TemporarySignature === $this->Session->GetData($this->TemporarySignature . "_" . getClientCode()) &&
 				isValid($this->TemporarySignature) &&
 				isValid($this->TemporaryPassword)
 			)
@@ -116,7 +117,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->Session->SetSecure("Image", $this->Image = $this->TemporaryImage = takeValid($profile, "Image"));
 		$this->Session->SetSecure("Name", $this->Name = $this->TemporaryName = takeValid($profile, "Name"));
 		$this->Session->SetSecure("Email", $this->Email = $this->TemporaryEmail = takeValid($profile, "Email"));
-		$this->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->DoSelectValue("`Access`", "`Id`=" . $this->GroupId));
+		$this->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->SelectValue("`Access`", "`Id`=" . $this->GroupId));
 		if (!$profile) {
 			$this->Session->ForgetSecure("Password");
 			$this->Session->ForgetSecure("Signature");
@@ -165,13 +166,13 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				return in_array($access, $acceptableAccess);
 		return null;
 	}
-	public static function GetAccessCondition($checkStatus = true, $checkAccess = true)
+	public function GetAccessCondition($checkStatus = true, $checkAccess = true, $tableName = "")
 	{
-		$acc = auth();
+		$tableName = $tableName?$tableName.".":"";
 		return " " . join(" AND ", [
-			...($checkStatus ? ["(`Status` IS NULL OR `Status` IN ('','1',1)) "] : []),
-			...($checkAccess ? ["`Access`>=" . \_::$Config->VisitAccess, "`Access`<=" . $acc] : []),
-			...(\_::$Config->AllowTranslate ? ["(`MetaData` IS NULL OR `MetaData` NOT REGEXP '/\s*([\"\\']?)lang\1\s*\:/i' OR `MetaData` REGEXP '/\s*([\"\\']?)lang\1\s*\:[\s\S]*([\"\\'])" . \_::$Back->Translate->Language . "\2/i')"] : [])
+			...($checkStatus ? ["($tableName`Status` IS NULL OR $tableName`Status` IN ('','1',1)) "] : []),
+			...($checkAccess ? [/*"$tableName`Access`>=" . \_::$Config->VisitAccess." OR ".*/"$tableName`Access`<=" . \_::$Back->User->Access()] : []),
+			...(\_::$Config->AllowTranslate ? ["($tableName`MetaData` IS NULL OR $tableName`MetaData` NOT REGEXP '/\s*([\"\\']?)lang\1\s*\:/i' OR $tableName`MetaData` REGEXP '/\s*([\"\\']?)lang\1\s*\:[\s\S]*([\"\\'])" . \_::$Back->Translate->Language . "\2/i')"] : [])
 		]);
 	}
 
@@ -186,24 +187,24 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if (isValid($password)) {
 			if ($hashPassword)
 				$password = $this->EncryptPassword($password);
-			$person = $this->DataTable->DoSelectRow(
+			$person = $this->DataTable->SelectRow(
 				"`Signature` , `Id` , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
 				"(`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
 				[":Id" => $signature, ":Signature" => $signature, ":Email" => $signature, ":Contact" => $signature, ":Password" => $password]
 			);
 			if (isEmpty($person)) {
 				$this->SignOut($signature);
-				throw new \ErrorException("The username or password is incorrect!");
+				throw new \SilentException("The username or password is incorrect!");
 			}
 		} else {
-			$person = $this->DataTable->DoSelectRow(
+			$person = $this->DataTable->SelectRow(
 				"`Signature` , `Id` , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
 				"`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)",
 				[":Id" => $signature, ":Signature" => $signature, ":Email" => $signature, ":Contact" => $signature]
 			);
 			if (isEmpty($person)) {
 				$this->SignOut($signature);
-				throw new \ErrorException("The username is incorrect!");
+				throw new \SilentException("The username is incorrect!");
 			}
 		}
 		$this->TemporarySignature = takeValid($person, "Signature");
@@ -216,7 +217,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : takeValid($this->DataTable->DoSelect("*", "`Id`=:Id", [":Id" => $id]), 0);
+		return is_null($id) ? null : takeValid($this->DataTable->Select("*", "`Id`=:Id", [":Id" => $id]), 0);
 	}
 	public function Set($fieldsDictionary, $signature = null, $password = null)
 	{
@@ -231,26 +232,26 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			return null;
 		if (takeValid($fieldsDictionary, "Email", $email) != $email)
 			$fieldsDictionary["Status"] = self::$InitialStatus;
-		return $this->DataTable->DoUpdate("`Id`='$id'", $fieldsDictionary);
+		return $this->DataTable->Update("`Id`='$id'", $fieldsDictionary);
 	}
 	public function GetValue($key, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->DoSelectValue($key, "`Id`=$id");
+		return is_null($id) ? null : $this->DataTable->SelectValue($key, "`Id`=$id");
 	}
 	public function SetValue($key, $value, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->DoUpdate("`Id`=$id", [$key => $value]);
+		return is_null($id) ? null : $this->DataTable->Update("`Id`=$id", [$key => $value]);
 	}
 
 	public function GetGroup($signature = null, $password = null)
 	{
 		if (is_null($id = $this->GroupId) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "GroupId");
-		return is_null($id) ? null : takeValid($this->GroupDataTable->DoSelect("*", "`Id`=:Id", [":Id" => $id]), 0);
+		return is_null($id) ? null : takeValid($this->GroupDataTable->Select("*", "`Id`=:Id", [":Id" => $id]), 0);
 	}
 	public function SetGroup($fieldsDictionary, $signature = null, $password = null)
 	{
@@ -261,11 +262,11 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		}
 		if (is_null($id))
 			return null;
-		return $this->GroupDataTable->DoUpdate("`Id`='$id'", $fieldsDictionary);
+		return $this->GroupDataTable->Update("`Id`='$id'", $fieldsDictionary);
 	}
 
 	public function MakeSign($regards = "Kind Regards"){
-		return trim(join(PHP_EOL,[
+		return trim(join("\n\r",[
 				$this->Access >= \_::$Config->AdminAccess?\_::$Info->Slogan:"",
 				$regards?"*$regards*":"",
                 "------",
@@ -279,7 +280,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupId = null, $status = null, $metadata = null)
 	{
 		$this->TemporaryImage = null;
-		return $this->DataTable->DoInsert([
+		return $this->DataTable->Insert([
 				":Signature" => $this->TemporarySignature = $signature ?? $email,
 				":Email" => $this->TemporaryEmail = $email,
 				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password),
@@ -287,7 +288,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				":FirstName" => $firstName,
 				":LastName" => $lastName,
 				":Contact" => $phone,
-				":GroupId" => $groupId ?? $this->GroupDataTable->DoSelectValue("`Id`", "Access=" . \_::$Config->UserAccess) ?? 0,
+				":GroupId" => $groupId ?? $this->GroupDataTable->SelectValue("`Id`", "Access=" . \_::$Config->UserAccess) ?? 0,
 				":Status" => $status,
 				":MetaData" => $metadata ? (is_string($metadata) ? $metadata : json_encode($metadata)) : null,
 			]
@@ -302,7 +303,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if ($status === false || ((int) $status) < self::$ActiveStatus)
 			return \Res::Flip(Html::Error("This account is not active yet!"), null, self::$ActiveHandlerPath . "?signature=$signature");
 		$this->Load($person);
-		$this->Session->SetData($this->Signature . "_" . getClientIp(), $this->Signature);
+		$this->Session->SetData($this->Signature . "_" . getClientCode(), $this->Signature);
 		return true;
 	}
 	public function SignInOrSignUp($signature, $password, $email = null)
@@ -313,10 +314,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SignOut($signature = null)
 	{
 		if ($signature === null || $signature === $this->Signature){
-			$this->Session->ForgetData($signature . "_" . getClientIp());
+			$this->Session->ForgetData($signature . "_" . getClientCode());
 			$this->Load(null);
 		} else
-			$this->Session->ForgetData($signature . "_" . getClientIp());
+			$this->Session->ForgetData($signature . "_" . getClientCode());
 		return !self::Access(\_::$Config->UserAccess);
 	}
 
@@ -365,7 +366,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$sign = $this->DecryptToken(self::$ActivationTokenKey, \Req::Receive(self::$ActivationTokenKey));
 		if (empty($sign))
 			return null;
-		return $this->DataTable->DoUpdate(
+		return $this->DataTable->Update(
 			"`Signature`=:Signature",
 			[
 				":Signature" => $sign,
@@ -412,10 +413,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SendTokenEmail($from, $to, $subject, $content, $linkAnchor = "Click Here", $handlerPath = null, $tokenKey = "sign")
 	{
 		if (!$to)
-			throw new \ErrorException("Please indicate your email address!");
-		$person = $this->DataTable->DoSelectRow("*", "`Email`=:Email", [":Email" => $to]);
+			throw new \SilentException("Please indicate your email address!");
+		$person = $this->DataTable->SelectRow("*", "`Email`=:Email", [":Email" => $to]);
 		if (isEmpty($person))
-			throw new \ErrorException("Unfortunately the email address is incorrect!");
+			throw new \SilentException("Unfortunately the email address is incorrect!");
 		$this->TemporaryEmail = takeValid($person, "Email");
 		$this->TemporarySignature = takeValid($person, "Signature");
 		$this->TemporaryName = takeValid($person, "Name");
@@ -456,9 +457,9 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			return null;
 		list($sign, $date) = explode(self::$TokenDelimiter, $this->Cryptograph->Decrypt($token, \_::$Config->SecretKey, true));
 		if ($this->Session->GetData($sign) != $key)
-			throw new \ErrorException("Your request is invalid or used before!");
+			throw new \SilentException("Your request is invalid or used before!");
 		if ($date != date(self::$TokenDateTimeFormat))
-			throw new \ErrorException("Your request is expired!");
+			throw new \SilentException("Your request is expired!");
 		$this->Session->ForgetData($sign);
 		return get(self::Find($sign), "Signature");
 	}

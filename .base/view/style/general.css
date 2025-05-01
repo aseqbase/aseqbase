@@ -76,6 +76,7 @@
 
 .result {
 	/* border-bottom: 3px double var(--fore-color-0); */
+	display: initial;
 	padding: 5px 0px;
     margin: 5px 0px;
 }

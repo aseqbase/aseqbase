@@ -44,7 +44,7 @@ class HashCrypt extends Cryptograph
         if ($decode) {
             $message = base64_decode($message, true);
             if ($message === false)
-                throw new \Exception('Encryption failure');
+                throw new \SilentException('Encryption failure');
         }
 
         // Hash Size -- in case HASH_ALGO is changed
@@ -61,7 +61,7 @@ class HashCrypt extends Cryptograph
         );
 
         if (!$this->HashEquals($mac, $calculated)) {
-            throw new \Exception('Encryption failure');
+            throw new \SilentException('Encryption failure');
         }
 
         // Pass to Cryptograph::decrypt

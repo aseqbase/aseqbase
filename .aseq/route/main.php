@@ -1,11 +1,13 @@
 <?php
+$viewData = grab($data, "View");
+$logicData = grab($data, "Logic");
 if (\Req::$Direction === "home" || isEmpty(\Req::$Direction))
-    view(\_::$Config->DefaultViewName, ["Name" => "home", "Title"=>\_::$Info->FullName]);
+    view(grab($viewData, "ViewName")??\_::$Config->DefaultViewName, ["Name" => grab($viewData, "Name")??"home", "Title"=>grab($viewData,  "Title")??\_::$Info->FullName,...($viewData??[])]);
 else {
-    $doc = logic( "content/get", ["Name" =>\Req::$Direction] );
+    $doc = logic( grab($logicData, "LogicName")??"content/get", ["Name" =>grab($logicData, "Name")??\Req::$Direction, ...($logicData??[])] );
     if (isEmpty($doc))
-        view(\_::$Config->DefaultViewName, ["Name" => between(\_::$Back->Router->Direction, \Req::$Direction)]);
+        view(grab($viewData, "ViewName")??\_::$Config->DefaultViewName, ["Name" => grab($viewData, "Name")??between(\_::$Back->Router->Direction, \Req::$Direction),...($viewData??[])]);
     else
-        view("content", $doc);
+        view(grab($viewData, "ViewName")??"content", $doc);
 }
 ?>

@@ -15,4 +15,13 @@ enum ScreenSize: string {
 	case XXSmall = "xxsm";
 	case XXSmallRange = "xxsm-range";
 }
+
+class SilentException extends Exception {}
+set_exception_handler(function ($exception) {
+    if ($exception instanceof SilentException) {
+        // Do nothing (prevent logging)
+    } else {
+        error_log($exception->getMessage()); // Log other exceptions
+    }
+});
 ?>

@@ -142,7 +142,7 @@ class Form extends Module
 	{
 		if ($this->BlockTimeout < 1)
 			return false;
-		return setSession(getClientIp() . getDirection(), time() + ($this->BlockTimeout / 1000));
+		return setSession(getClientIp() . getDirection(), time() + max(1, $this->BlockTimeout / 1000));
 	}
 	public function UnBlock()
 	{
@@ -658,7 +658,7 @@ class Form extends Module
 		$name = $this->Name . "_Form";
 		$src = $this->Action ?? $this->Path ?? \Req::$Path;
 		if (is_array($this->Children) && count($this->Children) > 0) {
-			module(Name: "Field");
+			module("Field");
 			$attr = $this->Method ? [] : ["disabled"];
 			$this->Children = isEmpty($this->FieldsTypes)
 				? iteration($this->Children, function ($k, $v) use ($attr) {
@@ -849,7 +849,7 @@ class Form extends Module
 	{
 		if (!isEmpty($received))
 			try {
-				return $this->Mail($received) ? $this->GetSuccess(null, ["class" => "page"]) : $this->GetError("Could not email data!");
+				return $this->Mail($received) ? $this->GetSuccess(null, ["class" => "page"]) : $this->GetError("Could not email the message!");
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);
 			}

@@ -253,7 +253,7 @@ class Router extends \ArrayObject
             $method = $this->Method;
             $pattern = $this->Pattern;
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                return (isStatic($handler)) ? route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default) :
+                return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
                     Convert::By($handler, $this);
             };
             if (isset($this[$method][$pattern]))
@@ -288,7 +288,7 @@ class Router extends \ArrayObject
             if (isValid($handler))
                 $this[$this->Method][$pattern] = [
                     function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                        return (isStatic($handler)) ? route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default) :
+                        return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
                             Convert::By($handler, $this);
                     }
                 ];
@@ -308,7 +308,7 @@ class Router extends \ArrayObject
                 $m = $this->Method;
                 $pattern = $this->Pattern;
                 $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                    return (isStatic($handler)) ? route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default) :
+                    return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
                         Convert::By($handler, $this);
                 };
                 for ($method = 1; $method < count($this); $method++)
@@ -339,7 +339,7 @@ class Router extends \ArrayObject
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
                 if ($this->Point <= 1 || $this->Global)
                     if (isStatic($handler))
-                        return route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default);
+                        return route($handler, $data, $print, $origin, $depth, $alternative, $default);
                     else
                         return Convert::By($handler, $this);
                 return null;
@@ -367,7 +367,7 @@ class Router extends \ArrayObject
             $h = function () use ($methodName, $handler, $data, $print, $origin, $depth, $alternative, $default) {
                 if ($this->DefaultMethodName == $methodName)
                     if (isStatic($handler))
-                        return route($handler, $data ?? $this, $print, $origin, $depth, $alternative, $default);
+                        return route($handler, $data, $print, $origin, $depth, $alternative, $default);
                     else
                         return Convert::By($handler, $this);
             };

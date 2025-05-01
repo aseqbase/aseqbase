@@ -1,8 +1,10 @@
 <?php
-view("main", data: [
+$viewData = grab($data, "View");
+view(get($viewData, "ViewName")??\_::$Config->DefaultViewName, data: [
     "WindowTitle" => \_::$Info->FullName,
     "WindowLogo" => MiMFa\Library\Local::GetUrl(\_::$Info->LogoPath),
-    "Name" => "400"
+    "Name" => get($viewData, "Name")??"400",
+    ...($data??[])
 ]);
 /**
  * For a full-screen message

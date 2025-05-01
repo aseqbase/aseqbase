@@ -1,5 +1,5 @@
 <?php
-$requests = \Req::Post();
+$requests = \Req::ReceivePost();
 if(($source = get($requests,"view")) != null){
     $doc = view($source = NormalizePath($source), print:false);
 } elseif(($source = get($requests,"page")) != null){

@@ -77,6 +77,5 @@ class reCaptcha
                 return (getValid($response, 'Success', false) == true && getValid($response, 'Score', 0) >= 0.5);
         }
 }
-
 if(isValid(\_::$Config->ReCaptchaSiteKey)) \_::$Front->Append("head", reCaptcha::GetScript(\_::$Config->ReCaptchaSiteKey));
 ?>

@@ -1,369 +1,201 @@
-<?php
-namespace MiMFa\Module;
-use MiMFa\Library\DataBase;
-use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+<?php namespace MiMFa\Module;
+
+use \MiMFa\Library\Html;
+use \MiMFa\Library\Convert;
+
 /**
- * To show data as pages
- *@copyright All rights are reserved for MiMFa Development Group
- *@author Mohammad Fathi
- *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
- *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
+ * A module to display content within different frames (internal, external, embed).
+ * @copyright All rights are reserved for MiMFa Development Group
+ * @author Mohammad Fathi
+ * @see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
+ * @link https://github.com/aseqbase/aseqbase/wiki/Modules#Content See the Documentation
  */
-class Page extends Module{
-	/**
-     * The whole document Item
-     * @var object|null
-     */
-	public $Item = null;
-	/**
-     * The root directory or path
-     * @var string|null
-     */
-
-	/**
-     * The default Path for more button reference
-     * @var string|null
-     */
-	public $Path = null;
-	/**
-     * The featured image
-     * @var string|null
-     */
-	public $Image = null;
-	/**
-     * The post buttons
-     * @var string|null
-     */
-	public $Buttons = null;
-
-	/**
-     * The Width of Image
-     * @var string
-     */
-	public $ImageWidth = "auto";
-	/**
-     * The Height of thumbnail preshow
-     * @var string
-     */
-	public $ImageHeight = "100%";
-	/**
-     * The Minimum Width of Image
-     * @var string
-     */
-	public $ImageMinWidth = "auto";
-	/**
-     * The Minimum Height of Image
-     * @var string
-     */
-	public $ImageMinHeight = "10vh";
-    /**
-     * The Maximum Width of Image
-     * @var string
-     */
-	public $ImageMaxWidth = "100%";
-	/**
-     * The Maximum Height of thumbnail preshow
-     * @var string
-     */
-	public $ImageMaxHeight = "50vh";
-
-	/**
-     * @var string|null
-     * @category Part
-     */
-	public $Animation = "zoom-up";
-
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowTitle = true;
-	/**
-     * Read more through clicking on the title
-     * @var bool
-     * @category Part
-     */
-	public $LinkedTitle = true;
-
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowMetaData = true;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowRoute = true;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowCreateTime = true;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowUpdateTime = false;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowAuthor = true;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowStatus = false;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowButtons = true;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowImage = true;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowContent = true;
-	/**
-     * @var bool
-     * @category Parts
-     */
-	public $ShowDescription = true;
-	/**
-     * @var bool
-     * @category Excerption
-     */
-	public $ShowMoreButton = true;
-	/**
-     * The label text of More button
-     * @var string|null
-     * @category Excerption
-     */
-	public $MoreButtonLabel = "See More...";
-
-	function __construct(){
-        parent::__construct();
-    }
+class Page extends Module
+{
+    public $AllowTitle = true;
+    public $AllowDescription = true;
+    public $AllowImage = true;
+    public $Content = null;
+    public $Tag = "main";
+    public $Attributes = " onclick='viewSideMenu(false)'";
 
     public function GetStyle()
     {
         return Html::Style("
             .{$this->Name} {
-                height: fit-content;
-                margin-top: var(--size-3);
-                margin-bottom: var(--size-3);
-                padding: var(--size-4);
-                font-size: var(--size-0);
+                width: 100%;
+                height: max-content;
+            }
+
+            .{$this->Name} > .page {
+                width: 100%;
+                height: max-content;
+                padding: 0;
+                margin: 0;
+                opacity: 0; /* Initially hide all pages */
                 " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
             }
 
-            .{$this->Name} .head {
-                margin-bottom: var(--size-2);
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+            .{$this->Name} > .page > .frame {
+                width: 100%;
+                height: max-content;
+                padding: 0;
+                margin: 0;
             }
 
-            .{$this->Name} .title {
-                padding: 0px;
-                margin: 0px;
-                text-align: unset;
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
-            }
-
-            .{$this->Name} .metadata {
-                font-size: var(--size-0);
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
-            }
-
-            .{$this->Name} .metadata .route {
-                padding-inline-end: var(--size-0); 
-            }
-
-            .{$this->Name} .more {
-                text-align: end;
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
-            }
-
-            .{$this->Name} .more > a {
-                opacity: 0;
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
-            }
-
-            .{$this->Name}:hover .more > a {
+            .{$this->Name} > .page.active {
                 opacity: 1;
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
-            }
-
-            .{$this->Name} .image {
-                width: {$this->ImageWidth};
-                height: {$this->ImageHeight};
-                min-height: {$this->ImageMinHeight};
-                min-width: {$this->ImageMinWidth};
-                max-height: {$this->ImageMaxHeight};
-                max-width: {$this->ImageMaxWidth};
-                overflow: hidden;
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
-            }
-
-            .{$this->Name} .description {
-                font-size: var(--size-2);
-                padding-top: var(--size-2);
-                padding-bottom: var(--size-2);
-                text-align: justify;
-                position: relative;
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
-            }
-
-            .{$this->Name} .content {
-                font-size: var(--size-1);
-                text-align: justify;
-                color: var(--fore-color-1);
-                background-color: var(--back-color-1);
-                padding-top: var(--size-3);
-                padding-bottom: var(--size-3);
             }
         ");
     }
-
+	
     public function Get()
     {
-        $item = $this->Item;
-        $p_access = get($item, 'Access' );
+        return Convert::ToString(function () {
+            yield $this->GetTitle();       // Handle and yield the title
+            yield $this->GetDescription();  // Handle and yield the description
 
-        if (!inspect($p_access, exit: false)) return null; // Or return an appropriate empty HTML string
+            // Internal Page
+            yield Html::Division(
+				Html::Division(
+					Convert::ToString($this->Content)
+				, ["class"=>"frame"]),
+			["class"=> "page internal-page active", "Id" => "internal"]);
 
-        module("Image" ); // Assuming this function makes the Image class available
-        $img = new \MiMFa\Module\Image(); // Make sure the correct namespace is used
-        $img->Class = "image";
+            // External Page (using iframe)
+            yield Html::Division(Html::Embed("", null, ["class"=> "frame"]), ["class"=> "page external-page", "Id" => "external", "style" => "display:none;"]);
 
-        $p_id = get($item, 'Id' );
-        $p_type = get($item, 'Type' );
-        $p_image = getValid($item, 'Image' , $this->Image);
-        $p_name = getBetween($item, 'Name', 'Title')?? $this->Title;
-        $p_title = getValid($item, 'Title' , $p_name);
-        $p_description = getValid($item, 'Description' , $this->Description);
-        $p_content = getValid($item, 'Content' , $this->Content);
-        $p_class = get($item, 'class');
-
-        if ($this->ShowRoute) {
-            module("Route"); // Assuming this makes the Route class available
-        }
-
-        $p_meta = getValid($item, 'MetaData' , null);
-        if ($p_meta !== null) {
-            $p_meta = Convert::FromJson($p_meta);
-        }
-
-        $p_showcontent = $this->ShowContent || getValid($p_meta, "ShowContent", false);
-        $p_showdescription = $this->ShowDescription || getValid($p_meta, "ShowDescription", false);
-        $p_showimage = $this->ShowImage || getValid($p_meta, "ShowImage", false);
-        $p_showtitle = $this->ShowTitle || getValid($p_meta, "ShowTitle", false);
-        $p_showmeta = $this->ShowMetaData || getValid($p_meta, "ShowMeta", false);
-        $p_path = getValid($item, 'Path' , $this->Path);
-        $hasl = isValid($p_path);
-        $p_showmorebutton = $hasl && ($this->ShowMoreButton || getValid($p_meta, "ShowMoreButton", false));
-        $p_morebuttontext = getValid($p_meta, "MoreButtonLabel", $this->MoreButtonLabel);
-        $p_meta = null;
-
-
-        if ($p_showmeta) {
-            if ($this->ShowAuthor) {
-                doValid(function ($val) use (&$p_meta) {
-                    $authorName = table("User")->DoSelectValue("Name" , "Id=:Id", [":Id" => $val]);
-                    if (isValid($authorName)) {
-                        $p_meta .= Html::Span($authorName, ["class"=> "author"]); // Use Html::Tag
-                    }
-                }, $item, 'AuthorId' );
-            }
-
-            // ... (Similar conversions for ShowCreateTime, ShowUpdateTime, ShowStatus, ShowButtons using Html::Tag)
-            if ($this->ShowCreateTime) {
-                doValid(function ($val) use (&$p_meta) {
-                    if (isValid($val)) {
-                        $p_meta .= Html::Span($val, ["class"=> "createtime"]);
-                    }
-                }, $item, 'CreateTime' );
-            }
-
-            if ($this->ShowUpdateTime) {
-                doValid(function ($val) use (&$p_meta) {
-                    if (isValid($val)) {
-                        $p_meta .= Html::Span($val, ["class"=> "updatetime"]);
-                    }
-                }, $item, 'UpdateTime' );
-            }
-
-            if ($this->ShowStatus) {
-                doValid(function ($val) use (&$p_meta) {
-                    if (isValid($val)) {
-                        $p_meta .= Html::Span($val, ["class"=> "status"]);
-                    }
-                }, $item, 'Status' );
-            }
-
-            if ($this->ShowButtons) {
-                doValid(function ($val) use (&$p_meta) {
-                    if (isValid($val)) {
-                        $p_meta .= $val; // Assuming $val is already HTML
-                    } else {
-                        $p_meta .= $this->Buttons; // Assuming $this->Buttons is already HTML
-                    }
-                }, $item, 'Buttons');
-            }
-        }
-
-        $img->Source = $p_image;
-
-        return Html::Container( // Main container
-            function () use ($this, $p_showtitle, $p_title, $p_showcontent, $hasl, $p_path, $p_showmeta, $p_meta, $p_showmorebutton, $p_morebuttontext, $p_showdescription, $p_description, $p_showimage, $img, $p_content) {
-                yield $img->GetStyle(); // Use GetStyle() 
-                {
-                    $headContent = Html::MediumSlot(function() use ($p_showtitle, $p_title, $hasl, $p_path, $p_showmeta, $p_meta){
-                    if($p_showtitle) yield Html::SuperHeading(__($p_title),($hasl && $this->LinkedTitle) ? $p_path:null, ["class"=> "title"]);
-
-                    if($p_showmeta && isValid($p_meta)){
-                        yield Html::Sub($p_meta, ["class"=> "metadata"]);
-                        if ($this->ShowRoute) {
-                            $route = new \MiMFa\Module\Route($p_path);
-                            $route->Tag = "span";
-                            $route->Class = "route";
-                            yield $route->ToString(); // Assuming ReDraw returns HTML
-                        }
-                    }
-                    });
-
-                    $moreButtonHead = "";
-                    if ($p_showmorebutton) {
-                        $moreButtonHead = Html::Division(Html::Link(__($p_morebuttontext), $p_path, ["class"=> "btn btn-outline"]), ["class"=> "more col-sm col-3 md-hide"]);
-                    }
-
-                    yield Html::Rack($headContent . $moreButtonHead, ["class"=>"head"]);
-                }
-                yield Html::Rack(function() use ($p_showdescription, $p_description, $p_showimage, $img){
-                    $descriptionContent = "";
-                    if ($p_showdescription) {
-                        $descriptionContent .= __($p_description);
-                    }
-                    $imageContent = "";
-                    if ($p_showimage && isValid($img->Source)) { //Check if image source is valid
-                        $imageContent .= Html::Division($img->ToString(), ["class"=> "col-5"]);
-                    }
-                    return $descriptionContent . $imageContent;
-                }, ["class"=>"description" ]);
-
-                if ($p_showcontent && isValid($p_content))
-                    yield Html::Division(__($p_content), ["class"=> "content"]);
-                elseif ($p_showmorebutton)
-                    yield Html::Division(Html::Link(__($p_morebuttontext), $p_path, ["class"=> "btn btn-block btn-outline"]), ["class"=> "more md-show"]);
-            },
-            ["class"=> "$p_type $p_class", ...($this->Animation ? ["data-aos"=>$this->Animation] : [])]
-        );
+            // Embed Page (using iframe)
+            yield Html::Division(Html::Embed("",  null,["class"=> "frame"]), ["class"=> "page embed-page", "Id" => "embed", "style" => "display:none;"]);
+        });
     }
+
+	public function GetScript(){
+		return parent::GetScript().Html::Script("
+			var ReadyHtml = {
+				load: (data=``)=> [
+					`<style>
+					.load {
+						background-image: var(--wait-symbol-path-url);
+						background-size: 70% 70%;
+						background-repeat: no-repeat;
+						background-position: center;
+						background-color: var(--back-color-1);
+						color: var(--fore-color-1);
+						position: absolute;
+						top: calc(50% - 5VMAX);
+						left: calc(50% - 5VMAX);
+						width: 10VMAX;
+						height: 10VMAX;
+						border-radius: 50%;  
+						animation: load 1.5s infinite ease-in-out;
+					}
+					@keyframes load {
+						0% {
+						transform: scale(0) rotate(0);
+						}
+						50% {
+						transform: scale(1) rotate(120);
+						}
+						100% {
+						transform: scale(2) rotate(240);
+						opacity: 0;
+						}
+					}
+					</style>`,`<div class='load'>`,data,`</div>`].join(`\r\n`),
+				wait: (data=``)=>[
+					`<style>
+					.wait{
+						background-size: 15vmax auto;
+						background-repeat: no-repeat;
+						background-position: center;
+						padding-top: 10%;
+						height: 95vh;
+						max-height: 100%;
+						width: 100vw;
+						max-width: 100%;
+						text-align: center;
+						background-image: var(--process-symbol-path-url);
+					}
+					</style>`,`<div class='wait'>`,data,`</div>`].join(`\r\n`),
+				error: (data=``)=>[
+					`<style>
+					.error {
+						background-size: 15vmax auto;
+						background-repeat: no-repeat;
+						background-position: center;
+						padding-top: 10%;
+						height: 95vh;
+						max-height: 100%;
+						width: 100vw;
+						max-width: 100%;
+						text-align: center;
+						background-image: var(--error-symbol-path-url);
+					}
+					</style>`,`<div class='error'>`,data,`</div>`].join(`\r\n`),
+				connectionError: (data=``) => [
+					`<style>
+					.error {
+						background-size: 15vmax auto;
+						background-repeat: no-repeat;
+						background-position: center;
+						padding-top: 10%;
+						height: 95vh;
+						max-height: 100%;
+						width: 100vw;
+						max-width: 100%;
+						text-align: center;
+						background-image: var(--error-symbol-path-url);
+					}
+					</style>`,`<div class='error'>`,data,`</div>`].join(`\r\n`)
+			};
+			function {$this->Name}_ShowFrame(selector = `.{$this->Name}`){
+				$(`.{$this->Name}>.page`).removeClass(`active`);
+				$(`.{$this->Name}>.page`).hide();
+				$(`.{$this->Name} `+selector).addClass(`active`);
+				$(`.{$this->Name} `+selector).show();
+			}
+			function {$this->Name}_ViewInternal(link,anim=null,cls=null, selector = `#internal`){
+				{$this->Name}_InjectInternal(link,anim,cls, selector);
+				{$this->Name}_ShowFrame(selector);
+			}
+			function {$this->Name}_ViewExternal(link,anim=null,cls=null, selector = `#external`){
+				{$this->Name}_InjectExternal(link,anim,cls, selector);
+				{$this->Name}_ShowFrame(selector);
+			}
+			function {$this->Name}_ViewEmbed(link,anim=null,cls=null, selector = `#embed`){
+				{$this->Name}_EmbedExternal(link,anim,cls, selector);
+				{$this->Name}_ShowFrame(selector);
+			}
+
+			function {$this->Name}_InjectInternal(link, anim=null, cls=null, selector = `#internal`){
+				selector += `>.frame`;
+				const frame = $(selector)[0];
+				frame.innerHTML = ReadyHtml.load();
+				if(!isEmpty(cls)) frame.addClass(cls);
+				if(!isEmpty(anim)) frame.setAttribute(`data-aos`,(isEmpty(anim)?``:anim));
+				$(selector).load(`/private.php?".(isEmpty(\Req::$Query)?"":(\Req::$Query))."`".", {name:link,animation:anim,class:cls},
+					function(data){
+						if(!data) frame.innerHTML = ReadyHtml.connectionError(`Please check your connection...`);
+					},
+					function(data){
+						frame.innerHTML = ReadyHtml.error(data.statusText);
+					}
+				);
+			}
+
+			function {$this->Name}_InjectExternal(link,anim=null, cls=null, selector = `#external`){
+				const frame = $(selector)[0];
+				frame.innerHTML = ReadyHtml.load();
+				frame.innerHTML = `<iframe is='x-frame' data-loading-page=\``+ReadyHtml.load()+`\` data-aos='`+anim+`' class='frame `+cls+`' src='`+link+`'></iframe>`;
+			}
+
+			function {$this->Name}_EmbedExternal(link,anim=null, cls=null, selector = `#embed`){
+				const frame = $(selector+` .frame`)[0];
+				frame.src = link;
+			}
+
+		");
+	}
 }
 ?>

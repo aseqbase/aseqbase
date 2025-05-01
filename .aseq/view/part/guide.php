@@ -1,8 +1,8 @@
 <?php
-$arr = table("Guide")->DoSelect();
+$arr = table("Guide")->Select();
 if(isValid($arr))
     foreach ($arr as $k=>$value)
         echo (isValid($value,"Description" )?__($value["Description" ]):"")
         .(isValid($value,"Content" )?__($value["Content" ]):"")
-        .(isValid($value,"Path" )?"<a href='".$value["Path" ]."' class='btn btn-lg btn-block ".(isValid($value,"class")?$value["class"]:"")."' data-aos='fade-left'>".__($value["Title" ])."</a><br />":"");
+        .(isValid($value,"Path" )?"<a href='".$value["Path" ]."' class='btn lg btn block ".(isValid($value,"class")?$value["class"]:"")."' data-aos='fade-left'>".__($value["Title" ])."</a><br />":"");
 ?>

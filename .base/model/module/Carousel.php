@@ -19,13 +19,49 @@ class Carousel extends Collection{
 	public $NextLabel = "<span class='carousel-control-next-icon'></span>";
 
 	public $Animation = "slide";
+	public $CaptionBackColor = null;
+	public $CaptionForeColor = null;
 
 	public $ActiveItem = 0;
 
 	public function __construct(){
         parent::__construct();
 		$this["data-bs-ride"] = "carousel";
+		$this->CaptionBackColor = $this->CaptionBackColor??\_::$Front->BackColor(0)."cc";
+		$this->CaptionForeColor = $this->CaptionForeColor??"var(--fore-color)";
     }
+
+	public function GetStyle(){
+		return Html::Style("
+		.{$this->Name} .carousel-inner{
+			height: 100%;
+			padding: 0px;
+		}
+		.{$this->Name} .carousel-item.media{
+			height: 100%;
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+			padding: 0px;
+		}
+		.{$this->Name} .carousel-item .carousel-caption{
+			background-color: {$this->CaptionBackColor};
+			color: {$this->CaptionForeColor};
+			text-align: start;
+			border-radius: var(--radius-1);
+			padding: var(--size-1) var(--size-0);
+			left: auto;
+			right: auto;
+			bottom: 5%;
+			margin-inline-start: 2%;
+			margin-inline-end: 2%;
+		}
+		.{$this->Name} .carousel-item .carousel-caption>*{
+			margin: initial;
+			text-align: start;
+		}
+		");
+	}
 
 	public function Get(){
 		return join(PHP_EOL, iterator_to_array((function(){
@@ -34,15 +70,15 @@ class Carousel extends Collection{
 			$target = ".".$this->Name;
 			$i = 0;
             foreach(Convert::ToItems($this->Items) as $item) {
-				if(is_array($item) && (isValid($item, "Image" ) || isValid($item, "Image" )))
-                    $item = Html::Image(null, get($item, "Image"))."
-						<div class='carousel-caption'>
-							<h3>".get($item, "Title" )."</h3>
-							<p>".getBetween($item, "Description", "Caption")."</p>
-						</div>";
 				$active = $i==$this->ActiveItem;
+				if(is_array($item) && (isValid($item, "Image" ) || isValid($item, "Image" )))
+					$inners[] = Html::Media( Html::Division(
+							Html::Heading(get($item, "Title" ), get($item, "Path" ),["class"=>"title"]).
+							Html::Paragraph(getBetween($item, "Description", "Caption"),["class"=>"description"])
+						,["class"=>"carousel-caption"]), get($item, "Image")
+					,["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>"carousel-item".($active?" active":"")]);
+                else $inners[] = Html::Division($item, ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>"carousel-item".($active?" active":"")]);
                 $indicators[] = Html::Element($this->IndicatorLabel, "button", ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>$active?"active":""]);
-                $inners[] = Html::Division($item, ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>"carousel-item".($active?" active":"")]);
 				$i++;
             }
             yield Html::Division($indicators, ["class"=>"carousel-indicators"]);

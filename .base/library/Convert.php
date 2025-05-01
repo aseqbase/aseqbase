@@ -113,7 +113,7 @@ class Convert
      */
     public static function ToText($html)
     {
-        $html = strip_tags($html, '<br><hr><section><content><main><header><footer><p><li><tr><h1><h2><h3><h3><h4><h5><h6>');
+        $html = strip_tags($html??"", '<br><hr><section><content><main><header><footer><p><li><tr><h1><h2><h3><h3><h4><h5><h6>');
         return preg_replace('/(\s*<[^>]*>\s*)+/', PHP_EOL, $html);
     }
 

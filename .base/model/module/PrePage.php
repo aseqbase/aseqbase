@@ -21,7 +21,7 @@ class PrePage extends Module{
 				text-align: justify;
 				padding: 3vmax 3vmax;
 			}
-			.{$this->Name} .media{
+			.{$this->Name}>:not(.content)>.media{
 				background-size: cover;
 				background-position: center;
 				background-repeat: no-repeat;

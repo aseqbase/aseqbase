@@ -213,7 +213,7 @@ class Module extends \Base
      public function GetDefaultAttributes()
      {
           return [
-               ($this->Id?["id" => $this->Id]:[]),
+               ($this->Id ? ["id" => $this->Id] : []),
                ["class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass()],
                (isEmpty($this->Attributes) ? [] : (is_array($this->Attributes) ? $this->Attributes : [Convert::ToString($this->Attributes, " ", "{0}={1} ")])),
                (count($this) < 1 ? [] : $this->__toArray())
@@ -255,7 +255,7 @@ class Module extends \Base
                     if (is_string($this->Title))
                          yield __($this->Title, styling: false);
                     elseif (is_callable($this->Title))
-                         ($this->Title)($attrs);
+                         yield ($this->Title)($attrs);
                     else
                          yield $this->Title;
                     yield (isValid($this->TitleTag) ? "</" . $this->TitleTag . ">" : "");
@@ -269,9 +269,9 @@ class Module extends \Base
                if (isValid($this->Description)) {
                     yield (isValid($this->DescriptionTag) ? "<" . $this->DescriptionTag . " $attrs>" : "");
                     if (is_string($this->Description))
-                         yield __($this->Description);
+                         yield __(Html::Convert($this->Description));
                     elseif (is_callable($this->Description))
-                         ($this->Description)($attrs);
+                         yield ($this->Description)($attrs);
                     else
                          yield $this->Description;
                     yield (isValid($this->DescriptionTag) ? "</" . $this->DescriptionTag . ">" : "");
@@ -285,9 +285,9 @@ class Module extends \Base
                if (isValid($this->Content)) {
                     yield (isValid($this->ContentTag) ? "<" . $this->ContentTag . " $attrs>" : "");
                     if (is_string($this->Content))
-                         yield __($this->Content);
+                         yield __(Html::Convert($this->Content));
                     elseif (is_callable($this->Content))
-                         ($this->Content)($attrs);
+                         yield ($this->Content)($attrs);
                     else
                          yield $this->Content;
                     yield (isValid($this->ContentTag) ? "</" . $this->ContentTag . ">" : "");

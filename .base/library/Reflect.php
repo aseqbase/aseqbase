@@ -113,7 +113,7 @@ class Reflect{
                         $uc++;
                     } else {
                         var_dump($content);
-                        throw new \Exception("Here could not find a destination to set the '$name'!");
+                        throw new \SilentException("Here could not find a destination to set the '$name'!");
                     }
                 }
             }

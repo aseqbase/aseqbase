@@ -62,10 +62,8 @@ class Profile extends Form{
 
 	public $MediaWidth = "var(--size-5)";
 	public $MediaHeight = "var(--size-5)";
-	public $BorderSize = 1;
 	public $HasDecoration = true;
 	public $TextWrap = false;
-	public $TextLength = 50;
 
 	public $SevereSecure = true;
 	public $CryptPassword = true;
@@ -106,10 +104,11 @@ class Profile extends Form{
             $this->DataTable = $itemsOrDataTable;
 		else $this->Items = $itemsOrDataTable;
         $a = (new DateTime())->format("z");
-		$this->ViewSecret = encrypt("$a-View");
-		$this->AddSecret = encrypt("$a-Add");
-		$this->RemoveSecret = encrypt("$a-Remove");
-		$this->ModifySecret = encrypt("$a-Modify");
+        $this->ViewSecret = sha1("$a-View");
+        $this->DuplicateSecret = sha1("$a-Duplicate");
+        $this->AddSecret = sha1("$a-Add");
+        $this->RemoveSecret = sha1("$a-Remove");
+        $this->ModifySecret = sha1("$a-Modify");
     }
     
 	public function GetStyle(){
@@ -208,9 +207,9 @@ class Profile extends Form{
 		$isc = $this->Controlable;
 		$isu = $isc && $this->Updatable && auth($this->UpdateAccess);
 		if(isValid($this->DataTable) && isValid($this->KeyColumn)){
-		    if(isValid($this->KeyValue)) $this->Items = $this->DataTable->DoSelectRow(count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$this->KeyValue]);
+		    if(isValid($this->KeyValue)) $this->Items = $this->DataTable->SelectRow(count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$this->KeyValue]);
             else $this->Items = isValid($this->SelectQuery)?$this->DataTable->DataBase->TrySelectRow($this->SelectQuery, $this->SelectParameters, $this->Items):
-                    $this->DataTable->DoSelectRow(
+                    $this->DataTable->SelectRow(
                     isEmpty($this->IncludeColumns)?"*":(in_array($this->KeyColumn, $this->IncludeColumns)?$this->IncludeColumns:[$this->KeyColumn, ...$this->IncludeColumns]),
                     [$this->SelectCondition, isEmpty("{$this->KeyColumn}=:{$this->KeyColumn}")],
                     [":{$this->KeyColumn}"=>$this->KeyValue], $this->Items
@@ -311,7 +310,7 @@ class Profile extends Form{
                         }
                     }
                     if($type !== false && !isEmpty($cell)) yield Html::Field(
-                        type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k, $this->Items)),
+                        type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k)),
                         key:$k,
                         value:$cell,
                         description:false,
@@ -369,12 +368,12 @@ class Profile extends Form{
     }
 	public function DoAddHandle($value){
         if(is_null($value)) return null;
-        $vals = $this->NormalizeValues(\Req::Post());
+        $vals = $this->NormalizeValues(\Req::ReceivePost());
         if(!auth($this->AddAccess)) return Html::Error("You have not access to modify!");
         unset($vals[$this->KeyColumn]);
         foreach ($vals as $k=>$v)
             if(isEmpty($v)) unset($vals[$k]);
-        if($this->DataTable->DoInsert($vals))
+        if($this->DataTable->Insert($vals))
             return Html::Success("The information added successfully!");
         return Html::Error("You can not add this item!");
     }
@@ -413,9 +412,9 @@ class Profile extends Form{
     }
 	public function DoModifyHandle($value){
         if(is_null($value)) return null;
-        $vals = $this->NormalizeValues(\Req::Put());
+        $vals = $this->NormalizeValues(\Req::ReceivePut());
         if(!auth(minaccess: $this->ModifyAccess)) return Html::Error("You have not access to modify!");
-        if($this->DataTable->DoUpdate([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
+        if($this->DataTable->Update([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
             return Html::Success("The information updated successfully!");
         return Html::Error("You can not update this item!");
     }
@@ -423,7 +422,7 @@ class Profile extends Form{
 	public function DoRemoveHandle($value){
         if(is_null($value)) return null;
         if(!auth($this->RemoveAccess)) return Html::Error("You have not access to delete!");
-        if($this->DataTable->DoDelete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]))
+        if($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]))
             return Html::Success("The items removed successfully!");
         return Html::Error("You can not remove this item!");
     }
@@ -493,7 +492,7 @@ class Profile extends Form{
 
 	public function NormalizeValues($values){
         try{
-            foreach (\Req::File()??[] as $k=>$v)
+            foreach (\Req::ReceiveFile()??[] as $k=>$v)
                 if(Local::IsFileObject($v)){
                     $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)) $type = \_::$Config->GetAcceptableFormats($type);

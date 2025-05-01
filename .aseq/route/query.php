@@ -1,18 +1,19 @@
 <?php
-$query = \Req::Receive("q") ?? \Req::Receive("Query");
-$args = logic("content/all", [
-    "Filter" => [
-        "Query" => $query,
-        "Cat" => implode("/", array_slice(explode("/",\Req::$Direction),1))
+$viewData = grab($data, "View") ?? [];
+$logicData = grab($data, "Logic") ?? [];
+$filter = grab($logicData, "Filter") ?? [];
+return route("search", [
+    "Logic" => [
+        "Filter" => [
+            "Category" => implode("/", array_slice(explode("/", \Req::$Direction), 1)),
+            ...$filter
+        ],
+        ...$logicData
     ],
-    "Order" => null
-]);
-
-view("contents", [
-    "Title" => "Query Results",
-    "WindowTitle" => [\Req::Receive("Query") ?? \Req::Receive("q", default: \Req::$Direction), \Req::Receive("Type" )],
-    "Description" => "Found <b>\"" . count($args) . "\"</b> results for searching <b>\"$query\"</b>!",
-    "ShowRoute" => true,
-    "Items" => $args
+    "View" => [
+        "Title" => "Query Results",
+        ...$viewData
+    ],
+    ...$data
 ]);
 ?>

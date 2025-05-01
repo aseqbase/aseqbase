@@ -1,6 +1,6 @@
 <?php
-module("Content" );
-$module = new \MiMFa\Module\Content();
+module("Page" );
+$module = new \MiMFa\Module\Page();
 $module->Content = isValid(\Req::$Direction)?
 		page(normalizePath(\Req::$Direction), alternative:"404", print: false):
 		page("home", alternative:"404", print: false);

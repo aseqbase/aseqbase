@@ -12,7 +12,7 @@ class SearchForm extends Module{
 		$src = $this->Path??\Req::$Host."/search";
 		if(isValid($src))
 			return parent::Get().Html::Form(
-					Html::SearchInput($this->QueryKey, \Req::Get($this->QueryKey), ["placeholder"=>__($this->PlaceHolder)])
+					Html::SearchInput($this->QueryKey, \Req::ReceiveGet($this->QueryKey), ["placeholder"=>__($this->PlaceHolder)])
 					."<button type='submit'>".__($this->SubmitLabel)."</button>"
 				, $src, ["method"=>"get"]);
 		return null;

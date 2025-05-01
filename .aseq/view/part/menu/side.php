@@ -1,6 +1,6 @@
 <?php module("SideMenu");
 $module = new MiMFa\Module\SideMenu();
-$module->Title = \_::$Info->Product;
+$module->Title = \_::$Info->Name;
 $module->Description = \_::$Info->Owner;
 $module->Items = \_::$Info->SideMenus;
 $module->Image = \_::$Info->LogoPath;

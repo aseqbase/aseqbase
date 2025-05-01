@@ -405,19 +405,20 @@ FodyWeavers.xsd
 # aseqbase
 /single
 /sequence
-/administrator
-/private
-/public
+/main
 /test
-/tmp
-/temp
+/administrator
 /ms
 /lms
 /ums
 /gms
 /erp
-/vendor
 /shop
+/private
+/public
+/tmp
+/temp
+/vendor
 /.vs
 /.vscode
 /.git

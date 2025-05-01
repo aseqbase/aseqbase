@@ -1,8 +1,14 @@
 <?php
 \_::$Back->Router->Route("(public|asset|(view/(script|style)))/.*\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm|webp)")
-    ->Default(fn()=>\Res::SendFile(normalizePath(\Req::$Request)));
-\_::$Back->Router->Route("posts?")->Default("post");
-\_::$Back->Router->Route("forums?")->Default("forum");
+    ->Default(fn()=>\Res::PutFile(normalizePath(\Req::$Request)));
+\_::$Back->Router->Route("contents")->Default("contents");
+\_::$Back->Router->Route("content")->Default("content");
+\_::$Back->Router->Route("posts")->Default("posts");
+\_::$Back->Router->Route("post")->Default("post");
+\_::$Back->Router->Route("newses")->Default("newses");
+\_::$Back->Router->Route("news")->Default("news");
+\_::$Back->Router->Route("forums")->Default("forums");
+\_::$Back->Router->Route("forum")->Default("forum");
 \_::$Back->Router->Route("(categor(ies|y))|(cats?)")->Default("category");
 \_::$Back->Router->Route("tags?")->Default("tag");
 \_::$Back->Router->Route("query")->Default("query");

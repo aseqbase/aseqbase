@@ -21,7 +21,7 @@ class Internal
      */
     public static function Handle($name = null)
     {
-        $received = $name ? [\Req::Internal($name)] : \Req::Internal();
+        $received = $name ? [\Req::ReceiveInternal($name)] : \Req::ReceiveInternal();
         $reses = [];
         foreach ($received as $name => $args) {
             $args = json_decode($args);

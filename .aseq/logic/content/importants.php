@@ -1,3 +1,4 @@
 <?php
-return logic("content/all",[...$data, "Order"=>"`Priority` DESC"]);
+grab($data, "Order");
+return logic("content/all",["Order"=>"`Priority` DESC", ...$data]);
 ?>

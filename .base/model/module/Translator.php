@@ -5,10 +5,10 @@ use MiMFa\Library\Session;
 use MiMFa\Library\Translate;
 class Translator extends Module{
 	public $Items = array(
-			"EN"=>array(
+			"en"=>array(
 				"Title" =>"English",
 				"Image" =>"https://flagcdn.com/16x12/gb.png",
-				"Direction"=>"LTR",
+				"Direction"=>"ltr",
 				"Encoding"=>"UTF-8"
 			)
 		);

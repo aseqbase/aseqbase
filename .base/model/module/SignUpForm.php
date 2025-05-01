@@ -86,27 +86,27 @@ class SignUpForm extends Form
 	{
 		if ($this->HasDecoration)
 			return parent::GetStyle() . Html::Style("
-			.{$this->Name} .btn-facebook {
+			.{$this->Name} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}
 
-			.{$this->Name} .btn-twitter {
+			.{$this->Name} .btn.twitter {
 				background-color: #42AEEC55 !important;
 			}
 
-			.{$this->Name} .btn-linkedin {
+			.{$this->Name} .btn.linkedin {
 				background-color: #0e86a855 !important;
 			}
 
-			.{$this->Name} .btn-facebook:hover {
+			.{$this->Name} .btn.facebook:hover {
 				background-color: #405D9D !important;
 			}
 
-			.{$this->Name} .btn-twitter:hover {
+			.{$this->Name} .btn.twitter:hover {
 				background-color: #42AEEC !important;
 			}
 
-			.{$this->Name} .btn-linkedin:hover {
+			.{$this->Name} .btn.linkedin:hover {
 				background-color: #0e86a8 !important;
 			}
 
@@ -257,7 +257,7 @@ class SignUpForm extends Form
 	{
 		if (!auth(\_::$Config->UserAccess))
 			try {
-				$received = \Req::Post();
+				$received = \Req::ReceivePost();
 				if (isValid($received, "Email") || isValid($received, "Password" )) {
 					$signature = get($received, "Signature");
 					if (!preg_match($this->SignaturePattern,$signature))

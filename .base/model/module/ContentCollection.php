@@ -10,8 +10,9 @@ module("Collection");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
-class PostCollection extends Collection{
+class ContentCollection extends Collection{
      public $RootRoute = null;
+     public $CollectionRoute = null;
      public $TitleTag = "h1";
 
     /**
@@ -185,6 +186,7 @@ class PostCollection extends Collection{
 	function __construct(){
         parent::__construct();
         $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
+        $this->CollectionRoute = $this->CollectionRoute??\_::$Address->ContentRoute;
         $this->CheckAccess = fn($item)=>auth(getValid($item, 'Access' , 0));
     }
 
@@ -193,7 +195,8 @@ class PostCollection extends Collection{
 			.{$this->Name}>*>.item {
 				height: fit-content;
 				max-width: calc(100% - 2 * var(--size-2));
-				background-Color: #88888808;
+				background-Color: var(--back-color-3);
+				Color: var(--fore-color-3);
 				margin: var(--size-2);
             	padding: var(--size-3);
 				font-size: var(--size-0);
@@ -234,8 +237,13 @@ class PostCollection extends Collection{
 				padding-inline-end: calc(var(--size-0) / 2);
 			}
 			.{$this->Name}>*>.item .more{
-                gap: var(--size-0);
-				text-align: end;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                gap: calc(var(--size-0) / 2);
+                text-align: end;
+                align-items: flex-start;
+                flex-direction: row-reverse;
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
 			.{$this->Name}>*>.item .more>*{
@@ -322,7 +330,7 @@ class PostCollection extends Collection{
                 $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->RootRoute.getValid($item,'Name' ,$p_id)):null;
                 if(!$this->CompressPath) {
                     $catDir = \_::$Back->Query->GetContentCategoryRoute($item);
-                    if(isValid($catDir)) $p_inselflink = $this->RootRoute.trim($catDir,"/\\")."/".($p_name??$p_id);
+                    if(isValid($catDir)) $p_inselflink = $this->CollectionRoute.trim($catDir,"/\\")."/".($p_name??$p_id);
                 }
                 $p_path = first(Convert::FromJson(getValid($item,'Path' , $this->DefaultPath)));
                 if($this->ShowRoute) $rout->Set($p_inselflink);
@@ -354,7 +362,7 @@ class PostCollection extends Collection{
 				    if($this->ShowAuthor)
                         doValid(
                             function($val) use(&$p_meta){
-                                $authorName = table("User")->DoSelectRow("Signature , Name","Id=:Id",[":Id"=>$val]);
+                                $authorName = table("User")->SelectRow("Signature , Name","Id=:Id",[":Id"=>$val]);
                                 if(!isEmpty($authorName)) $p_meta .=  " ".Html::Link($authorName["Name" ],\_::$Address->UserRoute.$authorName["Signature" ],["class"=>"author"]);
                             },
                             $item,
@@ -408,11 +416,11 @@ class PostCollection extends Collection{
                         }
                     yield "</div>";
                     if($p_showmorebutton || $p_showpathbutton) {
-                        yield "<div class='more col-sm col-3 md-hide'>";
+                        yield "<div class='more col col-3 md-hide'>";
                         if($p_showmorebutton)
-                            yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn btn-outline']);
+                            yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn primary']);
                         if($p_showpathbutton)
-                            yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn btn-outline']);
+                            yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn outline']);
                         yield "</div>";
                     }
                 yield "</div>";
@@ -422,16 +430,16 @@ class PostCollection extends Collection{
                 if($p_showexcerpt) yield $p_excerpt;
                 yield "</div>";
                 if($p_showimage && isValid($p_image))
-                    yield "<div class='col-lg-3'>".$img->ToString()."</div>";
+                    yield "<div class='col-lg col-lg-3'>".$img->ToString()."</div>";
                 yield "</div>";
                 if($p_showcontent && isValid($p_content))
                     yield "<div class='content'>".__($p_content, refering:$p_refering)."</div>";
                 if($p_showmorebutton || $p_showpathbutton) {
                     yield "<div class='more md-show'>";
                     if($p_showmorebutton)
-                        yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn btn-outline']);
+                        yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn primary']);
                     if($p_showpathbutton)
-                        yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn btn-outline']);
+                        yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn outline']);
                     yield "</div>";
                 }
                 yield "</article>";

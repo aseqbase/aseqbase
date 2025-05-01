@@ -56,7 +56,7 @@ class Collection extends Module{
      * The label text of More button
      * @var string|null
      */
-	public $MoreButtonLabel = "Read More...";
+	public $MoreButtonLabel = "More...";
 	/**
      * Show items with an animation effect
      * @var string|null
@@ -65,11 +65,14 @@ class Collection extends Module{
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
-			.{$this->Name} .items{
+			.{$this->Name}{
+				display: grid;
 				gap: 3vmax;
-				margin-bottom: 3vmax;
 			}
-			.{$this->Name} .items .item{
+			.{$this->Name}>.row{
+				gap: 3vmax;
+			}
+			.{$this->Name} .item{
 				background-color: var(--back-color-0);
 				color: var(--fore-color-0);
 				font-size: var(--size-1);
@@ -80,14 +83,14 @@ class Collection extends Module{
 				box-shadow: var(--shadow-1);
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .items .item:hover{
+			.{$this->Name} .item:hover{
 				background-color: var(--back-color-1);
 				color: var(--fore-color-1);
 				border-radius: var(--radius-2);
 				box-shadow: var(--shadow-2);
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
-			.{$this->Name} .items .item .image{
+			.{$this->Name} .item .image{
 				margin: 2vmax;
 				overflow: hidden;
 				height: 5vmax;
@@ -95,25 +98,25 @@ class Collection extends Module{
 				width: 100%;
 				max-width: 100%;
 			}
-			.{$this->Name} .items .item .image img{
+			.{$this->Name} .item .image img{
 				width: auto !important;
 				width:  100%;
 				max-width: 100%;
 			}
-			.{$this->Name} .items .item .description{
+			.{$this->Name} .item .description{
 				background-color: var(--back-color-0);
 				color: var(--fore-color-0);
 				text-align: start;
 				padding: 2vmin 2vmax;
 				margin-bottom: 0px;
 			}
-			.{$this->Name} .items .item .fa{
+			.{$this->Name} .item .fa{
 				padding: 20px;
 				margin-bottom: 3vh;
 				border: var(--border-0) var(--fore-color-0);
 				border-radius: 50%;
 			}
-			.{$this->Name} .items .item .btn{
+			.{$this->Name} .item .btn{
 				margin: 2vmax 5px;
 			}
 		");
@@ -128,7 +131,7 @@ class Collection extends Module{
 
             $i = 0;
             foreach(Convert::ToItems($this->Items) as $item) {
-                if($i % $this->MaximumColumns === 0)  yield "<div class='row items'>";
+			    if($i % $this->MaximumColumns === 0) yield "<div class='row'>";
 				if(is_string($item)) yield $item;
 				else if(auth(getValid($item,'Access' , \_::$Config->VisitAccess))){
 					$p_meta = getValid($item,'MetaData' ,null);
@@ -146,16 +149,25 @@ class Collection extends Module{
                     $p_buttons = getValid($item,'Buttons', $this->DefaultButtons);
                     $img->Source = $p_image;
 					if(is_null($p_description))
-                        yield Html::Button(
-                            (isEmpty($img->Source)?"":$img->ToString()).
-                            Html::SubHeading($p_name).
-							Convert::ToString($p_content).
-                            Convert::ToString($p_buttons),
-                            $p_link,
-                            ["class"=>"item col-sm"], $this->Animation? " data-aos-delay='".($i % $this->MaximumColumns*\_::$Front->AnimationSpeed)."' data-aos='{$this->Animation}'":null);
+						if(is_null($p_buttons))
+							yield Html::Button(
+								(isEmpty($img->Source)?"":$img->ToString()).
+								Html::SubHeading($p_name).
+								Convert::ToString($p_content),
+								$p_link,
+								["class"=>"item col-sm"], $this->Animation? " data-aos-delay='".($i % $this->MaximumColumns*\_::$Front->AnimationSpeed)."' data-aos='{$this->Animation}'":null);
+							else yield Html::Division(
+								Html::Link(
+								(isEmpty($img->Source)?"":$img->ToString()).
+								Html::SubHeading($p_name), $p_link).
+								Convert::ToString($p_content).
+								Convert::ToString($p_buttons).
+								(isValid($p_link)? Html::Button($this->MoreButtonLabel, $p_link, ["target"=>"blank"]):""),
+								["class"=>"item col-sm"], $this->Animation? "data-aos='{$this->Animation}'":null);
 					else yield Html::Division(
+							Html::Link(
                             (isEmpty($img->Source)?"":$img->ToString()).
-                            Html::SubHeading($p_name).
+                            Html::SubHeading($p_name), $p_link).
                             Html::Division($p_description, ["class"=>"description" ]).
 							Convert::ToString($p_content).
                             Convert::ToString($p_buttons).

@@ -110,8 +110,6 @@ use MiMFa\Library\Local;
 	--owner: \"" . __(\_::$Info->Owner, true, false) . "\";
 	--full-owner: \"" . __(\_::$Info->FullOwner, true, false) . "\";
 	--owner-description: \"" . __(\_::$Info->OwnerDescription, true, false) . "\";
-	--product: \"" . __(\_::$Info->Product, true, false) . "\";
-	--full-product: \"" . __(\_::$Info->FullProduct, true, false) . "\";
 	--name: \"" . __(\_::$Info->Name, true, false) . "\";
 	--full-name: \"" . __(\_::$Info->FullName, true, false) . "\";
 	--slogan: \"" . __(\_::$Info->Slogan, true, false) . "\";

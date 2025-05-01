@@ -312,7 +312,7 @@ class Local
 	 */
 	public static function GetFileObject($inputName)
 	{
-		return \Req::File($inputName);
+		return \Req::ReceiveFile($inputName);
 	}
 	/**
 	 * Check if the fileobject is not null or empty
@@ -340,7 +340,7 @@ class Local
 		if (is_string($content))
 			$content = self::GetFileObject($content);
 		if (!get($content, "name"))
-			throw new \Exception("There is not any file!");
+			throw new \SilentException("There is not any file!");
 		$directory = $directory ?? \_::$Aseq->PublicDirectory;
 
 		$fileType = strtolower(pathinfo($content["name"], PATHINFO_EXTENSION));
@@ -356,7 +356,7 @@ class Local
 		if (!$allow) {
 			if ($deleteSource)
 				unlink($sourceFile);
-			throw new \Exception("The file format is not acceptable!");
+			throw new \SilentException("The file format is not acceptable!");
 		}
 		// Check file size
 		$minSize = $minSize ?? \_::$Config->MinimumFileSize;
@@ -364,11 +364,11 @@ class Local
 		if ($content["size"] < $minSize) {
 			if ($deleteSource)
 				unlink($sourceFile);
-			throw new \Exception("The file size is very small!");
+			throw new \SilentException("The file size is very small!");
 		} elseif ($content["size"] > $maxSize) {
 			if ($deleteSource)
 				unlink($sourceFile);
-			throw new \Exception("The file size is very big!");
+			throw new \SilentException("The file size is very big!");
 		}
 		if (!$dir) {
 			$dir = \_::$Aseq->TempDirectory;
@@ -383,7 +383,7 @@ class Local
 			return $destFile;
 		if ($deleteSource)
 			unlink($sourceFile);
-		throw new \Exception("Sorry, there was an error uploading your file.");
+		throw new \SilentException("Sorry, there was an error uploading your file.");
 	}
 	/**
 	 * Save (Upload from the client side) file to the local storage
@@ -412,11 +412,11 @@ class Local
 		if (is_string($content))
 			$content = self::GetFileObject($content);
 		if (!get($content, "name"))
-			throw new \Exception("There is not any file!");
+			throw new \SilentException("There is not any file!");
 
 		// Check if image file is an actual image or fake image
 		if (getimagesize($content["tmp_name"]) === false)
-			throw new \Exception("The image file is not an actual image!");
+			throw new \SilentException("The image file is not an actual image!");
 		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableImageFormats);
 	}
 	/**
@@ -496,7 +496,7 @@ class Local
 	 * @param string|null $name Optional filename to force download with a specific name.
 	 */
 	public static function LoadFile($path, $name = null, $type = null){
-		\Res::SendFile($path, null, $type, true, $name);
+		\Res::PutFile($path, null, $type, true, $name);
 	}
 }
 

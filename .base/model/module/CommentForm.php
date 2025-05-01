@@ -51,18 +51,18 @@ class CommentForm extends Form
 	public function NotifyCommander($commentId, $data, $notification = "Reply to", $subject = null, $message = null)
 	{
 		try {
-			$row = table("Comment")->DoSelectRow("Contact, Subject", "Id=:Id", [":Id" => $commentId]);
+			$row = table("Comment")->SelectRow("Contact, Subject", "Id=:Id", [":Id" => $commentId]);
 			Contact::SendHTMLEmail(
 				\_::$Info->SenderEmail,
 				$row["Contact"],
 				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),
 				$message ?? [
 					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \Req::$Path),
-					"Subject" => get($data, "Subject"),
-					"Name" => getValid($data, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
+					"Subject" => Convert::ToText(get($data, "Subject")),
+					"Name" => Convert::ToText(getValid($data, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
 					"Contact" => getValid($data, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
-					"Content" => get($data, "Content"),
-					"Attach" => get($data, "Attach")
+					"Content" => Convert::ToText(get($data, "Content")),
+					"Attach" => Convert::ToText(get($data, "Attach"))
 				]
 			);
 		} catch (\Exception $ex) {
@@ -139,21 +139,21 @@ class CommentForm extends Form
 	{
 		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: true, reaction: true))
 			try {
-				$received = \Req::Post();
+				$received = \Req::ReceivePost();
 				if (isValid($received, "Name") || isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
 					$rid = get($received, "Reply");
 					$att = get($received, "Attach");
 					if ((\_::$Back->User && \_::$Back->User->Email) || isValid($received, "Contact"))
-						$res = table("Comment")->DoInsert([
+						$res = table("Comment")->Insert([
 							"ReplyId" => $rid,
 							"Relation" => $this->Relation,
 							"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
-							"Name" => getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
+							"Name" => Convert::ToText(getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
 							"Contact" => getValid($received, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
-							"Subject" => get($received, "Subject"),
-							"Content" => get($received, "Content"),
-							"Attach" => isStatic($att) ? $att : Convert::ToJson($att),
+							"Subject" => Convert::ToText(get($received, "Subject")),
+							"Content" => Convert::ToText(get($received, "Content")),
+							"Attach" => Convert::ToText(isStatic($att) ? $att : Convert::ToJson($att)),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
 						]);
@@ -178,19 +178,19 @@ class CommentForm extends Form
 	{
 		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: true, reaction: true))
 			try {
-				$received = \Req::Put();
+				$received = \Req::ReceivePut();
 				if (isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
 					$cid = get($received, "Id");
 					$att = get($received, "Attach");
 					if (isValid($cid))
-						$res = table("Comment")->DoUpdate("`Id`=:Id AND (" . (\_::$Back->User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
+						$res = table("Comment")->Update("`Id`=:Id AND (" . (\_::$Back->User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
 							":Id" => $cid,
 							":UserId" => \_::$Back->User->Id,
 							":Contact" => \_::$Back->User->Email,
-							"Subject" => get($received, "Subject"),
-							"Content" => get($received, "Content"),
-							"Attach" => isStatic($att) ? $att : Convert::ToJson($att),
+							"Subject" => Convert::ToText(get($received, "Subject")),
+							"Content" => Convert::ToText(get($received, "Content")),
+							"Attach" => Convert::ToText(isStatic($att) ? $att : Convert::ToJson($att)),
 							"UpdateTime" => Convert::ToDateTimeString(),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
@@ -210,7 +210,7 @@ class CommentForm extends Form
 
 	public function Patch()
 	{
-		$received = \Req::Patch();
+		$received = \Req::ReceivePatch();
 		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: false, reaction: true))
 			if (isValid($received, "Reply")) {
 				$this->UnBlock();
@@ -226,7 +226,7 @@ class CommentForm extends Form
 				$res = null;
 				$cid = get($received, "Id");
 				if (isValid($cid))
-					$res = table("Comment")->DoUpdate("`Id`=:Id", [
+					$res = table("Comment")->Update("`Id`=:Id", [
 						":Id" => $cid,
 						"Status" => getValid($received, "Status", $this->DefaultStatus)
 					]);
@@ -243,12 +243,12 @@ class CommentForm extends Form
 	{
 		if (auth(\_::$Config->UserAccess))
 			try {
-				$received = \Req::Delete();
+				$received = \Req::ReceiveDelete();
 				$cid = get($received, "Id");
 				if (isValid($cid))
 					if (
 						isValid($cid) && \_::$Back->User->Id &&
-						table("Comment")->DoDelete("`Id`=:Id AND (" . (\_::$Back->User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$Back->User->Id, ":UE" => \_::$Back->User->Email])
+						table("Comment")->Delete("`Id`=:Id AND (" . (\_::$Back->User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$Back->User->Id, ":UE" => \_::$Back->User->Email])
 					) {
 						$this->Status = 200;
 						return $this->GetWarning("This comment removed successfuly!");

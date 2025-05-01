@@ -142,10 +142,10 @@ class Session
 	}
 
 	public function SetData($key,$val){
-		return $this->DataTable->DoReplace(null,[':Key'=>$this->ToCipherKey($key), ':Value'=>$this->ToCipherValue($val), ':Ip'=>getClientIp()]);
+		return $this->DataTable->Replace(null,[':Key'=>$this->ToCipherKey($key), ':Value'=>$this->ToCipherValue($val), ':Ip'=>getClientIp()]);
     }
 	public function GetData($key){
-		return $this->ToPlainValue($this->DataTable->DoSelectValue("Value" , "`Key`=:Key", [':Key'=>$this->ToCipherKey($key)]));
+		return $this->ToPlainValue($this->DataTable->SelectValue("Value" , "`Key`=:Key", [':Key'=>$this->ToCipherKey($key)]));
 	}
 	public function PopData($key){
 		$val = $this->GetData($key);
@@ -156,10 +156,10 @@ class Session
 		return $this->DataTable->Exists(null,"`Key`=:Key",[':Key'=>$this->ToCipherKey($key)]);
 	}
 	public function ForgetData($key){
-		return $this->DataTable->DoDelete("`Key`=:Key",[':Key'=>$this->ToCipherKey($key)]);
+		return $this->DataTable->Delete("`Key`=:Key",[':Key'=>$this->ToCipherKey($key)]);
 	}
 	public function FlushData(){
-		return $this->DataTable->DoDelete("`Key` LIKE '".$this->GetId().$this->Separator."%'");
+		return $this->DataTable->Delete("`Key` LIKE '".$this->GetId().$this->Separator."%'");
 	}
 
 	public function SetCookie($key,$val){

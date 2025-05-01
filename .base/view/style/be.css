@@ -11,6 +11,25 @@
   display: block;
   height: 100%;
 }
+.be.fit {
+  width: fit-content;
+  height: fit-content;
+}
+.be.stretch {
+}
+.be.bold {
+  font-weight: bold;
+}
+.be.thick {
+  font-weight: bolder;
+}
+.be.thin {
+  font-weight: lighter;
+}
+.be.normal {
+  text-decoration: none;
+  font-weight: normal;
+}
 
 :has(.be.top, .be.middle, .be.bottom) {
   display: flex;
@@ -33,6 +52,12 @@
 .be.center {
   text-align: center;
 }
+.be.align.start {
+  text-align: start;
+}
+.be.align.end {
+  text-align: end;
+}
 
 .be.ltr {
   direction: ltr;
@@ -41,6 +66,21 @@
   direction: rtl;
 }
 
+.be.sticky{
+  position: sticky;
+}
+.be.sticky:not(.bottom,.left,.right){
+  top: 1vh;
+}
+.be.sticky.bottom{
+  bottom: 1vh;
+}
+.be.sticky.left{
+  left: 1vh;
+}
+.be.sticky.right{
+  right: 1vh;
+}
 
 .be.table {
   display: table;
@@ -65,6 +105,15 @@
 }
 .be.show {
   display: inherit;
+}
+.be.visible {
+  display: visible;
+}
+.be.invisible {
+  visibility: hidden;
+}
+.be.transparent{
+  background-color: transparent;
 }
 
 .be.light{

@@ -2,19 +2,14 @@
 	<?php
 	module("PrePage");
 	$module = new MiMFa\Module\PrePage();
-	$module->Title = "About";
+	$module->Title = \_::$Info->FullName??"About Us";
 	swap($module, $data);
-	$module->Render();
 	?>
 	<div class="container content">
 		<div class="row">
 			<div class="col-md">
-				<h2 class="align-center">
-					<strong>
-						<?php echo __(\_::$Info->FullName); ?>
-					</strong>
-				</h2>
 				<?php
+				$module->Render();
 				module("Image");
 				$module = new MiMFa\Module\Image();
 				$module->Image = \_::$Info->FullLogoPath;

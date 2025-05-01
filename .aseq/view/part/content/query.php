@@ -6,7 +6,7 @@ $module->CheckAccess = fn($item)=>\_::$Back->User->Access(\_::$Config->AdminAcce
 $module->Item = $data;
 $module->CommentForm->SubjectLabel = null;
 $module->RootRoute = "/query/";
-set($module, $data);
+swap($module, $data);
 $module->Name = $name;// To do not change the name of module
 $module->Render();
 ?>

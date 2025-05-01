@@ -44,7 +44,7 @@ class Cryptograph
     {
         if ($decode) {
             $message = base64_decode($message, true);
-            if ($message === false) throw new \Exception('Decoding failure');
+            if ($message === false) throw new \SilentException('Decoding failure');
         }
 
         $nonceSize = openssl_cipher_iv_length($this->Method);

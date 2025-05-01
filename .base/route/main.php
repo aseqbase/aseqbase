@@ -1,4 +1,5 @@
 
 <?php
-view(\_::$Config->DefaultViewName, ["Name" =>\Req::$Direction]);
+$viewData = grab($data, "View");
+view(get($viewData, "ViewName")??\_::$Config->DefaultViewName, ["Name" =>get($viewData, "Name")??\Req::$Direction, ...($viewData??[])]);
 ?>

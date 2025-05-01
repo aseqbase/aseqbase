@@ -5,8 +5,8 @@ use MiMFa\Library\Local;
 
 \Req::Grab("submit", "post");
 $imgchange = false;
-$received = \Req::Post();
-if ($imgObj = \Req::File("Image")) {
+$received = \Req::ReceivePost();
+if ($imgObj = \Req::ReceiveFile("Image")) {
     if (isValid($imgObj, "size") && Local::IsFileObject($imgObj)) {
         $img = \_::$Back->User->GetValue("Image");
         \Res::Message("Trying to change the profile picture!");
@@ -52,7 +52,7 @@ try {
             if (isValid($img) != isValid(\_::$Back->User->TemporaryImage))
                 \Res::Reload();
             else
-                \_::$Front->Script("
+                \Res::Script("
 $(\"form .content img\").attr('src','" . \_::$Back->User->TemporaryImage . "');
 $('input[type=file]').val(null);
 ");
@@ -60,7 +60,7 @@ $('input[type=file]').val(null);
         } else
             \Res::Success("Profile updated successfully!");
     } else
-        \Res::Error(\Req::POST("Signature" )==\_::$Back->User->Signature?"You did not change anythings!":"There a problem occured!" . Html::$NewLine . "You can not choice a duplicate signature!");
+        \Res::Error(\Req::ReceivePOST("Signature" )==\_::$Back->User->Signature?"You did not change anythings!":"There a problem occured!" . Html::$NewLine . "You can not choice a duplicate signature!");
 } catch (\Exception $ex) {
     \Res::Error($ex);
 }

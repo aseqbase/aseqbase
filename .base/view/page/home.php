@@ -1,11 +1,7 @@
 <?php
 use \MiMFa\Library\Html;
 use \MiMFa\Library\User;
-\_::$Front->Style("
-	.page-home {
-		padding: 10px 10px 50px;
-	}
-");
+;
 
 module("RingSlide");
 $module = new \MiMFa\Module\RingSlide();
@@ -13,9 +9,14 @@ $module->Image = \_::$Info->LogoPath;
 $module->Items = \_::$Info->Services;
 swap($module, $data);
 \Res::Render(
+	Html::Style("
+		.page-home {
+			padding: 10px 10px 50px;
+		}
+	") .
 	Html::Page(
 		part("small-header", print: false) .
-		$module->Handle().
+		$module->Handle() .
 		(!\_::$Config->AllowSigning || auth(\_::$Config->UserAccess) ? "" :
 			Html::Center(
 				Html::SmallSlot(

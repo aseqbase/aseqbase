@@ -89,7 +89,7 @@ class SignRecoverForm extends Form{
 
 	public function Post(){
 		try {
-			$received = \Req::Post();
+			$received = \Req::ReceivePost();
 			if(isValid($received, "Password" ) && \Req::Receive(User::$RecoveryTokenKey)){
 				$res = \_::$Back->User->ReceiveRecoveryEmail();
 				if($res)

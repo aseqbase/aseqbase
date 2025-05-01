@@ -16,7 +16,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 2.00010;
+	public static float $Version = 2.00030;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -88,14 +88,14 @@ require_once(__DIR__ . "/global/AddressBase.php");
 
 \_::$Sequences = [
 	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
-		=> str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? ""),
-	...($GLOBALS["SEQUENCES"]??[]),
+	=> str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? ""),
+	...($GLOBALS["SEQUENCES"] ?? []),
 	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, __DIR__ . DIRECTORY_SEPARATOR ?? "")
-		=> str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
+	=> str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
 ];
 
 run("global/Base");
-run("global/EnumBase");
+run("global/Types");
 
 run("Address");
 
@@ -111,23 +111,12 @@ run("Address");
 	$GLOBALS["BASE_ROOT"]
 );
 
-// unset($GLOBALS["ASEQ"]);
-// unset($GLOBALS["BASE"]);
-// unset($GLOBALS["ASEQBASE"]);
-// unset($GLOBALS["DIR"]);
-// unset($GLOBALS["ROOT"]);
-// unset($GLOBALS["BASE_DIR"]);
-// unset($GLOBALS["BASE_ROOT"]);
-// unset($GLOBALS["NEST"]);
-// unset($GLOBALS["SEQUENCES"]);
-
 run("global/ReqBase");
 run("Req");
 
 run("global/ResBase");
 run("Res");
 
-library("Math");
 library("Local");
 library("Convert");
 library("Html");
@@ -158,57 +147,77 @@ register_shutdown_function('cleanupTemp', false);
 
 /**
  * To get Features of an object from an array
- * @param mixed $object
+ * @param mixed $object The source object
+ * @param array $hierarchy A hierarchy of desired keys
  */
-function get($object, $data)
+function get($object, ...$hierarchy)
 {
+	if (count($hierarchy) === 0)
+		return $object;
+	$data = array_shift($hierarchy);
 	if (!is_array($data)) {
 		if (is_array($object)) {
 			if (isset($object[$data]))
-				return $object[$data];
+				return get($object[$data], ...$hierarchy);
 			$data = strtolower($data);
 			foreach ($object as $k => $v)
 				if ($data === strtolower($k))
-					return $v;
+					return get($v, ...$hierarchy);
 		} else
-			return $object->{$data} ??
+			return get($object->{$data} ??
 				$object->{strtoproper($data)} ??
 				$object->{strtolower($data)} ??
-				$object->{strtoupper($data)} ?? null;
-	} elseif (is_numeric(array_key_first($data))) {
-		$res = [];
-		foreach ($data as $k)
-			if (($val = get($object, $k)) !== null)
-				$res[$k] = $val;
-		return $res;
+				$object->{strtoupper($data)} ?? null, ...$hierarchy);
 	} else {
-		foreach ($data as $k => $v)
-			if (($val = get($object, $k)) === null)
-				$res[$k] = $v;
-			else
-				$res[$k] = $val;
+		$res = [];
+		if (is_array($object)) {
+			foreach ($data as $k => $v)
+				if (is_numeric($k)) {
+					if (($val = get($object, $v, ...$hierarchy)) !== null)
+						$res[$k] = $val;
+				} else
+					$res[$k] = get($object, $k, $v, ...$hierarchy);
+		} else {
+			foreach ($data as $k => $v)
+				if (is_numeric($k)) {
+					if (($val = get($object, $v, ...$hierarchy)) !== null)
+						$res[$k] = $val;
+				} else
+					$res[$k] = get($object, $k, $v, ...$hierarchy);
+		}
 		return $res;
 	}
 }
 /**
  * To get Features of an object from an array
  * Then unset that key of the $data
- * @param mixed $object
+ * @param mixed $object The source object
+ * @param array $hierarchy A hierarchy of desired keys
  */
-function grab(&$object, $data)
+function grab(&$object, ...$hierarchy)
 {
+	if (count($hierarchy) === 0)
+		return $object;
+	$data = array_shift($hierarchy);
+	$rem = count($hierarchy) === 0;
 	$res = null;
 	if (!is_array($data)) {
 		if (is_array($object)) {
 			if (isset($object[$data])) {
 				$res = $object[$data];
-				unset($object[$data]);
+				if ($rem)
+					unset($object[$data]);
+				else
+					return grab($object[$data], ...$hierarchy);
 			} else {
 				$data = strtolower($data);
 				foreach ($object as $k => $v)
 					if ($data === strtolower($k)) {
 						$res = $v;
-						unset($object[$k]);
+						if ($rem)
+							unset($object[$k]);
+						else
+							return grab($object[$k], ...$hierarchy);
 						break;
 					}
 			}
@@ -219,29 +228,40 @@ function grab(&$object, $data)
 				$object->{$key = strtolower($data)} ??
 				$object->{$key = strtoupper($data)} ??
 				($key = null);
-			if ($key !== null)
-				unset($object->$key);
+			if ($key !== null) {
+				if ($rem)
+					unset($object->$key);
+				else
+					return grab($object->$key, ...$hierarchy);
+				if (!$object)
+					unset($object);
+			}
 		}
 	} else {
 		$res = [];
 		$val = null;
-		if (is_numeric(array_key_first($data))) {
-			foreach ($data as $k)
-				if (($val = grab($object, $k)) !== null)
-					$res[$k] = $val;
-		} else
+		if (is_array($object)) {
 			foreach ($data as $k => $v)
-				if (($val = grab($object, $k)) === null)
-					$res[$k] = $v;
-				else
-					$res[$k] = $val;
+				if (is_numeric($k)) {
+					if (($val = grab($object, $v, ...$hierarchy)) !== null)
+						$res[$k] = $val;
+				} else
+					$res[$k] = grab($object, $k, $v, ...$hierarchy);
+		} else {
+			foreach ($data as $k => $v)
+				if (is_numeric($k)) {
+					if (($val = grab($object, $v, ...$hierarchy)) !== null)
+						$res[$k] = $val;
+				} else
+					$res[$k] = grab($object, $k, $v, ...$hierarchy);
+		}
 	}
 	return $res;
 }
 
 /**
  * To set Features of an object from an array or other object
- * @param mixed $object
+ * @param mixed $object The destination object
  */
 function set(&$object, $data)
 {
@@ -251,14 +271,14 @@ function set(&$object, $data)
 		} catch (Exception $ex) {
 		} else
 		foreach ($data as $k => $v)
-			if ((getValid($object, $k, null, $key)) !== null)
+			if (getValid($object, $k, null, $key) !== null || $key != null)
 				set($object->$key, $v);
 	return $object;
 }
 /**
  * To set Features of an object from an array or other object
  * Then unset that key of the $data
- * @param mixed $object
+ * @param mixed $object The destination object
  */
 function swap(&$object, &$data)
 {
@@ -269,11 +289,22 @@ function swap(&$object, &$data)
 		} catch (Exception $ex) {
 		} else
 		foreach ($data as $k => $v)
-			if ((getValid($object, $k, null, $key)) !== null) {
+			if (getValid($object, $k, null, $key) !== null || $key != null) {
 				set($object->$key, $v);
 				unset($data[$k]);
 			}
 	return $object;
+}
+function async($action, $callback = null, ...$args)
+{
+	$pid = 1;
+	if (function_exists("pcntl_fork"))
+		$pid = pcntl_fork(); // Create a child process
+	$result = $action(...$args);
+	if ($callback)
+		$callback($result);
+	if (!$pid)
+		exit(0); // End the child process
 }
 
 /**
@@ -321,8 +352,10 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 	if ($assign) {
 		if (is_string($assign))
 			\Res::Go($assign);
+		elseif (startsWith(\Req::$Request, \MiMFa\Library\User::$HandlerPath))
+			return true;
 		else
-			\Res::Go(\MiMFa\Library\User::$InHandlerPath);
+			\Res::Load(\MiMFa\Library\User::$InHandlerPath);
 	}
 	if ($exit !== false)
 		exit($exit);
@@ -335,7 +368,7 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
  */
 function auth($minaccess = null): mixed
 {
-	if (is_null(\_::$Info) || is_null(\_::$Back->User))
+	if (!\_::$Back->User)
 		return \MiMFa\Library\User::CheckAccess(null, $minaccess);
 	else
 		return \_::$Back->User->Access($minaccess);
@@ -377,7 +410,6 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
 		return ($default)($path, $data, $print);
 	return $default;
 }
-
 function addressing(string|null $file = null, $extension = null, int $origin = 0, int $depth = 99)
 {
 	$file = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $file ?? "");
@@ -397,7 +429,6 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 			return null;
 	return null;
 }
-
 function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = ".php")
 {
 	try {
@@ -411,6 +442,15 @@ function using(string|null $directory, string|null $name = null, mixed $data = [
 	} finally {
 		renderAppends($directory, $name);
 	}
+}
+/**
+ * To grab a hierarchy of keys from the global $data object
+ * @param array $hierarchy A hierarchy of desired keys
+ */
+function data(...$hierarchy)
+{
+	global $data;
+	return grab($data, ...$hierarchy);
 }
 
 /**
@@ -496,7 +536,7 @@ function run(string|null $name, mixed $data = [], bool $print = true, int $origi
 }
 /**
  * To interprete, the specified ModelName
- * @param non-empty-string $Name
+ * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
  * @return mixed
@@ -507,47 +547,47 @@ function model(string $name, mixed $data = [], bool $print = true, int $origin =
 }
 /**
  * To interprete, the specified LibraryName
- * @param non-empty-string $Name
+ * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function library(string $Name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function library(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->LibraryDirectory, $Name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified ComponentName
- * @param non-empty-string $Name
+ * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function component(string $Name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function component(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ComponentDirectory, $Name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified TemplateName
- * @param non-empty-string $Name
+ * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function module(string $Name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function module(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ModuleDirectory, $Name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified TemplateName
- * @param non-empty-string $Name
+ * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function template(string $Name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function template(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->TemplateDirectory, $Name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified viewname
@@ -556,7 +596,7 @@ function template(string $Name, mixed $data = [], bool $print = true, int $origi
  * @param bool $print
  * @return mixed
  */
-function view(string|null $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function view(string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ViewDirectory, $name ?? \_::$Config->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -611,7 +651,7 @@ function logic(string $name, mixed $data = [], bool $print = true, int $origin =
  * @param bool $print
  * @return mixed
  */
-function route(string|null $name, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function route(string|null $name = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data ?? \_::$Back->Router, $print, $origin, $depth, $alternative, $default);
 }
@@ -655,7 +695,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 				process: function ($k, $v, $i) {
 					return \MiMFa\Library\Html::Link($v, \_::$Address->ContentRoute . strtolower($k));
 				},
-				keyWords: table("Content")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
+				keyWords: table("Content")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
@@ -665,7 +705,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 				process: function ($k, $v, $i) {
 					return \MiMFa\Library\Html::Link($v, \_::$Address->CategoryRoute . strtolower($k));
 				},
-				keyWords: table("Category")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
+				keyWords: table("Category")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
@@ -675,7 +715,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 				process: function ($k, $v, $i) {
 					return \MiMFa\Library\Html::Link($v, \_::$Address->TagRoute . strtolower($k));
 				},
-				keyWords: table("Tag")->DoSelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
+				keyWords: table("Tag")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
@@ -685,7 +725,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 				process: function ($k, $v, $i) {
 					return \MiMFa\Library\Html::Link($v, \_::$Address->UserRoute . strtolower($k));
 				},
-				keyWords: table("User")->DoSelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
+				keyWords: table("User")->SelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
 				both: false,
 				caseSensitive: true
 			);
@@ -693,7 +733,26 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 	return $value;
 }
 
-
+/**
+ * Find somthing by a callable function on a countable element
+ * @param mixed $array
+ * @param callable $action The find $action($key, $value, $index)
+ * @return mixed
+ */
+function find($array, callable $action, &$key = null)
+{
+	if (!is_null($array)) {
+		$i = 0;
+		if (!is_iterable($array)) {
+			if ($action($i, $array, $i) !== null)
+				return $array;
+		} else
+			foreach ($array as $key => $value)
+				if ($action($key, $value, $i++) !== null)
+					return $value;
+	}
+	return null;
+}
 /**
  * Do a loop action by a callable function on a countable element
  * @param mixed $array
@@ -1201,6 +1260,10 @@ function getClientIp($version = null): string|null
 	}
 	return null;
 }
+function getClientCode(): string|null
+{
+	return md5(getClientIp() ?? $_SERVER['HTTP_USER_AGENT']);
+}
 
 /**
  * @deprecated
@@ -1260,7 +1323,7 @@ function getValid($obj, string|null $item = null, $defultValue = null, &$key = n
 		return isValid($obj) ? $obj : $defultValue;
 	elseif (is_array($obj)) {
 		if (isset($obj[$item]))
-			return isValid($obj[$item]) ? $obj[$item] : $defultValue;
+			return isValid($obj[$key = $item]) ? $obj[$item] : $defultValue;
 		$item = strtolower($item);
 		foreach ($obj as $k => $v)
 			if ($item === strtolower($k)) {
@@ -1284,7 +1347,7 @@ function grabValid(&$obj, string|null $item = null, $defultValue = null, &$key =
 		return isValid($obj) ? $obj : $defultValue;
 	elseif (is_array($obj)) {
 		if (isset($obj[$item])) {
-			$res = $obj[$item] ?? $defultValue;
+			$res = $obj[$key = $item] ?? $defultValue;
 			unset($obj[$item]);
 			return isValid($res) ? $res : $defultValue;
 		}

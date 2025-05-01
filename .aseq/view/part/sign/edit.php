@@ -32,7 +32,7 @@ if (isValid($user)) {
     });
     $form->AddChild(new \MiMFa\Module\Field("email", "Email", $user["Email"], (User::$InitialStatus < User::$ActiveStatus) ? "Your account will needs to activation, if change the field!" : "Each email account can have one profile!"));
     $form->AddChild(new \MiMFa\Module\Field("text", "Signature" , $user["Signature" ], "A unique name exclusive for this profile"));
-    $form->AddChild(new \MiMFa\Module\Field("dropdown", "GroupId" , $user["GroupId"], null, table("UserGroup")->DoSelectPairs("`Id`", "`Title`", "`Id`=".$user['GroupId']." OR (`Id`>=".\_::$Config->MinimumGroupId . " AND `Id`<=".\_::$Config->MaximumGroupId.")"), title: "Group"));
+    $form->AddChild(new \MiMFa\Module\Field("dropdown", "GroupId" , $user["GroupId"], null, table("UserGroup")->SelectPairs("`Id`", "`Title`", "`Id`=".$user['GroupId']." OR (`Id`>=".\_::$Config->MinimumGroupId . " AND `Id`<=".\_::$Config->MaximumGroupId.")"), title: "Group"));
     $form->AddChild(new \MiMFa\Module\Field("text", "Name" , $user["Name" ], "Your full name, you will known by this around the site"));
     $form->AddChild(new \MiMFa\Module\Field("textarea", "Bio" , $user["Bio" ], "Tell a public intorduction about yourself"));
     $form->AddChild(new \MiMFa\Module\Field("text", "First Name", $user["FirstName"]));

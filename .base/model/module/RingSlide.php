@@ -156,31 +156,32 @@ class RingSlide extends Module{
 	public function Get(){
 		$count = count($this->Items);
 		if($count > 0)
-			return Convert::ToString(function() use($count){
+			return Convert::ToString(function(){
 				yield parent::Get();
 				$btns = [];
 				$tags = [];
-				for($i = 0; $i < $count; $i++)
-					if(auth(getValid($this->Items[$i],"Access" ,\_::$Config->VisitAccess))) {
-						$desc = get($this->Items[$i], 'Description' );
-						$more = getBetween($this->Items[$i], "Button","More");
-						$pa = getBetween($this->Items[$i], 'Path' ,'Url' ,'Link');
+				loop($this->Items, function($k,$v,$i) use(&$btns, &$tags){
+					if(auth(getValid($v,"Access" ,\_::$Config->VisitAccess))) {
+						$desc = get($v, 'Description' );
+						$more = getBetween($v, "Button","More");
+						$pa = getBetween($v, 'Path' ,'Url' ,'Link');
 						$this->HasTab = $desc||$more;
 						$btns[] = Html::Link(
 							Html::Division(
-								Html::Media("", getBetween($this->Items[$i],'Image' , "Icon")),
+								Html::Media("", getBetween($v,'Image' , "Icon")),
 								["class"=>"button"]
-							).Html::Tooltip(getBetween($this->Items[$i],'Title' , "Name")),
+							).Html::Tooltip(getBetween($v,'Title' , "Name")),
 							$this->HasTab?"#tab$i":$pa,
 							$this->HasTab?["data-target"=>".tab", "data-toggle"=>'tab']:[]
 						);
 						
 						if($this->HasTab) $tags[] = Html::Division(
-							Html::ExternalHeading(get($this->Items[$i],'Name' ), $pa, ["class"=>"title" ]).
+							Html::ExternalHeading(get($v,'Name' ), $pa, ["class"=>"title" ]).
 								Html::Division($desc.$more, ["class"=>"description" ]), 
 							["class"=>"tab fade".($i===0?' active show':''), "Id" =>"tab$i"]
 						);
 					}
+				});
 				yield Html::Division(
 					Html::Division(
 						Html::Division($btns,["class"=>"center"]),

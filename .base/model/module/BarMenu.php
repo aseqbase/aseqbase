@@ -131,7 +131,7 @@ class BarMenu extends Module{
 
 	public function Get(){
 		return Convert::ToString(function(){
-            $rtl = \_::$Back->Translate->Direction == "RTL";
+            $rtl = \_::$Back->Translate->Direction == "rtl";
             yield parent::Get();
             $count = 0;
             foreach ($this->Items as $item)

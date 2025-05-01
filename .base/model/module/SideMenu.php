@@ -10,7 +10,7 @@ class SideMenu extends Module
 	public $Image = null;
 	public $Items = null;
 	public $Shortcuts = null;
-	public $Direction = "LTR";
+	public $Direction = "ltr";
 	public SearchForm|null $SearchForm = null;
 	public UserMenu|null $UserMenu = null;
 	public TemplateButton|null $TemplateButton = null;
@@ -42,7 +42,7 @@ class SideMenu extends Module
 	public function GetStyle()
 	{
 		$this->Direction = strtoupper($this->Direction);
-		$sdir = $this->Direction == "RTL" ? "left" : "right";
+		$sdir = $this->Direction == "rtl" ? "left" : "right";
 		$activeselector = $this->AllowHoverable ? ".{$this->Name}:is(.active, :hover)" : ".{$this->Name}.active";
 		$notactiveselector = ".{$this->Name}:not(.active)";
 		return parent::GetStyle() . Html::Style("

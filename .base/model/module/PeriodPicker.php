@@ -21,9 +21,9 @@ class PeriodPicker extends Module
       {
             parent::__construct();
             if ($setDefault) {
-                  if (!\Req::Get($this->FromTimeRequest) && isValid($fromTime))
+                  if (!\Req::ReceiveGet($this->FromTimeRequest) && isValid($fromTime))
                         self::$FromTime = $this->FromTimeValue = Convert::ToDateTime($fromTime)->format('Y-m-d H:i:s');
-                  if (!\Req::Get($this->ToTimeRequest) && isValid($toTime))
+                  if (!\Req::ReceiveGet($this->ToTimeRequest) && isValid($toTime))
                         self::$ToTime = $this->ToTimeValue = Convert::ToDateTime($toTime)->format('Y-m-d H:i:s');
             }
             $fromId = $this->Name . "_" . $this->FromTimeRequest;

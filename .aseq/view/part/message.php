@@ -1,32 +1,33 @@
 <?php
+use MiMFa\Library\Convert;
 $data = $data ?? [];
 module("Form");
 (new MiMFa\Library\Router())
 	->Post(function () use ($data) {
 		$form = new MiMFa\Module\Form();
-		$received = \Req::Post();
+		$received = \Req::ReceivePost();
 		if (!get($received, "Message"))
 			\Res::Render($form->GetError("Your message could not be empty!"));
 		else {
 			$form->MailSubject = \Req::$Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$Back->User, "Name")) . "'";
 			$form->ReceiverEmail = \_::$Info->ReceiverEmail;
 			$form->SenderEmail = get($received, "Email") ?? get(\_::$Back->User, "Email");
-			table("Comment")->DoInsert([
+			table("Comment")->Insert([
 				"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
 				"Relation" => \Req::$Url,
-				"Name" => getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null),
+				"Name" => Convert::ToText(getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
 				"Contact" => getValid($received, "Email", \_::$Back->User ? \_::$Back->User->Email : null),
-				"Subject" => get($received, "Subject"),
-				"Content" => get($received, "Message"),
+				"Subject" => Convert::ToText(get($received, "Subject")),
+				"Content" => Convert::ToText(get($received, "Message")),
 				"Access" => \_::$Config->AdminAccess,
 				"Status" => -1
 			]);
 			swap($form, $data);
-			$form->Handle();
+			$form->End();
 		}
 	})
 	->Get(function () use ($data) {
-		$form = new MiMFa\Module\Form();
+		$form = new MiMFa\Module\Form(method:"POST");
 		$form->Title = get($data, "Title") ?? "Leave a message to Us!";
 		$form->Image = get($data, "Image") ?? "envelope";
 		$form->Description = get($data, "Description");
@@ -36,9 +37,9 @@ module("Form");
 		$form->BackLabel = get($data, "BackLabel") ?? null;
 		$form->BackPath = get($data, "BackPath") ?? null;
 		module("Field");
-		$name = get(\_::$Back->User, "Name") ?? \Req::Get("Name");
-		$email = get(\_::$Back->User, "Email") ?? \Req::Get("Email");
-		$msg = \Req::Get("Message");
+		$name = get(\_::$Back->User, "Name") ?? \Req::ReceiveGet("Name");
+		$email = get(\_::$Back->User, "Email") ?? \Req::ReceiveGet("Email");
+		$msg = \Req::ReceiveGet("Message");
 		$form->Children = [new MiMFa\Module\Field("text", "Subject", $msg, required: true)];
 		if (!\_::$Back->User->Email) {
 			$form->Children[] = new MiMFa\Module\Field("text", "Name", $name, required: true, lock: !isEmpty($name));

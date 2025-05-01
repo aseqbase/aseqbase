@@ -1,6 +1,6 @@
 <?php
-module("Content");
-$module = new \MiMFa\Module\Content();
+module("Page");
+$module = new \MiMFa\Module\Page();
 $Name = grab($data, "Name");
 $module->Content =
 	isValid($Name) ?

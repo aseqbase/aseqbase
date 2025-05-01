@@ -335,13 +335,23 @@ let scrollTo = function (selector = "body :nth-child(1)", time = 1000) {
 	}, time);
 };
 
+let relocate = function (url = null) {
+	window.history.pushState(null, null, url??location.href);
+};
+let locate = function (url = null) {
+	window.history.replaceState(null, null, url??location.href);
+};
 let reload = function () {
-	window.location.assign(location.href);
+	window.location.reload();
 };
 let load = function (url = null) {
-	window.location.assign(url ?? location.href);
+	locate(url ?? location.href);
+	reload();
 };
-let open = function (url = null, target = '_blank') {
+let go = function (url = null, target = "_self") {
+	window.open(url ?? location.href, target);
+};
+let open = function (url = null, target = "_blank") {
 	window.open(url ?? location.href, target);
 };
 let share = function (url = null, path = null) {
@@ -392,7 +402,7 @@ let sendRequest = function (
 	method = 'POST',
 	url = null,
 	data = null,
-	selector = 'body :nth-child(1)',
+	selector = 'body',
 	success = null,
 	error = null,
 	ready = null,
@@ -425,6 +435,7 @@ let sendRequest = function (
 		else {
 			try { document.querySelector(selector + ' .result').remove(); } catch { }
 			if (!isEmpty(result)) {
+				result += "";
 				result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'Form submitted successfully!';
 				if (!isEmpty(result)) {
 					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Html.success(result);
@@ -440,6 +451,7 @@ let sendRequest = function (
 		if (!isEmpty(result)) {
 			result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'There was a problem!';
 			if (!isEmpty(result)) {
+				result += "";
 				if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Html.error(result);
 				if (isForm) $(selector).append(result);
 				else $(selector).prepend(result);
@@ -455,6 +467,7 @@ let sendRequest = function (
 		if (!isEmpty(result)) {
 			result = (typeof (result) === 'object') ? result.statusText : result;
 			if (result) {
+				result += "";
 				try { document.querySelector(selector + ' .result').remove(); } catch { }
 				{
 					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Html.message(result);
@@ -559,12 +572,22 @@ let sendExternal = function (url = null, data = null, selector = 'body :nth-chil
 };
 
 let submitForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
-	form = document.querySelector(selector);
+	form = null;
+	if(isString(selector)) form = document.querySelector(selector);
+	else {
+		form = selector;
+		selector = 'form';
+	}
 	if (!form) return null;
 	return sendRequest(form.getAttribute('method'), form.getAttribute('action'), new FormData(form), selector, success, error, ready, progress, timeout);
 };
 let handleForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
-	form = document.querySelector(selector);
+	form = null;
+	if(isString(selector)) form = document.querySelector(selector);
+	else {
+		form = selector;
+		selector = 'form';
+	}
 	if (form) form.onsubmit = function (e) {
 		e.preventDefault();
 		return sendRequest(form.getAttribute('method'), form.getAttribute('action'), new FormData(form), selector, success, error, ready, progress, timeout);

@@ -180,7 +180,7 @@ class Buttons extends Collection
 				yield Html::SubHeading(__($p_name, true, false));
 				yield Html::Paragraph(__($p_description, true, false));
 				if (isValid($p_path))
-					yield Html::Button(__($this->MoreButtonLabel), $clickact, ["class"=> "btn btn-outline btn-block"]);
+					yield Html::Button(__($this->MoreButtonLabel), $clickact, ["class"=> "btn outline btn block"]);
 				yield Html::Division(__($p_content ?? $p_description, true, false), ["class"=> "hide"]);
 				yield "</div>
 			</div>";

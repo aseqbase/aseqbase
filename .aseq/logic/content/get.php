@@ -1,12 +1,18 @@
 <?php
-$Name = grab($data, "Name")??\Req::Receive("Name" );
+$Name = grab($data, "Name");
 $Filter = grab($data, "Filter");
-if(isValid($Name)) return \_::$Back->Query->FindContent(
-    name: $Name,
-    direction: grab($Filter, "Cat")??grab($Filter, "Category")??\Req::Receive("Cat"),
-    type: grab($Filter, "Type" ) ?? \Req::Receive("Type" ),
-    tag: grab($Filter, "Tag") ?? \Req::Receive("Tag"),
+$result = null;
+$cn = \_::$Back->Query->ColumnNames;
+\_::$Back->Query->ColumnNames = grab($Filter, "Columns" ) ?? "*";
+if(isValid($Name)) $result = \_::$Back->Query->FindContent(
+    name: $Name??grab($Filter, "Query"),
+    direction: grab($Filter, "Category"),
+    type: grab($Filter, "Type" ),
+    tag: grab($Filter, "Tag"),
+    condition: grab($data, "Condition"),
+    params: grab($data, "Params")??[],
     table: grab($data, "Table")
 );
-return null;
+\_::$Back->Query->ColumnNames = $cn;
+return $result;
 ?>

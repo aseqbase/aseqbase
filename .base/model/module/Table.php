@@ -183,12 +183,12 @@ class Table extends Module
     public $SelectCondition = null;
     /**
      * To create Controls and Prepend them to the row management cell
-     * @var null|callable fn($id, $row)=>[control1, control2...]
+     * @var mixed fn($id, $row)=>[control1, control2...]
      */
     public $PrependControlsCreator = null;
     /**
      * To create Controls and Append them to the row management cell
-     * @var null|callable fn($id, $row)=>[control1, control2...]
+     * @var mixed fn($id, $row)=>[control1, control2...]
      */
     public $AppendControlsCreator = null;
 
@@ -235,6 +235,7 @@ class Table extends Module
      */
     public function Set($itemsOrDataTable = null)
     {
+        if(is_string($itemsOrDataTable)) $itemsOrDataTable = table($itemsOrDataTable);
         if ($itemsOrDataTable instanceof DataTable) {
             $this->DataTable = $itemsOrDataTable;
             $this->AllowScrollX =
@@ -294,8 +295,8 @@ class Table extends Module
 		.{$this->Name} .field {
 			width: 100%;
 		}
-		.{$this->Name} .input {
-			width: 100%;
+		.{$this->Name} :not(.field) .input {
+            max-width: 100px;
 		}
         table.dataTable.{$this->Name} tbody :is(td, tr) {
             text-align: -webkit-auto;
@@ -380,14 +381,14 @@ class Table extends Module
         if (isValid($this->DataTable) && isValid($this->KeyColumn)) {
             if ($this->AllowServerSide) {
                 $this->NavigationBar = isValid($this->SelectQuery) ? new Navigation($this->SelectQuery, queryParameters: $this->SelectParameters, defaultItems: $this->Items) :
-                    new Navigation($this->DataTable->MakeSelectQuery(
+                    new Navigation($this->DataTable->SelectQuery(
                         isEmpty($this->IncludeColumns) ? "*" : (in_array($this->KeyColumn, $this->IncludeColumns) ? $this->IncludeColumns : [$this->KeyColumn, ...$this->IncludeColumns]),
                         [$this->SelectCondition, isEmpty($this->IncludeRows) ? null : ("{$this->KeyColumn} IN('" . join("', '", $this->IncludeRows) . "')")]
                     ), defaultItems: $this->Items);
                 $this->Items = $this->NavigationBar->GetItems();
             } else {
                 $this->NavigationBar = new Navigation(isValid($this->SelectQuery) ? $this->DataTable->DataBase->TrySelect($this->SelectQuery, $this->SelectParameters, $this->Items) :
-                    $this->DataTable->DoSelect(
+                    $this->DataTable->Select(
                         isEmpty($this->IncludeColumns) ? "*" : (in_array($this->KeyColumn, $this->IncludeColumns) ? $this->IncludeColumns : [$this->KeyColumn, ...$this->IncludeColumns]),
                         [$this->SelectCondition, isEmpty($this->IncludeRows) ? null : ("{$this->KeyColumn} IN('" . join("', '", $this->IncludeRows) . "')")],
                         [],
@@ -735,7 +736,7 @@ class Table extends Module
             return null;
         if (!auth($this->ViewAccess))
             return Html::Error("You have not access to see datails!");
-        $record = $this->DataTable->DoSelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
+        $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
             return Html::Error("You can not see this item!");
         $form = $this->GetForm();
@@ -835,7 +836,7 @@ class Table extends Module
             return null;
         if (!auth($this->AddAccess))
             return Html::Error("You have not access to add!");
-        $record = $this->DataTable->DoSelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
+        $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
             return Html::Error("You can not add this item!");
         $form = $this->GetForm();
@@ -869,7 +870,7 @@ class Table extends Module
             return null;
         if (!auth($this->ModifyAccess))
             return Html::Error("You have not access to modify!");
-        $record = $this->DataTable->DoSelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
+        $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
             return Html::Error("You can not modify this item!");
         $form = $this->GetForm();
@@ -909,7 +910,7 @@ class Table extends Module
         foreach ($values as $k => $v)
             if (isEmpty($v))
                 unset($values[$k]);
-        if ($this->DataTable->DoInsert($values))
+        if ($this->DataTable->Insert($values))
             return \Res::Flip(Html::Success("The information added successfully!"));
         return Html::Error("You can not add this item!");
     }
@@ -921,7 +922,7 @@ class Table extends Module
             $values = $this->NormalizeFormValues($values);
             if (!is_array($values))
                 return $values;
-            if ($this->DataTable->DoUpdate([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $values))
+            if ($this->DataTable->Update([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $values))
                 return \Res::Flip(Html::Success("The information updated successfully!"));
             return Html::Error("You can not update this item!");
         }
@@ -932,7 +933,7 @@ class Table extends Module
             return null;
         if (!auth($this->RemoveAccess))
             return Html::Error("You have not access to delete!");
-        if ($this->DataTable->DoDelete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
+        if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
             return \Res::Flip(Html::Success("The items removed successfully!"));
         return Html::Error("You can not remove this item!");
     }
@@ -1003,12 +1004,12 @@ class Table extends Module
     public function NormalizeFormValues($values)
     {
         try {
-            $received = \Req::File();
+            $received = \Req::ReceiveFile();
             if ($received) {
                 $clearPrev = isValid($values, $this->KeyColumn) && $this->DataTable;
                 foreach ($received as $k => $v)
                     if (Local::IsFileObject($v)) {
-                        $values[$k] = $clearPrev ? $this->DataTable->DoSelectValue("`$k`", "`$this->KeyColumn`=:$this->KeyColumn", [":$this->KeyColumn" => $values[$this->KeyColumn]]) : null;
+                        $values[$k] = $clearPrev ? $this->DataTable->SelectValue("`$k`", "`$this->KeyColumn`=:$this->KeyColumn", [":$this->KeyColumn" => $values[$this->KeyColumn]]) : null;
                         if (isValid($values[$k]))
                             Local::DeleteFile($values[$k]);
                         unset($values[$k]);

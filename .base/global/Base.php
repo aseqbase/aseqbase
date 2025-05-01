@@ -65,15 +65,15 @@ class Base extends \ArrayObject
 		if ($setRevises)
 			\MiMFa\Library\Revise::Load($this);
 		$this->Router = (new Router())
-			->Get(fn (&$router) => $this->Get())
-			->Post(fn (&$router) => $this->Post())
-			->Put(fn (&$router) => $this->Put())
-			->File(fn (&$router) => $this->File())
-			->Patch(fn (&$router) => $this->Patch())
-			->Delete(fn (&$router) => $this->Delete())
-			->Stream(fn (&$router) => $this->Stream())
-			->Internal(fn (&$router) => $this->Internal())
-			->External(fn (&$router) => $this->External());
+			->Get(fn(&$router) => $this->Get())
+			->Post(fn(&$router) => $this->Post())
+			->Put(fn(&$router) => $this->Put())
+			->File(fn(&$router) => $this->File())
+			->Patch(fn(&$router) => $this->Patch())
+			->Delete(fn(&$router) => $this->Delete())
+			->Stream(fn(&$router) => $this->Stream())
+			->Internal(fn(&$router) => $this->Internal())
+			->External(fn(&$router) => $this->External());
 	}
 
 	public function Set_Defaults()
@@ -134,39 +134,39 @@ class Base extends \ArrayObject
 
 	public function Get()
 	{
-		return $this->Handler(\Req::Get());
+		return $this->Handler(\Req::ReceiveGet());
 	}
 	public function Post()
 	{
-		return $this->Handler(\Req::Post());
+		return $this->Handler(\Req::ReceivePost());
 	}
 	public function Put()
 	{
-		return $this->Handler(\Req::Put());
+		return $this->Handler(\Req::ReceivePut());
 	}
 	public function File()
 	{
-		return $this->Handler(\Req::File());
+		return $this->Handler(\Req::ReceiveFile());
 	}
 	public function Patch()
 	{
-		return $this->Handler(\Req::Patch());
+		return $this->Handler(\Req::ReceivePatch());
 	}
 	public function Delete()
 	{
-		return $this->Handler(\Req::Delete());
+		return $this->Handler(\Req::ReceiveDelete());
 	}
 	public function Stream()
 	{
-		return $this->Handler(\Req::Stream());
+		return $this->Handler(\Req::ReceiveStream());
 	}
 	public function Internal()
 	{
-		return $this->Handler(\Req::Internal());
+		return $this->Handler(\Req::ReceiveInternal());
 	}
 	public function External()
 	{
-		return $this->Handler(\Req::External());
+		return $this->Handler(\Req::ReceiveExternal());
 	}
 
 	public function Handler($received = null)
@@ -197,6 +197,19 @@ class Base extends \ArrayObject
 		return $this->Handle();
 	}
 
+	/**
+	 * Echos whole the contents then exit
+	 */
+	public function End()
+	{
+		if ($this->Visual) {
+			\Res::End($this->Handle());
+		} else {
+			$this->Handle();
+			\Res::End();
+		}
+	}
+
 	public function ToString()
 	{
 		ob_start();
@@ -215,28 +228,35 @@ class Base extends \ArrayObject
 			$arr[$key] = $value;
 		return $arr;
 	}
-    public function __get($name)
-    {
-        if(is_int($name)) return $this->offsetGet($name);
-        if(is_string($name)){
-            $n = $this->__getName($name);
-            if(method_exists($this, $n)) return $this->$n();
-            if(property_exists($this, $n)) return $this->$n;
-        }
-        return get($this, $name);
-    }
-    public function __set($name, $value)
-    {
-        if(is_int($name)) return $this->offsetSet($name, $value);
-        if(is_string($name)){
-            $n = $this->__getName($name);
-            if(method_exists($this, $n)) return $this->$n($value);
-            if(property_exists($this, $n)) return $this->$n = $value;
-        }
-        return set($this, [$name=> $value]);
-    }
-    private function __getName($name) {
-        return preg_replace("/\W+/", "", strToProper($name));
-    }
+	public function __get($name)
+	{
+		if (is_int($name))
+			return $this->offsetGet($name);
+		if (is_string($name)) {
+			$n = $this->__getName($name);
+			if (method_exists($this, $n))
+				return $this->$n();
+			if (property_exists($this, $n))
+				return $this->$n;
+		}
+		return get($this, $name);
+	}
+	public function __set($name, $value)
+	{
+		if (is_int($name))
+			return $this->offsetSet($name, $value);
+		if (is_string($name)) {
+			$n = $this->__getName($name);
+			if (method_exists($this, $n))
+				return $this->$n($value);
+			if (property_exists($this, $n))
+				return $this->$n = $value;
+		}
+		return set($this, [$name => $value]);
+	}
+	private function __getName($name)
+	{
+		return preg_replace("/\W+/", "", strToProper($name));
+	}
 }
 ?>

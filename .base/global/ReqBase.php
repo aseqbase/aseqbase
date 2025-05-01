@@ -82,10 +82,10 @@ abstract class ReqBase
 	 */
 	public static function Receive($key = null, array|string|null $source = null, $default = null)
 	{
-		if (is_null($source))
-			if (isEmpty($_REQUEST))
-				parse_str(file_get_contents('php://input'), $source);
-			else $source = $_REQUEST;
+		if (is_null($source)) $source = getMethodName();
+			// if (isEmpty($_REQUEST))
+			// 	parse_str(file_get_contents('php://input'), $source);
+			// else $source = $_REQUEST;
 		if (is_string($source))
 			switch (trim(strtolower($source))) {
 				case "bin":
@@ -184,7 +184,7 @@ abstract class ReqBase
 	 * @param mixed $key The getted data key
 	 * @return mixed Received data
 	 */
-	public static function Get($key = null, $default = null)
+	public static function ReceiveGet($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "get", $default);
@@ -195,7 +195,7 @@ abstract class ReqBase
 	 * @param mixed $key The posted data key
 	 * @return mixed Received data
 	 */
-	public static function Post($key = null, $default = null)
+	public static function ReceivePost($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "post", $default);
@@ -206,7 +206,7 @@ abstract class ReqBase
 	 * @param mixed $key The putted data key
 	 * @return mixed Received data
 	 */
-	public static function Put($key = null, $default = null)
+	public static function ReceivePut($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "put", $default);
@@ -217,7 +217,7 @@ abstract class ReqBase
 	 * @param mixed $key The patched data key
 	 * @return mixed Received data
 	 */
-	public static function Patch($key = null, $default = null)
+	public static function ReceivePatch($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "patch", $default);
@@ -228,7 +228,7 @@ abstract class ReqBase
 	 * @param mixed $key The file data key
 	 * @return mixed Received data
 	 */
-	public static function File($key = null, $default = null)
+	public static function ReceiveFile($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, $_FILES, $default);
@@ -239,7 +239,7 @@ abstract class ReqBase
 	 * @param mixed $key The deleted data key
 	 * @return mixed Received data
 	 */
-	public static function Delete($key = null, $default = null)
+	public static function ReceiveDelete($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "delete", $default);
@@ -250,7 +250,7 @@ abstract class ReqBase
 	 * @param mixed $key The internal data key
 	 * @return mixed Received data
 	 */
-	public static function Stream($key = null, $default = null)
+	public static function ReceiveStream($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "stream", $default);
@@ -261,7 +261,7 @@ abstract class ReqBase
 	 * @param mixed $key The internal data key
 	 * @return mixed Received data
 	 */
-	public static function Internal($key = null, $default = null)
+	public static function ReceiveInternal($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "internal", $default);
@@ -272,7 +272,7 @@ abstract class ReqBase
 	 * @param mixed $key The internal data key
 	 * @return mixed Received data
 	 */
-	public static function External($key = null, $default = null)
+	public static function ReceiveExternal($key = null, $default = null)
 	{
 		if (is_string($key ?? ""))
 			return self::Receive($key, "external", $default);

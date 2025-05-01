@@ -4,7 +4,7 @@ use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 module("Collection");
 /**
- * To show data as posts
+ * To show comments
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
@@ -150,7 +150,7 @@ class CommentCollection extends Collection
      * @var array|string|null
      * @category Management
      */
-    public $WaitingLabel = "<i class='fa fa-eye-slash'><span class='tooltip'>The message is received but not showed</span></i>";
+    public $WaitingLabel = "<i class='fa fa-check'><span class='tooltip'>The message is received but not showed</span></i>";
     /**
      * The label text of approved message
      * @var array|string|null
@@ -168,6 +168,8 @@ class CommentCollection extends Collection
         return Html::Style("
 			.{$this->Name} div.item {
 				height: fit-attach;
+                width: -webkit-fill-available;
+				width: fit-content;
 				background-Color: #88888808;
                 margin: calc(var(--size-1) / 2);
             	padding: var(--size-2);
@@ -193,13 +195,15 @@ class CommentCollection extends Collection
 			}
 
 			.{$this->Name} div.item .subject{
-                padding: 0px;
-                margin: 0px;
+                margin-top: 0px;
 				font-size: var(--size-3);
                 text-transform: none;
 				text-align: unset;
                 position: relative;
                 z-index: 1;
+                overflow-wrap: break-word;
+                flex-flow: wrap;
+                text-wrap-mode: wrap;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 			.{$this->Name} div.item:hover .subject{
@@ -248,7 +252,7 @@ class CommentCollection extends Collection
 				color: var(--fore-color-2);
 				opacity: 0.6;
                 aspect-ratio: 1;
-                boxshadow: var(--shadow-1);
+                box-shadow: var(--shadow-1);
                 border-radius: var(--radius-5);
                 line-height: {$this->AuthorImageWidth};
 				width: {$this->AuthorImageWidth};
@@ -270,6 +274,9 @@ class CommentCollection extends Collection
                 gap: var(--size-0);
             	font-size: var(--size-1);
 				position: relative;
+                overflow-wrap: break-word;
+                flex-flow: wrap;
+                text-wrap-mode: wrap;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 			.{$this->Name} div.item .message :is(.excerpt, .full){
@@ -324,7 +331,7 @@ class CommentCollection extends Collection
                     )
                 )
                     continue;
-                $p_access = getValid($item, 'Access', 0);
+                $p_access = getValid($item, 'Access', \_::$Config->VisitAccess);
                 if (!auth($p_access))
                     continue;
                 if (isValid($this->Relation) && $this->Relation != get($item, 'Relation'))
@@ -361,7 +368,6 @@ class CommentCollection extends Collection
                 } else
                     $p_replyes = [];
                 $p_refering = $this->AutoRefering;
-                $adminaccess = \_::$Back->User->Access(\_::$Config->AdminAccess);
                 $updateaccess = $adminaccess || ($p_email && get(\_::$Back->User, "Email") == $p_email) || ($p_userid && get(\_::$Back->User, "UserId") == $p_userid);
                 $p_replybuttontext = !$this->ShowButtons ? null : __($this->ReplyButtonLabel);
                 $p_showreplybutton = isValid($p_replybuttontext);
@@ -439,18 +445,21 @@ class CommentCollection extends Collection
                         ) : null),
                         ["class" => 'sidebtn']
                     );
-                if ($p_showsubject) yield "<h2 class='subject'>" . $p_subject . "</h2>";
+                if ($p_showsubject)
+                    yield "<h2 class='subject'>" . $p_subject . "</h2>";
                 yield "<div class='message'>";
-                $author = $this->ShowAuthorImage || $this->ShowAuthor ? table("User")->DoSelectRow("Signature, Name, Image", "Email=:Email", [":Email" => get($item, 'Contact')]) : [];
+                $author = $this->ShowAuthorImage || $this->ShowAuthor ? table("User")->SelectRow("Signature, Name, Image", "Email=:Email", [":Email" => get($item, 'Contact')]) : [];
                 if ($this->ShowAuthorImage) {
                     $aimg = get($author, "Image");
-                    if (!isEmpty($author)) yield Html::Media($aimg?" ":strtoupper(substr(getValid($author, "Name", $p_name),0,1)), $aimg??\MiMFa\Library\User::$DefaultImagePath, ["class" => "author-image"]);
+                    if (!isEmpty($author))
+                        yield Html::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \MiMFa\Library\User::$DefaultImagePath, ["class" => "author-image"]);
                 }
                 if ($this->ShowAuthor) {
                     $au = getValid($author, "Name", $p_name);
                     if (isEmpty($author))
                         yield Html::Span($au, null, ["class" => "author"]);
-                    else yield Html::Link($au, \_::$Address->UserRoute . get($author, "Signature"), ["class" => "author"]);
+                    else
+                        yield Html::Link($au, \_::$Address->UserRoute . get($author, "Signature"), ["class" => "author"]);
                 }
                 if ($p_showexcerpt)
                     yield "<div class='excerpt parent-hover-hide'>$p_excerpt</div>";

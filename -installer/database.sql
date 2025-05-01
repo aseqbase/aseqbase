@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `aseq_Content` (
   `TagIds` text DEFAULT NULL COMMENT 'Separate each Tag Id between two ''|''',
   `AuthorId` int(11) DEFAULT NULL,
   `EditorId` int(11) DEFAULT NULL,
-  `Type` enum('Post','Text','Image' ,'Animation','Video','Audio','File','Service',"product",'News','Article','Document','Collection','Course','Query','Form','Advertisement','Forum') NOT NULL DEFAULT 'Post',
+  `Type` enum('Item', 'Post', 'Text', 'Image', 'Animation', 'Video', 'Audio', 'File', 'Service', 'Product', 'Merchandise', 'News', 'Article', 'Document', 'Collection', 'Course', 'Query', 'Form', 'Advertisement', 'Forum') NOT NULL DEFAULT 'Item',
   `Name` varchar(256) DEFAULT NULL,
   `Image` varchar(1024) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `Title` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,

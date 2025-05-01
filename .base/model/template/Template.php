@@ -80,6 +80,7 @@ class Template extends \Base{
 		component("Global");
 		component("Live");
 		component("Icons");
+        component("ShortcutKey");
     }
 
 	public function Handler($received = null){
@@ -144,6 +145,12 @@ class Template extends \Base{
             transition: var(--transition-1) 2s;
         }
 
+        big {
+            font-size: 1.33em;
+        }
+        small {
+            font-size: 0.75em;
+        }
         :is(.button, .btn, .icon).success{
             background-color: var(--color-2);
             color: var(--fore-color-2);

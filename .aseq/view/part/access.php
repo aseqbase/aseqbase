@@ -5,7 +5,7 @@ if(auth(\_::$Config->GuestAccess)){
     if(auth(\_::$Config->UserAccess))
         echo Html::Center([
                 Html::Button("Dashboard", User::$DashboardHandlerPath, ["data-aos"=>"zoom-up", "data-aos-duration"=>"100" ]),
-                Html::Button("View Profile", User::$RoutePath, ["data-aos"=>"zoom-up", "data-aos-duration"=>"200" ]),
+                Html::Button("View Profile", User::$RouteHandlerPath, ["data-aos"=>"zoom-up", "data-aos-duration"=>"200" ]),
                 Html::Button("Edit Profile", User::$EditHandlerPath, ["data-aos"=>"zoom-up", "data-aos-duration"=>"300" ]),
                 Html::Button("Reset Password", User::$RecoverHandlerPath, ["data-aos"=>"zoom-up", "data-aos-duration"=>"400" ]),
                 Html::Button("Sign Out", User::$OutHandlerPath, ["data-aos"=>"zoom-up", "data-aos-duration"=>"500" ])

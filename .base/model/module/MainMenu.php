@@ -43,8 +43,8 @@ class MainMenu extends Module
 				padding: 0;
 				display: flex;
 				overflow: hidden;
-				background-color: " . \_::$Front->BackColor(2) . ($this->AllowFixed ? "ee" : "") . ";
-				color: var(--fore-color-2);
+				background-color: " . \_::$Front->BackColor(3) . ($this->AllowFixed ? "ee" : "") . ";
+				color: var(--fore-color-3);
 				" . ($this->AllowFixed ? "
 				position:fixed;
 				top:0;
@@ -123,7 +123,7 @@ class MainMenu extends Module
 				display: inline-block;
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active{
-				border-top: var(--border-2) var(--back-color-2);
+				border-top: var(--border-2) var(--back-color-3);
 				border-radius: var(--radius-2) var(--radius-2) 0px 0px;
 				color: " . \_::$Front->ForeColor(0) . "88;
 				background-color: var(--back-color-0);
@@ -131,7 +131,7 @@ class MainMenu extends Module
 			}
 			.{$this->Name} ul:not(.sub-items)>li>:is(.button, .button:visited){
 				background-color: transparent;
-				color: var(--fore-color-2);
+				color: var(--fore-color-3);
 				border: none;
 				font-size: inherit;
 				border-radius: none;
@@ -143,6 +143,7 @@ class MainMenu extends Module
 			.{$this->Name} ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
 				font-weight: bold;
 				background-color: var(--back-color-2);
+				color: var(--fore-color-2);
 				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active>:is(.button, .button:visited){
@@ -263,7 +264,7 @@ class MainMenu extends Module
 				clear: both;
 				display: flex;
 				align-items: center;
-				" . ((\_::$Back->Translate->Direction ?? \_::$Config->DefaultDirection) == "RTL" ? "left" : "right") . ": var(--size-2);
+				" . ((\_::$Back->Translate->Direction ?? \_::$Config->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
 			}
 			.{$this->Name} .other>div{
 				width: fit-content;

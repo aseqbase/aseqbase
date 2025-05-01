@@ -8,7 +8,7 @@ $module->Items = \_::$Info->Services;
 $module->Type = "box";
 if (isValid(\_::$Info, "DownloadPath"))
 	$module->Content = \MiMFa\Library\Html::Center(
-		\MiMFa\Library\Html::Link("Download", \_::$Info->DownloadPath, ['class' => 'btn-outline'])
+		\MiMFa\Library\Html::Link("Download", \_::$Info->DownloadPath, ['class' => 'btn outline'])
 	);
 swap($module, $data);
 $module->Render();

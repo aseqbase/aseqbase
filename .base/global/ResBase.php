@@ -48,11 +48,25 @@ abstract class ResBase
 		return $output;
 	}
 	/**
+	 * Replace the output with all the document in the client side
+	 * @param mixed $output The data that is ready to print
+	 */
+	public static function Set($output = null)
+	{
+		\Res::Render(\MiMFa\Library\Html::Script(
+			\MiMFa\Library\Internal::MakeScript(
+				$output,
+				null,
+				"(data,err)=>{document.open();document.write(data??err);document.close();}"
+			)
+		));
+	}
+	/**
 	 * Print only this output on the client side, Clear before then end
 	 * @param mixed $output The data that is ready to print
 	 * @param mixed $status The header status
 	 */
-	public static function Send($output = null, $status = null)
+	public static function Put($output = null, $status = null)
 	{
 		if (ob_get_level())
 			ob_end_clean(); // Clean any remaining output buffers
@@ -67,7 +81,7 @@ abstract class ResBase
 	 * @param string|null $name Optional filename to force download with a specific name.
 	 * @throws \Exception If the file path is invalid or the file cannot be read.
 	 */
-	public static function SendFile($path = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
+	public static function PutFile($path = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
 	{
 		// Clear output buffer if active
 		if (ob_get_level()) ob_clean();
@@ -125,27 +139,45 @@ abstract class ResBase
 	}
 
 	/**
-	 * Replace the output with document in the client side
-	 * @param mixed $output The data that is ready to print
+	 * Send values to the client side
+	 * @param string $method The Method to send data
+	 * @param mixed $path The Url to send data
+	 * @param mixed $data Desired data
+	 * @return bool|string Is sent or received response
 	 */
-	public static function Set($output = null)
+	public static function Send($method = null, $path = null, ...$data)
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(
-			\MiMFa\Library\Internal::MakeScript(
-				$output,
-				null,
-				"(data,err)=>{document.open();document.write(data??err);document.close();}"
-			)
-		));
-	}
+		if (isEmpty($path))
+			$path = getPath();
+		if (isEmpty($method))
+			$method = "POST";
+		else $method = strtoupper($method);
 
+		if (is_string($path) && isAbsoluteUrl($path)) {
+			$ch = curl_init($path);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+			curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Set a timeout to avoid hanging indefinitely
+			$response = curl_exec($ch);
+			if (curl_errno($ch)) {
+				$errorMessage = curl_error($ch);
+				curl_close($ch);
+				trigger_error("cURL Error: $errorMessage", E_USER_WARNING);
+				return false;
+			}
+			curl_close($ch);
+			return $response;
+		}
+		return false;
+	}
 	/**
 	 * Send values to the client side
 	 * @param mixed $path The Url to send GET data from that
 	 * @param mixed $data Additional data to send as query parameters
 	 * @return bool|string Is sent or received response
 	 */
-	public static function Get($path = null, ...$data)
+	public static function SendGet($path = null, ...$data)
 	{
 		if (isEmpty($path))
 			$path = getPath();
@@ -167,7 +199,7 @@ abstract class ResBase
 	 * @param mixed $data Desired data to POST
 	 * @return bool|string Is sent or received response
 	 */
-	public static function Post($path = null, ...$data)
+	public static function SendPost($path = null, ...$data)
 	{
 		if (isEmpty($path))
 			$path = getPath();
@@ -188,20 +220,9 @@ abstract class ResBase
 	 * @param mixed $data Desired data to PUT
 	 * @return bool|string Is sent or received response
 	 */
-	public static function Put($path = null, ...$data)
+	public static function SendPut($path = null, ...$data)
 	{
-		if (isEmpty($path))
-			$path = getPath();
-		if (is_string($path) && isAbsoluteUrl($path)) {
-			$ch = curl_init($path);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-			$response = curl_exec($ch);
-			curl_close($ch);
-			return $response;
-		}
-		return false;
+		return self::Send("PUT",$path,$data);
 	}
 	/**
 	 * Send patched values to the client side
@@ -209,20 +230,9 @@ abstract class ResBase
 	 * @param mixed $data Desired data to PATCH
 	 * @return bool|string Is sent or received response
 	 */
-	public static function Patch($path = null, ...$data)
+	public static function SendPatch($path = null, ...$data)
 	{
-		if (isEmpty($path))
-			$path = getPath();
-		if (is_string($path) && isAbsoluteUrl($path)) {
-			$ch = curl_init($path);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PATCH");
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-			$response = curl_exec($ch);
-			curl_close($ch);
-			return $response;
-		}
-		return false;
+		return self::Send("PATCH",$path,$data);
 	}
 	/**
 	 * Send file values to the client side
@@ -230,7 +240,7 @@ abstract class ResBase
 	 * @param mixed $data Desired data to FILE
 	 * @return bool|string Is sent or received response
 	 */
-	public static function File($path = null, ...$data)
+	public static function SendFile($path = null, ...$data)
 	{
 		if (isEmpty($path))
 			$path = getPath();
@@ -259,20 +269,9 @@ abstract class ResBase
 	 * @param mixed $data Desired data to DELETE
 	 * @return bool|string Is sent or received response
 	 */
-	public static function Delete($path = null, ...$data)
+	public static function SendDelete($path = null, ...$data)
 	{
-		if (isEmpty($path))
-			$path = getPath();
-		if (is_string($path) && isAbsoluteUrl($path)) {
-			$ch = curl_init($path);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-			$response = curl_exec($ch);
-			curl_close($ch);
-			return $response;
-		}
-		return false;
+		return self::Send("DELETE",$path,$data);
 	}
 	/**
 	 * Send stream values to the client side
@@ -280,27 +279,9 @@ abstract class ResBase
 	 * @param mixed $data Desired data to STREAM
 	 * @return bool|string Is sent or received response
 	 */
-	public static function Stream($path = null, ...$data)
+	public static function SendStream($path = null, ...$data)
 	{
-		if (isEmpty($path))
-			$path = getPath();
-		if (is_string($path) && isAbsoluteUrl($path)) {
-				$ch = curl_init($path);
-				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "STREAM"); // Custom "STREAM" request
-				curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Encode data
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return response as string
-				curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Set a timeout to avoid hanging indefinitely
-				$response = curl_exec($ch);
-				if (curl_errno($ch)) {
-					$errorMessage = curl_error($ch);
-					curl_close($ch);
-					trigger_error("cURL Error: $errorMessage", E_USER_WARNING);
-					return false;
-				}
-				curl_close($ch);
-				return $response;
-		}
-		return false;
+		return self::Send("STREAM",$path,$data);
 	}
 	/**
 	 * Send internal values to the client side
@@ -308,20 +289,9 @@ abstract class ResBase
 	 * @param mixed $data Desired data to INTERNAL
 	 * @return bool|string Is sent or received response
 	 */
-	public static function Internal($path = null, ...$data)
+	public static function SendInternal($path = null, ...$data)
 	{
-		if (isEmpty($path))
-			$path = getPath();
-		if (is_string($path) && isAbsoluteUrl($path)) {
-			$ch = curl_init($path);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "INTERNAL");
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-			$response = curl_exec($ch);
-			curl_close($ch);
-			return $response;
-		}
-		return false;
+		return self::Send("INTERNAL",$path,$data);
 	}
 	/**
 	 * Send external values to the client side
@@ -329,44 +299,123 @@ abstract class ResBase
 	 * @param mixed $data Desired data to EXTERNAL
 	 * @return bool|string Is sent or received response
 	 */
-	public static function External($path = null, ...$data)
+	public static function SendExternal($path = null, ...$data)
 	{
-		if (isEmpty($path))
-			$path = getPath();
-		if (is_string($path) && isAbsoluteUrl($path)) {
-			$ch = curl_init($path);
-			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "EXTERNAL");
-			curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-			$response = curl_exec($ch);
-			curl_close($ch);
-			return $response;
-		}
-		return false;
+		return self::Send("EXTERNAL",$path,$data);
 	}
 
-	public static function Go($url)
+	public static function Locate($url = null)
 	{
-		self::End("<html><head><script>window.location.assign(" . (isValid($url) ? "'" . \MiMFa\Library\Local::GetUrl($url) . "'" : "location.href") . ");</script></head></html>");
+		self::End(\MiMFa\Library\Html::Script("window.history.replaceState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");"));
 	}
-	public static function Reload()
+	public static function Relocate($url = null)
 	{
-		self::End(\MiMFa\Library\Html::Script("window.location.assign(location.href);"));
+		self::End(\MiMFa\Library\Html::Script("window.history.pushState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");"));
 	}
-	public static function Load($url = null)
+	public static function Go($url, $target = "_self")
 	{
-		self::End(\MiMFa\Library\Html::Script("window.location.assign(" . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");"));
+		self::End(\MiMFa\Library\Html::Script("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '$target');"));
 	}
 	public static function Open($url = null, $target = "_blank")
 	{
-		self::End(\MiMFa\Library\Html::Script("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '$target');"));
+		self::End("<html><head><script>window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '$target');</script></head></html>");
+	}
+	public static function Load($url = null)
+	{
+		self::End(\MiMFa\Library\Html::Script("window.history.replaceState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");window.location.reload();"));
+	}
+	public static function Reload()
+	{
+		self::End(\MiMFa\Library\Html::Script("window.location.reload();"));
 	}
 	public static function Share($urlOrText = null, $path = null)
 	{
 		self::Render(\MiMFa\Library\Html::Script("window.open('sms://$path?body='+" . (isValid($urlOrText) ? "'" . __($urlOrText, styling: false) . "'" : "location.href") . ", '_blank');"));
 	}
 
+	/**
+	 * Interact with all specific parts of the client side
+	 * @param mixed $script The front JS codes
+	 * @param mixed $callback The call back handler
+	 * @example: Interact('$("body").html', function(selectedHtml)=>{ //do somework })
+	 */
+	public static function Interact($script = null, $callback = null)
+	{
+        $callbackScript = "(data,err)=>document.querySelector('body').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
+        $progressScript = "null";
+		$timeout = 60000;
+		$start = \MiMFa\Library\Internal::MakeStartScript(true);
+		$end = \MiMFa\Library\Internal::MakeStartScript(true);
+		$id = "S_".getID(true);
+		if(isStatic($callback)) \Res::Render(\MiMFa\Library\Html::Script("$start(".$callbackScript.")(".
+				\MiMFa\Library\Script::Convert($callback) . ",$script);document.getElementById('$id').remove();$end",null, ["id"=>$id]));
+		else \Res::Render(\MiMFa\Library\Html::Script(
+				$callback ? "$start".
+					'sendInternal(null,{"' . \MiMFa\Library\Internal::Set($callback) . '":JSON.stringify('. $script . ")},'body',$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
+				: $script
+		,null, ["id"=>$id]));
+	}
+	/**
+	 * Have a dialog with the client side
+	 * @param mixed $script The front JS codes
+	 * @param mixed $callback The call back handler
+	 * @example: Dialog('$("body").html', function(selectedHtml)=>{ //do somework })
+	 * @return string|null The result of the client side
+	 */
+	public static function Dialog($script = null, $callback = null)
+	{
+		$id = "Dialog_".getId(true);
+		self::Interact(
+			"setMemo('$id', $script, 60000)",
+			$callback
+		);
+		return grabMemo($id);
+	}
+	/**
+	 * Interact with all specific parts of the client side one by one
+	 * @param mixed $script The front JS codes
+	 * @param mixed $callback The call back handler
+	 * @example: Get("body", function(selectedHtml)=>{ //do somework })
+	 */
+	public static function Iterate($script = null, $callback = null)
+	{
+        $callbackScript = "(data,err)=>{el=document.createElement('qb');el.innerHTML=data??err;item.before(...el.childNodes);item.remove();}";
+        $progressScript = "null";
+		$timeout = 60000;
+		$start = \MiMFa\Library\Internal::MakeStartScript(true);
+		$end = \MiMFa\Library\Internal::MakeStartScript(true);
+		$id = "S_".getID(true);
+		if(isStatic($callback)) \Res::Render(\MiMFa\Library\Html::Script("$start for(item of $script)(".$callbackScript.")(".
+				\MiMFa\Library\Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id"=>$id]));
+		else \Res::Render(\MiMFa\Library\Html::Script(
+				$callback ? "$start".
+					"for(item of $script)sendInternal(null,{\"" . \MiMFa\Library\Internal::Set($callback) . '":item.outerHTML},'.
+						"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
+				: $script
+		,null, ["id"=>$id]));
+	}
 
+	public static function Alert($message = null, $callback = null)
+	{
+		self::Interact(
+			\MiMFa\Library\Script::Alert($message)."??true",
+			$callback
+		);
+	}
+	public static function Confirm($message = null, $callback = null)
+	{
+		return self::Dialog(
+			\MiMFa\Library\Script::Confirm($message),
+			$callback
+		);
+	}
+	public static function Prompt($message = null, $callback = null, $default = null)
+	{
+		return self::Dialog(
+			\MiMFa\Library\Script::Prompt($message, $default),
+			$callback
+		);
+	}
 	/**
 	 * Render a message result output to the client side
 	 * @param mixed $output The data that is ready to print
@@ -406,6 +455,35 @@ abstract class ResBase
 	{
 		echo $output = \MiMFa\Library\Html::Error($output);
 		return $output;
+	}
+
+	/**
+	 * Render Scripts in the client side
+	 * @param mixed $output The data that is ready to print
+	 */
+	public static function Script($content, $source = null, ...$attributes)
+	{
+		\Res::Render(\MiMFa\Library\Html::Script(
+			\MiMFa\Library\Internal::MakeScript(
+				\MiMFa\Library\Html::Script($content, $source, ...$attributes),
+				null,
+				"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			)
+		));
+	}
+	/**
+	 * Render Styles in the client side
+	 * @param mixed $output The data that is ready to print
+	 */
+	public static function Style($content, $source = null, ...$attributes)
+	{
+		\Res::Render(\MiMFa\Library\Html::Script(
+			\MiMFa\Library\Internal::MakeScript(
+				\MiMFa\Library\Html::Style($content, $source, ...$attributes),
+				null,
+				"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			)
+		));
 	}
 }
 ?>

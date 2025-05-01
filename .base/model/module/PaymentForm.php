@@ -212,7 +212,7 @@ class PaymentForm extends Form{
 			if(Contact::SendHTMLEmail(\_::$Info->SenderEmail, $this->Transaction->SourceEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->Id, $doc, $this->Transaction->DestinationEmail))
                 $res .= Html::Success("A notification to '{$this->Transaction->SourceEmail}' has been sent!", $attr);
             else $res .= Html::Warning("Could not send a notification to '{$this->Transaction->SourceEmail}'!", $attr);
-		if(table("Payment")->DoInsert([
+		if(table("Payment")->Insert([
 				"TId" =>$this->Transaction->Id,
 				"Source" =>$this->Transaction->Source,
 				"SourceContent" =>$this->Transaction->SourceContent,

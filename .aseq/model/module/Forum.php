@@ -1,9 +1,9 @@
 <?php
 namespace MiMFa\Module;
-
 use DateTime;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
+module("Content");
 /**
  * To show data as posts
  *@copyright All rights are reserved for MiMFa Development Group
@@ -11,8 +11,7 @@ use MiMFa\Library\Convert;
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
-module("Post");
-class Forum extends Post
+class Forum extends Content
 {
      public $RootRoute = "/forum/";
 
@@ -46,35 +45,42 @@ class Forum extends Post
      public function Get()
      {
           $val = parent::Get();
-          if($this->LeaveCommentStartTime && Convert::ToDateTime() < $this->LeaveCommentStartTime)
+          if ($this->LeaveCommentStartTime && Convert::ToDateTime() < $this->LeaveCommentStartTime)
                return $this->GetMessage(
-                    Convert::ToShownDateTimeString() ." < ". Convert::ToShownDateTimeString($this->LeaveCommentStartTime),
+                    Convert::ToShownDateTimeString() . " < " . Convert::ToShownDateTimeString($this->LeaveCommentStartTime),
                     "This forum will open later!"
                );
-          if($this->LeaveCommentEndTime && Convert::ToDateTime() > $this->LeaveCommentEndTime)
+          if ($this->LeaveCommentEndTime && Convert::ToDateTime() > $this->LeaveCommentEndTime)
                return $this->GetMessage(
-                    Convert::ToShownDateTimeString() ." > ". Convert::ToShownDateTimeString($this->LeaveCommentEndTime),
+                    Convert::ToShownDateTimeString() . " > " . Convert::ToShownDateTimeString($this->LeaveCommentEndTime),
                     "This forum is not active anymore!"
                );
           return $val;
      }
 
-     public function GetCommentsCollection($relatedId)
+     public function GetCommentsCollection()
      {
-          if($this->ShowCommentStartTime && Convert::ToDateTime() < $this->ShowCommentStartTime) return null;
-          if($this->ShowCommentEndTime && Convert::ToDateTime() > $this->ShowCommentEndTime) return null;
-          module("CommentCollection");
-          $cc = new CommentCollection();
-          $cc->Items = table("Comment")->DoSelect("*",
-           "Relation=:rid AND ".\MiMFa\Library\User::GetAccessCondition(false)." ".$this->CommentsLimitation, [":rid" => $relatedId]);
-          if (count($cc->Items) > 0)
-               return Html::$HorizontalBreak . $cc->ToString();
+          if ($this->ShowComments && auth($this->ShowCommentsAccess)) {
+               if ($this->ShowCommentStartTime && Convert::ToDateTime() < $this->ShowCommentStartTime)
+                    return null;
+               if ($this->ShowCommentEndTime && Convert::ToDateTime() > $this->ShowCommentEndTime)
+                    return null;
+               module("CommentCollection");
+               $cc = new CommentCollection();
+               $cc->Items = table("Comment")->Select(
+                    "*",
+                    "Relation=:rid AND " . \_::$Back->User->GetAccessCondition(checkStatus: false) . " " . $this->CommentsLimitation,
+                    [":rid" => get($this->Item, 'Id')]
+               );
+               if (count($cc->Items) > 0)
+                    return Html::$HorizontalBreak . $cc->ToString();
+          }
           return null;
      }
 
      public function GetMessage($subject, $message, $icon = "clock")
      {
-          return Html::Division(Html::Image($icon).Html::Heading($subject).Html::Result($message), ["class"=>"be center"]);
+          return Html::Division(Html::Image($icon) . Html::Heading($subject) . Html::Result($message), ["class" => "be center"]);
      }
 
 }

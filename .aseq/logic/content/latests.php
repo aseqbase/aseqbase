@@ -1,3 +1,4 @@
 <?php
-return logic("content/all",[...$data, "Order"=>"`UpdateTime` DESC"]);
+grab($data, "Order");
+return logic("content/all",["Order"=>"`UpdateTime` DESC", ...$data]);
 ?>

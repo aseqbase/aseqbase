@@ -32,7 +32,7 @@ if (isValid($user))
 		,["class"=>"introduction"]).
         Html::Container([
             [
-                Html::Button("Show Profile", User::$RoutePath),
+                Html::Button("Show Profile", User::$RouteHandlerPath),
                 Html::Button("Edit Profile", User::$EditHandlerPath),
                 Html::Button("Reset Password", User::$RecoverHandlerPath),
                 Html::Button("Sign Out", User::$OutHandlerPath)

@@ -3,6 +3,12 @@ module("PrePage");
 $module= new MiMFa\Module\PrePage();
 $module->Title = "Guide";
 $module->Render();
+\Res::Style("
+.side-image{
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 70% auto;
+}");
 ?>
 <div class="container">
     <div class="row">

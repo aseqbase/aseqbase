@@ -25,16 +25,6 @@ abstract class InformationBase extends ArrayObject{
 	 */
 	public $OwnerDescription = null;
 	/**
-     * The website name
-	 * @var mixed
-	 */
-	public $Product = null;
-	/**
-     * The website full name
-	 * @var mixed
-	 */
-	public $FullProduct = null;
-	/**
      * The website owner and name
 	 * @var mixed
 	 */
@@ -66,6 +56,12 @@ abstract class InformationBase extends ArrayObject{
      * @var mixed
 	 */
 	public $FullDescription = null;
+	/**
+     * The copyright of the website
+     * @field strings
+     * @var mixed
+	 */
+	public $CopyRight = null;
 
 	/**
 	 * Default mail sender
@@ -163,51 +159,49 @@ abstract class InformationBase extends ArrayObject{
      * @field array
      * @var array
 	 */
-	public $KeyWords = array("MiMFa","Minimal Members Factory");
+	public $KeyWords = [];
 
 	/**
      * The main menu to show on the most pages
      * @field array
      * @var array
 	 */
-	public $MainMenus = array(
-		array("Name" =>"HOME","Path"=>"/home","Image" =>"home","Attributes"=> "class='menu-link'")
-	);
+	public $MainMenus = [];
 
 	/**
      * The side menu to show on the most pages
      * @field array
      * @var array
 	 */
-	public $SideMenus = null;
+	public $SideMenus = [];
 
 	/**
      * The main shortcut menu to show on the most pages
      * @field array
      * @var array
 	 */
-	public $Shortcuts = null;
+	public $Shortcuts = [];
 
 	/**
      * The main menu items to show on the first page
      * @field array
      * @var array
 	 */
-	public $Services = null;
+	public $Services = [];
 
 	/**
      * The main members and personnel of the website
      * @field array
      * @var array
 	 */
-	public $Members = array();
+	public $Members = [];
 
 	/**
      * The main contacts details to show on the most pages and contact page
      * @field array
      * @var array
 	 */
-	public $Contacts = array();
+	public $Contacts = [];
 
 
 	public function __construct(){
@@ -216,10 +210,10 @@ abstract class InformationBase extends ArrayObject{
 		\MiMFa\Library\Revise::Load($this);
 		
 		$menu = between($this->MainMenus,$this->SideMenus,$this->Shortcuts,$this->Services);
-		if(!isValid($this->MainMenus)) $this->MainMenus = $menu;
-		if(!isValid($this->SideMenus)) $this->SideMenus = $menu;
-		if(!isValid($this->Shortcuts)) $this->Shortcuts = $menu;
-		if(!isValid($this->Services)) $this->Services = $menu;
+		if(!$this->MainMenus) $this->MainMenus = $menu;
+		if(!$this->SideMenus) $this->SideMenus = $menu;
+		if(!$this->Shortcuts) $this->Shortcuts = $menu;
+		if(!$this->Services) $this->Services = $menu;
 	}
 	public function __get($name) {
         return $this[$this->PropertyName($name)];

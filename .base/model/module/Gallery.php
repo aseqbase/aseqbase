@@ -179,7 +179,7 @@ class Gallery extends Collection{
 					Html::SubHeading(__($p_name,true,false)).
 					Html::Paragraph(__($p_description,true,false)),
 				["class"=>"description" ]).
-				(isValid($p_path)? Html::Button($this->MoreButtonLabel, $clickact, ["class"=>"btn-outline btn-block"]):null).
+				(isValid($p_path)? Html::Button($this->MoreButtonLabel, $clickact, ["class"=>"btn outline btn block"]):null).
 				Html::Division(__($p_content??$p_description,true,false),["class"=>"hide"]),
 				["class"=>"item item-$i col-md"], $this->Animation? "data-aos-delay='".($i % $this->MaximumColumns*\_::$Front->AnimationSpeed)."' data-aos='{$this->Animation}'":null);
                 if(++$i % $this->MaximumColumns === 0) yield "</div>";

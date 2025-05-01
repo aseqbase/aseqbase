@@ -113,7 +113,7 @@ class Navigation extends Module{
 
 	public function __construct($itemsOrQuery = null, $count = null, $queryParameters = null, $defaultItems = null){
 		parent::__construct();
-		$query = \Req::Get()??array();
+		$query = \Req::ReceiveGet()??array();
 		$this->Page = (int)takeValid($query,$this->PageRequest,-1);
 		$this->Limit = (int)takeValid($query,$this->LimitRequest, -12);
 		$this->Count = (int)takeValid($query,$this->CountRequest, -1);
@@ -138,7 +138,7 @@ class Navigation extends Module{
 			if($this->LiveCount || $this->Count <= 0)
 				if(isValid($count)) $this->Count = $count;
 				elseif($this->AllowCount)
-                    $this->Count = count(between(\_::$Back->DataBase->Select($this->Query, $this->QueryParameters), $this->DefaultItems));
+                    $this->Count = count(between(\_::$Back->DataBase->ExecuteSelect($this->Query, $this->QueryParameters), $this->DefaultItems));
 				else $this->Count = 12;
         }
 		else {
@@ -159,7 +159,7 @@ class Navigation extends Module{
      */
 	public function GetItems($iterator=null){
 		if(isValid($iterator??$this->Items)) return array_slice(Convert::ToItems($iterator??$this->Items), $this->GetFromItem(), $this->GetLimit());
-		else return between(\_::$Back->DataBase->Select($this->Query." LIMIT ".$this->GetFromItem().", ".$this->GetLimit(),$this->QueryParameters),array_slice($this->DefaultItems, $this->GetFromItem(), $this->GetLimit()));
+		else return between(\_::$Back->DataBase->ExecuteSelect($this->Query." LIMIT ".$this->GetFromItem().", ".$this->GetLimit(),$this->QueryParameters),array_slice($this->DefaultItems, $this->GetFromItem(), $this->GetLimit()));
 	}
 	public function GetFromItem(){
 		return min($this->Count, max(0, ($this->Page-1) * $this->Limit));
@@ -234,7 +234,7 @@ class Navigation extends Module{
 					border-radius: var(--radius-5);
 					border: var(--border-1) var(--fore-color-1);
 					background-color: var(--back-color-1);
-					box-shadow: ".(\_::$Back->Translate->Direction=="RTL"?"":"-")."100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-1);
+					box-shadow: ".(\_::$Back->Translate->Direction=="rtl"?"":"-")."100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-1);
 					".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
 				}
 				.{$this->Name} input[type='range']:hover::-webkit-slider-thumb {
@@ -281,10 +281,10 @@ class Navigation extends Module{
 			$url = \Req::$Path."?";
 			$fromP = $this->GetFromPage();
 			$toP = $this->GetToPage();
-			$query = \Req::Get()??array();
+			$query = \Req::ReceiveGet()??array();
 			if(isset($query[$this->CountRequest])) $query[$this->CountRequest] = $this->Count."";
-			$right = \_::$Back->Translate->Direction=="RTL"?"left":"right";
-			$left = \_::$Back->Translate->Direction=="RTL"?"right":"left";
+			$right = \_::$Back->Translate->Direction=="rtl"?"left":"right";
+			$left = \_::$Back->Translate->Direction=="rtl"?"right":"left";
 
 			yield "<div class='contents'>";
 				$maxLimit = $this->AllowCount?min($this->Count,$this->MaxLimit):$this->MaxLimit;

@@ -11,17 +11,17 @@
         module("Translator");
         $module = new MiMFa\Module\Translator();
         $module->Items = array(
-            "EN" => array(
+            "en" => array(
                 "Title" => "English",
                 "Image" => "https://flagcdn.com/16x12/gb.png",
-                "Direction" => "LTR",
-                "Encoding" => "UTF-8"
+                "Direction" => "ltr",
+                "Encoding" => "utf-8"
             ),
-            "FA" => array(
+            "fa" => array(
                 "Title" => "فارسی",
                 "Image" => "https://flagcdn.com/16x12/ir.png",
-                "Direction" => "RTL",
-                "Encoding" => "UTF-8"
+                "Direction" => "rtl",
+                "Encoding" => "utf-8"
             )
         );
         $module->Style = new Style();
@@ -30,14 +30,11 @@
     }
     module("TemplateButton");
     $module = new MiMFa\Module\TemplateButton();
-    //$module->DarkLabel = "Dark Mode";
-    //$module->LightLabel = "Light Mode";
     $module->Style = new Style();
     $module->Style->Position = "absolute";
     $module->Style->Left = "var(--size-1)";
     $module->Render();
-    module("Simple");
-    (new MiMFa\Module\Simple(Html::Icon("arrow-up", "scrollTo('body :nth-child(1)');", ["style" => "border: none; position: absolute; right: var(--size-1);"])))->Render();
+    \Res::Render(Html::Icon("arrow-up", "scrollTo('body :nth-child(1)');", ["style" => "border: none; position: absolute; right: var(--size-1);"]));
     part("copyright");
     ?>
 </footer>
