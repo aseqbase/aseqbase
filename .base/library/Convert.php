@@ -36,7 +36,7 @@ class Convert
         if (!is_null($value)) {
             if (is_string($value) || is_numeric($value))
                 return $value;
-            if (is_subclass_of($value, "\Base"))
+            if ($value instanceof \Base)
                 return $value->ToString();
             if (is_countable($value) || is_iterable($value)) {
                 $texts = array();
