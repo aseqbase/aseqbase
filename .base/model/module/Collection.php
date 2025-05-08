@@ -63,6 +63,11 @@ class Collection extends Module{
      */
 	public $Animation = "fade-in";
 
+	public function __construct($items = null){
+        parent::__construct();
+		$this->Items = $items??$this->Items;
+	}
+
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
 			.{$this->Name}{

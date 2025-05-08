@@ -12,11 +12,12 @@ module("Form");
 			$form->MailSubject = \Req::$Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$Back->User, "Name")) . "'";
 			$form->ReceiverEmail = \_::$Info->ReceiverEmail;
 			$form->SenderEmail = get($received, "Email") ?? get(\_::$Back->User, "Email");
-			table("Comment")->Insert([
+			table("Message")->Insert([
 				"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
-				"Relation" => \Req::$Url,
+				"Type" => \Req::$Url,
 				"Name" => Convert::ToText(getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
-				"Contact" => getValid($received, "Email", \_::$Back->User ? \_::$Back->User->Email : null),
+				"From" => $form->SenderEmail,
+				"To" => $form->ReceiverEmail,
 				"Subject" => Convert::ToText(get($received, "Subject")),
 				"Content" => Convert::ToText(get($received, "Message")),
 				"Access" => \_::$Config->AdminAccess,

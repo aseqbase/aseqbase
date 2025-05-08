@@ -11,7 +11,6 @@ module("Collection");
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class Carousel extends Collection{
-	public $Capturable = true;
 	public $Class = "carousel";
 
 	public $IndicatorLabel = "";
@@ -24,8 +23,9 @@ class Carousel extends Collection{
 
 	public $ActiveItem = 0;
 
-	public function __construct(){
+	public function __construct($items = null){
         parent::__construct();
+		$this->Items = $items??$this->Items;
 		$this["data-bs-ride"] = "carousel";
 		$this->CaptionBackColor = $this->CaptionBackColor??\_::$Front->BackColor(0)."cc";
 		$this->CaptionForeColor = $this->CaptionForeColor??"var(--fore-color)";

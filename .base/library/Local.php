@@ -496,7 +496,7 @@ class Local
 	 * @param string|null $name Optional filename to force download with a specific name.
 	 */
 	public static function LoadFile($path, $name = null, $type = null){
-		\Res::PutFile($path, null, $type, true, $name);
+		\Res::SetFile($path, null, $type, true, $name);
 	}
 }
 

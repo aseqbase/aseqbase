@@ -2,40 +2,38 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-module("SearchForm");
-module("UserMenu");
-module("TemplateButton");
+use MiMFa\Library\User;
 class SideMenu extends Module
 {
 	public $Image = null;
 	public $Items = null;
 	public $Shortcuts = null;
 	public $Direction = "ltr";
-	public SearchForm|null $SearchForm = null;
-	public UserMenu|null $UserMenu = null;
-	public TemplateButton|null $TemplateButton = null;
 	public $HasBranding = true;
 	public $HasItems = true;
-	public $HasOthers = true;
 	public $HasImages = true;
 	public $HasTitles = true;
 	public $AllowChangeColor = true;
+	public $BackgroundShadow = true;
 	public $AllowHide = true;
 	public $AllowHoverable = true;
+	/**
+	 * Leave null to use the defalut buttons otherwise put your buttons
+	 * @var 
+	 */
+	public $Buttons = null;
+	public $AllowDefaultButtons = true;
+	public $ButtonsScreenSize = "md";
 	public $AllowSignButton = true;
 	public $SignButtonText = "&#9776;";
 	public $SignButtonScreenSize = "md";
-	public $OthersScreenSize = "md";
+	public $LogoWidth = "calc(1.25 * var(--size-5))";
+	public $LogoHeight = "calc(1.25 * var(--size-5))";
+
 
 	public function __construct()
 	{
 		parent::__construct();
-		$this->SearchForm = new SearchForm();
-		if (\_::$Config->AllowSigning) {
-			$this->UserMenu = new UserMenu();
-			$this->UserMenu->Path = null;
-		}
-		$this->TemplateButton = new TemplateButton();
 		$this->Direction = \_::$Back->Translate->Direction ?? \_::$Config->DefaultDirection;
 	}
 
@@ -105,6 +103,8 @@ class SideMenu extends Module
 				background-color: transparent;
 				display: table-cell;
 				font-size: var(--size-0);
+				width: {$this->LogoWidth};
+				height: {$this->LogoHeight};
 			}
 
 			.{$this->Name}>:not(.header, .other) :is(.item, a, a:visited){
@@ -180,7 +180,14 @@ class SideMenu extends Module
 			.{$this->Name} .fa{
 				font-size:  var(--size-2);
 			}
-			" . ($this->AllowSignButton ? "
+			" . (
+			isValid($this->BackgroundShadow) ? "
+			.{$this->Name}-background-screen {
+				background-color: {$this->BackgroundShadow};
+				width: 100%;
+				z-index:1;
+			}
+			" : "") . ($this->AllowSignButton ? "
 				.{$this->Name}-sign-button-menu{
 					font-size:  var(--size-3);
 					cursor: pointer;
@@ -196,21 +203,23 @@ class SideMenu extends Module
 				.{$this->Name}-sign-button-menu:hover{
 					color: var(--fore-color-0);
 				}
-
+		" : "") . ($this->AllowDefaultButtons ? "
 				.{$this->Name} .other{
 					text-align: center;
+					display: flex !important;
+					flex-direction: row;
+					flex-wrap: wrap;
+					justify-content: center;
+					align-content: center;
+					align-items: center;
 				}
-				.{$this->Name} .other>div{
-					width: fit-content;
-					display: initial;
-				}
-				.{$this->Name} .other .btn{
+				.{$this->Name} .other .button{
 					color: unset;
 					background-color: unset;
 					border: none;
 				}
 
-				.{$this->Name} form{
+				.{$this->Name} .other form{
 					text-decoration: none;
 					padding: 4px 10px;
 					margin: 10px;
@@ -223,12 +232,12 @@ class SideMenu extends Module
 					overflow: hidden;
 					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
-				.{$this->Name} form:is(:hover, :active, :focus) {
+				.{$this->Name} .other form:is(:hover, :active, :focus) {
 					font-weight: bold;
 					color: var(--fore-color-1);
 					background-color: var(--back-color-1);
 				}
-				.{$this->Name} form :not(html,head,body,style,script,link,meta,title){
+				.{$this->Name} .other form :not(html,head,body,style,script,link,meta,title){
 					padding: 0px;
 					margin: 0px;
 					display: inline-block;
@@ -238,37 +247,23 @@ class SideMenu extends Module
 					border: none;
 					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
-				.{$this->Name} form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
+				.{$this->Name} .other form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
 					font-weight: bold;
 					outline: none;
 					border: none;
 					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
-				.{$this->Name} form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
+				.{$this->Name} .other form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
 					color: var(--back-color-2);
 				}
-				.{$this->Name} form input[type='search']{
+				.{$this->Name} .other form input[type='search']{
             		width: calc(100% - 50px);
 					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
-				.{$this->Name} form:is(:hover, :active, :focus) input[type='search'], .{$this->Name} form input[type='search']:is(:hover, :active, :focus){
+				.{$this->Name} .other form:is(:hover, :active, :focus) input[type='search'], .{$this->Name} form input[type='search']:is(:hover, :active, :focus){
 					color: var(--fore-color-1);
-				}<?php
-        " : "") . ($this->UserMenu != null ? "
-			.{$this->UserMenu->Name} :is(button, a).menu{
-				aspect-ratio: initial !important;
-				width: 100% !important;
-				margin: 0px !important;
-			}
-			.{$this->UserMenu->Name} .menu>*{
-				width: 40% !important;
-				margin: 0px 30% !important;
-			}
-			.{$this->UserMenu->Name} .submenu{
-				position: relative !important;
-				width: 100% !important;
-			}
-		" : "") . ($this->AllowHide ? ("
+				}
+        " : "") . ($this->AllowHide ? ("
 			.{$this->Name}{
 				width: 50vmax;
 				margin-inline-start: -100vmax;
@@ -357,15 +352,22 @@ class SideMenu extends Module
 					["class" => "td header"]
 				);
 
-			if ($this->HasOthers)
-				yield Html::Division(
-					($this->SearchForm != null ? $this->SearchForm->ToString() : "") .
-					($this->UserMenu != null ? $this->UserMenu->ToString() : "") .
-					($this->TemplateButton != null ? $this->TemplateButton->ToString() : "")
-					,
-					["class" => "other {$this->OthersScreenSize}-show"]
+			if ($this->AllowDefaultButtons || $this->Buttons) {
+				$defaultButtons = [];
+				if ($this->AllowDefaultButtons) {
+					module("SearchForm");
+					module("TemplateButton"); 
+					$defaultButtons[] = new SearchForm();
+					if (\_::$Config->AllowSigning) $defaultButtons[] = Html::Button(Html::Icon("user"), User::$InHandlerPath);
+					$defaultButtons[] = new TemplateButton();
+				}
+				yield Html::Division([
+						...($defaultButtons? $defaultButtons : []),
+						...($this->Buttons? (is_array($this->Buttons)?$this->Buttons:[$this->Buttons]) : [])
+					],
+					["class" => "other {$this->ButtonsScreenSize}-show"]
 				);
-
+			}
 			if ($this->HasItems) {
 				$count = count($this->Items);
 				if ($count > 0) {
@@ -406,7 +408,7 @@ class SideMenu extends Module
 					);
 				}
 			}
-			if ($this->HasOthers && !isEmpty($this->Shortcuts)) {
+			if ($this->AllowDefaultButtons && !isEmpty($this->Shortcuts)) {
 				yield "<div class='footer'>";
 				module("Shortcuts");
 				$module = new Shortcuts();
@@ -417,6 +419,12 @@ class SideMenu extends Module
 				yield "</div>";
 			}
 		});
+	}
+
+	public function BeforeHandle()
+	{
+		if (isValid($this->BackgroundShadow))
+			return "<div class=\"background-screen {$this->Name}-background-screen hide\" onclick=\"{$this->Name}_ViewSideMenu(false);\"></div>";
 	}
 
 	public function AfterHandle()
@@ -437,11 +445,16 @@ class SideMenu extends Module
 	{
 		return parent::GetScript() . Html::Script("
 			function {$this->Name}_ViewSideMenu(show){
-				if(show === undefined) $('.{$this->Name}').toggleClass('active');
-				else if(show) $('.{$this->Name}').addClass('active');
-				else $('.{$this->Name}').removeClass('active');
+				if(show === undefined) show = !document.querySelector('.{$this->Name}').classList.contains('active');
+				if(show) {
+					document.querySelector('.{$this->Name}').classList.add('active');
+					document.querySelector('.{$this->Name}-background-screen').classList.remove('hide');
+				}
+				else {
+					document.querySelector('.{$this->Name}').classList.remove('active');
+					document.querySelector('.{$this->Name}-background-screen').classList.add('hide');
+				}
 			}
-			$('.page').click(function(){ {$this->Name}_ViewSideMenu(false); });
 		");
 	}
 }

@@ -862,7 +862,7 @@ class Form extends Module
 		$ex = null;
 		if (count($data) > 0 && get($data, "ReceiverEmail") ?? $this->ReceiverEmail)
 			if (
-				\MiMFa\Library\Contact::SendHTMLEmail(
+				\MiMFa\Library\Contact::SendHtmlEmail(
 					grab($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
 					grab($data, "ReceiverEmail") ?? $this->ReceiverEmail,
 					grab($data, "MailSubject") ?? $this->MailSubject ?? (\Req::$Domain . ": A new form submitted"),

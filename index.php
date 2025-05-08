@@ -13,7 +13,7 @@ $GLOBALS["ASEQ"] = null;//end($dirs);//join(".", $dirs);/* Change it to null if 
 $GLOBALS["BASE"] = ".aseq";/* Change it to the base directory if deferents */
 
 /*
-    Change \_::$Sequences
+    An array to apply your custom changes in \_::$Sequences
 	newdirectory, newaseq;// Add new directory to the \_::$Sequences
     directory, newaseq;// Update directory in the \_::$Sequences
     directory, null;// Remove thw directory from the \_::$Sequences

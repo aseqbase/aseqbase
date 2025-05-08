@@ -1,8 +1,5 @@
 <?php
 namespace MiMFa\Module;
-module("SearchForm");
-module("UserMenu");
-module("TemplateButton");
 use MiMFa\Library\Html;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
@@ -13,9 +10,6 @@ class MainMenu extends Module
 	public $Image = null;
 	public $Items = null;
 	public $Shortcuts = null;
-	public SearchForm|null $SearchForm = null;
-	public UserMenu|null $UserMenu = null;
-	public TemplateButton|null $TemplateButton = null;
 	public $HasBranding = true;
 	public $HasItems = true;
 	public $HasOthers = true;
@@ -24,15 +18,9 @@ class MainMenu extends Module
 	public $ShowItemsScreenSize = null;
 	public $HideOthersScreenSize = 'md';
 	public $ShowOthersScreenSize = null;
-
-	public function __construct()
-	{
-		parent::__construct();
-		$this->SearchForm = new SearchForm();
-		if (\_::$Config->AllowSigning)
-			$this->UserMenu = new UserMenu();
-		$this->TemplateButton = new TemplateButton();
-	}
+	public $AllowDefaultButtons = true;
+	public $LogoWidth = "calc(1.25 * var(--size-5))";
+	public $LogoHeight = "calc(1.25 * var(--size-5))";
 
 	public function GetStyle()
 	{
@@ -41,7 +29,6 @@ class MainMenu extends Module
 			.{$this->Name} {
 				margin: 0;
 				padding: 0;
-				display: flex;
 				overflow: hidden;
 				background-color: " . \_::$Front->BackColor(3) . ($this->AllowFixed ? "ee" : "") . ";
 				color: var(--fore-color-3);
@@ -64,11 +51,16 @@ class MainMenu extends Module
 			.{$this->Name} .header{
 				margin: 0;
 				width: fit-content;
-				padding: 5px 10px;
-				display: inline-table;
+				padding: 0px 10px;
+				display: flex;
+				justify-content: flex-start;
+				align-items: center;
+				flex-direction: row;
 			}
-			.{$this->Name} :is(.header, .header a, .header a:visited){
-				color: var(--fore-color-2);
+			.{$this->Name} :is(.header, .header a, .header a:visited, .header a:hover){
+				color: var(--fore-color-0);
+				text-decoration: none;
+				font-weight: normal !important;
 			}
 			.{$this->Name} .header .title{
 				font-size: var(--size-2);
@@ -84,8 +76,8 @@ class MainMenu extends Module
 				background-repeat: no-repeat;
 				background-size: 80% auto;
 				background-color: transparent;
-				width: 50px;
-				display: table-cell;
+				width: {$this->LogoWidth};
+				height: {$this->LogoHeight};
 				font-size: var(--size-0);
 			}
 
@@ -110,10 +102,12 @@ class MainMenu extends Module
 				margin: 0;
 				padding: 0;
 				overflow: hidden;
-				display: inline-table;
-				" . ($this->SearchForm != null ? "
+				display: flex;
+				align-items: center;
+				" . ($this->AllowDefaultButtons? "
 				min-width: fit-content;
-				max-width: 70% !important;
+				max-width: 70%;
+				margin-inline-end: 100px;
 				" : "") . "
 			}
 
@@ -329,15 +323,13 @@ class MainMenu extends Module
 	{
 		return Convert::ToString(function () {
 			if ($this->HasBranding)
-				yield Html::Rack(
-					(isValid($this->Image) ? Html::Media($this->Image, ['class' => 'image']) : "") .
+				yield Html::Division(
+					(isValid($this->Image) ? Html::Link(Html::Media($this->Image, ['class' => 'col-sm image']), \_::$Info->Path) : "") .
 					Html::Division(
 						(isValid($this->Description) ? Html::Division(__($this->Description, true, false), ['class' => 'description']) : "") .
-						(isValid($this->Title) ? Html::Division(__($this->Title, true, false), ['class' => 'title']) : "")
-					)
-					,
-					["class" => "header"]
-				);
+						(isValid($this->Title) ? Html::Link(Html::Division(__($this->Title, true, false), ['class' => 'title']), \_::$Info->Path) : ""),
+					["class" => "brand"]),
+				["class" => "header"]);
 			if ($this->HasItems)
 				if (count($this->Items) > 0)
 					yield Html::Items(
@@ -349,16 +341,21 @@ class MainMenu extends Module
 						["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : '') . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : '')]
 					);
 			if ($this->HasOthers) {
-				yield "<div class='other " . (isValid($this->ShowOthersScreenSize) ? $this->ShowOthersScreenSize . '-show' : '') . ' ' . (isValid($this->HideOthersScreenSize) ? $this->HideOthersScreenSize . '-hide' : '') . "'>";
-				if ($this->SearchForm != null)
-					yield $this->SearchForm->ToString();
-				if ($this->UserMenu != null)
-					yield $this->UserMenu->ToString();
-				if ($this->TemplateButton != null)
-					yield $this->TemplateButton->ToString();
-				if (isValid($this->Content))
-					yield $this->Content;
-				yield "</div>";
+				$defaultButtons = [];
+				if ($this->AllowDefaultButtons) {
+					module("SearchForm");
+					module("UserMenu");
+					module("TemplateButton");
+					$defaultButtons[] = new SearchForm();
+					if (\_::$Config->AllowSigning) $defaultButtons[] = new UserMenu();
+					$defaultButtons[] = new TemplateButton();
+				}
+				yield Html::Division([
+						...($defaultButtons? $defaultButtons : []),
+						...($this->Content? (is_array($this->Content)?$this->Content:[$this->Content]) : [])
+					],
+					["class" => "other {$this->ShowOthersScreenSize}-show {$this->HideOthersScreenSize}-hide"]
+				);
 			}
 		});
 	}
@@ -395,17 +392,6 @@ class MainMenu extends Module
 	public function AfterHandle()
 	{
 		return parent::AfterHandle() . ($this->AllowFixed ? "<div class='{$this->Name}-margin'></div>" : "");
-	}
-
-	public function GetScript()
-	{
-		return parent::GetScript() . Html::Script("
-			function ViewSideMenu(show){
-				if(show === undefined) $('.{$this->Name}').toggleClass('active');
-				else if(show) $('.{$this->Name}').addClass('active');
-				else $('.{$this->Name}').removeClass('active');
-			}
-		");
 	}
 }
 ?>

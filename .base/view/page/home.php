@@ -1,7 +1,6 @@
 <?php
 use \MiMFa\Library\Html;
 use \MiMFa\Library\User;
-;
 
 module("RingSlide");
 $module = new \MiMFa\Module\RingSlide();

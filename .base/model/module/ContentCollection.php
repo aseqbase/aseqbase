@@ -202,7 +202,7 @@ class ContentCollection extends Collection{
 				font-size: var(--size-0);
 				box-shadow: var(--shadow-1);
 				border-radius: var(--radius-2);
-            	border: var(--border-1) var(--back-color-5);
+            	border: var(--border-1) var(--back-color-1);
 				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
 			}
 			.{$this->Name}>*>.item:hover{

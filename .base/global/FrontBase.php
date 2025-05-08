@@ -48,7 +48,7 @@ abstract class FrontBase
 	 * @template array [Black, Red, Green, Blue, Yellow, Cyan, Violet, White]
 	 * @var mixed
 	 */
-	public $ColorPalette = array("#030405", "#dd2222", "#22dd22", "#2222dd", "#ccbb22", "#22dddd", "#dd22dd", "#fdfeff");
+	public $ColorPalette = array("#212529", "#dc3545", "#198754", "#0d6efd", "#ffc107", "#0dcaf0", "#6f42c1", "#f8f9fa");
 	/**
 	 * Fore Colors Palette
 	 * @field array<color>
@@ -205,13 +205,13 @@ abstract class FrontBase
 	public function CreateTemplate($name = null, $data = [])
 	{
 		switch (strtolower($name)) {
-			case 'Message':
+			case 'message':
 				template($name, $data);
 				return new \MiMFa\Template\Message();
-			case 'Splash':
+			case 'splash':
 				template($name, $data);
 				return new \MiMFa\Template\Splash();
-			case 'General':
+			case 'general':
 				template($name, $data);
 				return new \MiMFa\Template\General();
 			default:

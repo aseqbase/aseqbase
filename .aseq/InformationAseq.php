@@ -10,10 +10,10 @@ class InformationAseq extends InformationBase
 	public $Description = "An original, safe, very flexible, and innovative framework for web developments!";
 	public $FullDescription = "A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.";
 
-	public $Path = "https://aseqbase.ir";
-	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
+	public $Path = "/";
+	public $DownloadPath = null;
 	public $Location = null;
-	public $Payment = '{"Network":"TRC-20","Unit":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}';
+	public $Payment = null;
 
 	public $KeyWords = array("MiMFa aseqbase Framework", "MiMFa", "aseqbase", "Web Development", "Development", "Web Framework", "Website", "Framework");
 

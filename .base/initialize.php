@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__."/global.php");
+require_once(__DIR__.DIRECTORY_SEPARATOR."global.php");
 
 component("Component");
 template("Template");

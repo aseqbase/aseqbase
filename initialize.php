@@ -1,5 +1,6 @@
 <?php
 /* Don't change the codes below: */
+if(realpath(__DIR__.DIRECTORY_SEPARATOR."global.php")) include_once __DIR__.DIRECTORY_SEPARATOR."global.php";
 $GLOBALS["NEST"] = empty($GLOBALS["ASEQ"])?0:preg_match_all("/(?<=\S|\s)\.(?=\S|\s)/",$ASEQ)+1;
 if(!isset($GLOBALS["HOST"])){
 	$GLOBALS["HOST"] = (isset($_SERVER['HTTPS'])?"https://":"http://");

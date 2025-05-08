@@ -205,11 +205,11 @@ class PaymentForm extends Form{
 		$doc = Html::Document(__($this->SuccessContent).$this->Transaction->ToHtml());
 		$res = "";
 		if(isValid($this->Transaction->DestinationEmail))
-			if(Contact::SendHTMLEmail(\_::$Info->SenderEmail, $this->Transaction->DestinationEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->Id, $doc, $this->Transaction->SourceEmail,$this->Transaction->DestinationEmail == \_::$Info->ReceiverEmail?null:\_::$Info->ReceiverEmail))
+			if(Contact::SendHtmlEmail(\_::$Info->SenderEmail, $this->Transaction->DestinationEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->Id, $doc, $this->Transaction->SourceEmail,$this->Transaction->DestinationEmail == \_::$Info->ReceiverEmail?null:\_::$Info->ReceiverEmail))
                 $res .= Html::Success("Your transaction received", $attr);
             else $res .= Html::Warning("We could not receive your transaction details, please notify us!", $attr);
         if(isValid($this->Transaction->SourceEmail))
-			if(Contact::SendHTMLEmail(\_::$Info->SenderEmail, $this->Transaction->SourceEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->Id, $doc, $this->Transaction->DestinationEmail))
+			if(Contact::SendHtmlEmail(\_::$Info->SenderEmail, $this->Transaction->SourceEmail, __($this->SuccessSubject, styling:false)." - ".$this->Transaction->Id, $doc, $this->Transaction->DestinationEmail))
                 $res .= Html::Success("A notification to '{$this->Transaction->SourceEmail}' has been sent!", $attr);
             else $res .= Html::Warning("Could not send a notification to '{$this->Transaction->SourceEmail}'!", $attr);
 		if(table("Payment")->Insert([

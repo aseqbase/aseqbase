@@ -17,6 +17,6 @@
 		<meta name="twitter:Description" content="<?php echo \_::$Info->Description; ?>">
 		<meta name="twitter:Image" content="<?php echo \MiMFa\Library\Local::GetUrl(\_::$Info->LogoPath); ?>">
 		<!-- LICENCE PART: Don`t remove this part -->
-		<meta name="framwork" content="aseqbase">
+		<meta name="framework" content="aseqbase">
 		<!-- LICENCE PART -->
 		<?php echo join(PHP_EOL, \_::$Front->Libraries) . \_::$Front->GetInitial(); ?>

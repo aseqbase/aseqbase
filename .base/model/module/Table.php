@@ -152,15 +152,25 @@ class Table extends Module
 
     public $SevereSecure = true;
     public $CryptPassword = true;
-    public $FormBlockTimeout = 10000;
+    /**
+     * The displayed form
+     * @var Form|null
+     */
+    public $Form = null;
 
     public $OddEvenColumns = true;
     public $OddEvenRows = true;
     public $HoverableRows = true;
     public $HoverableCells = true;
 
-    protected $ExclusiveMethod = "OPTIONS";
-    protected $SecretKey = "_secret";
+    public $ExclusiveMethod = "TABLE";
+    public $SecretKey = "_secret";
+    /**
+     * A control manager function
+     * return null to do default action
+     * @default fn($values, $funcName)=>null
+     */
+    public $ControlHandler = null;
     public $Controlable = true;
     public $Updatable = false;
     public $UpdateAccess = 0;
@@ -440,6 +450,7 @@ class Table extends Module
         $maccess = $isu && !is_null($this->ModifyAccess) && auth($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && auth($this->RemoveAccess);
         $isc = $isc && ($vaccess || $aaccess || $maccess || $daccess || $raccess);
+        $addbutton = fn($text="Add your first item ") => Html::Center(Html::Button($text . Html::Image("plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
         if (is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey => $row)
@@ -549,9 +560,9 @@ class Table extends Module
                     $cells[] = "</tr></tfoot>";
                 } else
                     $cells[] = Convert::ToString($this->Footer);
-            return ($isc ? $this->HandleModal() : "") . parent::Get() . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . join(PHP_EOL, $cells);
+            return ($isc ? $this->HandleModal() : "") . parent::Get() . $addbutton("Add another item ") . Html::$NewLine . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . join(PHP_EOL, $cells);
         } elseif ($aaccess)
-            return ($isc ? $this->HandleModal() : "") . parent::Get() . Html::Center(Html::Button("Add your first item " . Html::Image("plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
+            return ($isc ? $this->HandleModal() : "") . parent::Get() . $addbutton("Add your first item ");
         return ($isc ? $this->HandleModal() : "") . parent::Get();
     }
 
@@ -643,10 +654,14 @@ class Table extends Module
 						}
 					);
 				}" . ($this->Updatable ? (auth($this->AddAccess) ? "
-				function {$this->Modal->Name}_Create(){
+				function {$this->Modal->Name}_Create(defaultValues){
 					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}',{$this->KeyColumn}:'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->ShowScript(null, null, '${data}') . "
+                            if(defaultValues)
+                            for(x in defaultValues)try{
+                            	document.querySelector('.{$this->Modal->Name} *[name=\"'+x+'\"]').value = defaultValues[x];
+                			}catch{}
 						}
 					);
 				}" : "") . (auth($this->ModifyAccess) ? "
@@ -689,46 +704,48 @@ class Table extends Module
         $value = get($values, $this->KeyColumn);
         $secret = grab($values, $this->SecretKey);
         $recievedData = count($values) > 1;
+        if(!$this->ControlHandler) $this->ControlHandler = fn($v,$f)=>null;
         if (!$secret) return Html::Error("Your request is not valid!");
         elseif ($secret === $this->ViewSecret)
-            return $this->GetViewForm($value);
+            return ($this->ControlHandler)($value, "GetViewForm") ?? $this->GetViewForm($value);
         elseif ($secret === $this->DuplicateSecret)
-            return $this->GetDuplicateForm($value);
+            return ($this->ControlHandler)($value, "GetDuplicateForm") ?? $this->GetDuplicateForm($value);
         elseif ($secret === $this->AddSecret)
             if ($recievedData)
-                return $this->AddRow($values);
+                return ($this->ControlHandler)($values, "AddRow") ?? $this->AddRow($values);
             else
-                return $this->GetAddForm($value);
+                return ($this->ControlHandler)($value, "GetAddForm") ?? $this->GetAddForm($value);
         elseif ($secret === $this->ModifySecret)
             if ($recievedData)
-                return $this->ModifyRow($values);
+                return ($this->ControlHandler)($values, "ModifyRow") ?? $this->ModifyRow($values);
             else
-                return $this->GetModifyForm($value);
+                return ($this->ControlHandler)($value, "GetModifyForm") ?? $this->GetModifyForm($value);
         elseif ($secret === $this->RemoveSecret)
-            return $this->RemoveRow($value);
+            return ($this->ControlHandler)($value, "RemoveRow") ?? $this->RemoveRow($value);
         else return Html::Error("There is not any response for your request!");
     }
 
     public function GetForm()
     {
         module("Form");
-        $form = new Form();
-        $form->Router->Get()->Switch();
-        $form->Method = $this->ExclusiveMethod;
-        $form->BlockTimeout = $this->FormBlockTimeout;
-        $form->Template = "b";
-        $form->Class = "container-fluid";
-        $form->CancelLabel = "Cancel";
+        if(!$this->Form) {
+            $this->Form = new Form();
+            $this->Form->Template = "s";
+            $this->Form->Class = "container-fluid";
+            $this->Form->CancelLabel = "Cancel";
+            $this->Form->SuccessPath = \Req::$Url;
+            $this->Form->BackPath = \Req::$Url;
+            $this->Form->BackLabel = null;
+            //$form->AllowHeader = false;
+        }
+        $this->Form->Router->Get()->Switch();
+        $this->Form->Method = $this->ExclusiveMethod;
         if ($this->Modal) {
-            $form->CancelPath = $this->Modal->HideScript();
-            $form->CancelLabel = "Cancel";
+            $this->Form->CancelPath = $this->Modal->HideScript();
+            $this->Form->CancelLabel = "Cancel";
         } else
-            $form->CancelLabel = null;
-        $form->SuccessPath = \Req::$Url;
-        $form->BackPath = \Req::$Url;
-        $form->BackLabel = null;
-        //$form->AllowHeader = false;
-        return $form;
+            $this->Form->CancelLabel = null;
+        return $this->Form;
     }
     public function GetViewForm($value)
     {

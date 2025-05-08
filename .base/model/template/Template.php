@@ -119,6 +119,7 @@ class Template extends \Base{
             text-align: unset;
         }
         * {
+            line-height: 1.3em;
             direction: ".(\_::$Back->Translate->Direction??\_::$Config->DefaultDirection).";
         }
         .tooltip {

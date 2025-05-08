@@ -83,13 +83,11 @@ abstract class ReqBase
 	public static function Receive($key = null, array|string|null $source = null, $default = null)
 	{
 		if (is_null($source)) $source = getMethodName();
-			// if (isEmpty($_REQUEST))
-			// 	parse_str(file_get_contents('php://input'), $source);
-			// else $source = $_REQUEST;
+		// if (isEmpty($_REQUEST))
+		// 	parse_str(file_get_contents('php://input'), $source);
+		// else $source = $_REQUEST;
 		if (is_string($source))
 			switch (trim(strtolower($source))) {
-				case "bin":
-				case "binary":
 				case "file":
 				case "files":
 					$source = $_FILES;
@@ -98,26 +96,12 @@ abstract class ReqBase
 					$source = $_GET;
 					break;
 				case "private":
-				case "add":
 				case "post":
 					$source = $_POST;
 					break;
 				case "put":
-				case "modify":
-				case "update":
-				case "edit":
 				case "patch":
-				case "val":
-				case "value":
-				case "remove":
 				case "delete":
-				case "del":
-				case "stream":
-				case "inter":
-				case "internal":
-				case "exter":
-				case "external":
-				default:
 					$res = file_get_contents('php://input');
 					if (!isEmpty($res)) {
 						if (isJson($res))
@@ -129,9 +113,21 @@ abstract class ReqBase
 					}
 					$_REQUEST = $source = is_array($source)? $source:[$source];
 					break;
-				// default:
-				// 	//$source = $_REQUEST;
-				// 	break;
+				default:
+					if(strtoupper($source) == getMethodName()) {
+						if($source = $_POST) break;
+						$res = file_get_contents('php://input');
+						if (!isEmpty($res)) {
+							if (isJson($res))
+								$source = \MiMFa\Library\Convert::FromJson($res) ?? $source;
+							else if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false)
+								$source = \MiMFa\Library\Convert::FromFormData($res, $_FILES) ?? $source;
+							else
+								parse_str($res, $source);
+						}
+						$_REQUEST = $source = is_array($source)? $source:[$source];
+					}
+					break;
 			}
 		if (is_null($key))
 			return (count($source) > 0 ? $source : $default) ?? [];
@@ -178,7 +174,7 @@ abstract class ReqBase
 		}
 		return $val;
 	}
-
+	
 	/**
 	 * Received input from the client side
 	 * @param mixed $key The getted data key

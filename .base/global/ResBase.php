@@ -48,25 +48,35 @@ abstract class ResBase
 		return $output;
 	}
 	/**
-	 * Replace the output with all the document in the client side
+	 * Print only this output on the client side then reload the page
 	 * @param mixed $output The data that is ready to print
+	 * @param mixed $status The header status
 	 */
-	public static function Set($output = null)
+	public static function Flip($output = null, $status = null, $url = null)
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(
-			\MiMFa\Library\Internal::MakeScript(
-				$output,
-				null,
-				"(data,err)=>{document.open();document.write(data??err);document.close();}"
-			)
-		));
+		ob_clean();
+		self::Status($status);
+		exit(\MiMFa\Library\Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
+	}
+	/**
+	 * Print only this output on the client side
+	 * @param mixed $output The data that is ready to print
+	 * @param mixed $status The header status
+	 */
+	public static function End($output = null, $status = null)
+	{
+		self::Status($status);
+		if ($output)
+			exit(\MiMFa\Library\Convert::ToString($output));
+		else
+			exit;
 	}
 	/**
 	 * Print only this output on the client side, Clear before then end
 	 * @param mixed $output The data that is ready to print
 	 * @param mixed $status The header status
 	 */
-	public static function Put($output = null, $status = null)
+	public static function Set($output = null, $status = null)
 	{
 		if (ob_get_level())
 			ob_end_clean(); // Clean any remaining output buffers
@@ -81,7 +91,7 @@ abstract class ResBase
 	 * @param string|null $name Optional filename to force download with a specific name.
 	 * @throws \Exception If the file path is invalid or the file cannot be read.
 	 */
-	public static function PutFile($path = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
+	public static function SetFile($path = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
 	{
 		// Clear output buffer if active
 		if (ob_get_level()) ob_clean();
@@ -114,28 +124,18 @@ abstract class ResBase
 		exit;
 	}
 	/**
-	 * Print only this output on the client side then reload the page
+	 * Replace the output with all the document in the client side
 	 * @param mixed $output The data that is ready to print
-	 * @param mixed $status The header status
 	 */
-	public static function Flip($output = null, $status = null, $url = null)
+	public static function Reset($output = null)
 	{
-		ob_clean();
-		self::Status($status);
-		exit(\MiMFa\Library\Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
-	}
-	/**
-	 * Print only this output on the client side
-	 * @param mixed $output The data that is ready to print
-	 * @param mixed $status The header status
-	 */
-	public static function End($output = null, $status = null)
-	{
-		self::Status($status);
-		if ($output)
-			exit(\MiMFa\Library\Convert::ToString($output));
-		else
-			exit;
+		\Res::Render(\MiMFa\Library\Html::Script(
+			\MiMFa\Library\Internal::MakeScript(
+				$output,
+				null,
+				"(data,err)=>{document.open();document.write(data??err);document.close();}"
+			)
+		));
 	}
 
 	/**

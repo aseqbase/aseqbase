@@ -1,6 +1,6 @@
 <?php
 \_::$Back->Router->Route("(public|asset|(view/(script|style)))/.*\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm|webp)")
-    ->Default(fn()=>\Res::PutFile(normalizePath(\Req::$Request)));
+    ->Default(fn()=>\Res::SetFile(normalizePath(\Req::$Request)));
 \_::$Back->Router->Route("contents")->Default("contents");
 \_::$Back->Router->Route("content")->Default("content");
 \_::$Back->Router->Route("posts")->Default("posts");

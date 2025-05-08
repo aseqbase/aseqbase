@@ -345,8 +345,7 @@ let reload = function () {
 	window.location.reload();
 };
 let load = function (url = null) {
-	locate(url ?? location.href);
-	reload();
+	window.location.href = url??window.location.href;
 };
 let go = function (url = null, target = "_self") {
 	window.open(url ?? location.href, target);
@@ -408,7 +407,8 @@ let sendRequest = function (
 	ready = null,
 	progress = null,
 	timeout = null) {
-
+	if (!document.querySelector(selector)) selector = 'body';
+	
 	const btns = document.querySelectorAll(selector + ' :is(button, .btn, .icon, input:is([type=button],[type=submit],[type=image],[type=reset]))');
 	const elems = document.querySelectorAll(selector);
 	const opacity = document.querySelector(selector).style.opacity;
@@ -479,7 +479,19 @@ let sendRequest = function (
 	};
 
 	const xhr = new XMLHttpRequest();
-	xhr.open(method, url, true);
+	switch (method) {
+		case "GET":
+		case "POST":
+		case "PATCH":
+		case "PUT":
+		case "DELETE":
+			xhr.open(method, url, true);
+			break;
+		default:
+			xhr.open("POST", url, true);
+			xhr.setRequestHeader("X-Custom-Method", method);
+			break;
+	}
 
 	if (contentType) xhr.setRequestHeader('Content-Type', contentType);
 

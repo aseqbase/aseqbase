@@ -16,7 +16,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 2.00030;
+	public static float $Version = 2.01050;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -82,7 +82,7 @@ class _
 	public static AddressBase $Address;
 }
 
-require_once(__DIR__ . "/global/AddressBase.php");
+require_once(__DIR__. DIRECTORY_SEPARATOR . "global". DIRECTORY_SEPARATOR . "AddressBase.php");
 
 \_::$Address = new AddressBase();
 
@@ -1027,32 +1027,24 @@ function getMethodName(string|int|null $method = null)
 {
 	switch (strtoupper($method ?? "")) {
 		case 1:
+		case "PUBLIC":
 		case "GET":
 			return "GET";
 		case 2:
-		case "SET":
+		case "PRIVATE":
 		case "POST":
-		case "ADD":
 			return "POST";
 		case 3:
-		case "EDIT":
-		case "MODIFY":
-		case "UPDATE":
 		case "PUT":
 			return "PUT";
 		case 4:
-		case "BIN":
-		case "BINARY":
 		case "FILES":
 		case "FILE":
 			return "POST";
 		case 5:
 		case "PATCH":
-		case "VALUE":
-		case "VAL":
 			return "PATCH";
 		case 6:
-		case "REMOVE":
 		case "DELETE":
 		case "DEL":
 			return "DELETE";
@@ -1068,7 +1060,7 @@ function getMethodName(string|int|null $method = null)
 		case "EXTERNAL":
 			return "EXTERNAL";
 		default:
-			return strtoupper($method ?? $_SERVER['REQUEST_METHOD'] ?? "OTHER");
+			return strtoupper($method ?? $_SERVER['HTTP_X_CUSTOM_METHOD'] ?? $_SERVER['REQUEST_METHOD'] ?? "OTHER");
 	}
 }
 /**
@@ -1089,34 +1081,26 @@ function getMethodName(string|int|null $method = null)
  */
 function getMethodIndex(string|int|null $method = null)
 {
-	switch (strtoupper($method ?? $_SERVER['REQUEST_METHOD'])) {
+	switch (strtoupper($method ?? $_SERVER['HTTP_X_CUSTOM_METHOD'] ?? $_SERVER['REQUEST_METHOD'])) {
 		case 1:
+		case "PUBLIC":
 		case "GET":
 			return 1;
 		case 2:
-		case "SET":
-		case "ADD":
+		case "PRIVATE":
 		case "POST":
 			return 2;
 		case 3:
-		case "EDIT":
-		case "MODIFY":
-		case "UPDATE":
 		case "PUT":
 			return 3;
 		case 4:
-		case "BIN":
-		case "BINARY":
 		case "FILES":
 		case "FILE":
 			return 4;
 		case 5:
 		case "PATCH":
-		case "VALUE":
-		case "VAL":
 			return 5;
 		case 6:
-		case "REMOVE":
 		case "DELETE":
 		case "DEL":
 			return 6;

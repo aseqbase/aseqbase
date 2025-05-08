@@ -176,13 +176,11 @@ class CommentCollection extends Collection
 				font-size: var(--size-0);
 				box-shadow: var(--shadow-1);
 				border-radius: var(--radius-2);
-            	border: var(--border-1) var(--back-color-5);
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 			.{$this->Name} div.item:hover{
 				box-shadow: var(--shadow-2);
 				border-radius:  var(--radius-1);
-				border-color: var(--back-color-4);
 				background-Color: #88888818;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
@@ -370,13 +368,13 @@ class CommentCollection extends Collection
                 $p_refering = $this->AutoRefering;
                 $updateaccess = $adminaccess || ($p_email && get(\_::$Back->User, "Email") == $p_email) || ($p_userid && get(\_::$Back->User, "UserId") == $p_userid);
                 $p_replybuttontext = !$this->ShowButtons ? null : __($this->ReplyButtonLabel);
-                $p_showreplybutton = isValid($p_replybuttontext);
+                $p_showreplybutton = !isEmpty($p_replybuttontext);
                 $p_editbuttontext = !$updateaccess || !$this->ShowButtons ? null : __($this->EditButtonLabel);
-                $p_showeditbutton = isValid($p_editbuttontext);
+                $p_showeditbutton = !isEmpty($p_editbuttontext);
                 $p_deletebuttontext = !$updateaccess || !$this->ShowButtons ? null : __($this->DeleteButtonLabel);
-                $p_showdeletebutton = isValid($p_deletebuttontext);
+                $p_showdeletebutton = !isEmpty($p_deletebuttontext);
                 $p_statustext = !$updateaccess || !$this->ShowStatus ? null : __($p_status ? $this->PublishedLabel : $this->WaitingLabel);
-                $p_showstatus = isValid($p_statustext);
+                $p_showstatus = !isEmpty($p_statustext);
                 $uid = "c_" . getId();
 
                 $p_excerpt = $p_showexcerpt ?

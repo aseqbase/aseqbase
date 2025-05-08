@@ -1,6 +1,10 @@
 <?php
 run("InformationAseq");
 class Information extends InformationAseq{
+	public $Path = "https://aseqbase.ir";
+	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
+	public $Payment = '{"Network":"TRC-20","Unit":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}';
+
 	public $MainMenus = [
 		array("Name" => "HOME", "Path"=> "/home", "Image" => "home"),
 		array("Name" => "POSTS", "Path"=> "/posts", "Image" => "th-large", "Attributes" => "class='menu-link'"),

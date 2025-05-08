@@ -101,6 +101,29 @@ CREATE TABLE IF NOT EXISTS `aseq_Comment` (
   PRIMARY KEY (`Id` )
 ) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
+--
+-- Table structure for table `aseq_Message
+--
+
+CREATE TABLE IF NOT EXISTS `aseq_Message` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `ReplyId` int(11) DEFAULT NULL,
+  `UserId` int(11) DEFAULT NULL,
+  `Name` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `From` varchar(256) NOT NULL,
+  `To` longtext NOT NULL,
+  `Subject` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Attach` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Type` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Access` int(11) DEFAULT 0,
+  `Status` tinytext DEFAULT NULL,
+  `CreateTime` datetime NOT NULL DEFAULT current_timestamp(),
+  `UpdateTime` datetime NOT NULL DEFAULT current_timestamp(),
+  `MetaData` longtext DEFAULT NULL,
+  PRIMARY KEY (`Id` )
+) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
 -- --------------------------------------------------------
 
 --

@@ -158,6 +158,8 @@ class Content extends Module
      public $RelatedsCount = ["News" => 10, "Default" => 5];
 
      public $LeaveComment = true;
+
+     public $ModifyComment = true;
      /**
       * @var bool
       * @category Parts
@@ -264,8 +266,9 @@ class Content extends Module
           $this->LeaveComment = \_::$Config->AllowWriteComment;
           $this->ShowComments = \_::$Config->AllowReadComment;
           $this->ShowCommentsAccess = \_::$Config->ReadCommentAccess;
-          $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
-          $this->CollectionRoute = $this->CollectionRoute??\_::$Address->ContentRoute;          $this->CommentForm = new CommentForm();
+          $this->RootRoute = $this->RootRoute ?? \_::$Address->ContentRoute;
+          $this->CollectionRoute = $this->CollectionRoute ?? \_::$Address->ContentRoute;
+          $this->CommentForm = new CommentForm();
           $this->CommentForm->MessageType = "texts";
           $this->CommentForm->Access = \_::$Config->WriteCommentAccess;
           $this->CommentForm->SubjectLabel =
@@ -289,7 +292,7 @@ class Content extends Module
           $p_meta = getValid($this->Item, 'MetaData', null);
           if ($p_meta !== null) {
                $p_meta = Convert::FromJson($p_meta);
-               swap($this, $p_meta);
+               set($this, $p_meta);
                return true;
           }
           return false;
@@ -378,7 +381,6 @@ class Content extends Module
 			.{$this->Name} .content{
                font-size: var(--size-1);
                text-align: justify;
-            	background-Color: var(--back-color-0);
 				padding-top: var(--size-3);
 				padding-bottom: var(--size-3);
 			}
@@ -422,9 +424,10 @@ class Content extends Module
      {
           return Html::Rack(
                Html::MediumSlot(
-                    ($this->ShowTitle? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $path : null, ['class' => 'heading']):"").
-                    $this->GetDetails($path)) .
-                    $this->GetButtons($path),
+                    ($this->ShowTitle ? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $path : null, ['class' => 'heading']) : "") .
+                    $this->GetDetails($path)
+               ) .
+               $this->GetButtons($path),
                ["class" => "title"]
           );
      }
@@ -499,7 +502,8 @@ class Content extends Module
           $p_image = getValid($this->Item, 'Image', $this->Image);
           return isValid($p_image) ? Html::Division(Html::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg-5", "style" => "text-align: center;"]) : "";
      }
-     public function GetDetails($path = null) {
+     public function GetDetails($path = null)
+     {
           $authorName = null;
           $createTime = get($this->Item, 'CreateTime');
           $modifyTime = get($this->Item, 'UpdateTime');
@@ -544,19 +548,20 @@ class Content extends Module
                excerpt: __(getValid($this->Item, 'Description', $this->Description), styling: false),
                image: getValid($this->Item, 'Image', $this->Image),
                author: ["Name" => $authorName],
-               datePublished: $createTime?explode(" ", $createTime)[0]:null,
-               dateModified: $modifyTime?explode(" ", $modifyTime)[0]:null
+               datePublished: $createTime ? explode(" ", $createTime)[0] : null,
+               dateModified: $modifyTime ? explode(" ", $modifyTime)[0] : null
           ) .
                ($p_meta ? Html::Sub($p_meta, null, ["class" => "details"]) : "");
      }
-     public function GetButtons($path = null) {
+     public function GetButtons($path = null)
+     {
           if (!$this->ShowButtons || isEmpty($path))
                return null;
           $paths = (!$this->ShowContent && (!$this->AutoExcerpt || !$this->ShowDescription)) ? [$path] : Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
           $p_morebuttontext = __(Convert::FromSwitch($this->ButtonsLabel, get($this->Item, 'Type')));
           return Html::SmallSlot(
                loop($paths, function ($k, $v, $i) use ($p_morebuttontext) {
-                    return Html::Button(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn ".($i<1?"main":"outline")]);
+                    return Html::Button(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn " . ($i < 1 ? "main" : "outline")]);
                }),
                attributes: ["class" => "buttons col-md-3 md-hide"]
           );
@@ -626,6 +631,14 @@ class Content extends Module
                     "Relation=:rid AND " . \_::$Back->User->GetAccessCondition(checkStatus: false) . " " . $this->CommentsLimitation,
                     [":rid" => get($this->Item, 'Id')]
                );
+               if (!$this->LeaveComment){
+                    $cc->ReplyButtonLabel = 
+                    $cc->DeleteButtonLabel = null;
+               }
+               if (!$this->ModifyComment){
+                    $cc->EditButtonLabel = 
+                    $cc->DeleteButtonLabel = null;
+               }
                if (count($cc->Items) > 0)
                     return Html::$HorizontalBreak . $cc->ToString();
           }

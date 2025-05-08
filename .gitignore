@@ -424,6 +424,7 @@ FodyWeavers.xsd
 /.git
 /.package
 /MiMFa aseqbase.sln
+/global.php
 *.zip
 *.rar
 # temporary

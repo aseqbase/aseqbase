@@ -52,7 +52,7 @@ class CommentForm extends Form
 	{
 		try {
 			$row = table("Comment")->SelectRow("Contact, Subject", "Id=:Id", [":Id" => $commentId]);
-			Contact::SendHTMLEmail(
+			Contact::SendHtmlEmail(
 				\_::$Info->SenderEmail,
 				$row["Contact"],
 				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),

@@ -8,14 +8,14 @@ require_once "SpecialCrypt.php";
 class User extends \Base
 {
 	public static $HandlerPath = "/sign";
-	public static $SignHandlerPath = "/sign/sign.php";
-	public static $UpHandlerPath = "/sign/up.php";
-	public static $InHandlerPath = "/sign/in.php";
-	public static $OutHandlerPath = "/sign/out.php";
-	public static $RouteHandlerPath = "/sign/profile.php";
-	public static $EditHandlerPath = "/sign/edit.php";
-	public static $DashboardHandlerPath = "/sign/dashboard.php";
-	public static $RecoverHandlerPath = "/sign/recover.php";
+	public static $SignHandlerPath = "/sign/sign";
+	public static $UpHandlerPath = "/sign/up";
+	public static $InHandlerPath = "/sign/in";
+	public static $OutHandlerPath = "/sign/out";
+	public static $RouteHandlerPath = "/sign/profile";
+	public static $EditHandlerPath = "/sign/edit";
+	public static $DashboardHandlerPath = "/sign/dashboard";
+	public static $RecoverHandlerPath = "/sign/recover";
 	
 	public static $DefaultImagePath = "user";
 	public static $RecoverEmailSubject = 'Account Recovery Request';
@@ -430,7 +430,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$dic['$SIGNATURE'] = $this->TemporarySignature;
 		$subject = Convert::FromDynamicString($subject ?? "", $dic, true);
 		$content = Convert::FromDynamicString($content ?? "", $dic, false);
-		return Contact::SendHTMLEmail($from, $this->TemporaryEmail, __($subject), __($content));
+		return Contact::SendHtmlEmail($from, $this->TemporaryEmail, __($subject), __($content));
 	}
 
 	/**
