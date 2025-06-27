@@ -64,7 +64,7 @@ class Translate
 				$query .= "UPDATE ".$this->DataTable->Name." SET `ValueOptions`=:ValueOptions$i WHERE `KeyCode`=:KeyCode$i;";
 			}
         }
-		$this->DataTable->DataBase->ExecuteUpdate($query,$args);
+		$this->DataTable->DataBase->Execute($query,$args);
 		$this->Language = $lang;
 	}
 
@@ -127,7 +127,7 @@ class Translate
 					$vals[$key] = $val;
 			$args[":ValueOptions$i"] = Convert::ToJson($vals);
         }
-        return $this->DataTable->DataBase->ExecuteReplace(join(PHP_EOL, $queries), $args);
+        return $this->DataTable->DataBase->FetchChangesExecute(join(PHP_EOL, $queries), $args);
 	}
 
 	public function ClearAll($condition = null, $params=[]) {

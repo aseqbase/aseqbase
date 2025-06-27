@@ -1,6 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
+use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 use MiMFa\Library\User;
 class SideMenu extends Module
@@ -11,8 +12,12 @@ class SideMenu extends Module
 	public $Direction = "ltr";
 	public $HasBranding = true;
 	public $HasItems = true;
-	public $HasImages = true;
-	public $HasTitles = true;
+	public $AllowItemsLabel = true;
+	public $AllowSubItemsLabel = true;
+	public $AllowItemsDescription = false;
+	public $AllowSubItemsDescription = true;
+	public $AllowItemsImage = false;
+	public $AllowSubItemsImage = true;
 	public $AllowChangeColor = true;
 	public $BackgroundShadow = true;
 	public $AllowHide = true;
@@ -58,7 +63,7 @@ class SideMenu extends Module
 				z-index: 999;
 				padding-bottom: 40px;
 				box-shadow: var(--shadow-5);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(2))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(2))) . "
 			}
 
 			.{$this->Name} .container{
@@ -107,78 +112,136 @@ class SideMenu extends Module
 				height: {$this->LogoHeight};
 			}
 
-			.{$this->Name}>:not(.header, .other) :is(.item, a, a:visited){
-				color: var(--back-color-2);
-			}
-			.{$this->Name}>:not(.header, .other) :is(.item, a, a:visited):hover, .{$this->Name}>:not(.header, .other) :is(.item, a, a:visited):hover *{
-				color: var(--fore-color-2);
-			}
 			$activeselector .main-items .item :is(a, a:visited){
 				column-gap: var(--size-1);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 
 			.{$this->Name} .row{
 				margin: 0px;
 			}
 
-			.{$this->Name} .main-items.items{
-				color: var(--back-color-2);
-				text-transform: uppercase;
-				padding: 0px;
-				margin: 0vmax 0px 3vmax 0px;
-			}
-			$notactiveselector .main-items .item{
-				padding: var(--size-0) calc(var(--size-0) / 3);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
-			}
-			$activeselector .main-items .item{
-				padding: var(--size-0) var(--size-1);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
-			}
-			.{$this->Name} .main-items .item:hover{
-				background-color: var(--back-color-2);
-				color: var(--fore-color-2);
-			}
-			$activeselector .main-items .item.active{
+			.{$this->Name} ul :is(li, li a, li a:visited, li .button, li .button:visited){
 				border: none;
-				border-inline-start: 2vmin solid var(--back-color-2);
+				text-align: start;
+				background-color: inherit;
+				color: inherit;
 			}
-			.{$this->Name} .main-items .item :is(a, a:visited, a:active){
+				
+			.{$this->Name} ul li .image{
+				margin-inline-end: var(--size-0);
+			}
+			.{$this->Name} ul li .description{
+				font-size: var(--size-0);
+				color: #8888;
+			}
+
+			.{$this->Name} ul li .fa{
+				font-size: var(--size-2);
+			}
+
+			.{$this->Name} ul li.dropdown{
+				position: initial;
+			}
+			.{$this->Name} ul li.dropdown ul{
+				text-align: start;
+			}
+
+			.{$this->Name} ul:not(.sub-items) {
+				list-style: none;
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
 				display: flex;
-				color: var(--back-color-2);
-				justify-content: space-evenly;
-				flex-direction: row;
-				align-content: space-between;
-				flex-wrap: nowrap;
-				align-items: center;
-			}
-			$notactiveselector .main-items .item.active{
-				border: none;
-				background-color: var(--back-color-0);
-				color: var(--fore-color-0);
-			}
-			$notactiveselector .main-items .item.active :is(a, a:visited, a:active){
-				color: var(--fore-color-0);
-			}
-			.{$this->Name} .main-items .item .image{
-				height: var(--size-0);
-				margin: calc(var(--size-0) / 2);
-                " . ($this->AllowChangeColor ? \MiMFa\Library\Style::DropColor(\_::$Front->BackColor(2)) : "") . "
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
-			}
-			.{$this->Name} .main-items .item:hover .image{
-                " . ($this->AllowChangeColor ? \MiMFa\Library\Style::DropColor(\_::$Front->ForeColor(2)) : "") . "
-			}
-			$notactiveselector .main-items .item.active .image{
-				height: var(--size-1);
-                " . ($this->AllowChangeColor ? \MiMFa\Library\Style::DropColor(\_::$Front->ForeColor(0)) : "") . "
-			}
-			.{$this->Name} .main-items .box{
+				align-items: stretch;
 				width: 100%;
+				flex-direction: column;
+				flex-wrap: nowrap;
 			}
-			.{$this->Name} .fa{
-				font-size:  var(--size-2);
+
+			.{$this->Name} ul:not(.sub-items)>li.active{
+				border-inline-start: var(--border-2) var(--back-color-3);
+			}
+			.{$this->Name} ul:not(.sub-items)>li>:is(.button, .button:visited){
+				border: none;
+				font-size: inherit;
+				border-radius: none;
+				text-decoration: none;
+				padding: var(--size-0) var(--size-1);
+				display: block;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
+				font-weight: bold;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
+				display: block;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+
+			.{$this->Name} ul.sub-items {
+				display: none;
+				padding: 0px;
+				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+				z-index: 99;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul.sub-items .sub-items {
+				display: flex;
+				position: relative;
+				font-size: 80%;
+				padding: 0px;
+				padding-inline-start: var(--size-5);
+				padding-bottom: calc(var(--size-0) / 2);
+				box-shadow: var(--shadow-1);
+				flex-wrap: wrap;
+				flex-direction: row;
+				align-content: stretch;
+				justify-content: flex-start;
+				align-items: stretch;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul.sub-items .sub-items li :is(.button, .button:visited) {
+				padding: calc(var(--size-0) / 2) var(--size-1);
+				border-color: transparent;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul.sub-items>li {
+				font-size: 80%;
+				display: block;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul.sub-items>li>:is(.button, .button:visited){
+				text-decoration: none;
+				padding: calc(var(--size-1) / 2) var(--size-1);
+				display: block;
+				text-align: start;
+			}
+			.{$this->Name} ul.sub-items>li.dropdown{
+				display: block;
+				border-bottom: var(--border-1) transparent;
+			}
+			.{$this->Name} ul.sub-items>li.dropdown:hover{
+				border-bottom: var(--border-1) var(--back-color-5);
+				box-shadow: var(--shadow-1);
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
+				font-weight: bold;
+				color: #8888;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
+				font-weight: bold;
+				border: none;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+			}
+			.{$this->Name} ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
+				font-weight: bold;
+				border: none;
+				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			" . (
 			isValid($this->BackgroundShadow) ? "
@@ -198,7 +261,7 @@ class SideMenu extends Module
 					position: fixed;
 					z-index: 9999;
 					color:  var(--fore-color-2);
-					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+					" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
 				.{$this->Name}-sign-button-menu:hover{
 					color: var(--fore-color-0);
@@ -230,7 +293,7 @@ class SideMenu extends Module
 					border-radius: var(--radius-3);
 					box-shadow: var(--shadow-1);
 					overflow: hidden;
-					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+					" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
 				.{$this->Name} .other form:is(:hover, :active, :focus) {
 					font-weight: bold;
@@ -245,20 +308,20 @@ class SideMenu extends Module
 					background-color: transparent;
 					outline: none;
 					border: none;
-					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+					" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
 				.{$this->Name} .other form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
 					font-weight: bold;
 					outline: none;
 					border: none;
-					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+					" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
 				.{$this->Name} .other form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
 					color: var(--back-color-2);
 				}
 				.{$this->Name} .other form input[type='search']{
             		width: calc(100% - 50px);
-					" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+					" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
 				.{$this->Name} .other form:is(:hover, :active, :focus) input[type='search'], .{$this->Name} form input[type='search']:is(:hover, :active, :focus){
 					color: var(--fore-color-1);
@@ -272,7 +335,7 @@ class SideMenu extends Module
 			$activeselector{
 				margin-inline-start: 0;
 				display: block !important;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 			.{$this->Name} .header .image{
 				width: var(--size-5);
@@ -289,13 +352,13 @@ class SideMenu extends Module
 				display: block;
 				width: 100%;
 				height: var(--size-5);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(0))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(0))) . "
 			}
 			$activeselector .header .image{
 				display: table-cell;
 				width: var(--size-3);
 				aspect-ratio: 1;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(0))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(0))) . "
 			}
 			.{$this->Name} .pin-button{
 				background-color: transparent;
@@ -303,7 +366,7 @@ class SideMenu extends Module
 				border: none;
 				padding: calc(var(--size-0) / 3);
 				aspect-ratio: 1;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 			.{$this->Name} .pin-button:hover{
 				background-color: #8881;
@@ -313,25 +376,25 @@ class SideMenu extends Module
 				width: 0px;
 				overflow: hidden;
 				opacity: 0;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 			$activeselector .main-items .box{
 				display: inherit;
 				width: 100%;
 				opacity: 1;
 				padding-inline-end: var(--size-5);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 			$notactiveselector>:not(.container, .header), $notactiveselector .header .division{
 				height: 0px;
 				width: 0px;
 				overflow: hidden;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 			$activeselector>:not(.container, .header), $activeselector .header .division{
 				height: fit-content;
 				width: inherit;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 			}
 		")));
 	}
@@ -368,46 +431,19 @@ class SideMenu extends Module
 					["class" => "other {$this->ButtonsScreenSize}-show"]
 				);
 			}
-			if ($this->HasItems) {
-				$count = count($this->Items);
-				if ($count > 0) {
-					$menuTags = "";
-					$ll = 999999999;
-					$i = 0;
-					foreach ($this->Items as $item) {
-						if (auth(getValid($item, "Access", \_::$Config->VisitAccess))) {
-							$sl = getValid($item, 'Layer', 1);
-							if ($sl <= $ll) {
-								if ($sl <= $ll && $i !== 0)
-									$menuTags .= "</div>";
-								$menuTags .= "<div class='row'>";
-							}
-							$ll = $sl;
-							$link = getBetween($item, 'Path', 'Link') ?? "";
-							$menuTags .= Html::Item(
-								Html::Link(
-									($this->HasImages ? Html::Image(getBetween($item, "Image", "Icon", "Logo")) : "") .
-									($this->HasTitles ? Html::Division(
-										__(getBetween($item, 'Name', 'Title'), true, false)
-										,
-										["class" => "box"]
-									) : ""),
-									$link,
-									get($item, 'Attributes')
-								),
-								["class" => "col-sm " . ((endsWith(\Req::$Url, $link) ? 'active' : ''))]
-							);
-						}
-						$i++;
-					}
-					//$menuTags .= "</div>";
-					yield Html::Container(
-						(isValid($this->Content) ? Html::Content(__($this->Content, true, false)) : "") .
-						Html::Items($menuTags, ["class" => "main-items"]),
-						["onclick" => "{$this->Name}_ViewSideMenu(false);"]
+			if ($this->HasItems)
+				if (count($this->Items) > 0)
+					yield Html::Items(
+						function () {
+							foreach ($this->Items as $item)
+								{
+									if($item["Items"]??null)$item["Path"] = null;
+									yield $this->CreateItem($item, 1);
+								}
+						},
+						["onclick"=>"{$this->Name}_ViewSideMenu(false);"],
+						["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : '') . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : '')]
 					);
-				}
-			}
 			if ($this->AllowDefaultButtons && !isEmpty($this->Shortcuts)) {
 				yield "<div class='footer'>";
 				module("Shortcuts");
@@ -419,6 +455,44 @@ class SideMenu extends Module
 				yield "</div>";
 			}
 		});
+	}
+
+	protected function CreateItem($item, $ind = 1)
+	{
+		if (!auth(getValid($item, "Access", \_::$Config->VisitAccess)))
+			return null;
+		$path = getBetween($item, "Path", "Link", "Url");
+		$act = endsWith(\Req::$Path, $path) ? 'active' : '';
+		$ind++;
+		$count = count(getValid($item, "Items", []));
+		return Html::Item(
+			($ind <=2? Html::Button(
+				($this->AllowItemsImage?Html::Image(getBetween($item, "Image", "Icon")):"").
+				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
+				($this->AllowItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
+				$path,
+				get($item, "Attributes")
+				) :
+				Html::Button(
+					($this->AllowSubItemsImage?Html::Image(getBetween($item, "Image", "Icon")):"").
+					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
+					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
+					$path,
+					get($item, "Attributes")
+				)
+			) .
+			($count > 0 ?
+				Html::Items(
+					function () use ($item, $ind) {
+						foreach ($item["Items"] as $itm)
+							yield $this->CreateItem($itm, $ind);
+					}
+					,
+					["class" => "sub-items sub-items-$ind"]
+				)
+				: ""),
+			["class" => $count > 0 ? "dropdown $act" : $act]
+		);
 	}
 
 	public function BeforeHandle()

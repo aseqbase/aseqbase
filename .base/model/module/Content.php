@@ -393,20 +393,11 @@ class Content extends Module
                $this->Set();
                if (!$this->GetAccess())
                     return;
-               $item = $this->Item;
-               $p_id = get($item, 'Id');
-               $p_name = getValid($item, 'Name') ?? $p_id ?? $this->Title;
 
-               $p_inselflink = $this->RootRoute . ($p_id ?? $p_name);
-               if (!$this->CompressPath) {
-                    $catDir = \_::$Back->Query->GetContentCategoryRoute($item);
-                    if (isValid($catDir))
-                         $p_inselflink = $this->CollectionRoute . trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
-               }
-
-               yield $this->GetTitle($p_inselflink);
-               yield $this->GetDescription($p_inselflink);
-               yield $this->GetContent($p_inselflink);
+               yield $this->GetTitle();
+               yield $this->GetDescription();
+               yield $this->GetContent();
+               yield $this->GetSpecial();
                yield $this->GetAttaches();
                yield $this->GetRelateds();
                yield $this->GetCommentsCollection();
@@ -420,35 +411,42 @@ class Content extends Module
           $p_status = intval(getValid($this->Item, 'Status', 1));
           return !($p_status < 1 || !($this->CheckAccess)($this->Item));
      }
-     public function GetTitle($path = null)
+     public function GetTitle($attributes = null)
      {
+          $p_id = get( $this->Item, 'Id');
+          $p_name = getValid( $this->Item, 'Name') ?? $p_id ?? $this->Title;
+          $nameOrId = $p_id ?? $p_name;
+          if (!$this->CompressPath) {
+               $catDir = \_::$Back->Query->GetContentCategoryRoute( $this->Item);
+               if (isValid($catDir))
+                    $nameOrId = trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
+          }
           return Html::Rack(
                Html::MediumSlot(
-                    ($this->ShowTitle ? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $path : null, ['class' => 'heading']) : "") .
-                    $this->GetDetails($path)
+                    ($this->ShowTitle ? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->RootRoute . $nameOrId : null, ['class' => 'heading']) : "") .
+                    $this->GetDetails($this->CollectionRoute . $nameOrId)
                ) .
-               $this->GetButtons($path),
-               ["class" => "title"]
+               $this->GetButtons(),
+               ["class" => "title"], $attributes
           );
      }
-     public function GetDescription($path = null)
+     public function GetDescription($attributes = null)
      {
           return Html::Rack(
                ($this->ShowDescription ? $this->GetExcerpt() : "") . $this->GetImage(),
                ["class" => "description"]
-          );
+          , $attributes);
      }
-     public function GetContent($path = null)
+     public function GetContent($attributes = null)
      {
           if (!$this->ShowContent)
                return null;
           $p_content = getValid($this->Item, 'Content', $this->Content);
-          return (isValid($p_content) ? Html::Division(__(Html::Convert($p_content), refering: $this->AutoRefering), ["class" => "content"]) : null) .
-               $this->GetSpecial($path);
+          return (isValid($p_content) ? Html::Division(__(Html::Convert($p_content), refering: $this->AutoRefering), ["class" => "content"], $attributes) : null);
      }
-     public function GetSpecial($path = null)
+     public function GetSpecial()
      {
-          $paths = (!$this->ShowContent && (!$this->AutoExcerpt || !$this->ShowDescription)) ? [$path] : Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
+          $paths = Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
           if (isEmpty($paths))
                return null;
           $p_type = get($this->Item, 'Type');
@@ -464,15 +462,15 @@ class Content extends Module
                case "Course":
                     module("MediaFrame");
                     if ($p_showmorebutton)
-                         return join(PHP_EOL, loop($paths, action: function ($k, $v, $i) use ($p_image, $p_morebuttontext) {
+                         return join(PHP_EOL, loop($paths, action: function ($v, $k) use ($p_image, $p_morebuttontext) {
                               return (new MediaFrame($v, logo: $p_image, name: is_numeric($k) ? $p_morebuttontext : $k))->DoRender();
-                         })) . Html::Division(loop($paths, function ($k, $v, $i) use ($p_morebuttontext) {
+                         })) . Html::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
                               return Html::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
                          }), ["class" => "more md-show"]);
                     break;
                default:
                     if ($p_showmorebutton)
-                         return Html::Division(loop($paths, function ($k, $v, $i) use ($p_morebuttontext) {
+                         return Html::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
                               return Html::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
                          }), ["class" => "more md-show"]);
                     break;
@@ -553,14 +551,14 @@ class Content extends Module
           ) .
                ($p_meta ? Html::Sub($p_meta, null, ["class" => "details"]) : "");
      }
-     public function GetButtons($path = null)
+     public function GetButtons()
      {
-          if (!$this->ShowButtons || isEmpty($path))
+          if (!$this->ShowButtons)
                return null;
-          $paths = (!$this->ShowContent && (!$this->AutoExcerpt || !$this->ShowDescription)) ? [$path] : Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
-          $p_morebuttontext = __(Convert::FromSwitch($this->ButtonsLabel, get($this->Item, 'Type')));
+          $paths = Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
+          $p_morebuttontext = __(value: Convert::FromSwitch($this->ButtonsLabel, get($this->Item, 'Type')));
           return Html::SmallSlot(
-               loop($paths, function ($k, $v, $i) use ($p_morebuttontext) {
+               loop($paths, function ($v, $k, $i) use ($p_morebuttontext) {
                     return Html::Button(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn " . ($i < 1 ? "main" : "outline")]);
                }),
                attributes: ["class" => "buttons col-md-3 md-hide"]
@@ -588,7 +586,7 @@ class Content extends Module
                if (count($tags) > 0)
                     return Html::$HorizontalBreak . Html::Division($p_tagstext . join(PHP_EOL, loop(
                          $tags,
-                         function ($k, $v, $i) {
+                         function ($v, $k) {
                               return Html::Link(
                                    isValid($v)
                                    ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v, styling: false)
@@ -616,7 +614,7 @@ class Content extends Module
           if (count($rels) > 0)
                return Html::$HorizontalBreak . Html::Division($p_relatedstext . join(PHP_EOL, loop(
                     $rels,
-                    function ($k, $v, $i) {
+                    function ($v, $k) {
                          return Html::Link(isValid($v) ? $v : $k, $this->RootRoute . $k, ["class" => "btn"]);
                     }
                )), ["class" => "relateds"]);

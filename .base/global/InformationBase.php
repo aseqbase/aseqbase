@@ -210,10 +210,10 @@ abstract class InformationBase extends ArrayObject{
 		\MiMFa\Library\Revise::Load($this);
 		
 		$menu = between($this->MainMenus,$this->SideMenus,$this->Shortcuts,$this->Services);
-		if(!$this->MainMenus) $this->MainMenus = $menu;
-		if(!$this->SideMenus) $this->SideMenus = $menu;
-		if(!$this->Shortcuts) $this->Shortcuts = $menu;
-		if(!$this->Services) $this->Services = $menu;
+		if(is_null($this->MainMenus)) $this->MainMenus = $menu;
+		if(is_null($this->MainMenus)) $this->SideMenus = $menu;
+		if(is_null($this->MainMenus)) $this->Shortcuts = $menu;
+		if(is_null($this->MainMenus)) $this->Services = $menu;
 	}
 	public function __get($name) {
         return $this[$this->PropertyName($name)];

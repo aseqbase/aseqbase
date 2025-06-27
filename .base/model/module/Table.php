@@ -397,7 +397,7 @@ class Table extends Module
                     ), defaultItems: $this->Items);
                 $this->Items = $this->NavigationBar->GetItems();
             } else {
-                $this->NavigationBar = new Navigation(isValid($this->SelectQuery) ? $this->DataTable->DataBase->TrySelect($this->SelectQuery, $this->SelectParameters, $this->Items) :
+                $this->NavigationBar = new Navigation(isValid($this->SelectQuery) ? $this->DataTable->DataBase->TryFetchRows($this->SelectQuery, $this->SelectParameters, $this->Items) :
                     $this->DataTable->Select(
                         isEmpty($this->IncludeColumns) ? "*" : (in_array($this->KeyColumn, $this->IncludeColumns) ? $this->IncludeColumns : [$this->KeyColumn, ...$this->IncludeColumns]),
                         [$this->SelectCondition, isEmpty($this->IncludeRows) ? null : ("{$this->KeyColumn} IN('" . join("', '", $this->IncludeRows) . "')")],
@@ -494,26 +494,26 @@ class Table extends Module
                                         $cells[] = $strow;
                                         foreach ($icks as $ckey)
                                             if (!$eck || !in_array($ckey, $ecks))
-                                                $cells[] = $this->GetCell($cn++, $ckey, true, $row);
+                                                $cells[] = $this->GetCell($cn++, $ckey, $row, true);
                                         $cells[] = $etrow;
                                     }
                                     $cells[] = $strow;
                                     foreach ($icks as $ckey)
                                         if (!$eck || !in_array($ckey, $ecks))
-                                            $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $ckey, $ckey, true, $row);
+                                            $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $ckey, $ckey, $row, true);
                                     $cells[] = $etrow;
                                 } else {
                                     if ($hcn) {
                                         $cells[] = $strow;
                                         foreach ($row as $ckey => $cel)
                                             if (!$eck || !in_array($ckey, $ecks))
-                                                $cells[] = $this->GetCell($cn++, $ckey, true, $row);
+                                                $cells[] = $this->GetCell($cn++, $ckey, $row, true);
                                         $cells[] = $etrow;
                                     }
                                     $cells[] = $strow;
                                     foreach ($row as $ckey => $cel)
                                         if (!$eck || !in_array($ckey, $ecks))
-                                            $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $ckey, $ckey, true, $row);
+                                            $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $ckey, $ckey, $row, true);
                                     $cells[] = $etrow;
                                 }
                                 $cells[] = "</thead>";
@@ -527,22 +527,22 @@ class Table extends Module
                                 if (!$eck || !in_array($ckey, $ecks)) {
                                     $cel = isset($row[$ckey]) ? $row[$ckey] : null;
                                     if ($isrk)
-                                        $cells[] = $this->GetCell(is_integer($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, true, $row);
+                                        $cells[] = $this->GetCell(is_integer($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, $row, true);
                                     elseif (in_array($ckey, $cks))
-                                        $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $cel, $ckey, true, $row);
+                                        $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $cel, $ckey, $row, true);
                                     else
-                                        $cells[] = $this->GetCell($cel, $ckey, false, $row);
+                                        $cells[] = $this->GetCell($cel, $ckey, $row, false);
                                 }
                         } else {
                             $colCount = max($colCount, count($row));
                             foreach ($row as $ckey => $cel)
                                 if (!$eck || !in_array($ckey, $ecks)) {
                                     if ($isrk)
-                                        $cells[] = $this->GetCell(is_integer($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, true, $row);
+                                        $cells[] = $this->GetCell(is_integer($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, $row, true);
                                     elseif (in_array($ckey, $cks))
-                                        $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $cel, $ckey, true, $row);
+                                        $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $cel, $ckey, $row, true);
                                     else
-                                        $cells[] = $this->GetCell($cel, $ckey, false, $row);
+                                        $cells[] = $this->GetCell($cel, $ckey, $row, false);
                                 }
                         }
                         $cells[] = $etrow;
@@ -566,28 +566,28 @@ class Table extends Module
         return ($isc ? $this->HandleModal() : "") . parent::Get();
     }
 
-    public function GetCell($cel, $key, $isHead = false, $row = [])
+    public function GetCell($value, $key, $record = [], bool $isHead = false)
     {
-        if (!$isHead || $cel !== $key)
-            $cel = Convert::ToString(Convert::By(get($this->CellsValues, $key), $cel, $key, $row) ?? $cel);
+        if (!$isHead || $value !== $key)
+            $value = Convert::ToString(Convert::By(get($this->CellsValues, $key), $value, $key, $record) ?? $value);
         if ($isHead) {
-            $cel = Convert::ToString($cel);
-            if (isFile($cel)) return "<th>" . Html::Media($cel) . "</th>";
-            else if (isAbsoluteUrl($cel)) return "<th>" . Html::Link(getPage($cel), $cel) . "</th>";
-            else return "<th>" . __($cel, translating: $this->AllowLabelTranslation, styling: false) . "</th>";
+            $value = Convert::ToString($value);
+            if (isFile($value)) return "<th>" . Html::Media($value) . "</th>";
+            else if (isAbsoluteUrl($value)) return "<th>" . Html::Link(getPage($value), $value) . "</th>";
+            else return "<th>" . __($value, translating: $this->AllowLabelTranslation, styling: false) . "</th>";
         }
         //if($this->Updatable && !$isHead && $key > 1){
-        //    $cel = new Field(key:$key, value: $cel, lock: true, type:getValid($this->CellsTypes,$key, null));
-        //    $cel->MinWidth = $this->MediaWidth;
-        //    $cel->MaxHeight = $this->MediaHeight;
-        //    return "<td>".Convert::ToString($cel)."</td>";
+        //    $value = new Field(key:$key, value: $value, lock: true, type:getValid($this->CellsTypes,$key, null));
+        //    $value->MinWidth = $this->MediaWidth;
+        //    $value->MaxHeight = $this->MediaHeight;
+        //    return "<td>".Convert::ToString($value)."</td>";
         //}
-        if (isFile($cel)) return "<td>" . Html::Media($cel) . "</td>";
-        if (isAbsoluteUrl($cel)) return "<td>" . Html::Link(getPage($cel), $cel) . "</td>";
-        $cel = __($cel, translating: $this->AllowDataTranslation, styling: false);
-        if (!$this->TextWrap && !startsWith($cel, "<"))
-            return "<td>" . Convert::ToExcerpt(Convert::ToText($cel), 0, $this->TextLength, "..." . Html::Tooltip($cel)) . "</td>";
-        return "<td>$cel</td>";
+        if (isFile($value)) return "<td>" . Html::Media($value) . "</td>";
+        if (isAbsoluteUrl($value)) return "<td>" . Html::Link(getPage($value), $value) . "</td>";
+        $value = __($value, translating: $this->AllowDataTranslation, styling: false);
+        if (!$this->TextWrap && !startsWith($value, "<"))
+            return "<td>" . Convert::ToExcerpt(Convert::ToText($value), 0, $this->TextLength, "..." . Html::Tooltip($value)) . "</td>";
+        return "<td>$value</td>";
     }
     public function GetScript()
     {
@@ -825,7 +825,7 @@ class Table extends Module
             description: $this->Description,
             method: null,
             children: (function () use ($record, $value) {
-                $schemas = $this->DataTable->DataBase->TrySelect(
+                $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'"
@@ -837,7 +837,7 @@ class Table extends Module
                         if ($schema["COLUMN_NAME"] == $key)
                         {
                             $val = $key == $this->KeyColumn ? $value : null;
-                            $res = $this->PrepareDataToShow($key, $val, $record, $schema);
+                            $res = $this->PrepareDataToShow($val, $key, $record, $schema);
                             if (!isEmpty($res))
                                 yield $res;
                         }
@@ -862,7 +862,7 @@ class Table extends Module
             description: $this->Description,
             method: null,
             children: (function () use ($record, $value) {
-                $schemas = $this->DataTable->DataBase->TrySelect(
+                $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'"
@@ -871,7 +871,7 @@ class Table extends Module
                         if ($schema["COLUMN_NAME"] == $key)
                         {
                             $val = $key == $this->KeyColumn ? $this->AddSecret : $val;
-                            $res = $this->PrepareDataToShow($key, $val, $record, $schema);
+                            $res = $this->PrepareDataToShow($val, $key, $record, $schema);
                             if (!isEmpty($res))
                                 yield $res;
                         }
@@ -896,7 +896,7 @@ class Table extends Module
             description: get($record, "Description"),
             method: null,
             children: (function () use ($record, $value) {
-                $schemas = $this->DataTable->DataBase->TrySelect(
+                $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'"
@@ -904,7 +904,7 @@ class Table extends Module
                 foreach ($record as $key => $val) foreach ($schemas as $schema)
                         if ($schema["COLUMN_NAME"] == $key)
                         {
-                            $res = $this->PrepareDataToShow($key, $val, $record, $schema);
+                            $res = $this->PrepareDataToShow($val, $key, $record, $schema);
                             if (!isEmpty($res))
                                 yield $res;
                             break;
@@ -955,7 +955,7 @@ class Table extends Module
         return Html::Error("You can not remove this item!");
     }
 
-    public function PrepareDataToShow(&$key, &$value, &$record, $schema)
+    public function PrepareDataToShow(&$value, &$key, &$record, $schema)
     {
         $type = getValid($this->CellsTypes, $key, $schema["DATA_TYPE"]);
         $options = null;

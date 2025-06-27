@@ -97,12 +97,12 @@ class Style extends \ArrayObject{
      * @return string|null
      */
 	public static function DoStrong($text, $keyWords=null, $caseSensitive = false, $multiline = true, $both = false, $standardization = false){
-		if($standardization) return self::DoProcess($text, function($k, $v) {return "<strong>$v</strong>";}, $keyWords, $caseSensitive, $multiline, $both);
-		else return self::DoProcess($text, function($k, $v) {return "<strong>$v</strong>";}, $keyWords, $caseSensitive, $multiline, $both);
+		if($standardization) return self::DoProcess($text, function($v) {return "<strong>$v</strong>";}, $keyWords, $caseSensitive, $multiline, $both);
+		else return self::DoProcess($text, function($v) {return "<strong>$v</strong>";}, $keyWords, $caseSensitive, $multiline, $both);
 	}
 	/**
      * Specify the keywords in the tag content automatically by a special process
-     * @param callable $process function($key, $value, $index) {return $value;}
+     * @param callable $process function($value, $key, $index) {return $value;}
      * @param string|null $text
      * @param array|null $keyWords
      * @param bool $caseSensitive
@@ -128,13 +128,13 @@ class Style extends \ArrayObject{
                 else $nk = $dic[$nv] = "<".$c++.">";
                 $text = preg_replace($start.preg_quote($key, "/").$end, $nk, $text);
                 if($key!=$value && !is_null($value)){
-                    if(array_key_exists($nv = $process($key, $value, $i++), $dic)) $nk = $dic[$nv];
+                    if(array_key_exists($nv = $process($value, $key, $i++), $dic)) $nk = $dic[$nv];
                     else $nk = $dic[$nv] = "<".$c++.">";
                     $text = preg_replace($start.preg_quote($value, "/").$end, $nk, $text);
                 }
             }
 		else foreach ($keyWords as $key=>$value){
-                if(array_key_exists($nv = $process($key, $value, $i++), $dic)) $nk = $dic[$nv];
+                if(array_key_exists($nv = $process($value, $key, $i++), $dic)) $nk = $dic[$nv];
                 else $nk = $dic[$nv] = "<".$c++.">";
                 if(!is_null($value)) $text = preg_replace($start.preg_quote($value, "/").$end, $nk, $text);
             }

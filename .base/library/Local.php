@@ -299,8 +299,9 @@ class Local
 			return null;
 		return $res;
 	}
-	public static function WriteText($path, string|null $text)
+	public static function WriteText($path, string|null $text, bool $ifNeeds = false)
 	{
+		if($ifNeeds && (self::ReadText($path) === $text)) return null;
 		return file_put_contents(self::GetFile($path) ?? self::GetPath($path), $text);
 	}
 

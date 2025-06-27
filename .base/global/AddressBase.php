@@ -10,7 +10,7 @@ class AddressBase
 	public string|null $Directory;
 	public string $ModelDirectory;
 	public string $ViewDirectory;
-	public string $LogicDirectory;
+	public string $ComputeDirectory;
 	public string $RouteDirectory;
 	public string $PrivateDirectory;
 	public string $PublicDirectory;
@@ -48,7 +48,7 @@ class AddressBase
 		$this->Directory = str_replace(["\\", "/"], [DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR], $rootDir ?? DIRECTORY_SEPARATOR);
 		$this->ModelDirectory = $this->Directory . "model" . DIRECTORY_SEPARATOR;
 		$this->ViewDirectory = $this->Directory . "view" . DIRECTORY_SEPARATOR;
-		$this->LogicDirectory = $this->Directory . "logic" . DIRECTORY_SEPARATOR;
+		$this->ComputeDirectory = $this->Directory . "compute" . DIRECTORY_SEPARATOR;
 		$this->RouteDirectory = $this->Directory . "route" . DIRECTORY_SEPARATOR;
 		$this->PrivateDirectory = $this->Directory . "private" . DIRECTORY_SEPARATOR;
 		$this->PublicDirectory = $this->Directory . "public" . DIRECTORY_SEPARATOR;

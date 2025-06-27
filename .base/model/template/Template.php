@@ -76,6 +76,7 @@ class Template extends \Base{
 
 	public function __construct($setDefaults = true, $setRevises = true){
         parent::__construct($setDefaults, $setRevises);
+        component("Manifest");
         component("JsonLD");
 		component("Global");
 		component("Live");
@@ -118,9 +119,9 @@ class Template extends \Base{
         html, body{
             text-align: unset;
         }
-        * {
-            line-height: 1.3em;
-            direction: ".(\_::$Back->Translate->Direction??\_::$Config->DefaultDirection).";
+        *:not(h1,h2,h3,h4,h5,h6) {
+            line-height: 1.5em;
+            direction: var(--dir);
         }
         .tooltip {
             position: absolute;
@@ -151,6 +152,13 @@ class Template extends \Base{
         }
         small {
             font-size: 0.75em;
+        }
+        sub, sup {
+            line-height: 1em;
+        }
+        .icon {
+            min-height: 1em;
+            min-width: 1em;
         }
         :is(.button, .btn, .icon).success{
             background-color: var(--color-2);

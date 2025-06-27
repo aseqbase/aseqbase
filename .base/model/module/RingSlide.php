@@ -160,7 +160,7 @@ class RingSlide extends Module{
 				yield parent::Get();
 				$btns = [];
 				$tags = [];
-				loop($this->Items, function($k,$v,$i) use(&$btns, &$tags){
+				loop($this->Items, function($v,$k,$i) use(&$btns, &$tags){
 					if(auth(getValid($v,"Access" ,\_::$Config->VisitAccess))) {
 						$desc = get($v, 'Description' );
 						$more = getBetween($v, "Button","More");

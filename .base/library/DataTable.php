@@ -9,121 +9,269 @@
 class DataTable
 {
 	public $Name = null;
+	public $MainName = null;
+	public $AlternativeName = null;
 	public \MiMFa\Library\DataBase $DataBase;
+	
+	public $PreQuery = null;
+	public $MidQuery = null;
+	public $PostQuery = null;
 
-	public function __construct(\MiMFa\Library\DataBase $dataBase, $name)
+	public function __construct(\MiMFa\Library\DataBase $dataBase, $name, bool $addPrefix = true)
 	{
 		$this->DataBase = $dataBase;
+		$this->MainName = $name;
+		$name = $addPrefix ? (\_::$Config->DataBasePrefix . $name) : $name;
 		foreach (\_::$Config->DataTableNameConvertors as $key => $value)
 			$name = preg_replace($key, $value, $name);
 		$this->Name = $name;
 	}
 
-	public function SelectValue($columns = "*", $condition = null, $params = [], $defaultValue = null)
-	{
-		return $this->DataBase->SelectValue($this->Name, $columns, $condition, $params, $defaultValue);
+	protected function GetDatabase(){
+		$this->DataBase->PreQuery = $this->PreQuery;
+		$this->DataBase->MidQuery = $this->MidQuery;
+		$this->DataBase->PostQuery = $this->PostQuery;
+		return $this->DataBase;
 	}
-	public function SelectValueQuery($columns = "*", $condition = null)
+	
+	public function Create($column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin", $defaultValue = null)
 	{
-		return $this->DataBase->SelectValueQuery($this->Name, $columns, $condition);
+		return $this->GetDatabase()->CreateTable($this->Name, $column_types, $configs,$defaultValue);
+	}
+	public function CreateQuery($column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin")
+	{
+		return $this->GetDatabase()->CreateTableQuery($this->Name, $column_types,  $configs);
+	}
+
+	public function SelectValue($column = "Id", $condition = null, $params = [], $defaultValue = null)
+	{
+		return $this->GetDatabase()->SelectValue($this->Name, $column, $condition, $params, $defaultValue);
+	}
+	public function SelectValueQuery($column = "Id", $condition = null)
+	{
+		return $this->GetDatabase()->SelectValueQuery($this->Name, $column, $condition);
 	}
 
 	public function Select($columns = "*", $condition = null, $params = [], $defaultValue = array())
 	{
-		return $this->DataBase->Select($this->Name, $columns, $condition, $params, $defaultValue);
+		return $this->GetDatabase()->Select($this->Name, $columns, $condition, $params, $defaultValue);
 	}
 	public function SelectQuery($columns = "*", $condition = null)
 	{
-		return $this->DataBase->SelectQuery($this->Name, $columns, $condition);
+		return $this->GetDatabase()->SelectQuery($this->Name, $columns, $condition);
 	}
 
 	public function SelectRow($columns = "*", $condition = null, $params = [], $defaultValue = array())
 	{
-		return $this->DataBase->SelectRow($this->Name, $columns, $condition, $params, $defaultValue);
+		return $this->GetDatabase()->SelectRow($this->Name, $columns, $condition, $params, $defaultValue);
 	}
 	public function SelectRowQuery($columns = "*", $condition = null)
 	{
-		return $this->DataBase->SelectRowQuery($this->Name, $columns, $condition);
+		return $this->GetDatabase()->SelectRowQuery($this->Name, $columns, $condition);
 	}
 
-	public function SelectColumn($columns = "*", $condition = null, $params = [], $defaultValue = array())
+	public function SelectColumn($column = "Id", $condition = null, $params = [], $defaultValue = array())
 	{
-		return $this->DataBase->SelectColumn($this->Name, $columns, $condition, $params, $defaultValue);
+		return $this->GetDatabase()->SelectColumn($this->Name, $column, $condition, $params, $defaultValue);
 	}
-	public function SelectColumnQuery($columns = "*", $condition = null)
+	public function SelectColumnQuery($column = "Id", $condition = null)
 	{
-		return $this->DataBase->SelectColumnQuery($this->Name, $columns, $condition);
+		return $this->GetDatabase()->SelectColumnQuery($this->Name, $column, $condition);
 	}
 
-	public function SelectPairs($key = "`Id`", $value = "`Name`", $condition = null, $params = [], $defaultValue = array())
+	public function SelectPairs($key = "Id", $value = "Name", $condition = null, $params = [], $defaultValue = array())
 	{
-		return $this->DataBase->SelectPairs($this->Name, $key, $value, $condition, $params, $defaultValue);
+		return $this->GetDatabase()->SelectPairs($this->Name, $key, $value, $condition, $params, $defaultValue);
 	}
-	public function SelectPairsQuery($key = "`Id`", $value = "`Name`", $condition = null)
+	public function SelectPairsQuery($key = "Id", $value = "Name", $condition = null)
 	{
-		return $this->DataBase->SelectPairsQuery($this->Name, $key, $value, $condition);
+		return $this->GetDatabase()->SelectPairsQuery($this->Name, $key, $value, $condition);
 	}
 
 	public function Insert($params = [], $defaultValue = false)
 	{
-		return $this->DataBase->Insert($this->Name, $params, $defaultValue);
+		return $this->GetDatabase()->Insert($this->Name, $params, $defaultValue);
 	}
 	public function InsertQuery(&$params)
 	{
-		return $this->DataBase->InsertQuery($this->Name, $params);
+		return $this->GetDatabase()->InsertQuery($this->Name, $params);
 	}
 
 	public function Replace($condition = null, $params = [], $defaultValue = false)
 	{
-		return $this->DataBase->Replace($this->Name, $condition, $params, $defaultValue);
+		return $this->GetDatabase()->Replace($this->Name, $condition, $params, $defaultValue);
 	}
 	public function ReplaceQuery($condition, &$params)
 	{
-		return $this->DataBase->ReplaceQuery($this->Name, $condition, $params);
+		return $this->GetDatabase()->ReplaceQuery($this->Name, $condition, $params);
 	}
 
 	public function Update($condition = null, $params = [], $defaultValue = false)
 	{
-		return $this->DataBase->Update($this->Name, $condition, $params, $defaultValue);
+		return $this->GetDatabase()->Update($this->Name, $condition, $params, $defaultValue);
 	}
 	public function UpdateQuery($condition, &$params)
 	{
-		return $this->DataBase->UpdateQuery($this->Name, $condition, $params);
+		return $this->GetDatabase()->UpdateQuery($this->Name, $condition, $params);
 	}
 
 	public function Delete($condition = null, $params = [], $defaultValue = false)
 	{
-		return $this->DataBase->Delete($this->Name, $condition, $params, $defaultValue);
+		return $this->GetDatabase()->Delete($this->Name, $condition, $params, $defaultValue);
 	}
 	public function DeleteQuery($condition = null)
 	{
-		return $this->DataBase->DeleteQuery($this->Name, $condition);
+		return $this->GetDatabase()->DeleteQuery($this->Name, $condition);
 	}
 
-	public function Count($col = "`Id`", $condition = null, $params = [])
+	
+	/**
+	 * Set an Alternative name for the table
+	 * @param string $name
+	 * @return DataTable
+	 */
+	public function As($name)
 	{
-		return $this->DataBase->Count($this->Name, $col, $condition, $params);
+		$this->AlternativeName = $name;
+		$this->MidQuery .= " AS ". $name;
+		return $this;
 	}
-	public function Sum($col = "`Id`", $condition = null, $params = [])
+	/**
+	 * An outer left join the table by another table to do other process by the first table
+	 * @param DataTable $dataTable
+	 * @param mixed $on A condition to join two tables with eachother
+	 * @return DataTable
+	 */
+	public function Join(DataTable $dataTable, $on = null)
 	{
-		return $this->DataBase->Sum($this->Name, $col, $condition, $params);
+		$this->MidQuery .= PHP_EOL."LEFT OUTER JOIN $dataTable->Name $dataTable->MidQuery ON ". ($on??(($this->AlternativeName??$this->Name).".{$dataTable->MainName}Id=".($dataTable->AlternativeName??$dataTable->Name).".Id"));
+		return $this;
 	}
-	public function Average($col = "`Id`", $condition = null, $params = [])
+	/**
+	 * An inner join the table by another table to do other processes on the common rows
+	 * @param DataTable $dataTable
+	 * @param mixed $on A condition to join two tables with eachother
+	 * @return DataTable
+	 */
+	public function InnerJoin(DataTable $dataTable, $on = null)
 	{
-		return $this->DataBase->Average($this->Name, $col, $condition, $params);
+		$this->MidQuery .= PHP_EOL."INNER JOIN $dataTable->Name $dataTable->MidQuery ON ". ($on??(($this->AlternativeName??$this->Name).".{$dataTable->MainName}Id=".($dataTable->AlternativeName??$dataTable->Name).".Id"));
+		return $this;
 	}
-	public function Max($col = "`Id`", $condition = null, $params = [])
+	/**
+	 * An outer right join the table by another table to do other process by the second table
+	 * @param DataTable $dataTable
+	 * @param mixed $on A condition to join two tables with eachother
+	 * @return DataTable
+	 */
+	public function OuterJoin(DataTable $dataTable, $on = null)
 	{
-		return $this->DataBase->Max($this->Name, $col, $condition, $params);
+		$this->MidQuery .= PHP_EOL."RIGHT OUTER JOIN $dataTable->Name $dataTable->MidQuery ON ". ($on??(($this->AlternativeName??$this->Name).".{$dataTable->MainName}Id=".($dataTable->AlternativeName??$dataTable->Name).".Id"));
+		return $this;
 	}
-	public function Min($col = "`Id`", $condition = null, $params = [])
+	/**
+	 * Join the table by another table to do other process by all tables rows
+	 * @param DataTable $dataTable
+	 * @param mixed $on A condition to join two tables with eachother
+	 * @return DataTable
+	 */
+	public function CrossJoin(DataTable $dataTable, $on = null)
 	{
-		return $this->DataBase->Min($this->Name, $col, $condition, $params);
+		$this->MidQuery .= PHP_EOL."CROSS JOIN $dataTable->Name $dataTable->MidQuery ON ". ($on??(($this->AlternativeName??$this->Name).".{$dataTable->MainName}Id=".($dataTable->AlternativeName??$dataTable->Name).".Id"));
+		return $this;
 	}
 
-	public function Exists($col = null, $condition = null, $params = [])
+	/**
+	 * To order all table rows
+	 * @param mixed $columns An array of ["columnname"=>"desc|asc"] or a simple string of "columnname desc|asc, ..."
+	 * @return DataTable
+	 */
+	public function OrderBy($columns = null, bool|null $ascending = null)
 	{
-		return $this->DataBase->Exists($this->Name, $col, $condition, $params);
+		$this->PostQuery .= PHP_EOL.$this->GetDatabase()->OrderNormalization($columns, $ascending);
+		return $this;
+	}
+
+	/**
+	 * To limit the numbers of retrieved table rows
+	 * @param string|int $limit The limitation number
+	 * @return DataTable
+	 */
+	public function Limit($limit = 1)
+	{
+		$this->PostQuery .= PHP_EOL.$this->GetDatabase()->LimitNormalization($limit);
+		return $this;
+	}
+
+
+	public function Exists($column = null, $condition = null, $params = [])
+	{
+		$result = null;
+		try {
+			$result = $this->GetDatabase()->FetchValueExecute($this->SelectValueQuery(is_null($column) ? "1" : $column, $condition), $params);
+		} catch (\Exception $ex) {
+		}
+		return !is_null($result);
+	}
+	public function Count($column = "Id", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("COUNT($column)", $condition), $params);
+	}
+	public function Sum($column = "Id", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("SUM($column)", $condition), $params);
+
+	}
+	public function Average($column = "Id", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("AVG($column)", $condition), $params);
+	}
+	public function Max($column = "Id", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("MAX($column)", $condition), $params);
+	}
+	public function Min($column = "Id", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("MIN($column)", $condition), $params);
+	}
+	public function First($columns = "*", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchRow($this->SelectRowQuery($columns, $condition), $params);
+	}
+	public function Last($columns = "*", $condition = null, $params = [])
+	{
+		return $this->OrderBy(ascending:false)->First($columns, $condition, $params);
+	}
+	public function FirstValue($column = "Id", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("FIRST($column)", $condition), $params);
+	}
+	public function LastValue($column = "Id", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("LAST($column)", $condition), $params);
+	}
+	
+	
+	public function GetMetaValue($key, $condition = null, $params = [], $defaultValue = null)
+	{
+		$metadata = Convert::FromJson($this->SelectValue("MetaData", $condition, $params));
+		return get($metadata, $key) ?? $defaultValue;
+	}
+	public function SetMetaValue($key, $value, $condition = null, $params = [], $defaultValue = false)
+	{
+		$metadata = Convert::FromJson($this->SelectValue("MetaData", $condition, $params));
+		if(!$metadata) $metadata = [];
+		$metadata[$key] = $value;
+		$params["MetaData"] = Convert::ToJson($metadata);
+		return $this->Update($condition, $params, $defaultValue);
+	}
+	public function ForgetMetaValue($key, $condition = null, $params = [], $defaultValue = false)
+	{
+		$metadata = Convert::FromJson($this->SelectValue("MetaData", $condition, $params));
+		if(!$metadata) $metadata = [];
+		unset($metadata[$key]);
+		$params["MetaData"] = Convert::ToJson($metadata);
+		return $this->Update($condition, $params, $defaultValue);
 	}
 }
 

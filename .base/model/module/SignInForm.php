@@ -14,7 +14,9 @@ class SignInForm extends Form{
 	public $SignaturePlaceHolder = "Email/Phone/UserName";
 	public $PasswordPlaceHolder = "Password";
 	public $SignUpLabel = "Do not have an account?";
-	public $RememberLabel = "Forgot your password?";
+	public $SignUpPath = null;
+	public $RecoverLabel = "Forgot your password?";
+	public $RecoverPath = null;
 	public $LoggedInWarning = "You are logged in!";
 	public $IncompleteWarning = "Please fill all fields correctly!";
 	public $IncorrectWarning = "UserName or Password is not correct!";
@@ -99,10 +101,10 @@ class SignInForm extends Form{
 	public function GetFooter(){
         return parent::GetFooter()
 			.Html::LargeSlot(
-				Html::Link($this->SignUpLabel, User::$UpHandlerPath)
+				Html::Link($this->SignUpLabel, $this->SignUpPath??User::$UpHandlerPath)
 			, ["class"=>"col-lg-12"])
 			.Html::LargeSlot(
-				Html::Link($this->RememberLabel, User::$RecoverHandlerPath)
+				Html::Link($this->RecoverLabel, $this->RecoverPath??User::$RecoverHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 

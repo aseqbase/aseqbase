@@ -36,7 +36,7 @@ class Tabs extends Module{
             Html::Division(
                 join("", loop(
                     $this->Items,
-                    function ($k, $v, $i) {
+                    function ($v, $k, $i) {
                         return Html::Division($k, ["class" => "tab-title" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " active" : ""), "onclick" => "{$this->Id}_openTab(this, '$this->Id-tab-$i')"]);
                     }
                 )),
@@ -45,7 +45,7 @@ class Tabs extends Module{
             Html::Division(
                 join("", loop(
                     $this->Items,
-                    function ($k, $v, $i) {
+                    function ($v, $k, $i) {
                         return Html::Element($v, "div", ["class" => "tab-content" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " show" : " hide"), "id" => "$this->Id-tab-$i"]);
                     }
                 )),

@@ -414,15 +414,13 @@ FodyWeavers.xsd
 /gms
 /erp
 /shop
+/nav
 /private
 /public
 /tmp
 /temp
 /vendor
-/.vs
-/.vscode
-/.git
-/.package
+/.*
 /MiMFa aseqbase.sln
 /global.php
 *.zip

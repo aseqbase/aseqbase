@@ -16,7 +16,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 2.01050;
+	public static float $Version = 3.00000;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -82,7 +82,7 @@ class _
 	public static AddressBase $Address;
 }
 
-require_once(__DIR__. DIRECTORY_SEPARATOR . "global". DIRECTORY_SEPARATOR . "AddressBase.php");
+require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "AddressBase.php");
 
 \_::$Address = new AddressBase();
 
@@ -144,6 +144,50 @@ run("Front");
 \MiMFa\Library\Local::CreateDirectory(\_::$Aseq->TempDirectory);
 register_shutdown_function('cleanupTemp', false);
 
+
+/**
+ * To check Features of an object from an array
+ * @param mixed $object The source object
+ * @param array $hierarchy A hierarchy of desired keys
+ */
+function has($object, ...$hierarchy)
+{
+	if (count($hierarchy) === 0)
+		return $object==true;
+	$data = array_shift($hierarchy);
+	if (!is_array($data)) {
+		if (is_array($object)) {
+			if (isset($object[$data]))
+				return has($object[$data], ...$hierarchy);
+			$data = strtolower($data);
+			foreach ($object as $k => $v)
+				if ($data === strtolower($k))
+					return has($v, ...$hierarchy);
+		} else
+			return has($object->{$data} ??
+				$object->{strtoproper($data)} ??
+				$object->{strtolower($data)} ??
+				$object->{strtoupper($data)} ?? null, ...$hierarchy);
+	} else {
+		$res = [];
+		if (is_array($object)) {
+			foreach ($data as $k => $v)
+				if (is_numeric($k)) {
+					if (($val = has($object, $v, ...$hierarchy)) !== null)
+						$res[$k] = $val;
+				} else
+					$res[$k] = has($object, $k, $v, ...$hierarchy);
+		} else {
+			foreach ($data as $k => $v)
+				if (is_numeric($k)) {
+					if (($val = has($object, $v, ...$hierarchy)) !== null)
+						$res[$k] = $val;
+				} else
+					$res[$k] = has($object, $k, $v, ...$hierarchy);
+		}
+		return $res;
+	}
+}
 
 /**
  * To get Features of an object from an array
@@ -378,9 +422,12 @@ function including(string $path, mixed $data = [], bool $print = true, $default 
 {
 	if (file_exists($path)) {
 		ob_start();
-		// if (count($data) > 0)
-		// 	extract($data);
-		$res = include_once $path;
+		$res = [];
+		if (endsWith($path, DIRECTORY_SEPARATOR)){
+			foreach (glob($path."*".\_::$Extension) as $file)
+				if(!is_null($r = include_once $file)) $res[] = $r;
+		} else
+			$res = include_once $path;
 		$output = ob_get_clean();
 		if ($print)
 			echo $output;
@@ -396,9 +443,12 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
 {
 	if (file_exists($path)) {
 		ob_start();
-		// if (count($data) > 0)
-		// 	extract($data);
-		$res = require_once $path;
+		$res = [];
+		if (endsWith($path, DIRECTORY_SEPARATOR)){
+			foreach (glob($path) as $file)
+				if(!is_null($r = require_once $file)) $res[] = $r;
+		} else
+			$res = require_once $path;
 		$output = ob_get_clean();
 		if ($print)
 			echo $output;
@@ -414,7 +464,8 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 {
 	$file = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $file ?? "");
 	$extension = $extension ?? \_::$Extension;
-	if (!endsWith($file, $extension))
+	$file = preg_replace("/(?<!\\".DIRECTORY_SEPARATOR.")\\".DIRECTORY_SEPARATOR."$/", DIRECTORY_SEPARATOR."index", $file);
+	if (!endsWith($file, $extension) && !endsWith($file, DIRECTORY_SEPARATOR))
 		$file .= $extension;
 	$path = null;
 	$toSeq = $depth < 0 ? (count(\_::$Sequences) + $depth) : ($origin + $depth);
@@ -429,7 +480,7 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 			return null;
 	return null;
 }
-function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = ".php")
+function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = null)
 {
 	try {
 		renderPrepends($directory, $name);
@@ -634,15 +685,15 @@ function part(string $name, mixed $data = [], bool $print = true, int $origin = 
 	return using(\_::$Address->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
- * To interprete, the specified logicname
+ * To interprete, the specified computionname
  * @param non-empty-lowercase-string $name
  * @param mixed $data
  * @param bool $print
  * @return mixed
  */
-function logic(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function compute(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->LogicDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->ComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified routename
@@ -664,9 +715,8 @@ function table(string $name, bool $prefix = true, int $origin = 0, int $depth = 
 {
 	return new \MiMFa\Library\DataTable(
 		$source ?? \_::$Back->DataBase,
-		$prefix ?
-		(\_::$Config->DataBasePrefix . $name)
-		: $name
+		$name,
+		$prefix
 	);
 }
 
@@ -692,7 +742,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 		if (\_::$Config->AllowContentRefering)
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
-				process: function ($k, $v, $i) {
+				process: function ($v, $k) {
 					return \MiMFa\Library\Html::Link($v, \_::$Address->ContentRoute . strtolower($k));
 				},
 				keyWords: table("Content")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
@@ -702,7 +752,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 		if (\_::$Config->AllowCategoryRefering)
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
-				process: function ($k, $v, $i) {
+				process: function ($v, $k) {
 					return \MiMFa\Library\Html::Link($v, \_::$Address->CategoryRoute . strtolower($k));
 				},
 				keyWords: table("Category")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
@@ -712,7 +762,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 		if (\_::$Config->AllowTagRefering)
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
-				process: function ($k, $v, $i) {
+				process: function ($v, $k) {
 					return \MiMFa\Library\Html::Link($v, \_::$Address->TagRoute . strtolower($k));
 				},
 				keyWords: table("Tag")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
@@ -722,7 +772,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 		if (\_::$Config->AllowUserRefering)
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
-				process: function ($k, $v, $i) {
+				process: function ($v, $k) {
 					return \MiMFa\Library\Html::Link($v, \_::$Address->UserRoute . strtolower($k));
 				},
 				keyWords: table("User")->SelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
@@ -736,7 +786,7 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 /**
  * Find somthing by a callable function on a countable element
  * @param mixed $array
- * @param callable $action The find $action($key, $value, $index)
+ * @param callable $action The find $action($value, $key, $index)
  * @return mixed
  */
 function find($array, callable $action, &$key = null)
@@ -744,11 +794,11 @@ function find($array, callable $action, &$key = null)
 	if (!is_null($array)) {
 		$i = 0;
 		if (!is_iterable($array)) {
-			if ($action($i, $array, $i) !== null)
+			if ($action($array, null, $i) !== null)
 				return $array;
 		} else
 			foreach ($array as $key => $value)
-				if ($action($key, $value, $i++) !== null)
+				if ($action($value, $key, $i++) !== null)
 					return $value;
 	}
 	return null;
@@ -756,7 +806,7 @@ function find($array, callable $action, &$key = null)
 /**
  * Do a loop action by a callable function on a countable element
  * @param mixed $array
- * @param callable $action The loop action $action($key, $value, $index)
+ * @param callable $action The loop action $action($value, $key, $index)
  * @return array
  */
 function loop($array, callable $action, $nullValues = false)
@@ -768,7 +818,7 @@ function loop($array, callable $action, $nullValues = false)
 /**
  * Do a loop action by a callable function on a countable element
  * @param mixed $array
- * @param callable $action The loop action $action($key, $value, $index)
+ * @param callable $action The loop action $action($value, $key, $index)
  * @return iterable
  */
 function iteration($array, callable $action, $nullValues = false)
@@ -776,11 +826,11 @@ function iteration($array, callable $action, $nullValues = false)
 	if (!is_null($array)) {
 		$i = 0;
 		if (!is_iterable($array)) {
-			if (($res = $action($i, $array, $i)) !== null || $nullValues)
+			if (($res = $action($array, null, $i)) !== null || $nullValues)
 				yield $res;
 		} else
 			foreach ($array as $key => $value)
-				if (($res = $action($key, $value, $i++)) !== null || $nullValues)
+				if (($res = $action($value, $key, $i++)) !== null || $nullValues)
 					yield $res;
 	}
 }
@@ -846,22 +896,31 @@ function decode($html, $dic)
 			$html = str_replace($v, $k, $html);
 	return $html;
 }
-
-function encrypt($plain)
+/**
+ * Encrypt plain by the key or the website secret key
+ * @param mixed $plain The plain text
+ * @param mixed $key Leave null to use default soft key
+ */
+function encrypt($plain, $key = null)
 {
 	if (is_null($plain))
 		return null;
 	if (empty($plain))
 		return $plain;
-	return \_::$Back->Cryptograph->Encrypt($plain, \_::$Config->SecretKey, true);
+	return \_::$Back->Cryptograph->Encrypt($plain, $key ?? \_::$Config->SoftKey, true);
 }
-function decrypt($cipher)
+/**
+ * Decrypt cipher by the key or the website secret key
+ * @param mixed $cipher The cipher text
+ * @param mixed $key Leave null to use default soft key
+ */
+function decrypt($cipher, $key = null)
 {
 	if (is_null($cipher))
 		return null;
 	if (empty($cipher))
 		return $cipher;
-	return \_::$Back->Cryptograph->Decrypt($cipher, \_::$Config->SecretKey, true);
+	return \_::$Back->Cryptograph->Decrypt($cipher, $key ?? \_::$Config->SoftKey, true);
 }
 
 function startsWith(string|null $haystack, string|null ...$needles): bool
@@ -888,8 +947,8 @@ function getId($random = false): int
 }
 
 /**
- * Get the full part of a url pointed to catch status
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp"
+ * Get the full part of a url pointed to cache status
+ * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
  * @return string|null
  */
 function getFullUrl(string|null $path = null, bool $optimize = true): string|null
@@ -902,7 +961,7 @@ function getFullUrl(string|null $path = null, bool $optimize = true): string|nul
 }
 /**
  * Get the full part of a url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp"
+ * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp"
  * @return string|null
  */
 function getUrl(string|null $path = null): string|null
@@ -1276,7 +1335,7 @@ function fetchValue(string|null $source, string|null $key, bool $ismultiline = t
 
 function isEmpty($obj): bool
 {
-	return !isset($obj) || is_null($obj) || (is_string($obj) && (trim($obj . "", " \n\r\t\v\f'\"") === "")) || (is_array($obj) && count($obj) === 0);
+	return !isset($obj) || is_null($obj) || (is_string($obj) && (trim($obj . "", " \n\r\t\v\f'\"") === "")) || (is_countable($obj) && count($obj) === 0);
 	//return $obj?(is_string($obj) && (trim($obj . "", " \n\r\t\v\f'\"") === "")):true;
 }
 function isValid($obj, string|null $item = null): bool
@@ -1458,7 +1517,7 @@ function isFile(string|null $url, string ...$formats): bool
  */
 function isUrl(string|null $url): bool
 {
-	return (!empty($url)) && preg_match("/^([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+$/", $url);
+	return (!empty($url)) && preg_match("/^([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d+))+$/", $url);
 }
 /**
  * Check if the string is only a relative URL
@@ -1467,7 +1526,7 @@ function isUrl(string|null $url): bool
  */
 function isRelativeUrl(string|null $url): bool
 {
-	return (!empty($url)) && preg_match("/^([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d))+$/", $url);
+	return (!empty($url)) && preg_match("/^([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\r\n\t\f]*)|(\:\d+))+$/", $url);
 }
 /**
  * Check if the string is only an absolute URL
@@ -1698,12 +1757,12 @@ function array_insert(&$array, $position, $insert)
 /**
  * Find everythings are match from an array by a callable function
  * @param array      $array
- * @param callable $searching function($key, $val){ return true; }
+ * @param callable $searching function($val, $key){ return true; }
  * @param array $array_find_keys
  */
 function array_find_keys($array, callable $searching)
 {
-	return array_filter($array, function ($k, $v) use ($searching) {
+	return array_filter($array, function ($v,$k) use ($searching) {
 		return $searching($v, $k);
 	}, ARRAY_FILTER_USE_BOTH);
 }

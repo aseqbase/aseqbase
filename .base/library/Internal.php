@@ -21,11 +21,11 @@ class Internal
      */
     public static function Handle($name = null)
     {
-        $received = $name ? [\Req::ReceiveInternal($name)] : \Req::ReceiveInternal();
+        $received = $name ? [$name => \Req::ReceiveInternal($name)] : \Req::ReceiveInternal();
         $reses = [];
-        foreach ($received as $name => $args) {
-            $args = json_decode($args);
-            $reses[] = Convert::By(self::Get($name, fn($a = null) => $a), $args);
+        foreach ($received as $k => $v) {
+            $args = json_decode($v, true, flags: JSON_OBJECT_AS_ARRAY);
+            $reses[] = Convert::By(self::Get($k, fn($a = null) => $a), ...$args);
         }
         return join("", $reses);
     }
@@ -119,7 +119,7 @@ class Internal
                 $source .= $file->current();
                 $file->next();
             }
-            return preg_find("/(fn|function)\s*\([\s\S]+$/", trim($source, ";() \n\r\t\v\x00"));
+            return preg_find("/(fn|function)\s*\([\s\S]+$/", trim($source, ";(),= \n\r\t\v\x00"));
         } elseif (is_object($handler)) {
             $reflection = new \ReflectionObject($handler);
             $source = 'fn($args=null)=>';

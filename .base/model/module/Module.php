@@ -45,7 +45,7 @@ class Module extends \Base
       */
      public $Id = null;
      /**
-      * The custom classes for the module
+      * The custom name for the module
       * @var enum-string
       * @small
       */

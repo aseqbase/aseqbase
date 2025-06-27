@@ -35,10 +35,10 @@ class PrePage extends Module{
 		if(isValid($this->Description))
 		return $this->GetTitle().Html::Rack(
 			$this->GetDescription(["class"=>'description col-md']).
-			Html::Media("",$this->Image, ["class"=>"blackwhite col-md-4"])
+			Html::Media("",$this->Image, ["class"=>"col-md-4"])
 		).$this->GetContent("class='content'");
 		else return Html::Rack(
-			Html::Media("",$this->Image, ["class"=>"blackwhite col-md"])
+			Html::Media("", $this->Image, ["class"=>"col-md"])
 		).$this->GetTitle().$this->GetContent("class='content'");
 	}
 }

@@ -129,6 +129,7 @@ abstract class ReqBase
 					}
 					break;
 			}
+		if(count($source) == 1 && isset($source[0])) $source = decrypt($source[0]);
 		if (is_null($key))
 			return (count($source) > 0 ? $source : $default) ?? [];
 		else

@@ -1,12 +1,12 @@
 <?php
-$logicData = grab($data, "Logic")??[];
+$logicData = grab($data, "Compute")??[];
 $filter = grab($logicData, "Filter")??[];
 $viewData = grab($data, "View")??[];
 $received = \Req::Receive();
 $query = getBetween($received, "q", "Query");
 $cat = getBetween($received, "Cat", "Category");
 return route("contents", [
-    "Logic"=>[
+    "Compute"=>[
         "Filter"=>[
             "Query" => grab($filter, "Query") ?? $query,
             "Category" => grab($filter, "Category") ?? $cat,

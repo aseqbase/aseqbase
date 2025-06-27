@@ -73,7 +73,8 @@ class Base extends \ArrayObject
 			->Delete(fn(&$router) => $this->Delete())
 			->Stream(fn(&$router) => $this->Stream())
 			->Internal(fn(&$router) => $this->Internal())
-			->External(fn(&$router) => $this->External());
+			->External(fn(&$router) => $this->External())
+			->Default(fn(&$router) => $this->Default());
 	}
 
 	public function Set_Defaults()
@@ -167,6 +168,10 @@ class Base extends \ArrayObject
 	public function External()
 	{
 		return $this->Handler(\Req::ReceiveExternal());
+	}
+	public function Default()
+	{
+		return $this->Handler(\Req::Receive());
 	}
 
 	public function Handler($received = null)

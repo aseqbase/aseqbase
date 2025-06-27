@@ -14,6 +14,12 @@ class MainMenu extends Module
 	public $HasItems = true;
 	public $HasOthers = true;
 	public $AllowFixed = false;
+	public $AllowItemsLabel = true;
+	public $AllowSubItemsLabel = true;
+	public $AllowItemsDescription = false;
+	public $AllowSubItemsDescription = true;
+	public $AllowItemsImage = false;
+	public $AllowSubItemsImage = true;
 	public $HideItemsScreenSize = 'md';
 	public $ShowItemsScreenSize = null;
 	public $HideOthersScreenSize = 'md';
@@ -29,7 +35,6 @@ class MainMenu extends Module
 			.{$this->Name} {
 				margin: 0;
 				padding: 0;
-				overflow: hidden;
 				background-color: " . \_::$Front->BackColor(3) . ($this->AllowFixed ? "ee" : "") . ";
 				color: var(--fore-color-3);
 				" . ($this->AllowFixed ? "
@@ -81,11 +86,15 @@ class MainMenu extends Module
 				font-size: var(--size-0);
 			}
 
-			.{$this->Name} :is(li, li a, li a:visited){
-				border: none;
+			.{$this->Name} ul li .image{
+				margin-inline-end: var(--size-0);
+			}
+			.{$this->Name} ul li .description{
+				font-size: var(--size-0);
+				color: #8888;
 			}
 
-			.{$this->Name} li .fa{
+			.{$this->Name} ul li .fa{
 				font-size: var(--size-2);
 			}
 
@@ -196,7 +205,7 @@ class MainMenu extends Module
 			.{$this->Name} ul.sub-items .sub-items li :is(.button, .button:visited) {
 				padding: calc(var(--size-0) / 2) var(--size-1);
 				background: transparent;
-				border-color: transparent;
+				border: none;
 				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} ul.sub-items>li {
@@ -205,11 +214,13 @@ class MainMenu extends Module
 				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} ul.sub-items>li>:is(.button, .button:visited){
+    			width: 100%;
 				color: var(--fore-color-1);
 				text-decoration: none;
 				padding: calc(var(--size-1) / 2) var(--size-1);
 				display: block;
 				text-align: start;
+				border: none;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown{
 				display: block;
@@ -217,18 +228,21 @@ class MainMenu extends Module
 			}
 			.{$this->Name} ul.sub-items>li.dropdown.active{
 				box-shadow: var(--shadow-2);
+				border: none;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown.active>:is(.button, .button:visited){
 				font-weight: bold;
+				border: none;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown:hover{
-				border-bottom: var(--border-1) var(--back-color-5);
+				border-bottom-color: var(--back-color-5);
 				box-shadow: var(--shadow-1);
 				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
 				font-weight: bold;
 				color: #8888;
+				border: none;
 				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
@@ -241,6 +255,7 @@ class MainMenu extends Module
 			.{$this->Name} ul.sub-items>li:not(.dropdown).active>:is(.button, .button:visited){
 				font-weight: bold;
 				box-shadow: var(--shadow-2);
+				border: none;
 			}
 			.{$this->Name} ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
 				font-weight: bold;
@@ -369,10 +384,20 @@ class MainMenu extends Module
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Html::Item(
-			Html::Button(
-				__(getBetween($item, "Title", "Name"), true, false),
+			($ind <=2? Html::Button(
+				($this->AllowItemsImage?Html::Image(getBetween($item, "Image", "Icon")):"").
+				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
+				($this->AllowItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
 				$path,
 				get($item, "Attributes")
+				) :
+				Html::Button(
+					($this->AllowSubItemsImage?Html::Image(getBetween($item, "Image", "Icon")):"").
+					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
+					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
+					$path,
+					get($item, "Attributes")
+				)
 			) .
 			($count > 0 ?
 				Html::Items(
@@ -383,8 +408,7 @@ class MainMenu extends Module
 					,
 					["class" => "sub-items sub-items-$ind"]
 				)
-				: "")
-			,
+				: ""),
 			["class" => $count > 0 ? "dropdown $act" : $act]
 		);
 	}

@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `aseq_Category` (
   `UpdateTime` datetime NOT NULL DEFAULT current_timestamp(),
   `MetaData` longtext DEFAULT NULL,
   PRIMARY KEY (`Id` )
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
 
@@ -71,9 +71,8 @@ CREATE TABLE IF NOT EXISTS `aseq_Content` (
   `CreateTime` datetime NOT NULL DEFAULT current_timestamp(),
   `UpdateTime` datetime NOT NULL DEFAULT current_timestamp(),
   `MetaData` longtext DEFAULT NULL,
-  PRIMARY KEY (`Id` ),
-  UNIQUE KEY `Name` (`Name` )
-) ENGINE=InnoDB AUTO_INCREMENT=1048 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+  PRIMARY KEY (`Id` )
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
 
@@ -99,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `aseq_Comment` (
   `UpdateTime` datetime NOT NULL DEFAULT current_timestamp(),
   `MetaData` longtext DEFAULT NULL,
   PRIMARY KEY (`Id` )
-) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 --
 -- Table structure for table `aseq_Message
@@ -122,7 +121,7 @@ CREATE TABLE IF NOT EXISTS `aseq_Message` (
   `UpdateTime` datetime NOT NULL DEFAULT current_timestamp(),
   `MetaData` longtext DEFAULT NULL,
   PRIMARY KEY (`Id` )
-) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
 
@@ -138,7 +137,7 @@ CREATE TABLE IF NOT EXISTS `aseq_Session` (
   `MetaData` longtext DEFAULT NULL,
   PRIMARY KEY (`Id` ),
   UNIQUE KEY `Key` (`Key` )
-) ENGINE=InnoDB AUTO_INCREMENT=71069 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
 
@@ -156,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `aseq_Tag` (
   `MetaData` longtext DEFAULT NULL,
   PRIMARY KEY (`Id` ),
   UNIQUE KEY `Name` (`Name` )
-) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
 
@@ -188,7 +187,7 @@ CREATE TABLE IF NOT EXISTS `aseq_User` (
   PRIMARY KEY (`Id` ),
   UNIQUE KEY `Signature` (`Signature` ) USING BTREE,
   UNIQUE KEY `Email` (`Email` )
-) ENGINE=InnoDB AUTO_INCREMENT=176 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
 
@@ -207,7 +206,7 @@ CREATE TABLE IF NOT EXISTS `aseq_UserGroup` (
   `MetaData` longtext DEFAULT NULL,
   PRIMARY KEY (`Id` ),
   UNIQUE KEY `Name` (`Name` )
-) ENGINE=InnoDB AUTO_INCREMENT=2147483648 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 --
 -- Dumping data for table `aseq_UserGroup`
@@ -223,35 +222,6 @@ INSERT INTO `aseq_UserGroup` (`Id` , `Name` , `Image` , `Title` , `Description` 
 (7, 'manager', NULL, 'Manager', 'The Manager User Group', 977777777, '1', ''),
 (8, 'administrator', NULL, 'Administrator', 'The Administrator User Group', 988888888, '1', ''),
 (9, 'super', NULL, 'Super', 'The Super User Group', 999999999, '1', '');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `aseq_Payment`
---
-
-CREATE TABLE IF NOT EXISTS `aseq_Payment` (
-  `Id` int(11) NOT NULL AUTO_INCREMENT,
-  `TId` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Source` tinytext DEFAULT NULL,
-  `SourceEmail` tinytext DEFAULT NULL,
-  `SourceContent` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `SourcePath` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Value` float DEFAULT NULL,
-  `Unit` tinytext DEFAULT NULL,
-  `Network` tinytext DEFAULT NULL,
-  `Transaction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Identifier` tinytext DEFAULT NULL,
-  `Destination` tinytext DEFAULT NULL,
-  `DestinationEmail` tinytext DEFAULT NULL,
-  `DestinationContent` tinytext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `DestinationPath` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Others` text DEFAULT NULL,
-  `CreateTime` datetime NOT NULL DEFAULT current_timestamp(),
-  `MetaData` longtext DEFAULT NULL,
-  PRIMARY KEY (`Id` )
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
 

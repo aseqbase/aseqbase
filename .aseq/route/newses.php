@@ -1,6 +1,6 @@
 <?php
 route("contents", [
-    "Logic" => [
+    "Compute" => [
         "Filter" => [
             "Type" => "News"
         ]

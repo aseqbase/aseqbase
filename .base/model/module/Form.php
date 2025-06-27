@@ -80,7 +80,7 @@ class Form extends Module
 	/**
 	 * Create the module
 	 */
-	public function __construct($title = null, $action = null, $method = "POST", mixed $children = [], $description = null, $image = null)
+	public function __construct($title = null, $action = null, $method = null, mixed $children = [], $description = null, $image = null)
 	{
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
@@ -152,7 +152,7 @@ class Form extends Module
 	/**
 	 * Set the main properties of module
 	 */
-	public function Set($title = null, $action = null, $method = "POST", mixed $children = [], $description = null, $image = null)
+	public function Set($title = null, $action = null, $method = null, mixed $children = [], $description = null, $image = null)
 	{
 		$this->Title = $title ?? $this->Title;
 		$this->Description = $description ?? $this->Description;
@@ -661,7 +661,7 @@ class Form extends Module
 			module("Field");
 			$attr = $this->Method ? [] : ["disabled"];
 			$this->Children = isEmpty($this->FieldsTypes)
-				? iteration($this->Children, function ($k, $v) use ($attr) {
+				? iteration($this->Children, function ($v, $k) use ($attr) {
 					if (is_integer($k))
 						if ($v instanceof \MiMFa\Module\Field)
 							return $v;
@@ -686,7 +686,7 @@ class Form extends Module
 							attributes: $attr
 						);
 				})
-				: iteration($this->FieldsTypes, function ($k, $type) use ($attr) {
+				: iteration($this->FieldsTypes, function ($type, $k) use ($attr) {
 					$v = getValid($this->Children, $k, null);
 					if ($type === false)
 						return null;

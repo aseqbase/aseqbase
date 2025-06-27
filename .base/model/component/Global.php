@@ -8,6 +8,8 @@ use MiMFa\Library\Local;
 \_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl('/view/style/be.css'));
 \_::$Front->Libraries[] = Html::Style("
 :root{
+	--dir: ".(\_::$Back->Translate->Direction??\_::$Config->DefaultDirection)."
+	--lang: ".(\_::$Back->Translate->Language??\_::$Config->DefaultLanguage)."
 	--color-0: " . \_::$Front->Color(0) . ";
 	--color-1: " . \_::$Front->Color(1) . ";
 	--color-2: " . \_::$Front->Color(2) . ";

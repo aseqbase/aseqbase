@@ -464,8 +464,9 @@ class Field extends Module{
 						title:$this->Title,
 						description:$this->Description,
 						options:$this->Options,
+						//attributes:[$placeHolderAttr, ...($this->Lock?["disabled"]:[]),...($this->Required?["required"]:[]), ...Convert::ToIteration($this->Attributes)]);
 						attributes:[$placeHolderAttr, $attrs]);
-                    break;
+						break;
             }
         });
     }

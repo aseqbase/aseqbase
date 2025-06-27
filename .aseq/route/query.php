@@ -1,9 +1,9 @@
 <?php
 $viewData = grab($data, "View") ?? [];
-$logicData = grab($data, "Logic") ?? [];
+$logicData = grab($data, "Compute") ?? [];
 $filter = grab($logicData, "Filter") ?? [];
 return route("search", [
-    "Logic" => [
+    "Compute" => [
         "Filter" => [
             "Category" => implode("/", array_slice(explode("/", \Req::$Direction), 1)),
             ...$filter

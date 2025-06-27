@@ -4,7 +4,7 @@ use \MiMFa\Library\Router;
 $data = $data??[];
 function findContent($router, &$data)
 {
-    $logicData = get($data, "Logic")??[];
+    $logicData = get($data, "Compute")??[];
     if(!is_array($logicData)) return Convert::By($logicData);
     $path = explode("/", trim(urldecode($router->Direction) ?? "", "/\\"));
     $name = last($path);
@@ -14,7 +14,7 @@ function findContent($router, &$data)
         $path = null;
     $filter = grab($logicData, "Filter") ?? [];
     $received = \Req::Receive();
-    return logic(grab($logicData, "LogicName")??"content/get", [
+    return compute(grab($logicData, "ComputeName")??"content/get", [
         "Name"=>$name,
         "Filter" => [
             "Query"=> grab($filter, "Query")??getBetween($received, "Query")??$name,
@@ -45,7 +45,7 @@ function findContent($router, &$data)
         $doc = findContent($router, $data);
         if (isEmpty($doc))
             \Res::Render(__(get($data, "ErrorHandler") ?? "Could not find related content"));
-        elseif (logic("comment/handle", $doc))
+        elseif (compute("comment/handle", $doc))
             \Res::Reload();
     })
     ->Handle();

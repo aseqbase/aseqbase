@@ -2,7 +2,6 @@
 //ini_set('display_errors', 1);
 //ini_set('display_startup_errors', 1);
 //ini_set('display_startup_errors', E_ALL);
-
 /*
  * Change the value, to the current subdomains sequence (like [my-subdomain-name])
  * or if this file is in the root address, leave null for that

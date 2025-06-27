@@ -10,13 +10,13 @@ $isuser = auth(\_::$Config->UserAccess);
     ->if($isuser)
     ->Route("sign/out")
     ->Get(function () {
-        if (logic("sign/out"))
+        if (compute("sign/out"))
             \Res::Load(User::$InHandlerPath);
         else
             return view("part", ["Name" => "access"]);
     })
     ->Default(function () {
-        if (logic("sign/out"))
+        if (compute("sign/out"))
             \Res::Reload();
         else
             \Res::Load(User::$InHandlerPath);
@@ -24,23 +24,23 @@ $isuser = auth(\_::$Config->UserAccess);
     ->else(!isEmpty(\Req::$Direction))
     ->Route->Get(fn() => view("part", ["Name" => \Req::$Direction]))
     ->else(!$isuser && \Req::Receive("Signature"))
-    ->Route("sign/up")->Default(fn () => logic("sign/up"))
+    ->Route("sign/up")->Default(fn () => compute("sign/up"))
     ->else(!$isuser)
     ->Route("sign/in")->Default(function () {
-        if (logic("sign/in"))
+        if (compute("sign/in"))
             \Res::Reload();
     })
     ->Route("sign/recover")->Default(function () {
-        if (logic("sign/recover"))
+        if (compute("sign/recover"))
             \Res::Load(User::$InHandlerPath);
     })
     ->else
     ->Route("sign/edit")->Default(function () {
-        if (logic("sign/edit"))
+        if (compute("sign/edit"))
             \Res::Reload();
     })
     ->else(!isEmpty(\Req::$Direction))
-    ->Route->Default(fn() => logic(\Req::$Direction))
+    ->Route->Default(fn() => compute(\Req::$Direction))
     ->else
     ->Route->Default(fn() => view("part", ["Name" => "access"]))
     ->Handle();

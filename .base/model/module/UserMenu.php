@@ -24,7 +24,7 @@ class UserMenu extends Module{
 			.{$this->Name} .menu{
 				aspect-ratio: 1;
 				max-height: 30vmin;
-				padding: calc(var(--size-0) / 2);
+				padding: var(--size-0);
 				border-radius: 100%;
 				display: inline-flex;
 				align-items: center;
@@ -98,7 +98,7 @@ class UserMenu extends Module{
         }
 		$count = count($this->Items);
 		if($count > 0){
-            return Html::Icon(takeValid(\_::$Back->User,"Image" ,"user"), $this->Path,["class"=>"menu"]).
+            return Html::Icon(takeValid(\_::$Back->User,"Image" ,"user"), $this->Path, ["class"=>"menu"]).
 				Html::Division(function(){
 				foreach($this->Items as $item)
                     if(isValid($item,'Path' ))

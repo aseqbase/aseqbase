@@ -158,11 +158,6 @@ class CommentCollection extends Collection
      */
     public $PublishedLabel = "<i class='fa fa-eye'><span class='tooltip'>The message is shown</span></i>";
 
-    function __construct()
-    {
-        parent::__construct();
-    }
-
     public function GetStyle()
     {
         return Html::Style("

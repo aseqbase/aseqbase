@@ -329,7 +329,7 @@ let getQuery = (element) => {
     return tagName;
 }
 
-let scrollTo = function (selector = "body :nth-child(1)", time = 1000) {
+let scrollTo = function (selector = "body+:nth-child(1)", time = 1000) {
 	$('html, body').animate({
 		scrollTop: parseInt($(selector).offset().top)
 	}, time);
@@ -401,7 +401,7 @@ let sendRequest = function (
 	method = 'POST',
 	url = null,
 	data = null,
-	selector = 'body',
+	selector = 'body+:nth-child(1)',
 	success = null,
 	error = null,
 	ready = null,
@@ -539,22 +539,22 @@ let sendRequest = function (
 	return xhr;
 };
 
-let sendGet = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendGet = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('GET', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPost = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPost = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPut = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPut = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('PUT', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPatch = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPatch = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('PATCH', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendDelete = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendDelete = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('DELETE', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendFile = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendFile = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	if (data) return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
 	else {
 		input.setAttribute('type', 'file');
@@ -573,13 +573,13 @@ let sendFile = function (url = null, data = null, selector = 'body :nth-child(1)
 		return res;
 	}
 };
-let sendStream = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendStream = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('STREAM', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendInternal = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendInternal = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendExternal = function (url = null, data = null, selector = 'body :nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendExternal = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('EXTERNAL', url, data, selector, success, error, ready, progress, timeout);
 };
 

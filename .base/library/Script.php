@@ -31,9 +31,9 @@ class Script
             if (is_subclass_of($obj, "\Base"))
                 return $obj->ToString();
             if (is_array($obj) && count($obj) > 0 && !is_int(array_key_first($obj))) 
-                return join("", ["{", join(", ", loop($obj, fn ($k, $v) => Convert::ToStatic($k).":".self::Convert($v))), "}"]);
+                return join("", ["{", join(", ", loop($obj, fn ($v, $k) => Convert::ToStatic($k).":".self::Convert($v))), "}"]);
             if (is_countable($obj) || is_iterable($obj)) 
-                return join("", ["[", join(", ", loop($obj, fn ($i, $o) => self::Convert($o))), "]"]);
+                return join("", ["[", join(", ", loop($obj, fn ($o) => self::Convert($o))), "]"]);
             if (is_callable($obj) || $obj instanceof \Closure)
                 return Internal::MakeScript($obj);
             return json_encode($obj, flags: JSON_OBJECT_AS_ARRAY);
@@ -85,7 +85,7 @@ class Script
     }
     public static function Points($content)
     {
-        return join(",", loop($content, function ($i, $row) {
+        return join(",", loop($content, function ($row, $i) {
             return self::Point($row, $i); }));
     }
     public static function Parameters($arr)
@@ -122,6 +122,10 @@ class Script
     public static function Prompt($message = "", $default = null)
     {
         return "prompt(" . self::Convert(__($message, styling: false)) . ", " . self::Convert(__($default, styling: false)) . ")";
+    }
+    public static function Log($message = "")
+    {
+        return "console.log(" . self::Convert(__($message, styling: false)) . ")";
     }
 }
 ?>

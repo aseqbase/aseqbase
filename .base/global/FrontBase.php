@@ -248,7 +248,7 @@ abstract class FrontBase
 		return join(PHP_EOL, $this->Finals);
 	}
 
-	
+
 	/**
 	 * Interact with all specific parts of the client side one by one
 	 * @param mixed $selector The source selector
@@ -257,7 +257,7 @@ abstract class FrontBase
 	 */
 	public static function Iterate($selector = null, $callback = null)
 	{
-		\Res::Iterate("document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??'body') . ")", $callback);
+		\Res::Iterate("document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? 'body') . ")", $callback);
 	}
 
 	/**
@@ -268,7 +268,7 @@ abstract class FrontBase
 	 */
 	public function Get($selector = null, $callback = null)
 	{
-		\Res::Interact("Array.from(document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
+		\Res::Interact("Array.from(document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
 	}
 	/**
 	 * Replace the output with a special part of client side
@@ -278,13 +278,22 @@ abstract class FrontBase
 	 */
 	public function Set($selector = null, $handler = null, ...$args)
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(
-			\MiMFa\Library\Internal::MakeScript(
-				$handler,
-				$args,
-				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.remove();})"
-			)
-		));
+		return \Res::Script($this->MakeSetScript($selector, $handler, ...$args));
+	}
+	/**
+	 * Make a script to
+	 * Replace the output with a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public function MakeSetScript($selector = null, $handler = null, ...$args)
+	{
+		return \MiMFa\Library\Internal::MakeScript(
+			$handler,
+			$args,
+			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err));l.remove();})"
+		);
 	}
 	/**
 	 * Delete a special part of client side
@@ -292,7 +301,16 @@ abstract class FrontBase
 	 */
 	public function Delete($selector = "body")
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(\MiMFa\Library\Internal::MakeStartScript()."document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultSourceSelector) . ").forEach(el=>el.remove())".\MiMFa\Library\Internal::MakeEndScript()));
+		return \Res::Script($this->MakeDeleteScript($selector));
+	}
+	/**
+	 * Make a script to
+	 * Delete a special part of client side
+	 * @param mixed $selector The destination selector
+	 */
+	public function MakeDeleteScript($selector = "body")
+	{
+		return \MiMFa\Library\Internal::MakeStartScript() . "document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultSourceSelector) . ").forEach(el=>el.remove())" . \MiMFa\Library\Internal::MakeEndScript();
 	}
 	/**
 	 * Insert output before a special part of client side
@@ -302,13 +320,22 @@ abstract class FrontBase
 	 */
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(
-			\MiMFa\Library\Internal::MakeScript(
-				$handler,
-				$args,
-				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
-			)
-		));
+		return \Res::Script($this->MakeBeforeScript($selector, $handler, ...$args));
+	}
+	/**
+	 * Make a script to
+	 * Insert output before a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public function MakeBeforeScript($selector = "body", $handler = null, ...$args)
+	{
+		return \MiMFa\Library\Internal::MakeScript(
+			$handler,
+			$args,
+			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+		);
 	}
 	/**
 	 * Insert output after a special part of client side
@@ -318,13 +345,22 @@ abstract class FrontBase
 	 */
 	public function After($selector = "body", $handler = null, ...$args)
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(
-			\MiMFa\Library\Internal::MakeScript(
-				$handler,
-				$args,
-				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
-			)
-		));
+		return \Res::Script($this->MakeAfterScript($selector, $handler, ...$args));
+	}
+	/**
+	 * Make a script to
+	 * Insert output after a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public function MakeAfterScript($selector = "body", $handler = null, ...$args)
+	{
+		return \MiMFa\Library\Internal::MakeScript(
+			$handler,
+			$args,
+			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+		);
 	}
 	/**
 	 * Print output inside a special part of client side
@@ -334,13 +370,23 @@ abstract class FrontBase
 	 */
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(
-			\MiMFa\Library\Internal::MakeScript(
-				$handler,
-				$args,
-				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
-			)
-		));
+		return \Res::Script($this->MakeFillScript($selector, $handler, ...$args));
+	}
+	/**
+	 * Make a script to
+	 * Print output inside a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public function MakeFillScript($selector = "body", $handler = null, ...$args)
+	{
+		return \MiMFa\Library\Internal::MakeScript(
+			$handler,
+			$args,
+			//"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
+			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+		);
 	}
 	/**
 	 * Prepend output on a special part of client side
@@ -350,13 +396,22 @@ abstract class FrontBase
 	 */
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(
-			\MiMFa\Library\Internal::MakeScript(
-				$handler,
-				$args,
-				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
-			)
-		));
+		return \Res::Script($this->MakePrependScript($selector, $handler, ...$args));
+	}
+	/**
+	 * Make a script to
+	 * Prepend output on a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public function MakePrependScript($selector = "body", $handler = null, ...$args)
+	{
+		return \MiMFa\Library\Internal::MakeScript(
+			$handler,
+			$args,
+			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+		);
 	}
 	/**
 	 * Append output on a special part of client side
@@ -366,13 +421,22 @@ abstract class FrontBase
 	 */
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
-		\Res::Render(\MiMFa\Library\Html::Script(
-			\MiMFa\Library\Internal::MakeScript(
-				$handler,
-				$args,
-				"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector??$this->DefaultDestinationSelector) . ").forEach(l=>l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
-			)
-		));
+		return \Res::Script($this->MakeAppendScript($selector, $handler, ...$args));
+	}
+	/**
+	 * Make a script to
+	 * Append output on a special part of client side
+	 * @param mixed $selector The destination selector
+	 * @param mixed $handler The data that is ready to print
+	 * @param mixed $args Handler input arguments
+	 */
+	public function MakeAppendScript($selector = "body", $handler = null, ...$args)
+	{
+		return \MiMFa\Library\Internal::MakeScript(
+			$handler,
+			$args,
+			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+		);
 	}
 }
 ?>

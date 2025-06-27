@@ -9,7 +9,7 @@ class JsonLD{
 			("{
 			  '@context': `".(grab($data, "@context")??"https://schema.org")."`,
 			  '@type': `".(grab($data, "@type")??"Article")."`,
-			  ".loop($data, fn($k, $v)=>'"'.$k.'":'.(is_iterable($v)?Convert::ToJson($v):'"'.$v.'"'))."
+			  ".loop($data, fn($v, $k)=>'"'.$k.'":'.(is_iterable($v)?Convert::ToJson($v):'"'.$v.'"'))."
 			}"):$data
 		, ['type' =>'application/ld+json']);
 	}

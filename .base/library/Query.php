@@ -156,13 +156,21 @@ class Query
         }
         return $id ?? $default;
     }
+    public function FindCategories(string|array|null $direction, array $default = [], int $nest = -1, DataTable|string|null $table = null)
+    {
+        $table = $table instanceof DataTable?$table:table($table ?? "Category", source: $this->DataBase);
+        $ids = $this->FindCategoryIds($direction, [], $nest, $table);
+        if (!$ids)
+            return $default;
+        return $table->Select("*", "$table->Name.Id IN (".join(",", $ids).") AND " . \_::$Back->User->GetAccessCondition(tableName:$table->Name));
+    }
     public function FindCategory(string|array|null $direction, array|null $default = null, DataTable|string|null $table = null)
     {
         $table = $table instanceof DataTable?$table:table($table ?? "Category", source: $this->DataBase);
         $id = $this->FindCategoryId($direction, null, table:$table);
         if (!$id)
             return $default;
-        return $table->SelectRow("*", "$table->Name.`Id`=:Id AND " . \_::$Back->User->GetAccessCondition(tableName:$table->Name), [":Id" => $id]);
+        return $table->SelectRow("*", "$table->Name.Id=:Id AND " . \_::$Back->User->GetAccessCondition(tableName:$table->Name), [":Id" => $id]);
     }
 
     public function FindTagId(string|null $tag, int|null $default = null, DataTable|string|null $table = null)

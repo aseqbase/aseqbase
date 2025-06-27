@@ -143,7 +143,7 @@ abstract class ResBase
 	 * @param string $method The Method to send data
 	 * @param mixed $path The Url to send data
 	 * @param mixed $data Desired data
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function Send($method = null, $path = null, ...$data)
 	{
@@ -175,7 +175,7 @@ abstract class ResBase
 	 * Send values to the client side
 	 * @param mixed $path The Url to send GET data from that
 	 * @param mixed $data Additional data to send as query parameters
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendGet($path = null, ...$data)
 	{
@@ -197,7 +197,7 @@ abstract class ResBase
 	 * Send posted values to the client side
 	 * @param mixed $path The Url to send POST data to that
 	 * @param mixed $data Desired data to POST
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendPost($path = null, ...$data)
 	{
@@ -218,7 +218,7 @@ abstract class ResBase
 	 * Send putted values to the client side
 	 * @param mixed $path The Url to send PUT data to that
 	 * @param mixed $data Desired data to PUT
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendPut($path = null, ...$data)
 	{
@@ -228,7 +228,7 @@ abstract class ResBase
 	 * Send patched values to the client side
 	 * @param mixed $path The Url to send PATCH data to that
 	 * @param mixed $data Desired data to PATCH
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendPatch($path = null, ...$data)
 	{
@@ -238,7 +238,7 @@ abstract class ResBase
 	 * Send file values to the client side
 	 * @param mixed $path The Url to send FILE data to that
 	 * @param mixed $data Desired data to FILE
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendFile($path = null, ...$data)
 	{
@@ -267,7 +267,7 @@ abstract class ResBase
 	 * Send delete values to the client side
 	 * @param mixed $path The Url to send DELETE data to that
 	 * @param mixed $data Desired data to DELETE
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendDelete($path = null, ...$data)
 	{
@@ -277,7 +277,7 @@ abstract class ResBase
 	 * Send stream values to the client side
 	 * @param mixed $path The Url to send STREAM data to that
 	 * @param mixed $data Desired data to STREAM
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendStream($path = null, ...$data)
 	{
@@ -287,7 +287,7 @@ abstract class ResBase
 	 * Send internal values to the client side
 	 * @param mixed $path The Url to send INTERNAL data to that
 	 * @param mixed $data Desired data to INTERNAL
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendInternal($path = null, ...$data)
 	{
@@ -297,7 +297,7 @@ abstract class ResBase
 	 * Send external values to the client side
 	 * @param mixed $path The Url to send EXTERNAL data to that
 	 * @param mixed $data Desired data to EXTERNAL
-	 * @return bool|string Is sent or received response
+	 * @return bool|string Its sent or received response
 	 */
 	public static function SendExternal($path = null, ...$data)
 	{
@@ -416,6 +416,12 @@ abstract class ResBase
 			$callback
 		);
 	}
+	public static function Log($message = null)
+	{
+		self::Script(
+			\MiMFa\Library\Script::Log($message)
+		);
+	}
 	/**
 	 * Render a message result output to the client side
 	 * @param mixed $output The data that is ready to print
@@ -453,6 +459,7 @@ abstract class ResBase
 	 */
 	public static function Error($output = null)
 	{
+		self::Status(400);
 		echo $output = \MiMFa\Library\Html::Error($output);
 		return $output;
 	}

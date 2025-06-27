@@ -152,11 +152,11 @@ class General extends Template
 				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.btn,.image,.media,.item,.fa){
 					font-weight: bold;
 				}
-				:is(.button, .icon, .btn), :is(.button, .icon, .btn):is(:visited, :active){
+				:is(.button, .icon[onclick], .btn), :is(.button, .icon[onclick], .btn):is(:visited, :active){
 					border: var(--border-1) transparent;
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				:is(.button, .icon, .btn):is(:hover, :focus){
+				:is(.button, .icon[onclick], .btn):is(:hover, :focus){
 					border-color: var(--fore-color-2);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
@@ -175,18 +175,19 @@ class General extends Template
 					padding: calc(var(--size-0) / 3) var(--size-1);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				a .icon{
+				.icon[onclick]{
 					text-decoration: none;
 					display: initial;
 					padding: calc(var(--size-0) / 2);
 					border: var(--border-1) transparent;
+					cursor: pointer;
 				}
-                a .icon:hover {
+                .icon[onclick]:hover {
                     background-color:var(--back-color-5);
                 	color:var(--fore-color-5);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.btn:hover{
+				:is(.button, .btn):hover{
                 	text-decoration: none;
 					background-color: var(--back-color-2);
 					color: var(--fore-color-2);
@@ -195,15 +196,15 @@ class General extends Template
 					box-shadow: var(--shadow-2);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.btn.block {
+				:is(.button, .btn).block {
 					width: 100%;
 				}
-				.btn.main, .btn.main:is(:visited, :active) {
+				:is(.button, .btn).main, :is(.button, .btn).main:is(:visited, :active) {
 					background-color: var(--back-color-5);
 					color: var(--fore-color-5);
 					border-color: var(--back-color-5);
 				}
-				.btn.main:hover{
+				:is(.button, .btn).main:hover{
 					background-color: var(--back-color-2);
 					color: var(--fore-color-2);
 					border-color: var(--back-color-5);
@@ -211,12 +212,12 @@ class General extends Template
 					box-shadow: var(--shadow-3);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.btn.primary, .btn.primary:is(:visited, :active) {
+				:is(.button, .btn).primary, :is(.button, .btn).primary:is(:visited, :active) {
 					background-color: var(--back-color-5);
 					color: var(--fore-color-5);
 					border-color: var(--back-color-5);
 				}
-				.btn.primary:hover{
+				:is(.button, .btn).primary:hover{
 					background-color: var(--fore-color-5);
 					color: var(--back-color-5);
 					border-color: var(--back-color-5);
@@ -224,13 +225,13 @@ class General extends Template
 					box-shadow: var(--shadow-2);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.btn.secondary, .btn.secondary:is(:visited, :active) {
+				:is(.button, .btn).secondary, :is(.button, .btn).secondary:is(:visited, :active) {
 					background-color: var(--back-color-3);
 					color: var(--fore-color-3);
 					border-color: var(--back-color-3);
 				}
 
-				.btn.outline, .btn.outline:is(:visited, :active){
+				:is(.button, .btn).outline, :is(.button, .btn).outline:is(:visited, :active){
 					background-color: transparent;
 					color: inherit;
 					border-color: var(--back-color-2);
@@ -239,7 +240,7 @@ class General extends Template
 					padding: calc(var(--size-0) / 3) var(--size-1);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.btn.outline:hover{
+				:is(.button, .btn).outline:hover{
 					background-color:  var(--back-color-2);
 					color: var(--fore-color-2);
 					border-color: var(--fore-color-2);
@@ -247,12 +248,12 @@ class General extends Template
 					box-shadow: var(--shadow-2);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.btn.outline.primary, .btn.outline.primary:is(:visited, :active) {
+				:is(.button, .btn).outline.primary, :is(.button, .btn).outline.primary:is(:visited, :active) {
 					background-color: var(--back-color-2);
 					color: var(--fore-color-2);
 					border-color: var(--fore-color-5);
 				}
-				.btn.outline.primary:hover{
+				:is(.button, .btn).outline.primary:hover{
 					background-color: var(--back-color-5);
 					color: var(--fore-color-5);
 					border-color: var(--fore-color-2);
@@ -260,7 +261,7 @@ class General extends Template
 					box-shadow: var(--shadow-2);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.btn.outline.secondary, .btn.outline.secondary:is(:visited, :active) {
+				:is(.button, .btn).outline.secondary, :is(.button, .btn).outline.secondary:is(:visited, :active) {
 					color: var(--fore-color-2);
 					border-color: var(--fore-color-2);
 				}

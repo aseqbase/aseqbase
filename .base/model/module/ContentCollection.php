@@ -183,8 +183,8 @@ class ContentCollection extends Collection{
      */
 	public $PathButtonLabel = ["News"=>"Source" ,"Post"=>"Refer","Text"=>"Refer","File"=>"Download","Document"=>"Download","Video"=>"Watch","Audio"=>"Listen","Image" =>"Look","Default"=>"Visit"];
 
-	function __construct(){
-        parent::__construct();
+	function __construct($items = null){
+        parent::__construct($items);
         $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
         $this->CollectionRoute = $this->CollectionRoute??\_::$Address->ContentRoute;
         $this->CheckAccess = fn($item)=>auth(getValid($item, 'Access' , 0));

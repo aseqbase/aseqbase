@@ -189,12 +189,22 @@ abstract class ConfigurationBase extends ArrayObject
      public $DefaultCommentStatus = 0;
 
      /**
-      * A special key for yhis website, be sure to change this
+      * A special key for the website, be sure to change this
       * @field password
       * @var string
       * @category Security
       */
      public $SecretKey = '~a!s@e#q$b%a^s&e*';
+      /**
+       * A special soft key for the default cryption, be sure to change this
+       * @field password
+       * @var string
+       * @category Security
+       */
+     public $SoftKey = null;
+     /**
+      * A special key generator for the website, override this for more security
+      */
      /**
       * Allow to set sessions on the client side (false for default)
       * @var bool
@@ -448,11 +458,17 @@ abstract class ConfigurationBase extends ArrayObject
       */
      public $DataBaseValueNormalization = true;
      /**
-      * The database HostName
+      * The database HostName or IP
       * @var string
       * @category DataBase
       */
      public $DataBaseHost = 'localhost';
+     /**
+      * The database Port or null for default
+      * @var string
+      * @category DataBase
+      */
+     public $DataBasePort = null;
      /**
       * The database UserName
       * @field password
@@ -466,7 +482,7 @@ abstract class ConfigurationBase extends ArrayObject
       * @var string
       * @category DataBase
       */
-     public $DataBasePassword = null;
+     public $DataBasePassword = 'root';
      /**
       * The database Name
       * @var string
@@ -498,6 +514,8 @@ abstract class ConfigurationBase extends ArrayObject
 		ini_set('display_startup_errors', $this->DisplayStartupError);
 		error_reporting($this->ReportError);
 		if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_" ;
+		if(!$this->SoftKey) $this->SoftKey = $this->SecretKey;
+		elseif(!$this->SecretKey) $this->SecretKey = $this->SoftKey;
      }
 	public function __get($name) {
         return $this[$this->PropertyName($name)]??null;
@@ -509,6 +527,7 @@ abstract class ConfigurationBase extends ArrayObject
         return preg_replace("/\W+/", "", strToProper($name));
     }
 
+     public function HardKey($seed) { return $seed.$this->SecretKey.$seed; }
 
      public function IsLatestVersion(): bool|null
      {

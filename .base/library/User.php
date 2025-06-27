@@ -25,7 +25,7 @@ This email address is associated with an account but no password is associated w
 Please $HYPERLINK or the below link if you want to reset your password... else ignore this message.<br>$LINK<br><br>
 With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public static $RecoverLinkAnchor = "CLICK ON THIS LINK";
-	public static $ActiveHandlerPath = "/sign/active.php";
+	public static $ActiveHandlerPath = "/sign/active";
 	public static $ActiveEmailSubject = "Account Activation Request";
 	public static $ActiveEmailContent = 'Hello dear $NAME,<br><br>
 We received an account activation request on $HOSTLINK for $EMAILLINK.<br>
@@ -246,6 +246,24 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			$id = takeValid($this->Find($signature, $password), "Id");
 		return is_null($id) ? null : $this->DataTable->Update("`Id`=$id", [$key => $value]);
 	}
+	public function GetMetaValue($key, $signature = null, $password = null)
+	{
+		if (is_null($id = $this->Id) || !is_null($signature))
+			$id = takeValid($this->Find($signature, $password), "Id");
+		return is_null($id) ? null : $this->DataTable->GetMetaValue($key, "`Id`=$id");
+	}
+	public function SetMetaValue($key, $value, $signature = null, $password = null)
+	{
+		if (is_null($id = $this->Id) || !is_null($signature))
+			$id = takeValid($this->Find($signature, $password), "Id");
+		return is_null($id) ? null : $this->DataTable->SetMetaValue($key, $value, "`Id`=$id");
+	}
+	public function ForgetMetaValue($key, $signature = null, $password = null)
+	{
+		if (is_null($id = $this->Id) || !is_null($signature))
+			$id = takeValid($this->Find($signature, $password), "Id");
+		return is_null($id) ? null : $this->DataTable->ForgetMetaValue($key, "`Id`=$id");
+	}
 
 	public function GetGroup($signature = null, $password = null)
 	{
@@ -442,7 +460,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function EncryptToken($key, $value)
 	{
 		$this->Session->SetData($value, $key);
-		return $this->Cryptograph->Encrypt($value . self::$TokenDelimiter . date(self::$TokenDateTimeFormat), \_::$Config->SecretKey, true);
+		return $this->Cryptograph->Encrypt($value . self::$TokenDelimiter . date(self::$TokenDateTimeFormat), \_::$Config->SoftKey, true);
 	}
 	/**
 	 * To get the value hided in the token, then forget stored data
@@ -455,7 +473,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if (!$key || !$token)
 			return null;
-		list($sign, $date) = explode(self::$TokenDelimiter, $this->Cryptograph->Decrypt($token, \_::$Config->SecretKey, true));
+		list($sign, $date) = explode(self::$TokenDelimiter, $this->Cryptograph->Decrypt($token, \_::$Config->SoftKey, true));
 		if ($this->Session->GetData($sign) != $key)
 			throw new \SilentException("Your request is invalid or used before!");
 		if ($date != date(self::$TokenDateTimeFormat))

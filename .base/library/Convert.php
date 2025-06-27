@@ -274,7 +274,7 @@ class Convert
 
     public static function ToJson($obj): string
     {
-        if (isEmpty($obj))
+        if (is_null($obj))
             return "null";
         return json_encode($obj, flags: JSON_OBJECT_AS_ARRAY);
     }

@@ -12,7 +12,9 @@ class SignRecoverForm extends Form{
 	public $PasswordLabel = "<i class='fa fa-lock'></i>";
 	public $PasswordConfirmationLabel = "<i class='fa fa-lock'></i>";
 	public $SignInLabel = "I remembered my password!";
+	public $SignInPath = null;
 	public $SignUpLabel = "I don't have an account!";
+	public $SignUpPath = null;
 	public $SignaturePlaceHolder = "Email/Phone";
 	public $PasswordPlaceHolder = "Password";
 	public $PasswordConfirmationPlaceHolder = "Confirm Password";
@@ -59,11 +61,17 @@ class SignRecoverForm extends Form{
 	{
 		return Html::Script("
 			$(function () {
+				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
+				});
+				$(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
+				});
                 $('.{$this->Name} form').submit(function(e) {
 					let error = null;
-					if (!$('.{$this->Name} form #Password').val().match({$this->PasswordPattern})) 
+					if (!$('.{$this->Name} form [name=Password]')?.val().match({$this->PasswordPattern})) 
 						error = Html.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
-					else if ($('.{$this->Name} form #PasswordConfirmation').val() != $('.{$this->Name} form #Password').val()) 
+					else if ($('.{$this->Name} form [name=PasswordConfirmation]')?.val() != $('.{$this->Name} form [name=Password]')?.val()) 
 						error = Html.error('New password and confirm password does not match!');
 					if(error) {
 						$('.{$this->Name} form .result').remove();
@@ -71,19 +79,20 @@ class SignRecoverForm extends Form{
 						e.preventDefault();
 						return false;
 					}
-					return false;
+					" . ($this->UseAjax ? "submitForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
+					return true;
                 });
 			});
-		") . parent::GetScript();
+		");
 	}
 	public function GetFooter(){
 		if(auth(\_::$Config->UserAccess)) return parent::GetFooter();
         else return parent::GetFooter()
 			.Html::LargeSlot(
-				Html::Link($this->SignInLabel, User::$InHandlerPath)
+				Html::Link($this->SignInLabel, $this->SignInPath??User::$InHandlerPath)
 			, ["class"=>"col-lg-12"])
 			.Html::LargeSlot(
-				Html::Link($this->SignUpLabel, User::$UpHandlerPath)
+				Html::Link($this->SignUpLabel, $this->SignUpPath??User::$UpHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 
