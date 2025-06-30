@@ -204,20 +204,7 @@ abstract class FrontBase
 
 	public function CreateTemplate($name = null, $data = [])
 	{
-		switch (strtolower($name)) {
-			case 'message':
-				template($name, $data);
-				return new \MiMFa\Template\Message();
-			case 'splash':
-				template($name, $data);
-				return new \MiMFa\Template\Splash();
-			case 'general':
-				template($name, $data);
-				return new \MiMFa\Template\General();
-			default:
-				template("Main", $data);
-				return new \MiMFa\Template\Main();
-		}
+		return new (template($name, $data, alternative:"Main"))();
 	}
 
 	public function IsDark($color = null): bool|null

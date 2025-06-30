@@ -605,7 +605,7 @@ function model(string $name, mixed $data = [], bool $print = true, int $origin =
  */
 function library(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default)??"\\MiMFa\\Template\\$name";
 }
 /**
  * To interprete, the specified ComponentName
@@ -616,7 +616,7 @@ function library(string $name, mixed $data = [], bool $print = true, int $origin
  */
 function component(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default)??"\\MiMFa\\Component\\$name";
 }
 /**
  * To interprete, the specified TemplateName
@@ -627,7 +627,7 @@ function component(string $name, mixed $data = [], bool $print = true, int $orig
  */
 function module(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default)??"\\MiMFa\\Module\\$name";
 }
 /**
  * To interprete, the specified TemplateName
@@ -638,7 +638,7 @@ function module(string $name, mixed $data = [], bool $print = true, int $origin 
  */
 function template(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default)??"\\MiMFa\\Template\\$name";
 }
 /**
  * To interprete, the specified viewname

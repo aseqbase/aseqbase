@@ -403,10 +403,22 @@ FodyWeavers.xsd
 *.sln.iml
 
 # aseqbase
-/single
-/sequence
-/main
+~*
+.htaccess
+/private
+/public
 /test
+/tmp
+/temp
+/vendor
+/MiMFa aseqbase.sln
+/global.php
+/Configuration.php
+/Information.php
+/Front.php
+/Back.php
+*.zip
+*.rar
 /administrator
 /ms
 /lms
@@ -415,15 +427,5 @@ FodyWeavers.xsd
 /erp
 /shop
 /nav
-/private
-/public
-/tmp
-/temp
-/vendor
-/.*
-/MiMFa aseqbase.sln
-/global.php
-*.zip
-*.rar
 # temporary
 /-installer/*.php

@@ -1,8 +1,6 @@
 <?php
 namespace MiMFa\Template;
 
-use MiMFa\Library\Convert;
-
 class Message extends Template{
 	public $SupTitle = null;
 	public $Title = null;
