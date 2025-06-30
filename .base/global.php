@@ -480,16 +480,17 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 			return null;
 	return null;
 }
-function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = null)
+function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = null, &$used = null)
 {
 	try {
-		renderPrepends($directory, $name);
+		renderPrepends($directory, $used=$name);
 		if (
 			$path =
 			addressing("$directory$name", $extension, $origin, $depth) ??
-			addressing("$directory$alternative", $extension, $origin, $depth)
+			addressing($directory.($used=$alternative), $extension, $origin, $depth)
 		)
 			return including($path, $data, $print, $default);
+		else $used=null;
 	} finally {
 		renderAppends($directory, $name);
 	}
@@ -605,7 +606,7 @@ function model(string $name, mixed $data = [], bool $print = true, int $origin =
  */
 function library(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default)??"\\MiMFa\\Template\\$name";
+	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used:$used)?"\\MiMFa\\Template\\$used":null;
 }
 /**
  * To interprete, the specified ComponentName
@@ -616,7 +617,7 @@ function library(string $name, mixed $data = [], bool $print = true, int $origin
  */
 function component(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default)??"\\MiMFa\\Component\\$name";
+	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used:$used)?"\\MiMFa\\Component\\$used":null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -627,7 +628,7 @@ function component(string $name, mixed $data = [], bool $print = true, int $orig
  */
 function module(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default)??"\\MiMFa\\Module\\$name";
+	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used:$used)?"\\MiMFa\\Module\\$used":null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -638,7 +639,7 @@ function module(string $name, mixed $data = [], bool $print = true, int $origin 
  */
 function template(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default)??"\\MiMFa\\Template\\$name";
+	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used:$used)?"\\MiMFa\\Template\\$used":null;
 }
 /**
  * To interprete, the specified viewname
