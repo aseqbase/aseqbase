@@ -419,6 +419,8 @@ FodyWeavers.xsd
 /Back.php
 *.zip
 *.rar
+/sequence
+/single
 /administrator
 /ms
 /lms
