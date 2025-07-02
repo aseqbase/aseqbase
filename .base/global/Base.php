@@ -264,4 +264,3 @@ class Base extends \ArrayObject
 		return preg_replace("/\W+/", "", strToProper($name));
 	}
 }
-?>

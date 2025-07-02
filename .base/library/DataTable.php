@@ -69,6 +69,14 @@ class DataTable
 	{
 		return $this->GetDatabase()->SelectRowQuery($this->Name, $columns, $condition);
 	}
+	public function SelectFirstRow($columns = "*", $condition = null, $params = [])
+	{
+		return $this->GetDatabase()->TryFetchRow($this->SelectRowQuery($columns, $condition), $params);
+	}
+	public function SelectLastRow($columns = "*", $condition = null, $params = [])
+	{
+		return $this->OrderBy(ascending:false)->SelectFirstRow($columns, $condition, $params);
+	}
 
 	public function SelectColumn($column = "Id", $condition = null, $params = [], $defaultValue = array())
 	{
@@ -234,19 +242,11 @@ class DataTable
 	{
 		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("MIN($column)", $condition), $params);
 	}
-	public function First($columns = "*", $condition = null, $params = [])
-	{
-		return $this->GetDatabase()->TryFetchRow($this->SelectRowQuery($columns, $condition), $params);
-	}
-	public function Last($columns = "*", $condition = null, $params = [])
-	{
-		return $this->OrderBy(ascending:false)->First($columns, $condition, $params);
-	}
-	public function FirstValue($column = "Id", $condition = null, $params = [])
+	public function First($column = "Id", $condition = null, $params = [])
 	{
 		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("FIRST($column)", $condition), $params);
 	}
-	public function LastValue($column = "Id", $condition = null, $params = [])
+	public function Last($column = "Id", $condition = null, $params = [])
 	{
 		return $this->GetDatabase()->TryFetchValue($this->SelectValueQuery("LAST($column)", $condition), $params);
 	}
@@ -274,5 +274,3 @@ class DataTable
 		return $this->Update($condition, $params, $defaultValue);
 	}
 }
-
-?>

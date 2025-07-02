@@ -493,4 +493,3 @@ abstract class ResBase
 		));
 	}
 }
-?>

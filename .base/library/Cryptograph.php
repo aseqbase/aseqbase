@@ -62,4 +62,3 @@ class Cryptograph
         return $plaintext;
     }
 }
-?>

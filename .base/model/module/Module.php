@@ -404,4 +404,4 @@ class Module extends \Base
                $output = $this->Render();
           return ob_get_clean() ?? $output;
      }
-} ?>
+}

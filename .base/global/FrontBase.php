@@ -204,9 +204,7 @@ abstract class FrontBase
 
 	public function CreateTemplate($name = null, $data = [])
 	{
-		$t = template($name, $data, alternative:"Main");
-		echo $t;
-		return new $t();
+		return new (template($name, $data, alternative:"Main"))();
 	}
 
 	public function IsDark($color = null): bool|null
@@ -428,4 +426,3 @@ abstract class FrontBase
 		);
 	}
 }
-?>

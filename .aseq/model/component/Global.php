@@ -3,9 +3,9 @@
 use MiMFa\Library\Html;
 use MiMFa\Library\Local;
 
-\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl('/view/style/reset.css'));
-\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl('/view/style/general.css'));
-\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl('/view/style/be.css'));
+\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl(\_::$Address->StyleDirectory.'reset.css'));
+\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl(\_::$Address->StyleDirectory.'general.css'));
+\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl(\_::$Address->StyleDirectory.'be.css'));
 \_::$Front->Libraries[] = Html::Style("
 :root{
 	--dir: ".(\_::$Back->Translate->Direction??\_::$Config->DefaultDirection).";
@@ -138,11 +138,11 @@ use MiMFa\Library\Local;
 	--error-symbol-path-url: URL(\"" . Local::GetUrl(\_::$Info->ErrorSymbolPath) . "\");
 }
 ");
-\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl('/view/style/view.css'));
+\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl(\_::$Address->StyleDirectory.'view.css'));
 
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl('/view/script/general.js'));
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl('/view/script/Math.js'));
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl('/view/script/Array.js'));
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl('/view/script/Evaluate.js'));
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl('/view/script/Html.js'));
+\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'general.js'));
+\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'Math.js'));
+\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'Array.js'));
+\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'Evaluate.js'));
+\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'Html.js'));
 ?>

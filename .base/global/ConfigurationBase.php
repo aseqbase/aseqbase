@@ -158,37 +158,6 @@ abstract class ConfigurationBase extends ArrayObject
      public $DefaultDirection = null;
 
      /**
-      * Allow to leave comments on posts
-      * @var bool
-      * @category Content
-      */
-     public $AllowWriteComment = true;
-     /**
-      * Access level to leave comments on posts
-      * @var int
-      * @category Content
-      */
-     public $WriteCommentAccess = 1;
-     /**
-      * Allow to read comments on posts
-      * @var bool
-      * @category Content
-      */
-     public $AllowReadComment = true;
-     /**
-      * Access level to read comments on posts
-      * @var int
-      * @category Content
-      */
-     public $ReadCommentAccess = 0;
-     /**
-      * Default status of new comments on posts
-      * @var int
-      * @category Content
-      */
-     public $DefaultCommentStatus = 0;
-
-     /**
       * A special key for the website, be sure to change this
       * @field password
       * @var string
@@ -410,34 +379,35 @@ abstract class ConfigurationBase extends ArrayObject
       * @category Security
       */
      public $AcceptableFileFormats = [".zip", ".rar"];
+     
      /**
       * 0: Not show Errors; 1: To show Errors
       * @field int
       * @var int|null
       * @category Debug
       */
-     public $DisplayError = null;
+     public $DisplayError = 1;
      /**
       * 0: Not show startup Errors; 1: To show startup Errors
       * @field int
       * @var int|null
       * @category Debug
       */
-     public $DisplayStartupError = null;
+     public $DisplayStartupError = 1;
      /**
       * E_ error flags
       * @field int
       * @var int|null
       * @category Debug
       */
-     public $ReportError = null;
+     public $ReportError = E_ALL;
      /**
       * Database Errors
       * @field int
       * @var int|null
       * @category Debug
       */
-     public $DataBaseError = null;
+     public $DataBaseError = 3;
 
      /**
       * The database default Encoding
@@ -566,4 +536,3 @@ abstract class ConfigurationBase extends ArrayObject
           }
      }
 }
-?>

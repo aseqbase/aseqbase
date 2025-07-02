@@ -104,4 +104,3 @@ class HashCrypt extends Cryptograph
         return hash_hmac($this->Algorithm, $a, $nonce) === hash_hmac($this->Algorithm, $b, $nonce);
     }
 }
-?>

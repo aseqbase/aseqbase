@@ -29,18 +29,13 @@ class AddressBase
 	public string $StyleDirectory;
 
 	public string|null $Route;
-	public string $ViewRoute;
-	public string $PageRoute;
-	public string $RegionRoute;
-	public string $PartRoute;
+	public string $AssetRoute;
 	public string $ScriptRoute;
 	public string $StyleRoute;
-	
 	public string $ContentRoute;
 	public string $CategoryRoute;
 	public string $TagRoute;
 	public string $UserRoute;
-
 
 	public function __construct(?string $name = null, ?string $rootDir = null, ?string $rootRoute = null)
 	{
@@ -63,21 +58,16 @@ class AddressBase
 		$this->PageDirectory = $this->ViewDirectory . "page" . DIRECTORY_SEPARATOR;
 		$this->RegionDirectory = $this->ViewDirectory . "region" . DIRECTORY_SEPARATOR;
 		$this->PartDirectory = $this->ViewDirectory . "part" . DIRECTORY_SEPARATOR;
-		$this->ScriptDirectory = $this->ViewDirectory . "script" . DIRECTORY_SEPARATOR;
-		$this->StyleDirectory = $this->ViewDirectory . "style" . DIRECTORY_SEPARATOR;
+		$this->ScriptDirectory = $this->AssetDirectory . "script" . DIRECTORY_SEPARATOR;
+		$this->StyleDirectory = $this->AssetDirectory . "style" . DIRECTORY_SEPARATOR;
 
 		$this->Route = str_replace(["\\", "/"], ["/", "/"], $rootRoute ?? "/");
-		$this->ViewRoute = $this->Route . "view/";
-		$this->PageRoute = $this->ViewRoute . "page/";
-		$this->RegionRoute = $this->ViewRoute . "region/";
-		$this->PartRoute = $this->ViewRoute . "part/";
-		$this->ScriptRoute = $this->ViewRoute . "script/";
-		$this->StyleRoute = $this->ViewRoute . "style/";
-
-		$this->ContentRoute = "/post/";
-		$this->CategoryRoute = "/cat/";
-		$this->TagRoute = "/tag/";
-		$this->UserRoute = "/user/";
+		$this->AssetRoute = $this->Route . "asset/";
+		$this->ScriptRoute = $this->AssetRoute . "script/";
+		$this->StyleRoute = $this->AssetRoute . "style/";
+		$this->ContentRoute = $this->Route . "post/";
+		$this->CategoryRoute = $this->Route . "cat/";
+		$this->TagRoute = $this->Route . "tag/";
+		$this->UserRoute = $this->Route . "user/";
 	}
 }
-?>

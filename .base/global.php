@@ -417,7 +417,14 @@ function auth($minaccess = null): mixed
 	else
 		return \_::$Back->User->Access($minaccess);
 }
-
+/**
+ * To include once a $path by the specific $data then return results or output
+ * @param string $path
+ * @param mixed $data
+ * @param bool $print
+ * @param mixed $default
+ * @return mixed The results of including a path or the printed values if $print be false
+ */
 function including(string $path, mixed $data = [], bool $print = true, $default = null)
 {
 	if (file_exists($path)) {
@@ -439,6 +446,14 @@ function including(string $path, mixed $data = [], bool $print = true, $default 
 		return ($default)($path, $data, $print);
 	return $default;
 }
+/**
+ * To require once a $path by the specific $data then return results or output
+ * @param string $path
+ * @param mixed $data
+ * @param bool $print
+ * @param mixed $default
+ * @return mixed The results of requiring a path or the printed values if $print be false
+ */
 function requiring(string $path, mixed $data = [], bool $print = true, $default = null)
 {
 	if (file_exists($path)) {
@@ -460,6 +475,14 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
 		return ($default)($path, $data, $print);
 	return $default;
 }
+/**
+ * To seacrh and find the correct path of a file between all sequences
+ * @param string|null $file The releative file path
+ * @param mixed $extension The extention like ".php"
+ * @param int $origin The start layer of the sequences (a zero started index)
+ * @param int $depth How much layers it should iterate in searching
+ * @return string|null The correct path of the file or null if its could not find
+ */
 function addressing(string|null $file = null, $extension = null, int $origin = 0, int $depth = 99)
 {
 	$file = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $file ?? "");
@@ -480,6 +503,14 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 			return null;
 	return null;
 }
+/**
+ * To seacrh in a specific directory in all sequences, to find a file with the name then including that
+ * @param string|null $file The releative file path
+ * @param mixed $extension The extention like ".php"
+ * @param int $origin The start layer of the sequences (a zero started index)
+ * @param int $depth How much layers it should iterate in searching
+ * @return mixed The including results or null if its could not find
+ */
 function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = null, &$used = null)
 {
 	try {
@@ -602,7 +633,7 @@ function model(string $name, mixed $data = [], bool $print = true, int $origin =
  * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return string|null The complete name of selected library class or return null if it's not found
  */
 function library(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
@@ -613,7 +644,7 @@ function library(string $name, mixed $data = [], bool $print = true, int $origin
  * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return string|null The complete name of selected component class or return null if it's not found
  */
 function component(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
@@ -624,7 +655,7 @@ function component(string $name, mixed $data = [], bool $print = true, int $orig
  * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return string|null The complete name of selected module class or return null if it's not found
  */
 function module(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
@@ -635,7 +666,7 @@ function module(string $name, mixed $data = [], bool $print = true, int $origin 
  * @param non-empty-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return string|null The complete name of selected template class or return null if it's not found
  */
 function template(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
@@ -646,40 +677,40 @@ function template(string $name, mixed $data = [], bool $print = true, int $origi
  * @param non-empty-lowercase-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return mixed The result of included view or the printed data
  */
 function view(string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ViewDirectory, $name ?? \_::$Config->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
- * To interprete, the specified pagename
- * @param non-empty-lowercase-string $name
- * @param mixed $data
- * @param bool $print
- * @return mixed
- */
-function page(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
-{
-	return using(\_::$Address->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
-}
-/**
  * To interprete, the specified regionname
  * @param non-empty-lowercase-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return mixed The result of included region or the printed data
  */
 function region(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
+ * To interprete, the specified pagename
+ * @param non-empty-lowercase-string $name
+ * @param mixed $data
+ * @param bool $print
+ * @return mixed The result of included page or the printed data
+ */
+function page(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+{
+	return using(\_::$Address->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+}
+/**
  * To interprete, the specified partname
  * @param non-empty-lowercase-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return mixed The result of included part or the printed data
  */
 function part(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
@@ -690,7 +721,7 @@ function part(string $name, mixed $data = [], bool $print = true, int $origin = 
  * @param non-empty-lowercase-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return mixed The result of the pointed computed codes or the printed data
  */
 function compute(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
@@ -701,7 +732,7 @@ function compute(string $name, mixed $data = [], bool $print = true, int $origin
  * @param non-empty-lowercase-string $name
  * @param mixed $data
  * @param bool $print
- * @return mixed
+ * @return mixed The result of the routers or the printed data
  */
 function route(string|null $name = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
@@ -710,7 +741,7 @@ function route(string|null $name = null, mixed $data = null, bool $print = true,
 /**
  * To get a Table from the DataBase
  * @param string $name The raw table name (Without any prefix)
- * @return \MiMFa\Library\DataTable
+ * @return \MiMFa\Library\DataTable The selected database's table
  */
 function table(string $name, bool $prefix = true, int $origin = 0, int $depth = 99, ?\MiMFa\Library\DataBase $source = null, $default = null)
 {

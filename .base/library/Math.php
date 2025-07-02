@@ -267,5 +267,4 @@ class Math
 	    }
 	    return ["X"=>min($xSize, $x),"Y"=>min($ySize, $y)];
     }
-
 }

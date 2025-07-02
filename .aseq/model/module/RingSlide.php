@@ -105,7 +105,7 @@ class RingSlide extends Module{
 				font-size: 180%;
 				left: 0px;
 				top: 0px;
-				background-image: url('".((\_::$Back->User??$this)->Image??$this->Image)."');
+				background-image: url('".getUrl($this->Image)."');
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: contain;
@@ -141,7 +141,8 @@ class RingSlide extends Module{
 				border-radius: 100%;
 			}
 			.{$this->Name} .menu>.center>a>.button>.media{
-				background-size: 50% 50% !important;
+				line-height: {$this->ButtonsSize}px;
+				font-size: calc({$this->ButtonsSize}px * 0.4);
 				width: {$this->ButtonsSize}px;
 				height: {$this->ButtonsSize}px;
                 ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor(\_::$Front->ForeColor(2)):"")."

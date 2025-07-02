@@ -500,5 +500,3 @@ class Local
 		\Res::SetFile($path, null, $type, true, $name);
 	}
 }
-
-?>

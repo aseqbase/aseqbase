@@ -24,4 +24,3 @@ set_exception_handler(function ($exception) {
         error_log($exception->getMessage()); // Log other exceptions
     }
 });
-?>

@@ -26,5 +26,7 @@ class Configuration extends ConfigurationAseq {
 
 	public $AllowSigning = true;
 	public $AllowTranslate = false;
+	public $DefaultLanguage = "FA";
+	public $DefaultDirection = "RTL";
 }
 ?>

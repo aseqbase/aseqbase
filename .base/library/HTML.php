@@ -2511,7 +2511,7 @@ class Html
                         "(data,err)=>document.getElementById('$sid').innerHTML=data??err"
                     )
                 ) =>
-                    self::Division(self::Center(self::Media(\_::$Info->ProcessSymbolPath ?? "spinner")), ["id" => $sid])
+                    self::Division(self::Center(self::Media("spinner")), ["id" => $sid])
             ],
             ["class" => "contentinput"]
         );
@@ -3199,7 +3199,7 @@ class Html
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading($title) .
-                \Res::Script(null, "/view/script/CanvasJS.min.js") .
+                \Res::Script(null, \_::$Address->ScriptDirectory."CanvasJS.min.js") .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {
@@ -3270,4 +3270,3 @@ class Html
             );
     }
 }
-?>

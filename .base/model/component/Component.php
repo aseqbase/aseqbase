@@ -3,4 +3,3 @@
 class Component extends \Base{
 	
 }
-?>

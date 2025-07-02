@@ -70,15 +70,12 @@ abstract class BackBase
 		\MiMFa\Library\Revise::Decode($this, takeValid($this->User->GetGroup(), "MetaData" , "[]"));
 		\MiMFa\Library\Revise::Decode($this, takeValid($this->User->Get(), "MetaData" , "[]"));
 	
-		if (\_::$Config->AllowTranslate) {
-			$this->Translate->AutoUpdate = \_::$Config->AutoUpdateLanguage;
-			$this->Translate->Initialize(
-				session: $this->Session,
-				lang:\_::$Config->DefaultLanguage,
-				direction:\_::$Config->DefaultDirection,
-				encoding: \_::$Config->Encoding
-			);
-		}
+		$this->Translate->AutoUpdate = \_::$Config->AutoUpdateLanguage;
+		$this->Translate->Initialize(
+			session: $this->Session,
+			lang:\_::$Config->DefaultLanguage,
+			direction:\_::$Config->DefaultDirection,
+			encoding: \_::$Config->Encoding
+		);
 	}
 }
-?>

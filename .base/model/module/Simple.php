@@ -1,17 +1,10 @@
 <?php namespace MiMFa\Module;
 
-use MiMFa\Library\Convert;
-
 class Simple extends Module{
-	public $DefaultGet = null;
-
-	public function __construct($defaultGet){
+	public function __construct($title, $content, $description){
 		parent::__construct();
-		$this->DefaultGet = $defaultGet;
-	}
-	
-	public function Get(){
-		return Convert::ToString($this->DefaultGet);
+		$this->Title = $title;
+		$this->Content = $content;
+		$this->Description = $description;
 	}
 }
-?>

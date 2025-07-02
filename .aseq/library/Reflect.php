@@ -494,4 +494,3 @@ class Reflected extends \ArrayObject{
         return $this;
     }
 }
-?>

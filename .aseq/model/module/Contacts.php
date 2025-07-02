@@ -28,7 +28,7 @@ class Contacts extends Module
 				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
 			}
 			.{$this->Name} .map{
-				border: 10px solid var(--back-color-3);
+				border: 10px solid var(--back-color-1);
 				box-shadow: var(--shadow-2);
 				border-radius: 5px;
 			}

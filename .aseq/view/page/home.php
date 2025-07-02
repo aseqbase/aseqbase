@@ -4,9 +4,9 @@ use \MiMFa\Library\User;
 
 module("RingSlide");
 $module = new \MiMFa\Module\RingSlide();
-$module->Image = \_::$Info->LogoPath;
+$module->Image = \_::$Back->User->Image??\_::$Info->LogoPath;
 $module->Items = \_::$Info->Services;
-swap($module, $data);
+//swap($module, $data);
 \Res::Render(
 	Html::Style("
 		.page-home {

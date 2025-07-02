@@ -287,4 +287,3 @@ abstract class ReqBase
 \ReqBase::$Page = getPage();
 \ReqBase::$Query = getQuery();
 \ReqBase::$Fragment = getFragment();
-?>

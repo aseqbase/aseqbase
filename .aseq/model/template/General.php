@@ -10,6 +10,12 @@ class General extends Template
 	public function __construct($setDefaults = true, $setRevises = true)
 	{
 		parent::__construct($setDefaults, $setRevises);
+        component("Manifest");
+        component("JsonLD");
+		component("Global");
+		component("Live");
+		component("Icons");
+        component("ShortcutKey");
 		component("JQuery");
 		component("Bootstrap");
 		component("AOS");
@@ -20,7 +26,6 @@ class General extends Template
 		parent::RenderInitial();
 		echo Html::Style("
 				body {
-					font: var(--size-1) var(--font-0), var(--font-1), var(--font-2);
 					overflow-x: hidden;
 					min-height: 100vh;
 					background-color: var(--back-color-0);

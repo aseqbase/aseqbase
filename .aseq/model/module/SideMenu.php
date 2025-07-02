@@ -44,8 +44,8 @@ class SideMenu extends Module
 
 	public function GetStyle()
 	{
-		$this->Direction = strtoupper($this->Direction);
-		$sdir = $this->Direction == "rtl" ? "left" : "right";
+		$this->Direction = strtolower($this->Direction);
+		$sdir = ($this->Direction == "rtl") ? "left" : "right";
 		$activeselector = $this->AllowHoverable ? ".{$this->Name}:is(.active, :hover)" : ".{$this->Name}.active";
 		$notactiveselector = ".{$this->Name}:not(.active)";
 		return parent::GetStyle() . Html::Style("
@@ -260,7 +260,7 @@ class SideMenu extends Module
 					padding: 0px 5px;
 					position: fixed;
 					z-index: 9999;
-					color:  var(--fore-color-2);
+					color:  var(--fore-color-3);
 					" . (Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
 				}
 				.{$this->Name}-sign-button-menu:hover{

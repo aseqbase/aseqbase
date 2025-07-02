@@ -183,4 +183,3 @@ class Internal
 Internal::$Directory = \_::$Aseq->PrivateDirectory . "internal" . DIRECTORY_SEPARATOR;
 Local::CreateDirectory(\_::$Aseq->PrivateDirectory);
 Local::CreateDirectory(Internal::$Directory);
-?>

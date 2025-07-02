@@ -56,12 +56,6 @@ abstract class InformationBase extends ArrayObject{
      * @var mixed
 	 */
 	public $FullDescription = null;
-	/**
-     * The copyright of the website
-     * @field strings
-     * @var mixed
-	 */
-	public $CopyRight = null;
 
 	/**
 	 * Default mail sender
@@ -97,63 +91,7 @@ abstract class InformationBase extends ArrayObject{
 	 * @var mixed
 	 */
 	public $FullLogoPath = "/asset/logo/full-logo.png";
-	/**
-     * The website main banner path
-     * @field path
-	 * @var mixed
-	 */
-	public $BannerPath = null;
-	/**
-     * The website full logo path
-     * @field path
-	 * @var mixed
-	 */
-	public $FullBannerPath = null;
-	/**
-     * The default homepage path
-     * @field path
-	 * @var mixed
-	 */
-	public $HomePath = "/home";
-	/**
-     * The default download links path
-     * @field path
-	 * @var mixed
-	 */
-	public $DownloadPath = null;
-	/**
-     * The default payment JSON data to use for paying process
-     * @field json
-     * @example '{"Network":"TRC-20","Unit":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}'
-     * @var mixed
-     */
-	public $Payment = null;
-	/**
-     * The main symbol path to show while system is waiting
-     * @field path
-	 * @var mixed
-	 */
-	public $WaitSymbolPath = "/asset/general/wait.gif";
-	/**
-     * The main symbol path to show while system is processing
-     * @field path
-	 * @var mixed
-	 */
-	public $ProcessSymbolPath = "/asset/general/process.gif";
-	/**
-     * The main symbol path to show on the errors
-     * @field path
-	 * @var mixed
-	 */
-	public $ErrorSymbolPath = "/asset/general/error.png";
-
-	/**
-     * The location link on the map
-     * @field map
-	 * @var mixed
-	 */
-	public $Location = null;
-
+	
 	/**
 	 * The main KeyWords of the website, these will effect on SEO and views
      * @field array
@@ -161,59 +99,10 @@ abstract class InformationBase extends ArrayObject{
 	 */
 	public $KeyWords = [];
 
-	/**
-     * The main menu to show on the most pages
-     * @field array
-     * @var array
-	 */
-	public $MainMenus = [];
-
-	/**
-     * The side menu to show on the most pages
-     * @field array
-     * @var array
-	 */
-	public $SideMenus = [];
-
-	/**
-     * The main shortcut menu to show on the most pages
-     * @field array
-     * @var array
-	 */
-	public $Shortcuts = [];
-
-	/**
-     * The main menu items to show on the first page
-     * @field array
-     * @var array
-	 */
-	public $Services = [];
-
-	/**
-     * The main members and personnel of the website
-     * @field array
-     * @var array
-	 */
-	public $Members = [];
-
-	/**
-     * The main contacts details to show on the most pages and contact page
-     * @field array
-     * @var array
-	 */
-	public $Contacts = [];
-
-
 	public function __construct(){
 		$this->SenderEmail = createEmail("do-not-reply");
 		$this->ReceiverEmail = createEmail("info");
 		\MiMFa\Library\Revise::Load($this);
-		
-		$menu = between($this->MainMenus,$this->SideMenus,$this->Shortcuts,$this->Services);
-		if(is_null($this->MainMenus)) $this->MainMenus = $menu;
-		if(is_null($this->MainMenus)) $this->SideMenus = $menu;
-		if(is_null($this->MainMenus)) $this->Shortcuts = $menu;
-		if(is_null($this->MainMenus)) $this->Services = $menu;
 	}
 	public function __get($name) {
         return $this[$this->PropertyName($name)];
@@ -225,4 +114,3 @@ abstract class InformationBase extends ArrayObject{
         return preg_replace("/\W+/", "", strToProper($name));
     }
 }
-?>

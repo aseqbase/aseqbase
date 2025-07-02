@@ -6,7 +6,7 @@ class BarMenu extends Module{
 	public $Items = null;
 	public $AllowLabels = false;
 	public $AllowAnimate = true;
-	public $AllowMiddle = true;
+	public $AllowMiddle = false;
 	public $AllowSides = false;
 	public $AllowChangeColor = true;
 	public $VisibleFromScreenSize = "sm";
@@ -38,12 +38,13 @@ class BarMenu extends Module{
 			}
 
 			.{$this->Name}:hover{
-				".\MiMFa\Library\Style::UniversalProperty("filter","drop-shadow(0px 0px 30px #00000088)")."
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("filter", "drop-shadow(0px 0px 30px #00000088)")."
+				".\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))."
 			}
 
 			.{$this->Name}>.button {
 				background-color: ".\_::$Front->BackColor(2)."dd;
+				color: var(--fore-color-2);
 				text-align: center;
 				align-content: center;
 				border: none;
@@ -63,20 +64,21 @@ class BarMenu extends Module{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: cover;
-				color: var(--fore-color-2);
 				aspect-ratio: 1;
 				height: {$this->Height}px;
 			}
 
 			.{$this->Name}>.button>.division>.media{
 				height: 55%;
-    			margin: 15%;
+    			margin: 15%;".
+				\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+			}
+			.{$this->Name}>.button>.division>.media:not(.fa){
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 60%;
 				color: var(--back-color-2);".
-				(($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter():"").
-				\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				(($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter():"")."
 			}
 			.{$this->Name}>.button:hover>.division>.media{
 				background-size: auto 70%;".

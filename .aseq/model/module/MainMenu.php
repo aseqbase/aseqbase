@@ -63,7 +63,6 @@ class MainMenu extends Module
 				flex-direction: row;
 			}
 			.{$this->Name} :is(.header, .header a, .header a:visited, .header a:hover){
-				color: var(--fore-color-0);
 				text-decoration: none;
 				font-weight: normal !important;
 			}
@@ -127,7 +126,6 @@ class MainMenu extends Module
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active{
 				border-top: var(--border-2) var(--back-color-3);
-				border-radius: var(--radius-2) var(--radius-2) 0px 0px;
 				color: " . \_::$Front->ForeColor(0) . "88;
 				background-color: var(--back-color-0);
 				box-shadow: var(--shadow-2);

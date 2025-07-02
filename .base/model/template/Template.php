@@ -74,16 +74,6 @@ class Template extends \Base{
      */
 	public $Footer = null;
 
-	public function __construct($setDefaults = true, $setRevises = true){
-        parent::__construct($setDefaults, $setRevises);
-        component("Manifest");
-        component("JsonLD");
-		component("Global");
-		component("Live");
-		component("Icons");
-        component("ShortcutKey");
-    }
-
 	public function Handler($received = null){
         ob_start();
 		$this->Render();
@@ -117,11 +107,19 @@ class Template extends \Base{
             opacity: 0 !important;
         }
         html, body{
+            font-family: var(--font-0), var(--font-3);
+            font-size: var(--size-1);
             text-align: unset;
         }
-        *:not(h1,h2,h3,h4,h5,h6) {
-            line-height: 1.5em;
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-3), var(--font-0);
             direction: var(--dir);
+        }
+        .button, .btn{
+            font-family: var(--font-2), var(--font-5), var(--font-0);
+        }
+        .input{
+            font-family: var(--font-1), var(--font-3), var(--font-0);
         }
         .tooltip {
             position: absolute;
@@ -145,6 +143,10 @@ class Template extends \Base{
             opacity: 1;
             z-index: 999;
             transition: var(--transition-1) 2s;
+        }
+        :not(h1, h2, h3, h4, h5, h6 {
+            line-height: 1.5em;
+            direction: var(--dir);
         }
 
         big {
@@ -217,4 +219,3 @@ class Template extends \Base{
         region("final");
     }
 }
-?>
