@@ -28,9 +28,23 @@
     "scripts": {
         "start": "php -S localhost:8000 & net start MySQL & php index.php"
     },
+     "autoload": {
+        "psr-4": {
+            "MiMFa\\": "./"
+        }
+    },
     "extra": {
         "installer-paths": {
-            "./": ["aseqbase/aseqbase"]
+            "./": ["aseqbase/aseqbase", "type:framework", "type:patch"],
+            "{$name}/": ["type:project", "type:directory"],
+            "model/library/": ["type:library"],
+            "model/component/": ["type:component"],
+            "model/module/": ["type:module"],
+            "model/template/": ["type:template"],
+            "view/": ["type:view"],
+            "route/": ["type:route"],
+            "compute/": ["type:compute"],
+            "asset/": ["type:asset"]
         }
     }
 }
