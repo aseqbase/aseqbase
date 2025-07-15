@@ -1,5 +1,4 @@
-<?php
-namespace MiMFa\Template;
+<?php namespace MiMFa\Template;
 use MiMFa\Library\Html;
 class General extends Template
 {
@@ -14,6 +13,7 @@ class General extends Template
         component("JsonLD");
 		component("Global");
 		component("Live");
+		component("FontFace");
 		component("Icons");
         component("ShortcutKey");
 		component("JQuery");
@@ -399,4 +399,4 @@ class General extends Template
 		if (isValid($this->BackgroundImage))
 			echo "<div class='background-screen'></div>";
 	}
-} ?>
+}

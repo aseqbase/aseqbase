@@ -19,7 +19,7 @@ class MainMenu extends Module
 	public $AllowItemsDescription = false;
 	public $AllowSubItemsDescription = true;
 	public $AllowItemsImage = false;
-	public $AllowSubItemsImage = true;
+	public $AllowSubItemsImage = false;
 	public $HideItemsScreenSize = 'md';
 	public $ShowItemsScreenSize = null;
 	public $HideOthersScreenSize = 'md';
@@ -357,15 +357,15 @@ class MainMenu extends Module
 				$defaultButtons = [];
 				if ($this->AllowDefaultButtons) {
 					module("SearchForm");
-					module("UserMenu");
 					module("TemplateButton");
+					module("UserMenu");
 					$defaultButtons[] = new SearchForm();
-					if (\_::$Config->AllowSigning) $defaultButtons[] = new UserMenu();
 					$defaultButtons[] = new TemplateButton();
+					if (\_::$Config->AllowSigning) $defaultButtons[] = new UserMenu();
 				}
 				yield Html::Division([
-						...($defaultButtons? $defaultButtons : []),
-						...($this->Content? (is_array($this->Content)?$this->Content:[$this->Content]) : [])
+						...($this->Content? (is_array($this->Content)?$this->Content:[$this->Content]) : []),
+						...($defaultButtons? $defaultButtons : [])
 					],
 					["class" => "other {$this->ShowOthersScreenSize}-show {$this->HideOthersScreenSize}-hide"]
 				);

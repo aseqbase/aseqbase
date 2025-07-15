@@ -60,7 +60,7 @@ $('input[type=file]').val(null);
         } else
             \Res::Success("Profile updated successfully!");
     } else
-        \Res::Error(\Req::ReceivePOST("Signature" )==\_::$Back->User->Signature?"You did not change anythings!":"There a problem occured!" . Html::$NewLine . "You can not choice a duplicate signature!");
+        \Res::Error(\Req::ReceivePOST("Signature" )==\_::$Back->User->Signature?"You did not change anythings!":"There a problem occured!" . Html::$Break . "You can not choice a duplicate signature!");
 } catch (\Exception $ex) {
     \Res::Error($ex);
 }

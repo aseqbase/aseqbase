@@ -153,7 +153,7 @@ register_shutdown_function('cleanupTemp', false);
 function has($object, ...$hierarchy)
 {
 	if (count($hierarchy) === 0)
-		return $object==true;
+		return $object == true;
 	$data = array_shift($hierarchy);
 	if (!is_array($data)) {
 		if (is_array($object)) {
@@ -430,9 +430,10 @@ function including(string $path, mixed $data = [], bool $print = true, $default 
 	if (file_exists($path)) {
 		ob_start();
 		$res = [];
-		if (endsWith($path, DIRECTORY_SEPARATOR)){
-			foreach (glob($path."*".\_::$Extension) as $file)
-				if(!is_null($r = include_once $file)) $res[] = $r;
+		if (endsWith($path, DIRECTORY_SEPARATOR)) {
+			foreach (glob($path . "*" . \_::$Extension) as $file)
+				if (!is_null($r = include_once $file))
+					$res[] = $r;
 		} else
 			$res = include_once $path;
 		$output = ob_get_clean();
@@ -459,9 +460,10 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
 	if (file_exists($path)) {
 		ob_start();
 		$res = [];
-		if (endsWith($path, DIRECTORY_SEPARATOR)){
+		if (endsWith($path, DIRECTORY_SEPARATOR)) {
 			foreach (glob($path) as $file)
-				if(!is_null($r = require_once $file)) $res[] = $r;
+				if (!is_null($r = require_once $file))
+					$res[] = $r;
 		} else
 			$res = require_once $path;
 		$output = ob_get_clean();
@@ -487,7 +489,7 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 {
 	$file = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $file ?? "");
 	$extension = $extension ?? \_::$Extension;
-	$file = preg_replace("/(?<!\\".DIRECTORY_SEPARATOR.")\\".DIRECTORY_SEPARATOR."$/", DIRECTORY_SEPARATOR."index", $file);
+	$file = preg_replace("/(?<!\\" . DIRECTORY_SEPARATOR . ")\\" . DIRECTORY_SEPARATOR . "$/", DIRECTORY_SEPARATOR . "index", $file);
 	if (!endsWith($file, $extension) && !endsWith($file, DIRECTORY_SEPARATOR))
 		$file .= $extension;
 	$path = null;
@@ -514,14 +516,15 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = null, &$used = null)
 {
 	try {
-		renderPrepends($directory, $used=$name);
+		renderPrepends($directory, $used = $name);
 		if (
 			$path =
 			addressing("$directory$name", $extension, $origin, $depth) ??
-			addressing($directory.($used=$alternative), $extension, $origin, $depth)
+			addressing($directory . ($used = $alternative), $extension, $origin, $depth)
 		)
 			return including($path, $data, $print, $default);
-		else $used=null;
+		else
+			$used = null;
 	} finally {
 		renderAppends($directory, $name);
 	}
@@ -637,7 +640,7 @@ function model(string $name, mixed $data = [], bool $print = true, int $origin =
  */
 function library(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used:$used)?"\\MiMFa\\Template\\$used":null;
+	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
 /**
  * To interprete, the specified ComponentName
@@ -648,7 +651,7 @@ function library(string $name, mixed $data = [], bool $print = true, int $origin
  */
 function component(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used:$used)?"\\MiMFa\\Component\\$used":null;
+	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used: $used) ? "\\MiMFa\\Component\\$used" : null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -659,7 +662,7 @@ function component(string $name, mixed $data = [], bool $print = true, int $orig
  */
 function module(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used:$used)?"\\MiMFa\\Module\\$used":null;
+	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used: $used) ? "\\MiMFa\\Module\\$used" : null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -670,7 +673,7 @@ function module(string $name, mixed $data = [], bool $print = true, int $origin 
  */
 function template(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used:$used)?"\\MiMFa\\Template\\$used":null;
+	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
 /**
  * To interprete, the specified viewname
@@ -737,6 +740,28 @@ function compute(string $name, mixed $data = [], bool $print = true, int $origin
 function route(string|null $name = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data ?? \_::$Back->Router, $print, $origin, $depth, $alternative, $default);
+}
+/**
+ * To get the url of the selected asset
+ * @param non-empty-string $directory
+ * @param string|array|null $extensions An array of extensions or a string of the disired extension
+ * @return string|null The complete path of selected asset or return null if it's not found
+ */
+function asset($directory, string|null $name = null, string|array|null $extensions = null, $optimize = false, int $origin = 0, int $depth = 99, $default = null)
+{
+	$directory = $directory??\_::$Address->AssetDirectory;
+	$i = 0;
+	$extension = isset($extensions[$i++]) ? $extensions[$i++] : ($extensions?$extensions:"");
+	try {
+		renderPrepends($directory, $name);
+		do {
+			if ($path = addressing("$directory$name", $extension, $origin, $depth))
+				return getFullUrl($path, $optimize);
+		} while ($extension = isset($extensions[$i]) ? $extensions[$i++] : null);
+		return $default;
+	} finally {
+		renderAppends($directory, $name);
+	}
 }
 /**
  * To get a Table from the DataBase
@@ -1054,8 +1079,6 @@ function getRequest(string|null $path = null): string|null
 {
 	if ($path == null)
 		$path = getUrl();
-	if (startsWith($path, \_::$Base->Directory))
-		$path = substr($path, strlen(\_::$Base->Directory));
 	return PREG_Replace("/(^\w+:\/*[^\/]+)/", "", $path);
 }
 /**
@@ -1067,8 +1090,6 @@ function getDirection(string|null $path = null): string|null
 {
 	if ($path == null)
 		$path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
-	if (startsWith($path, \_::$Base->Directory))
-		$path = substr($path, strlen(\_::$Base->Directory));
 	return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/", "", $path);
 }
 /**
@@ -1794,7 +1815,7 @@ function array_insert(&$array, $position, $insert)
  */
 function array_find_keys($array, callable $searching)
 {
-	return array_filter($array, function ($v,$k) use ($searching) {
+	return array_filter($array, function ($v, $k) use ($searching) {
 		return $searching($v, $k);
 	}, ARRAY_FILTER_USE_BOTH);
 }

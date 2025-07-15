@@ -1,5 +1,4 @@
-<?php
-namespace MiMFa\Module;
+<?php namespace MiMFa\Module;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 class BarMenu extends Module{
@@ -168,4 +167,3 @@ class BarMenu extends Module{
         });
 	}
 }
-?>

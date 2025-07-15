@@ -560,7 +560,7 @@ class Table extends Module
                     $cells[] = "</tr></tfoot>";
                 } else
                     $cells[] = Convert::ToString($this->Footer);
-            return ($isc ? $this->HandleModal() : "") . parent::Get() . $addbutton("Add another item ") . Html::$NewLine . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . join(PHP_EOL, $cells);
+            return ($isc ? $this->HandleModal() : "") . parent::Get() . ($aaccess?$addbutton("Add another item "):"") . Html::$Break . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . join(PHP_EOL, $cells);
         } elseif ($aaccess)
             return ($isc ? $this->HandleModal() : "") . parent::Get() . $addbutton("Add your first item ");
         return ($isc ? $this->HandleModal() : "") . parent::Get();
@@ -939,7 +939,7 @@ class Table extends Module
             $values = $this->NormalizeFormValues($values);
             if (!is_array($values))
                 return $values;
-            if ($this->DataTable->Update([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $values))
+            if ($this->DataTable->Update([$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumn}"], $values))
                 return \Res::Flip(Html::Success("The information updated successfully!"));
             return Html::Error("You can not update this item!");
         }

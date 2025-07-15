@@ -12,4 +12,3 @@ $alternative = grab($data, "Alternative")??404;
 if ($Name) $templ->Content = $module->Handle().\MiMFa\Library\Html::Page(part($Name, data: $data, print: false)??view($alternative, data: $data, print: false));
 else $templ->Content = $module->Handle().view($alternative, data: $data, print: false);
 $templ->Render();
-?>

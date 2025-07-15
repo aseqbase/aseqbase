@@ -416,6 +416,11 @@ abstract class ResBase
 			$callback
 		);
 	}
+	/**
+	 * Execute console.log script
+	 * @param mixed $message
+	 * @return void
+	 */
 	public static function Log($message = null)
 	{
 		self::Script(
@@ -460,6 +465,8 @@ abstract class ResBase
 	public static function Error($output = null)
 	{
 		self::Status(400);
+        if (is_a($output, "Exception") || is_subclass_of($output, "Exception"))
+            return \MiMFa\Library\Html::Script(\MiMFa\Library\Script::Error($output->getMessage()));
 		echo $output = \MiMFa\Library\Html::Error($output);
 		return $output;
 	}

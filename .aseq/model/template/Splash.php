@@ -211,4 +211,4 @@ class Splash extends Template{
 		<div class="logo"><div class="image"></div></div>
 	</div>
 <?php }
-}?>
+}

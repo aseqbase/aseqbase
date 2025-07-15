@@ -404,7 +404,7 @@ FodyWeavers.xsd
 
 # aseqbase
 ~*
-.htaccess
+.*
 /private
 /public
 /test
@@ -419,17 +419,5 @@ FodyWeavers.xsd
 /Back.php
 *.zip
 *.rar
-/sequence
-/single
-/administrator
-/ms
-/lms
-/ums
-/gms
-/erp
-/shop
-/nav
 # temporary
 /-installer/*.php
-sequence
-single

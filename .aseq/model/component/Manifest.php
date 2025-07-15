@@ -1,6 +1,4 @@
-<?php
-namespace MiMFa\Component;
-use MiMFa\Library\Html;
+<?php namespace MiMFa\Component;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Local;
 
@@ -48,4 +46,3 @@ class Manifest
 // 		'background_color' => '#ffffff'
 // 	]))
 // );
-?>

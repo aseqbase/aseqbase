@@ -1,8 +1,6 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
-use MiMFa\Library\Session;
-use MiMFa\Library\Translate;
 class Translator extends Module{
 	public $Items = array(
 			"en"=>array(
@@ -25,7 +23,7 @@ class Translator extends Module{
 	public function Get(){
 		$cur = \_::$Back->Translate->Language;
 		$langs = [];
-		foreach ($this->Items as $lng=>$value)
+		foreach ($this->Items??[] as $lng=>$value)
             if($lng != $cur)
                 $langs[] = Html::Button(
 					Html::Media("", getBetween($value,"Image","Icon")).

@@ -51,7 +51,7 @@ class AddressBase
 		$this->StorageDirectory = $this->Directory . "storage" . DIRECTORY_SEPARATOR;
 		$this->TempDirectory = "tmp" . DIRECTORY_SEPARATOR;
 		$this->LogDirectory = $this->Directory . "log" . DIRECTORY_SEPARATOR;
-		$this->LibraryDirectory = $this->Directory . "library" . DIRECTORY_SEPARATOR;
+		$this->LibraryDirectory = $this->ModelDirectory . "library" . DIRECTORY_SEPARATOR;
 		$this->ComponentDirectory = $this->ModelDirectory . "component" . DIRECTORY_SEPARATOR;
 		$this->TemplateDirectory = $this->ModelDirectory . "template" . DIRECTORY_SEPARATOR;
 		$this->ModuleDirectory = $this->ModelDirectory . "module" . DIRECTORY_SEPARATOR;

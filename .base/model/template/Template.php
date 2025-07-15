@@ -144,7 +144,7 @@ class Template extends \Base{
             z-index: 999;
             transition: var(--transition-1) 2s;
         }
-        :not(h1, h2, h3, h4, h5, h6 {
+        :not(h1, h2, h3, h4, h5, h6) {
             line-height: 1.5em;
             direction: var(--dir);
         }
@@ -210,7 +210,7 @@ class Template extends \Base{
     }
 	public function RenderContent(){
         foreach ($this->Children??[] as $key=>$value)
-        	if(is_string($key)) \Res::Render(Html::Section($value,["Id" =>$key]));
+        	if(is_string($key)) \Res::Render(Html::Section($value, ["Id" =>$key]));
             else \Res::Render($value);
     }
 	public function RenderFooter(){

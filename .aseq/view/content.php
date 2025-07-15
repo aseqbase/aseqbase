@@ -7,4 +7,3 @@ $templ->Content = part(
     alternative: grab($data, "Alternative")??"content/content",
     print:false);
 $templ->Render();
-?>

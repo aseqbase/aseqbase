@@ -584,7 +584,7 @@ class Content extends Module
                $p_tagsorder = Convert::FromSwitch($this->TagsOrder, $p_type);
                $tags = table("Tag")->SelectPairs("Name", "Title", "`Id` IN (" . join(",", $p_tags) . ") " . (isEmpty($p_tagsorder) ? "" : "ORDER BY $p_tagsorder") . " LIMIT $p_tagscount");
                if (count($tags) > 0)
-                    return Html::$HorizontalBreak . Html::Division($p_tagstext . join(PHP_EOL, loop(
+                    return Html::$BreakLine . Html::Division($p_tagstext . join(PHP_EOL, loop(
                          $tags,
                          function ($v, $k) {
                               return Html::Link(
@@ -612,7 +612,7 @@ class Content extends Module
           $p_relatedsorder = Convert::FromSwitch($this->RelatedsOrder, $p_type);
           $rels = table("Content")->SelectPairs("Id", "Title", "`Id`!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
           if (count($rels) > 0)
-               return Html::$HorizontalBreak . Html::Division($p_relatedstext . join(PHP_EOL, loop(
+               return Html::$BreakLine . Html::Division($p_relatedstext . join(PHP_EOL, loop(
                     $rels,
                     function ($v, $k) {
                          return Html::Link(isValid($v) ? $v : $k, $this->RootRoute . $k, ["class" => "btn"]);
@@ -626,7 +626,7 @@ class Content extends Module
                $cc = new CommentCollection();
                $cc->Items = table("Comment")->Select(
                     "*",
-                    "Relation=:rid AND " . \_::$Back->User->GetAccessCondition(checkStatus: false) . " " . $this->CommentsLimitation,
+                    "Relation=:rid AND " . \_::$Back->GetAccessCondition(checkStatus: false) . " " . $this->CommentsLimitation,
                     [":rid" => get($this->Item, 'Id')]
                );
                if (!$this->LeaveComment){
@@ -638,7 +638,7 @@ class Content extends Module
                     $cc->DeleteButtonLabel = null;
                }
                if (count($cc->Items) > 0)
-                    return Html::$HorizontalBreak . $cc->ToString();
+                    return Html::$BreakLine . $cc->ToString();
           }
      }
      public function GetCommentForm()
@@ -646,7 +646,7 @@ class Content extends Module
           if (!$this->LeaveComment)
                return null;
           $this->CommentForm->Relation = get($this->Item, 'Id');
-          return Html::$HorizontalBreak . $this->CommentForm->Handle();
+          return Html::$BreakLine . $this->CommentForm->Handle();
      }
 }
 ?>

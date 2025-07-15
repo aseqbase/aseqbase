@@ -144,7 +144,7 @@ class Members extends Module
                             // Features (Assignees)
                             yield Html::Division(function () use ($menu, $i) {
                                 foreach (getValid($menu[$i], 'Assignees', []) as $assignee)
-                                    yield Html::Division(__($assignee, styling: false)) . Html::$NewLine;
+                                    yield Html::Division(__($assignee, styling: false)) . Html::$Break;
                             }, ["class" => "features"]);
 
                             // List of Items (Details)

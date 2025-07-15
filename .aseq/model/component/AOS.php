@@ -10,4 +10,3 @@ use \MiMFa\Library\Html;
 			$(document).ready(function(){
 				Evaluate.URL();
 			});");
-?>

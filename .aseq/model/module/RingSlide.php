@@ -140,14 +140,19 @@ class RingSlide extends Module{
 				height: {$this->ButtonsSize}px;
 				border-radius: 100%;
 			}
-			.{$this->Name} .menu>.center>a>.button>.media{
-				line-height: {$this->ButtonsSize}px;
-				font-size: calc({$this->ButtonsSize}px * 0.4);
+			.{$this->Name} .menu>.center>a>.button>.media:not(.fa){
+				background-size: 40% 40%;
 				width: {$this->ButtonsSize}px;
 				height: {$this->ButtonsSize}px;
                 ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor(\_::$Front->ForeColor(2)):"")."
 			}
+			.{$this->Name} .menu>.center>a>.button>.media.fa{
+				line-height: {$this->ButtonsSize}px;
+				font-size: calc({$this->ButtonsSize}px * 0.4);
+                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor(\_::$Front->ForeColor(2)):"")."
+			}
 			.{$this->Name} .menu>.center>a:hover>.button>.media {
+				font-size: calc({$this->ButtonsSize}px * 0.6);
 				background-size: 60% 60%;
 				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
 			}

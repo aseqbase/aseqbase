@@ -60,4 +60,3 @@ class JsonLD{
 
 JsonLD::Create($data??null);
 \_::$Front->Libraries[] = \MiMFa\Component\JsonLD::Website();
-?>

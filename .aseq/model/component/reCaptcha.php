@@ -1,5 +1,4 @@
-<?php
-namespace MiMFa\Component;
+<?php namespace MiMFa\Component;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 /**
@@ -79,4 +78,3 @@ class reCaptcha
 }
 
 if(isValid(\_::$Config->ReCaptchaSiteKey)) \_::$Front->Append("head", reCaptcha::GetScript(\_::$Config->ReCaptchaSiteKey));
-?>

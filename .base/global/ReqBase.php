@@ -83,8 +83,7 @@ abstract class ReqBase
 	public static function Receive($key = null, array|string|null $source = null, $default = null)
 	{
 		if (is_null($source)) $source = getMethodName();
-		// if (isEmpty($_REQUEST))
-		// 	parse_str(file_get_contents('php://input'), $source);
+		// if (isEmpty($_REQUEST)) parse_str(file_get_contents('php://input'), $source);
 		// else $source = $_REQUEST;
 		if (is_string($source))
 			switch (trim(strtolower($source))) {
@@ -108,9 +107,10 @@ abstract class ReqBase
 							$source = \MiMFa\Library\Convert::FromJson($res) ?? $source;
 						else if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false)
 							$source = \MiMFa\Library\Convert::FromFormData($res, $_FILES) ?? $source;
-						else
-							parse_str($res, $source);
+						else parse_str($res, $source);
 					}
+					else parse_str($res, $source);
+
 					$_REQUEST = $source = is_array($source)? $source:[$source];
 					break;
 				default:
@@ -122,9 +122,10 @@ abstract class ReqBase
 								$source = \MiMFa\Library\Convert::FromJson($res) ?? $source;
 							else if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false)
 								$source = \MiMFa\Library\Convert::FromFormData($res, $_FILES) ?? $source;
-							else
-								parse_str($res, $source);
+							else parse_str($res, $source);
 						}
+						else parse_str($res, $source);
+						
 						$_REQUEST = $source = is_array($source)? $source:[$source];
 					}
 					break;

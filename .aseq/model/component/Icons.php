@@ -1,5 +1,4 @@
-<?php
-namespace MiMFa\Component;
+<?php namespace MiMFa\Component;
 use MiMFa\Library\Html;
 class Icons
 {
@@ -14,7 +13,7 @@ class Icons
 	public static function GetInitial()
 	{
 		self::$Initialized = true;
-		return HTML::Script(null, \_::$Address->ScriptRoute . \MiMFa\Library\Local::OptimizeUrl("Icons.js"));
+		return HTML::Script(null, asset(\_::$Address->ScriptDirectory, "Icons.js", optimize: true));
 	}
 	public static function GetStyle($root = null)
 	{
@@ -160,4 +159,3 @@ class Icons
 }
 
 if(!Icons::$Initialized) \_::$Front->Libraries[] = Icons::GetInitial();
-?>

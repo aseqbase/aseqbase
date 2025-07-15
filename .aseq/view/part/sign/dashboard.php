@@ -28,7 +28,7 @@ if (isValid($user))
 			Html::Media(\_::$Back->User->Image).
 			Html::ExternalHeading(\_::$Back->User->Name).
 			Html::Paragraph(\_::$Back->User->GetValue("Bio" )).
-            Html::$HorizontalBreak
+            Html::$BreakLine
 		,["class"=>"introduction"]).
         Html::Container([
             [

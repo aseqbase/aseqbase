@@ -126,4 +126,3 @@ class Message extends Template{
 	</html>
 <?php }
 }
-?>

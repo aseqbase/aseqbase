@@ -37,7 +37,7 @@
   font-weight: normal;
 }
 
-:has(.be.top, .be.middle, .be.bottom) {
+.be:is(.top,.middle,.bottom) {
   display: flex;
 }
 .be.top {

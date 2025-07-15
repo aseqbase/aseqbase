@@ -72,10 +72,21 @@ abstract class BackBase
 	
 		$this->Translate->AutoUpdate = \_::$Config->AutoUpdateLanguage;
 		$this->Translate->Initialize(
-			session: $this->Session,
-			lang:\_::$Config->DefaultLanguage,
-			direction:\_::$Config->DefaultDirection,
-			encoding: \_::$Config->Encoding
+			$this->Session,
+			\_::$Config->DefaultLanguage,
+			\_::$Config->DefaultDirection,
+			\_::$Config->Encoding,
+			\_::$Config->AllowTranslate && \_::$Config->CacheLanguage
 		);
+	}
+	
+	public function GetAccessCondition($checkStatus = true, $checkAccess = true, $tableName = "")
+	{
+		$tableName = $tableName?$tableName.".":"";
+		$cond = [];
+		if($checkStatus) $cond[] = "{$tableName}Status IS NULL OR {$tableName}Status IN ('','1',1)";
+		if($checkAccess) $cond[] = $this->User->GetAccessCondition($tableName);
+		if(\_::$Config->AllowTranslate) $cond[] = $this->Translate->GetAccessCondition($tableName);
+		return " (" . join(") AND (", $cond).")";
 	}
 }

@@ -145,6 +145,12 @@ abstract class ConfigurationBase extends ArrayObject
       */
      public $AutoUpdateLanguage = false;
      /**
+      * Allow to cache language for a fast rendering
+      * @var bool
+      * @category Language
+      */
+     public $CacheLanguage = true;
+     /**
       * Default language to translate all text by internal algorithms
       * @var string
       * @category Language

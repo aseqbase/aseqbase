@@ -1,11 +1,9 @@
 <?php
-
 use MiMFa\Library\Html;
-use MiMFa\Library\Local;
 
-\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl(\_::$Address->StyleDirectory.'reset.css'));
-\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl(\_::$Address->StyleDirectory.'general.css'));
-\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl(\_::$Address->StyleDirectory.'be.css'));
+\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'reset.css', optimize: true));
+\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
+\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'be.css', optimize: true));
 \_::$Front->Libraries[] = Html::Style("
 :root{
 	--dir: ".(\_::$Back->Translate->Direction??\_::$Config->DefaultDirection).";
@@ -121,28 +119,27 @@ use MiMFa\Library\Local;
 
 	--path: \"" . \_::$Info->Path . "\";
 	--home-path: \"" . \_::$Info->HomePath . "\";
-	--logo-path: \"" . Local::GetUrl(\_::$Info->LogoPath) . "\";
-	--full-logo-path: \"" . Local::GetUrl(\_::$Info->FullLogoPath) . "\";
-	--banner-path: \"" . Local::GetUrl(\_::$Info->BannerPath) . "\";
-	--full-banner-path: \"" . Local::GetUrl(\_::$Info->FullBannerPath) . "\";
-	--wait-symbol-path: \"" . Local::GetUrl(\_::$Info->WaitSymbolPath) . "\";
-	--process-symbol-path: \"" . Local::GetUrl(\_::$Info->ProcessSymbolPath) . "\";
-	--error-symbol-path: \"" . Local::GetUrl(\_::$Info->ErrorSymbolPath) . "\";
+	--logo-path: \"" . asset(\_::$Info->LogoPath) . "\";
+	--full-logo-path: \"" . asset(\_::$Info->FullLogoPath) . "\";
+	--banner-path: \"" . asset(\_::$Info->BannerPath) . "\";
+	--full-banner-path: \"" . asset(\_::$Info->FullBannerPath) . "\";
+	--wait-symbol-path: \"" . asset(\_::$Info->WaitSymbolPath) . "\";
+	--process-symbol-path: \"" . asset(\_::$Info->ProcessSymbolPath) . "\";
+	--error-symbol-path: \"" . asset(\_::$Info->ErrorSymbolPath) . "\";
 
-	--logo-path-url: URL(\"" . Local::GetUrl(\_::$Info->LogoPath) . "\");
-	--full-logo-path-url: URL(\"" . Local::GetUrl(\_::$Info->FullLogoPath) . "\");
-	--banner-path-url: URL(\"" . Local::GetUrl(\_::$Info->BannerPath) . "\");
-	--full-banner-path-url: URL(\"" . Local::GetUrl(\_::$Info->FullBannerPath) . "\");
-	--wait-symbol-path-url: URL(\"" . Local::GetUrl(\_::$Info->WaitSymbolPath) . "\");
-	--process-symbol-path-url: URL(\"" . Local::GetUrl(\_::$Info->ProcessSymbolPath) . "\");
-	--error-symbol-path-url: URL(\"" . Local::GetUrl(\_::$Info->ErrorSymbolPath) . "\");
+	--logo-path-url: URL(\"" . asset(\_::$Info->LogoPath) . "\");
+	--full-logo-path-url: URL(\"" . asset(\_::$Info->FullLogoPath) . "\");
+	--banner-path-url: URL(\"" . asset(\_::$Info->BannerPath) . "\");
+	--full-banner-path-url: URL(\"" . asset(\_::$Info->FullBannerPath) . "\");
+	--wait-symbol-path-url: URL(\"" . asset(\_::$Info->WaitSymbolPath) . "\");
+	--process-symbol-path-url: URL(\"" . asset(\_::$Info->ProcessSymbolPath) . "\");
+	--error-symbol-path-url: URL(\"" . asset(\_::$Info->ErrorSymbolPath) . "\");
 }
 ");
-\_::$Front->Libraries[] = Html::Style(null, Local::OptimizeUrl(\_::$Address->StyleDirectory.'view.css'));
+\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'view.css', optimize: true));
 
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'general.js'));
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'Math.js'));
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'Array.js'));
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'Evaluate.js'));
-\_::$Front->Libraries[] = Html::Script(null, Local::OptimizeUrl(\_::$Address->ScriptDirectory.'Html.js'));
-?>
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Math.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Array.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Evaluate.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Html.js', optimize: true));

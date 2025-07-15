@@ -231,7 +231,9 @@ INSERT INTO `aseq_UserGroup` (`Id` , `Name` , `Image` , `Title` , `Description` 
 
 CREATE TABLE `Translate_Lexicon` (
   `KeyCode` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `ValueOptions` longtext DEFAULT NULL
+  `ValueOptions` longtext DEFAULT NULL,
+  PRIMARY KEY (`KeyCode` ),
+  UNIQUE KEY `KeyCode` (`KeyCode` )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 COMMIT;

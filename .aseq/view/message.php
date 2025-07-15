@@ -9,4 +9,3 @@ $templ->SupDescription =  grab($data, "SupDescription") ?? "A Message";
 $templ->Description = grab($data, "Description") ?? "...";
 $templ->SubDescription =  grab($data, "SubDescription");
 $templ->Render();
-?>

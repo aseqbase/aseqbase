@@ -8,4 +8,3 @@ $templ->Content = isValid($content)?
         \MiMFa\Library\Html::Page($content):
         function() use($name, $data, $alternative) { return page($name, data: $data, print:false, alternative: $alternative); };
 $templ->Render();
-?>

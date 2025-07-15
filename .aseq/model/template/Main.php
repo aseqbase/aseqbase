@@ -1,5 +1,4 @@
-<?php
-namespace MiMFa\Template;
+<?php namespace MiMFa\Template;
 template("General");
 class Main extends General{
 	public $AllowHeader = true;
@@ -24,4 +23,4 @@ class Main extends General{
 		if($this->AllowFooter) part("footer");
 		if($this->AllowBarMenu) part("menu/bar");
     }
-} ?>
+}

@@ -7,4 +7,3 @@ $module->Items = \_::$Info->MainMenus;
 $module->AllowFixed = true;
 swap($module, $data);
 $module->Render();
-?>
