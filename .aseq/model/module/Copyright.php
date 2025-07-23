@@ -17,7 +17,7 @@ class Copyright extends Module{
 	}
 
 	public function Get(){
-		return Html::Span($this->Description,styling:false).Html::Link($this->Title, $this->Source);
+		return Html::Span($this->Description,styling:false)." ".Html::Link($this->Title, $this->Source);
 	}
 }
 ?>

@@ -1,12 +1,12 @@
 <?php
 use MiMFa\Library\Convert;
 $received = \Req::Receive();
-$logicData = get($data, "Compute") ?? [];
-$filter = grab($logicData, "Filter") ?? [];
+$computeData = get($data, "Compute") ?? [];
+$filter = grab($computeData, "Filter") ?? [];
 $cat = grab($filter, "Category") ?? get($received, "Category");
 $type = grab($filter, "Type") ?? get($received, "Type");
 $tag = grab($filter, "Tag") ?? get($received, "Tag");
-$items = !is_array($logicData)?Convert::By($logicData):compute(grab($logicData, "ComputeName") ?? "content/all", [
+$items = !is_array($computeData)?Convert::By($computeData):compute(grab($computeData, "ComputeName") ?? "content/all", [
     "Filter" => [
         "Query" => grab($filter, "Query") ?? get($received, "Query"),
         "Category" => $cat??\_::$Back->Router->Direction,
@@ -16,7 +16,7 @@ $items = !is_array($logicData)?Convert::By($logicData):compute(grab($logicData, 
     ],
     "Order" => grab($filter, "Order") ?? get($received, "Order"),
     "Limit" => grab($filter, "Limit") ?? get($received, "Limit")??-1,
-    ...$logicData
+    ...$computeData
 ]);
 
 $viewData = get($data, "View") ?? [];

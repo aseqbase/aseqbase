@@ -7,6 +7,7 @@ class Shortcuts extends Module{
 	public $AllowIcon = true;
 	public $AllowImage = false;
 	public $Items = null;
+    public $Printable = false;
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("

@@ -221,14 +221,14 @@ class DataTable
 	}
 
 
-	public function Exists($column = null, $condition = null, $params = [])
+	public function Exists($condition = null, $params = [])
 	{
 		$result = null;
 		try {
-			$result = $this->GetDatabase()->FetchValueExecute($this->SelectValueQuery(is_null($column) ? "1" : $column, $condition), $params);
+			$result = $this->SelectRow("*", $condition, $params);
 		} catch (\Exception $ex) {
 		}
-		return !is_null($result);
+		return !isEmpty($result);
 	}
 	public function Count($column = "Id", $condition = null, $params = [])
 	{

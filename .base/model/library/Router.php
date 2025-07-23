@@ -77,49 +77,28 @@ class Router extends \ArrayObject
         $method = null,
         $global = false
     ) {
-        parent::__construct([[/*ALL*/], [/*GET*/], [/*POST*/], [/*PUT*/], [/*FILE*/], [/*PATCH*/], [/*DELETE*/], [/*STREAM*/], [/*INTERNAL*/], [/*EXTERNAL*/], [/*OTHER*/]]);
         $this->Global = $global;
-        $this->Refresh($pattern, $method)->Set($handler);
+        $this->Refresh($pattern, $method)->Route($handler);
     }
     public function __get($name)
     {
-        if (is_int($name))
-            return $this->offsetGet($name);
-        if (is_string($name)) {
-            $n = $this->__getName($name);
-            if (method_exists($this, $n))
-                return $this->$n();
-            if (property_exists($this, $n))
-                return $this->$n;
-        }
-        return $this->offsetGet(getMethodIndex($name));
+        //return $this->offsetExists($name = getMethodName($name)) ? $this->offsetGet($name) : ($this[$name] = []);
+        return $this->offsetGet(getMethodName($name));
     }
     public function __set($name, $value)
     {
-        if (is_int($name))
-            return $this->offsetSet($name, $value);
-        if (is_string($name)) {
-            $n = $this->__getName($name);
-            if (method_exists($this, $n))
-                return $this->$n($value);
-            if (property_exists($this, $n))
-                return $this->$n = $value;
-        }
-        return $this->offsetSet(getMethodIndex($name), $value);
+        return $this->offsetSet(getMethodName($name), $value);
     }
-    private function __getName($name)
-    {
-        return preg_replace("/\W+/", "", strToProper($name));
-    }
+
 
     /**
      * To get handlers for the received request
      */
     public function Handlers()
     {
-        $this->Method = $this->DefaultMethodIndex;
+        $this->Method = $this->DefaultMethodName;
         do
-            foreach ($this[$this->Method] as $pat => $handlers)
+            foreach ($this[$this->Method]??[] as $pat => $handlers)
                 if (preg_match($pat, $this->Request ?? "", $matches)) {
                     foreach ($handlers as $i => $handler) {
                         $this->Pattern = $pat;
@@ -133,7 +112,7 @@ class Router extends \ArrayObject
                     if ($this->Point > 0 && !$this->Global)
                         continue;
                 }
-        while ($this->Method > 0 && ($this->Method = 0) == 0);
+        while ($this->Method != "ALL" && $this->Method = "ALL");
     }
     /**
      * To handle routing for the received request
@@ -160,8 +139,7 @@ class Router extends \ArrayObject
         $this->Direction = \Req::$Direction;
         $this->DefaultMethodIndex = getMethodIndex();
         $this->DefaultMethodName = getMethodName();
-        $this->Pattern = self::CreatePattern($pattern);
-        $this->Method = getMethodIndex($method);
+        $this->Set($method)->On($pattern);
         return $this;
     }
 
@@ -231,23 +209,67 @@ class Router extends \ArrayObject
     }
 
     /**
-     * To start routing for the requests
-     * @param mixed $pattern Url or Regex Pattern
-     * @example Route("/^\/post(?=\/|\\\|\?|#|@|$)/i")
+     * To set routing of the request
+     * @param mixed $pattern Url or Regex Pattern @example "/^\/post(?=\/|\\\|\?|#|@|$)/i"
      * @return Router
      */
-    public function Route($pattern = null): Router
+    public function On($pattern = null): Router
     {
         if ($this->IsActive)
             $this->Pattern = self::CreatePattern($pattern);
         return $this;
     }
     /**
-     * Add new route for the requests
+     * To set routing of the request
+     * @param int|string|null $method 0: ALL, 1:GET, 2:POST, 3:PUT, 4:FILE, 5:PATCH, 6:DELETE
+     * @return Router
+     */
+    public function Set($method = null): Router
+    {
+        if ($this->IsActive)
+            if(!isset($this[$this->Method = getMethodName($method)])) $this[$this->Method] = [];
+        return $this;
+    }
+    /**
+     * Remove the current pattern from the current or defined method
+     * @param int|string|null $method 0: ALL, 1:GET, 2:POST, 3:PUT, 4:FILE, 5:PATCH, 6:DELETE
+     * @return Router
+     */
+    public function Unset($method = null): Router
+    {
+        if ($this->IsActive)
+            unset($this[$method ? getMethodName($method) : $this->Method][$this->Pattern]);
+        return $this;
+    }
+    /**
+     * Remove the current pattern from all methods
+     * @return Router
+     */
+    public function Reset(): Router
+    {
+        if ($this->IsActive)
+            foreach ($this as $mthd => $pttrns)
+                unset($this[$mthd][$this->Pattern]);
+        return $this;
+    }
+    /**
+     * Remove all patterns from all methods
+     * @return Router
+     */
+    public function Clear(): Router
+    {
+        if ($this->IsActive)
+            foreach ($this as $mthd => $pttrns)
+                $this[$mthd] = [];
+        return $this;
+    }
+
+    /**
+     * Add new route for the current request method and pattern
      * @param mixed $handler A route name or handeler function
      * @return Router
      */
-    public function Set($handler, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
+    public function Route($handler, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive && isValid($handler)) {
             $method = $this->Method;
@@ -264,66 +286,33 @@ class Router extends \ArrayObject
         return $this;
     }
     /**
-     * Remove a route from this object
-     * @return Router
-     */
-    public function Unset(): Router
-    {
-        if ($this->IsActive)
-            unset($this[$this->Method][$this->Pattern]);
-        return $this;
-    }
-    /**
-     * Set only selected route for the requests
-     * And clear all other routes, Leave null to clear other requests
-     * @param mixed $handler A route name or handeler function, Leave null to clear other requests
-     * @return Router
-     */
-    public function Reset($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
-    {
-        if ($this->IsActive) {
-            $pattern = $this->Pattern;
-            for ($method = 0; $method < count($this); $method++)
-                unset($this[$method][$pattern]);
-            if (isValid($handler))
-                $this[$this->Method][$pattern] = [
-                    function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                        return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
-                            Convert::By($handler, $this);
-                    }
-                ];
-        }
-        return $this;
-    }
-    /**
-     * Add new route to other requests
+     * Add new route to other requests methods
      * Leave null to clear other requests
      * @param mixed $handler A route name or handeler function, Leave null to clear other requests
      * @return Router
      */
     public function Rest($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
+        if ($this->IsActive) {
+            $method = $this->Method;
+            $pattern = $this->Pattern;
             if (isValid($handler)) {
-                $m = $this->Method;
-                $pattern = $this->Pattern;
                 $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
                     return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
                         Convert::By($handler, $this);
                 };
-                for ($method = 1; $method < count($this); $method++)
-                    if ($m !== $method)
-                        if (isset($this[$method][$pattern]))
-                            $this[$method][$pattern][] = $h;
+                foreach ($this as $mthd => $pttrns)
+                    if ($mthd !== $method && $mthd !== "ALL") {
+                        if (isset($this[$mthd][$pattern]))
+                            $this[$mthd][$pattern][] = $h;
                         else
-                            $this[$method][$pattern] = [$h];
-            } else {
-                $m = $this->Method;
-                $pattern = $this->Pattern;
-                for ($method = 1; $method < count($this); $method++)
-                    if ($m !== $method)
-                        unset($this[$method][$pattern]);
-            }
+                            $this[$mthd][$pattern] = [$h];
+                    }
+            } else
+                foreach ($this as $mthd => $pttrns)
+                    if ($mthd !== $method && $mthd !== "ALL")
+                        unset($this[$mthd][$pattern]);
+        }
         return $this;
     }
     /**
@@ -336,47 +325,20 @@ class Router extends \ArrayObject
     public function Default($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
         if ($this->IsActive) {
+            $pattern = $this->Pattern;
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
                 if ($this->Point <= 1 || $this->Global)
-                    if (isStatic($handler))
-                        return route($handler, $data, $print, $origin, $depth, $alternative, $default);
-                    else
-                        return Convert::By($handler, $this);
+                    return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
+                        Convert::By($handler, $this);
                 return null;
             };
-            $pattern = $this->Pattern;
-            for ($method = 1; $method < count($this); $method++)
-                if (isset($this[$method][$pattern]))
-                    $this[$method][$pattern][] = $h;
-                else
-                    $this[$method][$pattern] = [$h];
-        }
-        return $this;
-    }
-    /**
-     * To change the method of router
-     * @param int|string|null $method 0: ALL, 1:GET, 2:POST, 3:PUT, 4:FILE, 5:PATCH, 6:DELETE
-     * @example: On("post", fn()=>do somthings)
-     * @example: On(2, fn()=>do somthings)
-     * @return Router
-     */
-    public function On($method = null, $handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
-    {
-        if ($this->IsActive) {
-            $methodName = getMethodName($method);
-            $h = function () use ($methodName, $handler, $data, $print, $origin, $depth, $alternative, $default) {
-                if ($this->DefaultMethodName == $methodName)
-                    if (isStatic($handler))
-                        return route($handler, $data, $print, $origin, $depth, $alternative, $default);
+            foreach ($this as $mthd => $pttrns)
+                if ($mthd !== "ALL") {
+                    if (isset($this[$mthd][$pattern]))
+                        $this[$mthd][$pattern][] = $h;
                     else
-                        return Convert::By($handler, $this);
-            };
-            $method = getMethodIndex($method);
-            $pattern = $this->Pattern;
-            if (isset($this[$method][$pattern]))
-                $this[$method][$pattern][] = $h;
-            else
-                $this[$method][$pattern] = [$h];
+                        $this[$mthd][$pattern] = [$h];
+                }
         }
         return $this;
     }
@@ -388,9 +350,7 @@ class Router extends \ArrayObject
      */
     public function All($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 0;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("ALL")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the GET requests
@@ -399,9 +359,7 @@ class Router extends \ArrayObject
      */
     public function Get($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 1;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("GET")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the POST requests
@@ -410,9 +368,7 @@ class Router extends \ArrayObject
      */
     public function Post($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 2;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("POST")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the PUT requests
@@ -421,9 +377,7 @@ class Router extends \ArrayObject
      */
     public function Put($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 3;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("PUT")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the FILE requests
@@ -432,9 +386,7 @@ class Router extends \ArrayObject
      */
     public function File($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 4;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("FILE")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the PATCH requests
@@ -443,9 +395,7 @@ class Router extends \ArrayObject
      */
     public function Patch($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 5;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("PATCH")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the DELETE requests
@@ -454,9 +404,7 @@ class Router extends \ArrayObject
      */
     public function Delete($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 6;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("DELETE")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
 
     /**
@@ -466,9 +414,7 @@ class Router extends \ArrayObject
      */
     public function Stream($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 7;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("STREAM")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
 
     /**
@@ -478,9 +424,7 @@ class Router extends \ArrayObject
      */
     public function Internal($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 8;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("INTERNAL")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
 
     /**
@@ -490,10 +434,9 @@ class Router extends \ArrayObject
      */
     public function External($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive)
-            $this->Method = 9;
-        return $this->Set($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("EXTERNAL")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
     }
+
     /**
      * 
      * Convert to Regular Expression pattern

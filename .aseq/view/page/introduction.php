@@ -9,6 +9,7 @@
     echo MiMFa\Component\Icons::GetStyle(".caselist");
     module("Image");
     $module = new MiMFa\Module\Image();
+    $module->AllowOrigin = false;
     $module->MinHeight = "6vh";
     echo $module->GetStyle();
     ?>
@@ -38,7 +39,7 @@
         <div class="services content row">
             <?php
             foreach (\_::$Info->Services as $value) {
-                $module->Image = get($value, "Image");
+                $module->Source = get($value, "Image");
                 $p = get($value, "Path");
                 $isp = isValid($p);
                 ?>
@@ -48,7 +49,7 @@
                         echo \MiMFa\Library\Html::OpenTag("a", ["href"=>$p]);
                     if ($v = get($value, "Icon"))
                         echo "<i class='$v'></i>";
-                    if (isValid($module->Image))
+                    if (isValid($module->Source))
                         $module->ReRender();
                     ?>
                     <h3 class="title">

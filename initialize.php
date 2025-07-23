@@ -5,14 +5,16 @@ $GLOBALS["NEST"] = empty($GLOBALS["ASEQ"])?0:preg_match_all("/(?<=\S|\s)\.(?=\S|
 if(!isset($GLOBALS["HOST"])){
 	$GLOBALS["HOST"] = (isset($_SERVER['HTTPS'])?"https://":"http://");
 	if($NEST > 0){
+		$host_parts = [];
 		if(preg_match("/(\d+\.)+$/",$_SERVER["HTTP_HOST"]))
 			$host_parts = explode(".", strtolower(trim($_SERVER["HTTP_HOST"])));
-		elseif(preg_match("/localhost$/", $_SERVER["HTTP_HOST"]))
-			$host_parts = [...explode(".", strtolower(trim($_SERVER["HTTP_HOST"]))), ""];
+		elseif(preg_match("/localhost(:\d{,6})?$/", $_SERVER["HTTP_HOST"]))
+			$host_parts = [strtolower(trim($_SERVER["HTTP_HOST"])), ""];
 		else $host_parts = explode(".", strtolower(trim($_SERVER["HTTP_HOST"])));
 		$hpc = count($host_parts);
 		$GLOBALS["HOST"] .= $host_parts[$hpc-(1+$NEST)];
 		for ($i = $NEST; $i > 0; $i--) $GLOBALS["HOST"] .= ".".$host_parts[$hpc-$i];
+		$GLOBALS["HOST"] = trim($GLOBALS["HOST"], ".");
     }
 	else $GLOBALS["HOST"] .= strtolower(trim($_SERVER["HTTP_HOST"]));
 }

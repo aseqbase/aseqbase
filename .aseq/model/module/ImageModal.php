@@ -5,7 +5,7 @@ use MiMFa\Library\Script;
 module("Modal");
 class ImageModal extends Modal{
 	public $Image = null;
-	public $AllowOriginal = true;
+	public $AllowOrigin = true;
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
@@ -22,7 +22,7 @@ class ImageModal extends Modal{
 	public function GetContents($content){
 		$content = $content??$this->Image;
 		if(isValid($content))
-			if($this->AllowOriginal)
+			if($this->AllowOrigin)
 				if(isFormat($content,".svg")) 
 					return Html::Embed(null,$content, ["class"=>"image", "style"=>"height: 100%;width: auto;"]);
 					//return parent::GetContents("<iframe class=\"image\" style=\"height: 100%;width: auto;\" src=\"".$content."\"></iframe>");
@@ -40,7 +40,7 @@ class ImageModal extends Modal{
 		Script::Convert($source??$this->Source).");";
 	}
 	public function ContentScript($parameterName){
-		if($this->AllowOriginal) return "$parameterName.endsWith(\".svg\")?
+		if($this->AllowOrigin) return "$parameterName.endsWith(\".svg\")?
 		(`<iframe class=\"image\" style=\"height: 100%; width: auto;\" src=\"`+$parameterName+`\"></iframe>`):
 		(`<div class=\"image\" style=\"background-image: url('`+$parameterName+`');\"></div>`)";
 		else return "`<div class=\"image\" style=\"background-image: url('`+$parameterName+`');\"></div>`";

@@ -237,7 +237,7 @@ class Table extends Module
         $this->AddSecret = sha1("$a-Add");
         $this->RemoveSecret = sha1("$a-Remove");
         $this->ModifySecret = sha1("$a-Modify");
-        $this->Router->On($this->ExclusiveMethod, fn(&$router) => $this->Exclusive());
+        $this->Router->Set($this->ExclusiveMethod)->Route(fn(&$router) => $this->Exclusive());
     }
     /**
      * Set the main properties of module

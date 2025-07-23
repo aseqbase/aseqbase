@@ -1,6 +1,6 @@
 <?php
-$logicData = grab($data, "Compute")??[];
-$filter = grab($logicData, "Filter")??[];
+$computeData = grab($data, "Compute")??[];
+$filter = grab($computeData, "Filter")??[];
 $viewData = grab($data, "View")??[];
 $received = \Req::Receive();
 $query = getBetween($received, "q", "Query");

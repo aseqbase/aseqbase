@@ -91,6 +91,7 @@ class Cards extends Collection
     {
         module("Image" );
         $img = new \MiMFa\Module\Image();
+    	$img->AllowOrigin = false;
         $img->Class = "image";
         $img->GetStyle(); // Output the image styles
 
@@ -104,7 +105,7 @@ class Cards extends Collection
             $p_name = __(getBetween($item, 'Title', 'Name')??$this->DefaultTitle, true, false);
             $p_description = __(getValid($item, 'Description' , $this->DefaultDescription));
             $p_content = __(getValid($item, 'Content' , $this->DefaultContent));
-            $p_link = getBetween($item, 'Link', 'Path')?? $this->DefaultLink;
+            $p_link = getBetween($item, 'Link', 'Path')?? $this->DefaultPath;
             $p_buttons = getValid($item, 'ButtonsContent', $this->DefaultButtons);
             $img->Source = $p_image;
 

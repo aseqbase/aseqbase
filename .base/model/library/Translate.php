@@ -81,7 +81,7 @@ class Translate
 
 	public function GetHybrid($text, $replacements = [], $lang = null)
 	{
-		if (self::IsRootLanguage($text))
+		if ($this->IsRootLanguage($text))
 			return $text;
 		$dic = array();
 		$text = Code($text, $dic, $this->CodeStart, $this->CodeEnd, $this->CodePattern);
@@ -98,7 +98,7 @@ class Translate
 	}
 	public function Get($text, $lang = null)
 	{
-		if (self::IsRootLanguage($text))
+		if ($this->IsRootLanguage($text))
 			return $text;
 		$dic = array();
 		$ntext = Code($text, $dic, $this->CodeStart, $this->CodeEnd, $this->CodePattern);
@@ -106,7 +106,9 @@ class Translate
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
-			return Decode($data[$lang ?? $this->Language]?? $data["x"], $dic);
+			$data = Decode($data[$lang ?? $this->Language]?? $data["x"], $dic);
+			if($this->CaseSensitive) return $data;
+			return self::SetCaseStatus($data, $text);
 		} elseif ($this->AutoUpdate)
 			$this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $ntext))]);
 		return $text;
@@ -126,7 +128,7 @@ class Translate
 
 	public function Set($text, $val = null, $lang = null)
 	{
-		if (self::IsRootLanguage($text))
+		if ($this->IsRootLanguage($text))
 			return false;
 		$dic = array();
 		$text = Code($text, $dic, $this->CodeStart, $this->CodeEnd, $this->CodePattern);
@@ -174,7 +176,11 @@ class Translate
 		$this->Cache = null;
 		return $this->DataTable->Delete($condition, $params);
 	}
-
+	/**
+	 * Convert the normal text to a suitable an maximum CodeLimit counted key
+	 * @param mixed $text The normal text
+	 * @return array|string|null
+	 */
 	public function CreateCode($text)
 	{
 		if ($text === null)
@@ -209,16 +215,6 @@ class Translate
 	}
 
 	/**
-	 * To check if the string is in a RTL language or LTR
-	 * @param null|string $text The text string
-	 */
-	public function GetDirection($text)
-	{
-		if (isEmpty($text))
-			return null;
-		return preg_match("/^[\s\d\-*\/\\\\+\.?=_\]\[{}()&\^%\$#@!~`'\"<>|]*[\p{Arabic}\p{Hebrew}]/u", $text) ? "rtl" : "ltr";
-	}
-	/**
 	 * To get all supported languages based on lexicon
 	 * @param mixed $condition
 	 * @param mixed $params
@@ -235,15 +231,70 @@ class Translate
 			$arr[$key] = array(
 				"Title" => getBetween($value, "Title", "Name")??strtoupper($key),
 				"Image" => getBetween($value, "Image", "Icon")??"https://flagcdn.com/16x12/$key.png",
-				"Direction" => get($value, "Direction")??preg_match("/(ar|fa|ur|he|ps|sd|ug|dv|ku|yi|nqo|syr|ckb|ks|bal|brh|bgn|haz|khw|lrc|mzn|pnb|prs|uz_AF|tt|ota)/i", $key??"")?"rtl":"ltr",
-				"Encoding" => get($value, "Encoding")??"utf-8"
+				"Direction" => $dir = get($value, "Direction")??preg_match("/(ar|fa|ur|he|ps|sd|ug|dv|ku|yi|nqo|syr|ckb|ks|bal|brh|bgn|haz|khw|lrc|mzn|pnb|prs|uz_AF|tt|ota)/i", $key??"")?"rtl":"ltr",
+				"Encoding" => $enc = get($value, "Encoding")??"utf-8",
+				"Query" => "lang=$key&direction=$dir&encoding=$enc"
 			);
 		}
 		return $arr;
 	}
 
+	/**
+	 * Get the data of the language suitable for a url query
+	 * @param null|string $key The language key of null for default
+	 */
+	public function GetQuery($key = null)
+	{
+		if($key) return get($this->GetLanguages(), $key, "Query");
+		else return "lang=".$this->Language."&direction=".$this->Direction."&encoding=".$this->Encoding;
+	}
+
 	public function GetAccessCondition($tablePrefix = "")
 	{
 		return "{$tablePrefix}MetaData IS NULL OR {$tablePrefix}MetaData NOT REGEXP '\\\\s*[\"'']?lang[\"'']?\\\\s*:' OR {$tablePrefix}MetaData REGEXP '\\\\s*[\"'']?lang[\"'']?\\\\s*:\\\\s*[\"'']" . $this->Language . "[\"'']'";
+	}
+
+	
+	/**
+	 * To check if the string is in a RTL language or LTR
+	 * @param null|string $text The text string
+	 */
+	public static function GetDirection($text)
+	{
+		if (isEmpty($text))
+			return null;
+		return preg_match("/^[\s\d\-*\/\\\\+\.?=_\]\[{}()&\^%\$#@!~`'\"<>|]*[\p{Arabic}\p{Hebrew}]/u", $text) ? "rtl" : "ltr";
+	}
+
+	/**
+	 * To get the case status of the normal text,
+	 * @param null|string $text The text string
+	 * @return int It will return 3 if all the world be Capital, 2 for Propper case, 1 for all Lower case and 0 for unknown case
+	 */
+	public static function GetCaseStatus($text)
+	{
+		if ($text === strtolower($text))
+			return 1;
+		if ($text === strToProper($text))
+			return 2;
+		if ($text === strtoupper($text))
+			return 3;
+		return 0;
+	}
+	/**
+	 * To set the case status of the text as the model,
+	 * @param null|string $text The text string
+	 * @param null|string $model The case model string for example "A" to set all upper "b"  for all lower
+	 * @return string The sat case text
+	 */
+	public static function SetCaseStatus($text, $model)
+	{
+		if ($model === strtolower($model))
+			return strtolower($text);
+		if ($model === strToProper($model))
+			return strToProper($text);
+		if ($model === strtoupper($model))
+			return strtoupper($text);
+		return $text;
 	}
 }

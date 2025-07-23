@@ -10,6 +10,7 @@ class BarMenu extends Module{
 	public $AllowChangeColor = true;
 	public $VisibleFromScreenSize = "sm";
 	public $Height = 40;
+     public $Printable = false;
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("

@@ -27,6 +27,7 @@ class MainMenu extends Module
 	public $AllowDefaultButtons = true;
 	public $LogoWidth = "calc(1.25 * var(--size-5))";
 	public $LogoHeight = "calc(1.25 * var(--size-5))";
+    public $Printable = false;
 
 	public function GetStyle()
 	{
@@ -104,6 +105,10 @@ class MainMenu extends Module
 				text-align: start;
 			}
 
+			.{$this->Name}>ul>li:not(.sub-items)>button{
+				text-transform: uppercase;
+			}
+				
 			.{$this->Name} ul:not(.sub-items) {
 				list-style: none;
 				list-style-type: none;
@@ -118,7 +123,6 @@ class MainMenu extends Module
 				margin-inline-end: 100px;
 				" : "") . "
 			}
-
 			.{$this->Name} ul:not(.sub-items)>li {
 				background-color: transparent;
 				color: inherit;

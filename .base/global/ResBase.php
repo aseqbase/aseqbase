@@ -1,4 +1,7 @@
 <?php
+
+use MiMFa\Library\Convert;
+
 /**
  * The Global Static Variables and Functions
  * You need to create and send responses
@@ -19,6 +22,19 @@ abstract class ResBase
 	{
 		if (isValid($key) && !headers_sent()) {
 			header("$key: $value");
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * To change the header content-type in the client side
+	 * @param mixed $value The header value
+	 * @return bool True if header is set, false otherwise
+	 */
+	public static function Type($value = null)
+	{
+		if (!headers_sent()) {
+			header("Content-Type: ".($value??"text/html"));
 			return true;
 		}
 		return false;
@@ -81,6 +97,30 @@ abstract class ResBase
 		if (ob_get_level())
 			ob_end_clean(); // Clean any remaining output buffers
 		self::End($output, $status);
+	}
+	/**
+	 * Print only this JSON on the client side, Clear before then end
+	 * @param mixed $output The data that is ready to print
+	 * @param mixed $status The header status
+	 */
+	public static function SetJson($output = null, $status = null)
+	{
+		if (ob_get_level())
+			ob_end_clean(); // Clean any remaining output buffers
+		self::Type("application/json");
+		self::End(isJson($output)?$output:Convert::ToJson($output), $status);
+	}
+	/**
+	 * Print only this XML on the client side, Clear before then end
+	 * @param mixed $output The data that is ready to print
+	 * @param mixed $status The header status
+	 */
+	public static function SetXml($output = null, $status = null)
+	{
+		if (ob_get_level())
+			ob_end_clean(); // Clean any remaining output buffers
+		self::Type("application/xml");
+		self::End(is_string($output)?$output:Convert::ToXmlString($output), $status);
 	}
 	/**
 	 * Sends a file to the client side.
@@ -481,7 +521,8 @@ abstract class ResBase
 			\MiMFa\Library\Internal::MakeScript(
 				\MiMFa\Library\Html::Script($content, $source, ...$attributes),
 				null,
-				"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+				"(data,err)=>$('head').append(data??err)"
+				//"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 			)
 		));
 	}

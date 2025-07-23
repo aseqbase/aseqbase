@@ -4,17 +4,17 @@ use \MiMFa\Library\Router;
 $data = $data??[];
 function findContent($router, &$data)
 {
-    $logicData = get($data, "Compute")??[];
-    if(!is_array($logicData)) return Convert::By($logicData);
+    $computeData = get($data, "Compute")??[];
+    if(!is_array($computeData)) return Convert::By($computeData);
     $path = explode("/", trim(urldecode($router->Direction) ?? "", "/\\"));
     $name = last($path);
     if (count($path) > 1)
         $path = implode("/", array_slice($path, 0, count($path) - 1));
     else
         $path = null;
-    $filter = grab($logicData, "Filter") ?? [];
+    $filter = grab($computeData, "Filter") ?? [];
     $received = \Req::Receive();
-    return compute(grab($logicData, "ComputeName")??"content/get", [
+    return compute(grab($computeData, "ComputeName")??"content/get", [
         "Name"=>$name,
         "Filter" => [
             "Query"=> grab($filter, "Query")??getBetween($received, "Query")??$name,
@@ -23,7 +23,7 @@ function findContent($router, &$data)
             "Tag"=> grab($filter, "Tag")??get($received, "Tag"),
             ...$filter
         ],
-        ...$logicData
+        ...$computeData
     ]);
 }
 
@@ -49,4 +49,3 @@ function findContent($router, &$data)
             \Res::Reload();
     })
     ->Handle();
-?>

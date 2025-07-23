@@ -208,7 +208,7 @@ class Profile extends Form{
 		$isu = $isc && $this->Updatable && auth($this->UpdateAccess);
 		if(isValid($this->DataTable) && isValid($this->KeyColumn)){
 		    if(isValid($this->KeyValue)) $this->Items = $this->DataTable->SelectRow(count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$this->KeyValue]);
-            else $this->Items = isValid($this->SelectQuery)?$this->DataTable->DataBase->TrySelectRow($this->SelectQuery, $this->SelectParameters, $this->Items):
+            else $this->Items = isValid($this->SelectQuery)?$this->DataTable->DataBase->SelectRow($this->SelectQuery, $this->SelectParameters, $this->Items):
                     $this->DataTable->SelectRow(
                     isEmpty($this->IncludeColumns)?"*":(in_array($this->KeyColumn, $this->IncludeColumns)?$this->IncludeColumns:[$this->KeyColumn, ...$this->IncludeColumns]),
                     [$this->SelectCondition, isEmpty("{$this->KeyColumn}=:{$this->KeyColumn}")],
@@ -342,7 +342,7 @@ class Profile extends Form{
             title:"Add {$this->Title}",
             description:$this->Description,
             children:(function() use($record, $value){
-                $schemas = $this->DataTable->DataBase->TrySelect(
+                $schemas = $this->DataTable->DataBase->Select(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'");
@@ -387,7 +387,7 @@ class Profile extends Form{
             title:getBetween($this->Items,"Title","Name"),
             description:get($this->Items,"Description"),
             children:(function() use($value){
-                $schemas = $this->DataTable->DataBase->TrySelect(
+                $schemas = $this->DataTable->DataBase->Select(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'");

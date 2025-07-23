@@ -12,7 +12,8 @@
 				$module->Render();
 				module("Image");
 				$module = new MiMFa\Module\Image();
-				$module->Image = \_::$Info->FullLogoPath;
+    			$module->AllowOrigin = false;
+				$module->Source = \_::$Info->FullLogoPath;
 				$module->Class = "align-center";
 				$module->Height = "15vmax";
 				$module->Render();

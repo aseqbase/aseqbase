@@ -151,6 +151,7 @@ class Gallery extends Collection{
 		return join(PHP_EOL, iterator_to_array((function(){
             module("Image" );
             $img = new Image();
+    		$img->AllowOrigin = false;
             $img->Class = "image";
             yield $img->GetStyle();
 
@@ -167,7 +168,7 @@ class Gallery extends Collection{
                 $p_description = getValid($item,'Description' , $this->DefaultDescription);
                 $p_content = getValid($item,'Content' ,$this->DefaultContent)??$p_description;
                 $p_download = get($item,'Download');
-                $p_link = getValid($item,'Link',$this->DefaultLink)??(isEmpty($this->MoreButtonLabel)?null:$p_download??$p_image);
+                $p_link = getValid($item,'Link',$this->DefaultPath)??(isEmpty($this->MoreButtonLabel)?null:$p_download??$p_image);
                 $p_path = getValid($item,'Path' , $this->DefaultPath)??$p_link;
                 $p_buttons = getValid($item,'ButtonsContent', $this->DefaultButtons);
                 $img->Source = $p_image;

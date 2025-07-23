@@ -10,7 +10,9 @@ class SignInForm extends Form{
 	public $Image = "sign-in";
 	public $SubmitLabel = "Sign In";
 	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
+	public $SignatureValue = null;
 	public $PasswordLabel = "<i class='fa fa-lock'></i>";
+	public $PasswordValue = null;
 	public $SignaturePlaceHolder = "Email/Phone/UserName";
 	public $PasswordPlaceHolder = "Password";
 	public $SignUpLabel = "Do not have an account?";
@@ -33,6 +35,7 @@ class SignInForm extends Form{
 	public $SignUp = false;
 	public $BlockTimeout = 5000;
 	public $ResponseView = null;
+    public $Printable = false;
 
 	public function __construct(){
         parent::__construct();
@@ -89,11 +92,11 @@ class SignInForm extends Form{
         if($this->HasInternalMethod){
 			yield Html::LargeSlot(
 					Html::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
-					Html::ValueInput("Signature" , ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
+					Html::ValueInput("Signature", $this->SignatureValue, ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
 				, ["class"=>"field col"]);
 			yield Html::LargeSlot(
-					Html::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
-					Html::SecretInput("Password" , ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"Password"])
+					Html::Label($this->PasswordLabel, $this->PasswordValue, "Password" , ["class"=>"prepend"]).
+					Html::SecretInput("Password", ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"Password"])
 				, ["class"=>"field col"]);
 		}
 		yield from parent::GetFields();

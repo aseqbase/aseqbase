@@ -8,6 +8,7 @@ class TemplateButton extends Module{
 	public $DarkLabel = "";
 	public $LightRequest = "LightMode";
 	public $DarkRequest = "DarkMode";
+    public $Printable = false;
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("

@@ -22,7 +22,7 @@
 </style>
 <div class="small-header">
 	<a href="<?php echo \_::$Info->HomePath; ?>">
-		<div class="brand-bar" >
+		<div class="brand-bar">
 			<div class="image" style="background-image: var(--logo-path-url);"></div>
 			<div class="title"><?php echo \_::$Info->FullName; ?></div>
 		</div>

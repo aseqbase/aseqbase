@@ -2,7 +2,10 @@
  MiMFa.net
  Responsive Styles
  */
-
+ 
+.show {
+  display: revert-layer !important;
+}
 .hide {
   display: none !important;
 }
@@ -10,13 +13,12 @@
 .visible {
   visibility: visible !important;
 }
-
 .invisible {
   visibility: hidden !important;
 }
 
 .hover-hide, .parent-hover-hide {
-  display: initial !important;
+  display: revert-layer !important;
 }
 :hover>.hover-hide, :hover>*>.parent-hover-hide {
   display: none !important;
@@ -26,7 +28,7 @@
   display: none !important;
 }
 :hover>.hover-show, :hover>*>.parent-hover-show {
-  display: initial !important;
+  display: revert-layer !important;
 }
 
 .hover-visible, .parent-hover-visible {
@@ -66,7 +68,7 @@
   }
 
   .xxlg-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .xxlg-block {
@@ -88,7 +90,7 @@
   }
 
   .xxlg-range-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .xxlg-range-block {
@@ -127,7 +129,7 @@
   }
 
   .xlg-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .xlg-block {
@@ -149,7 +151,7 @@
   }
 
   .xlg-range-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .xlg-range-block {
@@ -188,7 +190,7 @@
   }
 
   .lg-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .lg-block {
@@ -210,7 +212,7 @@
   }
 
   .lg-range-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .lg-range-block {
@@ -249,7 +251,7 @@
   }
 
   .md-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .md-block {
@@ -271,7 +273,7 @@
   }
 
   .md-range-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .md-range-block {
@@ -310,7 +312,7 @@
   }
 
   .sm-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .sm-block {
@@ -332,7 +334,7 @@
   }
 
   .sm-range-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .sm-range-block {
@@ -375,7 +377,7 @@
   }
 
   .xsm-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .xsm-block {
@@ -397,7 +399,7 @@
   }
 
   .xsm-range-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .xsm-range-block {
@@ -436,7 +438,7 @@
   }
 
   .xxsm-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .xxsm-block {
@@ -458,7 +460,7 @@
   }
 
   .xxsm-range-show {
-    display: initial !important;
+    display: revert-layer !important;
   }
 
   .xxsm-range-block {
@@ -470,6 +472,35 @@
   }
 
   .xxsm-range-hide {
+    display: none !important;
+  }
+}
+
+@media print {
+  :has(.print-friend){
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    width: 100%;
+    text-align: center;
+  }
+  .print-friend{
+    display: inline-flex;
+    visibility: visible;
+    opacity: 1;
+    margin: 0px;
+    padding: 0px;
+    align-items: center;
+    flex-direction: column;
+    text-align: revert;
+    width: fit-content;
+  }
+  .printable{
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .unprintable{
     display: none !important;
   }
 }

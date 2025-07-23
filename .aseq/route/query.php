@@ -1,14 +1,14 @@
 <?php
 $viewData = grab($data, "View") ?? [];
-$logicData = grab($data, "Compute") ?? [];
-$filter = grab($logicData, "Filter") ?? [];
+$computeData = grab($data, "Compute") ?? [];
+$filter = grab($computeData, "Filter") ?? [];
 return route("search", [
     "Compute" => [
         "Filter" => [
             "Category" => implode("/", array_slice(explode("/", \Req::$Direction), 1)),
             ...$filter
         ],
-        ...$logicData
+        ...$computeData
     ],
     "View" => [
         "Title" => "Query Results",

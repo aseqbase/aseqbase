@@ -186,7 +186,7 @@ class ContentCollection extends Collection{
 	function __construct($items = null){
         parent::__construct($items);
         $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
-        $this->CollectionRoute = $this->CollectionRoute??\_::$Address->ContentRoute;
+        $this->CollectionRoute = $this->CollectionRoute??\_::$Address->CategoryRoute;
         $this->CheckAccess = fn($item)=>auth(getValid($item, 'Access' , 0));
     }
 
@@ -291,6 +291,7 @@ class ContentCollection extends Collection{
         return join(PHP_EOL, iterator_to_array((function(){
 		    module("Image" );
 		    $img = new Image();
+            $img->AllowOrigin = false;
 		    $img->Class = "image";
 		    yield $img->GetStyle();
             $rout = null;

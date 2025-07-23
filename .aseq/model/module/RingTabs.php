@@ -3,8 +3,8 @@ namespace MiMFa\Module;
 use MiMFa\Library\User;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-class RingSlide extends Module{
-	public $Name = "RingSlide";
+class RingTabs extends Module{
+	public $Name = "RingTabs";
 	public $Class = "row";
 	public $Image = null;
 	public $Items = null;
@@ -13,6 +13,8 @@ class RingSlide extends Module{
 	public $CenterSize = 150;
 	public $ButtonsSize = 100;
 	public $Path = null;
+	public $MenuClass = "col-md";
+	public $TabsClass = "col-md-7";
 
 	/**
      * Create the module
@@ -29,13 +31,20 @@ class RingSlide extends Module{
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
+			.{$this->Name} {
+				min-height: 50vh;
+				display: flex;
+				align-content: center;
+				justify-content: center;
+				align-items: center;
+				overflow: hidden;
+			}
+
 			.{$this->Name} .tabs{
 				max-width: 100%;
-				margin-top: 15Vmin;
 			}
 
 			.{$this->Name} .tab{
-				padding: 0px 5vmax;
 				text-align: center;
 				display:none;
 			}
@@ -64,7 +73,7 @@ class RingSlide extends Module{
 				border-radius: var(--radius-2);
 			}
 			.{$this->Name} .menu {
-				min-height: 60vh;
+				min-height: ".($this->CenterSize+$this->ButtonsSize*2)."px;
 				display: -webkit-box;
 				display: -webkit-flex;
 				display: -ms-flexbox;
@@ -176,13 +185,13 @@ class RingSlide extends Module{
 							Html::Division(
 								Html::Media("", getBetween($v,'Image' , "Icon")),
 								["class"=>"button"]
-							).Html::Tooltip(getBetween($v,'Title' , "Name")),
+							).Html::Tooltip(getBetween($v,'Name' , "Title")),
 							$this->HasTab?"#tab$i":$pa,
 							$this->HasTab?["data-target"=>".tab", "data-toggle"=>'tab']:[]
 						);
 						
 						if($this->HasTab) $tags[] = Html::Division(
-							Html::ExternalHeading(get($v,'Name' ), $pa, ["class"=>"title" ]).
+							Html::ExternalHeading(get($v,'Title' ), $pa, ["class"=>"title" ]).
 								Html::Division($desc.$more, ["class"=>"description" ]), 
 							["class"=>"tab fade".($i===0?' active show':''), "Id" =>"tab$i"]
 						);
@@ -191,13 +200,13 @@ class RingSlide extends Module{
 				yield Html::Division(
 					Html::Division(
 						Html::Division($btns,["class"=>"center"]),
-						["class"=>"menu"]
+						["class"=>"menu {$this->MenuClass}"]
 					),
 					["class"=>"col-md", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]
 				);
 				if($tags) yield Html::Division(
 					Html::Division($tags,["class"=>"tabs"]),
-					["class"=>"col-md-7", "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]
+					["class"=>$this->TabsClass, "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]
 				);
 			});
 		else return null;

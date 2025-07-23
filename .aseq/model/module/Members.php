@@ -9,7 +9,7 @@ class Members extends Module
     public $DefaultName = null;
     public $DefaultDescription = null;
     public $DefaultDetails = null;
-    public $DefaultLink = null;
+    public $DefaultPath = null;
     public $MoreButtonLabel = "Read More...";
 
     public function GetStyle()

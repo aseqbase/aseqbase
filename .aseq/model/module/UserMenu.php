@@ -11,6 +11,7 @@ class UserMenu extends Module
 	public $AllowMiddle = true;
 	public $AllowChangeColor = true;
 	public $Path = null;
+    public $Printable = false;
 
 	public function __construct()
 	{

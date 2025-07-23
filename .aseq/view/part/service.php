@@ -1,6 +1,6 @@
 <?php
-module("RingSlide");
-$module = new \MiMFa\Module\RingSlide();
+module("RingTabs");
+$module = new \MiMFa\Module\RingTabs();
 $module->Image = \_::$Info->FullLogoPath;
 $module->Items = \_::$Info->Services;
 swap($module, $data);

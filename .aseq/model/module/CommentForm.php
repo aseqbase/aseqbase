@@ -39,6 +39,7 @@ class CommentForm extends Form
 	public $Relation = null;
 	public $DefaultAccess = 0;
 	public $DefaultStatus = 1;
+    public $Printable = false;
 
 	public function __construct()
 	{

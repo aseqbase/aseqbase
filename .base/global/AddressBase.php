@@ -1,6 +1,6 @@
 <?php
 
-class AddressBase
+class AddressBase extends ArrayObject
 {
 	/**
 	 * The top layer Name of this sequence
@@ -70,4 +70,14 @@ class AddressBase
 		$this->TagRoute = $this->Route . "tag/";
 		$this->UserRoute = $this->Route . "user/";
 	}
+	
+	public function __get($name) {
+        return $this[$this->PropertyName($name)];
+    }
+    public function __set($name, $value) {
+        $this[$this->PropertyName($name)] = $value;
+    }
+    public function PropertyName($name) {
+        return preg_replace("/\W+/", "", strToProper($name));
+    }
 }

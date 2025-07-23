@@ -34,6 +34,7 @@ class SideMenu extends Module
 	public $SignButtonScreenSize = "md";
 	public $LogoWidth = "calc(1.25 * var(--size-5))";
 	public $LogoHeight = "calc(1.25 * var(--size-5))";
+    public $Printable = false;
 
 
 	public function __construct()

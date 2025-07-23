@@ -2,7 +2,7 @@
 route("content", [
     "View"=>[
         "RootRoute" => "/post/",
-        "CollectionRoute" => "/posts/"
+        "CollectionRoute" => "/cat/"
     ],
     "ErrorHandler" => "Could not find related post"
 ]);

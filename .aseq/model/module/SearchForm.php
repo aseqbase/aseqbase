@@ -7,6 +7,7 @@ class SearchForm extends Module{
 	public $SubmitLabel = "<i class='fa fa-search'></i>";
 	public $PlaceHolder = "Search";
 	public $QueryKey = "q";
+    public $Printable = false;
 	
 	public function Get(){
 		$src = $this->Path??\Req::$Host."/search";

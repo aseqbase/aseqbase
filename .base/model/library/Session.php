@@ -153,7 +153,7 @@ class Session
 		return $val;
 	}
 	public function HasData($key){
-		return $this->DataTable->Exists(null,"`Key`=:Key",[':Key'=>$this->ToCipherKey($key)]);
+		return $this->DataTable->Exists("`Key`=:Key",[':Key'=>$this->ToCipherKey($key)]);
 	}
 	public function ForgetData($key){
 		return $this->DataTable->Delete("`Key`=:Key",[':Key'=>$this->ToCipherKey($key)]);

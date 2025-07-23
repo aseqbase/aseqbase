@@ -11,13 +11,16 @@ class SignUpForm extends Form
 	public $Image = "user";
 	public $SubmitLabel = "Register";
 	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
+	public $SignatureValue = null;
 	public $FirstNameLabel = "<i class='fa fa-user'></i>";
 	public $LastNameLabel = "<i class='fa fa-user'></i>";
 	public $EmailLabel = "<i class='fa fa-envelope'></i>";
 	public $GroupLabel = "<i class='fa fa-group'></i>";
+	public $GroupValue = null;
 	public $RouteLabel = "<i class='fa fa-route'></i>";
 	public $ContactLabel = "<i class='fa fa-phone-square'></i>";
 	public $PasswordLabel = "<i class='fa fa-lock'></i>";
+	public $PasswordValue = null;
 	public $PasswordConfirmationLabel = "<i class='fa fa-lock'></i>";
 	public $SignaturePlaceHolder = "Indicate a unique username";
 	public $FirstNamePlaceHolder = "Your first name";
@@ -183,7 +186,7 @@ class SignUpForm extends Form
 				yield Html::Rack(
 					Html::LargeSlot(
 						Html::Label($this->GroupLabel, "Group", ["class"=> "prepend"]) .
-						Html::SelectInput("Group", $this->GroupPlaceHolder, $this->GroupOptions),
+						Html::SelectInput("Group", $this->GroupValue, $this->GroupPlaceHolder, $this->GroupOptions),
 						["class"=> "field"]
 					)
 				);
@@ -199,7 +202,7 @@ class SignUpForm extends Form
 				yield Html::Rack(
 					Html::LargeSlot(
 						Html::Label($this->SignatureLabel, "Signature", ["class"=> "prepend"]) .
-						Html::ValueInput("Signature", ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "UserName"]),
+						Html::ValueInput("Signature", $this->SignatureValue, ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "UserName"]),
 						["class"=> "field"]
 					)
 				);
@@ -207,12 +210,12 @@ class SignUpForm extends Form
 				yield Html::Rack(
 					Html::LargeSlot(
 						Html::Label($this->PasswordLabel, "Password" , ["class"=> "prepend"]) .
-						Html::SecretInput("Password" , ["placeholder" => $this->PasswordPlaceHolder, "autocomplete" => "Password"]),
+						Html::SecretInput("Password", $this->PasswordValue, ["placeholder" => $this->PasswordPlaceHolder, "autocomplete" => "Password"]),
 						["class"=> "field"]
 					) .
 					Html::LargeSlot(
 						Html::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=> "prepend"]) .
-						Html::SecretInput("PasswordConfirmation", ["placeholder" => $this->PasswordConfirmationPlaceHolder, "autocomplete" => "Password"]),
+						Html::SecretInput("PasswordConfirmation", $this->PasswordValue, ["placeholder" => $this->PasswordConfirmationPlaceHolder, "autocomplete" => "Password"]),
 						["class"=> "field"]
 					)
 				);

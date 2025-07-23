@@ -100,6 +100,7 @@ class General extends Template
 					font-size: var(--size-1);
 					display: inline-block;
 					margin-top: var(--size-1);
+					padding-inline-end: var(--size-1);
 				}
 				h6:before{
 					display: block;

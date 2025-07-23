@@ -77,9 +77,19 @@ class Base extends \ArrayObject
 			->Default(fn(&$router) => $this->Default());
 	}
 
+	public function New($setDefaults = true, $setRevises = true)
+	{
+		if ($setDefaults)
+			$this->Set_Defaults();
+		if ($setRevises)
+			\MiMFa\Library\Revise::Load($this);
+		return $this;
+	}
+
 	public function Set_Defaults()
 	{
 		$this->Name = \_::$Config->EncryptNames ? (substr($this->Get_Namespace(), 0, 1) . RandomString(10)) : ($this->Name ?? $this->get_className()) . "_" . $this->Get_Namespace();
+		return $this;
 	}
 
 	public function Get_Class()

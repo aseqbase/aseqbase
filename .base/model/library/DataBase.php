@@ -11,6 +11,7 @@ class DataBase {
 	protected $DefaultConnection = null;
 	protected $UserName = null;
 	protected $Password = null;
+	public $Name = null;
 	public $StartWrap = "`";
 	public $EndWrap = "`";
 	public $PreQuery = null;
@@ -18,9 +19,9 @@ class DataBase {
 	public $PostQuery = null;
 	public $Timeout = null;
 
-	public function __construct($connection = null, $userName = null, $password = null)
+	public function __construct($userName = null, $password = null)
 	{
-		$this->DefaultConnection = $connection ?? \_::$Config->DataBaseType . ":host=" . \_::$Config->DataBaseHost . (\_::$Config->DataBasePort ? ";port=" . \_::$Config->DataBasePort : "") . ";dbname=" . \_::$Config->DataBaseName . ";charset=" . preg_replace("/\W/", "", \_::$Config->DataBaseEncoding);
+		$this->DefaultConnection = \_::$Config->DataBaseType . ":host=" . \_::$Config->DataBaseHost . (\_::$Config->DataBasePort ? ";port=" . \_::$Config->DataBasePort : "") . ";dbname=" . ($this->Name = \_::$Config->DataBaseName) . ";charset=" . preg_replace("/\W/", "", \_::$Config->DataBaseEncoding);
 		$this->UserName = $userName ?? \_::$Config->DataBaseUser;
 		$this->Password = $password ?? \_::$Config->DataBasePassword;
 	}

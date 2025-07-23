@@ -287,6 +287,41 @@ class Convert
         return [$json];
     }
 
+    public static function ToXml($data, \SimpleXMLElement|null $root = null) {
+        if ($root === null) {
+            $root = new \SimpleXMLElement('<root/>');
+        }
+        foreach (self::ToIteration($data) as $key => $value) {
+            if (is_array($value) || is_object($value)) {
+            self::ToXml($value, $root->addChild(is_numeric($key) ? "item$key" : $key));
+            } else {
+            $root->addChild(is_numeric($key) ? "item$key" : $key, htmlspecialchars((string)$value));
+            }
+        }
+        return $root;
+    }
+    public static function FromXml(\SimpleXMLElement|null $data, bool $asArray = false): object|array|null
+    {
+        libxml_use_internal_errors(true); // suppress XML parsing errors
+        try {
+                return json_decode(json_encode($data), $asArray); 
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+    public static function ToXmlString($data, \SimpleXMLElement|null $root = null) {
+        return self::ToXml($data, $root)->asXML();
+    }
+    public static function FromXmlString($data, bool $asArray = false): object|array|null
+    {
+        libxml_use_internal_errors(true); // suppress XML parsing errors
+        try {
+                return json_decode(json_encode(new \SimpleXMLElement(self::ToString($data))), $asArray); 
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     public static function FromFormData($data, &$files = [])
     {
         // Define the boundary from the raw data

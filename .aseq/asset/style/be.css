@@ -36,6 +36,12 @@
   text-decoration: none;
   font-weight: normal;
 }
+.be.square{
+    aspect-ratio: 1;
+}
+.be.circle{
+    border-radius: 100%;
+}
 
 .be:is(.top,.middle,.bottom) {
   display: flex;

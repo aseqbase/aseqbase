@@ -114,10 +114,13 @@ class Navigation extends Module{
 	public function __construct($itemsOrQuery = null, $count = null, $queryParameters = null, $defaultItems = null){
 		parent::__construct();
 		$query = \Req::ReceiveGet()??array();
+		$r = "_".getId(false); 
+		$this->PageRequest .= $r; 
+		$this->LimitRequest .= $r; 
+		$this->CountRequest .= $r; 
 		$this->Page = (int)takeValid($query,$this->PageRequest,-1);
 		$this->Limit = (int)takeValid($query,$this->LimitRequest, -12);
 		$this->Count = (int)takeValid($query,$this->CountRequest, -1);
-
 		$this->SetItems($itemsOrQuery, $count, $queryParameters, $defaultItems);
 	}
 

@@ -163,11 +163,12 @@ class Module extends \Base
      public $AllowTranslate = true;
 
      public $Visual = true;
+     public $Printable = true;
 
      public function __construct()
      {
           parent::__construct();
-          $this->Router->Get()->Unset()->Set(fn() => Convert::ToString(function () {
+          $this->Router->Get()->Unset()->Route(fn() => Convert::ToString(function () {
                if ($this->Styles === null)
                     yield $this->GetStyle();
                elseif (!isEmpty($this->Styles))
@@ -214,7 +215,7 @@ class Module extends \Base
      {
           return [
                ($this->Id ? ["id" => $this->Id] : []),
-               ["class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass()],
+               ["class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass() . ($this->Printable?'':' unprintable')],
                (isEmpty($this->Attributes) ? [] : (is_array($this->Attributes) ? $this->Attributes : [Convert::ToString($this->Attributes, " ", "{0}={1} ")])),
                (count($this) < 1 ? [] : $this->__toArray())
           ];

@@ -3,6 +3,7 @@ use \MiMFa\Library\Html;
 class FixedScreen extends Module{
 	public $Image = null;
 	public $BlurSize = "0px";
+    public $Printable = false;
 	
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("

@@ -16,7 +16,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 3.00000;
+	public static float $Version = 3.03000;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -144,7 +144,6 @@ run("Front");
 \MiMFa\Library\Local::CreateDirectory(\_::$Aseq->TempDirectory);
 register_shutdown_function('cleanupTemp', false);
 
-
 /**
  * To check Features of an object from an array
  * @param mixed $object The source object
@@ -155,6 +154,8 @@ function has($object, ...$hierarchy)
 	if (count($hierarchy) === 0)
 		return $object == true;
 	$data = array_shift($hierarchy);
+	if (is_null($data))
+		return false;
 	if (!is_array($data)) {
 		if (is_array($object)) {
 			if (isset($object[$data]))
@@ -185,7 +186,7 @@ function has($object, ...$hierarchy)
 				} else
 					$res[$k] = has($object, $k, $v, ...$hierarchy);
 		}
-		return $res;
+		return $res == true;
 	}
 }
 
@@ -199,6 +200,8 @@ function get($object, ...$hierarchy)
 	if (count($hierarchy) === 0)
 		return $object;
 	$data = array_shift($hierarchy);
+	if (is_null($data))
+		return null;
 	if (!is_array($data)) {
 		if (is_array($object)) {
 			if (isset($object[$data]))
@@ -243,6 +246,8 @@ function grab(&$object, ...$hierarchy)
 	if (count($hierarchy) === 0)
 		return $object;
 	$data = array_shift($hierarchy);
+	if (is_null($data))
+		return null;
 	$rem = count($hierarchy) === 0;
 	$res = null;
 	if (!is_array($data)) {
@@ -309,14 +314,20 @@ function grab(&$object, ...$hierarchy)
  */
 function set(&$object, $data)
 {
-	if (!is_array($data) || is_array($object))
+	if (!is_array($data) || !is_object($object))
 		try {
 			return $object = $data;
 		} catch (Exception $ex) {
-		} else
-		foreach ($data as $k => $v)
-			if (getValid($object, $k, null, $key) !== null || $key != null)
-				set($object->$key, $v);
+		} else {
+		foreach ($data as $k => $v) {
+			find($object, $k, $key, $index);
+			if ($key)
+				if (is_null($index))
+					set($object->$key, $v);
+				else
+					set($object[$key], $v);
+		}
+	}
 	return $object;
 }
 /**
@@ -326,17 +337,23 @@ function set(&$object, $data)
  */
 function swap(&$object, &$data)
 {
-	if (!is_array($data) || is_array($object))
+	if (!is_array($data) || !is_object($object))
 		try {
 			$object = $data;
 			unset($data);
 		} catch (Exception $ex) {
-		} else
-		foreach ($data as $k => $v)
-			if (getValid($object, $k, null, $key) !== null || $key != null) {
-				set($object->$key, $v);
+		} else {
+		foreach ($data as $k => $v) {
+			find($object, $k, $key, $index);
+			if ($key) {
+				if (is_null($index))
+					swap($object->$key, $v);
+				else
+					swap($object[$key], $v);
 				unset($data[$k]);
 			}
+		}
+	}
 	return $object;
 }
 function async($action, $callback = null, ...$args)
@@ -495,6 +512,7 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
 	$path = null;
 	$toSeq = $depth < 0 ? (count(\_::$Sequences) + $depth) : ($origin + $depth);
 	$seqInd = -1;
+	$file = ltrim($file, DIRECTORY_SEPARATOR);
 	foreach (\_::$Sequences as $dir => $host)
 		if (++$seqInd < $origin)
 			continue;
@@ -739,7 +757,7 @@ function compute(string $name, mixed $data = [], bool $print = true, int $origin
  */
 function route(string|null $name = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data ?? \_::$Back->Router, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To get the url of the selected asset
@@ -749,9 +767,9 @@ function route(string|null $name = null, mixed $data = null, bool $print = true,
  */
 function asset($directory, string|null $name = null, string|array|null $extensions = null, $optimize = false, int $origin = 0, int $depth = 99, $default = null)
 {
-	$directory = $directory??\_::$Address->AssetDirectory;
+	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|^/", \_::$Address->AssetDirectory, $directory ?? "");
 	$i = 0;
-	$extension = isset($extensions[$i++]) ? $extensions[$i++] : ($extensions?$extensions:"");
+	$extension = isset($extensions[$i++]) ? $extensions[$i++] : ($extensions ? $extensions : "");
 	try {
 		renderPrepends($directory, $name);
 		do {
@@ -842,24 +860,77 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 
 /**
  * Find somthing by a callable function on a countable element
- * @param mixed $array
+ * @param mixed $object The source object
+ * @param $item The key sample to find
+ * @param $key To get the corret spell of the key (optional)
+ * @return mixed
+ */
+function find($object, $item, &$key = null, int|null &$index = null)
+{
+	if (is_null($object))
+		return $index = $key = null;
+	if (is_iterable($object)) {
+		$it = strtolower($item);
+		$index = 0;
+		foreach ($object as $k => $v){
+			if ($it === strtolower(string: $k)) {
+				$key = $k;
+				return $v;
+			}
+			$index++;
+		}
+	}
+	$index = null;
+	return
+		isset($object->{$key = $item})?$object->$key:(
+			isset($object->{$key = strtoproper($item)})?$object->$key:(
+				isset($object->{$key = strtolower($item)})?$object->$key:(
+					isset($object->{$key = strtoupper($item)})?$object->$key:($key = null)
+				)
+			)
+		);
+}
+/**
+ * To seek for a result by a callable function on a countable element
+ * @param mixed $object The source object
  * @param callable $action The find $action($value, $key, $index)
  * @return mixed
  */
-function find($array, callable $action, &$key = null)
+function seek($object, callable $action, &$key = null, int|null &$index = null)
 {
-	if (!is_null($array)) {
-		$i = 0;
-		if (!is_iterable($array)) {
-			if ($action($array, null, $i) !== null)
-				return $array;
+	if (!is_null($object)) {
+		$index = 0;
+		if (!is_iterable($object)) {
+			if ($action($object, null, $index) !== null)
+				return $object;
 		} else
-			foreach ($array as $key => $value)
-				if ($action($value, $key, $i++) !== null)
+			foreach ($object as $key => $value)
+				if ($action($value, $key, $index++) !== null)
 					return $value;
 	}
+	$index = null;
 	return null;
 }
+/**
+ * To search and return all succeed result by a callable function on a countable element
+ * @param mixed $object The source object
+ * @param callable $action The find $action($value, $key, $index)
+ * @return mixed
+ */
+function search($object, callable $action)
+{
+	if (!is_null($object)) {
+		$index = 0;
+		if (!is_iterable($object)) {
+			if ($action($object, null, $index) !== null)
+				yield $object;
+		} else
+			foreach ($object as $key => $value)
+				if ($action($value, $key, $index++) !== null)
+					yield $value;
+	}
+}
+
 /**
  * Do a loop action by a callable function on a countable element
  * @param mixed $array
@@ -1386,109 +1457,102 @@ function fetchValue(string|null $source, string|null $key, bool $ismultiline = t
 	return trim($res);
 }
 
-function isEmpty($obj): bool
+function isEmpty($object): bool
 {
-	return !isset($obj) || is_null($obj) || (is_string($obj) && (trim($obj . "", " \n\r\t\v\f'\"") === "")) || (is_countable($obj) && count($obj) === 0);
-	//return $obj?(is_string($obj) && (trim($obj . "", " \n\r\t\v\f'\"") === "")):true;
+	return !isset($object) || is_null($object) || (is_string($object) && (trim($object . "", " \n\r\t\v\f'\"") === "")) || (is_countable($object) && count($object) === 0);
+	//return $object?(is_string($object) && (trim($object . "", " \n\r\t\v\f'\"") === "")):true;
 }
-function isValid($obj, string|null $item = null): bool
+function isValid($object, string|null $item = null): bool
 {
 	if ($item === null)
-		return isset($obj) && !is_null($obj) && (!is_string($obj) || !(trim($obj) == "" || trim($obj, "'\"") == ""));
-	//return $obj?true:false;
-	elseif (is_array($obj))
-		return isValid($obj) && isValid($item) && isset($obj[$item]) && isValid($obj[$item]);
+		return isset($object) && !is_null($object) && (!is_string($object) || !(trim($object) == "" || trim($object, "'\"") == ""));
+	//return $object?true:false;
 	else
-		return isValid($obj) && isset($obj->$item) && isValid($obj->$item);
+		return isValid($object) && isValid($item) && ((isset($object[$item]) && isValid($object[$item])) || (isset($object->$item) && isValid($object->$item)));
 }
-function takeValid($obj, string|null $item = null, $defultValue = null)
+function takeValid($object, string|null $item = null, $defultValue = null)
 {
-	if (isValid($obj, $item))
+	if (isValid($object, $item)) {
 		if ($item === null)
-			return $obj;
-		elseif (is_array($obj))
-			return $obj[$item];
-		else
-			return $obj->$item;
-	else
+			return $object;
+		if (isset($object[$item]))
+			return $object[$item];
+		return $object->$item;
+	} else
 		return $defultValue;
 }
-function getValid($obj, string|null $item = null, $defultValue = null, &$key = null)
+function getValid($object, string|null $item = null, $defultValue = null, &$key = null)
 {
-	if ($item == null)
-		return isValid($obj) ? $obj : $defultValue;
-	elseif (is_array($obj)) {
-		if (isset($obj[$item]))
-			return isValid($obj[$key = $item]) ? $obj[$item] : $defultValue;
+	if ($object === null || $item === null)
+		return isValid($object) ? $object : $defultValue;
+	if (is_array($object)) {
+		if (isset($object[$item]))
+			return isValid($object[$key = $item]) ? $object[$item] : $defultValue;
 		$item = strtolower($item);
-		foreach ($obj as $k => $v)
+		foreach ($object as $k => $v)
 			if ($item === strtolower($k)) {
 				$key = $k;
 				return isValid($v) ? $v : $defultValue;
 			}
-	} else {
-		$res =
-			($obj->{$key = $item} ??
-				$obj->{$key = strtoproper($item)} ??
-				$obj->{$key = strtolower($item)} ??
-				$obj->{$key = strtoupper($item)} ??
-				($key = null));
-		return isValid($res) ? $res : $defultValue;
 	}
-	return $defultValue;
+	$res =
+		$object->{$key = $item} ??
+		$object->{$key = strtoproper($item)} ??
+		$object->{$key = strtolower($item)} ??
+		$object->{$key = strtoupper($item)} ??
+		($key = null);
+	return isValid($res) ? $res : $defultValue;
 }
-function grabValid(&$obj, string|null $item = null, $defultValue = null, &$key = null)
+function grabValid(&$object, string|null $item = null, $defultValue = null, &$key = null)
 {
-	if ($item == null)
-		return isValid($obj) ? $obj : $defultValue;
-	elseif (is_array($obj)) {
-		if (isset($obj[$item])) {
-			$res = $obj[$key = $item] ?? $defultValue;
-			unset($obj[$item]);
+	if ($object === null || $item === null)
+		return isValid($object) ? $object : $defultValue;
+	if (is_array($object)) {
+		if (isset($object[$item])) {
+			$res = $object[$key = $item] ?? $defultValue;
+			unset($object[$item]);
 			return isValid($res) ? $res : $defultValue;
 		}
 		$item = strtolower($item);
-		foreach ($obj as $k => $v)
+		foreach ($object as $k => $v)
 			if ($item === strtolower($k)) {
 				$key = $k;
-				unset($obj[$k]);
+				unset($object[$k]);
 				return isValid($v) ? $v : $defultValue;
 			}
-	} else {
-		$res =
-			$obj->{$key = $item} ??
-			$obj->{$key = strtoproper($item)} ??
-			$obj->{$key = strtolower($item)} ??
-			$obj->{$key = strtoupper($item)} ??
-			($key = null) ?? $defultValue;
-		if ($key !== null)
-			unset($obj->$key);
-		return isValid($res) ? $res : $defultValue;
 	}
-	return $defultValue;
+	$res =
+		$object->{$key = $item} ??
+		$object->{$key = strtoproper($item)} ??
+		$object->{$key = strtolower($item)} ??
+		$object->{$key = strtoupper($item)} ??
+		($key = null) ?? $defultValue;
+	if ($key !== null)
+		unset($object->$key);
+	return isValid($res) ? $res : $defultValue;
 }
-function doValid(callable $func, $obj, string|null $item = null, $defultValue = null)
+function doValid(callable $func, $object, string|null $item = null, $defultValue = null)
 {
-	return isValid($obj, $item) ? $func(getValid($obj, $item)) : $defultValue;
+	return isValid($object, $item) ? $func(getValid($object, $item)) : $defultValue;
 }
-function takeBetween($obj, ...$items)
+function takeBetween($object, ...$items)
 {
 	foreach ($items as $value)
-		if (($value = getValid($obj, $value, null)) !== null)
+		if (($value = getValid($object, $value, null)) !== null)
 			return $value;
 	return null;
 }
-function getBetween($obj, ...$items)
+function getBetween($object, ...$items)
 {
 	foreach ($items as $value)
-		if (($value = getValid($obj, $value, null)) !== null)
+		if (($value = getValid($object, $value, null)) !== null)
 			return $value;
 	return null;
 }
-function grabBetween(&$obj, ...$items)
+function grabBetween(&$object, ...$items)
 {
 	foreach ($items as $value)
-		if (($value = grabValid($obj, $value, null)) !== null)
+		if (($value = grabValid($object, $value, null)) !== null)
 			return $value;
 	return null;
 }

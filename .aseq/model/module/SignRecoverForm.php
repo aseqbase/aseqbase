@@ -24,6 +24,7 @@ class SignRecoverForm extends Form{
 
 	public $BlockTimeout = 30000;
 	public $ResponseView = null;
+    public $Printable = false;
 
 	public function __construct(){
         parent::__construct();

@@ -404,7 +404,7 @@ FodyWeavers.xsd
 
 # aseqbase
 ~*
-.*
+.htaccess
 /private
 /public
 /test

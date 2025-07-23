@@ -4,7 +4,7 @@ $cn = \_::$Back->Query->ColumnNames;
 \_::$Back->Query->ColumnNames = grab($Filter, "Columns" ) ?? "*";
 $result = \_::$Back->Query->SearchContents(
     query: grab($Filter, "Query"),
-    direction: grab($Filter, "Category"),
+    direction: grabBetween($Filter, "Category", "Direction"),
     type: grab($Filter, "Type" ),
     tag: grab($Filter, "Tag"),
     nest: grab($Filter, "Nest")??-1,

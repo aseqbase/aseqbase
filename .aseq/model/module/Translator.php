@@ -10,6 +10,7 @@ class Translator extends Module{
 				"Encoding"=>"UTF-8"
 			)
 		);
+    public $Printable = false;
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
@@ -25,10 +26,11 @@ class Translator extends Module{
 		$langs = [];
 		foreach ($this->Items??[] as $lng=>$value)
             if($lng != $cur)
-                $langs[] = Html::Button(
+                $langs[] = Html::Element(
 					Html::Media("", getBetween($value,"Image","Icon")).
 					getBetween($value,"Title","Name" ),
-					"load(\"?lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding")."\");");
+					"button",
+					["class"=>"button", "onclick"=>"load(\"?".(getBetween($value,"Query" )??"lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding"))."\");"]);
 		return $this->GetTitle().$this->GetDescription().
 			join(PHP_EOL, $langs).
 			$this->GetContent();

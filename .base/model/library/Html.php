@@ -46,25 +46,25 @@ class Html
                     $value = preg_replace("/((^[ \t]?>.*\s?)+)/m", self::CodeBlock("$1"), $value); // Blockquotes
                     $value = code($value, $dic, pattern: $patt);// To keep all previous tags unchanged
                     // Quotes
-                    $value = preg_replace_callback('/(?<!")"(\S[\r\n"]+?\S)"(?!")/', fn($m) => self::Quote($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback('/"?""\s?([\s\S]+?)\s?"""?/s', fn($m) => self::QuoteBlock($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Blockquotes
+                    $value = preg_replace_callback('/(?<!")"(\S[\r\n"]+?\S)"(?!")/', fn($m) => self::Quote($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback('/"?""\s?([\s\S]+?)\s?"""?/s', fn($m) => self::QuoteBlock($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Blockquotes
                     // Headings
-                    $value = preg_replace_callback("/^\s?[ \t]*\#\s(.*)\s?/im", fn($m) => self::ExternalHeading($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{2}\s(.*)\s?/im", fn($m) => self::SuperHeading($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{3}\s(.*)\s?/im", fn($m) => self::Heading($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{4}\s(.*)\s?/im", fn($m) => self::SubHeading($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{5}\s(.*)\s?/im", fn($m) => self::InternalHeading($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{6}\s(.*)\s?/im", fn($m) => self::Element($m[1], "h6", ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/^\s?[ \t]*\#\s(.*)\s?/im", fn($m) => self::ExternalHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/^\s?[ \t]*\#{2}\s(.*)\s?/im", fn($m) => self::SuperHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/^\s?[ \t]*\#{3}\s(.*)\s?/im", fn($m) => self::Heading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/^\s?[ \t]*\#{4}\s(.*)\s?/im", fn($m) => self::SubHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/^\s?[ \t]*\#{5}\s(.*)\s?/im", fn($m) => self::InternalHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/^\s?[ \t]*\#{6}\s(.*)\s?/im", fn($m) => self::Element($m[1], "h6", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
                     // Footnotes
-                    $value = preg_replace_callback("/\[([a-z0-9_\-]+)\](?!\(|:)/i", fn($m) => self::Span("[$m[1]]", "#fn-$1", ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/\[\^([^\]]+)\](?!\(|:)/i", fn($m) => self::Super("[$m[1]]", "#fn-$1", ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/\[~([^\]]+)\](?!\(|:)/i", fn($m) => self::Sub("[$m[1]]", "#fn-$1", ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^[ \t]*\[([a-z0-9_\-]+)\]:\s*(.*)$\s?/im", fn($m) => self::Division("[$m[1]] $m[2]", ["class" => "footnote", "id" => "fn-$1"], ($dir = \_::$Back->Translate->GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^[ \t]*\[([\^~])([^\]]+)\]:\s*(.*)$\s?/im", fn($m) => self::Division("$m[1]$m[2] $m[3]", ["class" => "footnote", "id" => "fn-$2"], ($dir = \_::$Back->Translate->GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/\[([a-z0-9_\-]+)\](?!\(|:)/i", fn($m) => self::Span("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/\[\^([^\]]+)\](?!\(|:)/i", fn($m) => self::Super("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/\[~([^\]]+)\](?!\(|:)/i", fn($m) => self::Sub("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/^[ \t]*\[([a-z0-9_\-]+)\]:\s*(.*)$\s?/im", fn($m) => self::Division("[$m[1]] $m[2]", ["class" => "footnote", "id" => "fn-$1"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/^[ \t]*\[([\^~])([^\]]+)\]:\s*(.*)$\s?/im", fn($m) => self::Division("$m[1]$m[2] $m[3]", ["class" => "footnote", "id" => "fn-$2"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
                     // Medias
                     $value = preg_replace("/\!\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", self::Image("$1", "$2"), $value);
                     $value = preg_replace("/@\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", self::Media("$1", "$2"), $value);
-                    $value = preg_replace_callback("/\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Link($m[1], $m[2], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Link($m[1], $m[2], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
                     $value = preg_replace("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", self::Link("$1", "$1"), $value);
                     $value = preg_replace("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", self::Link("$1", "mailto:$1"), $value);
 
@@ -80,7 +80,7 @@ class Html
                                             preg_replace_callback(
                                                 "/[ \t]*([^|\r\n]+)[ \t]*(((\|\|?$)|(\|\|?)|$))/",
                                                 function ($cmatches) {
-                                                    return self::Cell($cmatches[1], strlen($cmatches[2]) > 1 ? ["Type" => "head"] : [], ($dir = \_::$Back->Translate->GetDirection($cmatches[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]);
+                                                    return self::Cell($cmatches[1], strlen($cmatches[2]) > 1 ? ["Type" => "head"] : [], ($dir = Translate::GetDirection($cmatches[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]);
                                                 },
                                                 $rmatches[1]
                                             )
@@ -106,7 +106,7 @@ class Html
                                 $list = [];
                                 foreach ($lines as $line) {
                                     if (preg_match($linePattern, $line, $ms)) {
-                                        $list[] = self::Item($ms[5], empty($ms[4]) ? [] : ["number" => $ms[4]], ($dir = \_::$Back->Translate->GetDirection($ms[5])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]);
+                                        $list[] = self::Item($ms[5], empty($ms[4]) ? [] : ["number" => $ms[4]], ($dir = Translate::GetDirection($ms[5])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]);
                                     } else {
                                         $list[count($list) - 1] .= "\n" . $line;
                                     }
@@ -122,19 +122,19 @@ class Html
                     } while ($lc);
 
                     // Texts
-                    $value = preg_replace_callback("/\*\*(\S[^\*\r\n\v]+)\*\*/i", fn($m) => self::Strong($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/\*([^\*\r\n\v]+)\*/i", fn($m) => self::Bold($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/__([^\r\n\v]+)__/i", fn($m) => self::Italic($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/~~([^\r\n\v]+)~~/i", fn($m) => self::Strike($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/(?<!\[)\^\(([^\)]+)\)/i", fn($m) => self::Super($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
-                    $value = preg_replace_callback("/(?<!\[)\~\(([^\)]+)\)/i", fn($m) => self::Sub($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
-                    $value = preg_replace_callback("/(?<!\[)\^([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Super($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
-                    $value = preg_replace_callback("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Sub($m[1], ($dir = \_::$Back->Translate->GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Subscript
+                    $value = preg_replace_callback("/\*\*(\S[^\*\r\n\v]+)\*\*/i", fn($m) => self::Strong($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/\*([^\*\r\n\v]+)\*/i", fn($m) => self::Bold($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/__([^\r\n\v]+)__/i", fn($m) => self::Italic($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/~~([^\r\n\v]+)~~/i", fn($m) => self::Strike($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $value = preg_replace_callback("/(?<!\[)\^\(([^\)]+)\)/i", fn($m) => self::Super($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
+                    $value = preg_replace_callback("/(?<!\[)\~\(([^\)]+)\)/i", fn($m) => self::Sub($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
+                    $value = preg_replace_callback("/(?<!\[)\^([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Super($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
+                    $value = preg_replace_callback("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Sub($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Subscript
                     // Signs
                     $value = preg_replace("/^[ \t]*\-{6,}$\s?/im", self::$BreakLine, $value);
                     $value = preg_replace("/((\r\n)|(\n\r)|(\r?\n\n\r?))/i", self::$Break, trim($value));
 
-                    return ($dir = \_::$Back->Translate->GetDirection($value)) == \_::$Back->Translate->Direction ? decode($value, $dic) : self::Division(decode($value, $dic), ["class" => "be $dir"]);
+                    return ($dir = Translate::GetDirection($value)) == \_::$Back->Translate->Direction ? decode($value, $dic) : self::Division(decode($value, $dic), ["class" => "be $dir"]);
                 }
             }
             if (is_subclass_of($value, "\Base"))
@@ -297,12 +297,14 @@ class Html
                                 if (isValid($value)) {
                                     if (is_callable($value) || $value instanceof \Closure)
                                         $value = Internal::MakeScript($value);
-                                    if (self::$AttributesOptimization && $optimization) {
+                                    $onpress = preg_find("/onpress/i", $key);
+                                    if ($onpress || self::$AttributesOptimization && $optimization) {
                                         if (!isValid($id)) {
                                             $id = "_" . getId(true);
                                             $attrs .= " id='$id'";
                                         }
-                                        $scripts[] = "document.getElementById('$id').$key = function(event){{$value}};";
+                                        if($onpress) $scripts[] = "document.getElementById('$id').addEventListener('keydown', function(event) {if (event.key === '".strToProper(str_replace($onpress, "", $key))."') $value});";
+                                        else $scripts[] = "document.getElementById('$id').$key = function(event){{$value}};";
                                     } else
                                         $attrs .= " " . self::Attribute($key, $value);
                                 }
@@ -603,7 +605,7 @@ class Html
         return self::Element(join(PHP_EOL, $srcs) . __($content, styling: false), "audio", ["class" => "audio"], $attributes);
     }
     /**
-     * The \<IMAGE\> or \<I\> HTML Tag
+     * The \<IMG\> or \<I\> HTML Tag
      * @param mixed $content The alternative content of the Tag
      * @param array|string|null $source The source path to show, Or other custom attributes of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
@@ -1467,7 +1469,7 @@ class Html
             $res = [];
             foreach ($content as $k => $item)
                 //$res[] = self::Item($item);
-                $res[] = self::Item((is_numeric($k) ? "" : self::InternalHeading($k)) . Convert::ToString($item));
+                $res[] = self::Item((is_numeric($k) ? "" : self::InlineHeading($k)) . Convert::ToString($item));
             $content = $res;
         }
         return self::Element(__($content, styling: false), "ol", ["class" => "list"], $attributes);
@@ -1484,7 +1486,7 @@ class Html
             $res = [];
             foreach ($content as $k => $item)
                 //$res[] = self::Item($item);
-                $res[] = self::Item((is_numeric($k) ? "" : self::InternalHeading($k)) . Convert::ToString($item));
+                $res[] = self::Item((is_numeric($k) ? "" : self::InlineHeading($k)) . Convert::ToString($item));
             $content = $res;
         }
         return self::Element(__($content, styling: false), "ul", ["class" => "items"], $attributes);
@@ -1584,6 +1586,23 @@ class Html
             } else
                 return self::Element(self::Link($content, $reference), "h5", ["class" => "internalheading"], $attributes);
         return self::Element(__($content, styling: false), "h5", ["class" => "internalheading"], $attributes);
+    }
+    /**
+     * The \<H6\> HTML Tag
+     * @param mixed $content The heading text
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function InlineHeading($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference) && count($attributes) === 0) {
+                $attributes = Convert::ToIteration($reference);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "h6", ["class" => "inlineheading"], $attributes);
+        return self::Element(__($content, styling: false), "h6", ["class" => "inlineheading"], $attributes);
     }
 
     /**
