@@ -34,15 +34,15 @@ class Installer
         if (!isset(self::$Configurations["DataBase"]))
             self::$Configurations["DataBase"] = [];
 
-        $host = ($force ? self::$Configurations["DataBase"]["Host"] : null) ?? (readline("Host [" . (self::$Configurations["DataBase"]["Host"] ?? "localhost") . "]: ") ?: 'localhost');
-        $name = ($force ? self::$Configurations["DataBase"]["Name"] : null) ?? (readline("Database name [" . (self::$Configurations["DataBase"]["Name"] ?? "localhost") . "]: ") ?: 'localhost');
+        $host = ($force ? self::$Configurations["DataBase"]["Host"]??null : null) ?? (readline("Host [" . (self::$Configurations["DataBase"]["Host"] ?? "localhost") . "]: ") ?: 'localhost');
+        $name = ($force ? self::$Configurations["DataBase"]["Name"]??null : null) ?? (readline("Database name [" . (self::$Configurations["DataBase"]["Name"] ?? "localhost") . "]: ") ?: 'localhost');
         if (empty($name)) {
             echo "❌ Database name required.\n";
             return false;
         }
-        $username = ($force ? self::$Configurations["DataBase"]["Username"] : null) ?? (readline("usernamename [" . (self::$Configurations["DataBase"]["Username"] ?? "root") . "]: ") ?: 'root');
-        $password = ($force ? self::$Configurations["DataBase"]["Password"] : null) ?? (readline("passwordword [" . (self::$Configurations["DataBase"]["Password"] ?? "root") . "]: ") ?: 'root');
-        $prefix = ($force ? self::$Configurations["DataBase"]["Prefix"] : null) ?? (readline("Table prefix [" . (self::$Configurations["DataBase"]["Prefix"] ?? "aseq_") . "]: ") ?: 'aseq_');
+        $username = ($force ? self::$Configurations["DataBase"]["Username"]??null : null) ?? (readline("usernamename [" . (self::$Configurations["DataBase"]["Username"] ?? "root") . "]: ") ?: 'root');
+        $password = ($force ? self::$Configurations["DataBase"]["Password"]??null : null) ?? (readline("passwordword [" . (self::$Configurations["DataBase"]["Password"] ?? "root") . "]: ") ?: 'root');
+        $prefix = ($force ? self::$Configurations["DataBase"]["Prefix"]??null : null) ?? (readline("Table prefix [" . (self::$Configurations["DataBase"]["Prefix"] ?? "aseq_") . "]: ") ?: 'aseq_');
 
         self::$Configurations["DataBase"]["Host"] = $host;
         self::$Configurations["DataBase"]["Name"] = $name;

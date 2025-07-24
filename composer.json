@@ -42,7 +42,7 @@
     "autoload": {
         "files": [ "-installer/Installer.php" ],
         "psr-4": {
-            "MiMFa\\": "./"
+            "MiMFa\\": ["model/","-installer/"]
         }
     },
     "extra": {
