@@ -32,6 +32,14 @@
             "net start MySQL",
             "php index.php"
         ],
+        "install": [
+            "php -installer/Installer.php",
+            "MiMFa\\Installer::Install"
+        ],
+        "update": [
+            "php -installer/Installer.php",
+            "MiMFa\\Installer::Update"
+        ],
         "post-install-cmd": [
             "MiMFa\\Installer::Install"
         ],
