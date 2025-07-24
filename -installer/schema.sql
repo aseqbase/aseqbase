@@ -2,7 +2,7 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
+-- Host: %%DATABASE%%:3306
 -- Generation Time: Jan 07, 2025 at 03:39 PM
 -- Server version: 10.5.27-MariaDB
 -- PHP Version: 8.3.14
@@ -18,18 +18,18 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `localhost`
+-- Database: `%%DATABASE%%`
 --
-CREATE DATABASE IF NOT EXISTS `localhost` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `localhost`;
+CREATE DATABASE IF NOT EXISTS `%%DATABASE%%` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `%%DATABASE%%`;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `aseq_Category`
+-- Table structure for table `%%PREFIX%%Category`
 --
 
-CREATE TABLE IF NOT EXISTS `aseq_Category` (
+CREATE TABLE IF NOT EXISTS `%%PREFIX%%Category` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `ParentId` int(11) DEFAULT NULL,
   `Name` tinytext NOT NULL,
@@ -48,10 +48,10 @@ CREATE TABLE IF NOT EXISTS `aseq_Category` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `aseq_Content`
+-- Table structure for table `%%PREFIX%%Content`
 --
 
-CREATE TABLE IF NOT EXISTS `aseq_Content` (
+CREATE TABLE IF NOT EXISTS `%%PREFIX%%Content` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `CategoryIds` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `TagIds` text DEFAULT NULL COMMENT 'Separate each Tag Id between two ''|''',
@@ -77,10 +77,10 @@ CREATE TABLE IF NOT EXISTS `aseq_Content` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `aseq_Comment`
+-- Table structure for table `%%PREFIX%%Comment`
 --
 
-CREATE TABLE IF NOT EXISTS `aseq_Comment` (
+CREATE TABLE IF NOT EXISTS `%%PREFIX%%Comment` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `ReplyId` int(11) DEFAULT NULL,
   `GroupId` int(11) DEFAULT NULL,
@@ -101,10 +101,10 @@ CREATE TABLE IF NOT EXISTS `aseq_Comment` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 --
--- Table structure for table `aseq_Message
+-- Table structure for table `%%PREFIX%%Message
 --
 
-CREATE TABLE IF NOT EXISTS `aseq_Message` (
+CREATE TABLE IF NOT EXISTS `%%PREFIX%%Message` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `ReplyId` int(11) DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
@@ -126,10 +126,10 @@ CREATE TABLE IF NOT EXISTS `aseq_Message` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `aseq_Session`
+-- Table structure for table `%%PREFIX%%Session`
 --
 
-CREATE TABLE IF NOT EXISTS `aseq_Session` (
+CREATE TABLE IF NOT EXISTS `%%PREFIX%%Session` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `Key` varchar(512) NOT NULL,
   `Value` text DEFAULT NULL,
@@ -142,10 +142,10 @@ CREATE TABLE IF NOT EXISTS `aseq_Session` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `aseq_Tag`
+-- Table structure for table `%%PREFIX%%Tag`
 --
 
-CREATE TABLE IF NOT EXISTS `aseq_Tag` (
+CREATE TABLE IF NOT EXISTS `%%PREFIX%%Tag` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `Name` varchar(512) NOT NULL,
   `Title` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
@@ -160,10 +160,10 @@ CREATE TABLE IF NOT EXISTS `aseq_Tag` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `aseq_User`
+-- Table structure for table `%%PREFIX%%User`
 --
 
-CREATE TABLE IF NOT EXISTS `aseq_User` (
+CREATE TABLE IF NOT EXISTS `%%PREFIX%%User` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `GroupId` int(11) NOT NULL DEFAULT 0,
   `Name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
@@ -192,10 +192,10 @@ CREATE TABLE IF NOT EXISTS `aseq_User` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `aseq_UserGroup`
+-- Table structure for table `%%PREFIX%%UserGroup`
 --
 
-CREATE TABLE IF NOT EXISTS `aseq_UserGroup` (
+CREATE TABLE IF NOT EXISTS `%%PREFIX%%UserGroup` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `Name` varchar(512) NOT NULL,
   `Image` varchar(1024) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
@@ -209,10 +209,10 @@ CREATE TABLE IF NOT EXISTS `aseq_UserGroup` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 --
--- Dumping data for table `aseq_UserGroup`
+-- Dumping data for table `%%PREFIX%%UserGroup`
 --
 
-INSERT INTO `aseq_UserGroup` (`Id` , `Name` , `Image` , `Title` , `Description` , `Access` , `Status` , `MetaData` ) VALUES
+REPLACE INTO `%%PREFIX%%UserGroup` (`Id` , `Name` , `Image` , `Title` , `Description` , `Access` , `Status` , `MetaData` ) VALUES
 (1, 'ban', NULL, 'Ban', 'The Ban Group', -1, '-1', ''),
 (2, 'guest', NULL, 'Guest', 'The Guest Group', 0, '', ''),
 (3, 'registered', NULL, 'Registered', 'The Registered User Group', 1, '1', ''),
@@ -229,7 +229,7 @@ INSERT INTO `aseq_UserGroup` (`Id` , `Name` , `Image` , `Title` , `Description` 
 -- Table structure for table `Translate_Lexicon`
 --
 
-CREATE TABLE `Translate_Lexicon` (
+CREATE TABLE IF NOT EXISTS `Translate_Lexicon` (
   `KeyCode` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `ValueOptions` longtext DEFAULT NULL,
   PRIMARY KEY (`KeyCode` ),
