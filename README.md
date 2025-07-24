@@ -55,20 +55,14 @@
   #### To make the Main Domain of aseqbase website
   2. Open a terminal in the home directory (public_html) of the website, then install the framework by:
 	
- 	> composer create-project aseqbase/aseqbase
-  or
-	
- 	> composer require aseqbase/aseqbase
+ 	> composer create-project aseqbase/aseqbase ./
   3. Use it through the domain URL (http://[my-domain-name].com)
   4. Enjoy...
 
   #### To make the subdomain of aseqbase website
   2. Open a terminal in your subdomain directory (public_html/[my-subdomain-name]/), then install the framework by:
 	
- 	> composer create-project aseqbase/aseqbase
-  or
-	
- 	> composer require aseqbase/aseqbase
+ 	> composer create-project aseqbase/aseqbase ./
   3. Create an opitonal file name `global.php` on the root directory with the bellow codes:
   ```
   <?php

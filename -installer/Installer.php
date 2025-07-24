@@ -34,6 +34,13 @@ class Installer
         if (!isset(self::$Configurations["DataBase"]))
             self::$Configurations["DataBase"] = [];
 
+        self::$DataBaseSchemaFile = self::$Configurations["DataBase"]["SchemaFile"]??self::$DataBaseSchemaFile;
+        $sqlFile = __DIR__ . DIRECTORY_SEPARATOR . self::$DataBaseSchemaFile; // Your base schema
+        if (!file_exists($sqlFile)) {
+            echo "⚠️ There is no database schema to install!\n";
+            return null;
+        }
+        
         $host = ($force ? self::$Configurations["DataBase"]["Host"]??null : null) ?? (readline("Host [" . (self::$Configurations["DataBase"]["Host"] ?? "localhost") . "]: ") ?: 'localhost');
         $name = ($force ? self::$Configurations["DataBase"]["Name"]??null : null) ?? (readline("Database name [" . (self::$Configurations["DataBase"]["Name"] ?? "localhost") . "]: ") ?: 'localhost');
         if (empty($name)) {
@@ -50,12 +57,6 @@ class Installer
         self::$Configurations["DataBase"]["Password"] = $password;
         self::$Configurations["DataBase"]["Prefix"] = $prefix;
 
-        self::$DataBaseSchemaFile = self::$Configurations["DataBase"]["SchemaFile"]??self::$DataBaseSchemaFile;
-        $sqlFile = __DIR__ . DIRECTORY_SEPARATOR . self::$DataBaseSchemaFile; // Your base schema
-        if (!file_exists($sqlFile)) {
-            echo "⚠️ There is no database schema to install!\n";
-            return null;
-        }
 
         // try {
         //     $pdo = new \PDO("mysql:host=$host;charset=utf8mb4", $username, $password);
