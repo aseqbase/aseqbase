@@ -108,7 +108,7 @@ class Installer
                 if (!is_dir($targetPath)) {
                     mkdir($targetPath, $dirPermission, true);
                 }
-            } elseif (!preg_match($sourceExcludePattern, $targetPath)) {
+            } elseif (!preg_match($sourceExcludePattern, $targetPath) && $item !== $targetPath) {
                 $shouldCopy = $force || !file_exists($targetPath) || filemtime($item) > filemtime($targetPath);
                 if ($shouldCopy) {
                     // Create folder if it doesn't exist
