@@ -14,7 +14,7 @@
     echo $module->GetStyle();
     ?>
     <style>
-        .caselist .fa {
+        .caselist .icon {
             width: 100%;
             text-align: center;
             font-size: var(--size-5);

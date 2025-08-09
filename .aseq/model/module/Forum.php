@@ -80,7 +80,7 @@ class Forum extends Content
 
      public function GetMessage($subject, $message, $icon = "clock")
      {
-          return Html::Division(Html::Image($icon) . Html::Heading($subject) . Html::Result($message), ["class" => "be center"]);
+          return Html::Division(Html::Image(null, $icon) . Html::Heading($subject) . Html::Result($message), ["class" => "be center"]);
      }
 
 }

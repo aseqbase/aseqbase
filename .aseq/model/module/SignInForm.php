@@ -9,9 +9,9 @@ class SignInForm extends Form{
 	public $Title = "Sign In";
 	public $Image = "sign-in";
 	public $SubmitLabel = "Sign In";
-	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
+	public $SignatureLabel = "<i class='icon fa fa-sign-in'></i>";
 	public $SignatureValue = null;
-	public $PasswordLabel = "<i class='fa fa-lock'></i>";
+	public $PasswordLabel = "<i class='icon fa fa-lock'></i>";
 	public $PasswordValue = null;
 	public $SignaturePlaceHolder = "Email/Phone/UserName";
 	public $PasswordPlaceHolder = "Password";
@@ -90,13 +90,16 @@ class SignInForm extends Form{
     }
 	public function GetFields(){
         if($this->HasInternalMethod){
-			yield Html::LargeSlot(
+			yield $this->SignatureValue?
+				Html::HiddenInput("Signature", $this->SignatureValue):
+				Html::LargeSlot(
 					Html::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
 					Html::ValueInput("Signature", $this->SignatureValue, ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
 				, ["class"=>"field col"]);
-			yield Html::LargeSlot(
-					Html::Label($this->PasswordLabel, $this->PasswordValue, "Password" , ["class"=>"prepend"]).
-					Html::SecretInput("Password", ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"Password"])
+			yield $this->PasswordValue?
+				Html::HiddenInput("Password", $this->PasswordValue):Html::LargeSlot(
+					Html::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
+					Html::SecretInput("Password", $this->PasswordValue, ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"password"])
 				, ["class"=>"field col"]);
 		}
 		yield from parent::GetFields();
@@ -124,6 +127,8 @@ class SignInForm extends Form{
                 	return $this->GetSuccess(Convert::FromDynamicString($this->CorrectConfirmingFormat));
 				elseif($res === false)
 					return $this->GetError($this->IncorrectWarning);
+				elseif(is_null($res))
+					return \Res::Flip($this->GetError("This account is not active yet!"), null, User::$ActiveHandlerPath . "?signature=$signature".(\Req::$Query?"&".\Req::$Query:""));
 				else
 					return $this->GetError($res);
 			}

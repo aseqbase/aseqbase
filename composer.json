@@ -48,7 +48,7 @@
     },
     "extra": {
         "installer-paths": {
-            "./": ["aseqbase/aseqbase", "type:framework", "type:patch"],
+            "./": ["aseqbase/aseqbase", "type:framework", "type:patch", "type:package"],
             "{$name}/": ["type:project", "type:directory"],
             "model/library/": ["type:library"],
             "model/component/": ["type:component"],

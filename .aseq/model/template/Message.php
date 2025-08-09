@@ -29,12 +29,12 @@ class Message extends Template{
 				<style>
 					body {
 						font-family: var(--font-1);
-						background-color: var(--back-color-1);
+						background-color: var(--back-color-inside);
 						background-image: url('<?php echo $this->Image; ?>');
 						background-size: cover;
 						background-position: center;
 						background-repeat: no-repeat;
-						color: var(--fore-color-1);
+						color: var(--fore-color-inside);
 						height: 100vh;
 						width: 100vw;
 						margin: 0px;
@@ -96,7 +96,7 @@ class Message extends Template{
 					}
 					.restriction-view .frame-2 p{
 						font-size: var(--size-0);
-						color: var(--fore-color-4);
+						color: var(--fore-color-special-inside);
 					}
 				</style>
         <?php }

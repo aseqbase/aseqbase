@@ -121,7 +121,7 @@ class Router extends \ArrayObject
     public function Handle()
     {
         foreach ($this->Handlers() as $handler)
-            $this->Result = $handler();
+            $this->Result = $handler()??$this->Result;
         return $this;
     }
 
@@ -275,7 +275,7 @@ class Router extends \ArrayObject
             $method = $this->Method;
             $pattern = $this->Pattern;
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
+                return (isStatic($handler??"")) ? route($handler??$this->Direction, $data, $print, $origin, $depth, $alternative, $default) :
                     Convert::By($handler, $this);
             };
             if (isset($this[$method][$pattern]))
@@ -298,7 +298,7 @@ class Router extends \ArrayObject
             $pattern = $this->Pattern;
             if (isValid($handler)) {
                 $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                    return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
+                    return (isStatic($handler??"")) ? route($handler??$this->Direction, $data, $print, $origin, $depth, $alternative, $default) :
                         Convert::By($handler, $this);
                 };
                 foreach ($this as $mthd => $pttrns)
@@ -317,7 +317,7 @@ class Router extends \ArrayObject
     }
     /**
      * Add new handler for ALL requests, to handle if specified methods could not handle before
-     * @param string|null|callable $handler A route name or a handeler function
+     * @param string|null|callable $handler A route name or a handeler function or null for default routing by route directory
      * @param mixed $data The passed data 
      * @param string|null|int $alternative An alternative route name
      * @return Router
@@ -328,7 +328,7 @@ class Router extends \ArrayObject
             $pattern = $this->Pattern;
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
                 if ($this->Point <= 1 || $this->Global)
-                    return (isStatic($handler)) ? route($handler, $data, $print, $origin, $depth, $alternative, $default) :
+                    return (isStatic($handler??"")) ? route($handler??$this->Direction, $data, $print, $origin, $depth, $alternative, $default) :
                         Convert::By($handler, $this);
                 return null;
             };
@@ -445,7 +445,7 @@ class Router extends \ArrayObject
     public static function CreatePattern($pattern = null, $default = "/^\/?[^\/\\\\.\?#@]*(\.\w*)*(?=\/|\\\|\?|#|@|$)/i"): string
     {
         if ($pattern)
-            return preg_match("/^\/[\s\S]+\/[gimsxU]{0,6}$/", $pattern) ?
+            return isPattern($pattern) ?
                 $pattern :
                 ("/^\\/?" . str_replace("/", "\/", $pattern) . "(\\.\\w*)*(?=\\/|\\\|\\?|#|@|$)/i");
         return $default;

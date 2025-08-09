@@ -15,11 +15,13 @@ class Script
             return "null";
         else {
             if (is_string($obj)) {
-                if($res = preg_find('/(?<=^\${).+(?=}$)/', $obj)) return $res;
+                if($res = preg_find('/(?<=^\\$\{).+(?=\}$)/', $obj)) return $res;
                 $sp = "`";
                 $obj = str_replace("\\", "\\\\", $obj);
-                if(preg_match("/\n|(\$\{)/",$obj))
-                    $obj = str_replace(["`", '$'], ["\\`", '\\$'], $obj);
+                // if(preg_match("/\n|(\\$\\{[\w\W]*\\})/",$obj))
+                //     $obj = str_replace(["`", '$'], ["\\`", '\\$'], $obj);
+                if(preg_match("/\n|(\\$\{[\w\W]*\})/",$obj))
+                    $obj = str_replace("`", "\\`", $obj);
                 else
                     $obj = str_replace($sp = "\"", "\\\"", $obj);
                 $obj = str_replace("</script>", "<\/script>", $obj);

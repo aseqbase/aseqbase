@@ -67,6 +67,9 @@
 .be.align.start {
   text-align: start;
 }
+.be.align.justify {
+  text-align: justify;
+}
 .be.align.end {
   text-align: end;
 }
@@ -151,19 +154,40 @@
 .be.white {
 	background-color: var(--color-6);
 }
+.be.blur{
+	-webkit-filter: blur(1.5rem);
+	-moz-filter: blur(1.5rem);
+	-o-filter: blur(1.5rem);
+	-ms-filter: blur(1.5rem);
+	filter: blur(1.5rem);
+}
+.be.sharp{
+	-webkit-filter: contrast(120%);
+	-moz-filter: contrast(120%);
+	-o-filter: contrast(120%);
+	-ms-filter: contrast(120%);
+	filter: contrast(120%);
+}
+.be.adjust{
+	-webkit-filter: brightness(90%) contrast(110%);
+	-moz-filter: brightness(90%) contrast(110%);
+	-o-filter: brightness(90%) contrast(110%);
+	-ms-filter: brightness(90%) contrast(110%);
+	filter: brightness(90%) contrast(110%);
+}
 .be.light{
-	-webkit-filter: brightness(100) grayscale(100);
-	-moz-filter: brightness(100) grayscale(100);
-	-o-filter: brightness(100) grayscale(100);
-	-ms-filter: brightness(100) grayscale(100);
-	filter: brightness(100) grayscale(100);
+	-webkit-filter: brightness(0) invert(1);
+	-moz-filter: brightness(0) invert(1);
+	-o-filter: brightness(0) invert(1);
+	-ms-filter: brightness(0) invert(1);
+	filter: brightness(0) invert(1);
 }
 .be.dark{
-	-webkit-filter: brightness(-100) grayscale(100);
-	-moz-filter: brightness(-100) grayscale(100);
-	-o-filter: brightness(-100) grayscale(100);
-	-ms-filter: brightness(-100) grayscale(100);
-	filter: brightness(-100) grayscale(100);
+	-webkit-filter: brightness(100) invert(1);
+	-moz-filter: brightness(100) invert(1);
+	-o-filter: brightness(100) invert(1);
+	-ms-filter: brightness(100) invert(1);
+	filter: brightness(100) invert(1);
 }
 .be.blackwhite{
 	-webkit-filter: brightness(100) grayscale(100) contrast(0.8);
@@ -171,4 +195,33 @@
 	-o-filter: brightness(100) grayscale(100) contrast(0.8);
 	-ms-filter: brightness(100) grayscale(100) contrast(0.8);
 	filter: brightness(100) grayscale(100) contrast(0.8);
+}
+.be.invert{
+	-webkit-filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+	-moz-filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+	-o-filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+	-ms-filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+	filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+
+@media print {
+  :has(.be.print.perfect){
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    width: 100%;
+    text-align: center;
+  }
+  .be.print.perfect{
+    display: inline-flex;
+    visibility: visible;
+    opacity: 1;
+    margin: 0px;
+    padding: 0px;
+    align-items: center;
+    flex-direction: column;
+    text-align: revert;
+    width: fit-content;
+  }
 }

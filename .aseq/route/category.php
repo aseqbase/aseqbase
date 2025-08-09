@@ -17,7 +17,7 @@ else {
             $computeData = grab($data, "Compute") ?? [];
             $items = compute( "category/all", [
                 "Direction" =>$path,
-                ...$computeData
+                ...$computeData??[]
             ]);
             
             $viewData = get($data, "View") ?? [];
@@ -28,12 +28,13 @@ else {
                 $c = get($viewData, "ErrorHandler");
                 if ($c)
                     return Convert::By($c, \_::$Back->Router);
-            } else array_shift($items);
+            } elseif(is_array($items)) array_shift($items);
+            else $items = [];
             view(grab($viewData, "ViewName") ?? "category", [
                 "RootRoute" => grab($viewData, "RootRoute") ?? \_::$Address->CategoryRoute,
                 "Items" => $items,
-                ...$viewData, 
-                ...$parent
+                ...$viewData??[], 
+                ...$parent??[]
             ]);
         })
         ->Handle();

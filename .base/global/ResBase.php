@@ -1,5 +1,4 @@
 <?php
-
 use MiMFa\Library\Convert;
 
 /**
@@ -60,7 +59,7 @@ abstract class ResBase
 	 */
 	public static function Render($output = null)
 	{
-		echo $output = \MiMFa\Library\Convert::ToString($output);
+		echo $output = Convert::ToString($output);
 		return $output;
 	}
 	/**
@@ -72,7 +71,7 @@ abstract class ResBase
 	{
 		ob_clean();
 		self::Status($status);
-		exit(\MiMFa\Library\Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
+		exit(Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
 	}
 	/**
 	 * Print only this output on the client side
@@ -83,7 +82,7 @@ abstract class ResBase
 	{
 		self::Status($status);
 		if ($output)
-			exit(\MiMFa\Library\Convert::ToString($output));
+			exit(Convert::ToString($output));
 		else
 			exit;
 	}
@@ -437,7 +436,7 @@ abstract class ResBase
 
 	public static function Alert($message = null, $callback = null)
 	{
-		self::Interact(
+		self::Script(
 			\MiMFa\Library\Script::Alert($message)."??true",
 			$callback
 		);

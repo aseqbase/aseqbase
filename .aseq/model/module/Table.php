@@ -263,8 +263,8 @@ class Table extends Module
     {
         return Html::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
-			backgroound-color: var(--back-color-1);
-			color: var(--fore-color-1);
+			backgroound-color: var(--back-color-inside);
+			color: var(--fore-color-inside);
 		}
 		.{$this->Name} :is(tr, td, th){
 			border-size: {$this->BorderSize};
@@ -315,11 +315,7 @@ class Table extends Module
             text-align: center;
         }
         table.dataTable.{$this->Name} tbody tr :is(th, td) span.number {
-            aspect-ratio: 1;
-            border-radius: var(--radius-5);
-            padding: calc(var(--size-0) / 2);
             margin: calc(var(--size-0) / 2);
-            background-color: #88888817;
         }
 		" . ($this->OddEvenColumns ? "
             table.dataTable.{$this->Name} tbody tr:nth-child(even) :is(td, th):nth-child(odd) {
@@ -371,8 +367,8 @@ class Table extends Module
             false;
         $this->Modal->Style = new Style();
         $this->Modal->Style->TextAlign = "initial";
-        $this->Modal->Style->BackgroundColor = "var(--back-color-0)";
-        $this->Modal->Style->Color = "var(--fore-color-0)";
+        $this->Modal->Style->BackgroundColor = "var(--back-color)";
+        $this->Modal->Style->Color = "var(--fore-color)";
         return $b;
     }
     public function HandleModal($force = false)
@@ -438,7 +434,7 @@ class Table extends Module
         $rowCount = 0;
         $colCount = $ick ? count($icks) : 0;
         if ($isu) {
-            $uck = Html::Division(auth($this->AddAccess) ? Html::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]) : Html::Image("tasks"));
+            $uck = Html::Division(auth($this->AddAccess) ? Html::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]) : Html::Image(null, "tasks"));
             if ($ick)
                 array_unshift($icks, $uck);
         }
@@ -450,7 +446,7 @@ class Table extends Module
         $maccess = $isu && !is_null($this->ModifyAccess) && auth($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && auth($this->RemoveAccess);
         $isc = $isc && ($vaccess || $aaccess || $maccess || $daccess || $raccess);
-        $addbutton = fn($text="Add your first item ") => Html::Center(Html::Button($text . Html::Image("plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
+        $addbutton = fn($text="Add your first item ") => Html::Center(Html::Button($text . Html::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
         if (is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey => $row)
@@ -554,7 +550,7 @@ class Table extends Module
                 if (is_bool($this->Footer)) {
                     $cells[] = "<tfoot><tr>";
                     if (0 < $colCount)
-                        $cells[] = Html::Cell("", $isc || $hrn ? ["Type"=>"head", "class" => "invisible"] : ["Type"=>"head"]);
+                        $cells[] = Html::Cell("", $isc || $hrn ? ["Type"=>"head", "class" => "view invisible"] : ["Type"=>"head"]);
                     for ($i = 1; $i < $colCount; $i++)
                         $cells[] = Html::Cell("", ["Type"=>"head"]/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
                     $cells[] = "</tr></tfoot>";
@@ -650,14 +646,14 @@ class Table extends Module
 				function {$this->Modal->Name}_View(key){
 					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ViewSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
-							" . $this->Modal->ShowScript(null, null, '${data}') . "
+							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" . ($this->Updatable ? (auth($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(defaultValues){
 					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}',{$this->KeyColumn}:'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
-							" . $this->Modal->ShowScript(null, null, '${data}') . "
+							" . $this->Modal->InitializeScript(null, null, '${data}') . "
                             if(defaultValues)
                             for(x in defaultValues)try{
                             	document.querySelector('.{$this->Modal->Name} *[name=\"'+x+'\"]').value = defaultValues[x];
@@ -668,14 +664,14 @@ class Table extends Module
 				function {$this->Modal->Name}_Modify(key){
 					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
-							" . $this->Modal->ShowScript(null, null, '${data}') . "
+							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (auth($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
 					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
-							" . $this->Modal->ShowScript(null, null, '${data}') . "
+							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (auth($this->RemoveAccess) ? "

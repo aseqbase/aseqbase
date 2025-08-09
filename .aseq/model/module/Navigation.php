@@ -219,15 +219,15 @@ class Navigation extends Module{
 					height: var(--size-1);
 					overflow: hidden;
 					-webkit-appearance: none;
-					border-color: var(--back-color-0);
-					background-color: var(--fore-color-1);
-					".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+					border-color: var(--back-color);
+					background-color: var(--fore-color-inside);
+					".Style::UniversalProperty("transition","var(--transition-1)")."
 				}
 				.{$this->Name} input[type='range']::-webkit-slider-runnable-track {
 					height: 100%;
 					-webkit-appearance: none;
-					color: var(--back-color-2);
-					background-color: var(--back-color-1);
+					color: var(--back-color-outside);
+					background-color: var(--back-color-inside);
 				}
 				.{$this->Name} input[type='range']::-webkit-slider-thumb {
 					aspect-ratio: 1;
@@ -235,29 +235,29 @@ class Navigation extends Module{
 					height: 100%;
 					cursor: pointer;
 					border-radius: var(--radius-5);
-					border: var(--border-1) var(--fore-color-1);
-					background-color: var(--back-color-1);
-					box-shadow: ".(\_::$Back->Translate->Direction=="rtl"?"":"-")."100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-1);
-					".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+					border: var(--border-1) var(--fore-color-inside);
+					background-color: var(--back-color-inside);
+					box-shadow: ".(\_::$Back->Translate->Direction=="rtl"?"":"-")."100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-inside);
+					".Style::UniversalProperty("transition","var(--transition-1)")."
 				}
 				.{$this->Name} input[type='range']:hover::-webkit-slider-thumb {
-					border-color: var(--fore-color-2);
-					background-color: var(--back-color-2);
+					border-color: var(--fore-color-outside);
+					background-color: var(--back-color-outside);
 				}
 			}
 			/*FF*/
 			.{$this->Name} input[type='range']::-moz-range-progress {
-				background-color: var(--back-color-1);
+				background-color: var(--back-color-inside);
 			}
 			.{$this->Name} input[type='range']::-moz-range-track {
-				background-color: var(--fore-color-1);
+				background-color: var(--fore-color-inside);
 			}
 			/*IE*/
 			.{$this->Name} input[type='range']::-ms-fill-lower {
-				background-color: var(--back-color-1);
+				background-color: var(--back-color-inside);
 			}
 			.{$this->Name} input[type='range']::-ms-fill-upper {
-				background-color: var(--fore-color-1);
+				background-color: var(--fore-color-inside);
 			}
 			":"").
 			"
@@ -268,7 +268,7 @@ class Navigation extends Module{
 				margin: 5px;
 			}
 			.{$this->Name} .item.active{
-				color: ".\_::$Front->ForeColor(1)."88;
+				color: var(--fore-color-inside);
 			}
 
 			.{$this->Name} :is(.item.next, .item.back){

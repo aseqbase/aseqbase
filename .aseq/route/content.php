@@ -21,9 +21,9 @@ function findContent($router, &$data)
             "Category" => grab($filter, "Category")??getBetween($received, "Category")??$path,
             "Type"=> grab($filter, "Type")??get($received, "Type"),
             "Tag"=> grab($filter, "Tag")??get($received, "Tag"),
-            ...$filter
+            ...$filter??[]
         ],
-        ...$computeData
+        ...$computeData??[]
     ]);
 }
 

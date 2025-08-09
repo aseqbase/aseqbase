@@ -59,19 +59,19 @@ class Query
             $condit = $this->DataBase->ConditionNormalization(\_::$Back->GetAccessCondition(tableName:$table->Name));
         $cids = $this->FindCategoryIds($direction, nest: $nest);
         if (count($cids) > 0) {
-            $condit .= " AND $table->Name.`CategoryIds` REGEXP '\\\\D(" . join("|", $cids) . ")\\\\D'";
+            $condit .= " AND $table->Name.CategoryIds REGEXP '\\\\D(" . join("|", $cids) . ")\\\\D'";
         }
         $tid = $this->FindTagId($tag);
         if (!is_null($tid)) {
-            $condit .= " AND $table->Name.`TagIds` REGEXP '\\\\D$tid\\\\D'";
+            $condit .= " AND $table->Name.TagIds REGEXP '\\\\D$tid\\\\D'";
         }
         if (isValid($type)) {
             $params[":Type"] = $type;
-            $condit .= " AND $table->Name.`Type`=:Type";
+            $condit .= " AND $table->Name.Type=:Type";
         }
         if (isValid($query)) {
             $qs = $this->NormalizeForDataBaseSearch($query);
-            $condit .= " AND ($table->Name.`Title` $qs OR $table->Name.`Name` $qs OR $table->Name.`Description` $qs OR $table->Name.`Content` $qs)";
+            $condit .= " AND ($table->Name.Title $qs OR $table->Name.Name $qs OR $table->Name.Description $qs OR $table->Name.Content $qs)";
         }
         $order = $this->DataBase->OrderNormalization($order);
         return $table->Select(
@@ -92,23 +92,23 @@ class Query
         if (isValid($name)) {
             $params[":Name"] = $name;
             $params[":Id"] = $name;
-            $condit .= " AND ($table->Name.`Name`=:Name OR $table->Name.`Id`=:Id)";
+            $condit .= " AND ($table->Name.Name=:Name OR $table->Name.Id=:Id)";
         }
         if (isValid($type)) {
             $params[":Type"] = $type;
-            $condit .= " AND $table->Name.`Type`=:Type";
+            $condit .= " AND $table->Name.Type=:Type";
         }
         $cid = $this->FindCategoryId($direction);
         if (!isEmpty($cid)) {
-            $condit .= " AND $table->Name.`CategoryIds` REGEXP '\\\\D$cid\\\\D'";
+            $condit .= " AND $table->Name.CategoryIds REGEXP '\\\\D$cid\\\\D'";
         }
         $tid = $this->FindTagId($tag);
         if (!isEmpty($tid)) {
-            $condit .= " AND $table->Name.`TagIds` REGEXP '\\\\D$tid\\\\D'";
+            $condit .= " AND $table->Name.TagIds REGEXP '\\\\D$tid\\\\D'";
         }
         return $table->SelectRow(
             $this->ColumnNames,
-            $condit . " ORDER BY $table->Name.`Priority` DESC, $table->Name.`UpdateTime` DESC",
+            $condit . " ORDER BY $table->Name.Priority DESC, $table->Name.UpdateTime DESC",
             $params);
     }
 
@@ -125,8 +125,8 @@ class Query
             $nest-- !== 0 && !isEmpty(
                 $newparentIds =
                 $table->SelectColumn(
-                    "$table->Name.`Id`",
-                    (count($newparentIds) > 0 ? " $table->Name.`ParentId` IN (" . join(",", $newparentIds) . ") AND " : "") . $condit,
+                    "$table->Name.Id",
+                    (count($newparentIds) > 0 ? " $table->Name.ParentId IN (" . join(",", $newparentIds) . ") AND " : "") . $condit,
                     null
                 )
             )
@@ -146,8 +146,8 @@ class Query
         foreach ($paths as $name) {
             $parentId = $id;
             $id = $table ->SelectValue(
-                "$table->Name.`Id`",
-                "($table->Name.`Id`=:Id OR $table->Name.`Name`=:Name) AND " . (isEmpty($parentId) ? "" : ("$table->Name.`ParentId`=" . $parentId . " AND ")) . $condit,
+                "$table->Name.Id",
+                "($table->Name.Id=:Id OR $table->Name.Name=:Name) AND " . (isEmpty($parentId) ? "" : ("$table->Name.ParentId=$parentId AND ")) . $condit,
                 [":Id" => $name, ":Name" => $name],
                 null
             );
@@ -179,8 +179,8 @@ class Query
             return $default;
         $table = $table instanceof DataTable?$table:table($table ?? "Tag", source: $this->DataBase);
         return $table->SelectValue(
-            "$table->Name.`Id`",
-            "$table->Name.`Id`=:Id OR $table->Name.`Name`=:Name",
+            "$table->Name.Id",
+            "$table->Name.Id=:Id OR $table->Name.Name=:Name",
             [":Id" => $tag, ":Name" => $tag],
             null
         ) ?? $default;
@@ -191,7 +191,7 @@ class Query
         $id = $this->FindTagId($tag, null, table:$table);
         if (!$id)
             return $default;
-        return $table->SelectRow("*", "$table->Name.`Id`=:Id", [":Id" => $id]);
+        return $table->SelectRow("*", "$table->Name.Id=:Id", [":Id" => $id]);
     }
 
 
@@ -216,7 +216,7 @@ class Query
         if (isEmpty($id))
             return $default;
         $table = table("Category", source: $this->DataBase);
-        return $table->SelectRow("*", "$table->Name.`Id`=:Id AND " . \_::$Back->GetAccessCondition(tableName:$table->Name), [":Id" => $id]);
+        return $table->SelectRow("*", "$table->Name.Id=:Id AND " . \_::$Back->GetAccessCondition(tableName:$table->Name), [":Id" => $id]);
     }
 
     public function GetContentTagIds(array|string $content, array|null $default = [], DataTable|string|null $table = null)
@@ -236,7 +236,7 @@ class Query
         if (isEmpty($id))
             return $default;
         $table = table("Tag", source: $this->DataBase);
-        return $table->SelectRow("*", "$table->Name.`Id`=:Id", [":Id" => $id]);
+        return $table->SelectRow("*", "$table->Name.Id=:Id", [":Id" => $id]);
     }
 
     private array $Cache_CategoryRoutes = [];
@@ -247,7 +247,7 @@ class Query
         if (isset($this->Cache_CategoryRoutes[$category]))
             return $this->Cache_CategoryRoutes[$category];
         $table = $table instanceof DataTable?$table:table($table ?? "Category", source: $this->DataBase);
-        $cat = is_array(value: $category) ? $category : $table->SelectRow("*", "($table->Name.`Name`=:Name OR $table->Name.`Id`=:Id) AND " . \_::$Back->GetAccessCondition(tableName:$table->Name), [":Name" => $category, ":Id" => $category]);
+        $cat = is_array(value: $category) ? $category : $table->SelectRow("*", "($table->Name.Name=:Name OR $table->Name.Id=:Id) AND " . \_::$Back->GetAccessCondition(tableName:$table->Name), [":Name" => $category, ":Id" => $category]);
         if (isEmpty($cat))
             return $default;
         return $this->Cache_CategoryRoutes[$category] = $this->GetCategoryRoute(takeValid($cat, "ParentId"), null, table:$table) . "/" . takeBetween($cat, "Name", "Id");

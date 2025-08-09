@@ -49,7 +49,7 @@ class ContentCollection extends Collection{
      * The Height of thumbnail preshow
      * @var string
      */
-	public $ThumbnailHeight = "100%";
+	public $ThumbnailHeight = "auto";
 	/**
      * The Minimum Width of thumbnail preshow
      * @var string
@@ -59,7 +59,7 @@ class ContentCollection extends Collection{
      * The Minimum Height of thumbnail preshow
      * @var string
      */
-	public $ThumbnailMinHeight = "10vh";
+	public $ThumbnailMinHeight = "auto";
     /**
      * The Maximum Width of thumbnail preshow
      * @var string
@@ -195,27 +195,27 @@ class ContentCollection extends Collection{
 			.{$this->Name}>*>.item {
 				height: fit-content;
 				max-width: calc(100% - 2 * var(--size-2));
-				background-Color: var(--back-color-3);
-				Color: var(--fore-color-3);
+				background-Color: var(--back-color-special);
+				Color: var(--fore-color-special);
 				margin: var(--size-2);
             	padding: var(--size-3);
 				font-size: var(--size-0);
 				box-shadow: var(--shadow-1);
 				border-radius: var(--radius-2);
-            	border: var(--border-1) var(--back-color-1);
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+            	border: var(--border-1) var(--back-color-inside);
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item:hover{
 				box-shadow: var(--shadow-2);
 				border-radius:  var(--radius-1);
-				border-color: var(--back-color-4);
+				border-color: var(--back-color-special-inside);
 				background-Color: #88888818;
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 
 			.{$this->Name}>*>.item .head{
 				margin-bottom: var(--size-2);
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 
 			.{$this->Name}>*>.item .title{
@@ -223,15 +223,15 @@ class ContentCollection extends Collection{
                 margin: 0px;
 				font-size: var(--size-3);
 				text-align: unset;
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item:hover .title{
 				font-size: var(--size-3);
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item .metadata{
 				font-size: var(--size-0);
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item .metadata>*{
 				padding-inline-end: calc(var(--size-0) / 2);
@@ -244,15 +244,15 @@ class ContentCollection extends Collection{
                 text-align: end;
                 align-items: flex-start;
                 flex-direction: row-reverse;
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item .more>*{
 				opacity: 0;
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item:hover .more>*{
             	opacity: 1;
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			/* Style the images inside the grid */
 			.{$this->Name}>*>.item .image {
@@ -264,19 +264,19 @@ class ContentCollection extends Collection{
 				max-height: {$this->ThumbnailMaxHeight};
 				max-width: {$this->ThumbnailMaxWidth};
 				overflow: hidden;
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item:hover .image{
 				opacity: 0.6;
 				".(\MiMFa\Library\Style::UniversalProperty("filter","blur(".$this->BlurSize.")"))."
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item .description{
                 gap: var(--size-0);
             	font-size: var(--size-2);
 				position: relative;
                 margin-bottom: var(--size-0);
-				".(\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)))."
+				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item .content{
                 font-size: var(--size-1);
@@ -417,7 +417,7 @@ class ContentCollection extends Collection{
                         }
                     yield "</div>";
                     if($p_showmorebutton || $p_showpathbutton) {
-                        yield "<div class='more col col-3 md-hide'>";
+                        yield "<div class='more col col-3 view md-hide'>";
                         if($p_showmorebutton)
                             yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn primary']);
                         if($p_showpathbutton)
@@ -436,7 +436,7 @@ class ContentCollection extends Collection{
                 if($p_showcontent && isValid($p_content))
                     yield "<div class='content'>".__($p_content, refering:$p_refering)."</div>";
                 if($p_showmorebutton || $p_showpathbutton) {
-                    yield "<div class='more md-show'>";
+                    yield "<div class='more view md-show'>";
                     if($p_showmorebutton)
                         yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn primary']);
                     if($p_showpathbutton)

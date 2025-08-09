@@ -12,11 +12,11 @@ $items = !is_array($computeData)?Convert::By($computeData):compute(grab($compute
         "Category" => $cat??\_::$Back->Router->Direction,
         "Type" => $type,
         "Tag" => $tag,
-        ...$filter
+        ...$filter??[]
     ],
     "Order" => grab($filter, "Order") ?? get($received, "Order"),
     "Limit" => grab($filter, "Limit") ?? get($received, "Limit")??-1,
-    ...$computeData
+    ...$computeData??[]
 ]);
 
 $viewData = get($data, "View") ?? [];
@@ -34,6 +34,6 @@ view(grab($viewData, "ViewName") ?? "contents", [
     "RootRoute" => grab($viewData, "RootRoute") ?? \_::$Address->ContentRoute,
     "Description" => grab($viewData, "Description"),
     "Items" => $items,
-    ...$viewData
+    ...$viewData??[]
 ]);
 ?>

@@ -25,9 +25,11 @@ class MainMenu extends Module
 	public $HideOthersScreenSize = 'md';
 	public $ShowOthersScreenSize = null;
 	public $AllowDefaultButtons = true;
-	public $LogoWidth = "calc(1.25 * var(--size-5))";
-	public $LogoHeight = "calc(1.25 * var(--size-5))";
+	public $LogoWidth = "auto";
+	public $LogoHeight = "calc(var(--size-5) - var(--size-0) / 2)";
+	public $FixedMargin = "60px";
     public $Printable = false;
+    public $ZIndex = "9999";
 
 	public function GetStyle()
 	{
@@ -36,9 +38,10 @@ class MainMenu extends Module
 			.{$this->Name} {
 				margin: 0;
 				padding: 0;
-				background-color: " . \_::$Front->BackColor(3) . ($this->AllowFixed ? "ee" : "") . ";
-				color: var(--fore-color-3);
+				background-color: var(--back-color-special);
+				color: var(--fore-color-special);
 				" . ($this->AllowFixed ? "
+				opacity: 0.95;
 				position:fixed;
 				top:0;
 				left:0;
@@ -49,19 +52,21 @@ class MainMenu extends Module
 			}
 			" . ($this->AllowFixed ? "
 			.{$this->Name}-margin{
-				height: 75px;
+				height: {$this->FixedMargin};
 				background: transparent;
 			}
 			" : "") . "
 
 			.{$this->Name} .header{
+				color: var(--fore-color-2);
 				margin: 0;
 				width: fit-content;
-				padding: 0px 10px;
 				display: flex;
 				justify-content: flex-start;
 				align-items: center;
 				flex-direction: row;
+				padding: calc(var(--size-0) / 2) var(--size-0);
+				gap: var(--size-0);
 			}
 			.{$this->Name} :is(.header, .header a, .header a:visited, .header a:hover){
 				text-decoration: none;
@@ -69,20 +74,19 @@ class MainMenu extends Module
 			}
 			.{$this->Name} .header .title{
 				font-size: var(--size-2);
-				padding: 0px 10px;
 				" . (isValid($this->Description) ? "line-height: var(--size-2);" : "") . "
 			}
 			.{$this->Name} .header .description{
 				font-size: var(--size-0);
-				padding: 0px 10px;
 			}
 			.{$this->Name} .header .image{
 				background-position: center;
 				background-repeat: no-repeat;
-				background-size: 80% auto;
+				background-size: 100% auto;
 				background-color: transparent;
 				width: {$this->LogoWidth};
 				height: {$this->LogoHeight};
+				width: fit-content;
 				font-size: var(--size-0);
 			}
 
@@ -91,11 +95,16 @@ class MainMenu extends Module
 			}
 			.{$this->Name} ul li .description{
 				font-size: var(--size-0);
-				color: #8888;
+				color: #888b;
+				font-weight: normal;
+			}
+			.{$this->Name} ul li:hover .description{
+				font-size: var(--size-0);
+				color: unset;
 			}
 
-			.{$this->Name} ul li .fa{
-				font-size: var(--size-2);
+			.{$this->Name} ul li .icon{
+				font-size: var(--size-1);
 			}
 
 			.{$this->Name} ul li.dropdown{
@@ -129,49 +138,49 @@ class MainMenu extends Module
 				display: inline-block;
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active{
-				border-top: var(--border-2) var(--back-color-3);
-				color: " . \_::$Front->ForeColor(0) . "88;
-				background-color: var(--back-color-0);
+				border-top: var(--border-2) var(--back-color-special);
+				color: var(--fore-color);
+				background-color: var(--back-color);
 				box-shadow: var(--shadow-2);
 			}
 			.{$this->Name} ul:not(.sub-items)>li>:is(.button, .button:visited){
 				background-color: transparent;
-				color: var(--fore-color-3);
+				color: var(--fore-color-special);
 				border: none;
 				font-size: inherit;
 				border-radius: none;
 				text-decoration: none;
 				padding: var(--size-0) var(--size-1);
 				display: block;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
 				font-weight: bold;
-				background-color: var(--back-color-2);
-				color: var(--fore-color-2);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				background-color: var(--back-color-outside);
+				color: var(--fore-color-outside);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active>:is(.button, .button:visited){
-				color: " . \_::$Front->ForeColor(0) . "88;
+				color: var(--fore-color);
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active:hover>:is(.button, .button:visited){
-				color: var(--fore-color-0);
+				color: var(--fore-color);
 			}
 			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
-				color: var(--fore-color-1);
-				background-color: var(--back-color-1);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				color: var(--fore-color-inside);
+				background-color: var(--back-color-inside);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
 				display: block;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			.{$this->Name} ul.sub-items {
 				display: none;
 				position: fixed;
-				color: var(--fore-color-2);
-				background-color: var(--back-color-1);
+				color: var(--fore-color-outside);
+				background-color: var(--back-color-inside);
 				min-width: 160px;
 				max-width: 90vw;
 				max-height: 70vh;
@@ -179,14 +188,14 @@ class MainMenu extends Module
 				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 				overflow-x: hidden;
 				overflow-y: auto;
-				z-index: 99;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				z-index: $this->ZIndex;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items .sub-items {
 				display: flex;
 				position: relative;
 				background-color: #8881;
-				font-size: 80%;
+				font-size: 90%;
 				min-width: calc(5 * var(--size-5));
 				max-width: 500px;
 				width: 70vw;
@@ -202,22 +211,21 @@ class MainMenu extends Module
 				align-content: stretch;
 				justify-content: flex-start;
 				align-items: stretch;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items .sub-items li :is(.button, .button:visited) {
 				padding: calc(var(--size-0) / 2) var(--size-1);
 				background: transparent;
 				border: none;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items>li {
-				font-size: 80%;
 				display: block;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items>li>:is(.button, .button:visited){
     			width: 100%;
-				color: var(--fore-color-1);
+				color: var(--fore-color-inside);
 				text-decoration: none;
 				padding: calc(var(--size-1) / 2) var(--size-1);
 				display: block;
@@ -237,22 +245,22 @@ class MainMenu extends Module
 				border: none;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown:hover{
-				border-bottom-color: var(--back-color-5);
+				border-bottom-color: var(--back-color-special-outside);
 				box-shadow: var(--shadow-1);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
 				font-weight: bold;
 				color: #8888;
 				border: none;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
 				font-weight: bold;
-				background-color: var(--back-color-5);
-				color: var(--fore-color-5);
+				background-color: var(--back-color-special-outside);
+				color: var(--fore-color-special-outside);
 				border: none;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items>li:not(.dropdown).active>:is(.button, .button:visited){
 				font-weight: bold;
@@ -261,10 +269,10 @@ class MainMenu extends Module
 			}
 			.{$this->Name} ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
 				font-weight: bold;
-				background-color: var(--back-color-5);
-				color: var(--fore-color-5);
+				background-color: var(--back-color-special-outside);
+				color: var(--fore-color-special-outside);
 				border: none;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 		" . ($this->HasOthers ? "
@@ -275,62 +283,90 @@ class MainMenu extends Module
 				clear: both;
 				display: flex;
 				align-items: center;
+				justify-content: space-around;
+				flex-wrap: nowrap;
+				padding: calc(var(--size-0) / 6) var(--size-0);
+				gap: calc(var(--size-0) * 0.5);
 				" . ((\_::$Back->Translate->Direction ?? \_::$Config->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
 			}
-			.{$this->Name} .other>div{
-				width: fit-content;
-				display: inline-flex;
-			}
 
-			.{$this->Name} form{
+			.{$this->Name} .other form{
 				text-decoration: none;
-				padding: 4px 10px;
-				margin: 10px;
+				padding: calc(var(--size-0) / 2);
 				display: block;
-				color: var(--fore-color-2);
-				background-color: var(--back-color-2);
-				border: var(--border-1) var(--back-color-5);
+				background-color: var(--back-color-outside);
+				color: var(--fore-color-outside);
+				border: var(--border-1) var(--back-color-special-outside);
 				border-radius: var(--radius-3);
 				box-shadow: var(--shadow-1);
-				overflow: hidden;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} form:is(:hover, :active, :focus) {
+			.{$this->Name} .other form:is(:hover, :active, :focus) {
 				font-weight: bold;
-				color: var(--fore-color-1);
-				background-color: var(--back-color-1);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				color: var(--fore-color-inside);
+				background-color: var(--back-color-inside);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} form :not(html,head,body,style,script,link,meta,title){
+			.{$this->Name} .other form :not(html,head,body,style,script,link,meta,title){
 				padding: 0px;
 				margin: 0px;
 				display: inline-block;
-				color: var(--fore-color-2);
+				color: var(--fore-color-outside);
 				background-color: transparent;
 				outline: none;
 				border: none;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
+			.{$this->Name} .other form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
 				font-weight: bold;
 				outline: none;
 				border: none;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
-				color: var(--back-color-2);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
-			}
-			.{$this->Name} form input[type='search']{
+			.{$this->Name} .other form input[type='search']{
 				max-width: 100%;
-				width: 80%;
-				width: 0px;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				width: calc(var(--size-0) / 3);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} form:is(:hover, :active, :focus) input[type='search'], .{$this->Name} form input[type='search']:is(:hover, :active, :focus){
-				color: var(--fore-color-1);
+			.{$this->Name} .other form:is(:hover, :active, :focus) input[type='search'], .{$this->Name} form input[type='search']:is(:hover, :active, :focus){
+				color: var(--fore-color-inside);
 				width: 200px;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->Name} :is(.other :not(form, .submenu)>.button, .other>.icon, .other>.button){
+				background-color: inherit;
+				color: inherit;
+				width: 50px;
+				padding: calc(var(--size-0) / 3);
+				border-radius: var(--radius-5);
+				display: inline-flex;
+				aspect-ratio: 1;
+				text-align: center;
+				justify-content: center;
+				align-items: center;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->Name} :is(.other :not(form, .submenu)>.button, .other>.icon, .other>.button):hover{
+				background-color: inherit;
+				color: inherit;
+				box-shadow: var(--shadow-2);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->Name} .other form .button{
+				margin: calc(var(--size-0) * -0.8);
+				width: 50px;
+				padding: calc(var(--size-0) / 3);
+				border-radius: var(--radius-5);
+				display: inline-flex;
+				aspect-ratio: 1;
+				text-align: center;
+				justify-content: center;
+				align-items: center;
+			}
+			.{$this->Name} .other form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
+				background-color: var(--back-color-special-outside);
+				color: var(--fore-color-special-outside);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}"
 				: "")
 		);
@@ -371,7 +407,7 @@ class MainMenu extends Module
 						...($this->Content? (is_array($this->Content)?$this->Content:[$this->Content]) : []),
 						...($defaultButtons? $defaultButtons : [])
 					],
-					["class" => "other {$this->ShowOthersScreenSize}-show {$this->HideOthersScreenSize}-hide"]
+					["class" => "other view {$this->ShowOthersScreenSize}-show {$this->HideOthersScreenSize}-hide"]
 				);
 			}
 		});
@@ -387,14 +423,14 @@ class MainMenu extends Module
 		$count = count(getValid($item, "Items", []));
 		return Html::Item(
 			($ind <=2? Html::Button(
-				($this->AllowItemsImage?Html::Image(getBetween($item, "Image", "Icon")):"").
+				($this->AllowItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
 				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
 				($this->AllowItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
 				$path,
 				get($item, "Attributes")
 				) :
 				Html::Button(
-					($this->AllowSubItemsImage?Html::Image(getBetween($item, "Image", "Icon")):"").
+					($this->AllowSubItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
 					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
 					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
 					$path,
@@ -417,7 +453,6 @@ class MainMenu extends Module
 
 	public function AfterHandle()
 	{
-		return parent::AfterHandle() . ($this->AllowFixed ? "<div class='{$this->Name}-margin'></div>" : "");
+		return parent::AfterHandle() . ($this->AllowFixed ? "<div class='{$this->Name}-margin be unprintable'></div>" : "");
 	}
 }
-?>

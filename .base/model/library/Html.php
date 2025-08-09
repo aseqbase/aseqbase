@@ -140,6 +140,7 @@ class Html
             if (is_subclass_of($value, "\Base"))
                 return $value->ToString();
             if (is_countable($value) || is_iterable($value)) {
+                if(!is_array($value)) $value = iterator_to_array($value);
                 $texts = array();
                 if (is_numeric(array_key_first($value))) {
                     foreach ($value as $val)
@@ -303,8 +304,10 @@ class Html
                                             $id = "_" . getId(true);
                                             $attrs .= " id='$id'";
                                         }
-                                        if($onpress) $scripts[] = "document.getElementById('$id').addEventListener('keydown', function(event) {if (event.key === '".strToProper(str_replace($onpress, "", $key))."') $value});";
-                                        else $scripts[] = "document.getElementById('$id').$key = function(event){{$value}};";
+                                        if ($onpress)
+                                            $scripts[] = "document.getElementById('$id').addEventListener('keyup', function(event) {if (event.key === '" . strToProper(str_replace($onpress, "", $key)) . "') $value});";
+                                        else
+                                            $scripts[] = "document.getElementById('$id').$key = function(event){{$value}};";
                                     } else
                                         $attrs .= " " . self::Attribute($key, $value);
                                 }
@@ -336,17 +339,22 @@ class Html
             return "$key=$sp$value$sp";
         }
     }
-    public static function HasAttribute(&$attributes, $key, $default = false): mixed
+    public static function HasAttribute($attributes, $key, $default = false): mixed
     {
         return has($attributes, $key) ?? has(first($attributes), $key) ?? $default;
     }
-    public static function GetAttribute(&$attributes, $key, $default = null): mixed
+    public static function GetAttribute($attributes, $key, $default = null): mixed
     {
         return get($attributes, $key) ?? get(first($attributes), $key) ?? $default;
     }
     public static function GrabAttribute(&$attributes, $key, $default = null): mixed
     {
-        return grab($attributes, $key) ?? get(first($attributes), $key) ?? $default;
+        if(!is_array($attributes)) $attributes = iterator_to_array($attributes);
+        return grab($attributes, $key) ?? grab($attributes, array_key_first($attributes), $key) ?? $default;
+    }
+    public static function FilterAttributes(&$attributes, callable $filter, $default = []): mixed
+    {
+        return filter($attributes, $filter, null) ?? filter($attributes[0], $filter, $default);
     }
     public static function Documents($title, $content = null, $description = null, $sources = [], ...$attributes)
     {
@@ -388,7 +396,7 @@ class Html
                         ],
                         "head"
                     ),
-                    self::Element($content ?? "", "body", ["class" => "document"], $attributes)
+                    self::Element($content ?? "", "body", ["class" => "document"], ...$attributes)
                 ],
                 "html"
             );
@@ -405,8 +413,8 @@ class Html
     public static function Tag(string|array|null $tagName = null, $content = null, ...$attributes)
     {
         return $content === false ?
-            self::Element($tagName, $attributes) :
-            self::Element($content, $tagName, $attributes);
+            self::Element($tagName, ...$attributes) :
+            self::Element($content, $tagName, ...$attributes);
     }
     private static array $TagStack = [];
     /**
@@ -465,9 +473,9 @@ class Html
      */
     public static function Description($content, ...$attributes)
     {
-        return self::Meta("abstract", $content, $attributes) .
-            self::Meta("description", $content, $attributes) .
-            self::Meta("twitter:description", $content, $attributes);
+        return self::Meta("abstract", $content, ...$attributes) .
+            self::Meta("description", $content, ...$attributes) .
+            self::Meta("twitter:description", $content, ...$attributes);
     }
     /**
      * The \<LINK\> HTML Tag
@@ -517,7 +525,8 @@ class Html
     {
         if (isValid($content))
             return self::Element($content ?? "", "style", $attributes);
-        else return self::Relation("stylesheet", $source, $attributes);
+        else
+            return self::Relation("stylesheet", $source, $attributes);
     }
 
     public static function Result($content, ...$attributes)
@@ -613,22 +622,35 @@ class Html
      */
     public static function Image($content, $source = null, ...$attributes)
     {
-        if (!isValid($source)) {
+        if (!$source) {
             $source = $content;
             $content = null;
-        } elseif (is_array($source) && count($attributes) === 0) {
-            $attributes = Convert::ToIteration($source, $attributes);
+        } elseif (is_array($source)) {
+            $attributes = Convert::ToIteration($source, ...$attributes);
             $source = $content;
             $content = null;
         }
-        if (!isValid($source))
+        if (!$source)
             return null;
-        if (startsWith($source, "fa ", "fa-"))
+        if (startsWith($source, "icon", "fa", "fa-"))
             return self::Element(__($content ?? "", styling: false), "i", ["class" => "image " . strtolower($source)], $attributes);
         elseif (isIdentifier($source))
-            return self::Element(__($content ?? "", styling: false), "i", ["class" => "image fa fa-" . strtolower($source)], $attributes);
-        else
-            return self::Element("img", ["src" => $source, "alt" => __($content ?? "", styling: false), "class" => "image"], $attributes);
+            return self::Element(__($content ?? "", styling: false), "i", ["class" => "image icon fa fa-" . strtolower($source)], $attributes);
+        else {
+            $srcs = [];
+            $src = $source;
+            if (is_array($source)) {
+                $src = array_shift($source);
+                foreach ($source as $key => $value)
+                    if (is_integer($key))
+                        $srcs[] = self::Element("source", ["srcset" => $value]);
+                    else
+                        $srcs[] = self::Element("source", ["srcset" => $value, "media" => $key]);
+            }
+            $srcs[] = self::Element("img", ["src" => $src, "alt" => __($content, styling: false)], self::FilterAttributes($attributes, fn($v, $k) => preg_match("/^((on\w+)|alt|src|id)$/i", $k)));
+            return self::Element(join(PHP_EOL, $srcs), "picture", ["class" => "image"], $attributes);
+        }
+        //return self::Element("img", ["src" => $source, "alt" => __($content ?? "", styling: false), "class" => "image"], $attributes);
     }
     /**
      * The \<IMAGE\> or \<I\> HTML Tag
@@ -642,17 +664,18 @@ class Html
         if (!isValid($source)) {
             $source = $content;
             $content = null;
-        } elseif (is_array($source) && count($attributes) === 0) {
-            $attributes = Convert::ToIteration($source, $attributes);
+        } elseif (is_array($source)) {
+            $attributes = Convert::ToIteration($source, ...$attributes);
             $source = $content;
             $content = null;
         }
         if (!isValid($source))
             return null;
         if (isIdentifier($source))
-            return self::Element("", "i", ["class" => "media fa fa-" . strtolower($source)], $attributes);
-        else
-            return self::Element(__($content ?? "", styling: false), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "');", "class" => "media"], $attributes);
+            return self::Icon($source, null, ["class" => "media"], $attributes);
+        if (isUrl($source))
+            return self::Image($content, $source, ["class" => "media"], $attributes);
+        return self::Element(__($content ?? "", styling: false), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "');", "class" => "media"], ...$attributes);
     }
     /**
      * The \<IFRAME\> or \<EMBED\> HTML Tag
@@ -667,8 +690,8 @@ class Html
         if (!isValid($source)) {
             $source = $content;
             $content = null;
-        } elseif (is_array($source) && count($attributes) === 0) {
-            $attributes = Convert::ToIteration($source, $attributes);
+        } elseif (is_array($source)) {
+            $attributes = Convert::ToIteration($source, ...$attributes);
             $source = $content;
             $content = null;
         }
@@ -678,7 +701,7 @@ class Html
             else
                 return self::Element($content ?? "", "iframe", ["src" => $source, "class" => "embed"], $attributes);
         return self::Element($content ?? $source ?? "", "embed", ["class" => "embed"], $attributes);
-        //return self::Element($content ?? "", "iframe", ["srcdoc" => str_replace("\"", "&quot;", Convert::ToString($source)), "class" => "embed"], $attributes);
+        //return self::Element($content ?? "", "iframe", ["srcdoc" => str_replace("\"", "&quot;", Convert::ToString($source)), "class" => "embed"], ...$attributes);
     }
     /**
      * The \<IFRAME\> HTML Tag devided in a page
@@ -702,7 +725,7 @@ class Html
             "align" => "top",
         ];
         foreach ($sources as $item)
-            $ls[] = self::Embed(null, $item, $atts, $attributes);
+            $ls[] = self::Embed(null, $item, $atts, ...$attributes);
         return Convert::ToString($ls);
     }
     /**
@@ -739,38 +762,38 @@ class Html
                 }
                 .$uniq .selected{
                     cursor: pointer;
-                    background-color: var(--fore-color-2);
-                    color: var(--back-color-2);
+                    background-color: var(--fore-color-outside);
+                    color: var(--back-color-outside);
                 }
                 .$uniq :is(span.clickable, .media).media{
                     cursor: pointer;
-                    color: var(--fore-color-1);
+                    color: var(--fore-color-inside);
                     padding: 1px 3px;
                     margin: 0px;
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
                 }
                 .$uniq :is(span.clickable, .media):hover{
                     cursor: pointer;
-                    color: var(--fore-color-2);
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+                    color: var(--fore-color-outside);
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
                 }
                 .$uniq :is(div, i, td).clickable{
                     cursor: pointer;
                     border-radius: var(--radius-0);
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
                 }
                 .$uniq :is(div, i, td).clickable:hover{
                     outline: var(--border-1) var(--color-4);
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
                 }
 
                 .$uniq :is(.grid$uniq, .select$uniq).shown{
                     position: absolute;
                     min-height: max-content;
-                    background-color: var(--back-color-1);
-                    color: var(--fore-color-1);
+                    background-color: var(--back-color-inside);
+                    color: var(--fore-color-inside);
                     z-index: 999;
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
                 }
                 .$uniq .grid$uniq.shown{
                     display: flex;
@@ -779,12 +802,12 @@ class Html
                     align-items: stretch;
                     flex-wrap: wrap;
                     flex-direction: row;
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
                 }
 
                 .$uniq :is(.grid$uniq, .select$uniq).hidden{
                     display: none;
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
                 }
 
                 .$uniq .grid$uniq th{
@@ -920,19 +943,19 @@ class Html
                 obefore = document.querySelector('.$uniq .select$uniq #OptionsBefore$uniq');
                 oafter = document.querySelector('.$uniq .select$uniq #OptionsAfter$uniq');
                 if(mn <= min) {
-                    obefore.setAttribute('class','fa fa-angle-up deactived');
+                    obefore.setAttribute('class','icon fa fa-angle-up deactived');
                     obefore.setAttribute('onclick','');
                 }
                 else {
-                    obefore.setAttribute('class','fa fa-angle-up clickable');
+                    obefore.setAttribute('class','icon fa fa-angle-up clickable');
                     obefore.setAttribute('onclick','{$uniq}_ShowOptions(`'+destSelector+'`, '+ (current - pc) +', '+ min +', '+ max +')');
                 }
                 if(mx >= max) {
-                    oafter.setAttribute('class','fa fa-angle-down deactived');
+                    oafter.setAttribute('class','icon fa fa-angle-down deactived');
                     oafter.setAttribute('onclick','');
                 }
                 else {
-                    oafter.setAttribute('class','fa fa-angle-down clickable');
+                    oafter.setAttribute('class','icon fa fa-angle-down clickable');
                     oafter.setAttribute('onclick','{$uniq}_ShowOptions(`'+destSelector+'`, '+ (current + pc) +', '+ min +', '+ max +')');
                 }
                 opts = `<div class='row'>`;
@@ -1029,7 +1052,7 @@ class Html
      */
     public static function Page($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "div", ["class" => "page"], $attributes);
+        return self::Element($content, "div", ["class" => "page"], $attributes);
     }
     /**
      * The \<DIV\> HTML Tag
@@ -1039,7 +1062,7 @@ class Html
      */
     public static function Part($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "div", ["class" => "part"], $attributes);
+        return self::Element($content, "div", ["class" => "part"], $attributes);
     }
     /**
      * The \<DIV\> HTML Tag
@@ -1049,7 +1072,7 @@ class Html
      */
     public static function Panel($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "div", ["class" => "panel", "style" => "display: inline-block; width: fit-content; height: fit-content;"], $attributes);
+        return self::Element($content, "div", ["class" => "panel", "style" => "display: inline-block; width: fit-content; height: fit-content;"], ...$attributes);
     }
     /**
      * The \<HEADER\> HTML Tag
@@ -1059,7 +1082,7 @@ class Html
      */
     public static function Header($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "header", ["class" => "header"], $attributes);
+        return self::Element($content, "header", ["class" => "header"], $attributes);
     }
     /**
      * The \<NAV\> HTML Tag
@@ -1069,7 +1092,7 @@ class Html
      */
     public static function Nav($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "nav", ["class" => "nav"], $attributes);
+        return self::Element($content, "nav", ["class" => "nav"], $attributes);
     }
     /**
      * The \<MAIN\> HTML Tag
@@ -1079,7 +1102,7 @@ class Html
      */
     public static function Content($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "main", ["class" => "content"], $attributes);
+        return self::Element($content, "main", ["class" => "content"], $attributes);
     }
     /**
      * The \<SECTION\> HTML Tag
@@ -1089,7 +1112,7 @@ class Html
      */
     public static function Section($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "section", ["class" => "section"], $attributes);
+        return self::Element($content, "section", ["class" => "section"], $attributes);
     }
     /**
      * The \<ASIDE\> HTML Tag
@@ -1099,7 +1122,7 @@ class Html
      */
     public static function Aside($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "aside", ["class" => "aside"], $attributes);
+        return self::Element($content, "aside", ["class" => "aside"], $attributes);
     }
     /**
      * The \<FOOTER\> HTML Tag
@@ -1109,7 +1132,7 @@ class Html
      */
     public static function Footer($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "footer", ["class" => "footer"], $attributes);
+        return self::Element($content, "footer", ["class" => "footer"], $attributes);
     }
     /**
      * The Container \<DIV\> HTML Tag
@@ -1125,7 +1148,7 @@ class Html
                 $res[] = self::Rack($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "container"], $attributes);
+        return self::Element($content, "div", ["class" => "container"], $attributes);
     }
     /**
      * The Container \<DIV\> HTML Tag
@@ -1141,7 +1164,7 @@ class Html
                 $res[] = self::LargeRack($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "container large-container"], $attributes);
+        return self::Element($content, "div", ["class" => "container large-container"], $attributes);
     }
     /**
      * The Container \<DIV\> HTML Tag
@@ -1157,7 +1180,7 @@ class Html
                 $res[] = self::MediumRack($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "container medium-container"], $attributes);
+        return self::Element($content, "div", ["class" => "container medium-container"], $attributes);
     }
     /**
      * The Container \<DIV\> HTML Tag
@@ -1173,7 +1196,7 @@ class Html
                 $res[] = self::SmallRack($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "container small-container"], $attributes);
+        return self::Element($content, "div", ["class" => "container small-container"], $attributes);
     }
     /**
      * The Main Partitioner \<DIV\> HTML Tag
@@ -1189,7 +1212,7 @@ class Html
                 $res[] = self::Rack($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "frame container-fluid"], $attributes);
+        return self::Element($content, "div", ["class" => "frame container-fluid"], $attributes);
     }
     /**
      * The Main Partitioner \<DIV\> HTML Tag
@@ -1205,7 +1228,7 @@ class Html
                 $res[] = self::LargeRack($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "frame large-frame container-fluid"], $attributes);
+        return self::Element($content, "div", ["class" => "frame large-frame container-fluid"], $attributes);
     }
     /**
      * The Main Partitioner \<DIV\> HTML Tag
@@ -1221,7 +1244,7 @@ class Html
                 $res[] = self::MediumRack($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "frame medium-frame container-fluid"], $attributes);
+        return self::Element($content, "div", ["class" => "frame medium-frame container-fluid"], $attributes);
     }
     /**
      * The Main Partitioner \<DIV\> HTML Tag
@@ -1237,7 +1260,7 @@ class Html
                 $res[] = self::SmallRack($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "frame small-frame container-fluid"], $attributes);
+        return self::Element($content, "div", ["class" => "frame small-frame container-fluid"], $attributes);
     }
     /**
      * The Row Partitioner \<DIV\> HTML Tag
@@ -1253,7 +1276,7 @@ class Html
                 $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "rack row"], $attributes);
+        return self::Element($content, "div", ["class" => "rack row"], $attributes);
     }
     /**
      * The Row Partitioner \<DIV\> HTML Tag
@@ -1269,7 +1292,7 @@ class Html
                 $res[] = self::LargeSlot($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "rack large-rack row"], $attributes);
+        return self::Element($content, "div", ["class" => "rack large-rack row"], $attributes);
     }
     /**
      * The Row Partitioner \<DIV\> HTML Tag
@@ -1285,7 +1308,7 @@ class Html
                 $res[] = self::MediumSlot($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "rack medium-rack row"], $attributes);
+        return self::Element($content, "div", ["class" => "rack medium-rack row"], $attributes);
     }
     /**
      * The Row Partitioner \<DIV\> HTML Tag
@@ -1301,7 +1324,7 @@ class Html
                 $res[] = self::SmallSlot($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "rack small-rack row"], $attributes);
+        return self::Element($content, "div", ["class" => "rack small-rack row"], $attributes);
     }
     /**
      * The Column Partitioner \<DIV\> HTML Tag
@@ -1317,7 +1340,7 @@ class Html
                 $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "slot col"], $attributes);
+        return self::Element($content, "div", ["class" => "slot col"], $attributes);
     }
     /**
      * The Column Partitioner \<DIV\> HTML Tag
@@ -1333,7 +1356,7 @@ class Html
                 $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "slot large-slot col-lg"], $attributes);
+        return self::Element($content, "div", ["class" => "slot large-slot col-lg"], $attributes);
     }
     /**
      * The Column Partitioner \<DIV\> HTML Tag
@@ -1349,7 +1372,7 @@ class Html
                 $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "slot medium-slot col-md"], $attributes);
+        return self::Element($content, "div", ["class" => "slot medium-slot col-md"], $attributes);
     }
     /**
      * The Column Partitioner \<DIV\> HTML Tag
@@ -1365,7 +1388,7 @@ class Html
                 $res[] = self::Slot($item);
             $content = $res;
         }
-        return self::Element(Convert::ToString($content), "div", ["class" => "slot small-slot col-sm"], $attributes);
+        return self::Element($content, "div", ["class" => "slot small-slot col-sm"], $attributes);
     }
     /**
      * The \<DIV\> HTML Tag
@@ -1375,7 +1398,7 @@ class Html
      */
     public static function Division($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "div", ["class" => "division"], $attributes);
+        return self::Element($content, "div", ["class" => "division"], $attributes);
     }
     /**
      * The \<CENTER\> HTML Tag
@@ -1385,7 +1408,7 @@ class Html
      */
     public static function Center($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "center", ["class" => "center"], $attributes);
+        return self::Element($content, "center", ["class" => "center"], $attributes);
     }
     /**
      * The \<PRE\> HTML Tag
@@ -1395,7 +1418,7 @@ class Html
      */
     public static function Pre($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "pre", ["class" => "pre", "ondblclick" => 'copy(this.innerText)'], $attributes);
+        return self::Element($content, "pre", ["class" => "pre", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<QOUTE\> HTML Tag
@@ -1405,7 +1428,7 @@ class Html
      */
     public static function Quote($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "quote", ["class" => "quote", "ondblclick" => 'copy(this.innerText)'], $attributes);
+        return self::Element($content, "quote", ["class" => "quote", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<BLOCKQOUTE\> HTML Tag
@@ -1415,7 +1438,7 @@ class Html
      */
     public static function QuoteBlock($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "blockquote", ["class" => "quoteblock", "ondblclick" => 'copy(this.innerText)'], $attributes);
+        return self::Element($content, "blockquote", ["class" => "quoteblock", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<CODE\> HTML Tag
@@ -1425,7 +1448,7 @@ class Html
      */
     public static function Code($content, ...$attributes)
     {
-        return self::Element(Convert::ToString($content), "code", ["class" => "code", "ondblclick" => 'copy(this.innerText)'], $attributes);
+        return self::Element($content, "code", ["class" => "code", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<BLOCKCODE\> HTML Tag
@@ -1435,7 +1458,7 @@ class Html
      */
     public static function CodeBlock($content, ...$attributes)
     {
-        return self::Element(self::Element(Convert::ToString($content), "blockcode", ["ondblclick" => 'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
+        return self::Element(self::Element($content, "blockcode", ["ondblclick" => 'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
     }
 
     /**
@@ -1454,6 +1477,7 @@ class Html
                 else
                     $res[] = self::Element(__($k, styling: false), "dt") . self::Element(__($item, styling: false), "dd");
             $content = $res;
+            return self::Element($content, "dl", ["class" => "collection"], $attributes);
         }
         return self::Element(__($content, styling: false), "dl", ["class" => "collection"], $attributes);
     }
@@ -1469,8 +1493,9 @@ class Html
             $res = [];
             foreach ($content as $k => $item)
                 //$res[] = self::Item($item);
-                $res[] = self::Item((is_numeric($k) ? "" : self::InlineHeading($k)) . Convert::ToString($item));
+                $res[] = self::Element((is_numeric($k) ? "" : self::InlineHeading($k)) . __($item, styling: false), "li", ["class" => "item"]);
             $content = $res;
+            return self::Element($content, "ol", ["class" => "list"], $attributes);
         }
         return self::Element(__($content, styling: false), "ol", ["class" => "list"], $attributes);
     }
@@ -1486,8 +1511,9 @@ class Html
             $res = [];
             foreach ($content as $k => $item)
                 //$res[] = self::Item($item);
-                $res[] = self::Item((is_numeric($k) ? "" : self::InlineHeading($k)) . Convert::ToString($item));
+                $res[] = self::Element((is_numeric($k) ? "" : self::InlineHeading($k)) . __($item, styling: false), "li", ["class" => "item"]);
             $content = $res;
+            return self::Element($content, "ul", ["class" => "items"], $attributes);
         }
         return self::Element(__($content, styling: false), "ul", ["class" => "items"], $attributes);
     }
@@ -1512,12 +1538,12 @@ class Html
     public static function ExternalHeading($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h1", ["class" => "externalheading"], $attributes);
-        return self::Element(__($content, styling: false), "h1", ["class" => "externalheading"], $attributes);
+        return self::Element(__($content, styling: false), "h1", ["class" => "heading externalheading"], $attributes);
     }
     /**
      * The \<H2\> HTML Tag
@@ -1529,12 +1555,12 @@ class Html
     public static function SuperHeading($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h2", ["class" => "superheading"], $attributes);
-        return self::Element(__($content, styling: false), "h2", ["class" => "superheading"], $attributes);
+        return self::Element(__($content, styling: false), "h2", ["class" => "heading superheading"], $attributes);
     }
     /**
      * The \<H3\> HTML Tag
@@ -1546,8 +1572,8 @@ class Html
     public static function Heading($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h3", ["class" => "heading"], $attributes);
@@ -1563,12 +1589,12 @@ class Html
     public static function SubHeading($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h4", ["class" => "subheading"], $attributes);
-        return self::Element(__($content, styling: false), "h4", ["class" => "subheading"], $attributes);
+        return self::Element(__($content, styling: false), "h4", ["class" => "heading subheading"], $attributes);
     }
     /**
      * The \<H5\> HTML Tag
@@ -1580,12 +1606,12 @@ class Html
     public static function InternalHeading($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h5", ["class" => "internalheading"], $attributes);
-        return self::Element(__($content, styling: false), "h5", ["class" => "internalheading"], $attributes);
+        return self::Element(__($content, styling: false), "h5", ["class" => "heading internalheading"], $attributes);
     }
     /**
      * The \<H6\> HTML Tag
@@ -1597,12 +1623,12 @@ class Html
     public static function InlineHeading($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h6", ["class" => "inlineheading"], $attributes);
-        return self::Element(__($content, styling: false), "h6", ["class" => "inlineheading"], $attributes);
+        return self::Element(__($content, styling: false), "h6", ["class" => "heading inlineheading"], $attributes);
     }
 
     /**
@@ -1629,7 +1655,7 @@ class Html
         ];
         $btnattr = [
             "style" =>
-                "background-color: var(--back-color-0);
+                "background-color: var(--back-color);
                 font-size: 75%;
                 padding: calc(var(--size-0) * .5);
                 margin: 0px;
@@ -1641,8 +1667,8 @@ class Html
         ];
         $hr = self::Element("hr", ["style" => "width: 100%; margin-bottom: calc(-" . (strlen($content)) . " * 0.5 * 0.75 * var(--size-0));"]);
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element($hr . self::Button($content, $reference, $btnattr), "div", $attr, $attributes);
@@ -1659,8 +1685,8 @@ class Html
     public static function Paragraph($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "p", ["class" => "paragraph"], $attributes);
@@ -1676,8 +1702,8 @@ class Html
     public static function Span($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "span", ["class" => "span"], $attributes);
@@ -1693,8 +1719,8 @@ class Html
     public static function Strong($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "strong", ["class" => "strong"], $attributes);
@@ -1710,8 +1736,8 @@ class Html
     public static function Bold($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "b", ["class" => "bold"], $attributes);
@@ -1727,8 +1753,8 @@ class Html
     public static function Big($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "big", ["class" => "big"], $attributes);
@@ -1744,8 +1770,8 @@ class Html
     public static function Italic($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "i", ["class" => "italic"], $attributes);
@@ -1761,8 +1787,8 @@ class Html
     public static function Strike($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "strike", ["class" => "strike"], $attributes);
@@ -1778,8 +1804,8 @@ class Html
     public static function Small($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "small", ["class" => "small"], $attributes);
@@ -1795,8 +1821,8 @@ class Html
     public static function Super($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "sup", ["class" => "super"], $attributes);
@@ -1812,8 +1838,8 @@ class Html
     public static function Sub($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "sub", ["class" => "sub"], $attributes);
@@ -1830,8 +1856,8 @@ class Html
     public static function Label($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
-            if (is_array($reference) && count($attributes) === 0) {
-                $attributes = Convert::ToIteration($reference);
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } elseif (isIdentifier($reference))
                 return self::Element(__($content, styling: false), "label", ["class" => "label", "for" => $reference], $attributes);
@@ -1874,8 +1900,8 @@ class Html
         if (is_null($reference)) {
             $reference = $content;
             $content = null;
-        } elseif (is_array($reference) && count($attributes) === 0) {
-            $attributes = Convert::ToIteration($reference);
+        } elseif (is_array($reference)) {
+            $attributes = Convert::ToIteration($reference, ...$attributes);
             $reference = $content;
             $content = null;
         }
@@ -1894,7 +1920,7 @@ class Html
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
             $action = "load(" . Script::Convert($action) . ")";
-        return self::Element(__($content, styling: false), "button", ["class" => "btn button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
+        return self::Element(__($content, styling: false), "button", ["class" => "button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
     }
     /**
      * The \<BUTTON\> or \<A\> HTML Tag
@@ -1907,9 +1933,11 @@ class Html
     {
         if (!isValid($content))
             return null;
-        if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
+        if (isEmpty($action))
+            return self::Element("", "i", ["class" => "icon fa fa-" . strtolower($content)], $attributes);
+        if (!isScript($action) && isUrl($action))
             $action = "load(" . Script::Convert($action) . ")";
-        return self::Media("", $content, ["class" => "icon"], $action ? ["onclick" => $action] : [], $attributes);
+        return self::Element(self::Icon($content, null), "button", ["class" => "icon", "type" => "button", "onclick" => $action], $attributes);
     }
 
     /**
@@ -1935,7 +1963,7 @@ class Html
                                 description: grab($f, "Description"),
                                 options: grab($f, "Option"),
                                 title: grab($f, "Title"),
-                                scope: grab($f, "Scope") ?? [],
+                                wrapper: grab($f, "Wrapper") ?? [],
                                 attributes: [...(grab($f, "Attributes") ?? []), ...$f]
                             );
                         elseif (is_string($f))
@@ -1946,8 +1974,6 @@ class Html
                         return self::Field(null, $k, $f);
                 }));
             };
-        else
-            $content = Convert::ToString($content);
         return self::Element($content, "form", $action ? ((isScript($action) || !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "class" => "form"], $attributes);
     }
     /**
@@ -1985,6 +2011,8 @@ class Html
             return "text";
         elseif (is_string($type))
             return strtolower($type);
+        elseif (is_int($type))
+            return "number";
         else
             return $type;
     }
@@ -1999,10 +2027,10 @@ class Html
      * @param mixed $title The label text of the field
      * @return string
      */
-    public static function Field($type = null, $key = null, $value = null, $description = null, $title = null, $scope = true, $options = null, ...$attributes)
+    public static function Field($type = null, $key = null, $value = null, $description = null, $title = null, $wrapper = true, $options = null, ...$attributes)
     {
-        if (is_array($description) && count($attributes) === 0) {
-            $attributes = Convert::ToIteration($description);
+        if (is_array($description)) {
+            $attributes = Convert::ToIteration($description, ...$attributes);
             $description = null;
         }
         if ($type === false)
@@ -2013,10 +2041,10 @@ class Html
                 (is_object($type) || ($type instanceof \stdClass))
             ) {
                 $description = get($type, "Description") ?? $description;
-                $scope = get($type, "Scope") ?? $scope;
+                $wrapper = get($type, "Scope") ?? $wrapper;
             } elseif (is_countable($type) && !is_null($options)) {
                 $description = get($type, "Description") ?? $description;
-                $scope = get($type, "Scope") ?? $scope;
+                $wrapper = get($type, "Scope") ?? $wrapper;
             }
         }
         $content = self::Interactor(
@@ -2032,8 +2060,8 @@ class Html
         // $isRequired = $isDisabled = false;
         // if (!is_null($attributes))
         //     if (is_string($attributes)) {
-        //         $isRequired = preg_match("/\brequired\b/i", $attributes);
-        //         $isDisabled = preg_match("/\bdisabled\b/i", $attributes);
+        //         $isRequired = preg_match("/\brequired\b/i", ...$attributes);
+        //         $isDisabled = preg_match("/\bdisabled\b/i", ...$attributes);
         //     } elseif (is_countable($attributes))
         //         foreach ($attributes as $k => $v) {
         //             $a = is_string($k) ? $k : (is_string($v) ? $v : "");
@@ -2048,7 +2076,7 @@ class Html
             $content = Html::Division($value, ["class" => "input"], $attributes);
         $id = self::GetAttribute($attributes, "Id") ?? Convert::ToId($key);
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
-        $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey, styling: false) . ($isRequired ? self::Span("*") : ""), $id, ["class" => "title"]));
+        $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey, styling: false) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title"]));
         $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description"]));
         switch ($type) {
             case null:
@@ -2061,7 +2089,7 @@ class Html
                 $titleTag = $descriptionTag = null;
                 break;
         }
-        if ($scope)
+        if ($wrapper)
             return self::Element(join('', [$titleTag, $content, $descriptionTag]), 'div', ['class' => 'field']);
         else
             return join('', [$titleTag, $content, $descriptionTag]);
@@ -2114,6 +2142,12 @@ class Html
                 $attributes = [...$attributes, ...(getValid($type, "Attributes", []))];
                 $type = self::InputDetector(get($type, "Type"), $value);
             }
+        } elseif (is_int($type)) {
+            $options = [10 ** ($type - 1), 10 ** $type - 1];
+            $type = "number";
+        } elseif (is_string($type) && isPattern($type)) {
+            $options = $type;
+            $type = "mask";
         } else
             $type = self::InputDetector($type, $value);
         if (!is_null($type) && is_string($type)) {
@@ -2327,6 +2361,9 @@ class Html
             case 'telephone':
                 $content = self::TelInput($key, $value, $attributes);
                 break;
+            case 'mask':
+                $content = self::MaskInput($key, $value, $options, $attributes);
+                break;
             case 'url':
                 $content = self::UrlInput($key, $value, $attributes);
                 break;
@@ -2436,8 +2473,8 @@ class Html
      */
     public static function SubmitButton($key = "Submit", $value = null, ...$attributes)
     {
-        if (is_array($value) && count($attributes) === 0) {
-            $attributes = Convert::ToIteration($value);
+        if (is_array($value)) {
+            $attributes = Convert::ToIteration($value, ...$attributes);
             $value = null;
         }
         return self::Element(__($value ?? $key, styling: false), "button", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit"], $attributes);
@@ -2451,8 +2488,8 @@ class Html
      */
     public static function ResetButton($key = "Reset", $value = null, ...$attributes)
     {
-        if (is_array($value) && count($attributes) === 0) {
-            $attributes = Convert::ToIteration($value);
+        if (is_array($value)) {
+            $attributes = Convert::ToIteration($value, ...$attributes);
             $value = null;
         }
         return self::Element(__($value ?? $key, styling: false), "button", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset"], $attributes);
@@ -2466,8 +2503,8 @@ class Html
      */
     public static function Input($key, $value = null, $type = null, ...$attributes)
     {
-        if (is_array($type) && count($attributes) === 0) {
-            $attributes = Convert::ToIteration($type);
+        if (is_array($type)) {
+            $attributes = Convert::ToIteration($type, ...$attributes);
             $type = "text";
         }
         return self::Element("input", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => self::GrabAttribute($attributes, "name") ?? Convert::ToKey($key), "placeholder" => self::GrabAttribute($attributes, "placeholder") ?? Convert::ToTitle($key), "type" => $type, "value" => $value, "class" => "input"], $attributes);
@@ -2517,7 +2554,7 @@ class Html
                         // "role"=>"textbox", "contenteditable"=>"true",
                         // "aria-label"=>"comment-box", "aria-multiline"=>"true", "aria-readonly"=>"false",
                         "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"
-                    ], $attributes),
+                    ], ...$attributes),
                 self::Icon(
                     "eye",
                     Internal::MakeScript(
@@ -2543,7 +2580,7 @@ class Html
      */
     public static function ScriptInput($key, $value = null, ...$attributes)
     {
-        return self::TextInput($key, $value, ["class" => "scriptinput", "rows" => "10", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;"], $attributes);
+        return self::TextInput($key, $value, ["class" => "scriptinput", "rows" => "10", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;"], ...$attributes);
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -2554,7 +2591,7 @@ class Html
      */
     public static function ObjectInput($key, $value = null, ...$attributes)
     {
-        return self::TextInput($key, $value, ["class" => "objectinput", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"], $attributes);
+        return self::TextInput($key, $value, ["class" => "objectinput", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"], ...$attributes);
     }
     /**
      * A \<DIV\> HTML Tag contains an array of Inputs
@@ -2595,7 +2632,7 @@ class Html
                     $sample = $item;
                 yield self::Field(
                     type: $type,
-                    scope: !$rem,
+                    wrapper: !$rem,
                     key: $key,
                     value: $item,
                     title: false,
@@ -2756,6 +2793,21 @@ class Html
         return self::Input($key, $value, "week", ["class" => "weekinput"], $attributes);
     }
     /**
+     * The \<INPUT\> HTML Tag by a pattern fo input
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $mask A RegEx pattern without wrap slashes
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function MaskInput($key, $value = null, $mask = "\\w+", ...$attributes)
+    {
+        return self::Input($key, $value, "text", [
+            "class" => "maskinput",
+            ...(isPattern($mask ?? "") ? ["onblur" => "this.value = (this.value.match($mask)??[''])[0]??''"] : ["pattern" => $mask, "title" => "Please complete field by correct format..."])
+        ], ...$attributes);
+    }
+    /**
      * The \<INPUT\> HTML Tag
      * @param mixed $key The tag name, id, or placeholder
      * @param mixed $value The tag default value
@@ -2764,7 +2816,7 @@ class Html
      */
     public static function PathInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "text", ["class" => "pathinput", "pattern" => '[^\<\>\^\`\{\|\}\r\n\t\f\v]*'], $attributes);
+        return self::MaskInput($key, $value, '[^\<\>\^\`\{\|\}\r\n\t\f\v]*', ["class" => "pathinput"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2775,11 +2827,7 @@ class Html
      */
     public static function UrlInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "text", [
-            "class" => "urlinput",
-            "pattern" => "(^\/[^:]*$)|(^https?:\/\/.*$)",
-            "title" => "Please enter a valid relative or absolute URL (e.g., /about or https://example.com)"
-        ], $attributes);
+        return self::MaskInput($key, $value, "(^\/[^:]*$)|(^https?:\/\/.*$)", ["class" => "urlinput"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2853,7 +2901,7 @@ class Html
             "Type" => "file",
             "Add" => true,
             "Remove" => true
-        ], ["class" => "fileinput", "multiple" => null], $attributes);
+        ], ["class" => "fileinput", "multiple" => null], ...$attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2900,7 +2948,7 @@ class Html
     public static function RangeInput($key, $value = null, $min = 0, $max = 100, ...$attributes)
     {
         $id = "_" . getId();
-        return self::Input($key, $value, "range", ["min" => $min, "max" => $max, "class" => "rangeinput", "oninput" => "document.getElementById('$id').value = this.value;"], $attributes) .
+        return self::Input($key, $value, "range", ["min" => $min, "max" => $max, "class" => "rangeinput", "oninput" => "document.getElementById('$id').value = this.value;"], ...$attributes) .
             self::Element($value ?? "", "output", ["class" => "tooltip", "id" => $id]);
     }
     /**
@@ -3061,7 +3109,7 @@ class Html
                     else
                         yield self::Row($v, ["Type" => in_array($k, $colHeaders) ? "head" : "cell"]);
                 }
-            })())) : Convert::ToString($content),
+            })())) : $content,
             "table",
             $options,
             ["class" => "table"],
@@ -3098,7 +3146,7 @@ class Html
             is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $head) {
                 foreach ($content as $k => $v)
                     yield self::Cell($v, ["Type" => $head]);
-            })())) : Convert::ToString($content),
+            })())) : $content,
             "tr",
             $options,
             ["class" => "table-row"],
@@ -3217,7 +3265,7 @@ class Html
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading($title) .
-                \Res::Script(null, asset(\_::$Address->ScriptDirectory,"CanvasJS.min.js")) .
+                \Res::Script(null, asset(\_::$Address->ScriptDirectory, "Canvas.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {

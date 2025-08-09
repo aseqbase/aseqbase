@@ -16,7 +16,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 3.03000;
+	public static float $Version = 3.70000;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -151,8 +151,9 @@ register_shutdown_function('cleanupTemp', false);
  */
 function has($object, ...$hierarchy)
 {
+	if(is_null($object)) return false;
 	if (count($hierarchy) === 0)
-		return $object == true;
+		return $object !== null;
 	$data = array_shift($hierarchy);
 	if (is_null($data))
 		return false;
@@ -170,23 +171,22 @@ function has($object, ...$hierarchy)
 				$object->{strtolower($data)} ??
 				$object->{strtoupper($data)} ?? null, ...$hierarchy);
 	} else {
-		$res = [];
 		if (is_array($object)) {
 			foreach ($data as $k => $v)
 				if (is_numeric($k)) {
 					if (($val = has($object, $v, ...$hierarchy)) !== null)
-						$res[$k] = $val;
+						return $val;
 				} else
-					$res[$k] = has($object, $k, $v, ...$hierarchy);
+					return has($object, $k, $v, ...$hierarchy);
 		} else {
 			foreach ($data as $k => $v)
 				if (is_numeric($k)) {
 					if (($val = has($object, $v, ...$hierarchy)) !== null)
-						$res[$k] = $val;
+						return $val;
 				} else
-					$res[$k] = has($object, $k, $v, ...$hierarchy);
+					return has($object, $k, $v, ...$hierarchy);
 		}
-		return $res == true;
+		return false;
 	}
 }
 
@@ -211,10 +211,13 @@ function get($object, ...$hierarchy)
 				if ($data === strtolower($k))
 					return get($v, ...$hierarchy);
 		} else
-			return get($object->{$data} ??
-				$object->{strtoproper($data)} ??
-				$object->{strtolower($data)} ??
-				$object->{strtoupper($data)} ?? null, ...$hierarchy);
+			return get(isset($object->$data)?$object->$data:(
+				isset($object->{strtoproper($data)})?$object->$data:(
+					isset($object->{strtolower($data)})?$object->$data:(
+						isset($object->{strtoupper($data)})?$object->$data:null
+					)
+				)
+			), ...$hierarchy);
 	} else {
 		$res = [];
 		if (is_array($object)) {
@@ -272,11 +275,13 @@ function grab(&$object, ...$hierarchy)
 			}
 		} else {
 			$key = null;
-			$res = $object->{$key = $data} ??
-				$object->{$key = strtoproper($data)} ??
-				$object->{$key = strtolower($data)} ??
-				$object->{$key = strtoupper($data)} ??
-				($key = null);
+			$res = isset($object->{$key = $data})?$object->$key:(
+				isset($object->{$key = strtoproper($data)})?$object->$key:(
+					isset($object->{$key = strtolower($data)})?$object->$key:(
+						isset($object->{$key = strtoupper($data)})?$object->$key:($key = null)
+					)
+				)
+			);
 			if ($key !== null) {
 				if ($rem)
 					unset($object->$key);
@@ -498,19 +503,26 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
  * To seacrh and find the correct path of a file between all sequences
  * @param string|null $file The releative file path
  * @param mixed $extension The extention like ".php"
- * @param int $origin The start layer of the sequences (a zero started index)
+ * @param string|int $origin The start layer of the sequences (a zero started index)
  * @param int $depth How much layers it should iterate in searching
  * @return string|null The correct path of the file or null if its could not find
  */
-function addressing(string|null $file = null, $extension = null, int $origin = 0, int $depth = 99)
+function addressing(string|null $file = null, $extension = null, string|int $origin = 0, int $depth = 999999)
 {
 	$file = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $file ?? "");
 	$extension = $extension ?? \_::$Extension;
 	$file = preg_replace("/(?<!\\" . DIRECTORY_SEPARATOR . ")\\" . DIRECTORY_SEPARATOR . "$/", DIRECTORY_SEPARATOR . "index", $file);
-	if (!endsWith($file, $extension) && !endsWith($file, DIRECTORY_SEPARATOR))
+	if (!endsWith($file, needles: $extension) && !endsWith($file, DIRECTORY_SEPARATOR))
 		$file .= $extension;
 	$path = null;
-	$toSeq = $depth < 0 ? (count(\_::$Sequences) + $depth) : ($origin + $depth);
+	//$toSeq = $depth < 0 ? (count(\_::$Sequences) + $depth) : ($origin + $depth);
+	if(is_string($origin)) {
+		take(\_::$Sequences, $origin, index:$origin);
+		if(is_null($origin)) $origin = 0;
+	}
+	$scount = count(\_::$Sequences);
+	$origin = $origin < 0 ? ($scount + $origin) : min($scount, $origin);
+	$toSeq = $depth < 0 ? ($scount + $depth) : min($scount, $origin + $depth);
 	$seqInd = -1;
 	$file = ltrim($file, DIRECTORY_SEPARATOR);
 	foreach (\_::$Sequences as $dir => $host)
@@ -527,11 +539,11 @@ function addressing(string|null $file = null, $extension = null, int $origin = 0
  * To seacrh in a specific directory in all sequences, to find a file with the name then including that
  * @param string|null $file The releative file path
  * @param mixed $extension The extention like ".php"
- * @param int $origin The start layer of the sequences (a zero started index)
+ * @param string|int $origin The start layer of the sequences (a zero started index)
  * @param int $depth How much layers it should iterate in searching
  * @return mixed The including results or null if its could not find
  */
-function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null, string|null $extension = null, &$used = null)
+function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, string|null $extension = null, &$used = null)
 {
 	try {
 		renderPrepends($directory, $used = $name);
@@ -619,7 +631,7 @@ function renderAppends($directory, string|null $name = null)
  * @param bool $print
  * @return mixed
  */
-function runAll(string|null $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function runAll(string|null $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	$depth = min($depth, count(\_::$Sequences)) - 1;
 	$res = [];
@@ -634,7 +646,7 @@ function runAll(string|null $name, mixed $data = [], bool $print = true, int $or
  * @param bool $print
  * @return mixed
  */
-function run(string|null $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function run(string|null $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->Directory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -645,7 +657,7 @@ function run(string|null $name, mixed $data = [], bool $print = true, int $origi
  * @param bool $print
  * @return mixed
  */
-function model(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function model(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -656,7 +668,7 @@ function model(string $name, mixed $data = [], bool $print = true, int $origin =
  * @param bool $print
  * @return string|null The complete name of selected library class or return null if it's not found
  */
-function library(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function library(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
@@ -667,7 +679,7 @@ function library(string $name, mixed $data = [], bool $print = true, int $origin
  * @param bool $print
  * @return string|null The complete name of selected component class or return null if it's not found
  */
-function component(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function component(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used: $used) ? "\\MiMFa\\Component\\$used" : null;
 }
@@ -678,7 +690,7 @@ function component(string $name, mixed $data = [], bool $print = true, int $orig
  * @param bool $print
  * @return string|null The complete name of selected module class or return null if it's not found
  */
-function module(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function module(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used: $used) ? "\\MiMFa\\Module\\$used" : null;
 }
@@ -689,7 +701,7 @@ function module(string $name, mixed $data = [], bool $print = true, int $origin 
  * @param bool $print
  * @return string|null The complete name of selected template class or return null if it's not found
  */
-function template(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function template(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
@@ -700,7 +712,7 @@ function template(string $name, mixed $data = [], bool $print = true, int $origi
  * @param bool $print
  * @return mixed The result of included view or the printed data
  */
-function view(string|null $name = null, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function view(string|null $name = null, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ViewDirectory, $name ?? \_::$Config->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -711,7 +723,7 @@ function view(string|null $name = null, mixed $data = [], bool $print = true, in
  * @param bool $print
  * @return mixed The result of included region or the printed data
  */
-function region(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function region(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -722,7 +734,7 @@ function region(string $name, mixed $data = [], bool $print = true, int $origin 
  * @param bool $print
  * @return mixed The result of included page or the printed data
  */
-function page(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function page(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -733,7 +745,7 @@ function page(string $name, mixed $data = [], bool $print = true, int $origin = 
  * @param bool $print
  * @return mixed The result of included part or the printed data
  */
-function part(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function part(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -744,7 +756,7 @@ function part(string $name, mixed $data = [], bool $print = true, int $origin = 
  * @param bool $print
  * @return mixed The result of the pointed computed codes or the printed data
  */
-function compute(string $name, mixed $data = [], bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function compute(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -755,7 +767,7 @@ function compute(string $name, mixed $data = [], bool $print = true, int $origin
  * @param bool $print
  * @return mixed The result of the routers or the printed data
  */
-function route(string|null $name = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
+function route(string|null $name = null, mixed $data = null, bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -765,9 +777,9 @@ function route(string|null $name = null, mixed $data = null, bool $print = true,
  * @param string|array|null $extensions An array of extensions or a string of the disired extension
  * @return string|null The complete path of selected asset or return null if it's not found
  */
-function asset($directory, string|null $name = null, string|array|null $extensions = null, $optimize = false, int $origin = 0, int $depth = 99, $default = null)
+function asset($directory, string|null $name = null, string|array|null $extensions = null, $optimize = false, string|int $origin = 0, int $depth = 999999, $default = null)
 {
-	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|^/", \_::$Address->AssetDirectory, $directory ?? "");
+	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Address->AssetRoute, $directory ?? "");
 	$i = 0;
 	$extension = isset($extensions[$i++]) ? $extensions[$i++] : ($extensions ? $extensions : "");
 	try {
@@ -786,7 +798,7 @@ function asset($directory, string|null $name = null, string|array|null $extensio
  * @param string $name The raw table name (Without any prefix)
  * @return \MiMFa\Library\DataTable The selected database's table
  */
-function table(string $name, bool $prefix = true, int $origin = 0, int $depth = 99, ?\MiMFa\Library\DataBase $source = null, $default = null)
+function table(string $name, bool $prefix = true, string|int $origin = 0, int $depth = 999999, ?\MiMFa\Library\DataBase $source = null, $default = null)
 {
 	return new \MiMFa\Library\DataTable(
 		$source ?? \_::$Back->DataBase,
@@ -859,21 +871,47 @@ function __(mixed $value, bool $translating = true, bool $styling = true, bool|n
 }
 
 /**
+ * To take somthing by an exact key on a countable element
+ * @param mixed $object The source object
+ * @param $key The key sample to find
+ * @param $index To get the index of the key (optional)
+ * @return mixed
+ */
+function take($object, $key, int|null &$index = null, $default = null)
+{
+	$index = null;
+	if (is_null($object) || is_null($key))
+		return $object;
+	if (is_array($object)) {
+		$index = 0;
+		foreach ($object as $k => $v){
+			if ($key === $k) return $v;
+			$index++;
+		}
+	}
+	$index = null;
+	return isset($object->$key)?$object->$key:$default;
+}
+/**
  * Find somthing by a callable function on a countable element
  * @param mixed $object The source object
  * @param $item The key sample to find
- * @param $key To get the corret spell of the key (optional)
+ * @param $key To get the correct spell of the key (optional)
  * @return mixed
  */
-function find($object, $item, &$key = null, int|null &$index = null)
+function find($object, $item, &$key = null, int|null &$index = null, $default = null)
 {
-	if (is_null($object))
-		return $index = $key = null;
-	if (is_iterable($object)) {
-		$it = strtolower($item);
+	$index = $key = null;
+	if (is_null($object) || is_null($item))
+		return $object;
+	if (is_array($object)) {
+		$index = is_int($item)?$item:0;
+		if (isset($object[$item]))
+				return $object[$key = $item];
 		$index = 0;
+		$it = strtolower($item);
 		foreach ($object as $k => $v){
-			if ($it === strtolower(string: $k)) {
+			if ($it === strtolower($k)) {
 				$key = $k;
 				return $v;
 			}
@@ -885,7 +923,7 @@ function find($object, $item, &$key = null, int|null &$index = null)
 		isset($object->{$key = $item})?$object->$key:(
 			isset($object->{$key = strtoproper($item)})?$object->$key:(
 				isset($object->{$key = strtolower($item)})?$object->$key:(
-					isset($object->{$key = strtoupper($item)})?$object->$key:($key = null)
+					isset($object->{$key = strtoupper($item)})?$object->$key:(($key = null)??$default)
 				)
 			)
 		);
@@ -893,47 +931,70 @@ function find($object, $item, &$key = null, int|null &$index = null)
 /**
  * To seek for a result by a callable function on a countable element
  * @param mixed $object The source object
- * @param callable $action The find $action($value, $key, $index)
+ * @param callable $by The filter $by($value, $key, $index)=> // return true if find and false when it is not find 
  * @return mixed
  */
-function seek($object, callable $action, &$key = null, int|null &$index = null)
+function seek($object, callable $by, &$key = null, int|null &$index = null, $default = null)
 {
 	if (!is_null($object)) {
 		$index = 0;
 		if (!is_iterable($object)) {
-			if ($action($object, null, $index) !== null)
+			if ($by($object, null, $index))
 				return $object;
 		} else
 			foreach ($object as $key => $value)
-				if ($action($value, $key, $index++) !== null)
+				if ($by($value, $key, $index++))
 					return $value;
 	}
 	$index = null;
-	return null;
+	return $default;
 }
 /**
- * To search and return all succeed result by a callable function on a countable element
+ * To filter and return all succeed results by a callable function on a countable element
  * @param mixed $object The source object
- * @param callable $action The find $action($value, $key, $index)
+ * @param callable $by The filter $by($value, $key, $index)=> // return true if find and false when it is not find 
  * @return mixed
  */
-function search($object, callable $action)
+function filter(&$object, callable $by, $default = null)
+{
+	if (!is_null($object)) {
+		$results = [];
+		$index = 0;
+		if (!is_iterable($object)) {
+			if ($by($object, null, $index))
+				$results = $object;
+		} else
+			foreach ($object as $key => $value)
+				if ($by($value, $key, $index++)){
+					$results[$key] = $value;
+					unset($object[$key]);
+				}
+	}
+	return $results??$default;
+}
+/**
+ * To search and return all succeed results by a callable function on a countable element
+ * @param mixed $object The source object
+ * @param callable $by The filter $by($value, $key, $index)=> // return true if find and false when it is not find 
+ * @return mixed
+ */
+function search($object, callable $by)
 {
 	if (!is_null($object)) {
 		$index = 0;
 		if (!is_iterable($object)) {
-			if ($action($object, null, $index) !== null)
+			if ($by($object, null, $index))
 				yield $object;
 		} else
 			foreach ($object as $key => $value)
-				if ($action($value, $key, $index++) !== null)
+				if ($by($value, $key, $index++))
 					yield $value;
 	}
 }
 
 /**
  * Do a loop action by a callable function on a countable element
- * @param mixed $array
+ * @param mixed $array An array or an intiger to iterate
  * @param callable $action The loop action $action($value, $key, $index)
  * @return array
  */
@@ -945,16 +1006,19 @@ function loop($array, callable $action, $nullValues = false)
 }
 /**
  * Do a loop action by a callable function on a countable element
- * @param mixed $array
+ * @param mixed $array An array or an intiger to iterate
  * @param callable $action The loop action $action($value, $key, $index)
- * @return iterable
  */
 function iteration($array, callable $action, $nullValues = false)
 {
 	if (!is_null($array)) {
 		$i = 0;
 		if (!is_iterable($array)) {
-			if (($res = $action($array, null, $i)) !== null || $nullValues)
+			if(is_int($array))
+				for (; $i < $array; $i++)
+					if (($res = $action($array, null, $i)) !== null || $nullValues)
+						yield $res;
+			elseif (($res = $action($array, null, $i)) !== null || $nullValues)
 				yield $res;
 		} else
 			foreach ($array as $key => $value)
@@ -1670,13 +1734,13 @@ function isScript(mixed $script): bool
 /**
  * To check if the string is a JSON or not
  * @param null|string $json The json string
- * @return bool
  */
 function isJson($json)
 {
 	if (isEmpty($json))
-		return 0;
-	return preg_match("/^\s*[\{|\[][\s\S]*[\}\]]\s*$/", $json);
+		return null;
+	if (!is_string($json)) return false;
+	return preg_match("/^\s*[\{|\[][\s\S]*[\}\]]\s*$/", $json)>0;
 }
 /**
  * Check if the string is a relative or absolute URL
@@ -1687,6 +1751,16 @@ function isEmail(string|null $email): bool
 {
 	return (!empty($email)) && preg_match("/^[A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+$/", $email);
 }
+/**
+ * Check if the string is a regex pattern or not
+ * @param null|string $text The text string
+ * @return bool
+ */
+function isPattern(string $text): bool
+{
+	return preg_match("/^\/[\s\S]+\/[gimsxU]{0,6}$/", $text);
+}
+
 
 /**
  * Check if the string is a suitable name for a class or id or name field
@@ -1695,7 +1769,7 @@ function isEmail(string|null $email): bool
  */
 function isIdentifier(string|null $text): bool
 {
-	return (!empty($text)) && preg_match("/^[A-Za-z_\$][A-Za-z0-9_\-\$]*$/", $text);
+	return (!empty($text)) && preg_match("/^[a-z_\$][a-z0-9_\-\$]*$/i", $text);
 }
 
 /**
@@ -1790,15 +1864,27 @@ function executeCommands(string|null $page, string|null $name = null): string|nu
 	return $page;
 }
 /**
- * Make a string to proper case
+ * Make a string to  ProperCase
  * @param string $string — The input string.
- * @return string — the propercased string.
+ * @return string — the ProperCased string.
  */
 function strToProper($string)
 {
 	if (empty($string))
 		return $string;
 	return preg_replace_callback("/\b[a-z]/", fn($v) => strtoupper($v[0]), $string);
+}
+/**
+ * Make a string to camleCase
+ * @param string $string — The input string.
+ * @return string — the camelCased string.
+ */
+function strToCamel($string)
+{
+	if (empty($string))
+		return $string;
+	$string =  preg_replace_callback("/(?<=[^A-Za-z])[a-z]/", fn($v) => strtoupper($v[0]), $string);
+	return strtolower(substr($string,0,1)).substr($string,1);
 }
 
 /**

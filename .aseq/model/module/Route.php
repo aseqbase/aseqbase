@@ -68,7 +68,7 @@ class Route extends Module{
 				text-align: unset;
 			}
 			.{$this->Name}, .{$this->Name} :is(*, a:visited){
-				color: ".\_::$Front->ForeColor(1)."aa;
+				color: var(--fore-color-inside);
 			}
 		");
 	}

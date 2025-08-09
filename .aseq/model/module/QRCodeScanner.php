@@ -1,9 +1,6 @@
 <?php namespace MiMFa\Module;
-use MiMFa\Library\Local;
-use MiMFa\Library\Convert;
 use MiMFa\Library\Html;
 use MiMFa\Library\Script;
-use MiMFa\Library\Style;
 
 /**
  * A Real-time webcam-driven HTML5 QR code scanner module.
@@ -13,7 +10,8 @@ use MiMFa\Library\Style;
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class QRCodeScanner extends Module{
-	public $CameraIndex = 0;
+	public $CameraIndex = 1;
+	public $AlternativeCameraIndex = 0;
 	/**
 	 * The target JS function name or a function like (content)=>//do process
 	 */
@@ -24,7 +22,11 @@ class QRCodeScanner extends Module{
 	public $ActiveAtEnding = true;
 	public $AllowMask = true;
 	public $MaskSize = "75%";
-	public $Title = "Scan Now...";
+	public $Title = null;
+	public $TitleTag = "h3";
+	public $TitleClass = "fa-fade";
+	public $Description = "Scan Now...";
+	public $DescriptionClass = "fa-fade";
 	public $CamerasNotFoundError = "No cameras found.";
 	public $BrowserNotSupportError = "Your browser does not support the video tag.";
     public $Printable = false;
@@ -53,10 +55,21 @@ class QRCodeScanner extends Module{
 			}
 			.{$this->Name} .message{
 				color: white;
-				font-size: var(--size-2);
+				padding:0px;
+				margin:0px;
 				position: absolute;
 				z-index: 1;
 				max-width: 100%;
+				text-align:center;
+				display: inline-flex;
+				align-content: center;
+				justify-content: center;
+				align-items: center;
+			}
+			.{$this->Name} .message *{
+				text-align:center;
+				padding:0px;
+				margin:0px;
 			}
 			.{$this->Name} .mask{
 				position: absolute;
@@ -83,7 +96,7 @@ class QRCodeScanner extends Module{
 		$this->BrowserNotSupportError.
 		Html::CloseTag("video").
 		($this->AllowMask?Html::Division($this->GetContent(), ["class"=>"mask"]):"").
-		Html::Division($this->GetTitle().$this->GetDescription(), ["class"=>"message"]);
+		Html::Division($this->GetTitle(["class"=>$this->TitleClass]).$this->GetDescription(["class"=>$this->DescriptionClass]), ["class"=>"message"]);
 	}
 	public function Toggle(){
 		\Res::Script($this->ToggleScript());
@@ -111,14 +124,20 @@ class QRCodeScanner extends Module{
 			}catch{Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');}
 			let {$this->Name} = new Instascan.Scanner({ video: document.querySelector('.{$this->Name} video') });
 			{$this->Name}.addListener('scan', function (content) {
-				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.add('success');":"")."
+				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);":"")."
 				".($this->TargetScriptFunction?"({$this->TargetScriptFunction})(content);":"")."
 				".($this->TargetId?"document.getElementById(".Script::Convert($this->TargetId).").value = content;":"")."
 				".($this->TargetSelector?"document.querySelector(".Script::Convert($this->TargetSelector).").value = content;":"")."
 				".($this->ActiveAtEnding?"":$this->DeactiveScript())."
+				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.add('success');":"")."
 			});
 			Instascan.Camera.getCameras().then(function (cameras) {
-				if (cameras.length >= {$this->CameraIndex}) {$this->Name}.start(cameras[{$this->CameraIndex}]);
+				if (cameras.length >= {$this->CameraIndex}) try{
+					{$this->Name}.start(cameras[{$this->CameraIndex}]);
+					if(!{$this->Name}._camera)
+						if (cameras.length >= {$this->AlternativeCameraIndex}) {$this->Name}.start(cameras[{$this->AlternativeCameraIndex}]);
+				} catch { if (cameras.length >= {$this->AlternativeCameraIndex}) {$this->Name}.start(cameras[{$this->AlternativeCameraIndex}]); }
+				else if (cameras.length >= {$this->AlternativeCameraIndex}) {$this->Name}.start(cameras[{$this->AlternativeCameraIndex}]);
 				else console.error(".Script::Convert($this->CamerasNotFoundError).");
 			}).catch(function (e) {
 				console.error(e);
@@ -135,6 +154,10 @@ class QRCodeScanner extends Module{
 		return "document.querySelector('.{$this->Name} video').style.display = 'none';";
 	}
 
+	public function MessageScript($message = null){
+		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.remove('success');":"").
+		"document.querySelector('.{$this->Name} .message').innerHTML = Html.message(".Script::Convert(__($message, styling:false)).");";
+	}
 	public function SuccessScript($message = null){
 		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.add('success');":"").
 		"document.querySelector('.{$this->Name} .message').innerHTML = Html.success(".Script::Convert(__($message, styling:false)).");";
@@ -144,4 +167,3 @@ class QRCodeScanner extends Module{
 		"document.querySelector('.{$this->Name} .message').innerHTML = Html.error(".Script::Convert(__($message, styling:false)).");";
 	}
 }
-?>

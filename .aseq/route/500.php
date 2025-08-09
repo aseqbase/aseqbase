@@ -7,6 +7,6 @@ view(get($viewData, "ViewName")??"message", data: [
     "Title" => \_::$Info->Name,
     "SupDescription" => "Internal Server Error 500",
     "Description" => "The server encountered an internal error or misconfiguration and was unable to complete your request",
-    ...($data??[])
+    ...$data??[]
 ]);
 ?>

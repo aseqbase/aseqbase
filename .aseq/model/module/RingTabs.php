@@ -61,15 +61,15 @@ class RingTabs extends Module{
 			}
 			.{$this->Name} .sign .btn{
 				font-size: var(--size-2);
-				color: var(--fore-color-2);
+				color: var(--fore-color-outside);
 				border-color: transparent;
 				margin: 0px 5px;
 			}
 			.{$this->Name} .sign .btn:hover{
-				background-color: var(--back-color-2);
+				background-color: var(--back-color-outside);
 				font-size: var(--size-2);
-				color: var(--fore-color-2);
-				border-color: var(--fore-color-2);
+				color: var(--fore-color-outside);
+				border-color: var(--fore-color-outside);
 				border-radius: var(--radius-2);
 			}
 			.{$this->Name} .menu {
@@ -96,13 +96,13 @@ class RingTabs extends Module{
 				height: {$this->CenterSize}px;
 				border-radius: 50%;
 				position: relative;
-				box-shadow: 0px 0px 20px var(--back-color-2);
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
+				box-shadow: 0px 0px 20px var(--back-color-outside);
+				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
 			.{$this->Name} .menu>.center:hover {
-				box-shadow: 0px 0px 50px var(--back-color-2);
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
+				box-shadow: 0px 0px 50px var(--back-color-outside);
+				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
 			.{$this->Name} .menu>.center:before {
@@ -118,29 +118,29 @@ class RingTabs extends Module{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: contain;
-				background-color: var(--back-color-2);
+				background-color: var(--back-color-outside);
 				border-radius: 100%;
 				cursor: pointer;
-				box-shadow: 0px 0px 20px var(--back-color-2);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
+				box-shadow: 0px 0px 20px var(--back-color-outside);
+				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
 			.{$this->Name} .menu>.center>a{
-				background-color: var(--back-color-2);
-				color: var(--fore-color-2);
+				background-color: var(--back-color-outside);
+				color: var(--fore-color-outside);
 				position: absolute;
 				text-align: center;
 				cursor: pointer;
-				border: var(--border-1) var(--back-color-2);
+				border: var(--border-1) var(--back-color-outside);
 				border-radius: 100%;
 				box-shadow: var(--shadow-3);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
+				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
 			.{$this->Name} .menu>.center>a:hover {
 				box-shadow: var(--shadow-4);
-				border:  var(--border-1) var(--back-color-2);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
+				border:  var(--border-1) var(--back-color-outside);
+				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
 			.{$this->Name} .menu>.center>a>.button{
@@ -149,21 +149,21 @@ class RingTabs extends Module{
 				height: {$this->ButtonsSize}px;
 				border-radius: 100%;
 			}
-			.{$this->Name} .menu>.center>a>.button>.media:not(.fa){
+			.{$this->Name} .menu>.center>a>.button>.media:not(.icon){
 				background-size: 40% 40%;
 				width: {$this->ButtonsSize}px;
 				height: {$this->ButtonsSize}px;
-                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor(\_::$Front->ForeColor(2)):"")."
+                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-outside)"):"")."
 			}
-			.{$this->Name} .menu>.center>a>.button>.media.fa{
+			.{$this->Name} .menu>.center>a>.button>.media.icon{
 				line-height: {$this->ButtonsSize}px;
 				font-size: calc({$this->ButtonsSize}px * 0.4);
-                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor(\_::$Front->ForeColor(2)):"")."
+                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-outside)"):"")."
 			}
 			.{$this->Name} .menu>.center>a:hover>.button>.media {
 				font-size: calc({$this->ButtonsSize}px * 0.6);
 				background-size: 60% 60%;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
+				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 		");
 	}
@@ -193,7 +193,7 @@ class RingTabs extends Module{
 						if($this->HasTab) $tags[] = Html::Division(
 							Html::ExternalHeading(get($v,'Title' ), $pa, ["class"=>"title" ]).
 								Html::Division($desc.$more, ["class"=>"description" ]), 
-							["class"=>"tab fade".($i===0?' active show':''), "Id" =>"tab$i"]
+							["class"=>"tab fade".($i===0?' active view show':''), "Id" =>"tab$i"]
 						);
 					}
 				});
@@ -255,8 +255,8 @@ class RingTabs extends Module{
 					const x = xn.replace('#', '');
 					$(tar).each(function(){
 						const y = $(this).attr('Id' );
-						if (x == y) $(this).addClass('active show');
-						else $(this).removeClass('active show');
+						if (x == y) $(this).addClass('active view show');
+						else $(this).removeClass('active view show');
 					});
 					$(bselector).each(function(){
 						const y = $(this).attr('href');

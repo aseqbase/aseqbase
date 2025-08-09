@@ -49,10 +49,10 @@ class Player extends Module
 				top: auto;
 				right: auto;
 				font-size: var(--size-1);
-				color: var(--fore-color-3);
+				color: #8888;
 				z-index: 1;
-				" . \MiMFa\Library\Style::UniversalProperty("text-stroke", "1px var(--back-color-3)") . "
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("text-stroke", "1px var(--back-color-special)") . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.controls>.button {
 				aspect-ratio: 1;
@@ -60,17 +60,18 @@ class Player extends Module
 				display: inline;
 				padding: 1vh;
 				cursor: pointer;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.controls>.button:hover {
-				background-color: var(--back-color-3);
+				background-color: var(--back-color-outside);
+				color: var(--fore-color-outside);
 				" . \MiMFa\Library\Style::UniversalProperty("text-stroke", "0px") . "
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			.{$this->Name}:hover>.controls{
 				opacity: 1;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			.{$this->Name}>.content {
@@ -87,38 +88,38 @@ class Player extends Module
 			}
 
 			.{$this->Name}>.content::-webkit-scrollbar {
-				background: var(--back-color-3);
+				background: var(--back-color-special);
 				width: 0px;
 				height: 0px;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}:hover>.content::-webkit-scrollbar {
 				width: 5px;
 				height: 5px;
 			}
 			.{$this->Name}>.content::-webkit-scrollbar:hover {
-				//background: var(--back-color-1);
+				//background: var(--back-color-inside);
 				width: 10px;
 				height: 10px;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-track {
 				border-radius: 1px;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-track:hover {
 				border-radius: 0px;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-thumb {
-				background: var(--fore-color-3);
+				background: var(--fore-color-special);
 				border-radius: 5px;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-thumb:hover {
-				background: var(--fore-color-1);
+				background: var(--fore-color-inside);
 				" . ($this->AllowZoom ? "cursor: grab;" : "") . "
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.content>:not(.page,html,head,body,style,script,link,meta,title) {
 				min-width: auto;
@@ -170,7 +171,7 @@ class Player extends Module
 			elseif (isFormat($source, ".wav", ".mp3", ".aac", ".amr", ".ogg", ".flac", ".wma", ".m4a"))
 				yield Html::Audio($source, "controls");
 			elseif (isFormat($source, ".png", ".jpg", ".jpeg", ".jiff", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp"))
-				yield Html::Image($source);
+				yield Html::Image(null, $source);
 			else
 				yield Html::Embed($source);
 			yield "</div>";
@@ -285,15 +286,15 @@ class Player extends Module
 	public function GetControls()
 	{
 		if ($this->AllowDownload)
-			yield '<div class="fa fa-download button" onclick="' . $this->DownloadScript() . '"></div>';
+			yield '<div class="icon fa fa-download button" onclick="' . $this->DownloadScript() . '"></div>';
 		if ($this->AllowShare)
-			yield '<div class="fa fa-share-alt button" onclick="' . $this->ShareScript() . '"></div>';
+			yield '<div class="icon fa fa-share-alt button" onclick="' . $this->ShareScript() . '"></div>';
 		if ($this->AllowZoom)
-			yield '<div class="fa fa-minus button" onclick="' . $this->ZoomOutScript() . '"></div>';
+			yield '<div class="icon fa fa-minus button" onclick="' . $this->ZoomOutScript() . '"></div>';
 		if ($this->AllowZoom)
-			yield '<div class="fa fa-plus button" onclick="' . $this->ZoomInScript() . '"></div>';
+			yield '<div class="icon fa fa-plus button" onclick="' . $this->ZoomInScript() . '"></div>';
 		if ($this->AllowZoom)
-			yield '<div class="fa fa-refresh button" onclick="' . $this->ResetScript() . '"></div>';
+			yield '<div class="icon fa fa-refresh button" onclick="' . $this->ResetScript() . '"></div>';
 	}
 
 	public function SetScript($content = "", $source = null)

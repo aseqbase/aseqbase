@@ -12,6 +12,7 @@ abstract class FrontBase
 {
 	public $AnimationSpeed = 250;
 	public $DetectMode = true;
+	public $DefaultDarkMode = null;
 	public $DarkMode = null;
 	public $DefaultSourceSelector = "body";
 	public $DefaultDestinationSelector = "body";
@@ -132,46 +133,90 @@ abstract class FrontBase
 		return $palette[$index >= count($palette) ? count($palette) - 1 : max(0, $index)];
 	}
 
+	/**
+	 * To get the Color by index
+	 * @param int $index 0:Black, 1:Red, 2:Green, 3:Blue, 4:Yellow, 5:Cyan, 6:Violet, 7:White
+	 */
 	public function Color(int $index = 0)
 	{
 		return $this->LoopPalette($this->ColorPalette, $index);
 	}
+	/**
+	 * To get the ForeColor by index
+	 * @param int $index 0:normal, 1:inside, 2:outside, 3:special, 4:special-inside, 5:special-outside
+	 */
 	public function ForeColor(int $index = 0)
 	{
 		return $this->LoopPalette($this->ForeColorPalette, $index);
 	}
+	/**
+	 * To get the BackColor by index
+	 * @param int $index 0:normal, 1:inside, 2:outside, 3:special, 4:special-inside, 5:special-outside
+	 */
 	public function BackColor(int $index = 0)
 	{
 		return $this->LoopPalette($this->BackColorPalette, $index);
 	}
+	/**
+	 * To get the Font by index
+	 * @param int $index 0:normal, 1:inside, 2:outside
+	 */
 	public function Font(int $index = 0)
 	{
 		return $this->LoopPalette($this->FontPalette, $index);
 	}
+	/**
+	 * To get the Size by index
+	 * @param int $index 0:sm, 1:n, 2:lg, 3:xlg, 4:xxlg,...
+	 */
 	public function Size(int $index = 0)
 	{
 		return $this->LimitPalette($this->SizePalette, $index);
 	}
+	/**
+	 * To get the Shadow by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
 	public function Shadow(int $index = 0)
 	{
 		return $this->LimitPalette($this->ShadowPalette, $index);
 	}
+	/**
+	 * To get the Border size by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
 	public function Border(int $index = 0)
 	{
 		return $this->LimitPalette($this->BorderPalette, $index);
 	}
+	/**
+	 * To get the Radius size by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
 	public function Radius(int $index = 0)
 	{
 		return $this->LimitPalette($this->RadiusPalette, $index);
 	}
+	/**
+	 * To get the Transition by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
 	public function Transition(int $index = 0)
 	{
 		return $this->LimitPalette($this->TransitionPalette, $index);
 	}
+	/**
+	 * To get the Overlay image by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
 	public function Overlay(int $index = 0)
 	{
 		return \MiMFa\Library\Local::GetUrl($this->LoopPalette($this->OverlayPalette, $index));
 	}
+	/**
+	 * To get the Pattern image by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
 	public function Pattern(int $index = 0)
 	{
 		return \MiMFa\Library\Local::GetUrl($this->LoopPalette($this->PatternPalette, $index));
@@ -181,9 +226,9 @@ abstract class FrontBase
 	{
 		\MiMFa\Library\Revise::Load($this);
 		if ($this->IsDark($this->BackColor(0)) === true)
-			$this->DarkMode = true;
+			$this->DefaultDarkMode = $this->DarkMode = true;
 		else
-			$this->DarkMode = false;
+			$this->DefaultDarkMode = $this->DarkMode = false;
 		$lm = \Req::Receive("LightMode");
 		$lm = $lm ? setMemo("LightMode", $lm) : false;
 		$dm = \Req::Receive("DarkMode");

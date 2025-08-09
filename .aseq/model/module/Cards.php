@@ -31,24 +31,24 @@ class Cards extends Collection
     {
         return Html::Style("
             .{$this->Name} .items .item {
-                background-color: var(--back-color-0)99;
-                color: var(--fore-color-0);
+                background-color: var(--back-color)99;
+                color: var(--fore-color);
                 font-size: var(--size-1);
                 text-align: center;
                 margin: 3vh;
                 padding: 0px;
-                border: var(--border-1) var(--fore-color-4);
+                border: var(--border-1) var(--fore-color-special-inside);
                 border-radius: var(--radius-1);
                 box-shadow: var(--shadow-1);
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+                " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} .items .item:hover {
-                background-color: var(--back-color-1);
-                color: var(--fore-color-1);
+                background-color: var(--back-color-inside);
+                color: var(--fore-color-inside);
                 border-radius: var(--radius-2);
                 box-shadow: var(--shadow-2);
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+                " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} .items .item .image {
@@ -67,17 +67,17 @@ class Cards extends Collection
             }
 
             .{$this->Name} .items .item .details {
-                background-color: var(--back-color-0);
-                color: var(--fore-color-0);
+                background-color: var(--back-color);
+                color: var(--fore-color);
                 text-align: left;
                 padding: 2vmin 2vmax;
                 margin-bottom: 0px;
             }
 
-            .{$this->Name} .items .item .fa {
+            .{$this->Name} .items .item .icon {
                 padding: 20px;
                 margin-bottom: 3vh;
-                border: var(--border-0) var(--fore-color-0);
+                border: var(--border-0) var(--fore-color);
                 border-radius: 50%;
             }
 

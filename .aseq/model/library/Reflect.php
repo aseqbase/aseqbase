@@ -22,7 +22,6 @@ class Reflect{
 
     /**
      * To get each Features of a Class
-     * @param mixed $object
      */
     public static function Get($objectOrReflection){
         if($objectOrReflection === null) return new Reflected();
@@ -32,7 +31,6 @@ class Reflect{
     }
     /**
      * To set each Features of a Class
-     * @param mixed $object
      */
     public static function Set($objectOrReflection, array $newData = []){
         if($objectOrReflection === null) return null;
@@ -48,7 +46,6 @@ class Reflect{
     }
     /**
      * To get fill Features by an array
-     * @param mixed $object
      */
     public static function Fill($objectOrReflection, array $newValues = []){
         $objectOrReflection = self::Get($objectOrReflection);
@@ -58,7 +55,6 @@ class Reflect{
     }
     /**
      * To get fill Features by an array
-     * @param mixed $object
      */
     public static function Update($objectOrReflection, array $newValues = []){
         $objectOrReflection = self::Get($objectOrReflection);
@@ -71,7 +67,6 @@ class Reflect{
     }
     /**
      * To get each Features of a Class
-     * @param mixed $object
      */
     public static function Write($objectOrReflection){
         $objectOrReflection = self::Get($objectOrReflection);
@@ -123,7 +118,6 @@ class Reflect{
 
     /**
      * To get the Path of a Class
-     * @param mixed $object
      */
     public static function GetPath($objectOrReflection){
         if($objectOrReflection === null) return null;
@@ -134,7 +128,6 @@ class Reflect{
 
     /**
      * To get all Features of a Class as a HTML Form
-     * @param mixed $object
      */
     public static function GetForm($objectOrReflection):\MiMFa\Module\Form{
         module("Form");
@@ -156,7 +149,6 @@ class Reflect{
     }
     /**
      * To get each of Features of a Class as a form HTML Field
-     * @param mixed $object
      */
     public static function GetFields($objectOrReflection){
         module("Field");
@@ -172,9 +164,8 @@ class Reflect{
     }
     /**
      * To handle all Features received of a Class HTML Form
-     * @param mixed $object
      */
-    public static function HandleForm($objectOrReflection, array $newValues = null){
+    public static function HandleForm($objectOrReflection, $newValues = null){
         try {
             if(is_null($newValues)) $newValues = \Req::Receive(null,"POST");
             $objectOrReflection = self::Update($objectOrReflection, $newValues);
@@ -201,19 +192,19 @@ class Reflected extends \ArrayObject{
     public string|null $Field = null;
     /**
      * {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
-	enum-string: to indicate the legal string name for a variable
-	class-string: to indicate the exist class name
-	interface-string: to indicate the exist interface name
-	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
+	 * enum-string: to indicate the legal string name for a variable
+	 * class-string: to indicate the exist class name
+	 * interface-string: to indicate the exist interface name
+	 * lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
      * @var string
      */
     public string|null $Var = null;
     /**
      * {bool, int, float, string, array<datatype>, etc.}: to indicate the variable or constant type. other useful type can be:
-	enum-string: to indicate the legal string name for a variable
-	class-string: to indicate the exist class name
-	interface-string: to indicate the exist interface name
-	lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
+	 * enum-string: to indicate the legal string name for a variable
+	 * class-string: to indicate the exist class name
+	 * interface-string: to indicate the exist interface name
+	 * lowercase-string, non-empty-string, non-empty-lowercase-string: to indicate a non empty string, lowercased or both at once
      * @var array
      */
     public array $Vars = [];

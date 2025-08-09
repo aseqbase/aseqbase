@@ -37,6 +37,7 @@ module("Form");
 		$form->BlockTimeout = get($data, "BlockTimeout") ?? 12;
 		$form->BackLabel = get($data, "BackLabel") ?? null;
 		$form->BackPath = get($data, "BackPath") ?? null;
+		$form->ContentClass = "col-lg-8";
 		module("Field");
 		$name = get(\_::$Back->User, "Name") ?? \Req::ReceiveGet("Name");
 		$email = get(\_::$Back->User, "Email") ?? \Req::ReceiveGet("Email");

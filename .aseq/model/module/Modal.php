@@ -17,10 +17,10 @@ class Modal extends Player{
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
 			.{$this->Name} {
-				background-Color: var(--back-color-3);
-				Color: var(--fore-color-3);
+				background-Color: var(--back-color-special);
+				Color: var(--fore-color-special);
 				border-radius: var(--radius-2);
-				border: var(--border-1) var(--fore-color-0);
+				border: var(--border-1) var(--fore-color);
 				height: {$this->Height};
 				width: {$this->Width};
 				position: fixed;
@@ -35,24 +35,24 @@ class Modal extends Player{
 			/* Expanding image detail */
 			.{$this->Name}>.body>.detail {
 				opacity:0;
-				Color: var(--fore-color-0);
+				Color: var(--fore-color);
 				position: absolute;
 				bottom: 0px;
 				width: 100%;
 				z-index: 1;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)).";
+				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)").";
 			}
 
 			.{$this->Name}:hover>.body>.detail {
 				opacity: 1;
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1)).";
+				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)").";
 			}
 
 			.{$this->Name}>.body>.detail>.title {
-				border-top: var(--border-1) var(--fore-color-0);
-				border-right: var(--border-1) var(--fore-color-0);
-				background-Color: ".\_::$Front->BackColor(0)."ee;
-				Color: var(--fore-color-0);
+				border-top: var(--border-1) var(--fore-color);
+				border-right: var(--border-1) var(--fore-color);
+				background-Color: var(--back-color);
+				Color: var(--fore-color);
 				font-size: var(--size-1);
 				text-align: unset;
 			    margin-bottom: -2vmin;
@@ -64,10 +64,10 @@ class Modal extends Player{
 
 			/* Expanding image text */
 			.{$this->Name}>.body>.detail>.description {
-				background-Color: ".\_::$Front->BackColor(0)."ee;
-				Color: var(--fore-color-0);
+				background-Color: var(--back-color);
+				Color: var(--fore-color);
 				font-size: var(--size-1);
-				border-top: var(--border-2) var(--fore-color-0);
+				border-top: var(--border-2) var(--fore-color);
 				border-radius: var(--radius-2);
 				width: 100%;
 				padding: 3vmin;
@@ -101,7 +101,7 @@ class Modal extends Player{
 
 	public function GetScript(){
 		return parent::GetScript().Html::Script("
-			function {$this->Name}_Show(title = null, description = null, content = null, buttonsContent = null, source = null){
+			function {$this->Name}_Initialize(title = null, description = null, content = null, buttonsContent = null, source = null){
 				if(content === null) {
 					content = title;
 					title = null;
@@ -114,7 +114,10 @@ class Modal extends Player{
 				if(buttonsContent !== null) $('.{$this->Name}>.buttons').html({$this->ButtonsScript('${buttonsContent}')});
 				$('.{$this->Name},.{$this->Name}-background-screen').removeClass('hide');
 				$('.{$this->Name},.{$this->Name}-background-screen').fadeIn(".\_::$Front->AnimationSpeed.");
-				scrollTo('.{$this->Name}');
+				scrollThere('.{$this->Name}');
+			}
+			function {$this->Name}_Show(){
+				{$this->InitializeScript()}
 			}
 			function {$this->Name}_Hide(){
 				{$this->ClearScript()};
@@ -140,8 +143,8 @@ class Modal extends Player{
 		"</div>";
 	}
 	public function GetControls(){
-		if($this->AllowClose) yield '<div class="fa fa-close button" onclick="'.$this->HideScript().'"></div>';
-		if($this->AllowFocus) yield'<div class="fa fa-info button" onclick="'.$this->ModalInfoScript().'"></div>';
+		if($this->AllowClose) yield Html::Icon("close", $this->HideScript(), ["class"=>"button be square circle"]);
+		if($this->AllowFocus) yield Html::Icon("info", $this->ModalInfoScript(), ["class"=>"button"]);
 		yield from parent::GetControls();
 	}
 	public function GetButtons($buttonsContent){
@@ -149,20 +152,23 @@ class Modal extends Player{
 	}
 
 	public function BeforeHandle(){
-		if(isValid($this->BackgroundShadow)) return "<div class=\"background-screen ".$this->Name."-background-screen hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
+		if(isValid(object: $this->BackgroundShadow)) return "<div class=\"background-screen ".$this->Name."-background-screen view hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
 	}
 
 	public function ButtonsScript($buttonsContent){
 		return Script::Convert($buttonsContent);
 	}
 
-	public function ShowScript($title = null, $description = null, $content = null, $buttonsContent = null, $source = null){
-		return $this->Name."_Show(".
-		Script::Convert($title??$this->Title).", ".
+	public function InitializeScript($title = null, $description = null, $content = null, $buttonsContent = null, $source = null){
+		return $this->Name."_Initialize(".
+		Script::Convert(obj: $title??$this->Title).", ".
 		Script::Convert($description??$this->Description).", ".
 		Script::Convert($content??$this->Content).", ".
 		Script::Convert($buttonsContent??$this->ButtonsContent).", ".
 		Script::Convert($source??$this->Source).");";
+	}
+	public function ShowScript(){
+		return $this->Name."_Show();";
 	}
 	public function HideScript(){
 		return $this->Name."_Hide();";

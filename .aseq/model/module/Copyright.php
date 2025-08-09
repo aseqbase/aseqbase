@@ -2,8 +2,11 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
 class Copyright extends Module{
-	public $Title = " MiMFa ";
-	public $Description = "Developed By:";
+	public $Title = "Developed By:";
+	public $TitleTag = "span";
+	public $Description = " MiMFa ";
+	public $DescriptionTag = "span";
+	public $ContentTag = "div";
 	public $Source = "http://mimfa.net";
 
 	public function GetStyle(){
@@ -17,7 +20,7 @@ class Copyright extends Module{
 	}
 
 	public function Get(){
-		return Html::Span($this->Description,styling:false)." ".Html::Link($this->Title, $this->Source);
+		return $this->GetContent().Html::Link($this->GetTitle()." ".$this->GetDescription(), $this->Source);
 	}
 }
 ?>

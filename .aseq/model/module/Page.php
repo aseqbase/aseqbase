@@ -33,7 +33,7 @@ class Page extends Module
                 padding: 0;
                 margin: 0;
                 opacity: 0; /* Initially hide all pages */
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+                " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} > .page > .frame {
@@ -80,8 +80,8 @@ class Page extends Module
 						background-size: 70% 70%;
 						background-repeat: no-repeat;
 						background-position: center;
-						background-color: var(--back-color-1);
-						color: var(--fore-color-1);
+						background-color: var(--back-color-inside);
+						color: var(--fore-color-inside);
 						position: absolute;
 						top: calc(50% - 5VMAX);
 						left: calc(50% - 5VMAX);

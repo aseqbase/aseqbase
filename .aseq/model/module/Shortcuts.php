@@ -19,7 +19,7 @@ class Shortcuts extends Module{
 				font-size:  var(--size-2);
 			}
 			.{$this->Name} .item.active{
-				border: var(--border-1) var(--fore-color-1);
+				border: var(--border-1) var(--fore-color-inside);
 				font-size:  var(--size-2);
 			}
 		");

@@ -46,12 +46,12 @@ class FixedBanner extends Module{
 				box-shadow: var(--shadow-2);
 				padding: 0px;
 				overflow: hidden;
-				color: ".(isValid($this->ForeColor)?$this->ForeColor:(\_::$Front->ForeColor(0))).";
-				".(isValid($this->BorderColor)? ("border: ".(\_::$Front->Border(2)." ".$this->BorderColor).";"):"")."
+				color: ".(isValid($this->ForeColor)?$this->ForeColor:"var(--fore-color)").";
+				".(isValid($this->BorderColor)? "border: var(--border-2) {$this->BorderColor};":"")."
 			}
 			.{$this->Name}.box>.content{
 				display: inline-block;
-				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$Front->BackColor(0))).";
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)").";
 				border-radius: var(--radius-1);
 			}
 			.{$this->Name}.hybrid>.content{
@@ -59,10 +59,10 @@ class FixedBanner extends Module{
 				width: 100%;
 				background-position: center;
 				background-repeat: repeat;
-				background-image: url('".($this->HeaderBanner??\_::$Front->Pattern(0))."');
+				background-image: url('".($this->HeaderBanner??"var(--pattern-0)")."');
 			}
 			.{$this->Name}:is(.transparent,.hybrid)>.content{
-				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$Front->BackColor(0)."77")).";
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)").";
 				border: none;
 				border-radius: var(--radius-0);
 			}
@@ -70,26 +70,26 @@ class FixedBanner extends Module{
 			.{$this->Name}>.content>.top{
 				padding: 10vmin;
 				padding-bottom: 0px;
-				color: ".(isValid($this->ForeColor)?$this->ForeColor:(\_::$Front->ForeColor(4))).";
+				color: ".(isValid($this->ForeColor)?$this->ForeColor:"var(--fore-color-special-inside)").";
 			}
 			.{$this->Name}.box>.content>.top{
-				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$Front->BackColor(4))).";
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color-special-inside)").";
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: cover;
-				background-image: url('".($this->HeaderBanner??\_::$Front->Pattern(0))."');
+				background-image: url('".($this->HeaderBanner??"var(--pattern-0)")."');
 			}
 
 			.{$this->Name}>.content>.bottom{
 				padding: 10vmin;
 				padding-top: 0px;
-				color: ".(isValid($this->ForeColor)?$this->ForeColor:(\_::$Front->ForeColor(0))).";
+				color: ".(isValid($this->ForeColor)?$this->ForeColor:"var(--fore-color)").";
 			}
 			.{$this->Name}.box>.content>.bottom{
-				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$Front->BackColor(0))).";
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)").";
 			}
 			.{$this->Name}:is(.transparent,.hybrid)>.content>.bottom{
-				background-color: ".(isValid($this->BackColor)?$this->BackColor:(\_::$Front->BackColor(0)))."77;
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)")."77;
 			}
 
 			.{$this->Name}>.content>.top>.image{
@@ -102,7 +102,7 @@ class FixedBanner extends Module{
 				padding-top: 0px;
 				font-size: var(--size-3);
     			font-weight: bold;
-				color: ".(isValid($this->SpecialColor)?$this->SpecialColor:(\_::$Front->ForeColor(4))).";
+				color: ".(isValid($this->SpecialColor)?$this->SpecialColor:"var(--fore-color-special-inside)").";
 			}
 
 			.{$this->Name}>.content>.bottom>.description{

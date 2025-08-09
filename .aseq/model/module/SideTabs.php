@@ -6,14 +6,13 @@ module("Tabs");
 class SideTabs extends Tabs{
 	public $Class = "row";
 	public $TitlesClass = "col-md";
-	public $TitleClass = "col col-md";
+	public $TitleClass = "col-sm";
 	public $ContentsClass = "col-md-8";
 
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
 			.{$this->Name} {
-				min-height: 50vh;
 				display: flex;
 				align-content: center;
 				justify-content: center;
@@ -41,7 +40,7 @@ class SideTabs extends Tabs{
 				width: calc(100% - var(--size-0));
 				text-align: center;
 				cursor: pointer;
-				border: var(--border-1) var(--back-color-2);
+				border: var(--border-1) var(--back-color-outside);
 				border-radius: var(--radius-1);
 				box-shadow: var(--shadow-1);
 				display: flex;
@@ -49,8 +48,9 @@ class SideTabs extends Tabs{
 				align-items: center;
 				justify-content: space-between;
 				align-content: center;
+				flex-wrap: nowrap;
 				gap: var(--size-0);
-				". \MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(2))."
+				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 			.{$this->Name} .tab-titles .tab-title.active{
 				background-color: inherit;
@@ -58,7 +58,7 @@ class SideTabs extends Tabs{
 				box-shadow: none;
 			}
 				
-			@media screen and (min-width:760px){
+			@media screen and (min-width:765px){
 				.{$this->Name} .tab-titles {
 					flex-direction: column;
 					flex-wrap: wrap;

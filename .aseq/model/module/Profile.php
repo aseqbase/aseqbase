@@ -114,8 +114,8 @@ class Profile extends Form{
 	public function GetStyle(){
 		return Html::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
-			backgroound-color: var(--back-color-1);
-			color: var(--fore-color-1);
+			backgroound-color: var(--back-color-inside);
+			color: var(--fore-color-inside);
 		}
 		.{$this->Name} tr th{
 			font-weight: bold;
@@ -162,11 +162,7 @@ class Profile extends Form{
             text-align: center;
         }
         table.dataTable.{$this->Name} tbody tr :is(th, td) span.number {
-            aspect-ratio: 1;
-            border-radius: var(--radius-5);
-            padding: calc(var(--size-0) / 2);
             margin: calc(var(--size-0) / 2);
-            background-color: #88888817;
         }
 		".($this->OddEvenColumns?"
             table.dataTable.{$this->Name} tbody tr:nth-child(even) :is(td, th):nth-child(odd) {

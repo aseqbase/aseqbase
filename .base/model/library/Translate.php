@@ -17,7 +17,7 @@ class Translate
 	public $Cache = null;
 	public DataTable $DataTable;
 	/**
-	 * A short version of language name (EN|SP|...)
+	 * A short version of language name (en|es|...)
 	 * @var string
 	 */
 	public $Language = "en";
@@ -89,12 +89,14 @@ class Translate
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
-			$text = isset($data[$lang ?? $this->Language]) ? $data[$lang ?? $this->Language] : $data["x"];
+			$data = $data[$lang ?? $this->Language]?? $data["x"];
 		} elseif ($this->AutoUpdate)
-			$this->DataTable->Insert([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $text))]);
+			$this->DataTable->Insert([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $data))]);
 		foreach ($replacements as $key => $val)
-			$text = str_replace($key, $val, $text);
-		return Decode($text, $dic);
+			$data = str_replace($key, $val, $data);
+		$data = Decode($data, $dic);
+		if($this->CaseSensitive) return $data;
+		return self::SetCaseStatus($data, $data);
 	}
 	public function Get($text, $lang = null)
 	{
@@ -114,12 +116,19 @@ class Translate
 		return $text;
 	}
 
-	public function GetAll($condition = null, $params = [])
+	public function GetAll($condition = null, $params = [], $hasKey = false)
 	{
 		$rows = $this->DataTable->Select("*", $condition, $params);
-		foreach ($rows as $value) {
-			$row = [];
+		$row = [];
+		if($hasKey) foreach ($rows as $value) {
+			foreach ($row as $k => $v) $row[$k] = "";
 			$row["KEY"] = $value["KeyCode"];
+			foreach (Convert::FromJson($value["ValueOptions"]) as $k => $v)
+				$row[$k] = $v;
+			yield $row;
+		}
+		else foreach ($rows as $value) {
+			foreach ($row as $k => $v) $row[$k] = "";
 			foreach (Convert::FromJson($value["ValueOptions"]) as $k => $v)
 				$row[$k] = $v;
 			yield $row;
@@ -185,16 +194,7 @@ class Translate
 	{
 		if ($text === null)
 			return "Null";
-		$key = preg_replace("/\s+/", " ", trim($text));
-		// str_replace(
-		// 	array("\r", "\n", "\t"),
-		// 	" ",
-		// 	str_replace(
-		// 		array("   ", "  ", "   "),
-		// 		" ",
-		// 		trim($text)
-		// 	)
-		// );
+		$key = preg_replace("/\s+/", " ", trim($text, " \n\r\t\v\x00~`!@#$%^&*()-+=?/.,|\\'\":;]}[{"));
 		if (strlen($key) > $this->CodeLimit)
 			$key = md5($key);
 		if(!$this->CaseSensitive) $key = strtolower($key);
@@ -230,7 +230,7 @@ class Translate
 			if($key=="x") $key = strtolower(\_::$Config->DefaultLanguage??$key);
 			$arr[$key] = array(
 				"Title" => getBetween($value, "Title", "Name")??strtoupper($key),
-				"Image" => getBetween($value, "Image", "Icon")??"https://flagcdn.com/16x12/$key.png",
+				"Image" => getBetween($value, "Image", "Icon")??"https://unpkg.com/language-icons/icons/$key.svg",
 				"Direction" => $dir = get($value, "Direction")??preg_match("/(ar|fa|ur|he|ps|sd|ug|dv|ku|yi|nqo|syr|ckb|ks|bal|brh|bgn|haz|khw|lrc|mzn|pnb|prs|uz_AF|tt|ota)/i", $key??"")?"rtl":"ltr",
 				"Encoding" => $enc = get($value, "Encoding")??"utf-8",
 				"Query" => "lang=$key&direction=$dir&encoding=$enc"
@@ -246,7 +246,7 @@ class Translate
 	public function GetQuery($key = null)
 	{
 		if($key) return get($this->GetLanguages(), $key, "Query");
-		else return "lang=".$this->Language."&direction=".$this->Direction."&encoding=".$this->Encoding;
+		else return "lang=".$this->Language."&direction=".$this->Direction."&encoding=".urlencode($this->Encoding);
 	}
 
 	public function GetAccessCondition($tablePrefix = "")

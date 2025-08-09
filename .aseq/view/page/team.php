@@ -3,7 +3,7 @@
 	module("PrePage");
 	$module = new \MiMFa\Module\PrePage();
 	$module->Title = "Team";
-	$module->Image = \MiMFa\Library\Local::GetUrl("group");
+	$module->Image = "users";
 	$module->Description = \_::$Info->OwnerDescription;
 	$module->Render();
 	module("Members");

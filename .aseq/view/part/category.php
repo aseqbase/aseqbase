@@ -1,6 +1,4 @@
 <?php
-
-use MiMFa\Library\Convert;
 use MiMFa\Library\Html;
 
 $Name = grab($data, 'Name');
@@ -11,8 +9,9 @@ module("Collection");
 $module = new \MiMFa\Module\Collection();
 $module->Title = !isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strlen($Title)) > 3 ? "$Title ".($Name?"($Name)":"") : between($Title, $Name);
 $module->DefaultImage = get($data, 'Image');
-$module->RootRoute = grab($data, 'RootRoute');
+$module->RootRoute = grab($data, 'RootRoute')??\_::$Address->CategoryRoute;
 $module->MaximumColumns = 3;
+$module->ExcerptLength = 150;
 $module->Class .= " page";
 $module->Items = $nav->GetItems();
 $name = $module->Name;// To do not change the name of module

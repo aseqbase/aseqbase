@@ -54,6 +54,7 @@ class Collection extends Module
 	 * @var int
 	 */
 	public $MaximumColumns = 4;
+	public $ExcerptLength = 150;
 	/**
 	 * The label text of More button
 	 * @var string|null
@@ -82,22 +83,22 @@ class Collection extends Module
 				gap: 3vmax;
 			}
 			.{$this->Name} .item{
-				background-color: var(--back-color-0);
-				color: var(--fore-color-0);
+				background-color: var(--back-color);
+				color: var(--fore-color);
 				font-size: var(--size-1);
 				text-align: center;
     			padding: 0px;
-				border: var(--border-1) var(--fore-color-4);
-				border-radius: var(--radius-1);
+				border: var(--border-1) var(--fore-color-special-inside);
+				border-radius: var(--radius-2);
 				box-shadow: var(--shadow-1);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} .item:hover{
-				background-color: var(--back-color-1);
-				color: var(--fore-color-1);
-				border-radius: var(--radius-2);
+				background-color: var(--back-color-inside);
+				color: var(--fore-color-inside);
+				border-radius: var(--radius-1);
 				box-shadow: var(--shadow-2);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} .item .image{
 				margin: 2vmax;
@@ -113,16 +114,16 @@ class Collection extends Module
 				max-width: 100%;
 			}
 			.{$this->Name} .item .description{
-				background-color: var(--back-color-0);
-				color: var(--fore-color-0);
+				background-color: var(--back-color);
+				color: var(--fore-color);
 				text-align: start;
 				padding: 2vmin 2vmax;
 				margin-bottom: 0px;
 			}
-			.{$this->Name} .item .fa{
+			.{$this->Name} .item .icon{
 				padding: 20px;
 				margin-bottom: 3vh;
-				border: var(--border-0) var(--fore-color-0);
+				border: var(--border-0) var(--fore-color);
 				border-radius: 50%;
 			}
 			.{$this->Name} .item .btn{
@@ -187,7 +188,7 @@ class Collection extends Module
 								Html::SubHeading($p_name),
 								$p_link
 							) .
-							Html::Division($p_description, ["class" => "description"]) .
+							Html::Division(Convert::ToExcerpt($p_description, 0, $this->ExcerptLength), ["class" => "description"]) .
 							Convert::ToString($p_buttons) .
 							(isValid($p_link) ? Html::Button($this->MoreButtonLabel, $p_link, ["target" => "blank"]) : ""),
 							["class" => "item col-sm"],

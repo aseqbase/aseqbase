@@ -66,7 +66,7 @@ class AddressBase extends ArrayObject
 		$this->ScriptRoute = $this->AssetRoute . "script/";
 		$this->StyleRoute = $this->AssetRoute . "style/";
 		$this->ContentRoute = $this->Route . "post/";
-		$this->CategoryRoute = $this->Route . "cat/";
+		$this->CategoryRoute = $this->Route . "category/";
 		$this->TagRoute = $this->Route . "tag/";
 		$this->UserRoute = $this->Route . "user/";
 	}

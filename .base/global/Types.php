@@ -1,6 +1,7 @@
 <?php
-enum ScreenSize: string {
-    case XXLarg = "xxlg";
+enum ScreenSize: string
+{
+	case XXLarg = "xxlg";
 	case XXLargRange = "xxlg-range";
 	case XLarg = "xlg";
 	case XLargRange = "xlg-range";
@@ -16,11 +17,14 @@ enum ScreenSize: string {
 	case XXSmallRange = "xxsm-range";
 }
 
-class SilentException extends Exception {}
-set_exception_handler(function ($exception) {
-    if ($exception instanceof SilentException) {
-        // Do nothing (prevent logging)
-    } else {
-        error_log($exception->getMessage()); // Log other exceptions
-    }
-});
+class SilentException extends Exception
+{
+}
+if (!error_reporting())
+	set_exception_handler(function ($exception) {
+		if ($exception instanceof SilentException) {
+			// Do nothing (prevent logging)
+		} else {
+			error_log($exception->getMessage()); // Log other exceptions
+		}
+	});

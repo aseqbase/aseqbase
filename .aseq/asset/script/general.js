@@ -329,7 +329,7 @@ let getQuery = (element) => {
     return tagName;
 }
 
-let scrollTo = function (selector = "body+:nth-child(1)", time = 1000) {
+let scrollThere = function (selector = "head", time = 1000) {
 	$('html, body').animate({
 		scrollTop: parseInt($(selector).offset().top)
 	}, time);
@@ -409,7 +409,7 @@ let sendRequest = function (
 	timeout = null) {
 	if (!document.querySelector(selector)) selector = 'body';
 	
-	const btns = document.querySelectorAll(selector + ' :is(button, .btn, .icon, input:is([type=button],[type=submit],[type=image],[type=reset]))');
+	const btns = document.querySelectorAll(selector + ' :is(button, [onclick], [ondblclick], input:is([type=button],[type=submit],[type=image],[type=reset]))');
 	const elems = document.querySelectorAll(selector);
 	const opacity = document.querySelector(selector).style.opacity;
 	url = url || location.href;

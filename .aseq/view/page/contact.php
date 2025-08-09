@@ -9,5 +9,5 @@
 	$module->Location = \_::$Info->Location;
     swap($module, $data);
 	$module->Render();
-	page("message");
+	part("message", $data);
 ?>

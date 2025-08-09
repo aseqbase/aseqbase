@@ -16,7 +16,7 @@ class Manifest
 // 	"manifest",
 // 	getFullUrl(Manifest::Store([
 // 		'short_name' => 'Digikala',
-// 		'name' => 'فروشگاه اینترنتی دیجی‌کالا',
+// 		'name' => 'فروشگاه اینترنتی دیجی کالا',
 // 		'icons' => [
 // 			[
 // 				'src' => 'favicon.ico',

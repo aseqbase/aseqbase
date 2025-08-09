@@ -4,6 +4,7 @@ use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
 use MiMFa\Library\Html;
 class Field extends Module{
+	public $Tag = "div";
 	public $Class = "field";
 	public $Template = null;
 	/**
@@ -36,9 +37,9 @@ class Field extends Module{
      * @var array|string|null
 	 */
 	public $Attributes = null;
-	public $ForeColor = "var(--fore-color-1)";
-	public $BackColor = "var(--back-color-1)";
-	public $BorderColor = "var(--fore-color-5)";
+	public $ForeColor = "var(--fore-color-inside)";
+	public $BackColor = "var(--back-color-inside)";
+	public $BorderColor = "var(--fore-color-special-outside)";
 	public $Height = "auto";
 	public $Width = "100%";
 	public $MinHeight = "10px";
@@ -71,7 +72,6 @@ class Field extends Module{
 	public function __construct($type = null, $key = null, $value = null, $description = null, $options = null, $attributes = null, $required = null, $lock = null, $title = null){
         parent::__construct();
 		$this->Set($type, $key, $value, $description, $options,  $attributes, $required, $lock, $title);
-		$this->Tag = null;
     }
 	/**
 	 * Change the inputs tool
@@ -143,7 +143,7 @@ class Field extends Module{
 				margin-right: -1px;
 				padding: 0px 10px;
 				z-index: 1;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name} .input{
 				".Style::DoProperty("color", $this->ForeColor)."
@@ -155,7 +155,7 @@ class Field extends Module{
 				".Style::DoProperty("border", \_::$Front->Border(1))."
 				border-color: transparent;
 				".Style::DoProperty("border-radius", \_::$Front->Radius(0))."
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name} label.description{
 				text-align: initial;
@@ -163,15 +163,15 @@ class Field extends Module{
 				font-size: 75%;
 				padding: 5px;
 				opacity: 0.5;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name}:hover .input{
 				".Style::DoProperty("border-color", $this->BorderColor)."
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name}:hover label.description{
 				opacity: 0.75;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 		");
 	}
@@ -203,7 +203,7 @@ class Field extends Module{
 				border-color: transparent;
 				border-right: 0px solid;
 				z-index: 1;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name} .input{
 				".Style::DoProperty("color", $this->ForeColor)."
@@ -216,7 +216,7 @@ class Field extends Module{
 				border-color: transparent;
 				border-left: 0px solid;
 				".Style::DoProperty("border-radius", \_::$Front->Radius(0))."
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name} label.description{
 				text-align: initial;
@@ -225,19 +225,19 @@ class Field extends Module{
 				font-size: 75%;
 				padding: 0px 5px;
 				opacity: 0;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name}:hover label.title{
 				".Style::DoProperty("border-color", $this->BorderColor)."
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name}:hover .input{
 				".Style::DoProperty("border-color", $this->BorderColor)."
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name}:hover label.description{
 				opacity: 0.75;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 		");
 	}
@@ -268,7 +268,7 @@ class Field extends Module{
 				border-color: transparent;
 				border-bottom: 0px solid;
 				z-index: 1;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name} .input{
 				".Style::DoProperty("color", $this->ForeColor)."
@@ -279,7 +279,7 @@ class Field extends Module{
 				".Style::DoProperty("border", \_::$Front->Border(1))."
 				border-color: transparent;
 				".Style::DoProperty("border-radius", \_::$Front->Radius(0))."
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name} label.description{
 				text-align: initial;
@@ -288,22 +288,22 @@ class Field extends Module{
 				margin-top: -1px;
 				padding: 3px;
 				opacity: 0;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name}:hover label.title{
 				font-size: 75%;
 				".Style::DoProperty("border-color", $this->BorderColor)."
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name}:hover .input{
 				font-size: 125%;
 				".Style::DoProperty("border-color", $this->BorderColor)."
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 			.{$this->Name}:hover label.description{
 				font-size: 75%;
 				opacity: 0.75;
-				".Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 		");
 	}
@@ -312,14 +312,17 @@ class Field extends Module{
 		return Convert::ToString(function(){
 			$type = Html::InputDetector($this->Type, $this->Value);
             $placeHolder = __($this->PlaceHolder??$this->Title, styling:false);
-            $placeHolderAttr = isValid($placeHolder)?"placeholder='$placeHolder'":"";
-            $attrs = "class='input'".($this->Lock?" disabled":"").($this->Required?" required":"")." ".Convert::ToString($this->Attributes, " ");
-			$startTag = "<div class=\"field\">";
-            $id = grab($this->Attributes, "id")??Convert::ToID($this->Key);
+            $attributes = [
+				["class"=>"input".($this->Lock?" disabled":"")],
+				($this->Required?["required"=>true]:[]),
+				(isValid($placeHolder)?["placeholder"=>$placeHolder]:[]),
+				$this->Attributes
+			];
+			$startTag = "";
+            $id = grab($attributes, "id")??Convert::ToID($this->Key);
             if(isValid($this->Title)) $startTag .= Html::Label($this->Title, $id, ["class"=>"title" ]);
 			$endTag = "";
             if(isValid($this->Description)) $endTag .= Html::Label($this->Description, $id, ["class"=>"description" ]);
-			$endTag .= "</div>";
 			yield $this->GetContent();
 			switch ($type) {
                 case 'doc':
@@ -345,17 +348,17 @@ class Field extends Module{
                         $p->MaxHeight = $this->MaxHeight??"25vmin";
                         $p->Id = "Player".getId();
                         if(!$this->Lock) $p->PrependControls = "
-											<div class=\"fa fa-trash button\" onclick=\"
+											<div class=\"icon fa fa-trash button\" onclick=\"
 												document.getElementById('$id').setAttribute('disabled','disabled');
 												document.getElementById('{$p->Id}').style.opacity='0.5';
 												document.getElementById('{$p->Id}').style.borderColor='#f33';\"></div>
-											<div class=\"fa fa-edit button\" onclick=\"
+											<div class=\"icon fa fa-edit button\" onclick=\"
 												document.getElementById('$id').removeAttribute('disabled');
 												document.getElementById('{$p->Id}').style.opacity='1';
 												document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
 												document.getElementById('$id').click();\"></div>";
                         yield $p->ToString();
-						$attrs = "style='display:none;' ".$attrs;
+						$attributes["style"] = ($attributes["style"]??"")." display:none;";
                     }
                     $others = "";
                     $accept = "";
@@ -385,7 +388,7 @@ class Field extends Module{
                                 $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-					yield Html::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput"], $placeHolderAttr, $accept, $attrs)
+					yield Html::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput"], $accept, $attributes)
 						.$others;
 					yield $endTag;
                     break;
@@ -412,17 +415,17 @@ class Field extends Module{
                         $p->MaxHeight = $this->MaxHeight??"25vmin";
                         $p->Id = "Player".getId();
                         if(!$this->Lock) $p->PrependControls = "
-											<div class=\"fa fa-trash button\" onclick=\"
+											<div class=\"icon fa fa-trash button\" onclick=\"
 												document.getElementById('$id').setAttribute('disabled','disabled');
 												document.getElementById('{$p->Id}').style.opacity='0.5';
 												document.getElementById('{$p->Id}').style.borderColor='#f33';\"></div>
-											<div class=\"fa fa-edit button\" onclick=\"
+											<div class=\"icon fa fa-edit button\" onclick=\"
 												document.getElementById('$id').removeAttribute('disabled');
 												document.getElementById('{$p->Id}').style.opacity='1';
 												document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
 												document.getElementById('$id').click();\"></div>";
                         yield $p->ToString();
-						$attrs = "style='display:none;' ".$attrs;
+						$attributes["style"] = ($attributes["style"]??"")." display:none;";
                     }
                     $others = "";
                     $accept = "";
@@ -452,20 +455,21 @@ class Field extends Module{
                                 $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-					yield Html::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput", "multiple" => null], $placeHolderAttr, $accept, $attrs)
+					yield Html::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput", "multiple" => null], $accept, $attributes)
 					.$others;
 					yield $endTag;
                     break;
                 default:
 					yield Html::Field(
-						type:$this->Type,
-						key:$this->Key,
-						value:$this->Value,
-						title:$this->Title,
-						description:$this->Description,
-						options:$this->Options,
-						//attributes:[$placeHolderAttr, ...($this->Lock?["disabled"]:[]),...($this->Required?["required"]:[]), ...Convert::ToIteration($this->Attributes)]);
-						attributes:[$placeHolderAttr, $attrs]);
+						type: $this->Type,
+						key: $this->Key,
+						value: $this->Value,
+						description: $this->Description,
+						title: $this->Title,
+						wrapper:false,
+						options: $this->Options,
+						attributes: $attributes
+					);
 						break;
             }
         });

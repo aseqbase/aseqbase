@@ -87,18 +87,21 @@ class Module extends \Base
       * @small
       */
      public $TitleTag = "h3";
+     public $TitleClass = "title";
      /**
       * The specific tag name to add Description
       * @var enum-string
       * @small
       */
      public $DescriptionTag = "div";
+     public $DescriptionClass = "description";
      /**
       * The specific tag name to add Content
       * @var enum-string
       * @small
       */
      public $ContentTag = null;
+     public $ContentClass = "content";
      /**
       * Attached Attributes of the main tag of this module
       * @var array<string>|string
@@ -215,7 +218,7 @@ class Module extends \Base
      {
           return [
                ($this->Id ? ["id" => $this->Id] : []),
-               ["class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass() . ($this->Printable?'':' unprintable')],
+               ["class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass() . ($this->Printable?'':' view unprintable')],
                (isEmpty($this->Attributes) ? [] : (is_array($this->Attributes) ? $this->Attributes : [Convert::ToString($this->Attributes, " ", "{0}={1} ")])),
                (count($this) < 1 ? [] : $this->__toArray())
           ];
@@ -226,10 +229,10 @@ class Module extends \Base
       */
      public function GetScreenClass()
      {
-          return (isValid($this->VisibleFromScreenSize) ? " " . $this->VisibleFromScreenSize . "-visible" : "") .
-               (isValid($this->InvisibleFromScreenSize) ? " " . $this->InvisibleFromScreenSize . "-invisible" : "") .
-               (isValid($this->ShowFromScreenSize) ? " " . $this->ShowFromScreenSize . "-show" : "") .
-               (isValid($this->HideFromScreenSize) ? " " . $this->HideFromScreenSize . "-hide" : "");
+          return (isValid($this->VisibleFromScreenSize) ? " view " . $this->VisibleFromScreenSize . "-visible" : "") .
+               (isValid($this->InvisibleFromScreenSize) ? " view " . $this->InvisibleFromScreenSize . "-invisible" : "") .
+               (isValid($this->ShowFromScreenSize) ? " view " . $this->ShowFromScreenSize . "-show" : "") .
+               (isValid($this->HideFromScreenSize) ? " view " . $this->HideFromScreenSize . "-hide" : "");
      }
 
      /**
@@ -247,10 +250,10 @@ class Module extends \Base
           return null;
      }
 
-     public function GetTitle($attrs = null)
+     public function GetTitle($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Html::Attributes($attrs, $atcm);
+               $attrs = Html::Attributes([["class"=> $this->TitleClass], $attrs], $atcm);
                if (isValid($this->Title)) {
                     yield (isValid($this->TitleTag) ? "<" . $this->TitleTag . " $attrs>" : "");
                     if (is_string($this->Title))
@@ -263,14 +266,14 @@ class Module extends \Base
                }
           });
      }
-     public function GetDescription($attrs = null)
+     public function GetDescription($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Html::Attributes($attrs, $atcm);
+               $attrs = Html::Attributes([["class"=> $this->DescriptionClass], $attrs], $atcm);
                if (isValid($this->Description)) {
                     yield (isValid($this->DescriptionTag) ? "<" . $this->DescriptionTag . " $attrs>" : "");
                     if (is_string($this->Description))
-                         yield __(Html::Convert($this->Description));
+                         yield __($this->Description);
                     elseif (is_callable($this->Description))
                          yield ($this->Description)($attrs);
                     else
@@ -279,10 +282,10 @@ class Module extends \Base
                }
           });
      }
-     public function GetContent($attrs = null)
+     public function GetContent($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Html::Attributes($attrs, $atcm);
+               $attrs = Html::Attributes([["class"=> $this->ContentClass], $attrs], $atcm);
                if (isValid($this->Content)) {
                     yield (isValid($this->ContentTag) ? "<" . $this->ContentTag . " $attrs>" : "");
                     if (is_string($this->Content))

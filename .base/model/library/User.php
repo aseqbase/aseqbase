@@ -176,7 +176,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if (!self::$Active)
 			return [];
 		if (!isValid($signature = $signature ?? $this->Signature ?? $this->TemporarySignature)) {
-			$this->SignOut($signature);
+			$this->SignOut(signature: $signature);
 			return [];
 		}
 		if (isValid($password)) {
@@ -290,6 +290,20 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			]));
 	}
 
+	/**
+	 * Summary of SignUp
+	 * @param mixed $signature
+	 * @param mixed $password
+	 * @param mixed $email
+	 * @param mixed $name
+	 * @param mixed $firstName
+	 * @param mixed $lastName
+	 * @param mixed $phone
+	 * @param mixed $groupId
+	 * @param mixed $status
+	 * @param mixed $metadata
+	 * @return bool|null It will return 'true' if signed up 'null' if the account is not active yet, and 'false' otherwise
+	 */
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupId = null, $status = null, $metadata = null)
 	{
 		$this->TemporaryImage = null;
@@ -305,8 +319,14 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				":Status" => $status,
 				":MetaData" => $metadata ? (is_string($metadata) ? $metadata : json_encode($metadata)) : null,
 			]
-		);
+		)?(($status === false || ((int) $status) < self::$ActiveStatus)?null:true):false;
 	}
+	/**
+	 * Summary of SignIn
+	 * @param mixed $signature
+	 * @param mixed $password
+	 * @return bool|null It will return 'true' if logged in 'null' if the account is not active yet, and 'false' otherwise
+	 */
 	public function SignIn($signature, $password)
 	{
 		if (!isValid($password))
@@ -314,14 +334,21 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$person = $this->Find($signature, $password);
 		$status = takeValid($person, "Status", self::$InitialStatus);
 		if ($status === false || ((int) $status) < self::$ActiveStatus)
-			return \Res::Flip(Html::Error("This account is not active yet!"), null, self::$ActiveHandlerPath . "?signature=$signature");
+			return null;
 		$this->Load($person);
 		$this->Session->SetData($this->Signature . "_" . getClientCode(), $this->Signature);
 		return true;
 	}
+	/**
+	 * Summary of SignInOrSignUp
+	 * @param mixed $signature
+	 * @param mixed $password
+	 * @param mixed $email
+	 * @return bool|null It will return 'true' if logged in 'null' if the account is not active yet, and 'false' otherwise
+	 */
 	public function SignInOrSignUp($signature, $password, $email = null)
 	{
-		return $this->SignIn($signature ?? $email, $password) ??
+		return ($res = $this->SignIn($signature ?? $email, $password)) !== false ?$res:
 			$this->SignUp($signature ?? $email, $password, $email);
 	}
 	public function SignOut($signature = null)

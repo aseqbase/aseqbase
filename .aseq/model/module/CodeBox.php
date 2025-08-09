@@ -24,10 +24,10 @@ class CodeBox extends Module
     {
         return Html::Style("
             .{$this->Name} {$this->ContentTag} {
-                background-Color: var(--back-color-4);
-                Color: var(--fore-color-4);
+                background-Color: var(--back-color-special-inside);
+                Color: var(--fore-color-special-inside);
                 border-radius: var(--radius-1);
-                border: var(--border-1) var(--fore-color-2);
+                border: var(--border-1) var(--fore-color-outside);
                 min-width: 50%;
                 resize: both;
                 overflow: scroll;

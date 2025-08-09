@@ -8,11 +8,11 @@ return route("contents", [
     "Compute"=>[
         "Filter"=>[
             "Tag"=>$path,
-            ...$filter
+            ...$filter??[]
         ],
-        ...$computeData
+        ...$computeData??[]
     ],
-    ...$parent,
-    ...$data
+    ...$parent??[],
+    ...$data??[]
 ]);
 ?>

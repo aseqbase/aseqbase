@@ -12,6 +12,11 @@ use MiMFa\Library\Html;
  */
 class Tabs extends Module
 {
+    public $Image = null;
+    public $PrependTitles = null;
+    public $AppendTitles = null;
+    public $PrependContents = null;
+    public $AppendContents = null;
     /**
      * The tabs array with the format [tab1Name=>tab1Content,tab2Name=>tab2Content]
      * @var array
@@ -26,7 +31,11 @@ class Tabs extends Module
     public $TitleClass = "";
     public $ContentsClass = "";
     public $ContentClass = "";
-    public $AllowTooltip = false;
+    public $ShowTitlesLabel = true;
+    public $ShowTitlesImage = true;
+    public $ShowTitlesDescription = true;
+    public $ShowTitle = false;
+    public $ShowImage = false;
 
     /**
      * Create the module
@@ -52,38 +61,40 @@ class Tabs extends Module
     }
     public function Get()
     {
-        return Html::Division($this->GetTitle() . 
+        return Html::Division(
+                $this->PrependTitles .
                     join("", loop(
                     $this->Items,
                     function ($v, $k, $i) {
                         $name = get($v, 'Name');
-                        $image = getBetween($v, "Image", "Icon");
-                        $desc = null;
-                        if ($k === $i) {
-                            $k = $name??get($v, "Title");
-                            $desc = $this->AllowTooltip?getBetween($v, "Tooltip", 'Description'):null;
-                        }
+                        $tooltip = $this->ShowTitlesDescription?(get($v, "Description")??$this->Description):null;
                         return Html::Button(
-                            Html::Span($k) . ($image ? Html::Media("", $image) : ""),
-                            "{$this->Name}_openTab(this, '$this->Name-tab-$i')",
+                            ($this->ShowTitlesLabel?Html::Span(get($v, 'Title')??$this->Title):null) . ($this->ShowTitlesImage ? Html::Media("", getBetween($v, "Image", "Icon")??$this->Image) : ""),
+                            getBetween($v, "Path", "Action")??"{$this->Name}_openTab(this, '$this->Name-tab-$i')",
                             $name?["name"=>$name]:[], 
-                            ["class" => "tab-title $this->TitleClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " active" : "")]). ($desc?Html::Tooltip($desc):"");
+                            get($v, "Attributes")??[],
+                            ["class" => "tab-title $this->TitleClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " active" : "")]). 
+                            ($tooltip?Html::Tooltip($tooltip):"");
                     }
-                )),
+                ))
+                . $this->AppendTitles,
                 ["class" => "tab-titles $this->TitlesClass"]
-            ) . $this->GetDescription() .
+            ) .
             Html::Division(
+                $this->PrependContents .
                 join("", loop(
                     $this->Items,
                     function ($v, $k, $i) {
                         if (is_array($v)) {
                             $name = get($v, 'Name');
-                            $content = get($v, 'Content');
-                            $v = Html::ExternalHeading(get($v, 'Title')??$this->Title, getBetween($v, 'Path', 'Url', 'Link'), ["class" => "title"]) .
-                                Html::Division(Convert::ToString($content) . getBetween($v, "Button", "More"), ["class" => "content"]);
-                        }return Html::Element($v, "div", $name?["name"=>$name]:[], ["class" => "tab-content $this->ContentClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " show" : " hide"), "id" => "$this->Name-tab-$i"]);
+                            $content = get($v, 'Content')??$this->Content;
+                            $v = 
+                                ($this->ShowImage?Html::Media(get($v, 'Title')??$this->Title, getBetween($v, "Image", "Icon")??$this->Image, ["class" => "image"]):"") .
+                                ($this->ShowTitle?Html::ExternalHeading(get($v, 'Title')??$this->Title, ["class" => "title"]):"") .
+                                Html::Division(Convert::ToString($content), ["class" => "content"]);
+                        }return Html::Element($v, "div", $name?["name"=>$name]:[], ["class" => "tab-content $this->ContentClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " view show" : " view hide"), "id" => "$this->Name-tab-$i"]);
                     }
-                )). $this->GetContent(),
+                )). $this->AppendContents,
                 ["class" => "tab-contents $this->ContentsClass"]
             );
     }

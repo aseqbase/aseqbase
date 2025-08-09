@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Category` (
   `ParentId` int(11) DEFAULT NULL,
   `Name` tinytext NOT NULL,
   `Title` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Image` varchar(1024) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `Access` int(11) NOT NULL DEFAULT 0,

@@ -33,4 +33,3 @@ $module->Items = \_::$Info->Services;
 		["class" => "page-home"]
 	)
 );
-?>

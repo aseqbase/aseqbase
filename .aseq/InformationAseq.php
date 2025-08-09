@@ -57,7 +57,7 @@ class InformationAseq extends InformationBase
      * @field path
 	 * @var mixed
 	 */
-	public $ErrorSymbolPath = "/asset/general/error.png";
+	public $ErrorSymbolPath = "/asset/general/error.gif";
 
 	/**
      * The location link on the map

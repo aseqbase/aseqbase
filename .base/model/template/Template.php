@@ -115,7 +115,7 @@ class Template extends \Base{
             font-family: var(--font-3), var(--font-0);
             direction: var(--dir);
         }
-        .button, .btn{
+        button,.button{
             font-family: var(--font-2), var(--font-5), var(--font-0);
         }
         .input{
@@ -130,8 +130,8 @@ class Template extends \Base{
             max-width: 70vw;
             min-width: 120px;
             width: max-content;
-            background-color: var(--fore-color-0);
-            color: var(--back-color-0);
+            background-color: var(--fore-color);
+            color: var(--back-color);
             border: var(--border-1);
             border-radius: var(--radius-1);
             box-shadow: var(--shadow-5);
@@ -144,11 +144,14 @@ class Template extends \Base{
             z-index: 999;
             transition: var(--transition-1) 2s;
         }
-        :not(h1, h2, h3, h4, h5, h6) {
+        :not(h1, h2, h3, h4, h5, h6, p, .content) {
             line-height: 1.5em;
             direction: var(--dir);
         }
-
+        p, .content {
+            line-height: 2em;
+            direction: var(--dir);
+        }
         big {
             font-size: 1.33em;
         }
@@ -158,45 +161,51 @@ class Template extends \Base{
         sub, sup {
             line-height: 1em;
         }
+        picture {
+            overflow: hidden;
+            display: flex;
+            align-content: center;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-direction: column;
+        }
+        picture img {
+            font-family: var(--font-3), var(--font-0);
+            font-size: var(--size-2);
+            max-width: 100%;
+            max-height: 100%;
+        }
         .icon {
             min-height: 1em;
             min-width: 1em;
         }
-        :is(.button, .btn, .icon).success{
-            background-color: var(--color-2);
-            color: var(--fore-color-2);
+        button, .button{
+            text-align: center;
+            background-color: unset;
+            color: unset;
+            overflow: unset;
             ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).error{
-            background-color: var(--color-1);
-            color: var(--fore-color-2);
+        :is(button, .button):hover{
+            font-weight: bold;
             ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
-        :is(.button, .btn, .icon).message{
-            background-color: var(--color-3);
-            color: var(--fore-color-2);
-            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
+        :is(button, .button, .icon).success{
+            background-color: var(--color-green);
+            color: var(--color-white);
         }
-        :is(.button, .btn, .icon).warning{
-            background-color: var(--color-4);
-            color: var(--fore-color-2);
-            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
+        :is(button, .button, .icon).error{
+            background-color: var(--color-red);
+            color: var(--color-white);
         }
-        :is(.button, .btn, .icon).success:hover{
-            background-color: ".\_::$Front->Color(1)."88;
-            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
+        :is(button, .button, .icon).message{
+            background-color: var(--color-violet);
+            color: var(--color-white);
         }
-        :is(.button, .btn, .icon).error:hover{
-            background-color: ".\_::$Front->Color(0)."88;
-            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
-        }
-        :is(.button, .btn, .icon).message:hover{
-            background-color: ".\_::$Front->Color(2)."88;
-            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
-        }
-        :is(.button, .btn, .icon).warning:hover{
-            background-color: ".\_::$Front->Color(3)."88;
-            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
+        :is(button, .button, .icon).warning{
+            background-color: var(--color-yellow);
+            color: var(--color-white);
         }
         "));
         foreach ($this as $key=>$value)

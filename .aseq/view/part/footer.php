@@ -1,5 +1,4 @@
-<footer>
-    <?php
+<footer><?php
     use MiMFa\Library\Style;
     use MiMFa\Library\Html;
     $module = new (module("Shortcuts"))();
@@ -9,6 +8,8 @@
     if (\_::$Config->AllowTranslate) {
         $module = new (module("Translator"))();
         $module->Items = \_::$Back->Translate->GetLanguages();
+        $module->ShowLabel = true;
+        $module->ShowImage = false;
         $module->Style = new Style();
         $module->Style->TextAlign = "center";
         $module->Render();
@@ -18,7 +19,17 @@
     $module->Style->Position = "absolute";
     $module->Style->Left = "var(--size-1)";
     $module->Render();
-    \Res::Render(Html::Icon("arrow-up", "scrollTo('body :nth-child(1)');", ["style" => "border: none; position: absolute; right: var(--size-1);"]));
+    \Res::Render(
+        Html::Icon("arrow-up", "scrollThere('head');", [
+            "class" => "view top-hide",
+            "style" => "
+                display: var(--display-scrollThere, inline-flex);
+                border: none;
+                position: fixed;
+                right: var(--size-1);
+                bottom: calc(var(--size-5) + var(--size-0));
+            "]
+        )
+    );
     part("copyright");
-    ?>
-</footer>
+?></footer>

@@ -8,9 +8,9 @@ class SignRecoverForm extends Form{
 	public $Title = "Account Recovery";
 	public $Image = "undo-alt";
 	public $SubmitLabel = "Submit";
-	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
-	public $PasswordLabel = "<i class='fa fa-lock'></i>";
-	public $PasswordConfirmationLabel = "<i class='fa fa-lock'></i>";
+	public $SignatureLabel = "<i class='icon fa fa-sign-in'></i>";
+	public $PasswordLabel = "<i class='icon fa fa-lock'></i>";
+	public $PasswordConfirmationLabel = "<i class='icon fa fa-lock'></i>";
 	public $SignInLabel = "I remembered my password!";
 	public $SignInPath = null;
 	public $SignUpLabel = "I don't have an account!";
@@ -63,10 +63,10 @@ class SignRecoverForm extends Form{
 		return Html::Script("
 			$(function () {
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-outside)');
 				});
 				$(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-outside)');
 				});
                 $('.{$this->Name} form').submit(function(e) {
 					let error = null;

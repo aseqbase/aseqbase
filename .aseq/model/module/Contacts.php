@@ -18,17 +18,17 @@ class Contacts extends Module
 				margin:0px !important;
 			}
 			.{$this->Name} a.badge, a.badge:visited {
-				background-color: var(--back-color-1);
-				color: var(--fore-color-1);
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				background-color: var(--back-color-inside);
+				color: var(--fore-color-inside);
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} a.badge:hover {
-				background-color: var(--fore-color-1);
-				color: var(--back-color-1);
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				background-color: var(--fore-color-inside);
+				color: var(--back-color-inside);
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .map{
-				border: 10px solid var(--back-color-1);
+				border: 10px solid var(--back-color-inside);
 				box-shadow: var(--shadow-2);
 				border-radius: 5px;
 			}

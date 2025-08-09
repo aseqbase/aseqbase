@@ -74,22 +74,22 @@ class Buttons extends Collection
 
 			.$this->Name>*>.item {
 				height: fit-content;
-				background-Color: var(--back-color-0);
-				color: var(--fore-color-0);
+				background-Color: var(--back-color);
+				color: var(--fore-color);
 				margin: 3vmin 2vmin;
 				padding: 0px;
 				font-size:  var(--size-0);
 				box-shadow:  var(--shadow-1);
 				border-radius:  var(--radius-1);
-				border:  var(--border-1) var(--fore-color-2);
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				border:  var(--border-1) var(--fore-color-outside);
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item:hover{
 				box-shadow:  var(--shadow-2);
 				border-radius:  var(--radius-2);
-				border:  var(--border-1) var(--fore-color-0);
-				background-Color: var(--back-color-1);
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				border:  var(--border-1) var(--fore-color);
+				background-Color: var(--back-color-inside);
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			/* Style the images inside the grid */
@@ -104,44 +104,44 @@ class Buttons extends Collection
 				max-height: $this->ThumbnailMaxHeight;
 				max-width: $this->ThumbnailMaxWidth;
 				overflow: hidden;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item:hover>.image{
-				background-Color: var(--back-color-0);
+				background-Color: var(--back-color);
 				opacity: 0.6;
 				" . \MiMFa\Library\Style::UniversalProperty("filter", "blur({$this->BlurSize})") . "
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item>.description{
-				background-Color: var(--back-color-0);
+				background-Color: var(--back-color);
 				padding: 0px 1vmax;
 				position: relative;
 				bottom: 0px;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item:hover>.description{
-				background-Color: var(--back-color-0);
+				background-Color: var(--back-color);
 				padding: 3vmin 1vmax;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item>.description>h4{
 				margin: 0px;
 				font-size: var(--size-0);
 				line-height: normal;
 				text-align: unset;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item:hover>.description>h4{
 				font-size: var(--size-1);
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item>.description>*:not(h4){
 				display: none;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item:hover>.description>*:not(h4){
 				display: block;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 		");
 	}
@@ -173,7 +173,7 @@ class Buttons extends Collection
 				$p_path = getValid($item, 'Path' , $this->DefaultPath) ?? $p_link;
 				$p_buttons = getValid($item, 'ButtonsContent', $this->DefaultButtons);
 				$img->Source = $p_image;
-				$clickact = $viewer->ShowScript($p_title, $p_description, ($p_link ?? $p_path ?? $p_image), $p_buttons, getFullUrl($p_download ?? $p_path ?? $p_link ?? $p_image));
+				$clickact = $viewer->InitializeScript($p_title, $p_description, ($p_link ?? $p_path ?? $p_image), $p_buttons, getFullUrl($p_download ?? $p_path ?? $p_link ?? $p_image));
 				$img->Attributes = ["onclick" => $clickact];
 				yield "<div class='item item-$i  col-md' " . ($this->Animation ? ("data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed / 2) . "' data-aos='{$this->Animation}'") : null) . ">";
 				yield $img->ToString();

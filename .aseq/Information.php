@@ -24,17 +24,17 @@ class Information extends InformationAseq{
 	];
 
 	public $Services = [
-		array("Name" => "MiMFa aseqbase", "Description" => "<p class='md-hide'>A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>", "Image" => "phone", "More" => "<a class='btn' href='/about'>MORE</a>"),
-		array("Name" => "OUR TARGET", "Description" => "<p class='md-hide'>Develop websites by <u>a seq</u>uence-<u>base</u>d framework</p>", "Image" => "bullseye", "More" => "<a class='btn' href='/about'>MORE</a>"),
-		array("Name" => "WHAT IS WEB FRAMEWORK", "Description" => "<p class='md-hide'>A web development framework is a set of resources and tools for software developers to build and manage web applications, web services and websites.</p>", "Image" => "quote-left", "More" => "<a href=\"introduction\">READ ABOUT ASEQBASE</a>")
+		array("Name" => "MiMFa aseqbase", "Description" => "<p class='view md-hide'>A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>", "Image" => "phone", "More" => "<a class='btn' href='/about'>MORE</a>"),
+		array("Name" => "OUR TARGET", "Description" => "<p class='view md-hide'>Develop websites by <u>a seq</u>uence-<u>base</u>d framework</p>", "Image" => "bullseye", "More" => "<a class='btn' href='/about'>MORE</a>"),
+		array("Name" => "WHAT IS WEB FRAMEWORK", "Description" => "<p class='view md-hide'>A web development framework is a set of resources and tools for software developers to build and manage web applications, web services and websites.</p>", "Image" => "quote-left", "More" => "<a href=\"introduction\">READ ABOUT ASEQBASE</a>")
 	];
 
 	public $Contacts = [
-		array("Name" => "Instagram", "Path"=> "/?page=https://www.instagram.com/aseqbase", "Icon"=> "fa fa-instagram"),
-		array("Name" => "Telegram", "Path"=> "https://t.me/aseqbase", "Icon"=> "fa fa-telegram"),
-		array("Name" => "Email", "Path"=> "mailto:aseqbase@mimfa.net", "Icon"=> "fa fa-envelope"),
-		array("Name" => "Github", "Path"=> "http://github.com/mimfa", "Icon"=> "fa fa-github"),
-		array("Name" => "Forum", "Path"=> "/chat", "Image" => "comment", "Icon"=> "fa fa-comments")
+		array("Name" => "Instagram", "Path"=> "/?page=https://www.instagram.com/aseqbase", "Icon"=> "instagram"),
+		array("Name" => "Telegram", "Path"=> "https://t.me/aseqbase", "Icon"=> "telegram"),
+		array("Name" => "Email", "Path"=> "mailto:aseqbase@mimfa.net", "Icon"=> "envelope"),
+		array("Name" => "Github", "Path"=> "http://github.com/mimfa", "Icon"=> "github"),
+		array("Name" => "Forum", "Path"=> "/chat", "Image" => "comment", "Icon"=> "comments")
 	];
 }
 ?>

@@ -1,8 +1,7 @@
 <?php
-use \MiMFa\Library\Html;
 module("Copyright");
 $module = new \MiMFa\Module\Copyright();
-$module->Description = \_::$Info->CopyRight??$module->Description;
+$module->Content = \_::$Info->CopyRight??$module->Content;
 swap($module, $data);
 $module->Render();
 ?>

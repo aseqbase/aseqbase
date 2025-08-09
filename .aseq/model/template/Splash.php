@@ -27,8 +27,8 @@ class Splash extends Template{
 	<style>
 		body {
 			font-family: var(--font-1);
-			color: var(--fore-color-5);
-			background-color: var(--back-color-5);
+			color: var(--fore-color-special-outside);
+			background-color: var(--back-color-special-outside);
 			background-image: <?php echo isValid($this->Image)?("url('".$this->Image."')"):"var(--overlay-url-0)"; ?>;
 			background-size: cover;
 			background-position: center;
@@ -112,14 +112,14 @@ class Splash extends Template{
 			top: -25vh;
 			animation: none;
 			color: transparent;
-			text-shadow: 0px 0px 1px  var(--fore-color-5);
+			text-shadow: 0px 0px 1px  var(--fore-color-special-outside);
 		}
 		.splash-view .frame-3>* {
 			width: fit-content;
 			display: inline-block;
 			animation: blurFadeIn 1s ease-in 5s backwards;
 			color: transparent;
-			text-shadow: 0px 0px 1px var(--fore-color-5);
+			text-shadow: 0px 0px 1px var(--fore-color-special-outside);
 		}
 		.splash-view .frame-3>*:nth-child(2) {
 			animation-delay: 6s;
@@ -138,18 +138,18 @@ class Splash extends Template{
 			0%{
 				opacity: 0;
 				display: none;
-				text-shadow: 0px 0px 40px var(--fore-color-5);
+				text-shadow: 0px 0px 40px var(--fore-color-special-outside);
 				transform: scale(0.9);
 			}
 			20%,75%{
 				opacity: 1;
-				text-shadow: 0px 0px 1px var(--fore-color-5);
+				text-shadow: 0px 0px 1px var(--fore-color-special-outside);
 				transform: scale(1);
 			}
 			100%{
 				opacity: 0;
 				display: none;
-				text-shadow: 0px 0px 50px var(--fore-color-5);
+				text-shadow: 0px 0px 50px var(--fore-color-special-outside);
 				transform: scale(0);
 			}
 		}
@@ -157,17 +157,17 @@ class Splash extends Template{
 			0%{
 				opacity: 0;
 				display: none;
-				text-shadow: 0px 0px 40px var(--fore-color-5);
+				text-shadow: 0px 0px 40px var(--fore-color-special-outside);
 				transform: scale(1.3);
 			}
 			50%{
 				opacity: 0.5;
-				text-shadow: 0px 0px 10px var(--fore-color-5);
+				text-shadow: 0px 0px 10px var(--fore-color-special-outside);
 				transform: scale(1.1);
 			}
 			100%{
 				opacity: 1;
-				text-shadow: 0px 0px 1px var(--fore-color-5);
+				text-shadow: 0px 0px 1px var(--fore-color-special-outside);
 				transform: scale(1);
 			}
 		}

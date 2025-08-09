@@ -24,6 +24,6 @@ return route("contents", [
             ...$viewData
         ]);
     },
-    ...$data
+    ...$data??[]
 ]);
 ?>

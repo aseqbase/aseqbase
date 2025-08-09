@@ -2,6 +2,7 @@
 use MiMFa\Library\Html;
 class Icons
 {
+	public static $Local = false;
 	public static $Initialized = false;
 	public static $DefaultRoot = "body";
 
@@ -13,13 +14,16 @@ class Icons
 	public static function GetInitial()
 	{
 		self::$Initialized = true;
-		return HTML::Script(null, asset(\_::$Address->ScriptDirectory, "Icons.js", optimize: true));
+		if(self::$Local)
+			return HTML::Style(null, asset(\_::$Address->StyleDirectory, "Icons.css", optimize: false), ["async"]).HTML::Script(null, asset(\_::$Address->ScriptDirectory, "Icons.js", optimize: false), ["async"]);
+		else return HTML::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
+			HTML::Script(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js", ["async"]);
 	}
 	public static function GetStyle($root = null)
 	{
 		$root = $root ?? self::$DefaultRoot;
 		return Html::Style("
-			$root .fa {
+			$root .fa:not(.icon) {
 				aspect-ratio: 1;
 				padding: 20px;
 				min-width: 60px;
@@ -27,14 +31,24 @@ class Icons
 				text-decoration: none;
 				margin: 5px 2px;
 				opacity: 0.9;
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			$root .icon {
+				aspect-ratio: 1;
+				padding: 20px;
+				text-align: center;
+				text-decoration: none;
+				margin: 5px 2px;
+				opacity: 0.9;
+				width: unset;
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			$root .fa:hover {
+			$root :is(.fa, .icon):hover {
 				opacity: 0.95;
-				color: var(--back-color-1);
-				background-color: var(--fore-color-1);
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				color: var(--back-color-inside);
+				background-color: var(--fore-color-inside);
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 		");
 	}
@@ -43,11 +57,11 @@ class Icons
 	{
 		$root = $root ?? self::$DefaultRoot;
 		return Html::Style("
-			$root .fa:hover {
+			$root :is(.fa, .icon):hover {
 				opacity: 1;
-				color: var(--back-color-1);
-				background-color: var(--fore-color-1);
-				" . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				color: var(--back-color-inside);
+				background-color: var(--fore-color-inside);
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			$root .fa-facebook:hover {

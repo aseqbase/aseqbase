@@ -19,23 +19,23 @@ class Members extends Module
                 gap: var(--size-1);
             }
             .{$this->Name} .teammember {
-                background-color: " . \_::$Front->BackColor(0) . "99 var(--overlay-url-0);
+                background-color: var(--back-color) var(--overlay-url-0);
                 background-size: 100% auto;
                 text-align: center;
-                border: var(--border-1) var(--fore-color-2);
+                border: var(--border-1) var(--fore-color-outside);
                 border-radius: var(--radius-1);
                 box-shadow: var(--shadow-1);
                 margin-top: 150px;
                 margin-bottom: 50px;
                 padding-bottom: 15px;
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+                " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} .teammember:hover {
-                background-color: " . \_::$Front->BackColor(1) . "99;
+                background-color: var(--back-color-inside);
                 box-shadow: var(--shadow-2);
-                border: var(--border-1) var(--fore-color-1);
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+                border: var(--border-1) var(--fore-color-inside);
+                " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} .teammember div.image {
@@ -43,19 +43,19 @@ class Members extends Module
             }
 
             .{$this->Name} .teammember div.image img {
-                background-color: " . \_::$Front->BackColor(0) . "99;
+                background-color: var(--back-color);
                 border-radius: 100%;
                 width: 200px;
                 max-width: 75vmin;
-                border: var(--border-1) var(--fore-color-2);
+                border: var(--border-1) var(--fore-color-outside);
                 margin-top: -100px;
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+                " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} .teammember:hover div.image img {
-                background-color: var(--back-color-1);
-                border: var(--border-1) var(--fore-color-1);
-                " . \MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1)) . ";
+                background-color: var(--back-color-inside);
+                border: var(--border-1) var(--fore-color-inside);
+                " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} .teammember .title {
@@ -81,9 +81,9 @@ class Members extends Module
             }
 
             .{$this->Name} .teammember .features div {
-                background-color: var(--back-color-0);
+                background-color: var(--back-color);
                 border-radius: var(--radius-2);
-                border: var(--border-1) var(--fore-color-2);
+                border: var(--border-1) var(--fore-color-outside);
                 margin: 5px;
                 padding: 0px 10px;
                 display: inline-block;
@@ -107,13 +107,13 @@ class Members extends Module
             }
 
             .{$this->Name} .teammember .badge-primary {
-                background-color: var(--fore-color-0);
-                color: var(--back-color-0);
+                background-color: var(--fore-color);
+                color: var(--back-color);
             }
 
             .{$this->Name} .teammember .badge-primary:hover {
-                background-color: var(--back-color-2);
-                color: var(--fore-color-2);
+                background-color: var(--back-color-outside);
+                color: var(--fore-color-outside);
             }
         ");
     }
@@ -130,7 +130,7 @@ class Members extends Module
                         // Start a column for each team member
                         yield Html::MediumSlot(function () use ($menu, $i) {
                             // Image
-                            yield Html::Division(Html::Image(get($menu[$i], 'Image')), ["class" => "image"]);
+                            yield Html::Division(Html::Image(null, get($menu[$i], 'Image')), ["class" => "image"]);
 
                             // Title (Name and Titles)
                             yield Html::Division(function () use ($menu, $i) {

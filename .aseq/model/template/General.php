@@ -10,9 +10,12 @@ class General extends Template
 	{
 		parent::__construct($setDefaults, $setRevises);
         component("Manifest");
-        component("JsonLD");
 		component("Global");
+        component("JsonLD");
+        component("View");
+        component("Be");
 		component("Live");
+		component("Evaluate");
 		component("FontFace");
 		component("Icons");
         component("ShortcutKey");
@@ -26,10 +29,14 @@ class General extends Template
 		parent::RenderInitial();
 		echo Html::Style("
 				body {
+				  	display: flex;
+					flex-direction: column;
+    				justify-content: space-between;
+					margin: 0;
 					overflow-x: hidden;
 					min-height: 100vh;
-					background-color: var(--back-color-0);
-					color: var(--fore-color-0);
+					background-color: var(--back-color);
+					color: var(--fore-color);
 					" . \MiMFa\Library\Style::UniversalProperty("font-smoothing", "antialiased") . "
 				}
 
@@ -40,7 +47,7 @@ class General extends Template
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				::-webkit-scrollbar:hover {
-					background-color: var(--back-color-1);
+					background-color: var(--back-color-inside);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				::-webkit-scrollbar-track {
@@ -52,21 +59,23 @@ class General extends Template
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				::-webkit-scrollbar-thumb {
-					//border: var(--border-1) var(--back-color-2);
-					background-color: " . \_::$Front->BackColor(2) . "33;
+					//border: var(--border-1) var(--back-color-outside);
+					background-color: #8884;
 					border-radius: 2px;
 					box-shadow: var(--shadow-2);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				::-webkit-scrollbar-thumb:hover {
-					background-color: var(--back-color-2);
+				::-webkit-scrollbar-thumb:hover{
+					background-color: var(--back-color-special-outside);
 					border-radius: 0px;
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				body>.background-screen{
 					background-image: " . (isValid($this->BackgroundImage) ? "url('" . $this->BackgroundImage . "')" : "var(--overlay-url-0)") . "
 				}
-
+				.page{
+				    flex-grow: 1;
+				}
 				:is(h1,h2,h3,h4,h5,h6) strong{
 					font-weight: normal;
 				}
@@ -74,36 +83,49 @@ class General extends Template
 					font-size: var(--size-5);
 					text-align: center;
 					text-transform: uppercase;
-					margin-top: max(4vmax, var(--size-5));
-					margin-bottom: var(--size-2);
 				}
 				h2{
 					font-size: var(--size-4);
 					text-align: center;
 					text-transform: uppercase;
-					margin-top: var(--size-4);
 				}
 				h3{
 					font-size: var(--size-3);
 					text-transform: uppercase;
-					margin-top: var(--size-3);
 				}
 				h4{
 					font-size: var(--size-2);
-					margin-top: var(--size-2);
 				}
 				h5{
 					font-size: var(--size-1);
-					margin-top: var(--size-1);
 				}
 				h6{
 					font-size: var(--size-1);
 					display: inline-block;
-					margin-top: var(--size-1);
-					padding-inline-end: var(--size-1);
 				}
 				h6:before{
 					display: block;
+				}
+				
+				.heading{
+					margin-top: var(--size-3);
+				}	
+				.externalheading{
+					margin-top: max(4vmax, var(--size-5));
+					margin-bottom: var(--size-2);
+				}
+				.superheading{
+					margin-top: var(--size-4);
+				}
+				.subheading{
+					margin-top: var(--size-2);
+				}
+				.internalheading{
+					margin-top: var(--size-1);
+				}
+				.inlineheading{
+					margin-top: var(--size-1);
+					padding-inline-end: var(--size-1);
 				}
 
 				p{
@@ -114,7 +136,6 @@ class General extends Template
 					background-color: #8881;
 					padding-left: 3px;
 					padding-right: 3px;
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				quote:hover{
                     display: inline;
@@ -131,7 +152,7 @@ class General extends Template
 					background-color: #8883;
 					padding-left: var(--size-0);
 					padding-right: var(--size-0);
-					border-inline-start: 3px solid var(--back-color-2);
+					border-inline-start: 3px solid var(--back-color-outside);
 				}
 				blockcode{
 					background-color: #8883;
@@ -140,138 +161,121 @@ class General extends Template
 					max-height: 95vh;
 					overflow-y: scroll;
 					text-wrap: auto;
-					border-inline-start: 3px solid var(--back-color-2);
+					border-inline-start: 3px solid var(--back-color-outside);
 				}
 
 				.table :is(thead,tbody,tfoot,tr,td,th) {
-					color: var(--fore-color-1);
-					background-color: var(--back-color-1);
+					color: var(--fore-color-inside);
+					background-color: var(--back-color-inside);
+				}
+
+				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.image,.media,.item,.fa){
+					font-weight: bold;
 				}
 
 				a, a:visited, a:active, a:hover{
 					color: inherit;
 					text-decoration: none;
 				}
-				a:not(.button, .icon, .btn):hover{
+				a:not(.button, .icon):hover{
 					text-decoration: underline;
 				}
-				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.btn,.image,.media,.item,.fa){
-					font-weight: bold;
-				}
-				:is(.button, .icon[onclick], .btn), :is(.button, .icon[onclick], .btn):is(:visited, :active){
+
+				:is(.button, .icon[onclick]), :is(.button, .icon[onclick]):is(:visited, :active){
 					border: var(--border-1) transparent;
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				:is(.button, .icon[onclick], .btn):is(:hover, :focus){
-					border-color: var(--fore-color-2);
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
+				:is(.button, .icon[onclick]):is(:hover, :focus){
+					border-color: var(--fore-color-outside);
 				}
-                :is(a.btn, .btn), :is(a.btn, .btn):is(:visited, :active) {
-					text-decoration: none;
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
-				}
-				.btn, .btn:is(:visited, :active){
-					display: inline-grid;
-					align-items: center;
-					background-color: var(--back-color-1);
-					color: var(--fore-color-1);
-					border-color: var(--back-color-1);
-					font-size: var(--size-1);
-					border-radius: var(--radius-1);
-					padding: calc(var(--size-0) / 3) var(--size-1);
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
-				}
+
 				.icon[onclick]{
 					text-decoration: none;
 					display: initial;
 					padding: calc(var(--size-0) / 2);
 					border: var(--border-1) transparent;
 					cursor: pointer;
+					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
                 .icon[onclick]:hover {
-                    background-color:var(--back-color-5);
-                	color:var(--fore-color-5);
+                    background-color:var(--back-color-special-outside);
+                	color:var(--fore-color-special-outside);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
-				}
-				:is(.button, .btn):hover{
-                	text-decoration: none;
-					background-color: var(--back-color-2);
-					color: var(--fore-color-2);
-					border-color: var(--fore-color-2);
-					border-radius: var(--radius-0);
-					box-shadow: var(--shadow-2);
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
-				}
-				:is(.button, .btn).block {
-					width: 100%;
-				}
-				:is(.button, .btn).main, :is(.button, .btn).main:is(:visited, :active) {
-					background-color: var(--back-color-5);
-					color: var(--fore-color-5);
-					border-color: var(--back-color-5);
-				}
-				:is(.button, .btn).main:hover{
-					background-color: var(--back-color-2);
-					color: var(--fore-color-2);
-					border-color: var(--back-color-5);
-					border-radius: var(--radius-0);
-					box-shadow: var(--shadow-3);
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
-				}
-				:is(.button, .btn).primary, :is(.button, .btn).primary:is(:visited, :active) {
-					background-color: var(--back-color-5);
-					color: var(--fore-color-5);
-					border-color: var(--back-color-5);
-				}
-				:is(.button, .btn).primary:hover{
-					background-color: var(--fore-color-5);
-					color: var(--back-color-5);
-					border-color: var(--back-color-5);
-					border-radius: var(--radius-0);
-					box-shadow: var(--shadow-2);
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
-				}
-				:is(.button, .btn).secondary, :is(.button, .btn).secondary:is(:visited, :active) {
-					background-color: var(--back-color-3);
-					color: var(--fore-color-3);
-					border-color: var(--back-color-3);
 				}
 
-				:is(.button, .btn).outline, :is(.button, .btn).outline:is(:visited, :active){
-					background-color: transparent;
-					color: inherit;
-					border-color: var(--back-color-2);
-					font-size: var(--size-1);
+				.button{
+					text-decoration: none;
+					display: inline-flex;
+					flex-wrap: wrap;
+					justify-content: center;
+					flex-direction: column;
+					align-items: center;
 					border-radius: var(--radius-1);
-					padding: calc(var(--size-0) / 3) var(--size-1);
+					padding: calc(var(--size-3) / 2) var(--size-3);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				:is(.button, .btn).outline:hover{
-					background-color:  var(--back-color-2);
-					color: var(--fore-color-2);
-					border-color: var(--fore-color-2);
+				.button:hover{
+					background-color: var(--back-color-outside);
+					color: var(--fore-color-outside);
+                	text-decoration: none;
+					border-color: var(--fore-color-outside);
 					border-radius: var(--radius-0);
 					box-shadow: var(--shadow-2);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				:is(.button, .btn).outline.primary, :is(.button, .btn).outline.primary:is(:visited, :active) {
-					background-color: var(--back-color-2);
-					color: var(--fore-color-2);
-					border-color: var(--fore-color-5);
+				.button.block {
+					width: 100%;
 				}
-				:is(.button, .btn).outline.primary:hover{
+				.button.main, .button.main:is(:visited, :active) {
 					background-color: var(--back-color-5);
 					color: var(--fore-color-5);
-					border-color: var(--fore-color-2);
-					border-radius: var(--radius-0);
-					box-shadow: var(--shadow-2);
-					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
+					border-color: var(--back-color-5);
 				}
-				:is(.button, .btn).outline.secondary, :is(.button, .btn).outline.secondary:is(:visited, :active) {
+				.button.main:hover{
+					background-color: var(--back-color-2);
 					color: var(--fore-color-2);
-					border-color: var(--fore-color-2);
+					border-color: var(--back-color-2);
+					border-radius: var(--radius-0);
+					box-shadow: var(--shadow-3);
 				}
-				:is(a, .button, .icon, .btn):deactive {
+				.button.primary, .button.primary:is(:visited, :active) {
+					background-color: var(--back-color-special-outside);
+					color: var(--fore-color-special-outside);
+					border-color: var(--back-color-special-outside);
+				}
+				.button.primary:hover{
+					background-color: var(--fore-color-special-outside);
+					color: var(--back-color-special-outside);
+					border-color: var(--back-color-special-outside);
+				}
+				.button.secondary, .button.secondary:is(:visited, :active) {
+					background-color: var(--back-color-outside);
+					color: var(--fore-color-outside);
+					border-color: var(--back-color-outside);
+				}
+
+				.button.outline, .button.outline:is(:visited, :active){
+					background-color: var(--back-color);
+					color: var(--fore-color);
+					border-color: var(--back-color);
+				}
+				.button.outline:hover{
+					background-color: var(--fore-color);
+					color: var(--back-color-outside);
+					border-color: var(--back-color-outside);
+				}
+				.button.outline.primary, .button.outline.primary:is(:visited, :active) {
+					border-color: var(--fore-color-special-outside);
+				}
+				.button.outline.primary:hover{
+					border-color: var(--back-color-special-outside);
+				}
+				.button.outline.secondary, .button.outline.secondary:is(:visited, :active) {
+					border-color: var(--fore-color-outside);
+				}
+				.button.outline.secondary:hover, .button.outline.secondary:is(:visited, :active):hover {
+					border-color: var(--back-color-outside);
+				}
+				:is(a, .button, .icon):deactive {
 					" . \MiMFa\Library\Style::UniversalProperty("filter", "grayscale(100)") . "
 				}
 
@@ -279,7 +283,7 @@ class General extends Template
 					height: calc(var(--size-0) / 2);
 					outline: none;
 					-webkit-appearance: none;
-					border: var(--border-1) var(--fore-color-2);
+					border: var(--border-1) var(--fore-color-outside);
 					border-radius: var(--radius-1);
 				}
 				input[type='range'].rangeinput::-webkit-slider-thumb {
@@ -287,7 +291,7 @@ class General extends Template
 					height: var(--size-1);
 					cursor: ew-resize;
 					-webkit-appearance: none;
-					background-color: var(--back-color-2);
+					background-color: var(--back-color-outside);
 					border-radius: var(--radius-5);
 				}
 
@@ -324,9 +328,9 @@ class General extends Template
 					margin: var(--size-0) 0;
 				}
 				content>.page>.frame>.page{
-					color: var(--fore-color-1);
-					background-color: " . \_::$Front->BackColor(1) . "88;
-					border: var(--border-1) var(--back-color-1);
+					color: var(--fore-color-inside);
+					background-color: var(--back-color-inside);
+					border: var(--border-1) var(--back-color-inside);
 					box-shadow: var(--shadow-2);
 					border-radius: var(--radius-1);
 					padding: var(--size-0) var(--size-3) var(--size-4) var(--size-3);
@@ -334,8 +338,8 @@ class General extends Template
 				}
 
 				footer{
-					color: var(--fore-color-3);
-					background-color: var(--back-color-3);
+					color: var(--fore-color-special);
+					background-color: var(--back-color-special);
 					margin-top: var(--size-4);
 					padding-top: var(--size-5);
 					padding-bottom: var(--size-5);
@@ -351,7 +355,7 @@ class General extends Template
 
 				.main-bullet li:before{
 					content: '○';
-					color: var(--fore-color-2);
+					color: var(--fore-color-outside);
 					padding-right: 12px;
 				}
 				.main-bullet li{
@@ -375,9 +379,9 @@ class General extends Template
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.interactive-table tr:hover{
-					border-color: var(--back-color-4);
-					background-color: var(--fore-color-4);
-					color: var(--back-color-4);
+					border-color: var(--back-color-special-inside);
+					background-color: var(--fore-color-special-inside);
+					color: var(--back-color-special-inside);
 					box-shadow: var(--shadow-2);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
@@ -387,9 +391,9 @@ class General extends Template
 				const min = slider.min
 				const max = slider.max
 				const value = slider.value
-				slider.style.background = `linear-gradient(to right, var(--fore-color-1) 0%, var(--fore-color-1) \${(value-min)/(max-min)*100}%, var(--back-color-1) \${(value-min)/(max-min)*100}%, var(--back-color-1) 100%)`
+				slider.style.background = `linear-gradient(to right, var(--fore-color-inside) 0%, var(--fore-color-inside) \${(value-min)/(max-min)*100}%, var(--back-color-inside) \${(value-min)/(max-min)*100}%, var(--back-color-inside) 100%)`
 				slider.oninput = function() {
-					this.style.background = `linear-gradient(to right, var(--fore-color-1) 0%, var(--fore-color-1) \${(this.value-this.min)/(this.max-this.min)*100}%, var(--back-color-1) \${(this.value-this.min)/(this.max-this.min)*100}%, var(--back-color-1) 100%)`
+					this.style.background = `linear-gradient(to right, var(--fore-color-inside) 0%, var(--fore-color-inside) \${(this.value-this.min)/(this.max-this.min)*100}%, var(--back-color-inside) \${(this.value-this.min)/(this.max-this.min)*100}%, var(--back-color-inside) 100%)`
 				};
 			}
 		");

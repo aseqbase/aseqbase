@@ -304,45 +304,45 @@ class Content extends Module
           return Html::Style("
 			.{$this->Name} {
 				height: fit-content;
-				background-Color: var(--back-color-3);
-				color: var(--fore-color-3);
+				background-Color: var(--back-color-special);
+				color: var(--fore-color-special);
                     margin-top: var(--size-3);
                     margin-bottom: var(--size-3);
                     padding: var(--size-4) var(--size-3);
 				font-size:  var(--size-0);
 				box-shadow:  var(--shadow-1);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			.{$this->Name} .title{
 				margin-bottom: var(--size-2);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			.{$this->Name} .heading{
-                padding: 0px;
-                margin: 0px;
+                    padding: 0px;
+                    margin: 0px;
 				text-align: unset;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .details{
 				font-size: var(--size-0);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .details .route{
 				padding-$ralign: var(--size-0);
 			}
 			.{$this->Name} .buttons{
 				text-align: $ralign;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .buttons>.button{
             	opacity: 0;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}:hover .buttons>.button{
             	opacity: 1;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .tags a{
                 line-height: 100%;
@@ -369,14 +369,14 @@ class Content extends Module
 				max-height: $this->ImageMaxHeight;
 				max-width: $this->ImageMaxWidth;
 				overflow: hidden;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .description{
             	font-size: var(--size-2);
                gap: var(--size-2);
             	text-align: justify;
 				position: relative;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .content{
                font-size: var(--size-1);
@@ -466,13 +466,13 @@ class Content extends Module
                               return (new MediaFrame($v, logo: $p_image, name: is_numeric($k) ? $p_morebuttontext : $k))->DoRender();
                          })) . Html::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
                               return Html::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
-                         }), ["class" => "more md-show"]);
+                         }), ["class" => "more view md-show"]);
                     break;
                default:
                     if ($p_showmorebutton)
                          return Html::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
                               return Html::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
-                         }), ["class" => "more md-show"]);
+                         }), ["class" => "more view md-show"]);
                     break;
           }
      }
@@ -561,7 +561,7 @@ class Content extends Module
                loop($paths, function ($v, $k, $i) use ($p_morebuttontext) {
                     return Html::Button(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn " . ($i < 1 ? "main" : "outline")]);
                }),
-               attributes: ["class" => "buttons col-md-3 md-hide"]
+               attributes: ["class" => "buttons col-md-3 view md-hide"]
           );
      }
      public function GetAttaches()

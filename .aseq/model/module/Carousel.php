@@ -27,7 +27,7 @@ class Carousel extends Collection{
         parent::__construct();
 		$this->Items = $items??$this->Items;
 		$this["data-bs-ride"] = "carousel";
-		$this->CaptionBackColor = $this->CaptionBackColor??\_::$Front->BackColor(0)."cc";
+		$this->CaptionBackColor = $this->CaptionBackColor??"var(--back-color)";
 		$this->CaptionForeColor = $this->CaptionForeColor??"var(--fore-color)";
     }
 

@@ -120,43 +120,43 @@ class CommentCollection extends Collection
      * @var array|string|null
      * @category Management
      */
-    public $UpdateButtonLabel = "<i class='fa fa-save'><span class='tooltip'>Save the changes</span></i>";
+    public $UpdateButtonLabel = "<i class='icon fa fa-save'><span class='tooltip'>Save the changes</span></i>";
     /**
      * The label text of cancel button
      * @var array|string|null
      * @category Management
      */
-    public $CancelButtonLabel = "<i class='fa fa-close'><span class='tooltip'>Cancel the process</span></i>";
+    public $CancelButtonLabel = "<i class='icon fa fa-close'><span class='tooltip'>Cancel the process</span></i>";
     /**
      * The label text of Reply button
      * @var array|string|null
      * @category Management
      */
-    public $ReplyButtonLabel = "<i class='fa fa-reply'><span class='tooltip'>Reply to this message</span></i>";
+    public $ReplyButtonLabel = "<i class='icon fa fa-reply'><span class='tooltip'>Reply to this message</span></i>";
     /**
      * The label text of Edit button
      * @var array|string|null
      * @category Management
      */
-    public $EditButtonLabel = "<i class='fa fa-pencil'><span class='tooltip'>Edit the message</span></i>";
+    public $EditButtonLabel = "<i class='icon fa fa-pencil'><span class='tooltip'>Edit the message</span></i>";
     /**
      * The label text of Delete button
      * @var array|string|null
      * @category Management
      */
-    public $DeleteButtonLabel = "<i class='fa fa-trash'><span class='tooltip'>Remove the message for ever</span></i>";
+    public $DeleteButtonLabel = "<i class='icon fa fa-trash'><span class='tooltip'>Remove the message for ever</span></i>";
     /**
      * The label text of waiting to approve message
      * @var array|string|null
      * @category Management
      */
-    public $WaitingLabel = "<i class='fa fa-check'><span class='tooltip'>The message is received but not showed</span></i>";
+    public $WaitingLabel = "<i class='icon fa fa-check'><span class='tooltip'>The message is received but not showed</span></i>";
     /**
      * The label text of approved message
      * @var array|string|null
      * @category Management
      */
-    public $PublishedLabel = "<i class='fa fa-eye'><span class='tooltip'>The message is shown</span></i>";
+    public $PublishedLabel = "<i class='icon fa fa-eye'><span class='tooltip'>The message is shown</span></i>";
 
     public function GetStyle()
     {
@@ -171,20 +171,20 @@ class CommentCollection extends Collection
 				font-size: var(--size-0);
 				box-shadow: var(--shadow-1);
 				border-radius: var(--radius-2);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item:hover{
 				box-shadow: var(--shadow-2);
 				border-radius:  var(--radius-1);
 				background-Color: #88888818;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item.deactive {
 				background-Color: #88888844;
 				box-shadow: var(--shadow-0);
 				border-radius: var(--radius-0);
             	border: none;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 
 			.{$this->Name} div.item .subject{
@@ -197,11 +197,11 @@ class CommentCollection extends Collection
                 overflow-wrap: break-word;
                 flex-flow: wrap;
                 text-wrap-mode: wrap;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item:hover .subject{
 				font-size: var(--size-3);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item .author{
                 font-weight: bold;
@@ -217,7 +217,7 @@ class CommentCollection extends Collection
                 width: 100%;
 				text-align: end;
 				opacity: 0;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} :hover>*>.sidebtn{
                 padding: calc(var(--size-0) / 2);
@@ -232,17 +232,17 @@ class CommentCollection extends Collection
 				opacity: 0.8;
 				font-size: calc(var(--size-0) * 0.8);
                 z-index: 9;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} .item .sidebtn>*:hover{
                 outline: none;
                 border: none;
 				opacity: 1;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item .message .author-image {
-				background-color: var(--back-color-2);
-				color: var(--fore-color-2);
+				background-color: var(--back-color-outside);
+				color: var(--fore-color-outside);
 				opacity: 0.6;
                 aspect-ratio: 1;
                 box-shadow: var(--shadow-1);
@@ -257,11 +257,11 @@ class CommentCollection extends Collection
                 display: inline-flex;
                 justify-content: center;
                 align-items: center;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item:hover .message .author-image{
 				opacity: 1;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item .message{
                 gap: var(--size-0);
@@ -270,7 +270,7 @@ class CommentCollection extends Collection
                 overflow-wrap: break-word;
                 flex-flow: wrap;
                 text-wrap-mode: wrap;
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item .message :is(.excerpt, .full){
                 padding-inline-end: calc(var(--size-0) / 2);
@@ -292,9 +292,9 @@ class CommentCollection extends Collection
                 gap: var(--size-0);
             	font-size: var(--size-1);
 				position: relative;
-                border-top: var(--border-1) var(--back-color-1);
+                border-top: var(--border-1) var(--back-color-inside);
                 padding-inline-start: var(--size-0);
-				" . (\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))) . "
+				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
         ");
     }
@@ -455,9 +455,9 @@ class CommentCollection extends Collection
                         yield Html::Link($au, \_::$Address->UserRoute . get($author, "Signature"), ["class" => "author"]);
                 }
                 if ($p_showexcerpt)
-                    yield "<div class='excerpt parent-hover-hide'>$p_excerpt</div>";
+                    yield "<div class='excerpt view parent-hover-hide'>$p_excerpt</div>";
                 if ($p_showmessage && !isEmpty($p_message))
-                    yield "<div class='full parent-hover-show'>" . __(Html::Convert($p_message), refering: $p_refering) . "</div>";
+                    yield "<div class='full view parent-hover-show'>" . __(Html::Convert($p_message), refering: $p_refering) . "</div>";
                 if ($p_showmeta && isValid($p_meta))
                     yield "<div class='metadata'>$p_meta</div>";
                 if ($p_showimage && isValid($p_image))

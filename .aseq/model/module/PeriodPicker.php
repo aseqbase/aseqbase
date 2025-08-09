@@ -48,8 +48,8 @@ class PeriodPicker extends Module
             margin: 1vmin 1vmax;
 		}
 		.{$this->Name} .field .input{
-            background-color: var(--back-color-1);
-            color: var(--fore-color-1);
+            background-color: var(--back-color-inside);
+            color: var(--fore-color-inside);
 		}
 		.{$this->Name} .field .button{
             display: inline-block;

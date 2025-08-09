@@ -13,10 +13,13 @@ if (isValid($user))
 				text-align: center;
 			}
 			.page header.header.introduction .media {
+				background-color: var(--back-color-inside);
 				aspect-ratio: 1;
 				width: 50%;
 				max-width: 300px;
-				border-radius: 100%;
+				border: var(--border-4) var(--back-color-inside);
+				border-radius: var(--radius-max);
+				box-shadow: var(--shadow-0);
 				display: inline-flex;
 			}
 			.page .container {

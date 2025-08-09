@@ -8,14 +8,14 @@ class BarMenu extends Module{
 	public $AllowMiddle = false;
 	public $AllowSides = false;
 	public $AllowChangeColor = true;
-	public $VisibleFromScreenSize = "sm";
+	public $ShowFromScreenSize = "sm";
 	public $Height = 40;
-     public $Printable = false;
+    public $Printable = false;
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
 			.{$this->Name}{
-				color: var(--fore-color-2);
+				color: var(--fore-color-outside);
 				text-transform: uppercase;
 				text-align: center;
 				width:100vw;
@@ -34,74 +34,73 @@ class BarMenu extends Module{
 				flex-wrap: wrap;
 				z-index: 999999;
 				".\MiMFa\Library\Style::UniversalProperty("filter","drop-shadow(0px 0px 20px #00000044)")."
-				".\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 
 			.{$this->Name}:hover{
 				".\MiMFa\Library\Style::UniversalProperty("filter", "drop-shadow(0px 0px 30px #00000088)")."
-				".\MiMFa\Library\Style::UniversalProperty("transition", \_::$Front->Transition(1))."
+				".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
 			}
 
-			.{$this->Name}>.button {
-				background-color: ".\_::$Front->BackColor(2)."dd;
-				color: var(--fore-color-2);
-				text-align: center;
-				align-content: center;
-				border: none;
-				display: flex;
-				justify-content: center;
-				align-items: stretch;
-			}
-			.{$this->Name}>.button:hover {
-				cursor: pointer;
-				border: none;
-				".(($this->AllowAnimate)?"background-color: var(--fore-color-2);
-				color: var(--back-color-2);":"").
-				\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
-			}
-			.{$this->Name}>.button>.division {
+			.{$this->Name} .button {
+				background-color: var(--back-color-outside);
 				background-image: var(--overlay-url-0);
 				background-position: center;
 				background-repeat: no-repeat;
-				background-size: cover;
-				aspect-ratio: 1;
+				color: var(--fore-color-outside);
+				border: none;
+				display: flex;
+				border-radius: var(--radius-0);
+				text-align: center;
+				align-content: center;
+				justify-content: center;
+				align-items: center;
+    			flex-direction: column;
 				height: {$this->Height}px;
+				aspect-ratio: 1;
+			}
+			.{$this->Name} .button:hover {
+				cursor: pointer;
+				border: none;
+				".(($this->AllowAnimate)?"background-color: var(--fore-color-outside);
+				color: var(--back-color-outside);":"").
+				\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 
-			.{$this->Name}>.button>.division>.media{
+			.{$this->Name} .button>.media{
 				height: 55%;
     			margin: 15%;".
-				\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
 			}
-			.{$this->Name}>.button>.division>.media:not(.fa){
+			.{$this->Name} .button>.media:not(.icon){
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 60%;
-				color: var(--back-color-2);".
+				color: var(--back-color-outside);".
 				(($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter():"")."
 			}
-			.{$this->Name}>.button:hover>.division>.media{
+			.{$this->Name} .button:hover>.media{
 				background-size: auto 70%;".
 				(($this->AllowAnimate)? \MiMFa\Library\Style::UniversalProperty("filter","none"):"").
-				\MiMFa\Library\Style::UniversalProperty("transition",\_::$Front->Transition(1))."
+				\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 
-			.{$this->Name}>.button>.division>.media>span {
+			.{$this->Name} .button>.media>span {
 				text-shadow: 0px 5px 10px #000000aa;
 				display:none;
 			}
 			".(($this->AllowLabels)?"
-			.{$this->Name}>.button>.division:hover>.media>span {
+			.{$this->Name} .button:hover>.media>span {
 				display:block;
 			}
 			":"")."
 
-			.{$this->Name}>.button>.division:not(:last-child) {
+			.{$this->Name} .button:not(:last-child) {
 				border-right: none; /* Prevent double borders */
 			}
 			".
 			(($this->AllowMiddle)?"
-				.{$this->Name}>.button.middle {
+				.{$this->Name} .button.middle {
 					margin-top: -".($this->Height*0.25)."px;
 					height: ".($this->Height*1.25)."px;
 					border-radius: 100% 100% 0px 0px;
@@ -111,21 +110,21 @@ class BarMenu extends Module{
 					border-bottom: none !important;
 					outline: none !important;
 				}
-				.{$this->Name}>.button.middle:hover{
+				.{$this->Name} .button.middle:hover{
 					box-shadow:var(--shadow-2);
 				}
 
-				.{$this->Name}>.button.right{
+				.{$this->Name} .button.right{
 					border-radius: 35% 0px 0px 0px;
 				}
-				.{$this->Name}>.button.left{
+				.{$this->Name} .button.left{
 					border-radius: 0px 35% 0px 0px;
 				}":""
 			).($this->AllowSides?"
-				.{$this->Name}>.button.first{
+				.{$this->Name} .button.first{
 					border-radius: 50% 0px 0px 0px;
 				}
-				.{$this->Name}>.button.last{
+				.{$this->Name} .button.last{
 					border-radius: 0px 50% 0px 0px;
 				}":"")
 		);
@@ -154,11 +153,9 @@ class BarMenu extends Module{
                         elseif((($i-1) >= $m) && ($i >= $m)) $cls = $rtl?"left":"right";
                         elseif($ism =((($i-1) <= $m) && (($i+1) >= $m))) $cls = "middle";
                         yield Html::Button(
-							Html::Division(
-								Html::Media(
-									Html::Span(getBetween($item, "Title" , 'Name' )),
-									getBetween($item, "Image" , 'Icon')
-								)
+							Html::Media(
+								$this->AllowLabels?Html::Span(getBetween($item, "Title" , 'Name' )):null,
+								getBetween($item, "Image" , 'Icon')
 							)
 							, getBetween($item, 'Path', "Link" )??""
 						, ['class'=>$cls], get($item,"Attributes")??[]);

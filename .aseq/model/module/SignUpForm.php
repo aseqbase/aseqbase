@@ -8,26 +8,26 @@ class SignUpForm extends Form
 {
 	public $Action = null;
 	public $Title = "Sign Up";
-	public $Image = "user";
+	public $Image = "user-plus";
 	public $SubmitLabel = "Register";
-	public $SignatureLabel = "<i class='fa fa-sign-in'></i>";
+	public $SignatureLabel = "<i class='icon fa fa-sign-in'></i>";
 	public $SignatureValue = null;
-	public $FirstNameLabel = "<i class='fa fa-user'></i>";
-	public $LastNameLabel = "<i class='fa fa-user'></i>";
-	public $EmailLabel = "<i class='fa fa-envelope'></i>";
-	public $GroupLabel = "<i class='fa fa-group'></i>";
+	public $FirstNameLabel = "<i class='icon fa fa-user'></i>";
+	public $LastNameLabel = "<i class='icon fa fa-user'></i>";
+	public $EmailLabel = "<i class='icon fa fa-envelope'></i>";
+	public $GroupLabel = "<i class='icon fa fa-group'></i>";
 	public $GroupValue = null;
-	public $RouteLabel = "<i class='fa fa-route'></i>";
-	public $ContactLabel = "<i class='fa fa-phone-square'></i>";
-	public $PasswordLabel = "<i class='fa fa-lock'></i>";
+	public $RouteLabel = "<i class='icon fa fa-route'></i>";
+	public $ContactLabel = "<i class='icon fa fa-phone-square'></i>";
+	public $PasswordLabel = "<i class='icon fa fa-lock'></i>";
 	public $PasswordValue = null;
-	public $PasswordConfirmationLabel = "<i class='fa fa-lock'></i>";
+	public $PasswordConfirmationLabel = "<i class='icon fa fa-lock'></i>";
 	public $SignaturePlaceHolder = "Indicate a unique username";
 	public $FirstNamePlaceHolder = "Your first name";
 	public $LastNamePlaceHolder = "Your last name";
 	public $EmailPlaceHolder = "Your valid email address";
 	public $GroupPlaceHolder = null;
-	public $RoutePlaceHolder = null;//"<i class='fa fa-route'></i>";
+	public $RoutePlaceHolder = null;//"<i class='icon fa fa-route'></i>";
 	public $ContactPlaceHolder = "A valid phone number";
 	public $PasswordPlaceHolder = "A strong password";
 	public $PasswordConfirmationPlaceHolder = "Confirm your password";
@@ -238,10 +238,10 @@ class SignUpForm extends Form
 		return Html::Script("
 			$(function () {
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-outside)');
 				});
 				$(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-outside)');
 				});
                 $('.{$this->Name} form').submit(function(e) {
 					let error = null;
@@ -292,7 +292,7 @@ class SignUpForm extends Form
 							groupId: $group,
 							status: $this->InitialStatus,
 							metadata: $route?["Route"=>$route]:null
-						)
+						) !== false
 					) {
 						$this->Result = true;
 						return $this->GetSuccess("Dear '" . \_::$Back->User->TemporaryName . "', You registered successfully");
@@ -306,4 +306,3 @@ class SignUpForm extends Form
 			return $this->GetWarning("You are logged in!");
 	}
 }
-?>

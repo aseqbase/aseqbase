@@ -41,6 +41,7 @@ class Form extends Module
 	public $SuccessPath = null;
 	public $ErrorPath = null;
 	public $HasDecoration = true;
+	public $AllowAnimate = true;
 	public $AllowHeader = true;
 	public $AllowContent = true;
 	public $AllowFooter = true;
@@ -62,9 +63,9 @@ class Form extends Module
 	 */
 	public $Signing = null;
 
-	public $FieldsForeColor = "var(--fore-color-1)";
-	public $FieldsBackColor = "var(--back-color-1)";
-	public $FieldsBorderColor = "var(--fore-color-4)";
+	public $FieldsForeColor = "var(--fore-color-inside)";
+	public $FieldsBackColor = "var(--back-color-inside)";
+	public $FieldsBorderColor = "var(--fore-color-special-inside)";
 	public $FieldsHeight = "auto";
 	public $FieldsWidth = "100%";
 	public $FieldsMinHeight = "10px";
@@ -89,7 +90,8 @@ class Form extends Module
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \Res::Status($this->Status);
 		// });
-		if(\_::$Back->User->Access(\_::$Config->AdminAccess)) $this->BlockTimeout = 500;
+		if (\_::$Back->User->Access(\_::$Config->AdminAccess))
+			$this->BlockTimeout = 500;
 	}
 
 	public function CheckAccess($access = 0, $blocking = true, $reaction = false, &$message = null)
@@ -173,7 +175,6 @@ class Form extends Module
 				.{$this->Name} form {
 					padding-top: var(--size-0);
 					padding-bottom: var(--size-0);
-					background-color: var(--back-color-0);
     				position: relative;
 				}
 				.{$this->Name} form .fields {
@@ -185,9 +186,10 @@ class Form extends Module
 					top: 0px;
 					bottom: 0px;
 					padding: var(--size-1);
+					text-align: center;
 				}
 				.{$this->Name} .header :is(.form-image, .form-image:before) {
-					color: var(--fore-color-3);
+					color: var(--fore-color-special);
 					font-size: 300%;
 					margin: 0px 5%;
             		width: 90%;
@@ -195,23 +197,28 @@ class Form extends Module
 					height: auto;
 					text-align: center;
 				}
-				.{$this->Name} .header :not(i):is(.form-image, .form-image:before) {
+				.{$this->Name} .header svg.form-image {
+					color: var(--fore-color-special);
+					margin: 0;
+					padding: 0;
+            		width: 30%;
+					height: unset;
+					text-align: center;
+				}
+				.{$this->Name} .header :not(svg, i):is(.form-image, .form-image:before) {
 					background-size: cover;
 					background-repeat: no-repeat;
 					border-radius: 100%;
 					aspect-ratio: 1;
 				}
 				.{$this->Name} .header .form-title {
+					margin: var(--size-0);
 					text-align: center;
 				}
 				.{$this->Name} .header .back-button {
 					text-align: center;
 					display: block;
 					width: 100%;
-				}
-				.{$this->Name} .content {
-					background-color: var(--back-color-0);
-					color: var(--fore-color-0);
 				}
 
 				.{$this->Name} .content .title {
@@ -230,19 +237,19 @@ class Form extends Module
 					border-radius: var(--radius-1);
 					padding: calc(var(--size-0) / 2) var(--size-0);
 					box-shadow: var(--shadow-0);
-					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} .button:hover {
 					font-weight: bold;
 					box-shadow: var(--shadow-2);
 				}
 				.{$this->Name} .submitbutton {
-					background-color: var(--fore-color-2);
-					color: var(--back-color-2);
+					background-color: var(--fore-color-outside);
+					color: var(--back-color-outside);
 				}
 				.{$this->Name} .submitbutton:hover {
-					background-color: var(--back-color-5);
-					color: var(--fore-color-5);
+					background-color: var(--back-color-special-outside);
+					color: var(--fore-color-special-outside);
 				}
 
 				.{$this->Name} .group {
@@ -294,7 +301,7 @@ class Form extends Module
 					align-items: center;
 					margin: 0px;
 					padding: 0px var(--size-0);
-					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} .field .prepend{
 					display: inline-flex;
@@ -303,10 +310,10 @@ class Form extends Module
 					padding: var(--size-0);
 					height: 100%;
 					border: none;
-					background-color: var(--back-color-1);
-					color: var(--fore-color-1);
+					background-color: var(--back-color-inside);
+					color: var(--fore-color-inside);
 					border-top: none;
-					border-bottom: 1px solid var(--fore-color-4);
+					border-bottom: 1px solid var(--fore-color-special-inside);
 				}
 				.{$this->Name} .field .input {
 					" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -322,7 +329,7 @@ class Form extends Module
 					border-bottom: var(--border-1);
 					border-color: transparent;
 					border-radius: var(--radius-0);
-					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} .field .input[type='color'] {
 					min-width: auto;
@@ -337,7 +344,7 @@ class Form extends Module
 				.{$this->Name} .field .input:focus {
 					box-shadow: none;
 					" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} .field label.description{
 					font-size: 75%;
@@ -346,11 +353,11 @@ class Form extends Module
 					text-align: initial;
 					display: block;
 					padding-top: 5px;
-					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} .field:hover label.description{
 					opacity: 0.75;
-					" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 					
 				.{$this->Name} .group.buttons {
@@ -380,7 +387,7 @@ class Form extends Module
 				vertical-align: top;
 				margin: 5px;
 				padding: 5px var(--size-0);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -395,7 +402,7 @@ class Form extends Module
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
 				border-radius: var(--radius-0);
 				margin: 5px;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -409,15 +416,15 @@ class Form extends Module
 				line-height: 100%;
 				padding: 5px 2px;
 				opacity: 0.5;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover .input{
 				" . Style::DoProperty("outline-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover label.description{
 				opacity: 0.75;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 		");
 	}
@@ -445,7 +452,7 @@ class Form extends Module
 				margin-right: -1px;
 				padding: 3px var(--size-1);
 				border-radius: 3px 0px 0px 3px;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -463,7 +470,7 @@ class Form extends Module
 				border-bottom: var(--border-1);
 				border-color: transparent;
 				border-radius: var(--radius-0);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -478,19 +485,19 @@ class Form extends Module
 				line-height: 100%;
 				padding: 3px;
 				opacity: 0;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover label.title{
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover .input{
 				outline: none;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover label.description{
 				opacity: 0.75;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 		");
 	}
@@ -523,7 +530,7 @@ class Form extends Module
 				border-color: transparent;
 				border-bottom: 0px solid;
 				z-index: 1;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -537,7 +544,7 @@ class Form extends Module
 				border-color: transparent;
 				padding: 2px var(--size-0);
 				border-radius: var(--radius-0);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -552,23 +559,23 @@ class Form extends Module
 				margin-top: -1px;
 				padding: 2px var(--size-0);
 				opacity: 0;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover label.title{
 				font-size: 75%;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover .input{
 				font-size: 125%;
 				outline: none;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover label.description{
 				font-size: 75%;
 				opacity: 0.75;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 		");
 	}
@@ -595,7 +602,7 @@ class Form extends Module
 				margin-right: -1px;
 				padding: 5px var(--size-0);
 			    margin: 5px;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -610,7 +617,7 @@ class Form extends Module
 				border-color: transparent;
 				border-bottom: var(--border-1);
 				border-radius: var(--radius-0);
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -624,24 +631,24 @@ class Form extends Module
 				line-height: 100%;
 				text-align: initial;
 				border-radius: 3px;
-				border: var(--border-1) var(--back-color-2);
-				background-color: var(--fore-color-2);
-				color: var(--back-color-2);
+				border: var(--border-1) var(--back-color-outside);
+				background-color: var(--fore-color-outside);
+				color: var(--back-color-outside);
 				position: absolute;
 				padding: calc(var(--size-0) / 2);
 				z-index: 1;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover .input{
 				outline: none;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover label.description{
 				opacity: 1;
 				display: block;
 				font-size: 75%;
-				" . Style::UniversalProperty("transition", \_::$Front->Transition(1)) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 					
 			.{$this->Name} .group.buttons {
@@ -663,17 +670,17 @@ class Form extends Module
 			$this->Children = isEmpty($this->FieldsTypes)
 				? iteration($this->Children, function ($v, $k) use ($attr) {
 					if (is_integer($k))
-						if ($v instanceof \MiMFa\Module\Field)
-							return $v;
+						if ($v instanceof \Base)
+							return $v->ToString();
 						elseif (is_array($v))
 							return Html::Field(
 								type: grab($v, "Type"),
 								key: grab($v, "Key"),
 								value: grab($v, "Value"),
 								description: grab($v, "Description"),
-								options: grab($v, "Option"),
+								options: grab($v, "Options"),
 								title: grab($v, "Title"),
-								scope: grab($v, "Scope") ?? [],
+								wrapper: grab($v, "Wrapper") ?? [],
 								attributes: [...(grab($v, "Attributes") ?? []), ...$v]
 							);
 						else
@@ -713,8 +720,7 @@ class Form extends Module
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
 							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class" => "back-button"]) : "")
-							,
-							["class" => "header"]
+							, ["class" => "header", ...($this->AllowAnimate?["data-aos"=>"fade-left"]:[])]
 						) : "") .
 						Html::LargeSlot(
 							Html::Form(
@@ -730,7 +736,7 @@ class Form extends Module
 							) .
 							($this->AllowFooter ? $this->GetFooter() : "")
 							,
-							["class" => "{$this->ContentClass} content"]
+							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate?["data-aos"=>"fade-right"]:[])]
 						)
 					);
 			else
@@ -751,7 +757,7 @@ class Form extends Module
 						,
 						$src,
 						["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
-					) .
+					, ...($this->AllowAnimate?["data-aos"=>"fade-left"]:[])) .
 					($this->AllowFooter ? $this->GetFooter() : "");
 		}
 		return null;
@@ -786,11 +792,11 @@ class Form extends Module
 		return parent::GetScript() . Html::Script("
 			$(document).ready(function () {
 				" . ($this->UseAjax ? "handleForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
-				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
+				$('.{$this->Name} :is(input, select, textarea)').on('focus', function () {
+					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-outside)');
 				});
-				$(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-2)');
+				$('.{$this->Name} :is(input, select, textarea)').on('blur', function () {
+					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-outside)');
 				});
 			});
 		");
@@ -913,4 +919,3 @@ class Form extends Module
 			);
 	}
 }
-?>
