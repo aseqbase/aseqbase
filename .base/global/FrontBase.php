@@ -10,10 +10,11 @@ library("Revise");
  */
 abstract class FrontBase
 {
-	public $AnimationSpeed = 250;
+	public $AnimationSpeed = 500;
 	public $DetectMode = true;
-	public $DefaultDarkMode = null;
-	public $DarkMode = null;
+	public $SwitchMode = null;
+	public $DefaultMode = null;
+	public $CurrentMode = null;
 	public $DefaultSourceSelector = "body";
 	public $DefaultDestinationSelector = "body";
 
@@ -53,14 +54,14 @@ abstract class FrontBase
 	/**
 	 * Fore Colors Palette
 	 * @field array<color>
-	 * @template array [normal, inside, outside, special, special-inside, special-outside]
+	 * @template array [normal, inside, outside, special, special-input, special-output]
 	 * @var mixed
 	 */
 	public $ForeColorPalette = array("#151515", "#202020", "#101010", "#040506", "#3aa3e9", "#fdfeff");
 	/**
 	 * Back Colors Palette
 	 * @field array<color>
-	 * @template array [normal, inside, outside, special, special-inside, special-outside]
+	 * @template array [normal, inside, outside, special, special-input, special-output]
 	 * @var mixed
 	 */
 	public $BackColorPalette = array("#fdfeff", "#fafbfc", "#fdfeff", "#fafcfd", "#fdfeff", "#3aa3e9");
@@ -70,7 +71,7 @@ abstract class FrontBase
 	 * @template array [normal, inside, outside]
 	 * @var mixed
 	 */
-	public $FontPalette = array("'dubai light', sans-serif", "'dubai', sans-serif", "'dubai', sans-serif", "'Tahoma', sans-serif", "'Tahoma', sans-serif", "'Times new Romance', sans-serif");
+	public $FontPalette = array("'Dubai-Light', sans-serif", "'Dubai', sans-serif", "'Dubai', sans-serif");
 	/**
 	 * Sizes Palette
 	 * @field array<size>
@@ -100,7 +101,7 @@ abstract class FrontBase
 	 * @template array [minimum, normal, medium, maximum, ...]
 	 * @var mixed
 	 */
-	public $RadiusPalette = array("0px", "3px", "5px", "50px", "50%", "100%");
+	public $RadiusPalette = array("unset", "3px", "5px", "25px", "50%", "100%");
 	/**
 	 * Transitions Palette
 	 * @field array<text>
@@ -143,7 +144,7 @@ abstract class FrontBase
 	}
 	/**
 	 * To get the ForeColor by index
-	 * @param int $index 0:normal, 1:inside, 2:outside, 3:special, 4:special-inside, 5:special-outside
+	 * @param int $index 0:normal, 1:inside, 2:outside, 3:special, 4:special-input, 5:special-output
 	 */
 	public function ForeColor(int $index = 0)
 	{
@@ -151,7 +152,7 @@ abstract class FrontBase
 	}
 	/**
 	 * To get the BackColor by index
-	 * @param int $index 0:normal, 1:inside, 2:outside, 3:special, 4:special-inside, 5:special-outside
+	 * @param int $index 0:normal, 1:inside, 2:outside, 3:special, 4:special-input, 5:special-output
 	 */
 	public function BackColor(int $index = 0)
 	{
@@ -225,45 +226,38 @@ abstract class FrontBase
 	public function __construct()
 	{
 		\MiMFa\Library\Revise::Load($this);
-		if ($this->IsDark($this->BackColor(0)) === true)
-			$this->DefaultDarkMode = $this->DarkMode = true;
-		else
-			$this->DefaultDarkMode = $this->DarkMode = false;
-		$lm = \Req::Receive("LightMode");
-		$lm = $lm ? setMemo("LightMode", $lm) : false;
-		$dm = \Req::Receive("DarkMode");
-		$dm = $dm ? setMemo("DarkMode", $dm) : false;
-		if (
-			$this->DetectMode && (
-				($this->DarkMode && ($lm || getMemo("LightMode")))
-				||
-				(!$this->DarkMode && ($dm || getMemo("DarkMode")))
-			)
-		) {
+		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
+		$this->SwitchMode = receive("SwitchMode") ?? getMemo("SwitchMode") ?? $this->SwitchMode;
+		if ($this->DetectMode && $this->SwitchMode) {
 			$middle = $this->ForeColorPalette;
 			$this->ForeColorPalette = $this->BackColorPalette;
 			$this->BackColorPalette = $middle;
-			$this->DarkMode = !$this->DarkMode;
+			$this->CurrentMode = $this->GetMode($this->BackColor(0));
 		}
 	}
 
 	public function CreateTemplate($name = null, $data = [])
 	{
-		return new (template($name, $data, alternative:"Main"))();
+		return new (template($name, $data, alternative: "Main"))();
 	}
 
-	public function IsDark($color = null): bool|null
+	/**
+	 * Get the lightness of a color with a number between -255 to +255
+	 * @param mixed $color A three, four, six or eight characters hexadecimal color numbers for example #f80 or #ff8800
+	 * @return float|int A number between -255 (for maximum in darkness) to +255 (for maximum in lightness)
+	 */
+	public function GetMode($color = null)
 	{
 		if (!isValid($color))
-			return $this->IsDark($this->BackColor(0)) === false;
-		$l = strlen($color);
-		$rgba = preg_find_all($l > 6 ? '/\w\w/' : '/\w/', $color);
-		$sc = hexdec(getValid($rgba, 0, 0)) + hexdec(getValid($rgba, 1, 0)) + hexdec(getValid($rgba, 2, 0));
-		if ($sc < 127)
-			return true;
-		elseif ($sc > 382)
-			return false;
-		return null;
+			if (!is_null($this->CurrentMode))
+				return $this->CurrentMode;
+			else
+				return $this->GetMode($this->BackColor(0));
+		$l = strlen($color) > 6;
+		$rgb = preg_find_all($l ? '/\w\w/' : '/\w/', $color);
+		$sc = ($l ? hexdec(getValid($rgb, 0, 0)) + hexdec(getValid($rgb, 1, 0)) + hexdec(getValid($rgb, 2, 0)) :
+			hexdec(getValid($rgb, 0, 0)) * 16 + hexdec(getValid($rgb, 1, 0)) * 16 + hexdec(getValid($rgb, 2, 0)) * 16 - 3);
+		return $sc > 510 ? $sc - 510 : ($sc < 255 ? $sc - 255 : $sc - 382.5);
 	}
 
 
@@ -285,22 +279,22 @@ abstract class FrontBase
 	 * Interact with all specific parts of the client side one by one
 	 * @param mixed $selector The source selector
 	 * @param mixed $callback The call back handler
-	 * @example: Get("body", function(selectedHtml)=>{ //do somework })
+	 * @example: get("body", function(selectedHtml)=>{ //do somework })
 	 */
 	public static function Iterate($selector = null, $callback = null)
 	{
-		\Res::Iterate("document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? 'body') . ")", $callback);
+		iterateRequest("document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? 'body') . ")", $callback);
 	}
 
 	/**
 	 * Get all specific parts of the client side
 	 * @param mixed $selector The source selector
 	 * @param mixed $callback The call back handler
-	 * @example: Get("body", function(selectedHtml)=>{ //do somework })
+	 * @example: get("body", function(selectedHtml)=>{ //do somework })
 	 */
 	public function Get($selector = null, $callback = null)
 	{
-		\Res::Interact("Array.from(document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
+		request("Array.from(document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
 	}
 	/**
 	 * Replace the output with a special part of client side
@@ -310,7 +304,7 @@ abstract class FrontBase
 	 */
 	public function Set($selector = null, $handler = null, ...$args)
 	{
-		return \Res::Script($this->MakeSetScript($selector, $handler, ...$args));
+		return renderScript($this->MakeSetScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -333,7 +327,7 @@ abstract class FrontBase
 	 */
 	public function Delete($selector = "body")
 	{
-		return \Res::Script($this->MakeDeleteScript($selector));
+		return renderScript($this->MakeDeleteScript($selector));
 	}
 	/**
 	 * Make a script to
@@ -352,7 +346,7 @@ abstract class FrontBase
 	 */
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
-		return \Res::Script($this->MakeBeforeScript($selector, $handler, ...$args));
+		return renderScript($this->MakeBeforeScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -377,7 +371,7 @@ abstract class FrontBase
 	 */
 	public function After($selector = "body", $handler = null, ...$args)
 	{
-		return \Res::Script($this->MakeAfterScript($selector, $handler, ...$args));
+		return renderScript($this->MakeAfterScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -402,7 +396,7 @@ abstract class FrontBase
 	 */
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
-		return \Res::Script($this->MakeFillScript($selector, $handler, ...$args));
+		return renderScript($this->MakeFillScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -428,7 +422,7 @@ abstract class FrontBase
 	 */
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
-		return \Res::Script($this->MakePrependScript($selector, $handler, ...$args));
+		return renderScript($this->MakePrependScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -453,7 +447,7 @@ abstract class FrontBase
 	 */
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
-		return \Res::Script($this->MakeAppendScript($selector, $handler, ...$args));
+		return renderScript($this->MakeAppendScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to

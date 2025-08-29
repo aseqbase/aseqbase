@@ -70,10 +70,10 @@ class FixedBanner extends Module{
 			.{$this->Name}>.content>.top{
 				padding: 10vmin;
 				padding-bottom: 0px;
-				color: ".(isValid($this->ForeColor)?$this->ForeColor:"var(--fore-color-special-inside)").";
+				color: ".(isValid($this->ForeColor)?$this->ForeColor:"var(--fore-color-special-input)").";
 			}
 			.{$this->Name}.box>.content>.top{
-				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color-special-inside)").";
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color-special-input)").";
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: cover;
@@ -102,7 +102,7 @@ class FixedBanner extends Module{
 				padding-top: 0px;
 				font-size: var(--size-3);
     			font-weight: bold;
-				color: ".(isValid($this->SpecialColor)?$this->SpecialColor:"var(--fore-color-special-inside)").";
+				color: ".(isValid($this->SpecialColor)?$this->SpecialColor:"var(--fore-color-special-input)").";
 			}
 
 			.{$this->Name}>.content>.bottom>.description{
@@ -143,7 +143,7 @@ class FixedBanner extends Module{
 						(isValid($this->Title)? Html::ExternalHeading($this->Title, null, ["class"=>'title' , "data-aos"=>'zoom-up', "data-aos-delay"=>'1000', "data-aos-offset"=>'-500']):"")
 					,["class"=>"top"]).
 					Html::Division(
-						(isValid($this->Description)? Html::Division(__($this->Description,true,false), ["class"=>'description' , "data-aos"=>'flip-right', "data-aos-delay"=>'1500', "data-aos-offset"=>'-500']):"").
+						(isValid($this->Description)? Html::Division(__($this->Description), ["class"=>'description' , "data-aos"=>'flip-right', "data-aos-delay"=>'1500', "data-aos-offset"=>'-500']):"").
 						(isValid($this->Items)? Html::Division(
 							Convert::ToString(function(){
 								$i = 6;
@@ -154,8 +154,8 @@ class FixedBanner extends Module{
 									if($p) yield Html::OpenTag("a", ["href"=>$p]);
 									if(isValid($item,'Image' )) yield Html::Image(null, get($item, "Image" ));
 									if(isValid($item,'Icon')) yield "<i class='icon {$item['Icon']}' aria-hidden='true'></i>";
-									if(isValid($item,'Name' )) yield "<div class='title'>".__($item['Name' ],true,false)."</div>";
-									if(isValid($item,'More')) yield "<div class='more'>".__($item['More'],true,false)."</div>";
+									if(isValid($item,'Name' )) yield "<div class='title'>".__($item['Name' ])."</div>";
+									if(isValid($item,'More')) yield "<div class='more'>".__($item['More'])."</div>";
 									if($p) yield Html::CloseTag();
 									yield "</div>";
 								}

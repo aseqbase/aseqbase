@@ -88,14 +88,14 @@ class Collection extends Module
 				font-size: var(--size-1);
 				text-align: center;
     			padding: 0px;
-				border: var(--border-1) var(--fore-color-special-inside);
+				border: var(--border-1) var(--fore-color-special-input);
 				border-radius: var(--radius-2);
 				box-shadow: var(--shadow-1);
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} .item:hover{
-				background-color: var(--back-color-inside);
-				color: var(--fore-color-inside);
+				background-color: var(--back-color-input);
+				color: var(--fore-color-input);
 				border-radius: var(--radius-1);
 				box-shadow: var(--shadow-2);
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
@@ -156,7 +156,7 @@ class Collection extends Module
 					$p_image = getValid($item, 'Image', $this->DefaultImage);
 					$p_name = __(getBetween($item, 'Title', 'Name') ?? $this->DefaultTitle, true, false);
 					$p_description = getValid($item, 'Description', $this->DefaultDescription);
-					$p_description = is_null($p_description) ? null : __($p_description);
+					$p_description = is_null($p_description) ? null : __($p_description, styling:true, referring:true);
 					$p_link = ($l = getBetween($item, 'Path', 'Link')) ? $l : ($this->RootRoute ? $this->RootRoute . getBetween($item, 'Id', 'Name') : $this->DefaultPath);
 					$p_buttons = getValid($item, 'Buttons', $this->DefaultButtons);
 					$img->Source = $p_image;

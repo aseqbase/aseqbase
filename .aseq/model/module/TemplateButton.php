@@ -11,8 +11,7 @@ class TemplateButton extends Module{
 	public $DarkIcon = "moon";
 	public $LightLabel = "";
 	public $DarkLabel = "";
-	public $LightRequest = "LightMode";
-	public $DarkRequest = "DarkMode";
+	public $SwitchRequest = "SwitchMode";
     public $Printable = false;
 
 	public function __construct(){
@@ -20,45 +19,43 @@ class TemplateButton extends Module{
 		if(!$this->Class) 
 			if($this->LightLabel || $this->DarkLabel) $this->Class = "button";
 			else $this->Class = "icon";
-		$invertation = "// reload();
-		invertStyleId = '{$this->Name}-invert-styles';
-		invertStyle = document.getElementById(invertStyleId);
-		invertContent = ".Script::Convert(\_::$Front->DarkMode?
-			Html::Media($this->DarkLabel, $this->DarkIcon)
-			:Html::Media($this->LightLabel, $this->LightIcon)
-	    ).";
-		content = ".Script::Convert(\_::$Front->DarkMode?
+		$isDark = \_::$Front->GetMode() < 0 && !\_::$Front->SwitchMode;
+		$this->Attributes["onclick"] = "
+		switchStyleId = '{$this->Name}-switch-styles';
+		switchStyle = document.getElementById(switchStyleId);
+		switchContent = ".Script::Convert($isDark?
+			Html::Media($this->DarkLabel, $this->DarkIcon):
 			Html::Media($this->LightLabel, $this->LightIcon)
-			:Html::Media($this->DarkLabel, $this->DarkIcon)
-	    ).";
-		if(invertStyle) {
+		).";
+		content = ".Script::Convert($isDark?
+			Html::Media($this->LightLabel, $this->LightIcon):
+			Html::Media($this->DarkLabel, $this->DarkIcon)
+		).";
+		if(switchStyle) switchStyle.remove();
+		else {
+			switchStyle = document.createElement('style');
+			switchStyle.id = switchStyleId;
+			switchStyle.innerHTML = `".GlobalStyle::SwitchVariables()."`;
+			document.head.append(switchStyle);
+		}
+		if({$this->Name}_SwitchMode) {
 			document.querySelector('.{$this->Name} .media').outerHTML = content;
-			invertStyle.remove();
+			setMemo('{$this->SwitchRequest}', {$this->Name}_SwitchMode = false);
 		} else {
-			document.querySelector('.{$this->Name} .media').outerHTML = invertContent;
-			invertStyle = document.createElement('style');
-			invertStyle.id = invertStyleId;
-			invertStyle.innerHTML = `".GlobalStyle::InvertVariables()."`;
-			document.head.append(invertStyle);
+			document.querySelector('.{$this->Name} .media').outerHTML = switchContent;
+			setMemo('{$this->SwitchRequest}', {$this->Name}_SwitchMode = true);
 		}";
-		if(\_::$Front->DarkMode) $this->Attributes["onclick"]="
-			setMemo(`{$this->LightRequest}`,true);
-			setMemo(`{$this->DarkRequest}`,false);
-			$invertation
-		";
-		else $this->Attributes["onclick"]="
-			setMemo(`{$this->DarkRequest}`,true);
-			setMemo(`{$this->LightRequest}`,false);
-			$invertation
-		";
 	}
 	public function Get(){
 		return $this->GetTitle().$this->GetDescription().
-		(\_::$Front->DarkMode?
-			Html::Media($this->LightLabel, $this->LightIcon)
-			:Html::Media($this->DarkLabel, $this->DarkIcon)
+		(\_::$Front->GetMode() < 0?
+			Html::Media($this->LightLabel, $this->LightIcon):
+			Html::Media($this->DarkLabel, $this->DarkIcon)
 	    ).
 		$this->GetContent();
+    }
+	public function GetScript(){
+		return parent::GetScript().Html::Script("{$this->Name}_SwitchMode = ".(\_::$Front->SwitchMode?"true ":"false").";");
     }
 }
 ?>

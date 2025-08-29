@@ -167,7 +167,7 @@ class Reflect{
      */
     public static function HandleForm($objectOrReflection, $newValues = null){
         try {
-            if(is_null($newValues)) $newValues = \Req::Receive(null,"POST");
+            if(is_null($newValues)) $newValues = receivePost(null);
             $objectOrReflection = self::Update($objectOrReflection, $newValues);
             $c = count($objectOrReflection);
             if($c < 1) return Html::Warning("Here is no unsaved change!");

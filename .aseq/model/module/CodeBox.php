@@ -24,10 +24,10 @@ class CodeBox extends Module
     {
         return Html::Style("
             .{$this->Name} {$this->ContentTag} {
-                background-Color: var(--back-color-special-inside);
-                Color: var(--fore-color-special-inside);
+                background-Color: var(--back-color-special-input);
+                Color: var(--fore-color-special-input);
                 border-radius: var(--radius-1);
-                border: var(--border-1) var(--fore-color-outside);
+                border: var(--border-1) var(--fore-color-output);
                 min-width: 50%;
                 resize: both;
                 overflow: scroll;
@@ -47,9 +47,9 @@ class CodeBox extends Module
                 $this->ControlBox = new Panel();
                 $this->ControlBox->Content = function () use ($id) {
                     if (isValid($this->CopyButtonLabel))
-                        return Html::Button(__($this->CopyButtonLabel), "copyFrom('$id');", ["class"=> "btn"]);
+                        return Html::Button($this->CopyButtonLabel, "copyFrom('$id');", ["class"=> "btn"]);
                     if (isValid($this->PasteButtonLabel))
-                        return Html::Button(__($this->PasteButtonLabel), "pasteInto('$id');", ["class"=> "btn"]);
+                        return Html::Button($this->PasteButtonLabel, "pasteInto('$id');", ["class"=> "btn"]);
                     return ""; // Return empty string if neither button is valid
                 };
             }

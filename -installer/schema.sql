@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%User` (
   `FirstName` varchar(256) DEFAULT NULL,
   `MiddleName` varchar(256) DEFAULT NULL,
   `LastName` varchar(256) DEFAULT NULL,
-  `Gender` enum('Unspecified','Male','Female','X') DEFAULT NULL,
+  `Gender` enum('Unspecified','Male','Female','X') NOT NULL DEFAULT 'Unspecified',
   `Image` varchar(1024) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `Bio` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Email` varchar(256) DEFAULT NULL,

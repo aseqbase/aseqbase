@@ -80,8 +80,8 @@ class Page extends Module
 						background-size: 70% 70%;
 						background-repeat: no-repeat;
 						background-position: center;
-						background-color: var(--back-color-inside);
-						color: var(--fore-color-inside);
+						background-color: var(--back-color-input);
+						color: var(--fore-color-input);
 						position: absolute;
 						top: calc(50% - 5VMAX);
 						left: calc(50% - 5VMAX);
@@ -174,7 +174,7 @@ class Page extends Module
 				frame.innerHTML = ReadyHtml.load();
 				if(!isEmpty(cls)) frame.addClass(cls);
 				if(!isEmpty(anim)) frame.setAttribute(`data-aos`,(isEmpty(anim)?``:anim));
-				$(selector).load(`/private.php?".(isEmpty(\Req::$Query)?"":(\Req::$Query))."`".", {name:link,animation:anim,class:cls},
+				$(selector).load(`/private.php?".(isEmpty(\_::$Query)?"":(\_::$Query))."`".", {name:link,animation:anim,class:cls},
 					function(data){
 						if(!data) frame.innerHTML = ReadyHtml.connectionError(`Please check your connection...`);
 					},

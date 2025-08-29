@@ -5,14 +5,6 @@ class GlobalStyle{
 		$rootSelector{
 			--dir: ".(\_::$Back->Translate->Direction??\_::$Config->DefaultDirection).";
 			--lang: ".(\_::$Back->Translate->Language??\_::$Config->DefaultLanguage).";
-			--color-0: " . \_::$Front->Color(0) . ";
-			--color-1: " . \_::$Front->Color(1) . ";
-			--color-2: " . \_::$Front->Color(2) . ";
-			--color-3: " . \_::$Front->Color(3) . ";
-			--color-4: " . \_::$Front->Color(4) . ";
-			--color-5: " . \_::$Front->Color(5) . ";
-			--color-6: " . \_::$Front->Color(6) . ";
-			--color-7: " . \_::$Front->Color(7) . ";
 			--color-black: " . \_::$Front->Color(0) . ";
 			--color-red: " . \_::$Front->Color(1) . ";
 			--color-green: " . \_::$Front->Color(2) . ";
@@ -22,30 +14,18 @@ class GlobalStyle{
 			--color-violet: " . \_::$Front->Color(6) . ";
 			--color-white: " . \_::$Front->Color(7) . ";
 			--fore-color: " . \_::$Front->ForeColor(0) . ";
-			--fore-color-inside: " . \_::$Front->ForeColor(1) . ";
-			--fore-color-outside: " . \_::$Front->ForeColor(2) . ";
+			--fore-color-input: " . \_::$Front->ForeColor(1) . ";
+			--fore-color-output: " . \_::$Front->ForeColor(2) . ";
 			--fore-color-special: " . \_::$Front->ForeColor(3) . ";
-			--fore-color-special-inside: " . \_::$Front->ForeColor(4) . ";
-			--fore-color-special-outside: " . \_::$Front->ForeColor(5) . ";
+			--fore-color-special-input: " . \_::$Front->ForeColor(4) . ";
+			--fore-color-special-output: " . \_::$Front->ForeColor(5) . ";
 			--back-color: " . \_::$Front->BackColor(0) . ";
-			--back-color-inside: " . \_::$Front->BackColor(1) . ";
-			--back-color-outside: " . \_::$Front->BackColor(2) . ";
+			--back-color-input: " . \_::$Front->BackColor(1) . ";
+			--back-color-output: " . \_::$Front->BackColor(2) . ";
 			--back-color-special: " . \_::$Front->BackColor(3) . ";
-			--back-color-special-inside: " . \_::$Front->BackColor(4) . ";
-			--back-color-special-outside: " . \_::$Front->BackColor(5) . ";".(
-			\_::$Front->DefaultDarkMode === \_::$Front->DarkMode?"
-			--fore-color-0: " . \_::$Front->ForeColor(0) . ";
-			--fore-color-1: " . \_::$Front->ForeColor(1) . ";
-			--fore-color-2: " . \_::$Front->ForeColor(2) . ";
-			--fore-color-3: " . \_::$Front->ForeColor(3) . ";
-			--fore-color-4: " . \_::$Front->ForeColor(4) . ";
-			--fore-color-5: " . \_::$Front->ForeColor(5) . ";
-			--back-color-0: " . \_::$Front->BackColor(0) . ";
-			--back-color-1: " . \_::$Front->BackColor(1) . ";
-			--back-color-2: " . \_::$Front->BackColor(2) . ";
-			--back-color-3: " . \_::$Front->BackColor(3) . ";
-			--back-color-4: " . \_::$Front->BackColor(4) . ";
-			--back-color-5: " . \_::$Front->BackColor(5) . ";":"
+			--back-color-special-input: " . \_::$Front->BackColor(4) . ";
+			--back-color-special-output: " . \_::$Front->BackColor(5) . ";".(
+			\_::$Front->SwitchMode?"
 			--fore-color-0: " . \_::$Front->BackColor(0) . ";
 			--fore-color-1: " . \_::$Front->BackColor(1) . ";
 			--fore-color-2: " . \_::$Front->BackColor(2) . ";
@@ -57,14 +37,26 @@ class GlobalStyle{
 			--back-color-2: " . \_::$Front->ForeColor(2) . ";
 			--back-color-3: " . \_::$Front->ForeColor(3) . ";
 			--back-color-4: " . \_::$Front->ForeColor(4) . ";
-			--back-color-5: " . \_::$Front->ForeColor(5) . ";"
+			--back-color-5: " . \_::$Front->ForeColor(5) . ";":"
+			--fore-color-0: " . \_::$Front->ForeColor(0) . ";
+			--fore-color-1: " . \_::$Front->ForeColor(1) . ";
+			--fore-color-2: " . \_::$Front->ForeColor(2) . ";
+			--fore-color-3: " . \_::$Front->ForeColor(3) . ";
+			--fore-color-4: " . \_::$Front->ForeColor(4) . ";
+			--fore-color-5: " . \_::$Front->ForeColor(5) . ";
+			--back-color-0: " . \_::$Front->BackColor(0) . ";
+			--back-color-1: " . \_::$Front->BackColor(1) . ";
+			--back-color-2: " . \_::$Front->BackColor(2) . ";
+			--back-color-3: " . \_::$Front->BackColor(3) . ";
+			--back-color-4: " . \_::$Front->BackColor(4) . ";
+			--back-color-5: " . \_::$Front->BackColor(5) . ";"
 			)."
-			--font-0: " . \_::$Front->Font(0) . ";
-			--font-1: " . \_::$Front->Font(1) . ";
-			--font-2: " . \_::$Front->Font(2) . ";
-			--font-3: " . \_::$Front->Font(3) . ";
-			--font-4: " . \_::$Front->Font(4) . ";
-			--font-5: " . \_::$Front->Font(5) . ";
+			--font: " . \_::$Front->Font(0) . ";
+			--font-input: " . \_::$Front->Font(1) . ";
+			--font-output: " . \_::$Front->Font(2) . ";
+			--font-special: " . \_::$Front->Font(3) . ";
+			--font-special-input: " . \_::$Front->Font(4) . ";
+			--font-special-output: " . \_::$Front->Font(5) . ";
 			--size-0: " . \_::$Front->Size(0) . ";
 			--size-1: " . \_::$Front->Size(1) . ";
 			--size-2: " . \_::$Front->Size(2) . ";
@@ -139,14 +131,8 @@ class GlobalStyle{
 			--pattern-url-max: URL(\"" . last(\_::$Front->PatternPalette) . "\");
 
 			--owner: \"" . __(\_::$Info->Owner, true, false) . "\";
-			--full-owner: \"" . __(\_::$Info->FullOwner, true, false) . "\";
-			--owner-description: \"" . __(\_::$Info->OwnerDescription, true, false) . "\";
 			--name: \"" . __(\_::$Info->Name, true, false) . "\";
-			--full-name: \"" . __(\_::$Info->FullName, true, false) . "\";
 			--slogan: \"" . __(\_::$Info->Slogan, true, false) . "\";
-			--full-slogan: \"" . __(\_::$Info->FullSlogan, true, false) . "\";
-			--description: \"" . __(\_::$Info->Description, true, false) . "\";
-			--full-description: \"" . __(\_::$Info->FullDescription, true, false) . "\";
 
 			--path: \"" . \_::$Info->Path . "\";
 			--home-path: \"" . \_::$Info->HomePath . "\";
@@ -167,20 +153,20 @@ class GlobalStyle{
 			--error-symbol-path-url: URL(\"" . asset(\_::$Info->ErrorSymbolPath) . "\");
 		}";
 	}
-	public static function InvertVariables($rootSelector = ":root") { return "
+	public static function SwitchVariables($rootSelector = ":root") { return "
 		$rootSelector{
 			--fore-color: " . \_::$Front->BackColor(0) . ";
-			--fore-color-inside: " . \_::$Front->BackColor(1) . ";
-			--fore-color-outside: " . \_::$Front->BackColor(2) . ";
+			--fore-color-input: " . \_::$Front->BackColor(1) . ";
+			--fore-color-output: " . \_::$Front->BackColor(2) . ";
 			--fore-color-special: " . \_::$Front->BackColor(3) . ";
-			--fore-color-special-inside: " . \_::$Front->BackColor(4) . ";
-			--fore-color-special-outside: " . \_::$Front->BackColor(5) . ";
+			--fore-color-special-input: " . \_::$Front->BackColor(4) . ";
+			--fore-color-special-output: " . \_::$Front->BackColor(5) . ";
 			--back-color: " . \_::$Front->ForeColor(0) . ";
-			--back-color-inside: " . \_::$Front->ForeColor(1) . ";
-			--back-color-outside: " . \_::$Front->ForeColor(2) . ";
+			--back-color-input: " . \_::$Front->ForeColor(1) . ";
+			--back-color-output: " . \_::$Front->ForeColor(2) . ";
 			--back-color-special: " . \_::$Front->ForeColor(3) . ";
-			--back-color-special-inside: " . \_::$Front->ForeColor(4) . ";
-			--back-color-special-outside: " . \_::$Front->ForeColor(5) . ";
+			--back-color-special-input: " . \_::$Front->ForeColor(4) . ";
+			--back-color-special-output: " . \_::$Front->ForeColor(5) . ";
 		}";
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 $templ = \_::$Front->CreateTemplate("Template");
-$name = grab($data, "Name") ?? \Req::$Direction;
+$name = grab($data, "Name") ?? \_::$Direction;
 $templ->WindowTitle = grab($data, "WindowTitle")??get($data, 'Title' )??between($name, \_::$Info->Name);
 $alternative = grab($data, "Alternative") ?? "404";
 $content = grab($data, "Content");

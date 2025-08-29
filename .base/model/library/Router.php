@@ -122,8 +122,21 @@ class Router extends \ArrayObject
     {
         foreach ($this->Handlers() as $handler)
             $this->Result = $handler()??$this->Result;
-        return $this;
+        return $this->Result;
     }
+	/**
+	 * Echos and returns whole the contents
+	 */
+	public function Render()
+	{
+        return render($this->Handle());
+	}
+	public function ToString()
+	{
+		ob_start();
+		$output = $this->Render();
+		return ob_get_clean() ?? $output;
+	}
 
     /**
      * Refresh all properties, have no effect on routes
@@ -135,8 +148,8 @@ class Router extends \ArrayObject
         $this->Result = null;
         $this->Point = 0;
         $this->Taken = null;
-        $this->Request = \Req::$Request;
-        $this->Direction = \Req::$Direction;
+        $this->Request = \_::$Request;
+        $this->Direction = \_::$Direction;
         $this->DefaultMethodIndex = getMethodIndex();
         $this->DefaultMethodName = getMethodName();
         $this->Set($method)->On($pattern);
@@ -271,7 +284,7 @@ class Router extends \ArrayObject
      */
     public function Route($handler, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null): Router
     {
-        if ($this->IsActive && isValid($handler)) {
+        if ($this->IsActive && $handler) {
             $method = $this->Method;
             $pattern = $this->Pattern;
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
@@ -296,7 +309,7 @@ class Router extends \ArrayObject
         if ($this->IsActive) {
             $method = $this->Method;
             $pattern = $this->Pattern;
-            if (isValid($handler)) {
+            if ($handler) {
                 $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
                     return (isStatic($handler??"")) ? route($handler??$this->Direction, $data, $print, $origin, $depth, $alternative, $default) :
                         Convert::By($handler, $this);

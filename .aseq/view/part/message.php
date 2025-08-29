@@ -5,16 +5,16 @@ module("Form");
 (new MiMFa\Library\Router())
 	->Post(function () use ($data) {
 		$form = new MiMFa\Module\Form();
-		$received = \Req::ReceivePost();
+		$received = receivePost();
 		if (!get($received, "Message"))
-			\Res::Render($form->GetError("Your message could not be empty!"));
+			render($form->GetError("Your message could not be empty!"));
 		else {
-			$form->MailSubject = \Req::$Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$Back->User, "Name")) . "'";
+			$form->MailSubject = \_::$Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$Back->User, "Name")) . "'";
 			$form->ReceiverEmail = \_::$Info->ReceiverEmail;
 			$form->SenderEmail = get($received, "Email") ?? get(\_::$Back->User, "Email");
 			table("Message")->Insert([
 				"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
-				"Type" => \Req::$Url,
+				"Type" => \_::$Url,
 				"Name" => Convert::ToText(getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
 				"From" => $form->SenderEmail,
 				"To" => $form->ReceiverEmail,
@@ -24,7 +24,7 @@ module("Form");
 				"Status" => -1
 			]);
 			swap($form, $data);
-			$form->End();
+			$form->Render();
 		}
 	})
 	->Get(function () use ($data) {
@@ -39,9 +39,9 @@ module("Form");
 		$form->BackPath = get($data, "BackPath") ?? null;
 		$form->ContentClass = "col-lg-8";
 		module("Field");
-		$name = get(\_::$Back->User, "Name") ?? \Req::ReceiveGet("Name");
-		$email = get(\_::$Back->User, "Email") ?? \Req::ReceiveGet("Email");
-		$msg = \Req::ReceiveGet("Message");
+		$name = get(\_::$Back->User, "Name") ?? receiveGet("Name");
+		$email = get(\_::$Back->User, "Email") ?? receiveGet("Email");
+		$msg = receiveGet("Message");
 		$form->Children = [new MiMFa\Module\Field("text", "Subject", $msg, required: true)];
 		if (!\_::$Back->User->Email) {
 			$form->Children[] = new MiMFa\Module\Field("text", "Name", $name, required: true, lock: !isEmpty($name));

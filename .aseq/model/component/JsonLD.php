@@ -20,10 +20,10 @@ class JsonLD{
 			  '@context': 'https://schema.org/',
 			  '@type': 'WebSite',
 			  'name': `".Convert::ToText($name??\_::$Info->FullName)."`,
-			  'url': `".($url??\Req::$Host)."`,
+			  'url': `".($url??\_::$Host)."`,
 			  'potentialAction': {
 				'@type': 'SearchAction',
-				'target': `".($searchUrl??(\Req::$Host.'/search?q={search_term_string}'))."`,
+				'target': `".($searchUrl??(\_::$Host.'/search?q={search_term_string}'))."`,
 				'query-input': 'required name=search_term_string'
 			  }
 			}"
@@ -40,12 +40,12 @@ class JsonLD{
 			  'author': {
 				'@type': 'Person',
 				'name': `".get($author,'Name' )."`,
-				'url': `".getValid($author,'Url',(\Req::$Host.(isValid($author,'Name' )?'':'/'.get($author,'Name' ))))."`
+				'url': `".getValid($author,'Url',(\_::$Host.(isValid($author,'Name' )?'':'/'.get($author,'Name' ))))."`
 			  },
 			  'publisher': {
 				'@type': 'Organization',
 				'name': `".get($publisher,'Name' )."`,
-				'url': `".getValid($publisher,'Url',(\Req::$Host.(isValid($publisher,'Name' )?'':'/'.get($publisher,'Name' ))))."`
+				'url': `".getValid($publisher,'Url',(\_::$Host.(isValid($publisher,'Name' )?'':'/'.get($publisher,'Name' ))))."`
 				'logo': {
 				  '@type': 'ImageObject',
 				  'url': `".getValid($publisher,'Url',\_::$Info->LogoPath)."`

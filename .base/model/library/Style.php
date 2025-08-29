@@ -18,9 +18,9 @@ class Style extends \ArrayObject{
     }
 
 	public function Get(){
-		$styles = "";
-		foreach($this as $key=>$val) $styles .= self::DoProperty($key,$val);
-		return $styles;
+		$styles = [];
+		foreach($this as $key=>$val) $styles[] = "$key:$val;";//self::DoProperty($key,$val);
+		return join(" ", $styles);
 	}
 
 	public static function UniversalProperty($prop,$val){
@@ -151,8 +151,8 @@ class Style extends \ArrayObject{
 		");
 	}
 
-	public static function ToggleFilter($light = null){
-		return $light??\_::$Front->DarkMode? self::LightFilter():self::DarkFilter();
+	public static function ToggleFilter(int|null $mode = null){
+		return ($mode??\_::$Front->GetMode()??0)<0? self::LightFilter():self::DarkFilter();
 	}
 	public static function DarkFilter(){
 		return self::UniversalProperty("filter","brightness(-1000%) opacity(1) grayscale(100%)");

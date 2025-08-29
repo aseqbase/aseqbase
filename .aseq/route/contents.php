@@ -1,6 +1,6 @@
 <?php
 use MiMFa\Library\Convert;
-$received = \Req::Receive();
+$received = receive();
 $computeData = get($data, "Compute") ?? [];
 $filter = grab($computeData, "Filter") ?? [];
 $cat = grab($filter, "Category") ?? get($received, "Category");
@@ -30,7 +30,7 @@ if (isEmpty($items)) {
 }
 
 view(grab($viewData, "ViewName") ?? "contents", [
-    "Title" => grab($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", \Req::$Page), $cat, grab($data, "DefaultTitle") ?? "Contents"),
+    "Title" => grab($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", \_::$Page), $cat, grab($data, "DefaultTitle") ?? "Contents"),
     "RootRoute" => grab($viewData, "RootRoute") ?? \_::$Address->ContentRoute,
     "Description" => grab($viewData, "Description"),
     "Items" => $items,

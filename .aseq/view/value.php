@@ -1,2 +1,2 @@
 <?php
-\Res::Render($data);
+render($data);

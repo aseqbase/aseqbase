@@ -37,15 +37,15 @@ class Cards extends Collection
                 text-align: center;
                 margin: 3vh;
                 padding: 0px;
-                border: var(--border-1) var(--fore-color-special-inside);
+                border: var(--border-1) var(--fore-color-special-input);
                 border-radius: var(--radius-1);
                 box-shadow: var(--shadow-1);
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} .items .item:hover {
-                background-color: var(--back-color-inside);
-                color: var(--fore-color-inside);
+                background-color: var(--back-color-input);
+                color: var(--fore-color-input);
                 border-radius: var(--radius-2);
                 box-shadow: var(--shadow-2);
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
@@ -116,7 +116,7 @@ class Cards extends Collection
                 $buttonsHtml = $p_buttons; // Assuming $p_buttons is already HTML
                 $linkHtml = "";
                 if (isValid($p_link)) {
-                    $linkHtml = Html::Link(__($this->MoreButtonLabel), $p_link, ["class"=> "btn", "target" => "blank"]);
+                    $linkHtml = Html::Link($this->MoreButtonLabel, $p_link, ["class"=> "btn", "target" => "blank"]);
                 }
                 return $imageHtml . $titleHtml . $detailsHtml . $buttonsHtml . $linkHtml;
             }, ["class"=> "item col-sm", "data-aos" => "fade-up"]);

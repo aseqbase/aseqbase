@@ -171,16 +171,12 @@ class Module extends \Base
      public function __construct()
      {
           parent::__construct();
-          $this->Router->Get()->Unset()->Route(fn() => Convert::ToString(function () {
-               if ($this->Styles === null)
-                    yield $this->GetStyle();
-               elseif (!isEmpty($this->Styles))
-                    yield Html::Style($this->Styles);
+          $this->Router->On()->Get()->Unset()->Route(fn() => Convert::ToString(function () {
+               if ($this->Styles === null) yield $this->GetStyle();
+               elseif ($this->Styles) yield Html::Style($this->Styles);
                yield $this->GetOpenTag() . $this->Get() . $this->GetCloseTag();
-               if ($this->Scripts === null)
-                    yield $this->GetScript();
-               elseif (!isEmpty($this->Scripts))
-                    yield Html::Script($this->Scripts);
+               if ($this->Scripts === null) yield $this->GetScript();
+               elseif ($this->Scripts) yield Html::Script($this->Scripts);
           }));
      }
 
@@ -191,12 +187,10 @@ class Module extends \Base
      public function GetOpenTag($tag = null)
      {
           $st = null;
-          if (isValid($this->Style))
-               $st = is_string($this->Style) ? $this->Style : $this->Style->Get();
-          if (isValid($tag ?? $this->Tag))
-               return join("", ["<", ($tag ?? $this->Tag ?? "div"), " ", Html::Attributes($this->GetDefaultAttributes(), $this->Attachments), isValid($st) ? " style=\"{$st}\"" : "", ">"]);
-          elseif (isValid($st))
-               return "<style>.{$this->Name}{ $st }</style>";
+          if ($this->Style) $st = is_string($this->Style) ? $this->Style : $this->Style->Get();
+          if ($tag = $tag ?? $this->Tag)
+               return join("", ["<$tag ", Html::Attributes($this->GetDefaultAttributes(), $this->Attachments), $st ? " style=\"{$st}\">" : ">"]);
+          elseif ($st) return "<style>.{$this->Name}{ $st }</style>";
           return null;
      }
      /**
@@ -205,8 +199,7 @@ class Module extends \Base
       */
      public function GetCloseTag($tag = null)
      {
-          if (isValid($tag ?? $this->Tag))
-               return "</" . ($tag ?? $this->Tag ?? "div") . ">" . Convert::ToString($this->Attachments);
+          if ($tag = $tag ?? $this->Tag) return "</$tag>" . Convert::ToString($this->Attachments);
           return null;
      }
 
@@ -220,7 +213,7 @@ class Module extends \Base
                ($this->Id ? ["id" => $this->Id] : []),
                ["class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass() . ($this->Printable?'':' view unprintable')],
                (isEmpty($this->Attributes) ? [] : (is_array($this->Attributes) ? $this->Attributes : [Convert::ToString($this->Attributes, " ", "{0}={1} ")])),
-               (count($this) < 1 ? [] : $this->__toArray())
+               ($this->__toArray())
           ];
      }
      /**
@@ -257,7 +250,7 @@ class Module extends \Base
                if (isValid($this->Title)) {
                     yield (isValid($this->TitleTag) ? "<" . $this->TitleTag . " $attrs>" : "");
                     if (is_string($this->Title))
-                         yield __($this->Title, styling: false);
+                         yield __($this->Title);
                     elseif (is_callable($this->Title))
                          yield ($this->Title)($attrs);
                     else
@@ -369,7 +362,7 @@ class Module extends \Base
      public function Render()
      {
           if ($this->Visual) {
-               \Res::Render($this->Handle());
+               render($this->Handle());
                $this->Rendered++;
                return null;
           }
@@ -381,7 +374,7 @@ class Module extends \Base
      public function ReRender()
      {
           if ($this->Visual) {
-               \Res::Render($this->ReHandle());
+               render($this->ReHandle());
                $this->Rendered++;
                return null;
           }

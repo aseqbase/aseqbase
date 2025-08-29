@@ -31,11 +31,11 @@ class Tabs extends Module
     public $TitleClass = "";
     public $ContentsClass = "";
     public $ContentClass = "";
-    public $ShowTitlesLabel = true;
-    public $ShowTitlesImage = true;
-    public $ShowTitlesDescription = true;
-    public $ShowTitle = false;
-    public $ShowImage = false;
+    public $AllowTitlesLabel = true;
+    public $AllowTitlesImage = true;
+    public $AllowTitlesDescription = true;
+    public $AllowTitle = false;
+    public $AllowImage = false;
 
     /**
      * Create the module
@@ -67,9 +67,9 @@ class Tabs extends Module
                     $this->Items,
                     function ($v, $k, $i) {
                         $name = get($v, 'Name');
-                        $tooltip = $this->ShowTitlesDescription?(get($v, "Description")??$this->Description):null;
+                        $tooltip = $this->AllowTitlesDescription?(get($v, "Description")??$this->Description):null;
                         return Html::Button(
-                            ($this->ShowTitlesLabel?Html::Span(get($v, 'Title')??$this->Title):null) . ($this->ShowTitlesImage ? Html::Media("", getBetween($v, "Image", "Icon")??$this->Image) : ""),
+                            ($this->AllowTitlesLabel?Html::Span(get($v, 'Title')??$this->Title):null) . ($this->AllowTitlesImage ? Html::Media("", getBetween($v, "Image", "Icon")??$this->Image) : ""),
                             getBetween($v, "Path", "Action")??"{$this->Name}_openTab(this, '$this->Name-tab-$i')",
                             $name?["name"=>$name]:[], 
                             get($v, "Attributes")??[],
@@ -89,8 +89,8 @@ class Tabs extends Module
                             $name = get($v, 'Name');
                             $content = get($v, 'Content')??$this->Content;
                             $v = 
-                                ($this->ShowImage?Html::Media(get($v, 'Title')??$this->Title, getBetween($v, "Image", "Icon")??$this->Image, ["class" => "image"]):"") .
-                                ($this->ShowTitle?Html::ExternalHeading(get($v, 'Title')??$this->Title, ["class" => "title"]):"") .
+                                ($this->AllowImage?Html::Media(get($v, 'Title')??$this->Title, getBetween($v, "Image", "Icon")??$this->Image, ["class" => "image"]):"") .
+                                ($this->AllowTitle?Html::ExternalHeading(get($v, 'Title')??$this->Title, ["class" => "title"]):"") .
                                 Html::Division(Convert::ToString($content), ["class" => "content"]);
                         }return Html::Element($v, "div", $name?["name"=>$name]:[], ["class" => "tab-content $this->ContentClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " view show" : " view hide"), "id" => "$this->Name-tab-$i"]);
                     }

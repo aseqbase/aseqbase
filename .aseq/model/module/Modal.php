@@ -12,7 +12,7 @@ class Modal extends Player{
 	public $AllowFocus = true;
 	public $Width = "90vw";
 	public $Height = "90vh";
-	public $BackgroundShadow = "#00000099";
+	public $BackgroundMask = "#00000099";
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
@@ -74,9 +74,9 @@ class Modal extends Player{
 				text-align: justify;
 			}
 			".(
-			isValid($this->BackgroundShadow)?"
-			.{$this->Name}-background-screen {
-				background-color: {$this->BackgroundShadow};
+			isValid($this->BackgroundMask)?"
+			.{$this->Name}-background-mask {
+				background: {$this->BackgroundMask};
 				width: 100%;
 				z-index:1;
 			}
@@ -112,8 +112,8 @@ class Modal extends Player{
 				if(isEmpty(description)) $('.{$this->Name}>.body>.detail>.description').hide();
 				else $('.{$this->Name}>.body>.detail>.description').show().text(description);
 				if(buttonsContent !== null) $('.{$this->Name}>.buttons').html({$this->ButtonsScript('${buttonsContent}')});
-				$('.{$this->Name},.{$this->Name}-background-screen').removeClass('hide');
-				$('.{$this->Name},.{$this->Name}-background-screen').fadeIn(".\_::$Front->AnimationSpeed.");
+				$('.{$this->Name},.{$this->Name}-background-mask').removeClass('hide');
+				$('.{$this->Name},.{$this->Name}-background-mask').fadeIn(".\_::$Front->AnimationSpeed.");
 				scrollThere('.{$this->Name}');
 			}
 			function {$this->Name}_Show(){
@@ -121,7 +121,7 @@ class Modal extends Player{
 			}
 			function {$this->Name}_Hide(){
 				{$this->ClearScript()};
-				$('.{$this->Name},.{$this->Name}-background-screen').fadeOut(".\_::$Front->AnimationSpeed.");
+				$('.{$this->Name},.{$this->Name}-background-mask').fadeOut(".\_::$Front->AnimationSpeed.");
 				$('.{$this->Name}>.body>.detail>.title').text('');
 				$('.{$this->Name}>.body>.detail>.description').text('');
 				$('.{$this->Name}>.buttons').html('');
@@ -152,7 +152,7 @@ class Modal extends Player{
 	}
 
 	public function BeforeHandle(){
-		if(isValid(object: $this->BackgroundShadow)) return "<div class=\"background-screen ".$this->Name."-background-screen view hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
+		if(isValid(object: $this->BackgroundMask)) return "<div class=\"background-mask ".$this->Name."-background-mask view hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
 	}
 
 	public function ButtonsScript($buttonsContent){

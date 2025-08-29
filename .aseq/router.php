@@ -1,6 +1,6 @@
 <?php
 \_::$Back->Router->On("public|asset/.*\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm|webp)")
-    ->Default(fn()=>\Res::SetFile(normalizePath(\Req::$Request)));
+    ->Default(fn()=>responseFile(normalizePath(\_::$Request)));
 \_::$Back->Router->On("contents")->Default("contents");
 \_::$Back->Router->On("content")->Default("content");
 \_::$Back->Router->On("posts")->Default("posts");

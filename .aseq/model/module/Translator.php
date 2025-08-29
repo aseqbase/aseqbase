@@ -15,17 +15,25 @@ class Translator extends Module{
 	 * @var array
 	 */
 	public $Items = [];
-    public $ShowCode = false;
-    public $ShowLabel = false;
-    public $ShowImage = true;
+    public $AllowCode = false;
+    public $AllowLabel = false;
+    public $AllowImage = true;
     public $Printable = false;
 
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
+            .{$this->Name} {
+				display: flex;
+				gap: var(--size-0);
+				justify-content: center;
+				flex-wrap: wrap;
+				align-content: center;
+				align-items: center;
+            }
             .{$this->Name} button {
 				cursor: pointer;
-				padding: 8px;
-				gap: var(--size-0);
+				".($this->AllowLabel || $this->AllowCode?"padding: calc(var(--size-0) / 2);":"padding: 0px;")."
+				gap: calc(var(--size-0) / 2);
 				color: inherit;
             }
             .{$this->Name} button .image {
@@ -41,9 +49,9 @@ class Translator extends Module{
 		foreach ($this->Items??[] as $lng=>$value)
             if($lng != $cur)
                 $langs[] = Html::Element(
-					($this->ShowCode?strtoupper($lng):"").
-					($this->ShowImage?Html::Image($lng, getBetween($value,"Image","Icon"), ["onerror"=>"this.src='".asset("/asset/overlay/glass.png")."';"]):"").
-					($this->ShowLabel?getBetween($value,"Title","Name" ):""),
+					($this->AllowCode?strtoupper($lng):"").
+					($this->AllowImage?Html::Image($lng, getBetween($value,"Image","Icon"), ["onerror"=>"this.src='".asset("/asset/overlay/glass.png")."';"]):"").
+					($this->AllowLabel?getBetween($value,"Title","Name" ):""),
 					"button",
 					["class"=>"button", "onclick"=>"load(\"?".(getBetween($value,"Query" )??"lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding"))."\");"]);
 		return $this->GetTitle().$this->GetDescription().

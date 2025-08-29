@@ -9,7 +9,7 @@ class RingTabs extends Module{
 	public $Image = null;
 	public $Items = null;
 	public $AllowChangeColor = true;
-	public $HasTab = true;
+	public $AllowTab = true;
 	public $CenterSize = 150;
 	public $ButtonsSize = 100;
 	public $Path = null;
@@ -61,15 +61,15 @@ class RingTabs extends Module{
 			}
 			.{$this->Name} .sign .btn{
 				font-size: var(--size-2);
-				color: var(--fore-color-outside);
+				color: var(--fore-color-output);
 				border-color: transparent;
 				margin: 0px 5px;
 			}
 			.{$this->Name} .sign .btn:hover{
-				background-color: var(--back-color-outside);
+				background-color: var(--back-color-output);
 				font-size: var(--size-2);
-				color: var(--fore-color-outside);
-				border-color: var(--fore-color-outside);
+				color: var(--fore-color-output);
+				border-color: var(--fore-color-output);
 				border-radius: var(--radius-2);
 			}
 			.{$this->Name} .menu {
@@ -96,12 +96,12 @@ class RingTabs extends Module{
 				height: {$this->CenterSize}px;
 				border-radius: 50%;
 				position: relative;
-				box-shadow: 0px 0px 20px var(--back-color-outside);
+				box-shadow: 0px 0px 20px var(--back-color-output);
 				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
 			.{$this->Name} .menu>.center:hover {
-				box-shadow: 0px 0px 50px var(--back-color-outside);
+				box-shadow: 0px 0px 50px var(--back-color-output);
 				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
@@ -118,20 +118,20 @@ class RingTabs extends Module{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: contain;
-				background-color: var(--back-color-outside);
+				background-color: var(--back-color-output);
 				border-radius: 100%;
 				cursor: pointer;
-				box-shadow: 0px 0px 20px var(--back-color-outside);
+				box-shadow: 0px 0px 20px var(--back-color-output);
 				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
 			.{$this->Name} .menu>.center>a{
-				background-color: var(--back-color-outside);
-				color: var(--fore-color-outside);
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
 				position: absolute;
 				text-align: center;
 				cursor: pointer;
-				border: var(--border-1) var(--back-color-outside);
+				border: var(--border-1) var(--back-color-output);
 				border-radius: 100%;
 				box-shadow: var(--shadow-3);
 				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
@@ -139,7 +139,7 @@ class RingTabs extends Module{
 
 			.{$this->Name} .menu>.center>a:hover {
 				box-shadow: var(--shadow-4);
-				border:  var(--border-1) var(--back-color-outside);
+				border:  var(--border-1) var(--back-color-output);
 				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
@@ -153,12 +153,12 @@ class RingTabs extends Module{
 				background-size: 40% 40%;
 				width: {$this->ButtonsSize}px;
 				height: {$this->ButtonsSize}px;
-                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-outside)"):"")."
+                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-output)"):"")."
 			}
 			.{$this->Name} .menu>.center>a>.button>.media.icon{
 				line-height: {$this->ButtonsSize}px;
 				font-size: calc({$this->ButtonsSize}px * 0.4);
-                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-outside)"):"")."
+                ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-output)"):"")."
 			}
 			.{$this->Name} .menu>.center>a:hover>.button>.media {
 				font-size: calc({$this->ButtonsSize}px * 0.6);
@@ -180,17 +180,17 @@ class RingTabs extends Module{
 						$desc = get($v, 'Description' );
 						$more = getBetween($v, "Button","More");
 						$pa = getBetween($v, 'Path' ,'Url' ,'Link');
-						$this->HasTab = $desc||$more;
+						$this->AllowTab = $desc||$more;
 						$btns[] = Html::Link(
 							Html::Division(
 								Html::Media("", getBetween($v,'Image' , "Icon")),
 								["class"=>"button"]
 							).Html::Tooltip(getBetween($v,'Name' , "Title")),
-							$this->HasTab?"#tab$i":$pa,
-							$this->HasTab?["data-target"=>".tab", "data-toggle"=>'tab']:[]
+							$this->AllowTab?"#tab$i":$pa,
+							$this->AllowTab?["data-target"=>".tab", "data-toggle"=>'tab']:[]
 						);
 						
-						if($this->HasTab) $tags[] = Html::Division(
+						if($this->AllowTab) $tags[] = Html::Division(
 							Html::ExternalHeading(get($v,'Title' ), $pa, ["class"=>"title" ]).
 								Html::Division($desc.$more, ["class"=>"description" ]), 
 							["class"=>"tab fade".($i===0?' active view show':''), "Id" =>"tab$i"]
@@ -263,7 +263,7 @@ class RingTabs extends Module{
 						if (xn == y) $(this).addClass('active');
 						else $(this).removeClass('active');
 					});
-					if(".($this->HasTab?"true":"false").") evt.preventDefault();
+					if(".($this->AllowTab?"true":"false").") evt.preventDefault();
 				});
 			});
 			"):"");

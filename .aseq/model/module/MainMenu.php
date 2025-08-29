@@ -10,9 +10,9 @@ class MainMenu extends Module
 	public $Image = null;
 	public $Items = null;
 	public $Shortcuts = null;
-	public $HasBranding = true;
-	public $HasItems = true;
-	public $HasOthers = true;
+	public $AllowBranding = true;
+	public $AllowItems = true;
+	public $AllowOthers = true;
 	public $AllowFixed = false;
 	public $AllowItemsLabel = true;
 	public $AllowSubItemsLabel = true;
@@ -58,7 +58,7 @@ class MainMenu extends Module
 			" : "") . "
 
 			.{$this->Name} .header{
-				color: var(--fore-color-2);
+				color: var(--back-color-5);
 				margin: 0;
 				width: fit-content;
 				display: flex;
@@ -114,6 +114,15 @@ class MainMenu extends Module
 				text-align: start;
 			}
 
+			.{$this->Name} :is(button, .button, .icon[onclick]){
+				border: var(--border-0);
+				border-radius: var(--radius-0);
+				box-shadow: var(--shadow-0);
+			}
+			.{$this->Name} :is(button, .button, .icon[onclick]):hover{
+				box-shadow: var(--shadow-2);
+			}
+				
 			.{$this->Name}>ul>li:not(.sub-items)>button{
 				text-transform: uppercase;
 			}
@@ -148,7 +157,7 @@ class MainMenu extends Module
 				color: var(--fore-color-special);
 				border: none;
 				font-size: inherit;
-				border-radius: none;
+				border-radius: unset;
 				text-decoration: none;
 				padding: var(--size-0) var(--size-1);
 				display: block;
@@ -156,8 +165,8 @@ class MainMenu extends Module
 			}
 			.{$this->Name} ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
 				font-weight: bold;
-				background-color: var(--back-color-outside);
-				color: var(--fore-color-outside);
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active>:is(.button, .button:visited){
@@ -167,8 +176,8 @@ class MainMenu extends Module
 				color: var(--fore-color);
 			}
 			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
-				color: var(--fore-color-inside);
-				background-color: var(--back-color-inside);
+				color: var(--fore-color-output);
+				background-color: var(--back-color-output);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
@@ -179,13 +188,13 @@ class MainMenu extends Module
 			.{$this->Name} ul.sub-items {
 				display: none;
 				position: fixed;
-				color: var(--fore-color-outside);
-				background-color: var(--back-color-inside);
+				color: var(--fore-color-special);
+				background-color: var(--back-color-special);
 				min-width: 160px;
 				max-width: 90vw;
 				max-height: 70vh;
 				padding: 0px;
-				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+				box-shadow: 0px 16px 16px 0px rgba(0,0,0,0.2);
 				overflow-x: hidden;
 				overflow-y: auto;
 				z-index: $this->ZIndex;
@@ -225,7 +234,7 @@ class MainMenu extends Module
 			}
 			.{$this->Name} ul.sub-items>li>:is(.button, .button:visited){
     			width: 100%;
-				color: var(--fore-color-inside);
+				color: var(--fore-color-input);
 				text-decoration: none;
 				padding: calc(var(--size-1) / 2) var(--size-1);
 				display: block;
@@ -245,20 +254,21 @@ class MainMenu extends Module
 				border: none;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown:hover{
-				border-bottom-color: var(--back-color-special-outside);
+				border-bottom-color: var(--back-color-output);
 				box-shadow: var(--shadow-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
 				font-weight: bold;
-				color: #8888;
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
 				border: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
 				font-weight: bold;
-				background-color: var(--back-color-special-outside);
-				color: var(--fore-color-special-outside);
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
 				border: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -269,13 +279,13 @@ class MainMenu extends Module
 			}
 			.{$this->Name} ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
 				font-weight: bold;
-				background-color: var(--back-color-special-outside);
-				color: var(--fore-color-special-outside);
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
 				border: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-		" . ($this->HasOthers ? "
+		" . ($this->AllowOthers ? "
 			.{$this->Name} .other{
 				text-align: end;
 				width: fit-content;
@@ -292,53 +302,51 @@ class MainMenu extends Module
 
 			.{$this->Name} .other form{
 				text-decoration: none;
-				padding: calc(var(--size-0) / 2);
-				display: block;
-				background-color: var(--back-color-outside);
-				color: var(--fore-color-outside);
-				border: var(--border-1) var(--back-color-special-outside);
+				padding: 0px;
+				margin: 0px;
+				border: var(--border-1) var(--back-color-special-output);
 				border-radius: var(--radius-3);
 				box-shadow: var(--shadow-1);
+				display: flex;
+				align-content: center;
+				align-items: center;
+				justify-content: space-between;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .other form:is(:hover, :active, :focus) {
 				font-weight: bold;
-				color: var(--fore-color-inside);
-				background-color: var(--back-color-inside);
+				color: var(--fore-color-input);
+				background-color: var(--back-color-input);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .other form :not(html,head,body,style,script,link,meta,title){
-				padding: 0px;
-				margin: 0px;
-				display: inline-block;
-				color: var(--fore-color-outside);
+			.{$this->Name} .other form :is(input, .input, .input:is(:hover, :active, :focus)) {
+				padding: calc(var(--size-0) / 2) var(--size-0);
+				border: none;
+				outline: none;
 				background-color: transparent;
-				outline: none;
-				border: none;
+				color: unset;
+			}
+			.{$this->Name} .other form:not(:hover, :active, :focus) :is(input, .input, .input:not(:hover, :active, :focus)){
+				/*padding: calc(var(--size-0) / 2) 0px;*/
+				width: 0px;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .other form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
-				font-weight: bold;
-				outline: none;
-				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} .other form input[type='search']{
-				max-width: 100%;
-				width: calc(var(--size-0) / 3);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} .other form:is(:hover, :active, :focus) input[type='search'], .{$this->Name} form input[type='search']:is(:hover, :active, :focus){
-				color: var(--fore-color-inside);
+			.{$this->Name} .other form:is(:hover, :active, :focus) :is(input, .input, .input:is(:hover, :active, :focus)){
+				/*padding: calc(var(--size-0) / 2) var(--size-0);*/
 				width: 200px;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} :is(.other :not(form, .submenu)>.button, .other>.icon, .other>.button){
+			.{$this->Name} .other form :is(button, .button)  {
+				aspect-ratio: 1;
+				padding: calc(var(--size-0) / 2);
+				border-radius: var(--radius-max);
+			}
+			.{$this->Name} :is(.other .other-item>.button, .other>.icon, .other>.button){
 				background-color: inherit;
 				color: inherit;
 				width: 50px;
 				padding: calc(var(--size-0) / 3);
-				border-radius: var(--radius-5);
+				border-radius: var(--radius-max);
 				display: inline-flex;
 				aspect-ratio: 1;
 				text-align: center;
@@ -346,44 +354,26 @@ class MainMenu extends Module
 				align-items: center;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} :is(.other :not(form, .submenu)>.button, .other>.icon, .other>.button):hover{
-				background-color: inherit;
-				color: inherit;
-				box-shadow: var(--shadow-2);
+			.{$this->Name} :is(.other .other-item>.button, .other>.icon, .other>.button):hover{
+				box-shadow: var(--shadow-3);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .other form .button{
-				margin: calc(var(--size-0) * -0.8);
-				width: 50px;
-				padding: calc(var(--size-0) / 3);
-				border-radius: var(--radius-5);
-				display: inline-flex;
-				aspect-ratio: 1;
-				text-align: center;
-				justify-content: center;
-				align-items: center;
-			}
-			.{$this->Name} .other form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
-				background-color: var(--back-color-special-outside);
-				color: var(--fore-color-special-outside);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}"
-				: "")
+			" : "")
 		);
 	}
 
 	public function Get()
 	{
 		return Convert::ToString(function () {
-			if ($this->HasBranding)
+			if ($this->AllowBranding)
 				yield Html::Division(
 					(isValid($this->Image) ? Html::Link(Html::Media($this->Image, ['class' => 'col-sm image']), \_::$Info->Path) : "") .
 					Html::Division(
-						(isValid($this->Description) ? Html::Division(__($this->Description, true, false), ['class' => 'description']) : "") .
-						(isValid($this->Title) ? Html::Link(Html::Division(__($this->Title, true, false), ['class' => 'title']), \_::$Info->Path) : ""),
+						(isValid($this->Description) ? Html::Division(__($this->Description), ['class' => 'description']) : "") .
+						(isValid($this->Title) ? Html::Link(Html::Division(__($this->Title), ['class' => 'title']), \_::$Info->Path) : ""),
 					["class" => "brand"]),
 				["class" => "header"]);
-			if ($this->HasItems)
+			if ($this->AllowItems)
 				if (count($this->Items) > 0)
 					yield Html::Items(
 						function () {
@@ -393,15 +383,19 @@ class MainMenu extends Module
 						,
 						["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : '') . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : '')]
 					);
-			if ($this->HasOthers) {
+			if ($this->AllowOthers) {
 				$defaultButtons = [];
 				if ($this->AllowDefaultButtons) {
 					module("SearchForm");
 					module("TemplateButton");
 					module("UserMenu");
-					$defaultButtons[] = new SearchForm();
+					$defaultButtons[] = new searchForm();
 					$defaultButtons[] = new TemplateButton();
-					if (\_::$Config->AllowSigning) $defaultButtons[] = new UserMenu();
+					if (\_::$Config->AllowSigning) {
+						$usermenu = new UserMenu();
+						$usermenu->Class = "other-item";
+						$defaultButtons[] = $usermenu;
+					}
 				}
 				yield Html::Division([
 						...($this->Content? (is_array($this->Content)?$this->Content:[$this->Content]) : []),
@@ -418,21 +412,21 @@ class MainMenu extends Module
 		if (!auth(getValid($item, "Access", \_::$Config->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path", "Link", "Url");
-		$act = endsWith(\Req::$Path, $path) ? 'active' : '';
+		$act = endsWith(\_::$Path, $path) ? 'active' : '';
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Html::Item(
 			($ind <=2? Html::Button(
 				($this->AllowItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
-				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
-				($this->AllowItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
+				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name")):"").
+				($this->AllowItemsDescription?Html::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 				$path,
 				get($item, "Attributes")
 				) :
 				Html::Button(
 					($this->AllowSubItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
-					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
-					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
+					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name")):"").
+					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 					$path,
 					get($item, "Attributes")
 				)

@@ -26,7 +26,7 @@ class Local
 				return $root . $p;
 		$address = str_replace(DIRECTORY_SEPARATOR, "/", $address);
 		if (!startsWith($address, "/")) {
-			$dirs = explode("/", \Req::$Direction);
+			$dirs = explode("/", \_::$Direction);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)),"/");
 			if (strlen($dirs) !== 0)
 				$address = "$dirs/$address";
@@ -43,9 +43,9 @@ class Local
 		if ((!isValid($url)) || isAbsoluteUrl($url))
 			return $url;
 		if (startsWith($url, "/")) 
-			return \Req::$Host.$url;
+			return \_::$Host.$url;
 		else {
-			$dirs = explode("/", \Req::$Url);
+			$dirs = explode("/", \_::$Url);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
 			return "$dirs/$url";
 		}
@@ -313,7 +313,7 @@ class Local
 	 */
 	public static function GetFileObject($inputName)
 	{
-		return \Req::ReceiveFile($inputName);
+		return receiveFile($inputName);
 	}
 	/**
 	 * Check if the fileobject is not null or empty
@@ -323,7 +323,7 @@ class Local
 	public static function IsFileObject($content)
 	{
 		if (is_string($content))
-			$content = \Req::Receive($content);
+			$content = receive($content);
 		return get($content, "name") ? true : false;
 	}
 
@@ -486,8 +486,8 @@ class Local
 		header('Cache-Control: must-revalidate');
 		header('Pragma: public');
 
-		\Res::Render("\xEF\xBB\xBF");
-		\Res::End($content);
+		render("\xEF\xBB\xBF");
+		response($content);
 	}
 	/**
 	 * Load (Download from the client side) file from the local storage,
@@ -497,6 +497,6 @@ class Local
 	 * @param string|null $name Optional filename to force download with a specific name.
 	 */
 	public static function LoadFile($path, $name = null, $type = null){
-		\Res::SetFile($path, null, $type, true, $name);
+		responseFile($path, null, $type, true, $name);
 	}
 }

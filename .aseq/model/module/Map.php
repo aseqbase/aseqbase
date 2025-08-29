@@ -204,7 +204,7 @@ class Map extends Module
 	{
 		parent::__construct();
 		$this->Id = "_" . getId();
-		$this->Invert = $this->Invert ?? \_::$Front->DarkMode;
+		$this->Invert = $this->Invert ?? \_::$Front->SwitchMode;
 	}
 
 	public function BeforeHandle()
@@ -267,8 +267,8 @@ class Map extends Module
 				}
 			" : "") .
 			".{$this->Name}{
-				background-color: var(--back-color-inside);
-				color: var(--fore-color-inside);
+				background-color: var(--back-color-input);
+				color: var(--fore-color-input);
 				display: flex;
 				align-content: center;
 				justify-content: center;
@@ -286,10 +286,10 @@ class Map extends Module
 			.{$this->Name} :is(.leaflet-popup-content-wrapper, .leaflet-popup-tip){
 				background-color: var(--back-color);
 				color: var(--fore-color);
-				font-family: var(--font-0), var(--font-1), var(--font-2);
+				font-family: var(--font), var(--font-input), var(--font-output);
 				font-size: var(--size-1);
 				text-align: start;
-				border: var(--size-2) var(--fore-color-inside);
+				border: var(--size-2) var(--fore-color-input);
 				border-radius: var(--radius-1);
 				box-shadow: var(--shadow-4);
 			}
@@ -309,16 +309,16 @@ class Map extends Module
 				background-color: transparent;
 			}
 			.{$this->Name} .leaflet-control:not(.leaflet-control-attribution) :is(div, section, ul, li){
-				background-color: var(--back-color-inside);
-				color: var(--fore-color-inside);
+				background-color: var(--back-color-input);
+				color: var(--fore-color-input);
 				border: none;
 				outline: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .leaflet-control:not(.leaflet-control-attribution)>:is(button, [role=button], a){
-				background-color: var(--back-color-outside);
-				color: var(--fore-color-outside);
-				border: var(--border-1) var(--fore-color-outside);
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
+				border: var(--border-1) var(--fore-color-output);
 				border-radius: var(--radius-5);
 				box-shadow: var(--shadow-3);
 				outline: none;
@@ -329,16 +329,16 @@ class Map extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .leaflet-control:not(.leaflet-control-attribution)>:is(button, [role=button], a):hover{
-				background-color: var(--back-color-special-outside);
-				color: var(--fore-color-special-outside);
-				border-color: var(--fore-color-special-outside);
+				background-color: var(--back-color-special-output);
+				color: var(--fore-color-special-output);
+				border-color: var(--fore-color-special-output);
 				text-decoration: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .leaflet-control-layers-toggle{
-				background-color: var(--back-color-outside);
-				color: var(--fore-color-outside);
-				border-color: var(--fore-color-special-outside);
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
+				border-color: var(--fore-color-special-output);
 			}
 			.{$this->Name} .leaflet-bar-part>.button-state{
 				line-height: var(--size-5);
@@ -346,7 +346,7 @@ class Map extends Module
 			.{$this->Name} .leaflet-control-layers-list {
 				box-shadow: var(--shadow-5);
 				border-radius: var(--radius-1);
-				border: var(--border-1) var(--fore-color-outside);
+				border: var(--border-1) var(--fore-color-output);
 				line-height: 150%;
 				text-align: start;
 				padding: var(--size-0);
@@ -769,14 +769,14 @@ class Map extends Module
 
 	public function MessageScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.message(" . Script::Convert(__($message, styling: false)) . ");";
+		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.message(" . Script::Convert(__($message)) . ");";
 	}
 	public function SuccessScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.success(" . Script::Convert(__($message, styling: false)) . ");";
+		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.success(" . Script::Convert(__($message)) . ");";
 	}
 	public function ErrorScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.error(" . Script::Convert(__($message, styling: false)) . ");";
+		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.error(" . Script::Convert(__($message)) . ");";
 	}
 }

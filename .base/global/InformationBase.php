@@ -25,6 +25,12 @@ abstract class InformationBase extends ArrayObject{
 	 */
 	public $OwnerDescription = null;
 	/**
+     * A full version of descriptions about the website owner
+     * @field strings
+     * @var mixed
+	 */
+	public $FullOwnerDescription = null;
+	/**
      * The website owner and name
 	 * @var mixed
 	 */
@@ -84,13 +90,19 @@ abstract class InformationBase extends ArrayObject{
      * @field path
      * @var mixed
 	 */
-	public $LogoPath = "/asset/logo/logo.png";
+	public $LogoPath = "asset/logo/logo.png";
+	/**
+     * The website brand logo path
+     * @field path
+	 * @var mixed
+	 */
+	public $BrandLogoPath = "asset/logo/brand-logo.png";
 	/**
      * The website full logo path
      * @field path
 	 * @var mixed
 	 */
-	public $FullLogoPath = "/asset/logo/full-logo.png";
+	public $FullLogoPath = "asset/logo/full-logo.png";
 	
 	/**
 	 * The main KeyWords of the website, these will effect on SEO and views
@@ -105,7 +117,7 @@ abstract class InformationBase extends ArrayObject{
 		\MiMFa\Library\Revise::Load($this);
 	}
 	public function __get($name) {
-        return $this[$this->PropertyName($name)];
+        return $this[$this->PropertyName($name)]??null;
     }
     public function __set($name, $value) {
         $this[$this->PropertyName($name)] = $value;

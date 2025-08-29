@@ -145,43 +145,43 @@ class Base extends \ArrayObject
 
 	public function Get()
 	{
-		return $this->Handler(\Req::ReceiveGet());
+		return $this->Handler(receiveGet());
 	}
 	public function Post()
 	{
-		return $this->Handler(\Req::ReceivePost());
+		return $this->Handler(receivePost());
 	}
 	public function Put()
 	{
-		return $this->Handler(\Req::ReceivePut());
+		return $this->Handler(receivePut());
 	}
 	public function File()
 	{
-		return $this->Handler(\Req::ReceiveFile());
+		return $this->Handler(receiveFile());
 	}
 	public function Patch()
 	{
-		return $this->Handler(\Req::ReceivePatch());
+		return $this->Handler(receivePatch());
 	}
 	public function Delete()
 	{
-		return $this->Handler(\Req::ReceiveDelete());
+		return $this->Handler(receiveDelete());
 	}
 	public function Stream()
 	{
-		return $this->Handler(\Req::ReceiveStream());
+		return $this->Handler(receiveStream());
 	}
 	public function Internal()
 	{
-		return $this->Handler(\Req::ReceiveInternal());
+		return $this->Handler(receiveInternal());
 	}
 	public function External()
 	{
-		return $this->Handler(\Req::ReceiveExternal());
+		return $this->Handler(receiveExternal());
 	}
 	public function Default()
 	{
-		return $this->Handler(\Req::Receive());
+		return $this->Handler(receive());
 	}
 
 	public function Handler($received = null)
@@ -205,24 +205,11 @@ class Base extends \ArrayObject
 	public function Render()
 	{
 		if ($this->Visual) {
-			\Res::Render($this->Handle());
+			render($this->Handle());
 			$this->Rendered++;
 			return null;
 		}
 		return $this->Handle();
-	}
-
-	/**
-	 * Echos whole the contents then exit
-	 */
-	public function End()
-	{
-		if ($this->Visual) {
-			\Res::End($this->Handle());
-		} else {
-			$this->Handle();
-			\Res::End();
-		}
 	}
 
 	public function ToString()

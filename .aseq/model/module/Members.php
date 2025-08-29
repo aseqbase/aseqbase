@@ -22,7 +22,7 @@ class Members extends Module
                 background-color: var(--back-color) var(--overlay-url-0);
                 background-size: 100% auto;
                 text-align: center;
-                border: var(--border-1) var(--fore-color-outside);
+                border: var(--border-1) var(--fore-color-output);
                 border-radius: var(--radius-1);
                 box-shadow: var(--shadow-1);
                 margin-top: 150px;
@@ -32,9 +32,9 @@ class Members extends Module
             }
 
             .{$this->Name} .teammember:hover {
-                background-color: var(--back-color-inside);
+                background-color: var(--back-color-input);
                 box-shadow: var(--shadow-2);
-                border: var(--border-1) var(--fore-color-inside);
+                border: var(--border-1) var(--fore-color-input);
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
@@ -47,14 +47,14 @@ class Members extends Module
                 border-radius: 100%;
                 width: 200px;
                 max-width: 75vmin;
-                border: var(--border-1) var(--fore-color-outside);
+                border: var(--border-1) var(--fore-color-output);
                 margin-top: -100px;
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
             .{$this->Name} .teammember:hover div.image img {
-                background-color: var(--back-color-inside);
-                border: var(--border-1) var(--fore-color-inside);
+                background-color: var(--back-color-input);
+                border: var(--border-1) var(--fore-color-input);
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
@@ -83,7 +83,7 @@ class Members extends Module
             .{$this->Name} .teammember .features div {
                 background-color: var(--back-color);
                 border-radius: var(--radius-2);
-                border: var(--border-1) var(--fore-color-outside);
+                border: var(--border-1) var(--fore-color-output);
                 margin: 5px;
                 padding: 0px 10px;
                 display: inline-block;
@@ -106,14 +106,14 @@ class Members extends Module
                 overflow-wrap: anywhere;
             }
 
-            .{$this->Name} .teammember .badge-primary {
+            .{$this->Name} .teammember .badge.main {
                 background-color: var(--fore-color);
                 color: var(--back-color);
             }
 
-            .{$this->Name} .teammember .badge-primary:hover {
-                background-color: var(--back-color-outside);
-                color: var(--fore-color-outside);
+            .{$this->Name} .teammember .badge.main:hover {
+                background-color: var(--back-color-output);
+                color: var(--fore-color-output);
             }
         ");
     }
@@ -134,17 +134,17 @@ class Members extends Module
 
                             // Title (Name and Titles)
                             yield Html::Division(function () use ($menu, $i) {
-                                yield Html::Super(__(get($menu[$i], 'PreName'), styling: false));
+                                yield Html::Super(get($menu[$i], 'PreName'));
                                 yield Html::Division(
-                                    Html::Strong(__(get($menu[$i], 'FirstName'), styling: false) . " " . __(get($menu[$i], 'MiddleName'), styling: false) . " " . __(get($menu[$i], 'LastName'), styling: false))
+                                    Html::Strong(__(get($menu[$i], 'FirstName')) . " " . __(get($menu[$i], 'MiddleName')) . " " . __(get($menu[$i], 'LastName')))
                                 );
-                                yield Html::Sub(__(get($menu[$i], 'PostName'), styling: false));
+                                yield Html::Sub(get($menu[$i], 'PostName'));
                             }, ["class" => "title"]);
 
                             // Features (Assignees)
                             yield Html::Division(function () use ($menu, $i) {
                                 foreach (getValid($menu[$i], 'Assignees', []) as $assignee)
-                                    yield Html::Division(__($assignee, styling: false)) . Html::$Break;
+                                    yield Html::Division(__($assignee)) . Html::$Break;
                             }, ["class" => "features"]);
 
                             // List of Items (Details)
@@ -152,10 +152,10 @@ class Members extends Module
                                 foreach (getValid($menu[$i], 'Items', []) as $item) {
                                     yield Html::Item(
                                         Html::Italic(
-                                            __(get($item, 'Key'), styling: false) . __(":", styling: false),
+                                            __(get($item, 'Key')) . __(":"),
                                             null,
                                             ["class" => 'fa ' . get($item, "class"), "aria-hidden" => 'true']
-                                        ) . __(getValid($item, 'Value', ''), styling: false),
+                                        ) . __(getValid($item, 'Value', '')),
                                         ["class" => "list-item d-flex justify-content-between align-items-center"]
                                     );
                                 }

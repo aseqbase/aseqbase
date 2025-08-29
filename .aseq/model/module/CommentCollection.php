@@ -37,62 +37,62 @@ class CommentCollection extends Collection
      * @var bool
      * @category Parts
      */
-    public $ShowMetaData = true;
+    public $AllowMetaData = true;
     /**
      * @var bool
      * @category Parts
      */
-    public $ShowCreateTime = true;
+    public $AllowCreateTime = true;
     /**
      * @var bool
      * @category Parts
      */
-    public $ShowUpdateTime = false;
+    public $AllowUpdateTime = false;
     /**
      * @var bool
      * @category Parts
      */
-    public $ShowAuthor = true;
+    public $AllowAuthor = true;
     /**
      * @var bool
      * @category Parts
      */
-    public $ShowAuthorImage = true;
+    public $AllowAuthorImage = true;
     /**
      * @var bool
      * @category Parts
      */
-    public $ShowStatus = true;
+    public $AllowStatus = true;
     /**
      * @var bool
      * @category Parts
      */
-    public $ShowImage = true;
+    public $AllowImage = true;
     /**
      * @var bool
      * @category Parts
      */
-    public $ShowSubject = true;
+    public $AllowSubject = true;
     /**
      * @var bool
      * @category Parts
      */
-    public $ShowMessage = true;
+    public $AllowMessage = true;
     /**
      * @var bool
      * @category Excerption
      */
-    public $ShowAttach = true;
+    public $AllowAttach = true;
     /**
      * Allow to show replies
      * @var mixed
      */
-    public $ShowReplies = true;
+    public $AllowReplies = true;
     /**
      * Allow to analyze all text and linking categories and tags to their messages, to improve the website's SEO
      * @var mixed
      */
-    public $AutoRefering = true;
+    public $AutoReferring = true;
     /**
      * Selected Excerpts text automatically
      * @var bool
@@ -114,7 +114,7 @@ class CommentCollection extends Collection
      * @var bool
      * @category Parts
      */
-    public $ShowButtons = true;
+    public $AllowButtons = true;
     /**
      * The label text of Save button in Edit mode
      * @var array|string|null
@@ -241,8 +241,8 @@ class CommentCollection extends Collection
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item .message .author-image {
-				background-color: var(--back-color-outside);
-				color: var(--fore-color-outside);
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
 				opacity: 0.6;
                 aspect-ratio: 1;
                 box-shadow: var(--shadow-1);
@@ -292,7 +292,7 @@ class CommentCollection extends Collection
                 gap: var(--size-0);
             	font-size: var(--size-1);
 				position: relative;
-                border-top: var(--border-1) var(--back-color-inside);
+                border-top: var(--border-1) var(--back-color-input);
                 padding-inline-start: var(--size-0);
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
@@ -344,13 +344,13 @@ class CommentCollection extends Collection
                 $p_email = get($item, 'Contact');
 
                 $p_showexcerpt = isValid($p_message) && $this->AutoExcerpt;
-                $p_showsubject = isValid($p_subject) && $this->ShowSubject;
-                $p_showmessage = $this->ShowMessage;
-                $p_showattach = $this->ShowAttach;
-                $p_showimage = isValid($p_image) && $this->ShowImage;
-                $p_showmeta = $this->ShowMetaData;
+                $p_showsubject = isValid($p_subject) && $this->AllowSubject;
+                $p_showmessage = $this->AllowMessage;
+                $p_showattach = $this->AllowAttach;
+                $p_showimage = isValid($p_image) && $this->AllowImage;
+                $p_showmeta = $this->AllowMetaData;
 
-                $p_replyes = $this->ShowReplies;
+                $p_replyes = $this->AllowReplies;
                 if ($p_replyes) {
                     $p_replyes = [];
                     foreach (Convert::ToItems($this->Items) as $k1 => $item1)
@@ -360,15 +360,15 @@ class CommentCollection extends Collection
                         }
                 } else
                     $p_replyes = [];
-                $p_refering = $this->AutoRefering;
+                $p_referring = $this->AutoReferring;
                 $updateaccess = $adminaccess || ($p_email && get(\_::$Back->User, "Email") == $p_email) || ($p_userid && get(\_::$Back->User, "UserId") == $p_userid);
-                $p_replybuttontext = !$this->ShowButtons ? null : __($this->ReplyButtonLabel);
+                $p_replybuttontext = !$this->AllowButtons ? null : __($this->ReplyButtonLabel);
                 $p_showreplybutton = !isEmpty($p_replybuttontext);
-                $p_editbuttontext = !$updateaccess || !$this->ShowButtons ? null : __($this->EditButtonLabel);
+                $p_editbuttontext = !$updateaccess || !$this->AllowButtons ? null : __($this->EditButtonLabel);
                 $p_showeditbutton = !isEmpty($p_editbuttontext);
-                $p_deletebuttontext = !$updateaccess || !$this->ShowButtons ? null : __($this->DeleteButtonLabel);
+                $p_deletebuttontext = !$updateaccess || !$this->AllowButtons ? null : __($this->DeleteButtonLabel);
                 $p_showdeletebutton = !isEmpty($p_deletebuttontext);
-                $p_statustext = !$updateaccess || !$this->ShowStatus ? null : __($p_status ? $this->PublishedLabel : $this->WaitingLabel);
+                $p_statustext = !$updateaccess || !$this->AllowStatus ? null : __($p_status ? $this->PublishedLabel : $this->WaitingLabel);
                 $p_showstatus = !isEmpty($p_statustext);
                 $uid = "c_" . getId();
 
@@ -382,7 +382,7 @@ class CommentCollection extends Collection
                     $p_message;
 
                 if ($p_showmeta) {
-                    if ($this->ShowCreateTime)
+                    if ($this->AllowCreateTime)
                         doValid(
                             function ($val) use (&$p_meta) {
                                 if (isValid($val))
@@ -391,7 +391,7 @@ class CommentCollection extends Collection
                             $item,
                             'CreateTime'
                         );
-                    if ($this->ShowUpdateTime)
+                    if ($this->AllowUpdateTime)
                         doValid(
                             function ($val) use (&$p_meta) {
                                 if (isValid($val))
@@ -402,7 +402,7 @@ class CommentCollection extends Collection
                         );
                     if ($p_showstatus)
                         $p_meta .= $p_statustext;
-                    if ($this->ShowButtons)
+                    if ($this->AllowButtons)
                         doValid(
                             function ($val) use (&$p_meta) {
                                 if (isValid($val))
@@ -441,13 +441,13 @@ class CommentCollection extends Collection
                 if ($p_showsubject)
                     yield "<h2 class='subject'>" . $p_subject . "</h2>";
                 yield "<div class='message'>";
-                $author = $this->ShowAuthorImage || $this->ShowAuthor ? table("User")->SelectRow("Signature, Name, Image", "Email=:Email", [":Email" => get($item, 'Contact')]) : [];
-                if ($this->ShowAuthorImage) {
+                $author = $this->AllowAuthorImage || $this->AllowAuthor ? table("User")->SelectRow("Signature, Name, Image", "Email=:Email", [":Email" => get($item, 'Contact')]) : [];
+                if ($this->AllowAuthorImage) {
                     $aimg = get($author, "Image");
                     if (!isEmpty($author))
                         yield Html::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \MiMFa\Library\User::$DefaultImagePath, ["class" => "author-image"]);
                 }
-                if ($this->ShowAuthor) {
+                if ($this->AllowAuthor) {
                     $au = getValid($author, "Name", $p_name);
                     if (isEmpty($author))
                         yield Html::Span($au, null, ["class" => "author"]);
@@ -457,7 +457,7 @@ class CommentCollection extends Collection
                 if ($p_showexcerpt)
                     yield "<div class='excerpt view parent-hover-hide'>$p_excerpt</div>";
                 if ($p_showmessage && !isEmpty($p_message))
-                    yield "<div class='full view parent-hover-show'>" . __(Html::Convert($p_message), refering: $p_refering) . "</div>";
+                    yield "<div class='full view parent-hover-show'>" . __(Html::Convert($p_message), referring: $p_referring) . "</div>";
                 if ($p_showmeta && isValid($p_meta))
                     yield "<div class='metadata'>$p_meta</div>";
                 if ($p_showimage && isValid($p_image))
@@ -516,7 +516,7 @@ class CommentCollection extends Collection
                 }
             }" . "
             function {$this->Name}_Delete(btn, selector, forid) {
-                if(confirm(`" . __("Are you sure to delete this command?", styling: false) . "`))
+                if(confirm(`" . __("Are you sure to delete this command?") . "`))
                     sendDelete(
                         null,
                         {Id:forid},

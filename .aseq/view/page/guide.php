@@ -3,7 +3,7 @@ module("PrePage");
 $module= new MiMFa\Module\PrePage();
 $module->Title = "Guide";
 $module->Render();
-\Res::Style("
+renderStyle("
 .side-image{
     background-position: center;
     background-repeat: no-repeat;

@@ -113,7 +113,7 @@ class Navigation extends Module{
 
 	public function __construct($itemsOrQuery = null, $count = null, $queryParameters = null, $defaultItems = null){
 		parent::__construct();
-		$query = \Req::ReceiveGet()??array();
+		$query = receiveGet()??array();
 		$r = "_".getId(false); 
 		$this->PageRequest .= $r; 
 		$this->LimitRequest .= $r; 
@@ -220,14 +220,14 @@ class Navigation extends Module{
 					overflow: hidden;
 					-webkit-appearance: none;
 					border-color: var(--back-color);
-					background-color: var(--fore-color-inside);
+					background-color: var(--fore-color-input);
 					".Style::UniversalProperty("transition","var(--transition-1)")."
 				}
 				.{$this->Name} input[type='range']::-webkit-slider-runnable-track {
 					height: 100%;
 					-webkit-appearance: none;
-					color: var(--back-color-outside);
-					background-color: var(--back-color-inside);
+					color: var(--back-color-output);
+					background-color: var(--back-color-input);
 				}
 				.{$this->Name} input[type='range']::-webkit-slider-thumb {
 					aspect-ratio: 1;
@@ -235,29 +235,29 @@ class Navigation extends Module{
 					height: 100%;
 					cursor: pointer;
 					border-radius: var(--radius-5);
-					border: var(--border-1) var(--fore-color-inside);
-					background-color: var(--back-color-inside);
-					box-shadow: ".(\_::$Back->Translate->Direction=="rtl"?"":"-")."100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-inside);
+					border: var(--border-1) var(--fore-color-input);
+					background-color: var(--back-color-input);
+					box-shadow: ".(\_::$Back->Translate->Direction=="rtl"?"":"-")."100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-input);
 					".Style::UniversalProperty("transition","var(--transition-1)")."
 				}
 				.{$this->Name} input[type='range']:hover::-webkit-slider-thumb {
-					border-color: var(--fore-color-outside);
-					background-color: var(--back-color-outside);
+					border-color: var(--fore-color-output);
+					background-color: var(--back-color-output);
 				}
 			}
 			/*FF*/
 			.{$this->Name} input[type='range']::-moz-range-progress {
-				background-color: var(--back-color-inside);
+				background-color: var(--back-color-input);
 			}
 			.{$this->Name} input[type='range']::-moz-range-track {
-				background-color: var(--fore-color-inside);
+				background-color: var(--fore-color-input);
 			}
 			/*IE*/
 			.{$this->Name} input[type='range']::-ms-fill-lower {
-				background-color: var(--back-color-inside);
+				background-color: var(--back-color-input);
 			}
 			.{$this->Name} input[type='range']::-ms-fill-upper {
-				background-color: var(--fore-color-inside);
+				background-color: var(--fore-color-input);
 			}
 			":"").
 			"
@@ -268,7 +268,7 @@ class Navigation extends Module{
 				margin: 5px;
 			}
 			.{$this->Name} .item.active{
-				color: var(--fore-color-inside);
+				color: var(--fore-color-input);
 			}
 
 			.{$this->Name} :is(.item.next, .item.back){
@@ -281,10 +281,10 @@ class Navigation extends Module{
 	public function Get(){
 		return Convert::ToString(function(){
 			yield parent::Get();
-			$url = \Req::$Path."?";
+			$url = \_::$Path."?";
 			$fromP = $this->GetFromPage();
 			$toP = $this->GetToPage();
-			$query = \Req::ReceiveGet()??array();
+			$query = receiveGet()??array();
 			if(isset($query[$this->CountRequest])) $query[$this->CountRequest] = $this->Count."";
 			$right = \_::$Back->Translate->Direction=="rtl"?"left":"right";
 			$left = \_::$Back->Translate->Direction=="rtl"?"right":"left";
@@ -293,7 +293,7 @@ class Navigation extends Module{
 				$maxLimit = $this->AllowCount?min($this->Count,$this->MaxLimit):$this->MaxLimit;
 				if($this->MinLimit < $maxLimit)
 					yield Html::Division(
-						Html::RangeInput(null,$this->Limit, $this->MinLimit, $maxLimit, ["onchange"=>"load('/".\Req::$Direction."?".preg_replace("/\&{$this->LimitRequest}\=\d+/","",\Req::$Query??"")."&{$this->LimitRequest}='+this.value);"]).
+						Html::RangeInput(null,$this->Limit, $this->MinLimit, $maxLimit, ["onchange"=>"load('/".\_::$Direction."?".preg_replace("/\&{$this->LimitRequest}\=\d+/","",\_::$Query??"")."&{$this->LimitRequest}='+this.value);"]).
 						($this->AllowCount?Html::Span($this->Count):0)
 					,["class"=>"rangepanel"]);
 

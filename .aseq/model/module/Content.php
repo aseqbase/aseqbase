@@ -84,7 +84,7 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $ShowTitle = true;
+     public $AllowTitle = true;
      /**
       * Read more through clicking on the title
       * @var bool
@@ -96,18 +96,18 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $ShowDetails = true;
+     public $AllowDetails = true;
      /**
       * @var bool
       * @category Parts
       */
-     public $ShowRoute = true;
+     public $AllowRoute = true;
 
      /**
       * @var bool
       * @category Parts
       */
-     public $ShowTags = true;
+     public $AllowTags = true;
      /**
       * The label text of Tags
       * @var string|null
@@ -134,7 +134,7 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $ShowRelateds = true;
+     public $AllowRelateds = true;
      /**
       * The label text of Related posts
       * @var string|null
@@ -164,12 +164,12 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $ShowComments = true;
+     public $AllowComments = true;
      /**
       * @var int
       * @category Parts
       */
-     public $ShowCommentsAccess = 0;
+     public $AllowCommentsAccess = 0;
      /**
       * @var string|null
       * @category Management
@@ -180,27 +180,27 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $ShowCreateTime = true;
+     public $AllowCreateTime = true;
      /**
       * @var bool
       * @category Parts
       */
-     public $ShowUpdateTime = false;
+     public $AllowUpdateTime = false;
      /**
       * @var bool
       * @category Parts
       */
-     public $ShowAuthor = true;
+     public $AllowAuthor = true;
      /**
       * @var bool
       * @category Parts
       */
-     public $ShowStatus = false;
+     public $AllowStatus = false;
      /**
       * @var bool
       * @category Parts
       */
-     public $ShowButtons = true;
+     public $AllowButtons = true;
      /**
       * The label text of More button
       * @var string|null
@@ -213,7 +213,7 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $ShowAttaches = true;
+     public $AllowAttaches = true;
      /**
       * The label text of Attaches part
       * @var string|null
@@ -225,17 +225,17 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $ShowImage = true;
+     public $AllowImage = true;
      /**
       * @var bool
       * @category Parts
       */
-     public $ShowContent = true;
+     public $AllowContent = true;
      /**
       * @var bool
       * @category Parts
       */
-     public $ShowDescription = true;
+     public $AllowDescription = true;
      /**
       * @var bool
       * @category Excerption
@@ -245,7 +245,7 @@ class Content extends Module
       * Allow to analyze all text and linking categories and tags to their descriptions, to improve the website's SEO
       * @var mixed
       */
-     public $AutoRefering = true;
+     public $AutoReferring = true;
      /**
       * The length of selected Excerpt text characters
       * @var int
@@ -264,8 +264,8 @@ class Content extends Module
      {
           parent::__construct();
           $this->LeaveComment = \_::$Config->AllowWriteComment;
-          $this->ShowComments = \_::$Config->AllowReadComment;
-          $this->ShowCommentsAccess = \_::$Config->ReadCommentAccess;
+          $this->AllowComments = \_::$Config->AllowReadComment;
+          $this->AllowCommentsAccess = \_::$Config->ReadCommentAccess;
           $this->RootRoute = $this->RootRoute ?? \_::$Address->ContentRoute;
           $this->CollectionRoute = $this->CollectionRoute ?? \_::$Address->ContentRoute;
           $this->CommentForm = new CommentForm();
@@ -423,7 +423,7 @@ class Content extends Module
           }
           return Html::Rack(
                Html::MediumSlot(
-                    ($this->ShowTitle ? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->RootRoute . $nameOrId : null, ['class' => 'heading']) : "") .
+                    ($this->AllowTitle ? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->RootRoute . $nameOrId : null, ['class' => 'heading']) : "") .
                     $this->GetDetails($this->CollectionRoute . $nameOrId)
                ) .
                $this->GetButtons(),
@@ -433,16 +433,16 @@ class Content extends Module
      public function GetDescription($attributes = null)
      {
           return Html::Rack(
-               ($this->ShowDescription ? $this->GetExcerpt() : "") . $this->GetImage(),
+               ($this->AllowDescription ? $this->GetExcerpt() : "") . $this->GetImage(),
                ["class" => "description"]
           , $attributes);
      }
      public function GetContent($attributes = null)
      {
-          if (!$this->ShowContent)
+          if (!$this->AllowContent)
                return null;
           $p_content = getValid($this->Item, 'Content', $this->Content);
-          return (isValid($p_content) ? Html::Division(__(Html::Convert($p_content), refering: $this->AutoRefering), ["class" => "content"], $attributes) : null);
+          return (isValid($p_content) ? Html::Division(__(Html::Convert($p_content), styling: true, referring: $this->AutoReferring), ["class" => "content"], $attributes) : null);
      }
      public function GetSpecial()
      {
@@ -452,7 +452,7 @@ class Content extends Module
           $p_type = get($this->Item, 'Type');
           $p_morebuttontext = __(Convert::FromSwitch($this->ButtonsLabel, get($this->Item, 'Type')));
           $p_image = getValid($this->Item, 'Image', $this->Image);
-          $p_showmorebutton = $this->ShowButtons && !isEmpty($paths);
+          $p_showmorebutton = $this->AllowButtons && !isEmpty($paths);
           $p_template = Convert::FromSwitch($this->Template, $p_type) ?? $p_type;
           switch ($p_template) {
                case "Media":
@@ -487,7 +487,8 @@ class Content extends Module
                               $this->ExcerptLength,
                               $this->ExcerptSign
                          ) : $this->Description)),
-                    refering: $this->AutoRefering
+                    styling: true,
+                    referring: $this->AutoReferring
                )
                ,
                ["class" => "excerpt"]
@@ -495,7 +496,7 @@ class Content extends Module
      }
      public function GetImage()
      {
-          if (!$this->ShowImage)
+          if (!$this->AllowImage)
                return null;
           $p_image = getValid($this->Item, 'Image', $this->Image);
           return isValid($p_image) ? Html::Division(Html::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg-5", "style" => "text-align: center;"]) : "";
@@ -506,15 +507,15 @@ class Content extends Module
           $createTime = get($this->Item, 'CreateTime');
           $modifyTime = get($this->Item, 'UpdateTime');
           $p_meta = null;
-          if ($this->ShowRoute) {
+          if ($this->AllowRoute) {
                module("Route");
                $route = new \MiMFa\Module\Route($path);
                $route->Tag = "span";
                $route->Class = "route";
                $p_meta = $route->ToString();
           }
-          if ($this->ShowDetails) {
-               if ($this->ShowAuthor)
+          if ($this->AllowDetails) {
+               if ($this->AllowAuthor)
                     doValid(
                          function ($val) use (&$p_meta) {
                               $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
@@ -524,13 +525,13 @@ class Content extends Module
                          $this->Item,
                          'AuthorId'
                     );
-               if ($this->ShowCreateTime)
+               if ($this->AllowCreateTime)
                     if (isValid($createTime))
                          $p_meta .= " <span class='createtime'>" . Convert::ToShownDateTimeString($createTime) . "</span>";
-               if ($this->ShowUpdateTime)
+               if ($this->AllowUpdateTime)
                     if (isValid($modifyTime))
                          $p_meta .= " <span class='updatetime'>" . Convert::ToShownDateTimeString($modifyTime) . "</span>";
-               if ($this->ShowStatus)
+               if ($this->AllowStatus)
                     doValid(
                          function ($val) use (&$p_meta) {
                               if (isValid($val))
@@ -542,8 +543,8 @@ class Content extends Module
           }
           component("JsonLD");
           return \MiMFa\Component\JsonLD::Article(
-               title: __(getValid($this->Item, 'Title', $this->Title), styling: false),
-               excerpt: __(getValid($this->Item, 'Description', $this->Description), styling: false),
+               title: __(getValid($this->Item, 'Title', $this->Title)),
+               excerpt: __(getValid($this->Item, 'Description', $this->Description)),
                image: getValid($this->Item, 'Image', $this->Image),
                author: ["Name" => $authorName],
                datePublished: $createTime ? explode(" ", $createTime)[0] : null,
@@ -553,7 +554,7 @@ class Content extends Module
      }
      public function GetButtons()
      {
-          if (!$this->ShowButtons)
+          if (!$this->AllowButtons)
                return null;
           $paths = Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
           $p_morebuttontext = __(value: Convert::FromSwitch($this->ButtonsLabel, get($this->Item, 'Type')));
@@ -566,7 +567,7 @@ class Content extends Module
      }
      public function GetAttaches()
      {
-          if (!$this->ShowAttaches)
+          if (!$this->AllowAttaches)
                return null;
           $p_attaches = Convert::FromJson(get($this->Item, 'Attach'));
           if (!isEmpty($p_attaches))
@@ -574,7 +575,7 @@ class Content extends Module
      }
      public function GetTags()
      {
-          if (!$this->ShowTags)
+          if (!$this->AllowTags)
                return null;
           $p_tags = Convert::FromJson(get($this->Item, 'TagIds'));
           if (!isEmpty($p_tags)) {
@@ -589,7 +590,7 @@ class Content extends Module
                          function ($v, $k) {
                               return Html::Link(
                                    isValid($v)
-                                   ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v, styling: false)
+                                   ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
                                    : $k
                                    ,
                                    \_::$Address->TagRoute . $k,
@@ -601,7 +602,7 @@ class Content extends Module
      }
      public function GetRelateds()
      {
-          if (!$this->ShowRelateds)
+          if (!$this->AllowRelateds)
                return null;
           $p_tags = Convert::FromJson(get($this->Item, 'TagIds'));
           if (isEmpty($p_tags))
@@ -621,7 +622,7 @@ class Content extends Module
      }
      public function GetCommentsCollection()
      {
-          if ($this->ShowComments && auth($this->ShowCommentsAccess)) {
+          if ($this->AllowComments && auth($this->AllowCommentsAccess)) {
                module("CommentCollection");
                $cc = new CommentCollection();
                $cc->Items = table("Comment")->Select(

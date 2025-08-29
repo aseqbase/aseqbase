@@ -58,7 +58,7 @@ class CommentForm extends Form
 				$row["Contact"],
 				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),
 				$message ?? [
-					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \Req::$Path),
+					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \_::$Path),
 					"Subject" => Convert::ToText(get($data, "Subject")),
 					"Name" => Convert::ToText(getValid($data, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
 					"Contact" => getValid($data, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
@@ -140,7 +140,7 @@ class CommentForm extends Form
 	{
 		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: true, reaction: true))
 			try {
-				$received = \Req::ReceivePost();
+				$received = receivePost();
 				if (isValid($received, "Name") || isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
 					$rid = get($received, "Reply");
@@ -179,7 +179,7 @@ class CommentForm extends Form
 	{
 		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: true, reaction: true))
 			try {
-				$received = \Req::ReceivePut();
+				$received = receivePut();
 				if (isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
 					$cid = get($received, "Id");
@@ -211,7 +211,7 @@ class CommentForm extends Form
 
 	public function Patch()
 	{
-		$received = \Req::ReceivePatch();
+		$received = receivePatch();
 		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: false, reaction: true))
 			if (isValid($received, "Reply")) {
 				$this->UnBlock();
@@ -244,7 +244,7 @@ class CommentForm extends Form
 	{
 		if (auth(\_::$Config->UserAccess))
 			try {
-				$received = \Req::ReceiveDelete();
+				$received = receiveDelete();
 				$cid = get($received, "Id");
 				if (isValid($cid))
 					if (

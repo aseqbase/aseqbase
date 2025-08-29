@@ -60,7 +60,7 @@ class Forum extends Content
 
      public function GetCommentsCollection()
      {
-          if ($this->ShowComments && auth($this->ShowCommentsAccess)) {
+          if ($this->AllowComments && auth($this->AllowCommentsAccess)) {
                if ($this->ShowCommentStartTime && Convert::ToDateTime() < $this->ShowCommentStartTime)
                     return null;
                if ($this->ShowCommentEndTime && Convert::ToDateTime() > $this->ShowCommentEndTime)

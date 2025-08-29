@@ -9,6 +9,7 @@ namespace MiMFa\Library;
  */
 class Html
 {
+    #region MAIN
     public static $AttributesOptimization = false;
     public static $MaxDecimalPrecision = 2;
     public static $MaxValueLength = 10;
@@ -140,7 +141,8 @@ class Html
             if (is_subclass_of($value, "\Base"))
                 return $value->ToString();
             if (is_countable($value) || is_iterable($value)) {
-                if(!is_array($value)) $value = iterator_to_array($value);
+                if (!is_array($value))
+                    $value = iterator_to_array($value);
                 $texts = array();
                 if (is_numeric(array_key_first($value))) {
                     foreach ($value as $val)
@@ -282,7 +284,7 @@ class Html
                         case "title":
                         case "description":
                         case "placeholder":
-                            $attrs .= " " . self::Attribute($key, __($value, styling: false));
+                            $attrs .= " " . self::Attribute($key, __($value));
                             break;
                         case "href":
                             if (get($attrdic, "rel"))
@@ -305,7 +307,7 @@ class Html
                                             $attrs .= " id='$id'";
                                         }
                                         if ($onpress)
-                                            $scripts[] = "document.getElementById('$id').addEventListener('keyup', function(event) {if (event.key === '" . strToProper(str_replace($onpress, "", $key)) . "') $value});";
+                                            $scripts[] = "document.getElementById('$id').addEventListener('keyup', function(event) {if (event.key === '" . strToProper(str_replace($onpress, "", $key)) . "'){{$value}}});";
                                         else
                                             $scripts[] = "document.getElementById('$id').$key = function(event){{$value}};";
                                     } else
@@ -341,20 +343,52 @@ class Html
     }
     public static function HasAttribute($attributes, $key, $default = false): mixed
     {
-        return has($attributes, $key) ?? has(first($attributes), $key) ?? $default;
+        if (is_array($attributes)) {
+            if ($res = has($attributes, $key))
+                return $res;
+            foreach ($attributes as $ke => $val)
+                if (($res = self::HasAttribute($val, $key, $default)) && $res !== $default)
+                    return $res;
+        }
+        return $default;
     }
     public static function GetAttribute($attributes, $key, $default = null): mixed
     {
-        return get($attributes, $key) ?? get(first($attributes), $key) ?? $default;
+        if (is_array($attributes)) {
+            if ($res = get($attributes, $key))
+                return $res;
+            foreach ($attributes as $ke => $val)
+                if (($res = self::GetAttribute($val, $key, $default)) && $res !== $default)
+                    return $res;
+        }
+        return $default;
     }
     public static function GrabAttribute(&$attributes, $key, $default = null): mixed
     {
-        if(!is_array($attributes)) $attributes = iterator_to_array($attributes);
-        return grab($attributes, $key) ?? grab($attributes, array_key_first($attributes), $key) ?? $default;
+        if (is_array($attributes)) {
+            if ($res = grab($attributes, $key))
+                return $res;
+            foreach ($attributes as $ke => $val)
+                if (($res = self::GrabAttribute($val, $key, $default)) && $res !== $default) {
+                    $attributes[$ke] = $val;
+                    return $res;
+                }
+        }
+        return $default;
     }
     public static function FilterAttributes(&$attributes, callable $filter, $default = []): mixed
     {
-        return filter($attributes, $filter, null) ?? filter($attributes[0], $filter, $default);
+
+        if (is_array($attributes)) {
+            if ($res = filter($attributes, $filter))
+                return $res;
+            foreach ($attributes as $ke => $val)
+                if (($res = self::FilterAttributes($val, $filter, $default)) && $res !== $default) {
+                    $attributes[$ke] = $val;
+                    return $res;
+                }
+        }
+        return $default;
     }
     public static function Documents($title, $content = null, $description = null, $sources = [], ...$attributes)
     {
@@ -455,7 +489,10 @@ class Html
             return null;
         return "</$tagName>";
     }
+    #endregion
 
+
+    #region META
     /**
      * The \<TITLE\> HTML Tag
      * @param string|null $content The window title
@@ -464,7 +501,7 @@ class Html
      */
     public static function Title($content, ...$attributes)
     {
-        return self::Element(__($content, styling: false), "title", $attributes);
+        return self::Element(__($content), "title", $attributes);
     }
     /**
      * The \<META\> HTML Tag
@@ -528,39 +565,44 @@ class Html
         else
             return self::Relation("stylesheet", $source, $attributes);
     }
+    #endregion
 
-    public static function Result($content, ...$attributes)
+
+    #region NOTIFICATION
+    public static function Result($content, $icon = "bell", $wait = 10000, ...$attributes)
     {
         $id = "_" . getId(true);
         return self::Element(
-            __($content, styling: false) . self::Tooltip("Double click to hide"),
+            Html::Icon($icon) . Html::Division(__($content, referring: true) . self::Tooltip("Double click to hide")) . Html::Icon("close", "document.getElementById('$id')?.remove()"),
             "div",
             [
                 "id" => $id,
-                "class" => "result",
+                "class" => "result $id",
                 "ondblclick" => "this.style.display = 'none'",
-                "onmouseenter" => "this.id = ''",
+                "onmouseenter" => "this.classList.remove('$id');",
             ],
             $attributes
-        ) . self::Script("setTimeout(() => document.getElementById('$id')?.remove(), 5000);")
-        ;
+        ) . self::Script("setTimeout(() => document.querySelector('#$id.$id')?.remove(), $wait);");
     }
     public static function Success($content, ...$attributes)
     {
-        return self::Result($content, ["class" => "success"], $attributes);
+        return self::Result($content, "circle-check", 10000, ["class" => "success"], $attributes);
     }
     public static function Warning($content, ...$attributes)
     {
-        return self::Result($content, ["class" => "warning"], $attributes);
+        return self::Result($content, "triangle-exclamation", 10000, ["class" => "warning"], $attributes);
     }
     public static function Error($content, ...$attributes)
     {
         if (is_a($content, "Exception") || is_subclass_of($content, "Exception"))
-            return self::Result($content->getMessage(), ["class" => "error"], $attributes);
+            return self::Result($content->getMessage(), "circle-exclamation", 10000, ["class" => "error"], $attributes);
         else
-            return self::Result($content, ["class" => "error"], $attributes);
+            return self::Result($content, "circle-exclamation", 10000, ["class" => "error"], $attributes);
     }
+    #endregion
 
+
+    #region MEDIA
     /**
      * The \<VIDEO\> HTML Tag
      * @param mixed $content The alternative content of the Tag
@@ -585,7 +627,7 @@ class Html
                     $srcs[] = self::Element("Source", ["src" => $value, "type" => $key]);
         else
             $srcs[] = self::Element("Source", ["src" => $source]);
-        return self::Element(join(PHP_EOL, $srcs) . __($content, styling: false), "video", ["class" => "video"], $attributes);
+        return self::Element(join(PHP_EOL, $srcs) . __($content), "video", ["class" => "video"], $attributes);
     }
     /**
      * The \<AUDIO\> HTML Tag
@@ -611,7 +653,7 @@ class Html
                     $srcs[] = self::Element("Source", ["src" => $value, "type" => $key]);
         else
             $srcs[] = self::Element("Source", ["src" => $source]);
-        return self::Element(join(PHP_EOL, $srcs) . __($content, styling: false), "audio", ["class" => "audio"], $attributes);
+        return self::Element(join(PHP_EOL, $srcs) . __($content), "audio", ["class" => "audio"], $attributes);
     }
     /**
      * The \<IMG\> or \<I\> HTML Tag
@@ -633,9 +675,9 @@ class Html
         if (!$source)
             return null;
         if (startsWith($source, "icon", "fa", "fa-"))
-            return self::Element(__($content ?? "", styling: false), "i", ["class" => "image " . strtolower($source)], $attributes);
+            return self::Element("", "i", ["class" => "image " . strtolower($source)], $attributes) . ($content ? Html::Tooltip($content) : "");
         elseif (isIdentifier($source))
-            return self::Element(__($content ?? "", styling: false), "i", ["class" => "image icon fa fa-" . strtolower($source)], $attributes);
+            return self::Element("", "i", ["class" => "image icon fa fa-" . strtolower($source)], $attributes) . ($content ? Html::Tooltip($content) : "");
         else {
             $srcs = [];
             $src = $source;
@@ -647,10 +689,10 @@ class Html
                     else
                         $srcs[] = self::Element("source", ["srcset" => $value, "media" => $key]);
             }
-            $srcs[] = self::Element("img", ["src" => $src, "alt" => __($content, styling: false)], self::FilterAttributes($attributes, fn($v, $k) => preg_match("/^((on\w+)|alt|src|id)$/i", $k)));
+            $srcs[] = self::Element("img", ["src" => $src, "alt" => __($content)], self::FilterAttributes($attributes, fn($v, $k) => preg_match("/^((on\w+)|alt|src|id)$/i", $k)));
             return self::Element(join(PHP_EOL, $srcs), "picture", ["class" => "image"], $attributes);
         }
-        //return self::Element("img", ["src" => $source, "alt" => __($content ?? "", styling: false), "class" => "image"], $attributes);
+        //return self::Element("img", ["src" => $source, "alt" => __($content ?? ""), "class" => "image"], $attributes);
     }
     /**
      * The \<IMAGE\> or \<I\> HTML Tag
@@ -675,7 +717,7 @@ class Html
             return self::Icon($source, null, ["class" => "media"], $attributes);
         if (isUrl($source))
             return self::Image($content, $source, ["class" => "media"], $attributes);
-        return self::Element(__($content ?? "", styling: false), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "');", "class" => "media"], ...$attributes);
+        return self::Element(__($content ?? ""), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "');", "class" => "media"], ...$attributes);
     }
     /**
      * The \<IFRAME\> or \<EMBED\> HTML Tag
@@ -728,322 +770,10 @@ class Html
             $ls[] = self::Embed(null, $item, $atts, ...$attributes);
         return Convert::ToString($ls);
     }
-    /**
-     * The Calendar HTML Tag
-     * @param mixed $content The tag default value
-     * @param mixed $attributes The custom attributes of the Tag
-     * @return string
-     */
-    public static function Calendar($content = null, ...$attributes)
-    {
-        if (!isValid($content))
-            $content = Convert::ToDateTime();
-        $dt = Convert::ToShownDateTime($content);
-        $uniq = "_" . getId(true);
-        $update = "{$uniq}_Click();";
-        $weekDays = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
-        return
-            self::Style("
-                .$uniq{
-                    text-align: center;
-                    display: flex;
-                    align-content: space-around;
-                    justify-content: space-around;
-                    align-items: stretch;
-                    flex-wrap: wrap;
-                    flex-direction: row-reverse;
-                }
-                .$uniq *{
-                    direction: ltr;
-                }
-                .$uniq .deactived{
-                    cursor: default;
-                    opacity: 0.5;
-                }
-                .$uniq .selected{
-                    cursor: pointer;
-                    background-color: var(--fore-color-outside);
-                    color: var(--back-color-outside);
-                }
-                .$uniq :is(span.clickable, .media).media{
-                    cursor: pointer;
-                    color: var(--fore-color-inside);
-                    padding: 1px 3px;
-                    margin: 0px;
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
-                }
-                .$uniq :is(span.clickable, .media):hover{
-                    cursor: pointer;
-                    color: var(--fore-color-outside);
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
-                }
-                .$uniq :is(div, i, td).clickable{
-                    cursor: pointer;
-                    border-radius: var(--radius-0);
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
-                }
-                .$uniq :is(div, i, td).clickable:hover{
-                    outline: var(--border-1) var(--color-4);
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
-                }
+    #endregion
 
-                .$uniq :is(.grid$uniq, .select$uniq).shown{
-                    position: absolute;
-                    min-height: max-content;
-                    background-color: var(--back-color-inside);
-                    color: var(--fore-color-inside);
-                    z-index: 999;
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
-                }
-                .$uniq .grid$uniq.shown{
-                    display: flex;
-                    align-content: space-around;
-                    justify-content: space-around;
-                    align-items: stretch;
-                    flex-wrap: wrap;
-                    flex-direction: row;
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
-                }
 
-                .$uniq :is(.grid$uniq, .select$uniq).hidden{
-                    display: none;
-				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
-                }
-
-                .$uniq .grid$uniq th{
-                    padding-bottom: 5px;
-                    opacity: 0.8;
-                }
-                .$uniq .grid$uniq td{
-                    padding: 1px 3px;
-                }
-                .$uniq .select$uniq :is(#OptionsBefore$uniq, #OptionsAfter$uniq){
-                    cursor: pointer;
-                    text-align: center;
-                    display: block;
-                    width: 100%;
-                }
-            ") .
-            self::Script("
-            function {$uniq}_Click(day = null){
-                const tso = " . (\_::$Config->TimeStampOffset * 1000) . ";
-                dt = new Date(
-                    document.querySelector('.$uniq .Y$uniq').innerText+'-'+
-                    document.querySelector('.$uniq .M$uniq').innerText+'-'+
-                    (day??document.querySelector('.$uniq .D$uniq')).innerText+' '+
-                    document.querySelector('.$uniq .h$uniq').innerText+':'+
-                    document.querySelector('.$uniq .m$uniq').innerText+':'+
-                    document.querySelector('.$uniq .s$uniq').innerText+' UTC');
-                gdt = new Date(dt.getTime() - tso);
-                $uniq = document.querySelector('.$uniq');
-                $uniq.setAttribute('value' , gdt.getTime());
-                if(day == null) {
-                    cd = dt.getDate();
-                    sd = 1;
-                    ed = new Date(gdt.getFullYear(), gdt.getMonth()+1, 0).getDate();
-                    sw = (new Date(dt.getFullYear(), dt.getMonth(), sd).getDay()+1)%7;
-                    if(" . (\_::$Config->DateTimeZone == "UTC" ? "false" : "true") . ")
-                        switch(dt.getMonth() + 1){
-                            case 1:
-                            case 2:
-                                ed = 31;
-                                sw -= 3;
-                            break;
-                            case 3:
-                            case 4:
-                                ed = 31;
-                            break;
-                            case 5:
-                            case 6:
-                                ed = 31;
-                                sw += 1;
-                            break;
-                            case 7:
-                                ed = 30;
-                                sw += 2;
-                            break;
-                            case 8:
-                                ed = 30;
-                                sw += 1;
-                            break;
-                            case 9:
-                            case 10:
-                                ed = 30;
-                            break;
-                            case 11:
-                                ed = 30;
-                                sw -= 1;
-                            break;
-                            case 12:
-                                ed = 29;
-                                sw -= 1;
-                            break;
-                        }
-                    if(sw < 0) sw += 7;
-                    let w = 0;
-                    for(item of document.querySelectorAll('.$uniq .week$uniq td'))
-                        if(w++ >= sw && sd <= ed) {
-                            item.innerText = sd;
-                            item.setAttribute('class','clickable');
-                            if(sd == cd) item.setAttribute('class','clickable D$uniq selected');
-                            sd++;
-                        } else {
-                            item.innerText = '';
-                            item.setAttribute('class','');
-                        }
-                } else {
-                    for(item of document.querySelectorAll('.$uniq td.clickable'))
-                        item.setAttribute('class','clickable');
-                    day.setAttribute('class','clickable D$uniq selected');
-                    document.querySelector('.$uniq span.D$uniq').innerText = day.innerText;
-                    {$uniq}_ToggleWeek(false);
-                }
-                $uniq.dispatchEvent(new Event('change'));
-            }
-            function {$uniq}_ShowOptions(destSelector, current, min = 0, max = 9999){
-                dv = parseInt(document.querySelector(destSelector).innerText);
-                c = Math.abs(current);
-                rc = 7;
-                pc = 42;
-                if(c > 9999999) {
-                    rc = 1;
-                    pc = 3;
-                }
-                else if(c > 999999) {
-                    rc = 1;
-                    pc = 6;
-                }
-                else if(c > 99999) {
-                    rc = 2;
-                    pc = 12;
-                }
-                else if(c > 9999) {
-                    rc = 3;
-                    pc = 18;
-                }
-                else if(c > 999) {
-                    rc = 4;
-                    pc = 24;
-                }
-                else if(c > 99) {
-                    rc = 5;
-                    pc = 30;
-                }
-                else {
-                    let nc = Math.abs(max - min) + 1;
-                    for(let i = 6; i > 0; i--)
-                        if(nc%i == 0) {
-                            rc = i;
-                            pc = Math.min(nc, i * 6);
-                            break;
-                        }
-                }
-                mn = Math.max(min, current - pc + 1);
-                mx = Math.min(max, mn + pc - 1);
-                obefore = document.querySelector('.$uniq .select$uniq #OptionsBefore$uniq');
-                oafter = document.querySelector('.$uniq .select$uniq #OptionsAfter$uniq');
-                if(mn <= min) {
-                    obefore.setAttribute('class','icon fa fa-angle-up deactived');
-                    obefore.setAttribute('onclick','');
-                }
-                else {
-                    obefore.setAttribute('class','icon fa fa-angle-up clickable');
-                    obefore.setAttribute('onclick','{$uniq}_ShowOptions(`'+destSelector+'`, '+ (current - pc) +', '+ min +', '+ max +')');
-                }
-                if(mx >= max) {
-                    oafter.setAttribute('class','icon fa fa-angle-down deactived');
-                    oafter.setAttribute('onclick','');
-                }
-                else {
-                    oafter.setAttribute('class','icon fa fa-angle-down clickable');
-                    oafter.setAttribute('onclick','{$uniq}_ShowOptions(`'+destSelector+'`, '+ (current + pc) +', '+ min +', '+ max +')');
-                }
-                opts = `<div class='row'>`;
-                for(let i = 0; mn <= mx; i++) {
-                    if(i%rc==0 && i != 0) opts += `</div><div class='row'>`;
-                    opts += `<div class='col-sm clickable`+(dv == mn?' selected':'')+`' onclick=\"{$uniq}_SelectOption(this, document.querySelector(\``+destSelector+`\`))\">`+(mn++)+`</div>`;
-                }
-                opts += `</div>`;
-                document.querySelector('.$uniq .select$uniq .options$uniq').innerHTML = opts;
-                document.querySelector('.$uniq .grid$uniq').setAttribute('class','grid$uniq hidden');
-                document.querySelector('.$uniq .select$uniq').setAttribute('class','select$uniq shown');
-            }
-            function {$uniq}_SelectOption(newElement, oldElement){
-                oldElement.innerText = newElement.innerText;
-                document.querySelector('.$uniq .select$uniq').setAttribute('class','select$uniq hidden');
-                $update
-            }
-            ShowWeeks = false;
-            function {$uniq}_ToggleWeek(show = null){
-                if(show == null) show = !ShowWeeks;
-                ShowWeeks = show;
-                document.querySelector('.$uniq .grid$uniq').setAttribute('class','grid$uniq '+(show?'shown':'hidden'));
-            }
-            ") .
-            self::Division(
-                self::Division([
-                    self::Span(self::Media("", "calendar", ["onclick" => "{$uniq}_ToggleWeek();"])) .
-                    self::Span($dt->format("Y"), ["class" => "Y$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .Y$uniq', parseInt(this.innerText), 0, 9999)"]) .
-                    self::Span("/") .
-                    self::Span($dt->format("m"), ["class" => "M$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .M$uniq', parseInt(this.innerText), 1, 12)"]) .
-                    self::Span("/") .
-                    self::Span($dt->format("d"), ["class" => "D$uniq clickable", "onclick" => "{$uniq}_ToggleWeek(true);"])
-                ]) .
-                self::SmallFrame(
-                    [
-                        [self::Media(" ", "angle-up", ["id" => "OptionsBefore$uniq"])],
-                        [self::SmallFrame("", ["class" => "options$uniq"])],
-                        [self::Media(" ", "angle-down", ["id" => "OptionsAfter$uniq"])]
-                    ]
-                    ,
-                    ["class" => "select$uniq hidden"]
-                ) .
-                "<table class='grid$uniq hidden'>" .
-                "<tr>" . join(PHP_EOL, [
-                        self::Cell($weekDays[0], ["Type" => "head"]),
-                        self::Cell($weekDays[1], ["Type" => "head"]),
-                        self::Cell($weekDays[2], ["Type" => "head"]),
-                        self::Cell($weekDays[3], ["Type" => "head"]),
-                        self::Cell($weekDays[4], ["Type" => "head"]),
-                        self::Cell($weekDays[5], ["Type" => "head"]),
-                        self::Cell($weekDays[6], ["Type" => "head"])
-                    ]) . "</tr>" .
-                join(
-                    PHP_EOL,
-                    iterator_to_array((function () use ($uniq, $dt, $update, $weekDays) {
-                        $week = [];
-                        $cd = intval($dt->format("d"));
-                        $sw = (intval($dt->setDate(intval($dt->format("Y")), intval($dt->format("m")), 1)->format("w")) + 1) % 7;
-                        $ed = intval($dt->format("t"));
-                        $d = -$sw;
-                        for ($i = 1; $i <= 49; $i++) {
-                            if (++$d > 0 && $d <= $ed)
-                                $cel = self::Cell($d, ["Type" => "cell", "class" => "clickable" . ($cd == $d ? " D$uniq selected" : ""), "onclick" => "{$uniq}_Click(this);"]);
-                            else
-                                $cel = self::Cell("", ["Type" => "cell"]);
-                            if (count($week) == 7) {
-                                yield "<tr class='week$uniq'>" . join(PHP_EOL, $week) . "</tr>";
-                                $week = [$cel];
-                            } else
-                                $week[] = $cel;
-                        }
-                    })())
-                ) .
-                "</table> &nbsp; " .
-                self::Division([
-                    self::Span(self::Media("", "clock", ["onclick" => "{$uniq}_ToggleWeek();"])) .
-                    self::Span($dt->format("H"), ["class" => "h$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .h$uniq', parseInt(this.innerText), 0, 23)"]) .
-                    self::Span(":") .
-                    self::Span($dt->format("i"), ["class" => "m$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .m$uniq', parseInt(this.innerText), 0, 59)"]) .
-                    self::Span(":") .
-                    self::Span($dt->format("s"), ["class" => "s$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .s$uniq', parseInt(this.innerText), 0, 59)"])
-                ])
-                ,
-                ["class" => "calendar $uniq", "value" => Convert::ToDateTime($content)->format('Uv')/*Get the miliseconds of the Time*/],
-                $attributes
-            );
-    }
-
+    #region PARTITIONING
     /**
      * The \<DIV\> HTML Tag
      * @param mixed $content The content of the Tag
@@ -1068,6 +798,7 @@ class Html
      * The \<DIV\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
+     * @deprecated
      * @return string
      */
     public static function Panel($content, ...$attributes)
@@ -1390,6 +1121,7 @@ class Html
         }
         return self::Element($content, "div", ["class" => "slot small-slot col-sm"], $attributes);
     }
+
     /**
      * The \<DIV\> HTML Tag
      * @param mixed $content The content of the Tag
@@ -1460,7 +1192,10 @@ class Html
     {
         return self::Element(self::Element($content, "blockcode", ["ondblclick" => 'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
     }
+    #endregion
 
+
+    #region COLLECTING
     /**
      * The Unordered List \<DL\> HTML Tag
      * @param mixed $content The content of the Tag
@@ -1475,11 +1210,11 @@ class Html
                 if (is_numeric($k))
                     $res[] = $item;
                 else
-                    $res[] = self::Element(__($k, styling: false), "dt") . self::Element(__($item, styling: false), "dd");
+                    $res[] = self::Element(__($k), "dt") . self::Element(__($item), "dd");
             $content = $res;
             return self::Element($content, "dl", ["class" => "collection"], $attributes);
         }
-        return self::Element(__($content, styling: false), "dl", ["class" => "collection"], $attributes);
+        return self::Element(__($content), "dl", ["class" => "collection"], $attributes);
     }
     /**
      * The Ordered List \<OL\> HTML Tag
@@ -1493,11 +1228,11 @@ class Html
             $res = [];
             foreach ($content as $k => $item)
                 //$res[] = self::Item($item);
-                $res[] = self::Element((is_numeric($k) ? "" : self::InlineHeading($k)) . __($item, styling: false), "li", ["class" => "item"]);
+                $res[] = self::Element((is_numeric($k) ? "" : self::InlineHeading($k)) . __($item), "li", ["class" => "item"]);
             $content = $res;
             return self::Element($content, "ol", ["class" => "list"], $attributes);
         }
-        return self::Element(__($content, styling: false), "ol", ["class" => "list"], $attributes);
+        return self::Element(__($content), "ol", ["class" => "list"], $attributes);
     }
     /**
      * The Unordered List \<UL\> HTML Tag
@@ -1511,11 +1246,11 @@ class Html
             $res = [];
             foreach ($content as $k => $item)
                 //$res[] = self::Item($item);
-                $res[] = self::Element((is_numeric($k) ? "" : self::InlineHeading($k)) . __($item, styling: false), "li", ["class" => "item"]);
+                $res[] = self::Element((is_numeric($k) ? "" : self::InlineHeading($k)) . __($item), "li", ["class" => "item"]);
             $content = $res;
             return self::Element($content, "ul", ["class" => "items"], $attributes);
         }
-        return self::Element(__($content, styling: false), "ul", ["class" => "items"], $attributes);
+        return self::Element(__($content), "ul", ["class" => "items"], $attributes);
     }
     /**
      * The List Item \<LI\> HTML Tag
@@ -1525,9 +1260,88 @@ class Html
      */
     public static function Item($content, ...$attributes)
     {
-        return self::Element(__($content, styling: false), "li", ["class" => "item"], $attributes);
+        return self::Element(__($content), "li", ["class" => "item"], $attributes);
     }
 
+    /**
+     * The \<TABLE\> HTML Tag
+     * @param mixed $content The rows array or table content
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Table($content = "", $options = [], ...$attributes)
+    {
+        $rowHeaders = grab($options, "RowHeaders") ?? [intval(grab($options, "RowHeader") ?? 0)];
+        $colHeaders = grab($options, "ColHeaders") ?? [intval(grab($options, "ColHeader") ?? 0)];
+        return self::Element(
+            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $rowHeaders, $colHeaders) {
+                foreach ($content as $k => $v) {
+                    if (in_array($k, $rowHeaders))
+                        yield self::Column($v);
+                    else
+                        yield self::Row($v, ["Type" => in_array($k, $colHeaders) ? "head" : "cell"]);
+                }
+            })())) : $content,
+            "table",
+            $options,
+            ["class" => "table"],
+            $attributes
+        );
+    }
+    /**
+     * The \<THEAD\> HTML Tag
+     * @param mixed $content The column labels array or content
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Column($content = "", ...$attributes)
+    {
+        return self::Element(
+            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content) {
+                yield self::Row($content, ["type" => "head"]);
+            })())) : __($content),
+            "thead",
+            ["class" => "table-column"],
+            $attributes
+        );
+    }
+    /**
+     * The \<TR\> HTML Tag
+     * @param mixed $content The row array or content
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Row($content = "", $options = [], ...$attributes)
+    {
+        $head = grab($options, "Type");
+        return self::Element(
+            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $head) {
+                foreach ($content as $k => $v)
+                    yield self::Cell($v, ["Type" => $head]);
+            })())) : $content,
+            "tr",
+            $options,
+            ["class" => "table-row"],
+            $attributes
+        );
+    }
+    /**
+     * The \<TD\> or \<TH\> HTML Tag
+     * @param mixed $content The cell array or content
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Cell($content = "", $options = [], ...$attributes)
+    {
+        if (strtolower(grab($options, "Type") ?? "") === "head")
+            return self::Element(__($content), "th", $options, ["class" => "table-cell"], $attributes);
+        else
+            return self::Element(__($content, referring: true), "td", $options, ["class" => "table-cell"], $attributes);
+    }
+    #endregion
+
+
+    #region HEADING
     /**
      * The \<H1\> HTML Tag
      * @param mixed $content The heading text
@@ -1543,7 +1357,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h1", ["class" => "externalheading"], $attributes);
-        return self::Element(__($content, styling: false), "h1", ["class" => "heading externalheading"], $attributes);
+        return self::Element(__($content), "h1", ["class" => "heading externalheading"], $attributes);
     }
     /**
      * The \<H2\> HTML Tag
@@ -1560,7 +1374,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h2", ["class" => "superheading"], $attributes);
-        return self::Element(__($content, styling: false), "h2", ["class" => "heading superheading"], $attributes);
+        return self::Element(__($content), "h2", ["class" => "heading superheading"], $attributes);
     }
     /**
      * The \<H3\> HTML Tag
@@ -1577,7 +1391,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h3", ["class" => "heading"], $attributes);
-        return self::Element(__($content, styling: false), "h3", ["class" => "heading"], $attributes);
+        return self::Element(__($content), "h3", ["class" => "heading"], $attributes);
     }
     /**
      * The \<H4\> HTML Tag
@@ -1594,7 +1408,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h4", ["class" => "subheading"], $attributes);
-        return self::Element(__($content, styling: false), "h4", ["class" => "heading subheading"], $attributes);
+        return self::Element(__($content), "h4", ["class" => "heading subheading"], $attributes);
     }
     /**
      * The \<H5\> HTML Tag
@@ -1611,7 +1425,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h5", ["class" => "internalheading"], $attributes);
-        return self::Element(__($content, styling: false), "h5", ["class" => "heading internalheading"], $attributes);
+        return self::Element(__($content), "h5", ["class" => "heading internalheading"], $attributes);
     }
     /**
      * The \<H6\> HTML Tag
@@ -1628,9 +1442,12 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "h6", ["class" => "inlineheading"], $attributes);
-        return self::Element(__($content, styling: false), "h6", ["class" => "heading inlineheading"], $attributes);
+        return self::Element(__($content), "h6", ["class" => "heading inlineheading"], $attributes);
     }
+    #endregion
 
+
+    #region TEXTS
     /**
      * The \<HR\> HTML Tag
      * @param mixed $content The content of the Tag
@@ -1638,7 +1455,7 @@ class Html
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Break($content, $reference = null, ...$attributes)
+    public static function BreakLine($content, $reference = null, ...$attributes)
     {
         if (is_null($content))
             return self::Element("hr", ["class" => "break"], $attributes);
@@ -1674,7 +1491,6 @@ class Html
                 return self::Element($hr . self::Button($content, $reference, $btnattr), "div", $attr, $attributes);
         return self::Element($hr . self::Span($content, null, $btnattr), "div", $attr, $attributes);
     }
-
     /**
      * The \<P\> HTML Tag
      * @param mixed $content The content of the Tag
@@ -1690,7 +1506,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "p", ["class" => "paragraph"], $attributes);
-        return self::Element(__($content, styling: false), "p", ["class" => "paragraph"], $attributes);
+        return self::Element(__($content, styling: true, referring: true), "p", ["class" => "paragraph"], $attributes);
     }
     /**
      * The \<SPAN\> HTML Tag
@@ -1707,7 +1523,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "span", ["class" => "span"], $attributes);
-        return self::Element(__($content, styling: false), "span", ["class" => "span"], $attributes);
+        return self::Element(__($content), "span", ["class" => "span"], $attributes);
     }
     /**
      * The \<STRONG\> HTML Tag
@@ -1724,7 +1540,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "strong", ["class" => "strong"], $attributes);
-        return self::Element(__($content, styling: false), "strong", ["class" => "strong"], $attributes);
+        return self::Element(__($content), "strong", ["class" => "strong"], $attributes);
     }
     /**
      * The \<B\> HTML Tag
@@ -1741,7 +1557,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "b", ["class" => "bold"], $attributes);
-        return self::Element(__($content, styling: false), "b", ["class" => "bold"], $attributes);
+        return self::Element(__($content), "b", ["class" => "bold"], $attributes);
     }
     /**
      * The \<BIG\> HTML Tag
@@ -1758,7 +1574,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "big", ["class" => "big"], $attributes);
-        return self::Element(__($content, styling: false), "big", ["class" => "big"], $attributes);
+        return self::Element(__($content), "big", ["class" => "big"], $attributes);
     }
     /**
      * The \<i\> HTML Tag
@@ -1775,7 +1591,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "i", ["class" => "italic"], $attributes);
-        return self::Element(__($content, styling: false), "i", ["class" => "italic"], $attributes);
+        return self::Element(__($content), "i", ["class" => "italic"], $attributes);
     }
     /**
      * The \<STRIKE\> HTML Tag
@@ -1792,7 +1608,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "strike", ["class" => "strike"], $attributes);
-        return self::Element(__($content, styling: false), "strike", ["class" => "strike"], $attributes);
+        return self::Element(__($content), "strike", ["class" => "strike"], $attributes);
     }
     /**
      * The \<SMALL\> HTML Tag
@@ -1809,7 +1625,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "small", ["class" => "small"], $attributes);
-        return self::Element(__($content, styling: false), "small", ["class" => "small"], $attributes);
+        return self::Element(__($content), "small", ["class" => "small"], $attributes);
     }
     /**
      * The \<sup\> HTML Tag
@@ -1826,7 +1642,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "sup", ["class" => "super"], $attributes);
-        return self::Element(__($content, styling: false), "sup", ["class" => "super"], $attributes);
+        return self::Element(__($content), "sup", ["class" => "super"], $attributes);
     }
     /**
      * The \<sub\> HTML Tag
@@ -1843,7 +1659,7 @@ class Html
                 $reference = null;
             } else
                 return self::Element(self::Link($content, $reference), "sub", ["class" => "sub"], $attributes);
-        return self::Element(__($content, styling: false), "sub", ["class" => "sub"], $attributes);
+        return self::Element(__($content), "sub", ["class" => "sub"], $attributes);
     }
 
     /**
@@ -1860,10 +1676,10 @@ class Html
                 $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } elseif (isIdentifier($reference))
-                return self::Element(__($content, styling: false), "label", ["class" => "label", "for" => $reference], $attributes);
+                return self::Element(__($content), "label", ["class" => "label", "for" => $reference], $attributes);
             else
-                return self::Element(__($content, styling: false) . __($reference, styling: false), "label", ["class" => "label"], $attributes);
-        return self::Element(__($content, styling: false), "label", ["class" => "label"], $attributes);
+                return self::Element(__($content) . __($reference), "label", ["class" => "label"], $attributes);
+        return self::Element(__($content), "label", ["class" => "label"], $attributes);
     }
     /**
      * The \<SPAN\> HTML Tag
@@ -1873,7 +1689,7 @@ class Html
      */
     public static function Tooltip($content, ...$attributes)
     {
-        return self::Element(__($content, styling: false), "div", ["class" => "tooltip"], $attributes);
+        return self::Element(__($content), "div", ["class" => "tooltip"], $attributes);
     }
     /**
      * The \<DATA\> HTML Tag
@@ -1884,9 +1700,12 @@ class Html
      */
     public static function Data($content, $value, ...$attributes)
     {
-        return self::Element(__($content, styling: false), "data", ["class" => "data", "value" => $value], $attributes);
+        return self::Element(__($content), "data", ["class" => "data", "value" => $value], $attributes);
     }
+    #endregion
 
+
+    #region OUTPUT
     /**
      * The \<A\> HTML Tag
      * @param mixed $content The anchor text of the Tag
@@ -1907,7 +1726,7 @@ class Html
         }
         if (is_null($content))
             $content = getDomain($reference);
-        return self::Element(__($content, styling: false), "a", ["href" => $reference, "class" => "link"], $attributes);
+        return self::Element(__($content), "a", ["href" => $reference, "class" => "link"], $attributes);
     }
     /**
      * The \<BUTTON\> or \<A\> HTML Tag
@@ -1920,7 +1739,7 @@ class Html
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
             $action = "load(" . Script::Convert($action) . ")";
-        return self::Element(__($content, styling: false), "button", ["class" => "button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
+        return self::Element(__($content), "button", ["class" => "button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
     }
     /**
      * The \<BUTTON\> or \<A\> HTML Tag
@@ -1939,9 +1758,12 @@ class Html
             $action = "load(" . Script::Convert($action) . ")";
         return self::Element(self::Icon($content, null), "button", ["class" => "icon", "type" => "button", "onclick" => $action], $attributes);
     }
+    #endregion
 
+
+    #region INPUT
     /**
-     * The \<FORM\> HTML Tag
+     * The \<FORM\> HTML Tag (the default method is GET)
      * @param mixed $content The form fields
      * @param string|null|array|callable $action The action reference path
      * @param mixed $attributes The custom attributes of the Tag
@@ -2076,7 +1898,7 @@ class Html
             $content = Html::Division($value, ["class" => "input"], $attributes);
         $id = self::GetAttribute($attributes, "Id") ?? Convert::ToId($key);
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
-        $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey, styling: false) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title"]));
+        $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title"]));
         $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description"]));
         switch ($type) {
             case null:
@@ -2369,6 +2191,7 @@ class Html
                 break;
             case 'map':
             case 'location':
+                $content = self::ValueInput($key, $value = Convert::ToString($value, ","), $attributes);
             case 'path':
                 $content = self::ValueInput($key, $value, $attributes);
                 break;
@@ -2477,7 +2300,7 @@ class Html
             $attributes = Convert::ToIteration($value, ...$attributes);
             $value = null;
         }
-        return self::Element(__($value ?? $key, styling: false), "button", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit"], $attributes);
+        return self::Element(__($value ?? $key), "button", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit"], $attributes);
     }
     /**
      * The \<BUTTON\ TYPE="RESET"> HTML Tag
@@ -2492,7 +2315,7 @@ class Html
             $attributes = Convert::ToIteration($value, ...$attributes);
             $value = null;
         }
-        return self::Element(__($value ?? $key, styling: false), "button", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset"], $attributes);
+        return self::Element(__($value ?? $key), "button", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2529,7 +2352,7 @@ class Html
      */
     public static function TextInput($key, $value = null, ...$attributes)
     {
-        return self::Element($value ?? "", "textarea", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key), styling: false), "class" => "input textinput"], $attributes);
+        return self::Element($value ?? "", "textarea", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key)), "class" => "input textinput"], $attributes);
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -2548,7 +2371,7 @@ class Html
                     self::Element($value ?? "", "textarea", [
                         "id" => $eid,
                         "name" => Convert::ToKey($key),
-                        "placeholder" => __(Convert::ToTitle($key), styling: false),
+                        "placeholder" => __(Convert::ToTitle($key)),
                         "class" => "input contentinput",
                         "rows" => "20",
                         // "role"=>"textbox", "contenteditable"=>"true",
@@ -3017,28 +2840,347 @@ class Html
      */
     public static function SelectInput($key, $value = null, $options = [], ...$attributes)
     {
-        $ma = first($attributes);
         return self::Element(
             is_iterable($options) || is_array($options) ?
-            iterator_to_array((function () use ($options, $value) {
+            iterator_to_array((function () use ($options, $value, $attributes) {
                 $value = Convert::ToString($value);
                 $f = false;
                 if ($f = isEmpty($value))
-                    yield self::Element("", "option", ["value" => "", "selected" => "true"]);
+                    yield self::Element(__(self::GrabAttribute($attributes, "PlaceHolder", "")), "option", ["value" => "", "selected" => "true"]);
                 // else
                 //     yield self::Element("", "option", ["value" => ""]);
                 foreach ($options as $k => $v)
                     if (!$f && ($f = ($k == $value)))
-                        yield self::Element(__($v ?? "", styling: false), "option", ["value" => $k, "selected" => "true"]);
+                        yield self::Element(__($v ?? ""), "option", ["value" => $k, "selected" => "true"]);
                     else
-                        yield self::Element(__($v ?? "", styling: false), "option", ["value" => $k]);
+                        yield self::Element(__($v ?? ""), "option", ["value" => $k]);
             })())
             : Convert::ToString($options, assignFormat: "<option value='{0}'>{1}</option>\r\n")
             ,
             "select",
-            ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key), styling: false), "class" => "input selectinput"],
+            ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key)), "class" => "input selectinput"],
             $attributes
         );
+    }
+    #endregion
+
+
+    #region MODULE
+    /**
+     * The Calendar HTML Tag
+     * @param mixed $content The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function Calendar($content = null, ...$attributes)
+    {
+        if (!isValid($content))
+            $content = Convert::ToDateTime();
+        $dt = Convert::ToShownDateTime($content);
+        $uniq = "_" . getId(true);
+        $update = "{$uniq}_Click();";
+        $weekDays = ["Sa.", "Su.", "Mo.", "Tu.", "We.", "Th.", "Fr."];
+        return
+            self::Style("
+                .$uniq{
+                    text-align: center;
+                    display: flex;
+                    align-content: space-around;
+                    justify-content: space-around;
+                    align-items: stretch;
+                    flex-wrap: wrap;
+                    flex-direction: row-reverse;
+                }
+                .$uniq *{
+                    direction: ltr;
+                }
+                .$uniq .deactived{
+                    cursor: default;
+                    opacity: 0.5;
+                }
+                .$uniq .selected{
+                    cursor: pointer;
+                    background-color: var(--fore-color-output);
+                    color: var(--back-color-output);
+                }
+                .$uniq :is(span.clickable, .media).media{
+                    cursor: pointer;
+                    color: var(--fore-color-input);
+                    padding: 1px 3px;
+                    margin: 0px;
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
+                }
+                .$uniq :is(span.clickable, .media):hover{
+                    cursor: pointer;
+                    color: var(--fore-color-output);
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
+                }
+                .$uniq :is(div, i, td).clickable{
+                    cursor: pointer;
+                    border-radius: var(--radius-0);
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
+                }
+                .$uniq :is(div, i, td).clickable:hover{
+                    outline: var(--border-1) var(--color-yellow);
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
+                }
+
+                .$uniq :is(.grid$uniq, .select$uniq).shown{
+                    position: absolute;
+                    min-height: max-content;
+                    background-color: var(--back-color-input);
+                    color: var(--fore-color-input);
+                    z-index: 999;
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
+                }
+                .$uniq .grid$uniq.shown{
+                    display: flex;
+                    align-content: space-around;
+                    justify-content: space-around;
+                    align-items: stretch;
+                    flex-wrap: wrap;
+                    flex-direction: row;
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
+                }
+
+                .$uniq :is(.grid$uniq, .select$uniq).hidden{
+                    display: none;
+				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
+                }
+
+                .$uniq .grid$uniq th{
+                    padding-bottom: 5px;
+                    opacity: 0.8;
+                }
+                .$uniq .grid$uniq td{
+                    padding: 1px 3px;
+                }
+                .$uniq .select$uniq :is(#OptionsBefore$uniq, #OptionsAfter$uniq){
+                    cursor: pointer;
+                    text-align: center;
+                    display: block;
+                    width: 100%;
+                    height: var(--size-4);
+                }
+            ") .
+            self::Script("
+            function {$uniq}_Click(day = null){
+                const tso = " . (\_::$Config->TimeStampOffset * 1000) . ";
+                dt = new Date(
+                    document.querySelector('.$uniq .Y$uniq').innerText+'-'+
+                    document.querySelector('.$uniq .M$uniq').innerText+'-'+
+                    (day??document.querySelector('.$uniq .D$uniq')).innerText+' '+
+                    document.querySelector('.$uniq .h$uniq').innerText+':'+
+                    document.querySelector('.$uniq .m$uniq').innerText+':'+
+                    document.querySelector('.$uniq .s$uniq').innerText+' UTC');
+                gdt = new Date(dt.getTime() - tso);
+                $uniq = document.querySelector('.$uniq');
+                $uniq.setAttribute('value' , gdt.getTime());
+                if(day == null) {
+                    cd = dt.getDate();
+                    sd = 1;
+                    ed = new Date(gdt.getFullYear(), gdt.getMonth()+1, 0).getDate();
+                    sw = (new Date(dt.getFullYear(), dt.getMonth(), sd).getDay()+1)%7;
+                    if(" . (\_::$Config->DateTimeZone == "UTC" ? "false" : "true") . ")
+                        switch(dt.getMonth() + 1){
+                            case 1:
+                            case 2:
+                                ed = 31;
+                                sw -= 3;
+                            break;
+                            case 3:
+                            case 4:
+                                ed = 31;
+                            break;
+                            case 5:
+                            case 6:
+                                ed = 31;
+                                sw += 1;
+                            break;
+                            case 7:
+                                ed = 30;
+                                sw += 2;
+                            break;
+                            case 8:
+                                ed = 30;
+                                sw += 1;
+                            break;
+                            case 9:
+                            case 10:
+                                ed = 30;
+                            break;
+                            case 11:
+                                ed = 30;
+                                sw -= 1;
+                            break;
+                            case 12:
+                                ed = 29;
+                                sw -= 1;
+                            break;
+                        }
+                    if(sw < 0) sw += 7;
+                    let w = 0;
+                    for(item of document.querySelectorAll('.$uniq .week$uniq td'))
+                        if(w++ >= sw && sd <= ed) {
+                            item.innerText = sd;
+                            item.setAttribute('class','clickable');
+                            if(sd == cd) item.setAttribute('class','clickable D$uniq selected');
+                            sd++;
+                        } else {
+                            item.innerText = '';
+                            item.setAttribute('class','');
+                        }
+                } else {
+                    for(item of document.querySelectorAll('.$uniq td.clickable'))
+                        item.setAttribute('class','clickable');
+                    day.setAttribute('class','clickable D$uniq selected');
+                    document.querySelector('.$uniq span.D$uniq').innerText = day.innerText;
+                    {$uniq}_ToggleWeek(false);
+                }
+                $uniq.dispatchEvent(new Event('change'));
+            }
+            function {$uniq}_ShowOptions(destSelector, current, min = 0, max = 9999){
+                dv = parseInt(document.querySelector(destSelector).innerText);
+                c = Math.abs(current);
+                rc = 4;
+                pc = 16;
+                if(c > 9999999) {
+                    rc = 1;
+                    pc = 4;
+                }
+                else if(c > 999999) {
+                    rc = 1;
+                    pc = 4;
+                }
+                else if(c > 99999) {
+                    rc = 2;
+                    pc = 8;
+                }
+                else if(c > 9999) {
+                    rc = 3;
+                    pc = 12;
+                }
+                else if(c > 999) {
+                    rc = 3;
+                    pc = 12;
+                }
+                else if(c > 99) {
+                    rc = 4;
+                    pc = 16;
+                }
+                // else {
+                //     let nc = Math.abs(max - min) + 1;
+                //     for(let i = 4; i > 0; i--)
+                //         if(nc%i == 0) {
+                //             rc = i;
+                //             pc = Math.min(nc, i * 4);
+                //             break;
+                //         }
+                // }
+                mn = Math.max(min, current - rc + 1);
+                mx = Math.min(max, mn + pc - 1);
+                obefore = document.querySelector('.$uniq .select$uniq #OptionsBefore$uniq');
+                oafter = document.querySelector('.$uniq .select$uniq #OptionsAfter$uniq');
+                if(mn <= min) {
+                    obefore.setAttribute('class','icon fa fa-angle-up hide');
+                    obefore.setAttribute('onclick','');
+                }
+                else {
+                    obefore.setAttribute('class','icon fa fa-angle-up clickable');
+                    obefore.setAttribute('onclick','{$uniq}_ShowOptions(`'+destSelector+'`, '+ (current - rc) +', '+ min +', '+ max +')');
+                }
+                if(mx >= max) {
+                    oafter.setAttribute('class','icon fa fa-angle-down hide');
+                    oafter.setAttribute('onclick','');
+                }
+                else {
+                    oafter.setAttribute('class','icon fa fa-angle-down clickable');
+                    oafter.setAttribute('onclick','{$uniq}_ShowOptions(`'+destSelector+'`, '+ (current + rc) +', '+ min +', '+ max +')');
+                }
+                opts = `<div class='row'>`;
+                for(let i = 0; mn <= mx; i++) {
+                    if(i%rc==0 && i != 0) opts += `</div><div class='row'>`;
+                    opts += `<div class='col-sm clickable`+(dv == mn?' selected':'')+`' onclick=\"{$uniq}_SelectOption(this, document.querySelector(\``+destSelector+`\`))\">`+(mn++)+`</div>`;
+                }
+                opts += `</div>`;
+                document.querySelector('.$uniq .select$uniq .options$uniq').innerHTML = opts;
+                document.querySelector('.$uniq .grid$uniq').setAttribute('class','grid$uniq hidden');
+                document.querySelector('.$uniq .select$uniq').setAttribute('class','select$uniq shown');
+            }
+            function {$uniq}_SelectOption(newElement, oldElement){
+                oldElement.innerText = newElement.innerText;
+                document.querySelector('.$uniq .select$uniq').setAttribute('class','select$uniq hidden');
+                $update
+            }
+            ShowWeeks = false;
+            function {$uniq}_ToggleWeek(show = null){
+                if(show == null) show = !ShowWeeks;
+                ShowWeeks = show;
+                document.querySelector('.$uniq .grid$uniq').setAttribute('class','grid$uniq '+(show?'shown':'hidden'));
+            }
+            ") .
+            self::Division(
+                self::Division([
+                    self::Span(self::Media("", "calendar", ["onclick" => "{$uniq}_ToggleWeek();"])) .
+                    self::Span($dt->format("Y"), ["class" => "Y$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .Y$uniq', parseInt(this.innerText), 0, 9999)"]) .
+                    self::Span("/") .
+                    self::Span($dt->format("m"), ["class" => "M$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .M$uniq', parseInt(this.innerText), 1, 12)"]) .
+                    self::Span("/") .
+                    self::Span($dt->format("d"), ["class" => "D$uniq clickable", "onclick" => "{$uniq}_ToggleWeek(true);"])
+                ]) .
+                self::Division(
+                    [
+                        self::Media(" ", "angle-up", ["id" => "OptionsBefore$uniq"]),
+                        [self::SmallFrame("", ["class" => "options$uniq"])],
+                        self::Media(" ", "angle-down", ["id" => "OptionsAfter$uniq"])
+                    ]
+                    ,
+                    ["class" => "select$uniq hidden"]
+                ) .
+                "<table class='grid$uniq hidden'>" .
+                "<tr>" . join(PHP_EOL, [
+                        self::Cell($weekDays[0], ["Type" => "head"]),
+                        self::Cell($weekDays[1], ["Type" => "head"]),
+                        self::Cell($weekDays[2], ["Type" => "head"]),
+                        self::Cell($weekDays[3], ["Type" => "head"]),
+                        self::Cell($weekDays[4], ["Type" => "head"]),
+                        self::Cell($weekDays[5], ["Type" => "head"]),
+                        self::Cell($weekDays[6], ["Type" => "head"])
+                    ]) . "</tr>" .
+                join(
+                    PHP_EOL,
+                    iterator_to_array((function () use ($uniq, $dt, $update, $weekDays) {
+                        $week = [];
+                        $cd = intval($dt->format("d"));
+                        $sw = (intval($dt->setDate(intval($dt->format("Y")), intval($dt->format("m")), 1)->format("w")) + 1) % 7;
+                        $ed = intval($dt->format("t"));
+                        $d = -$sw;
+                        for ($i = 1; $i <= 49; $i++) {
+                            if (++$d > 0 && $d <= $ed)
+                                $cel = self::Cell($d, ["Type" => "cell", "class" => "clickable" . ($cd == $d ? " D$uniq selected" : ""), "onclick" => "{$uniq}_Click(this);"]);
+                            else
+                                $cel = self::Cell("", ["Type" => "cell"]);
+                            if (count($week) == 7) {
+                                yield "<tr class='week$uniq'>" . join(PHP_EOL, $week) . "</tr>";
+                                $week = [$cel];
+                            } else
+                                $week[] = $cel;
+                        }
+                    })())
+                ) .
+                "</table> &nbsp; " .
+                self::Division([
+                    self::Span(self::Media("", "clock", ["onclick" => "{$uniq}_ToggleWeek();"])) .
+                    self::Span($dt->format("H"), ["class" => "h$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .h$uniq', parseInt(this.innerText), 0, 23)"]) .
+                    self::Span(":") .
+                    self::Span($dt->format("i"), ["class" => "m$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .m$uniq', parseInt(this.innerText), 0, 59)"]) .
+                    self::Span(":") .
+                    self::Span($dt->format("s"), ["class" => "s$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .s$uniq', parseInt(this.innerText), 0, 59)"])
+                ])
+                ,
+                ["class" => "calendar $uniq", "value" => Convert::ToDateTime($content)->format('Uv')/*Get the miliseconds of the Time*/],
+                $attributes
+            );
     }
 
     /**
@@ -3089,80 +3231,6 @@ class Html
             document.getElementById(tabId).classList.add('show');
             tab.classList.add('active');
         }");
-    }
-
-    /**
-     * The \<TABLE\> HTML Tag
-     * @param mixed $content The rows array or table content
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Table($content = "", $options = [], ...$attributes)
-    {
-        $rowHeaders = grab($options, "RowHeaders") ?? [intval(grab($options, "RowHeader") ?? 0)];
-        $colHeaders = grab($options, "ColHeaders") ?? [intval(grab($options, "ColHeader") ?? 0)];
-        return self::Element(
-            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $rowHeaders, $colHeaders) {
-                foreach ($content as $k => $v) {
-                    if (in_array($k, $rowHeaders))
-                        yield self::Column($v);
-                    else
-                        yield self::Row($v, ["Type" => in_array($k, $colHeaders) ? "head" : "cell"]);
-                }
-            })())) : $content,
-            "table",
-            $options,
-            ["class" => "table"],
-            $attributes
-        );
-    }
-    /**
-     * The \<THEAD\> HTML Tag
-     * @param mixed $content The column labels array or content
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Column($content = "", ...$attributes)
-    {
-        return self::Element(
-            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content) {
-                yield self::Row($content, ["type" => "head"]);
-            })())) : __($content, styling: false),
-            "thead",
-            ["class" => "table-column"],
-            $attributes
-        );
-    }
-    /**
-     * The \<TR\> HTML Tag
-     * @param mixed $content The row array or content
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Row($content = "", $options = [], ...$attributes)
-    {
-        $head = grab($options, "Type");
-        return self::Element(
-            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $head) {
-                foreach ($content as $k => $v)
-                    yield self::Cell($v, ["Type" => $head]);
-            })())) : $content,
-            "tr",
-            $options,
-            ["class" => "table-row"],
-            $attributes
-        );
-    }
-    /**
-     * The \<TD\> or \<TH\> HTML Tag
-     * @param mixed $content The cell array or content
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Cell($content = "", $options = [], ...$attributes)
-    {
-        $tagName = strtolower(grab($options, "Type") ?? "") === "head" ? "th" : "td";
-        return self::Element(__($content, styling: false), $tagName, $options, ["class" => "table-cell"], $attributes);
     }
 
     public static function Chart($type = "column", $content = null, $title = null, $description = null, $axisXTitle = "X", $axisYTitle = "Y", $color = null, $foreColor = null, $backColor = null, $font = "defaultFont", $height = "400px", $width = null, $axisXBegin = null, $axisYBegin = null, $axisXInterval = null, $axisYInterval = null, $options = [], ...$attributes)
@@ -3258,14 +3326,14 @@ class Html
 
             $datachart = "[" . join(",", $arr) . "]";
         }
-        $axisXTitle = __($axisXTitle, styling: false);
-        $axisYTitle = __($axisYTitle, styling: false);
-        $title = __($title, styling: false);
-        $description = __($description, styling: false);
+        $axisXTitle = __($axisXTitle);
+        $axisYTitle = __($axisYTitle);
+        $title = __($title);
+        $description = __($description);
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading($title) .
-                \Res::Script(null, asset(\_::$Address->ScriptDirectory, "Canvas.js")) .
+                renderScript(null, asset(\_::$Address->ScriptDirectory, "Canvas.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {
@@ -3335,4 +3403,5 @@ class Html
                 $attributes
             );
     }
+    #endregion
 }

@@ -40,7 +40,7 @@ class SideTabs extends Tabs{
 				width: calc(100% - var(--size-0));
 				text-align: center;
 				cursor: pointer;
-				border: var(--border-1) var(--back-color-outside);
+				border: var(--border-1) var(--back-color-output);
 				border-radius: var(--radius-1);
 				box-shadow: var(--shadow-1);
 				display: flex;

@@ -19,6 +19,7 @@ class Form extends Module
 	 */
 	public $Template = null;
 	public $Access = 0;
+	public $IsActive = true;
 	public $Path = null;
 	public $Action = null;
 	public $Image = null;
@@ -28,7 +29,7 @@ class Form extends Module
 	public $ResetLabel = "Reset";
 	public $CancelLabel = null;
 	public $CancelPath = null;
-	public $BackLabel = "Back to Home";
+	public $BackLabel = null;
 	public $BackPath = null;
 	public $ReCaptchaSiteKey = null;
 	public $Method = "POST";
@@ -40,7 +41,7 @@ class Form extends Module
 	public $BlockTimeout = 25000;
 	public $SuccessPath = null;
 	public $ErrorPath = null;
-	public $HasDecoration = true;
+	public $AllowDecoration = true;
 	public $AllowAnimate = true;
 	public $AllowHeader = true;
 	public $AllowContent = true;
@@ -63,9 +64,9 @@ class Form extends Module
 	 */
 	public $Signing = null;
 
-	public $FieldsForeColor = "var(--fore-color-inside)";
-	public $FieldsBackColor = "var(--back-color-inside)";
-	public $FieldsBorderColor = "var(--fore-color-special-inside)";
+	public $FieldsForeColor = "var(--fore-color-input)";
+	public $FieldsBackColor = "var(--back-color-input)";
+	public $FieldsBorderColor = "var(--fore-color-special-input)";
 	public $FieldsHeight = "auto";
 	public $FieldsWidth = "100%";
 	public $FieldsMinHeight = "10px";
@@ -80,6 +81,7 @@ class Form extends Module
 
 	/**
 	 * Create the module
+     * @param string|null|array|callable $action The action reference path
 	 */
 	public function __construct($title = null, $action = null, $method = null, mixed $children = [], $description = null, $image = null)
 	{
@@ -88,7 +90,7 @@ class Form extends Module
 		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
 		$this->Signing = fn() => part(User::$InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
-		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \Res::Status($this->Status);
+		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);
 		// });
 		if (\_::$Back->User->Access(\_::$Config->AdminAccess))
 			$this->BlockTimeout = 500;
@@ -99,7 +101,7 @@ class Form extends Module
 		if (!auth($access)) {
 			$message = $this->GetError("You have not enough access!");
 			if ($reaction)
-				\Res::End($this->GetSigning());
+				response($this->GetSigning());
 			return false;
 		}
 		if (($message = $this->CheckBlock()) === false) {
@@ -107,7 +109,7 @@ class Form extends Module
 				$this->MakeBlock();
 		} else {
 			if ($reaction)
-				\Res::End($message);
+				response($message);
 			return false;
 		}
 		if (isValid($this->ReCaptchaSiteKey)) {
@@ -115,7 +117,7 @@ class Form extends Module
 			if (!\MiMFa\Component\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey)) {
 				$message = $this->GetError("Do something to denied access!");
 				if ($reaction)
-					\Res::End($message);
+					response($message);
 				return false;
 			}
 		}
@@ -153,6 +155,7 @@ class Form extends Module
 
 	/**
 	 * Set the main properties of module
+     * @param string|null|array|callable $action The action reference path
 	 */
 	public function Set($title = null, $action = null, $method = null, mixed $children = [], $description = null, $image = null)
 	{
@@ -167,10 +170,14 @@ class Form extends Module
 
 	public function GetStyle()
 	{
-		if ($this->HasDecoration) {
+		if ($this->AllowDecoration) {
 			$style = parent::GetStyle() . Html::Style("
 				.{$this->Name} .rack {
 					align-items: center;
+				}
+				.{$this->Name} .content {
+					background-color: var(--back-color);
+					color: var(--fore-color);
 				}
 				.{$this->Name} form {
 					padding-top: var(--size-0);
@@ -183,8 +190,8 @@ class Form extends Module
 				}
 				.{$this->Name} .header {
 					position: sticky;
-					top: 0px;
-					bottom: 0px;
+					top: var(--size-max);
+					bottom: var(--size-max);
 					padding: var(--size-1);
 					text-align: center;
 				}
@@ -201,7 +208,7 @@ class Form extends Module
 					color: var(--fore-color-special);
 					margin: 0;
 					padding: 0;
-            		width: 30%;
+            		width: 10vmin;
 					height: unset;
 					text-align: center;
 				}
@@ -230,26 +237,9 @@ class Form extends Module
 				}
 				
 				.{$this->Name} .button {
-					background-color: inherit;
-					color: inherit;
-					width: initial;
-					max-width: 85vw;
-					border-radius: var(--radius-1);
-					padding: calc(var(--size-0) / 2) var(--size-0);
-					box-shadow: var(--shadow-0);
+					width: fit-content;
+					max-width: 85%;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-				}
-				.{$this->Name} .button:hover {
-					font-weight: bold;
-					box-shadow: var(--shadow-2);
-				}
-				.{$this->Name} .submitbutton {
-					background-color: var(--fore-color-outside);
-					color: var(--back-color-outside);
-				}
-				.{$this->Name} .submitbutton:hover {
-					background-color: var(--back-color-special-outside);
-					color: var(--fore-color-special-outside);
 				}
 
 				.{$this->Name} .group {
@@ -310,10 +300,10 @@ class Form extends Module
 					padding: var(--size-0);
 					height: 100%;
 					border: none;
-					background-color: var(--back-color-inside);
-					color: var(--fore-color-inside);
+					background-color: var(--back-color-input);
+					color: var(--fore-color-input);
 					border-top: none;
-					border-bottom: 1px solid var(--fore-color-special-inside);
+					border-bottom: 1px solid var(--fore-color-special-input);
 				}
 				.{$this->Name} .field .input {
 					" . Style::DoProperty("color", $this->FieldsForeColor) . "
@@ -516,8 +506,8 @@ class Form extends Module
 				display: table-row;
 			}
 			.{$this->Name} .field label.title{
-				" . Style::DoProperty("color", $this->FieldsForeColor) . "
-				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
+				background-color: var(--back-color);
+				color: var(--fore-color);
 				width: fit-content;
 				display: flex;
 				position: relative;
@@ -631,9 +621,9 @@ class Form extends Module
 				line-height: 100%;
 				text-align: initial;
 				border-radius: 3px;
-				border: var(--border-1) var(--back-color-outside);
-				background-color: var(--fore-color-outside);
-				color: var(--back-color-outside);
+				border: var(--border-1) var(--back-color-output);
+				background-color: var(--fore-color-output);
+				color: var(--back-color-output);
 				position: absolute;
 				padding: calc(var(--size-0) / 2);
 				z-index: 1;
@@ -663,7 +653,7 @@ class Form extends Module
 		if (($res = $this->CheckBlock()) !== false)
 			return $res;
 		$name = $this->Name . "_Form";
-		$src = $this->Action ?? $this->Path ?? \Req::$Path;
+		$src = $this->Action ?? $this->Path ?? \_::$Path;
 		if (is_array($this->Children) && count($this->Children) > 0) {
 			module("Field");
 			$attr = $this->Method ? [] : ["disabled"];
@@ -680,7 +670,7 @@ class Form extends Module
 								description: grab($v, "Description"),
 								options: grab($v, "Options"),
 								title: grab($v, "Title"),
-								wrapper: grab($v, "Wrapper") ?? [],
+								wrapper: grab($v, "Wrapper") ?? true,
 								attributes: [...(grab($v, "Attributes") ?? []), ...$v]
 							);
 						else
@@ -711,7 +701,7 @@ class Form extends Module
 
 		if (isValid($src)) {
 			$this->Status = $this->Status ?? 200;
-			if ($this->HasDecoration)
+			if ($this->AllowDecoration)
 				return
 					Html::Rack(
 						($this->AllowHeader ? Html::LargeSlot(
@@ -719,7 +709,7 @@ class Form extends Module
 							$this->GetHeader() .
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
-							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class" => "back-button"]) : "")
+							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Host, ["class" => "back-button"]) : "")
 							, ["class" => "header", ...($this->AllowAnimate?["data-aos"=>"fade-left"]:[])]
 						) : "") .
 						Html::LargeSlot(
@@ -747,7 +737,7 @@ class Form extends Module
 						$this->GetHeader() .
 						$this->GetTitle(["class" => "form-title"]) .
 						$this->GetDescription(["class" => "form-description"]) .
-						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \Req::$Host, ["class" => "back-button"]) : "")
+						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Host, ["class" => "back-button"]) : "")
 						: ""
 					) .
 					Html::Form(
@@ -778,10 +768,10 @@ class Form extends Module
 		if (isValid($this->Buttons))
 			yield $this->Buttons;
 		if ($this->Method) {
-			yield (isValid($this->SubmitLabel) ? Html::SubmitButton($this->SubmitLabel, ["Name" => "submit"]) : "");
+			if($this->IsActive)yield (isValid($this->SubmitLabel) ? Html::SubmitButton($this->SubmitLabel, ["Name" => "submit", "class"=>"main"]) : "");
 			yield (isValid($this->ResetLabel) ? Html::ResetButton($this->ResetLabel, ["Name" => "reset"]) : "");
 		}
-		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \Req::$Host, ["Name" => "cancel"]) : "");
+		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \_::$Host, ["Name" => "cancel"]) : "");
 	}
 	public function GetFooter()
 	{
@@ -793,10 +783,10 @@ class Form extends Module
 			$(document).ready(function () {
 				" . ($this->UseAjax ? "handleForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
 				$('.{$this->Name} :is(input, select, textarea)').on('focus', function () {
-					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-outside)');
+					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-output)');
 				});
 				$('.{$this->Name} :is(input, select, textarea)').on('blur', function () {
-					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-outside)');
+					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-output)');
 				});
 			});
 		");
@@ -805,7 +795,7 @@ class Form extends Module
 
 	public function GetMessage($msg, ...$attr)
 	{
-		return Html::Result($msg, ...$attr);
+		return Html::Result($msg, attributes: $attr);
 	}
 	public function GetSuccess($msg = null, ...$attr)
 	{
@@ -871,7 +861,7 @@ class Form extends Module
 				\MiMFa\Library\Contact::SendHtmlEmail(
 					grab($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
 					grab($data, "ReceiverEmail") ?? $this->ReceiverEmail,
-					grab($data, "MailSubject") ?? $this->MailSubject ?? (\Req::$Domain . ": A new form submitted"),
+					grab($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Domain . ": A new form submitted"),
 					grab($data, "MailMessage") ?? $data,
 					exception: $ex
 				)

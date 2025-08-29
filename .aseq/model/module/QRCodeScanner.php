@@ -89,7 +89,7 @@ class QRCodeScanner extends Module{
 	}
 
 	public function Get(){
-		//\Res::Script(null, \_::$Address->ScriptRoute . "Instascan.js");
+		//RenderScript(null, \_::$Address->ScriptRoute . "Instascan.js");
 		return Html::Script(null,"https://rawgit.com/schmich/instascan-builds/master/instascan.min.js").
 		Html::OpenTag("video", $this->GetDefaultAttributes()).
 		Html::Script($this->ActiveAtBegining?$this->ActiveScript():$this->DeactiveScript()).
@@ -99,7 +99,7 @@ class QRCodeScanner extends Module{
 		Html::Division($this->GetTitle(["class"=>$this->TitleClass]).$this->GetDescription(["class"=>$this->DescriptionClass]), ["class"=>"message"]);
 	}
 	public function Toggle(){
-		\Res::Script($this->ToggleScript());
+		renderScript($this->ToggleScript());
 	}
 	public function ToggleScript(){
 		return "qrscanner = document.querySelector('.{$this->Name} video');
@@ -113,7 +113,7 @@ class QRCodeScanner extends Module{
 
 	public function Active(){
 		$this->ActiveAtBegining = true;
-		\Res::Script($this->ActiveScript());
+		renderScript($this->ActiveScript());
 		return $this;
 	}
 	public function ActiveScript(){
@@ -147,7 +147,7 @@ class QRCodeScanner extends Module{
 	
 	public function Deactive(){
 		$this->ActiveAtBegining = false;
-		\Res::Script($this->DeactiveScript());
+		renderScript($this->DeactiveScript());
 		return $this;
 	}
 	public function DeactiveScript(){
@@ -156,14 +156,14 @@ class QRCodeScanner extends Module{
 
 	public function MessageScript($message = null){
 		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.remove('success');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Html.message(".Script::Convert(__($message, styling:false)).");";
+		"document.querySelector('.{$this->Name} .message').innerHTML = Html.division(".Script::Convert(__($message)).");";
 	}
 	public function SuccessScript($message = null){
 		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.add('success');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Html.success(".Script::Convert(__($message, styling:false)).");";
+		"document.querySelector('.{$this->Name} .message').innerHTML = Html.division(".Script::Convert(__($message)).", {CLASS:'be fore green'});";
 	}
 	public function ErrorScript($message = null){
 		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('success');document.querySelector('.{$this->Name} .mask').classList.add('error');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Html.error(".Script::Convert(__($message, styling:false)).");";
+		"document.querySelector('.{$this->Name} .message').innerHTML = Html.division(".Script::Convert(__($message)).", {CLASS:'be fore red'});";
 	}
 }

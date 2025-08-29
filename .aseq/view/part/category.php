@@ -20,6 +20,6 @@ $module->Name = $name;// To do not change the name of module
 $module->Render();
 if($module->Items){
     $nav->Render();
-    \Res::Render(Html::$BreakLine);
+    render(Html::$BreakLine);
 }
 part("content/all", ["Items"=>compute("content/all", ["Filter"=>["Category"=>get($data, 'Id')??$Name]])]);

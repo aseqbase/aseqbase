@@ -63,8 +63,8 @@ class Player extends Module
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.controls>.button:hover {
-				background-color: var(--back-color-outside);
-				color: var(--fore-color-outside);
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
 				" . \MiMFa\Library\Style::UniversalProperty("text-stroke", "0px") . "
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -98,7 +98,7 @@ class Player extends Module
 				height: 5px;
 			}
 			.{$this->Name}>.content::-webkit-scrollbar:hover {
-				//background: var(--back-color-inside);
+				//background: var(--back-color-input);
 				width: 10px;
 				height: 10px;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
@@ -117,7 +117,7 @@ class Player extends Module
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}>.content::-webkit-scrollbar-thumb:hover {
-				background: var(--fore-color-inside);
+				background: var(--fore-color-input);
 				" . ($this->AllowZoom ? "cursor: grab;" : "") . "
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}

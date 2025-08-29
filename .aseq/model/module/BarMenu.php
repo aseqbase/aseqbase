@@ -15,7 +15,7 @@ class BarMenu extends Module{
 	public function GetStyle(){
 		return parent::GetStyle().Html::Style("
 			.{$this->Name}{
-				color: var(--fore-color-outside);
+				color: var(--fore-color-output);
 				text-transform: uppercase;
 				text-align: center;
 				width:100vw;
@@ -42,12 +42,21 @@ class BarMenu extends Module{
 				".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
 			}
 
+			.{$this->Name} :is(button, .button, .icon[onclick]){
+				border: var(--border-0);
+				border-radius: var(--radius-0);
+				box-shadow: var(--shadow-0);
+			}
+			.{$this->Name} :is(button, .button, .icon[onclick]):hover{
+				box-shadow: var(--shadow-2);
+			}
+			
 			.{$this->Name} .button {
-				background-color: var(--back-color-outside);
+				background-color: var(--back-color-output);
 				background-image: var(--overlay-url-0);
 				background-position: center;
 				background-repeat: no-repeat;
-				color: var(--fore-color-outside);
+				color: var(--fore-color-output);
 				border: none;
 				display: flex;
 				border-radius: var(--radius-0);
@@ -62,8 +71,8 @@ class BarMenu extends Module{
 			.{$this->Name} .button:hover {
 				cursor: pointer;
 				border: none;
-				".(($this->AllowAnimate)?"background-color: var(--fore-color-outside);
-				color: var(--back-color-outside);":"").
+				".(($this->AllowAnimate)?"background-color: var(--fore-color-output);
+				color: var(--back-color-output);":"").
 				\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
 			}
 
@@ -76,7 +85,7 @@ class BarMenu extends Module{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 60%;
-				color: var(--back-color-outside);".
+				color: var(--back-color-output);".
 				(($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter():"")."
 			}
 			.{$this->Name} .button:hover>.media{

@@ -46,8 +46,8 @@ class Icons
 
 			$root :is(.fa, .icon):hover {
 				opacity: 0.95;
-				color: var(--back-color-inside);
-				background-color: var(--fore-color-inside);
+				color: var(--back-color-input);
+				background-color: var(--fore-color-input);
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 		");
@@ -59,8 +59,8 @@ class Icons
 		return Html::Style("
 			$root :is(.fa, .icon):hover {
 				opacity: 1;
-				color: var(--back-color-inside);
-				background-color: var(--fore-color-inside);
+				color: var(--back-color-input);
+				background-color: var(--fore-color-input);
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 

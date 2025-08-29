@@ -75,7 +75,7 @@ class ContentCollection extends Collection{
      * @var bool
      * @category Parts
      */
-	public $ShowTitle = true;
+	public $AllowTitle = true;
 	/**
      * Read more through clicking on the title
      * @var bool
@@ -86,57 +86,57 @@ class ContentCollection extends Collection{
      * @var bool
      * @category Parts
      */
-	public $ShowMetaData = true;
+	public $AllowMetaData = true;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowRoute = true;
+	public $AllowRoute = true;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowCreateTime = true;
+	public $AllowCreateTime = true;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowUpdateTime = false;
+	public $AllowUpdateTime = false;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowAuthor = false;
+	public $AllowAuthor = false;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowStatus = false;
+	public $AllowStatus = false;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowButtons = true;
+	public $AllowButtons = true;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowImage = true;
+	public $AllowImage = true;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowDescription = true;
+	public $AllowDescription = true;
 	/**
      * @var bool
      * @category Parts
      */
-	public $ShowContent = false;
+	public $AllowContent = false;
 	/**
      * @var bool
      * @category Excerption
      */
-	public $ShowExcerpt = false;
+	public $AllowExcerpt = false;
 	/**
      * Selected Excerpts text automatically
      * @var bool
@@ -147,7 +147,7 @@ class ContentCollection extends Collection{
      * Allow to analyze all text and linking categories and tags to their descriptions, to improve the website's SEO
 	 * @var mixed
 	 */
-	public $AutoRefering = true;
+	public $AutoReferring = true;
 	/**
      * The length of selected Excerpt text characters
      * @var int
@@ -163,7 +163,7 @@ class ContentCollection extends Collection{
      * @var bool
      * @category Excerption
      */
-	public $ShowMoreButton = true;
+	public $AllowMoreButton = true;
 	/**
      * The label text of More button
      * @var array|string|null
@@ -174,7 +174,7 @@ class ContentCollection extends Collection{
      * @var bool
      * @category Excerption
      */
-	public $ShowPathButton = true;
+	public $AllowPathButton = true;
 	/**
      * The label text of Path button
      * @var array|string|null
@@ -202,13 +202,13 @@ class ContentCollection extends Collection{
 				font-size: var(--size-0);
 				box-shadow: var(--shadow-1);
 				border-radius: var(--radius-2);
-            	border: var(--border-1) var(--back-color-inside);
+            	border: var(--border-1) var(--back-color-input);
 				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item:hover{
 				box-shadow: var(--shadow-2);
 				border-radius:  var(--radius-1);
-				border-color: var(--back-color-special-inside);
+				border-color: var(--back-color-special-input);
 				background-Color: #88888818;
 				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
@@ -295,7 +295,7 @@ class ContentCollection extends Collection{
 		    $img->Class = "image";
 		    yield $img->GetStyle();
             $rout = null;
-            if($this->ShowRoute){
+            if($this->AllowRoute){
                 module("Route");
                 $rout = new \MiMFa\Module\Route();
                 $rout->Class = "route";
@@ -321,24 +321,24 @@ class ContentCollection extends Collection{
 			    $p_content = getValid($item,'Content' ,$this->DefaultContent);
 			    $p_class = get($item,'Class');
 
-			    $p_showexcerpt = $this->ShowExcerpt;
-			    $p_showcontent = $this->ShowContent;
-			    $p_showdescription = $this->ShowDescription;
-			    $p_showimage =  $this->ShowImage;
-			    $p_showtitle = $this->ShowTitle;
-                $p_showmeta =$this->ShowMetaData;
-                $p_refering =$this->AutoRefering;
+			    $p_showexcerpt = $this->AllowExcerpt;
+			    $p_showcontent = $this->AllowContent;
+			    $p_showdescription = $this->AllowDescription;
+			    $p_showimage =  $this->AllowImage;
+			    $p_showtitle = $this->AllowTitle;
+                $p_showmeta =$this->AllowMetaData;
+                $p_referring =$this->AutoReferring;
                 $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->RootRoute.getValid($item,'Name' ,$p_id)):null;
                 if(!$this->CompressPath) {
                     $catDir = \_::$Back->Query->GetContentCategoryRoute($item);
                     if(isValid($catDir)) $p_inselflink = $this->CollectionRoute.trim($catDir,"/\\")."/".($p_name??$p_id);
                 }
                 $p_path = first(Convert::FromJson(getValid($item,'Path' , $this->DefaultPath)));
-                if($this->ShowRoute) $rout->Set($p_inselflink);
+                if($this->AllowRoute) $rout->Set($p_inselflink);
 			    $hasl = isValid($p_inselflink);
-			    $p_showmorebutton = $hasl && $this->ShowMoreButton;
+			    $p_showmorebutton = $hasl && $this->AllowMoreButton;
                 $p_morebuttontext = Convert::FromSwitch($this->MoreButtonLabel, $p_type);
-			    $p_showpathbutton = isValid($p_path) && $this->ShowPathButton;
+			    $p_showpathbutton = isValid($p_path) && $this->AllowPathButton;
                 $p_pathbuttontext = Convert::FromSwitch($this->PathButtonLabel, $p_type);
 
                 $p_excerpt = null;
@@ -348,19 +348,19 @@ class ContentCollection extends Collection{
 						    0,
 						    $this->ExcerptLength,
 						    $this->ExcerptSign
-					    ), refering:$p_refering);
+					    ), styling:true, referring:$p_referring);
                     if($p_showexcerpt)
                         $p_excerpt = __(Convert::ToExcerpt(
 						    Convert::ToText($p_content),
 						    0,
 						    $this->ExcerptLength,
 						    $this->ExcerptSign
-					    ), refering:$p_refering);
+					    ), styling:true, referring:$p_referring);
                 }
-                else $p_description = __($p_description, refering:$p_refering);
+                else $p_description = __($p_description, styling:true, referring:$p_referring);
 
 			    if($p_showmeta){
-				    if($this->ShowAuthor)
+				    if($this->AllowAuthor)
                         doValid(
                             function($val) use(&$p_meta){
                                 $authorName = table("User")->SelectRow("Signature , Name","Id=:Id",[":Id"=>$val]);
@@ -369,7 +369,7 @@ class ContentCollection extends Collection{
                             $item,
                             'AuthorId'
                         );
-                    if($this->ShowCreateTime)
+                    if($this->AllowCreateTime)
                         doValid(
                             function($val) use(&$p_meta){
                                 if(isValid($val)) $p_meta .= Html::Span(Convert::ToShownDateTimeString($val), ["class"=>'createtime' ]);
@@ -377,7 +377,7 @@ class ContentCollection extends Collection{
                             $item,
                             'CreateTime'
                         );
-                    if($this->ShowUpdateTime)
+                    if($this->AllowUpdateTime)
                         doValid(
                             function($val) use(&$p_meta){
                                 if(isValid($val)) $p_meta .= Html::Span(Convert::ToShownDateTimeString($val), ["class"=>'updatetime' ]);
@@ -385,7 +385,7 @@ class ContentCollection extends Collection{
                             $item,
                             'UpdateTime'
                         );
-                    if($this->ShowStatus)
+                    if($this->AllowStatus)
                         doValid(
                             function($val) use(&$p_meta){
                                 if(isValid($val)) $p_meta .= " <span class='status'>$val</span>";
@@ -393,7 +393,7 @@ class ContentCollection extends Collection{
                             $item,
                             'Status'
                         );
-                    if($this->ShowButtons)
+                    if($this->AllowButtons)
                         doValid(
                             function($val) use(&$p_meta){
                                 if(isValid($val)) $p_meta .=  " ".$val;
@@ -412,14 +412,14 @@ class ContentCollection extends Collection{
                         if($p_showtitle) yield Html::SuperHeading($p_title, $lt?$p_inselflink:null, ['class'=>'title']);
                         if($p_showmeta && isValid($p_meta)) {
                             yield "<sub class='metadata'>";
-                            if($this->ShowRoute) yield $rout->ToString();
+                            if($this->AllowRoute) yield $rout->ToString();
                             yield $p_meta."</sub>";
                         }
                     yield "</div>";
                     if($p_showmorebutton || $p_showpathbutton) {
                         yield "<div class='more col col-3 view md-hide'>";
                         if($p_showmorebutton)
-                            yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn primary']);
+                            yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn main']);
                         if($p_showpathbutton)
                             yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn outline']);
                         yield "</div>";
@@ -434,13 +434,13 @@ class ContentCollection extends Collection{
                     yield "<div class='col-lg col-lg-3'>".$img->ToString()."</div>";
                 yield "</div>";
                 if($p_showcontent && isValid($p_content))
-                    yield "<div class='content'>".__($p_content, refering:$p_refering)."</div>";
+                    yield "<div class='content'>".__($p_content, styling:true, referring:$p_referring)."</div>";
                 if($p_showmorebutton || $p_showpathbutton) {
                     yield "<div class='more view md-show'>";
                     if($p_showmorebutton)
-                        yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn primary']);
+                        yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'main']);
                     if($p_showpathbutton)
-                        yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn outline']);
+                        yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'outline']);
                     yield "</div>";
                 }
                 yield "</article>";

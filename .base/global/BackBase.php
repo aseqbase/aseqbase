@@ -72,7 +72,6 @@ abstract class BackBase
 	
 		$this->Translate->AutoUpdate = \_::$Config->AutoUpdateLanguage;
 		$this->Translate->Initialize(
-			$this->Session,
 			\_::$Config->DefaultLanguage,
 			\_::$Config->DefaultDirection,
 			\_::$Config->Encoding,

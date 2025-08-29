@@ -388,12 +388,12 @@ class DataBase {
 		$stmt = $Connection->prepare($query);
 		$isdone = $stmt->execute($this->ParametersNormalization($params));
 		$this->Reset();
-		return $isdone ? (($r = $stmt->rowCount()) ? $r : $stmt->columnCount()) : false;
+		return $isdone ? ($stmt->rowCount()?: $stmt->columnCount()) : false;
 	}
 	public function TryFetchChanges($query, $params = [], bool|int $defaultValue = false): bool|int
 	{
 		try {
-			return $this->FetchChangesExecute($query, $params) ?? $defaultValue;
+			return $this->FetchChangesExecute($query, $params)?: $defaultValue;
 		} catch (\Exception $ex) {
 			$this->Error($ex, $query, $params);
 			return $defaultValue;

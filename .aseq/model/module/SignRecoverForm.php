@@ -33,7 +33,7 @@ class SignRecoverForm extends Form{
 	}
 
 	public function GetFields(){
-		if(!is_null($rrk = \Req::Receive(User::$RecoveryTokenKey))){
+		if(!is_null($rrk = receive(User::$RecoveryTokenKey))){
 			yield Html::HiddenInput(User::$RecoveryTokenKey, $rrk);
 			yield Html::Rack(
 				Html::LargeSlot(
@@ -63,10 +63,10 @@ class SignRecoverForm extends Form{
 		return Html::Script("
 			$(function () {
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-outside)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
 				$(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-outside)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
                 $('.{$this->Name} form').submit(function(e) {
 					let error = null;
@@ -99,8 +99,8 @@ class SignRecoverForm extends Form{
 
 	public function Post(){
 		try {
-			$received = \Req::ReceivePost();
-			if(isValid($received, "Password" ) && \Req::Receive(User::$RecoveryTokenKey)){
+			$received = receivePost();
+			if(isValid($received, "Password" ) && receive(User::$RecoveryTokenKey)){
 				$res = \_::$Back->User->ReceiveRecoveryEmail();
 				if($res)
                 	return $this->GetSuccess("Dear '".\_::$Back->User->TemporaryName."', your password changed successfully!");

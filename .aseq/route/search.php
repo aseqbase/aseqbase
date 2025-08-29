@@ -2,7 +2,7 @@
 $computeData = grab($data, "Compute")??[];
 $filter = grab($computeData, "Filter")??[];
 $viewData = grab($data, "View")??[];
-$received = \Req::Receive();
+$received = receive();
 $query = getBetween($received, "q", "Query");
 $cat = getBetween($received, "Cat", "Category");
 return route("contents", [

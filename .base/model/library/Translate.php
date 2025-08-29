@@ -47,11 +47,11 @@ class Translate
 	 * Change the Default Language of translator
 	 * Default language is EN
 	 */
-	public function Initialize(Session $session, ?string $defaultLang = null, ?string $defaultDirection = null, ?string $defaultEncoding = null,  bool $caching = true)
+	public function Initialize(?string $defaultLang = null, ?string $defaultDirection = null, ?string $defaultEncoding = null,  bool $caching = true)
 	{
-		$session->SetCookie("Lang", $this->Language = strtolower(\Req::Grab("lang", "get") ?? $session->GetCookie("Lang") ?? $defaultLang ?? $this->Language));
-		$session->SetCookie( "Direction", $this->Direction = strtolower(\Req::Grab("direction", "get") ?? $session->GetCookie("Direction") ?? $defaultDirection ?? $this->Direction));
-		$session->SetCookie("Encoding", $this->Encoding = strtolower(\Req::Grab("encoding", "get") ?? $session->GetCookie("Encoding") ?? $defaultEncoding ?? $this->Encoding));
+		setMemo("Lang", $this->Language = strtolower(snapReceive("lang", null, "get") ?? getMemo("Lang") ?? $defaultLang ?? $this->Language));
+		setMemo( "Direction", $this->Direction = strtolower(snapReceive("direction", null, "get") ?? getMemo("Direction") ?? $defaultDirection ?? $this->Direction));
+		setMemo("Encoding", $this->Encoding = strtolower(snapReceive("encoding", null, "get") ?? getMemo("Encoding") ?? $defaultEncoding ?? $this->Encoding));
 		$this->GetValueQuery = $this->DataTable->SelectValueQuery("ValueOptions", $this->CaseSensitive ? "KeyCode=:KeyCode" : "LOWER(KeyCode)=:KeyCode");
 		if ($this->AllowCache = $caching) $this->CacheAll();
 	}
@@ -194,7 +194,7 @@ class Translate
 	{
 		if ($text === null)
 			return "Null";
-		$key = preg_replace("/\s+/", " ", trim($text, " \n\r\t\v\x00~`!@#$%^&*()-+=?/.,|\\'\":;]}[{"));
+		$key = preg_replace("/\s+|((?<=[\w\W]{4})\.)/", " ", trim($text, " \n\r\t\v\x00~`!@#$%^&*()-+=?/,|\\'\":;]}[{"));
 		if (strlen($key) > $this->CodeLimit)
 			$key = md5($key);
 		if(!$this->CaseSensitive) $key = strtolower($key);

@@ -13,7 +13,7 @@ function findContent($router, &$data)
     else
         $path = null;
     $filter = grab($computeData, "Filter") ?? [];
-    $received = \Req::Receive();
+    $received = receive();
     return compute(grab($computeData, "ComputeName")??"content/get", [
         "Name"=>$name,
         "Filter" => [
@@ -44,8 +44,8 @@ function findContent($router, &$data)
     ->Default(function ($router) use ($data) {
         $doc = findContent($router, $data);
         if (isEmpty($doc))
-            \Res::Render(__(get($data, "ErrorHandler") ?? "Could not find related content"));
+            render(__(get($data, "ErrorHandler") ?? "Could not find related content"));
         elseif (compute("comment/handle", $doc))
-            \Res::Reload();
+            reload();
     })
     ->Handle();

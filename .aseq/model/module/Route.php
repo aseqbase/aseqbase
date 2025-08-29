@@ -33,7 +33,7 @@ class Route extends Module{
      * Show current document name in route
      * @var bool
      */
-	public $ShowCurrent = false;
+	public $AllowCurrent = false;
 	/**
      * Convert the first character of each word in a string to uppercase
      * @var bool
@@ -50,7 +50,7 @@ class Route extends Module{
 
 	public function Set($itemsOrpath = null){
 		if(is_null($itemsOrpath)){
-            $this->Path = "/".\Req::$Direction;
+            $this->Path = "/".\_::$Direction;
             $this->Items = null;
         }elseif(is_array($itemsOrpath)){
             $this->Path = null;
@@ -68,7 +68,7 @@ class Route extends Module{
 				text-align: unset;
 			}
 			.{$this->Name}, .{$this->Name} :is(*, a:visited){
-				color: var(--fore-color-inside);
+				color: var(--fore-color-input);
 			}
 		");
 	}
@@ -98,10 +98,10 @@ class Route extends Module{
 				}
 				$route = Html::Link($this->RootLabel??array_keys($this->Items)[0], array_values($this->Items)[0]);
 				if($this->AllowProperCase)
-					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
+					foreach (array_slice($this->Items,1, $this->AllowCurrent?null:(count($this->Items)-2)) as $key=>$value)
 						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link(ucwords($key), $value));
 				else
-					foreach (array_slice($this->Items,1, $this->ShowCurrent?null:(count($this->Items)-2)) as $key=>$value)
+					foreach (array_slice($this->Items,1, $this->AllowCurrent?null:(count($this->Items)-2)) as $key=>$value)
 						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link($key, $value));
 						yield $route;
 			}

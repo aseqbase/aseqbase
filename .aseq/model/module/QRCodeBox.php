@@ -2,7 +2,7 @@
 module("Image");
 class QRCodeBox extends Image{
 	public $AllowOrigin = true;
-	public $ShowContent = false;
+	public $AllowContent = false;
 	public $Width = "100%";
 	public $Height = "100%";
     public $Root = "https://api.qrserver.com/v1/create-qr-code/?data=";
@@ -19,7 +19,7 @@ class QRCodeBox extends Image{
 
 	public function Get(){
 		$this->Source = $this->Convert($this->Content);
-		return parent::Get().($this->ShowContent? $this->GetContent() : "");
+		return parent::Get().($this->AllowContent? $this->GetContent() : "");
     }
     
 	public function Convert($val){

@@ -81,14 +81,14 @@ class Buttons extends Collection
 				font-size:  var(--size-0);
 				box-shadow:  var(--shadow-1);
 				border-radius:  var(--radius-1);
-				border:  var(--border-1) var(--fore-color-outside);
+				border:  var(--border-1) var(--fore-color-output);
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.$this->Name>*>.item:hover{
 				box-shadow:  var(--shadow-2);
 				border-radius:  var(--radius-2);
 				border:  var(--border-1) var(--fore-color);
-				background-Color: var(--back-color-inside);
+				background-Color: var(--back-color-input);
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
@@ -178,10 +178,10 @@ class Buttons extends Collection
 				yield "<div class='item item-$i  col-md' " . ($this->Animation ? ("data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed / 2) . "' data-aos='{$this->Animation}'") : null) . ">";
 				yield $img->ToString();
 				yield "<div class='description'>";
-				yield Html::SubHeading(__($p_name, true, false));
-				yield Html::Paragraph(__($p_description, true, false));
+				yield Html::SubHeading($p_name, true, false);
+				yield Html::Paragraph($p_description);
 				if (isValid($p_path))
-					yield Html::Button(__($this->MoreButtonLabel), $clickact, ["class"=> "btn outline btn block"]);
+					yield Html::Button($this->MoreButtonLabel, $clickact, ["class"=> "btn outline btn block"]);
 				yield Html::Division(__($p_content ?? $p_description, true, false), ["class"=> "hide"]);
 				yield "</div>
 			</div>";

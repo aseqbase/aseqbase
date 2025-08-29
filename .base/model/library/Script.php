@@ -144,26 +144,26 @@ class Script
 
     public static function Alert($message = "")
     {
-        return "alert(" . self::Convert(__($message, styling: false)) . ")";
+        return "alert(" . self::Convert(__($message)) . ")";
     }
     public static function Confirm($message = "")
     {
-        return "confirm(" . self::Convert(__($message, styling: false)) . ")";
+        return "confirm(" . self::Convert(__($message)) . ")";
     }
     public static function Prompt($message = "", $default = null)
     {
-        return "prompt(" . self::Convert(__($message, styling: false)) . ", " . self::Convert(__($default, styling: false)) . ")";
+        return "prompt(" . self::Convert(__($message)) . ", " . self::Convert(__($default)) . ")";
     }
     public static function Log($message = "")
     {
-        return "console.log(" . self::Convert(__($message, styling: false)) . ")";
+        return "console.log(" . self::Convert(__($message)) . ")";
     }
     public static function Error($message = "")
     {
-        return "console.error(" . self::Convert(__($message, styling: false)) . ")";
+        return "console.error(" . self::Convert(__($message)) . ")";
     }
     public static function Warning($message = "")
     {
-        return "console.warn(" . self::Convert(__($message, styling: false)) . ")";
+        return "console.warn(" . self::Convert(__($message)) . ")";
     }
 }

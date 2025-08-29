@@ -10,16 +10,16 @@ class SideMenu extends Module
 	public $Items = null;
 	public $Shortcuts = null;
 	public $Direction = "ltr";
-	public $HasBranding = true;
-	public $HasItems = true;
+	public $BackgroundMask = "#00000099";
+	public $AllowBranding = true;
+	public $AllowItems = true;
 	public $AllowItemsLabel = true;
 	public $AllowSubItemsLabel = true;
-	public $AllowItemsDescription = false;
+	public $AllowItemsDescription = true;
 	public $AllowSubItemsDescription = true;
-	public $AllowItemsImage = false;
+	public $AllowItemsImage = true;
 	public $AllowSubItemsImage = true;
 	public $AllowChangeColor = true;
-	public $BackgroundShadow = true;
 	public $AllowHide = true;
 	public $AllowHoverable = true;
 	/**
@@ -51,8 +51,8 @@ class SideMenu extends Module
 		$notactiveselector = ".{$this->Name}:not(.active)";
 		return parent::GetStyle() . Html::Style("
 			.{$this->Name}{
-				background-color: var(--fore-color-outside);
-				color: var(--back-color-outside);
+				background-color: var(--fore-color-output);
+				color: var(--back-color-output);
 				font-size: var(--size-1);
 				position: fixed;
 				max-height: 100%;
@@ -72,7 +72,8 @@ class SideMenu extends Module
 			}
 
 			.{$this->Name} .header{
-				background-color:  var(--back-color-outside);
+				background-color: var(--fore-color-5);
+				color: var(--back-color-5);
 				padding: 5px;
 			}
 			.{$this->Name} .footer{
@@ -85,7 +86,7 @@ class SideMenu extends Module
 				align-items: stretch;
 			}
 			.{$this->Name} .header, .{$this->Name} .header a, .{$this->Name} .header a:visited{
-				color: var(--fore-color-outside);
+				color: var(--back-color-5);
 			}
 			$notactiveselector .header .branding{
 				display: none;
@@ -113,6 +114,15 @@ class SideMenu extends Module
 				height: {$this->LogoHeight};
 			}
 
+			.{$this->Name} :is(button, .button){
+				border: var(--border-0);
+				border-radius: var(--radius-0);
+				box-shadow: var(--shadow-0);
+			}
+			.{$this->Name} :is(button, .button):hover{
+				box-shadow: var(--shadow-2);
+			}
+
 			$activeselector .main-items .item :is(a, a:visited){
 				column-gap: var(--size-1);
 				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
@@ -126,15 +136,19 @@ class SideMenu extends Module
 				border: none;
 				text-align: start;
 				background-color: inherit;
+				width: 100%;
 				color: inherit;
 			}
 				
 			.{$this->Name} ul li .image{
 				margin-inline-end: var(--size-0);
 			}
-			.{$this->Name} ul li .description{
+			.{$this->Name} ul li .button>.description{
+				opacity: 0.7;
 				font-size: var(--size-0);
-				color: #888b;
+			}
+			.{$this->Name} ul li .button:hover>.description{
+				opacity: 1;
 			}
 
 			.{$this->Name} ul li .icon{
@@ -167,7 +181,7 @@ class SideMenu extends Module
 			.{$this->Name} ul:not(.sub-items)>li>:is(.button, .button:visited){
 				border: none;
 				font-size: inherit;
-				border-radius: none;
+				border-radius: unset;
 				text-decoration: none;
 				padding: var(--size-0) var(--size-1);
 				display: block;
@@ -217,6 +231,7 @@ class SideMenu extends Module
 				text-decoration: none;
 				padding: calc(var(--size-1) / 2) var(--size-1);
 				display: block;
+				width: 100%;
 				text-align: start;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown{
@@ -224,7 +239,7 @@ class SideMenu extends Module
 				border-bottom: var(--border-1) transparent;
 			}
 			.{$this->Name} ul.sub-items>li.dropdown:hover{
-				border-bottom: var(--border-1) var(--back-color-special-outside);
+				border-bottom: var(--border-1) var(--back-color-special-output);
 				box-shadow: var(--shadow-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -243,10 +258,9 @@ class SideMenu extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			" . (
-			isValid($this->BackgroundShadow) ? "
-			.{$this->Name}-background-screen {
-				background-color: {$this->BackgroundShadow};
-				width: 100%;
+			isValid($this->BackgroundMask) ? "
+			.{$this->Name}-background-mask {
+				background: {$this->BackgroundMask};
 				z-index:1;
 			}
 			" : "") . ($this->AllowSignButton ? "
@@ -269,62 +283,49 @@ class SideMenu extends Module
 				.{$this->Name} .other{
 					text-align: center;
 					display: flex !important;
-					flex-direction: row;
-					flex-wrap: wrap;
-					justify-content: center;
-					align-content: center;
-					align-items: center;
+					justify-content: flex-start;
+					gap: var(--size-0);
+					padding: var(--size-0);
 				}
-				.{$this->Name} .other .button{
-					color: unset;
-					background-color: unset;
-					border: none;
+				.{$this->Name} .other :is(button, .button){
+					aspect-ratio: 1;
+					border-radius: var(--radius-max);
 				}
 
 				.{$this->Name} .other form{
+					margin: 0px;
+					padding: 0px;
 					text-decoration: none;
-					padding: 4px 8px;
-					margin: 10px;
-					display: block;
-					color: var(--fore-color-outside);
-					background-color: var(--back-color-outside);
-					border: var(--border-1) var(--back-color-special-outside);
+					color: var(--fore-color-output);
+					background-color: var(--back-color-output);
+					border: var(--border-1) var(--back-color-special-output);
 					border-radius: var(--radius-3);
 					box-shadow: var(--shadow-1);
 					overflow: hidden;
+					display: flex;
+					align-content: center;
+					align-items: center;
+					justify-content: space-between;
+					max-width: calc(100% - 6 * var(--size-0));
 					" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
 				}
 				.{$this->Name} .other form:is(:hover, :active, :focus) {
 					font-weight: bold;
-					color: var(--fore-color-inside);
-					background-color: var(--back-color-inside);
+					color: var(--fore-color-input);
+					background-color: var(--back-color-input);
 				}
-				.{$this->Name} .other form :not(html,head,body,style,script,link,meta,title){
-					padding: 0px;
-					margin: 0px;
-					display: inline-block;
-					color: var(--fore-color-outside);
+				.{$this->Name} .other form :is(input, .input, .input:is(:hover, :active, :focus)) {
+					max-width: calc(100% - 3 * var(--size-0));
+					padding: calc(var(--size-0) / 2) var(--size-0);
+					border: none;
+					outline: none;
 					background-color: transparent;
-					outline: none;
-					border: none;
-					" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
+					color: unset;
 				}
-				.{$this->Name} .other form:is(:hover, :active, :focus) :not(html,head,body,style,script,link,meta,title) {
-					font-weight: bold;
-					outline: none;
-					border: none;
-					" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
+				.{$this->Name} .other form :is(button, .button)  {
+					padding: calc(var(--size-0) / 2);
 				}
-				.{$this->Name} .other form:is(:hover, :active, :focus) :is(button, button :not(html,head,body,style,script,link,meta,title))  {
-					color: var(--back-color-outside);
-				}
-				.{$this->Name} .other form input[type='search']{
-            		width: calc(100% - 50px);
-					" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
-				}
-				.{$this->Name} .other form:is(:hover, :active, :focus) input[type='search'], .{$this->Name} form input[type='search']:is(:hover, :active, :focus){
-					color: var(--fore-color-inside);
-				}
+					
         " : "") . ($this->AllowHide ? ("
 			.{$this->Name}{
 				width: 50vmax;
@@ -401,26 +402,25 @@ class SideMenu extends Module
 	public function Get()
 	{
 		return Convert::ToString(function () {
-			if ($this->HasBranding)
+			if ($this->AllowBranding)
 				yield Html::Header(
 					(isValid($this->Image) ? Html::Media("", $this->Image, ["class" => 'td image', "rowspan" => '2']) : "") .
 					Html::Division(
-						(isValid($this->Description) ? Html::Division(__($this->Description, true, false), ["class" => "td description"]) : "") .
-						(isValid($this->Title) ? Html::Division(Html::Link(__($this->Title, true, false), '/'), ["class" => "td title"]) : "")
+						(isValid($this->Description) ? Html::Division(__($this->Description), ["class" => "td description"]) : "") .
+						(isValid($this->Title) ? Html::Division(Html::Link(__($this->Title), '/'), ["class" => "td title"]) : "")
 						,
 						["class" => "td branding"]
 					)
 					,
 					["class" => "td header"]
 				);
-
 			if ($this->AllowDefaultButtons || $this->Buttons) {
 				$defaultButtons = [];
 				if ($this->AllowDefaultButtons) {
 					module("SearchForm");
 					module("TemplateButton"); 
-					$defaultButtons[] = new SearchForm();
-					if (\_::$Config->AllowSigning) $defaultButtons[] = Html::Button(Html::Icon("user"), User::$InHandlerPath);
+					$defaultButtons[] = new searchForm();
+					if (\_::$Config->AllowSigning) $defaultButtons[] = Html::Icon("user", User::$InHandlerPath);
 					$defaultButtons[] = new TemplateButton();
 				}
 				yield Html::Division([
@@ -430,7 +430,7 @@ class SideMenu extends Module
 					["class" => "other view {$this->ButtonsScreenSize}-show"]
 				);
 			}
-			if ($this->HasItems)
+			if ($this->AllowItems)
 				if (count($this->Items) > 0)
 					yield Html::Items(
 						function () {
@@ -443,6 +443,7 @@ class SideMenu extends Module
 						["onclick"=>"{$this->Name}_ViewSideMenu(false);"],
 						["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : '') . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : '')]
 					);
+			yield $this->GetContent();
 			if ($this->AllowDefaultButtons && !isEmpty($this->Shortcuts)) {
 				yield "<div class='footer'>";
 				module("Shortcuts");
@@ -461,21 +462,21 @@ class SideMenu extends Module
 		if (!auth(getValid($item, "Access", \_::$Config->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path", "Link", "Url");
-		$act = endsWith(\Req::$Path, $path) ? 'active' : '';
+		$act = endsWith(\_::$Path, $path) ? 'active' : '';
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Html::Item(
 			($ind <=2? Html::Button(
 				($this->AllowItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
-				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
-				($this->AllowItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
+				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name")):"").
+				($this->AllowItemsDescription?Html::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 				$path,
 				get($item, "Attributes")
 				) :
 				Html::Button(
 					($this->AllowSubItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
-					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name"), true, false):"").
-					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description"), true, false), ["class"=>"description"]):""),
+					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name")):"").
+					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 					$path,
 					get($item, "Attributes")
 				)
@@ -496,8 +497,8 @@ class SideMenu extends Module
 
 	public function BeforeHandle()
 	{
-		if (isValid($this->BackgroundShadow))
-			return "<div class=\"background-screen {$this->Name}-background-screen view hide\" onclick=\"{$this->Name}_ViewSideMenu(false);\"></div>";
+		if (isValid($this->BackgroundMask))
+			return "<div class=\"background-mask {$this->Name}-background-mask view hide\" onclick=\"{$this->Name}_ViewSideMenu(false);\"></div>";
 	}
 
 	public function AfterHandle()
@@ -521,11 +522,11 @@ class SideMenu extends Module
 				if(show === undefined) show = !document.querySelector('.{$this->Name}').classList.contains('active');
 				if(show) {
 					document.querySelector('.{$this->Name}').classList.add('active');
-					document.querySelector('.{$this->Name}-background-screen').classList.remove('hide');
+					document.querySelector('.{$this->Name}-background-mask').classList.remove('hide');
 				}
 				else {
 					document.querySelector('.{$this->Name}').classList.remove('active');
-					document.querySelector('.{$this->Name}-background-screen').classList.add('hide');
+					document.querySelector('.{$this->Name}-background-mask').classList.add('hide');
 				}
 			}
 		");

@@ -34,25 +34,31 @@ class UserMenu extends Module
 				position: absolute;
 				top: auto;
 				".(\_::$Back->Translate->Direction=="rtl"?"left":"right").": 0;
-				background-color: var(--back-color-inside);
-				color: var(--fore-color-inside);
+				background-color: var(--back-color-special);
+				color: var(--fore-color-special);
 				min-width: 300px;
 				min-width: min(210px, 100%);
 				max-width: 90vw;
 				max-height: 70vh;
 				width: max-content;
 				padding: 0px;
-				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+				box-shadow: 0px 16px 16px 0px rgba(0,0,0,0.2);
 				overflow-x: hidden;
 				overflow-y: auto;
 				text-align: initial;
 				z-index: 9;
-            	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
+            	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-2)") . "
+			}
+			.{$this->Name} .submenu .name{
+				background-color: var(--fore-color-output);
+				color: var(--back-color-output);
+				" . \MiMFa\Library\Style::UniversalProperty("word-wrap", "break-word") . "
 			}
 			.{$this->Name} .submenu .bio>:not(html,head,body,style,script,link,meta,title){
             	font-size: 80%;
 				opacity: 0.8;
-				color: var(--fore-color-inside);
+				background-color: var(--back-color-input);
+				color: var(--fore-color-input);
 				width: min-content;
 				min-width: 100%;
 				padding: var(--size-0) var(--size-1);
@@ -68,6 +74,7 @@ class UserMenu extends Module
 			}
 			.{$this->Name}:hover .submenu{
             	display: grid;
+            	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-2)") . "
 			}
 		");
 	}
@@ -81,7 +88,7 @@ class UserMenu extends Module
 				);
 			else
 				$this->Items = array(
-					array("Name" => takeValid(\_::$Back->User, "Name", "Profile"), "Path" => User::$RouteHandlerPath, "Attributes"=>["class"=>"name"]),
+					array("Name" => takeValid(\_::$Back->User, "Name", "Profile"), "Path" => User::$RouteHandlerPath, "Attributes"=>["class"=>"name main"]),
 					array("Name" => Convert::ToExcerpt(Convert::ToText(takeValid(\_::$Back->User, "Bio", null) ?? between(\_::$Back->User->GetValue("Bio"), "New User..."))), "Attributes" => ["class" => "bio"]),
 					array("Name" => "Dashboard", "Image" => "gamepad", "Path" => User::$DashboardHandlerPath),
 					array("Name" => "Edit Profile", "Image" => "edit", "Path" => User::$EditHandlerPath),
@@ -96,13 +103,13 @@ class UserMenu extends Module
 							if (isValid($item, 'Path'))
 								yield Html::Button(
 									doValid(fn($v)=>$v?Html::Image($v):"", $item,"Image").
-									Html::Division(__(getBetween($item, "Name", "Title"), styling: false)),
+									Html::Division(__(getBetween($item, "Name", "Title"))),
 									get($item, 'Path'),
 									get($item, "Attributes")
 								);
 							else
 								yield Html::Span(
-									Html::Division(__(getBetween($item, "Name", "Title"), styling: false), ["style" => (isValid($item, 'Image') ? ("background-image: url('" . $item['Image'] . "')") : "")]),
+									Html::Division(__(getBetween($item, "Name", "Title")), ["style" => (isValid($item, 'Image') ? ("background-image: url('" . $item['Image'] . "')") : "")]),
 									null,
 									get($item, "Attributes")
 								);

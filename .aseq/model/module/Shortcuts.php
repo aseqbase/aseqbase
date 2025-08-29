@@ -19,7 +19,7 @@ class Shortcuts extends Module{
 				font-size:  var(--size-2);
 			}
 			.{$this->Name} .item.active{
-				border: var(--border-1) var(--fore-color-inside);
+				border: var(--border-1) var(--fore-color-input);
 				font-size:  var(--size-2);
 			}
 		");
@@ -36,7 +36,7 @@ class Shortcuts extends Module{
 					yield Html::Link(
 						$this->AllowTitle?(getBetween($item,'Title','Name' )??""):"",
 						$link = getBetween($item,'Path','Link'),
-						["class"=>"item".(endsWith(\Req::$Url,$link)?' active':'').(($this->AllowIcon && isValid($item,'Icon'))?' '.$item['Icon']:'')],
+						["class"=>"item".(endsWith(\_::$Url,$link)?' active':'').(($this->AllowIcon && isValid($item,'Icon'))?' '.$item['Icon']:'')],
 						get($item,"Attributes")
 					);
 				}

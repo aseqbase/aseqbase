@@ -5,7 +5,7 @@ view(get($viewData, "ViewName")??"message", data: [
     "WindowLogo" => MiMFa\Library\Local::GetUrl(\_::$Info->LogoPath),
     "Title" => "Forbidden 403",
     "Description" => \_::$Config->RestrictionContent ?? "You don't have permission to access on this server.",
-    "Content" => GetClientIp(),
+    "Content" => getClientIp(),
     ...($data??[])
 ]);
 ?>

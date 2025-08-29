@@ -19,14 +19,14 @@ class SignInForm extends Form{
 	public $SignUpPath = null;
 	public $RecoverLabel = "Forgot your password?";
 	public $RecoverPath = null;
-	public $LoggedInWarning = "You are logged in!";
+	public $SignedInWarning = "You are logged in!";
 	public $IncompleteWarning = "Please fill all fields correctly!";
 	public $IncorrectWarning = "UserName or Password is not correct!";
 	public $CorrectConfirmingFormat = 'Dear \'$NAME\', you have logged in successfully';
 	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
 	public $Welcome = null;
-	public $HasInternalMethod = true;
-	public $HasExternalMethod = false;
+	public $AllowInternalMethod = true;
+	public $AllowExternalMethod = false;
 	public $MultipleSignIn = false;
 	/**
 	 * Simple signing up if the user is not exists
@@ -36,16 +36,16 @@ class SignInForm extends Form{
 	public $BlockTimeout = 5000;
 	public $ResponseView = null;
     public $Printable = false;
-
+	
 	public function __construct(){
         parent::__construct();
 		$this->Action = User::$InHandlerPath;
-		$this->SuccessPath = \Req::$Path;
+		$this->SuccessPath = \_::$Path;
 		$this->Welcome = function(){ return part(User::$DashboardHandlerPath, print:false); };
 	}
 
 	public function GetStyle(){
-		if($this->HasDecoration) return ((auth(\_::$Config->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Html::Style("
+		if($this->AllowDecoration) return ((auth(\_::$Config->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Html::Style("
 			.{$this->Name} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}
@@ -89,7 +89,7 @@ class SignInForm extends Form{
 			return __(Convert::FromDynamicString($this->WelcomeFormat));
     }
 	public function GetFields(){
-        if($this->HasInternalMethod){
+        if($this->AllowInternalMethod){
 			yield $this->SignatureValue?
 				Html::HiddenInput("Signature", $this->SignatureValue):
 				Html::LargeSlot(
@@ -116,7 +116,7 @@ class SignInForm extends Form{
 
 	public function Post(){
 		if(!auth(\_::$Config->UserAccess) || $this->MultipleSignIn) try {
-			$received = \Req::ReceivePost();
+			$received = receivePost();
 			$signature = get($received,"Signature" );
 			$password = get($received,"Password" );
 			if(isValid($signature) && isValid($password)) {
@@ -128,14 +128,14 @@ class SignInForm extends Form{
 				elseif($res === false)
 					return $this->GetError($this->IncorrectWarning);
 				elseif(is_null($res))
-					return \Res::Flip($this->GetError("This account is not active yet!"), null, User::$ActiveHandlerPath . "?signature=$signature".(\Req::$Query?"&".\Req::$Query:""));
+					return flipResponse($this->GetError("This account is not active yet!"), null, User::$ActiveHandlerPath . "?signature=$signature".(\_::$Query?"&".\_::$Query:""));
 				else
 					return $this->GetError($res);
 			}
 			else return $this->GetWarning($this->IncompleteWarning);
 		} catch(\Exception $ex) { return $this->GetError($ex); }
 		$this->Result = true;
-		return $this->GetMessage($this->LoggedInWarning);
+		return $this->GetMessage($this->SignedInWarning);
     }
 	
 	public function Delete(){

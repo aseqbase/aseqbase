@@ -4,45 +4,44 @@ use \MiMFa\Library\Router;
 $isuser = auth(\_::$Config->UserAccess);
 $data = $data??[];
 (new Router())
-    ->On("sign/in")->Get(function() use($data) { return view("part", ["Name" => "sign/in",...\Req::ReceiveGet(),...$data]);})
-    ->On("sign/up")->Get(function() use($data) { return view("part", ["Name" => "sign/up",...\Req::ReceiveGet(),...$data]);})
-    ->On("sign/recover")->Get(function() use($data) { return  view("part", ["Name" => "sign/recover",...\Req::ReceiveGet(),...$data]);})
-    ->On("sign/active")->Get(function() use($data) { return  view("part", ["Name" => "sign/active",...\Req::ReceiveGet(),...$data]);})
+    ->On("sign/in")->Get(function() use($data) { return view("part", ["Name" => "sign/in",...receiveGet(),...$data]);})
+    ->On("sign/up")->Get(function() use($data) { return view("part", ["Name" => "sign/up",...receiveGet(),...$data]);})
+    ->On("sign/recover")->Get(function() use($data) { return  view("part", ["Name" => "sign/recover",...receiveGet(),...$data]);})
+    ->On("sign/active")->Get(function() use($data) { return  view("part", ["Name" => "sign/active",...receiveGet(),...$data]);})
     ->if($isuser)
         ->On("sign/out")
         ->Get(function () {
             if (compute("sign/out"))
-                \Res::Load(User::$InHandlerPath);
+                load(User::$InHandlerPath);
             else
                 return view("part", ["Name" => "access"]);
         })
         ->Default(function () {
             if (compute("sign/out"))
-                \Res::Reload();
+                reload();
             else
-                \Res::Load(User::$InHandlerPath);
+                load(User::$InHandlerPath);
         })
-    ->else(!isEmpty(\Req::$Direction))
-        ->On()->Get(fn() => view("part", ["Name" => \Req::$Direction]))
-    ->else(!$isuser && \Req::Receive("Signature"))
-        ->On("sign/up")->Default(fn () => compute("sign/up"))
+    ->else(!isEmpty(\_::$Direction))
+        ->On()->Get(fn() => view("part", ["Name" => \_::$Direction]))
+    ->else(!$isuser && receive("Signature"))
+        ->On("sign/up")->Rest(fn () => compute("sign/up"))
     ->else(!$isuser)
-        ->On("sign/in")->Default(function () {
+        ->On("sign/in")->Rest(function () {
             if (compute("sign/in"))
-                \Res::Reload();
+                reload();
         })
-        ->On("sign/recover")->Default(function () {
+        ->On("sign/recover")->Rest(function () {
             if (compute("sign/recover"))
-                \Res::Load(User::$InHandlerPath);
+                load(User::$InHandlerPath);
         })
     ->else()
-        ->On("sign/edit")->Default(function () {
+        ->On("sign/edit")->Rest(function () {
             if (compute("sign/edit"))
-                \Res::Reload();
+                reload();
         })
-    ->else(!isEmpty(\Req::$Direction))
-        ->On()->Default(fn() => compute(\Req::$Direction))
+    ->else(!isEmpty(\_::$Direction))
+        ->On()->Default(fn() => compute(\_::$Direction))
     ->else()
         ->On()->Default(fn() => view("part", ["Name" => "access"]))
     ->Handle();
-?>

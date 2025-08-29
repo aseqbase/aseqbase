@@ -62,8 +62,8 @@ class SignUpForm extends Form
 	public $Welcome = null;
 	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
 	public $ContactCountryCode = null;
-	public $HasInternalMethod = true;
-	public $HasExternalMethod = false;
+	public $AllowInternalMethod = true;
+	public $AllowExternalMethod = false;
 	public $MultipleSignIn = false;
 	public $UpdateMode = false;
 	public $DefaultGroupId = null;
@@ -88,7 +88,7 @@ class SignUpForm extends Form
 
 	public function GetStyle()
 	{
-		if ($this->HasDecoration)
+		if ($this->AllowDecoration)
 			return parent::GetStyle() . Html::Style("
 			.{$this->Name} .btn.facebook {
 				background-color: #405D9D55 !important;
@@ -145,7 +145,7 @@ class SignUpForm extends Form
 	}
 	public function GetFields()
 	{
-		if ($this->HasInternalMethod) {
+		if ($this->AllowInternalMethod) {
 			yield Html::Rack(
 				(isValid($this->FirstNameLabel) ? Html::LargeSlot(
 					Html::Label($this->FirstNameLabel, "FirstName", ["class"=> "prepend"]) .
@@ -220,7 +220,7 @@ class SignUpForm extends Form
 					)
 				);
 		}
-		if ($this->HasExternalMethod) {
+		if ($this->AllowExternalMethod) {
 		}
 		yield from parent::GetFields();
 	}
@@ -238,10 +238,10 @@ class SignUpForm extends Form
 		return Html::Script("
 			$(function () {
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-outside)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
 				$(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-outside)');
+					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
                 $('.{$this->Name} form').submit(function(e) {
 					let error = null;
@@ -268,7 +268,7 @@ class SignUpForm extends Form
 	{
 		if (!auth(\_::$Config->UserAccess))
 			try {
-				$received = \Req::ReceivePost();
+				$received = receivePost();
 				if (isValid($received, "Email") || isValid($received, "Password" )) {
 					$signature = get($received, "Signature");
 					if (!preg_match($this->SignaturePattern,$signature))

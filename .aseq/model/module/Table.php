@@ -146,7 +146,7 @@ class Table extends Module
     public $MediaWidth = "var(--size-5)";
     public $MediaHeight = "var(--size-5)";
     public $BorderSize = 1;
-    public $HasDecoration = true;
+    public $AllowDecoration = true;
     public $TextWrap = false;
     public $TextLength = 50;
 
@@ -237,7 +237,7 @@ class Table extends Module
         $this->AddSecret = sha1("$a-Add");
         $this->RemoveSecret = sha1("$a-Remove");
         $this->ModifySecret = sha1("$a-Modify");
-        $this->Router->Set($this->ExclusiveMethod)->Route(fn(&$router) => $this->Exclusive());
+        $this->Router->Set($this->ExclusiveMethod)->Route(fn(&$router) => response($this->Exclusive()));
     }
     /**
      * Set the main properties of module
@@ -263,8 +263,8 @@ class Table extends Module
     {
         return Html::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
-			backgroound-color: var(--back-color-inside);
-			color: var(--fore-color-inside);
+			backgroound-color: var(--back-color-input);
+			color: var(--fore-color-input);
 		}
 		.{$this->Name} :is(tr, td, th){
 			border-size: {$this->BorderSize};
@@ -336,13 +336,13 @@ class Table extends Module
 		" : "") . ($this->HoverableCells ? "
             table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
                 background-color: transparent;
-                outline: 1px solid var(--color-4);
+                outline: 1px solid var(--color-yellow);
                 border-radius: var(--radius-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
             }
             table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
                 background-color: transparent;
-                outline: 1px solid var(--color-2);
+                outline: 1px solid var(--color-green);
                 border-radius: var(--radius-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
             }
@@ -397,7 +397,7 @@ class Table extends Module
                     $this->DataTable->Select(
                         isEmpty($this->IncludeColumns) ? "*" : (in_array($this->KeyColumn, $this->IncludeColumns) ? $this->IncludeColumns : [$this->KeyColumn, ...$this->IncludeColumns]),
                         [$this->SelectCondition, isEmpty($this->IncludeRows) ? null : ("{$this->KeyColumn} IN('" . join("', '", $this->IncludeRows) . "')")],
-                        [],
+                        $this->SelectParameters,
                         $this->Items
                     ));
                 $this->Items = $this->NavigationBar->GetItems();
@@ -570,7 +570,7 @@ class Table extends Module
             $value = Convert::ToString($value);
             if (isFile($value)) return "<th>" . Html::Media($value) . "</th>";
             else if (isAbsoluteUrl($value)) return "<th>" . Html::Link(getPage($value), $value) . "</th>";
-            else return "<th>" . __($value, translating: $this->AllowLabelTranslation, styling: false) . "</th>";
+            else return "<th>" . __($value, translating: $this->AllowLabelTranslation) . "</th>";
         }
         //if($this->Updatable && !$isHead && $key > 1){
         //    $value = new Field(key:$key, value: $value, lock: true, type:getValid($this->CellsTypes,$key, null));
@@ -580,7 +580,7 @@ class Table extends Module
         //}
         if (isFile($value)) return "<td>" . Html::Media($value) . "</td>";
         if (isAbsoluteUrl($value)) return "<td>" . Html::Link(getPage($value), $value) . "</td>";
-        $value = __($value, translating: $this->AllowDataTranslation, styling: false);
+        $value = __($value, translating: $this->AllowDataTranslation);
         if (!$this->TextWrap && !startsWith($value, "<"))
             return "<td>" . Convert::ToExcerpt(Convert::ToText($value), 0, $this->TextLength, "..." . Html::Tooltip($value)) . "</td>";
         return "<td>$value</td>";
@@ -590,7 +590,7 @@ class Table extends Module
         $localPaging = is_null($this->NavigationBar);
         return Html::Script(
             "$(document).ready(()=>{" .
-            (!$this->HasDecoration ? "" :
+            (!$this->AllowDecoration ? "" :
                 "$('.{$this->Name}').DataTable({" .
                 join(", ", [
                     ...(is_null($this->AllowCache) ? [] : ["stateSave: " . ($this->AllowCache ? "true" : "false")]),
@@ -613,27 +613,27 @@ class Table extends Module
                     ...($this->FooterCallback ? ["footerCallback: {$this->FooterCallback}"] : []),
                     ...[
                         "language: {" .
-                        "decimal: \"" . __("", styling: false) . "\"," .
-                        "emptyTable: \"" . __("No items available", styling: false) . "\"," .
-                        "info: \"" . __("Showing _START_ to _END_ of _TOTAL_ entries", styling: false) . "\"," .
-                        "infoEmpty: \"" . __("", styling: false) . "\"," .
-                        "infoFiltered: \"" . __("(filtered from _MAX_ total entries)", styling: false) . "\"," .
-                        "infoPostFix: \"" . __("", styling: false) . "\"," .
-                        "thousands: \"" . __(",", styling: false) . "\"," .
-                        "lengthMenu: \"" . __("Display _MENU_ items per page", styling: false) . "\"," .
-                        "loadingRecords: \"" . __("Loading...", styling: false) . "\"," .
-                        "processing: \"" . __("", styling: false) . "\"," .
-                        "search: \"" . __("Search: ", styling: false) . "\"," .
-                        "zeroRecords: \"" . __("No matching items found", styling: false) . "\"," .
+                        "decimal: \"" . __("") . "\"," .
+                        "emptyTable: \"" . __("No items available") . "\"," .
+                        "info: \"" . __("Showing _START_ to _END_ of _TOTAL_ entries") . "\"," .
+                        "infoEmpty: \"" . __("") . "\"," .
+                        "infoFiltered: \"" . __("(filtered from _MAX_ total entries)") . "\"," .
+                        "infoPostFix: \"" . __("") . "\"," .
+                        "thousands: \"" . __(",") . "\"," .
+                        "lengthMenu: \"" . __("Display _MENU_ items per page") . "\"," .
+                        "loadingRecords: \"" . __("Loading...") . "\"," .
+                        "processing: \"" . __("") . "\"," .
+                        "search: \"" . __("Search: ") . "\"," .
+                        "zeroRecords: \"" . __("No matching items found") . "\"," .
                         "paginate: {" .
-                        "first: \"" . __("First", styling: false) . "\"," .
-                        "last: \"" . __("Last", styling: false) . "\"," .
-                        "next: \"" . __("Next", styling: false) . "\"," .
-                        "previous: \"" . __("Previous", styling: false) . "\"" .
+                        "first: \"" . __("First") . "\"," .
+                        "last: \"" . __("Last") . "\"," .
+                        "next: \"" . __("Next") . "\"," .
+                        "previous: \"" . __("Previous") . "\"" .
                         "}," .
                         "aria: {" .
-                        "sortAscending: \"" . __(": activate to sort column ascending", styling: false) . "\"," .
-                        "sortDescending: \"" . __(": activate to sort column descending", styling: false) . "\"" .
+                        "sortAscending: \"" . __(": activate to sort column ascending") . "\"," .
+                        "sortDescending: \"" . __(": activate to sort column descending") . "\"" .
                         "}" .
                         "}"
                     ],
@@ -676,7 +676,7 @@ class Table extends Module
 					);
 				}" : "") . (auth($this->RemoveAccess) ? "
 				function {$this->Modal->Name}_Delete(key){
-					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?", styling: false) . "`))" : "") . "
+					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?") . "`))" : "") . "
 						sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
 						(data, err)=>{
 							load();
@@ -696,7 +696,7 @@ class Table extends Module
 
     public function Exclusive()
     {
-        $values = \Req::Receive(null, $this->ExclusiveMethod) ?? [];
+        $values = receive(method: $this->ExclusiveMethod) ?? [];
         $value = get($values, $this->KeyColumn);
         $secret = grab($values, $this->SecretKey);
         $recievedData = count($values) > 1;
@@ -729,8 +729,8 @@ class Table extends Module
             $this->Form->Template = "s";
             $this->Form->Class = "container-fluid";
             $this->Form->CancelLabel = "Cancel";
-            $this->Form->SuccessPath = \Req::$Url;
-            $this->Form->BackPath = \Req::$Url;
+            $this->Form->SuccessPath = \_::$Url;
+            $this->Form->BackPath = \_::$Url;
             $this->Form->BackLabel = null;
             //$form->AllowHeader = false;
         }
@@ -924,7 +924,7 @@ class Table extends Module
             if (isEmpty($v))
                 unset($values[$k]);
         if ($this->DataTable->Insert($values))
-            return \Res::Flip(Html::Success("The information added successfully!"));
+            return flipResponse(Html::Success("The information added successfully!"));
         return Html::Error("You can not add this item!");
     }
     public function ModifyRow($values)
@@ -936,7 +936,7 @@ class Table extends Module
             if (!is_array($values))
                 return $values;
             if ($this->DataTable->Update([$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumn}"], $values))
-                return \Res::Flip(Html::Success("The information updated successfully!"));
+                return flipResponse(Html::Success("The information updated successfully!"));
             return Html::Error("You can not update this item!");
         }
     }
@@ -947,7 +947,7 @@ class Table extends Module
         if (!auth($this->RemoveAccess))
             return Html::Error("You have not access to delete!");
         if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
-            return \Res::Flip(Html::Success("The items removed successfully!"));
+            return flipResponse(Html::Success("The items removed successfully!"));
         return Html::Error("You can not remove this item!");
     }
 
@@ -1017,7 +1017,7 @@ class Table extends Module
     public function NormalizeFormValues($values)
     {
         try {
-            $received = \Req::ReceiveFile();
+            $received = receiveFile();
             if ($received) {
                 $clearPrev = isValid($values, $this->KeyColumn) && $this->DataTable;
                 foreach ($received as $k => $v)

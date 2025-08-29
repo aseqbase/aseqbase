@@ -527,13 +527,13 @@ class Convert
             if (!isset($additionalKeys['$HOSTEMAIL']))
                 $additionalKeys['$HOSTEMAIL'] = $email;
             if (!isset($additionalKeys['$HOSTLINK']))
-                $additionalKeys['$HOSTLINK'] = Html::Link(\Req::$Site, \Req::$Host);
+                $additionalKeys['$HOSTLINK'] = Html::Link(\_::$Site, \_::$Host);
             if (!isset($additionalKeys['$HOST']))
-                $additionalKeys['$HOST'] = \Req::$Host;
+                $additionalKeys['$HOST'] = \_::$Host;
             if (!isset($additionalKeys['$URLLINK']))
-                $additionalKeys['$URLLINK'] = Html::Link(\Req::$Url, \Req::$Url);
+                $additionalKeys['$URLLINK'] = Html::Link(\_::$Url, \_::$Url);
             if (!isset($additionalKeys['$URL']))
-                $additionalKeys['$URL'] = \Req::$Url;
+                $additionalKeys['$URL'] = \_::$Url;
             if (!isValid($additionalKeys, '$SIGNATURE'))
                 $additionalKeys['$SIGNATURE'] = \_::$Back->User->TemporarySignature;
             if (!isValid($additionalKeys, '$NAME'))

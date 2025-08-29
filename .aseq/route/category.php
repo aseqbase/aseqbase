@@ -3,7 +3,7 @@
 use MiMFa\Library\Convert;
 use MiMFa\Library\Router;
 
-$path = implode("/", array_slice(explode("/", \Req::$Direction), 1));
+$path = implode("/", array_slice(explode("/", \_::$Direction), 1));
 $parent = compute( "category/get", ["Direction" =>$path]);
 if(isEmpty($parent)) view(\_::$Config->DefaultViewName, ["Name" =>404]);
 else {

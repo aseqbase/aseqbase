@@ -37,9 +37,9 @@ class Field extends Module{
      * @var array|string|null
 	 */
 	public $Attributes = null;
-	public $ForeColor = "var(--fore-color-inside)";
-	public $BackColor = "var(--back-color-inside)";
-	public $BorderColor = "var(--fore-color-special-outside)";
+	public $ForeColor = "var(--fore-color-input)";
+	public $BackColor = "var(--back-color-input)";
+	public $BorderColor = "var(--fore-color-special-output)";
 	public $Height = "auto";
 	public $Width = "100%";
 	public $MinHeight = "10px";
@@ -311,7 +311,7 @@ class Field extends Module{
 	public function Get(){
 		return Convert::ToString(function(){
 			$type = Html::InputDetector($this->Type, $this->Value);
-            $placeHolder = __($this->PlaceHolder??$this->Title, styling:false);
+            $placeHolder = __($this->PlaceHolder??$this->Title);
             $attributes = [
 				["class"=>"input".($this->Lock?" disabled":"")],
 				($this->Required?["required"=>true]:[]),

@@ -227,13 +227,13 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			return null;
 		if (takeValid($fieldsDictionary, "Email", $email) != $email)
 			$fieldsDictionary["Status"] = self::$InitialStatus;
-		return $this->DataTable->Update("`Id`='$id'", $fieldsDictionary);
+		return $this->DataTable->Update("Id='$id'", $fieldsDictionary);
 	}
 	public function GetValue($key, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->SelectValue($key, "`Id`=$id");
+		return is_null($id) ? null : $this->DataTable->SelectValue($key, "Id=$id");
 	}
 	public function SetValue($key, $value, $signature = null, $password = null)
 	{
@@ -331,7 +331,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if (!isValid($password))
 			return false;
-		$person = $this->Find($signature, $password);
+		$person = null;
+		try{ $person = $this->Find($signature, $password); } catch(\Exception $ex) { return false; }
 		$status = takeValid($person, "Status", self::$InitialStatus);
 		if ($status === false || ((int) $status) < self::$ActiveStatus)
 			return null;
@@ -403,7 +404,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 */
 	public function ReceiveActivationEmail()
 	{
-		$sign = $this->DecryptToken(self::$ActivationTokenKey, \Req::Receive(self::$ActivationTokenKey));
+		$sign = $this->DecryptToken(self::$ActivationTokenKey, receive(self::$ActivationTokenKey));
 		if (empty($sign))
 			return null;
 		return $this->DataTable->Update(
@@ -438,10 +439,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 */
 	public function ReceiveRecoveryEmail()
 	{
-		$newPass = \Req::Receive("Password");
+		$newPass = receive("Password");
 		if (isValid($newPass)) {
 			$this->EncryptPassword($newPass);
-			$sign = $this->DecryptToken(self::$RecoveryTokenKey, \Req::Receive(self::$RecoveryTokenKey));
+			$sign = $this->DecryptToken(self::$RecoveryTokenKey, receive(self::$RecoveryTokenKey));
 			if (empty($sign))
 				return null;
 			return self::ResetPassword($sign, $newPass) ? true : false;
@@ -462,7 +463,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->TemporaryName = takeValid($person, "Name");
 		$this->TemporaryImage = takeValid($person, "Image");
 		$this->TemporaryPassword = takeValid($person, "Password");
-		$path = \Req::$Host . ($handlerPath ?? self::$HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
+		$path = \_::$Host . ($handlerPath ?? self::$HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
 		$dic = array();
 		$dic['$HYPERLINK'] = Html::Link($linkAnchor, $path);
 		$dic['$LINK'] = Html::Link($path, $path);

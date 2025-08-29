@@ -62,7 +62,7 @@ class Profile extends Form{
 
 	public $MediaWidth = "var(--size-5)";
 	public $MediaHeight = "var(--size-5)";
-	public $HasDecoration = true;
+	public $AllowDecoration = true;
 	public $TextWrap = false;
 
 	public $SevereSecure = true;
@@ -114,8 +114,8 @@ class Profile extends Form{
 	public function GetStyle(){
 		return Html::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
-			backgroound-color: var(--back-color-inside);
-			color: var(--fore-color-inside);
+			backgroound-color: var(--back-color-input);
+			color: var(--fore-color-input);
 		}
 		.{$this->Name} tr th{
 			font-weight: bold;
@@ -183,13 +183,13 @@ class Profile extends Form{
 		":"").($this->HoverableCells?"
             table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
                 background-color: transparent;
-                outline: 1px solid var(--color-4);
+                outline: 1px solid var(--color-yellow);
                 border-radius: var(--radius-1);
 				".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
             table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
                 background-color: transparent;
-                outline: 1px solid var(--color-2);
+                outline: 1px solid var(--color-green);
                 border-radius: var(--radius-1);
 				".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
@@ -218,7 +218,7 @@ class Profile extends Form{
         $maccess = $isu && !is_null($this->ModifyAccess) && auth($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && auth($this->RemoveAccess);
 		$isc = $isc && ($vaccess || $aaccess || $maccess || $raccess);
-        $secret = \Req::Receive("secret")??$this->ViewSecret;
+        $secret = receive("secret")??$this->ViewSecret;
         return Html::Division([
             ...($maccess? [Html::Icon("edit","{$this->Name}_Modify(`$key`);", ["class"=>"table-item-modify"])] : []),
             ...($raccess? [Html::Icon("trash","{$this->Name}_Delete(`$key`);", ["class"=>"table-item-delete"])] : [])
@@ -229,7 +229,7 @@ class Profile extends Form{
         ->Default(function() use($key) { return $this->GetAddFields($key); })
         ->else($secret === $this->ModifySecret)
         ->Default(function() use($key) { return $this->GetModifyFields($key); })
-        ->Handle()->Result;
+        ->Handle();
 	}
 
 	public function GetScript(){
@@ -245,7 +245,7 @@ class Profile extends Form{
 					sendPatch(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
 				}":"").(auth($this->RemoveAccess)?"
 				function {$this->Name}_Delete(key){
-					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?", styling:false)."`))":"")."
+					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?")."`))":"")."
 						sendDelete(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->Name}`,
 						(data, err)=>{
 							load();
@@ -267,7 +267,7 @@ class Profile extends Form{
         ->Post(function() use($key) { return $this->DoAddHandle($key); })
         ->else($key !== null)
         ->Put(function() use($key) { return $this->DoModifyHandle($key); })
-        ->Handle()->Result;
+        ->Handle();
     }
 
 	public function GetViewFields($value){
@@ -319,8 +319,8 @@ class Profile extends Form{
         $this->Class = "container";
         $this->SubmitLabel = null;
         $this->ResetLabel = null;
-        $this->SuccessPath = \Req::$Url;
-        $this->BackPath = \Req::$Url;
+        $this->SuccessPath = \_::$Url;
+        $this->BackPath = \_::$Url;
         $this->BackLabel = null;
         //$this->AllowHeader = false;
         return $this->Handle();
@@ -356,15 +356,15 @@ class Profile extends Form{
         $this->Template = "b";
         $this->Class = "container";
         $this->CancelLabel = "Cancel";
-        $this->SuccessPath = \Req::$Url;
-        $this->BackPath = \Req::$Url;
+        $this->SuccessPath = \_::$Url;
+        $this->BackPath = \_::$Url;
         $this->BackLabel = null;
         //$this->AllowHeader = false;
         return $this->Handle();
     }
 	public function DoAddHandle($value){
         if(is_null($value)) return null;
-        $vals = $this->NormalizeValues(\Req::ReceivePost());
+        $vals = $this->NormalizeValues(receivePost());
         if(!auth($this->AddAccess)) return Html::Error("You have not access to modify!");
         unset($vals[$this->KeyColumn]);
         foreach ($vals as $k=>$v)
@@ -400,15 +400,15 @@ class Profile extends Form{
         $this->Template = "b";
         $this->Class = "container";
         $this->CancelLabel = "Cancel";
-        $this->SuccessPath = \Req::$Url;
-        $this->BackPath = \Req::$Url;
+        $this->SuccessPath = \_::$Url;
+        $this->BackPath = \_::$Url;
         $this->BackLabel = null;
         //$this->AllowHeader = false;
         return $this->Handle();
     }
 	public function DoModifyHandle($value){
         if(is_null($value)) return null;
-        $vals = $this->NormalizeValues(\Req::ReceivePut());
+        $vals = $this->NormalizeValues(receivePut());
         if(!auth(minaccess: $this->ModifyAccess)) return Html::Error("You have not access to modify!");
         if($this->DataTable->Update([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
             return Html::Success("The information updated successfully!");
@@ -488,7 +488,7 @@ class Profile extends Form{
 
 	public function NormalizeValues($values){
         try{
-            foreach (\Req::ReceiveFile()??[] as $k=>$v)
+            foreach (receiveFile()??[] as $k=>$v)
                 if(Local::IsFileObject($v)){
                     $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)) $type = \_::$Config->GetAcceptableFormats($type);

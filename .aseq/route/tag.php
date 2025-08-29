@@ -1,5 +1,5 @@
 <?php
-$path = implode("/", array_slice(explode("/", \Req::$Direction), 1));
+$path = implode("/", array_slice(explode("/", \_::$Direction), 1));
 $parent = compute( "tag/get", ["Name" =>$path]);
 $computeData = grab($data, "Compute") ?? [];
 $filter = grab($computeData, "Filter") ?? [];

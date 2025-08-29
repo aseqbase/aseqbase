@@ -8,9 +8,18 @@ $module->Description = \_::$Info->Owner;
 $module->Items = \_::$Info->SideMenus;
 $module->Image = \_::$Info->LogoPath;
 $module->Shortcuts = \_::$Info->Contacts;
+if (\_::$Config->AllowTranslate) {
+    $moduleTranslator = new (module("Translator"))();
+    $moduleTranslator->Items = \_::$Back->Translate->GetLanguages();
+    $moduleTranslator->AllowLabel = true;
+    $moduleTranslator->AllowImage = false;
+    $moduleTranslator->Style = new MiMFa\Library\Style();
+	$moduleTranslator->Style->Padding = "var(--size-2)  var(--size-min)";
+    $module->Content = $moduleTranslator->ToString();
+}
 swap($module, $data);
 $module->Render();
-\Res::Render(Html::Script("
+render(Html::Script("
 	function viewSideMenu(show){
 		{$module->Name}_ViewSideMenu(show);
 	}

@@ -81,50 +81,44 @@ class Template extends \Base{
     }
 
 	public function Render(){
-		if(isValid($this->Initial)) \Res::Render($this->Initial);
+		if(isValid($this->Initial)) render($this->Initial);
 		else $this->RenderInitial();
-		if(isValid($this->Main)) \Res::Render($this->Main);
+		if(isValid($this->Main)) render($this->Main);
 		else $this->RenderMain();
-        if(isValid($this->Header)) \Res::Render($this->Header);
+        if(isValid($this->Header)) render($this->Header);
         else $this->RenderHeader();
-        if(isValid($this->Content)) \Res::Render($this->Content);
+        if(isValid($this->Content)) render($this->Content);
         else $this->RenderContent();
-        if(isValid($this->Footer)) \Res::Render($this->Footer);
+        if(isValid($this->Footer)) render($this->Footer);
         else $this->RenderFooter();
-		if(isValid($this->Final)) \Res::Render($this->Final);
+		if(isValid($this->Final)) render($this->Final);
 		else $this->RenderFinal();
 	}
 
 	public function RenderInitial(){
         region("initial");
-        $title = $this->WindowTitle??[preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/","",\Req::$Direction)];
-        \Res::Render(Html::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
-		\Res::Render(Html::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
-        \Res::Render(Html::Style("
+        $title = $this->WindowTitle??[preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/","",\_::$Direction)];
+        render(Html::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
+		render(Html::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
+        render(Html::Style("
         head, style, script, link, meta, title{
             display: none !important;
             visible: hidden !important;
             opacity: 0 !important;
         }
         html, body{
-            font-family: var(--font-0), var(--font-3);
+            font-family: var(--font), var(--font-special);
             font-size: var(--size-1);
             text-align: unset;
         }
         h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-3), var(--font-0);
+            font-family: var(--font-special), var(--font);
             direction: var(--dir);
-        }
-        button,.button{
-            font-family: var(--font-2), var(--font-5), var(--font-0);
-        }
-        .input{
-            font-family: var(--font-1), var(--font-3), var(--font-0);
         }
         .tooltip {
             position: absolute;
             opacity: 0;
-            font-family: var(--font-0);
+            font-family: var(--font);
             font-size: var(--size-0);
             font-weight: lighter;
             max-width: 70vw;
@@ -138,6 +132,31 @@ class Template extends \Base{
             padding: 9px 9px;
             z-index: -999;
             transition: var(--transition-0);
+        }
+        .result{
+            font-size: var(--size-min);
+            background-color: var(--back-color-special);
+            border: var(--border-2);
+            padding: calc(var(--size-min) / 2) var(--size-min);
+            display: flex;
+            align-content: center;
+            align-items: center;
+            gap: var(--size-min);
+        }
+        .result>.division{
+            width: -webkit-fill-available;
+        }
+        .result.message{
+            color: var(--color-blue);
+        }
+        .result.success{
+            color: var(--color-green);
+        }
+        .result.error{
+            color: var(--color-red);
+        }
+        .result.warning{
+            color: var(--color-yellow);
         }
         :not(html,head,body,style,script,link,meta,title):hover>.tooltip {
             opacity: 1;
@@ -171,7 +190,7 @@ class Template extends \Base{
             flex-direction: column;
         }
         picture img {
-            font-family: var(--font-3), var(--font-0);
+            font-family: var(--font-special), var(--font);
             font-size: var(--size-2);
             max-width: 100%;
             max-height: 100%;
@@ -181,6 +200,7 @@ class Template extends \Base{
             min-width: 1em;
         }
         button, .button{
+            font-family: var(--font-output), var(--font-special-output), var(--font);
             text-align: center;
             background-color: unset;
             color: unset;
@@ -207,10 +227,22 @@ class Template extends \Base{
             background-color: var(--color-yellow);
             color: var(--color-white);
         }
+        .input{
+            font-family: var(--font-input), var(--font-special-input), var(--font);
+            background-color: var(--back-color-input);
+            color: var(--fore-color-input);
+            border: var(--border-1) var(--fore-color-input);
+        }
+        .input *{
+            font-family: var(--font-input), var(--font-special-input), var(--font);
+        }
+        body>*:deactive {
+            " . \MiMFa\Library\Style::UniversalProperty("filter", "grayscale(100)") . "
+        }
         "));
         foreach ($this as $key=>$value)
-        	if(is_string($key)) \Res::Render(Html::Meta($key, Convert::ToString($value)));
-            else \Res::Render($value);
+        	if(is_string($key)) render(Html::Meta($key, Convert::ToString($value)));
+            else render($value);
     }
 	public function RenderMain(){
         region("main");
@@ -219,8 +251,8 @@ class Template extends \Base{
     }
 	public function RenderContent(){
         foreach ($this->Children??[] as $key=>$value)
-        	if(is_string($key)) \Res::Render(Html::Section($value, ["Id" =>$key]));
-            else \Res::Render($value);
+        	if(is_string($key)) render(Html::Section($value, ["Id" =>$key]));
+            else render($value);
     }
 	public function RenderFooter(){
     }

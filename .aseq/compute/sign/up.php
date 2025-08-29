@@ -6,10 +6,10 @@ swap($module, $data);
 $module->Render();
 if($module->Result)
     if (User::$InitialStatus < User::$ActiveStatus)
-        \Res::Load(User::$ActiveHandlerPath."?Email=".urlencode(\_::$Back->User->TemporaryEmail));
+        load(User::$ActiveHandlerPath."?Email=".urlencode(\_::$Back->User->TemporaryEmail));
     else {
         \_::$Back->User->Refresh();
-        \Res::Load(User::$InHandlerPath);
+        load(User::$InHandlerPath);
     }
 return $module->Result;
 ?>

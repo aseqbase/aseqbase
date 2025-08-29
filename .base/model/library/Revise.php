@@ -137,7 +137,7 @@ class Revise{
      */
     public static function HandleForm($object, array $newValues = null){
         try {
-            if(is_null($newValues)) $newValues = \Req::Receive(null,"POST");
+            if(is_null($newValues)) $newValues = receivePost(null);
             foreach ($newValues as $key=>$value)
                 if(isset($object->$key)) $object->$key = $value;
             if(self::Store($object)) return Html::Success("Data updated successfully!");

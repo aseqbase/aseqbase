@@ -10,7 +10,7 @@ $name = $module->Name;
 $module->Title = !isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strlen($Title)) > 3 ? "$Title ".($Name?"($Name)":"") : between($Title, $Name);
 $module->Description = grab($data, "Description");
 $module->DefaultImage = grab($data, 'Image');
-$module->ShowRoute = false;
+$module->AllowRoute = false;
 $module->Class .= " page";
 $module->Items = $nav->GetItems();
 swap($module, $data);

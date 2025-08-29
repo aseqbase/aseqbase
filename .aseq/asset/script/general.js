@@ -365,14 +365,16 @@ let mailTo = function (email) {
 };
 
 
-let setMemo = function (key, value, expires = 0, path = "/") {
+let setMemo = function (key, value, expires = 0, path = "/", $secure = false) {
 	time = "";
 	if (expires) {
 		var date = new Date();
 		date.setTime(date.getTime() + expires);
 		time = "; expires=" + date.toUTCString();
 	}
-	document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value || "")}${time}; Secure; path=${path}`;
+	if($secure) $secure = "; Secure";
+	else $secure = "";
+	document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value || "")}${time}${$secure}; path=${path}`;
 };
 let getMemo = function (key) {
     let nameEQ = encodeURIComponent(key) + "=";
@@ -500,7 +502,7 @@ let sendRequest = function (
 	xhr.upload.addEventListener('progress', progress);
 
 	xhr.onload = function () {
-		btns.forEach(btn => btn.classList.remove('hide'));
+		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
 
 		if (xhr.status >= 200 && xhr.status < 300) {
@@ -517,20 +519,20 @@ let sendRequest = function (
 	};
 
 	xhr.onerror = function () {
-		btns.forEach(btn => btn.classList.remove('hide'));
+		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
 		error('Network Error' + (xhr.statusText ? "<br>" + xhr.statusText : ""), xhr.status);
 	};
 
 	xhr.ontimeout = function () {
-		btns.forEach(btn => btn.classList.remove('hide'));
+		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
 		error('Timeout' + (xhr.statusText ? "<br>" + xhr.statusText : ""), xhr.status ?? 'timeout');
 	};
 
 	xhr.onloadstart = function () {
 		ready(xhr.statusText, xhr.status);
-		btns.forEach(btn => btn.classList.add('hide'));
+		btns.forEach(btn => btn.classList.add('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = '.5');
 	};
 

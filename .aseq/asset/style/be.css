@@ -3,6 +3,60 @@
  Quick Styles
  */
 
+.be.reset {
+  display: initial;
+  padding: initial;
+  margin: initial;
+  width: initial;
+  height: initial;
+  min-width: initial;
+  min-height: initial;
+  max-width: initial;
+  max-height: initial;
+}
+.be.reset.font {
+  font: initial;
+  font-size: initial;
+  line-height: initial;
+}
+.be.reset.color {
+  color: initial;
+  background: initial;
+}
+.be.reset.effect {
+  box-shadow: initial;
+  text-shadow: initial;
+  border: initial;
+  outline: initial;
+}
+
+.be.unset {
+  display: initial;
+  padding: 0px;
+  margin: 0px;
+  width: initial;
+  height: initial;
+  min-width: unset;
+  min-height: unset;
+  max-width: unset;
+  max-height: unset;
+}
+.be.unset.font {
+  font: unset;
+  font-size: unset;
+  line-height: unset;
+}
+.be.unset.color {
+  color: unset;
+  background: unset;
+}
+.be.unset.effect {
+  box-shadow: none;
+  text-shadow: none;
+  border: none;
+  outline: none;
+}
+
 .be.wide {
   display: block;
   width: 100%;
@@ -36,11 +90,53 @@
   text-decoration: none;
   font-weight: normal;
 }
+.be.circle{
+    border-radius: 100%;
+}
 .be.square{
     aspect-ratio: 1;
 }
-.be.circle{
-    border-radius: 100%;
+.be.diamond{
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 100%);
+}
+.be.triangle{
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+.be.bottom.triangle{
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+}
+.be.right.triangle{
+    clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+}
+.be.left.triangle{
+    clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+}
+.be.notch{
+    clip-path: polygon(0% 25%, 50% 0%, 100% 25%, 100% 100%, 0% 100%);
+}
+.be.notch.bottom{
+    clip-path: polygon(0% 75%, 0% 0%, 100% 0%, 100% 75%, 50% 100%);
+}
+.be.xxsmall {
+  font-size: 50%;
+}
+.be.xsmall {
+  font-size: 67%;
+}
+.be.small {
+  font-size: 85%;
+}
+.be.medium {
+  font-size: 100%;
+}
+.be.large {
+  font-size: 125%;
+}
+.be.xlarge {
+  font-size: 150%;
+}
+.be.xxlarge {
+  font-size: 200%;
 }
 
 .be:is(.top,.middle,.bottom) {
@@ -127,33 +223,63 @@
 .be.invisible {
   visibility: hidden;
 }
-.be.transparent{
+
+.be.transparent.fore{
+  color: transparent;
+}
+.be.black.fore {
+	color: var(--color-black);
+}
+.be.red.fore {
+	color: var(--color-red);
+}
+.be.green.fore {
+	color: var(--color-green);
+}
+.be.blue.fore {
+	color: var(--color-green);
+}
+.be.yellow.fore {
+	color: var(--color-blue);
+}
+.be.cyan.fore {
+	color: var(--color-yellow);
+}
+.be.violet.fore {
+	color: var(--color-cyan);
+}
+.be.white.fore {
+	color: var(--color-violet);
+}
+
+.be.transparent:not(.fore){
   background-color: transparent;
 }
-.be.black {
-	background-color: var(--color-0);
+.be.black:not(.fore) {
+	background-color: var(--color-black);
 }
-.be.red {
-	background-color: var(--color-1);
+.be.red:not(.fore) {
+	background-color: var(--color-red);
 }
-.be.green {
-	background-color: var(--color-2);
+.be.green:not(.fore) {
+	background-color: var(--color-green);
 }
-.be.blue {
-	background-color: var(--color-2);
+.be.blue:not(.fore) {
+	background-color: var(--color-green);
 }
-.be.yellow {
-	background-color: var(--color-3);
+.be.yellow:not(.fore) {
+	background-color: var(--color-blue);
 }
-.be.cyan {
-	background-color: var(--color-4);
+.be.cyan:not(.fore) {
+	background-color: var(--color-yellow);
 }
-.be.violet {
-	background-color: var(--color-5);
+.be.violet:not(.fore){
+	background-color: var(--color-cyan);
 }
-.be.white {
-	background-color: var(--color-6);
+.be.white:not(.fore) {
+	background-color: var(--color-violet);
 }
+
 .be.blur{
 	-webkit-filter: blur(1.5rem);
 	-moz-filter: blur(1.5rem);

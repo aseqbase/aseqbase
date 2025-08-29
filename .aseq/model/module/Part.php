@@ -35,10 +35,10 @@ class Part extends Module
 
     public function Get()
     {
-        $titleHtml = $this->GetTitle(); // Assuming GetTitle() returns HTML
+        $titleHtml = $this->GetTitle(); // Assuming getTitle() returns HTML
 
         $rowContent = Html::Rack(function () {
-            $descriptionHtml = $this->GetDescription(["class"=> "col-md description"]); // Assuming GetDescription() returns HTML
+            $descriptionHtml = $this->GetDescription(["class"=> "col-md description"]); // Assuming getDescription() returns HTML
 
             $imageHtml = "";
             if (isValid($this->Image)) {
@@ -48,7 +48,7 @@ class Part extends Module
             return $descriptionHtml . $imageHtml;
         });
 
-        $contentHtml = $this->GetContent(["class"=> "content"]); // Assuming GetContent() returns HTML
+        $contentHtml = $this->GetContent(["class"=> "content"]); // Assuming getContent() returns HTML
 
         return $titleHtml . $rowContent . $contentHtml;
     }

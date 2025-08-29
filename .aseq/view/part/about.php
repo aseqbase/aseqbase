@@ -9,7 +9,7 @@ $separator->Style = new \MiMFa\Library\Style();
 $module->Style->TextAlign = "justify";
 $module->Style->Padding = "calc(2*var(--size-5)) var(--size-5)";
 $module->Style->BackgroundColor =
-    $separator->Style->BackgroundColor = "var(--color-7)";
+    $separator->Style->BackgroundColor = "var(--color-white)";
 $module->Style->Color =
     $separator->Style->Color = "#fffe";
 $separator->Style->BorderRadius = "0px 0px 100% 100%";
@@ -24,7 +24,7 @@ $separator->Render();
 $module->Set_Defaults();
 $separator->Set_Defaults();
 $module->Style->BackgroundColor =
-    $separator->Style->BackgroundColor = "var(--color-7)";
+    $separator->Style->BackgroundColor = "var(--color-white)";
 $separator->MergeBottom = false;
 $module->Title = "Who We Are?";
 $module->Image = null;

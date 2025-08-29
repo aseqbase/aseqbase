@@ -232,6 +232,8 @@ Html.success = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: 
 Html.error = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result error", ondblclick: "this.style.display = 'none'" }, ...attributes });
 Html.warning = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "result warning", ondblclick: "this.style.display = 'none'" }, ...attributes });
 
+Html.division = (content, attributes = {}) => Html(content, "div", { ...{ CLASS: "division" }, ...attributes });
+
 Html.link = (link, anchor = null, attributes = {}) => Html(anchor ?? link, "a", { ...{ HREF: link, CLASS: "Link" }, ...attributes });
 
 Html.image = (source, alt = null, attributes = {}) => Html("img", { ...{ SRC: source, ALT: alt, CLASS: "Image" }, ...attributes });

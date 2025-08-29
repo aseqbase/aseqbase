@@ -113,25 +113,25 @@ abstract class ConfigurationBase extends ArrayObject
       * @var bool
       * @category Optimization
       */
-     public $AllowContentRefering = true;
+     public $AllowContentReferring = true;
      /**
       * Allow to analyze all text and linking categories to their called names or titles, to improve the website's SEO
       * @var bool
       * @category Optimization
       */
-     public $AllowCategoryRefering = false;
+     public $AllowCategoryReferring = false;
      /**
       * Allow to analyze all text and linking tags to their called names or titles, to improve the website's SEO
       * @var bool
       * @category Optimization
       */
-     public $AllowTagRefering = true;
+     public $AllowTagReferring = true;
      /**
       * Allow to analyze all text and linking users to their called names, to improve the website's SEO
       * @var bool
       * @category Optimization
       */
-     public $AllowUserRefering = false;
+     public $AllowUserReferring = false;
      /**
       * Allow to translate all text by internal algorithms
       * @var bool
@@ -511,11 +511,11 @@ abstract class ConfigurationBase extends ArrayObject
      }
      public function GetLatestVersion(): float|null
      {
-          return floatval(\Req::ReceiveGet($this->CheckVersionSourcePath));
+          return floatval(receiveGet($this->CheckVersionSourcePath));
      }
      public function GetLatestVersionPath(): string|null
      {
-          return \Req::ReceiveGet($this->LatestVersionSourcePath);
+          return receiveGet($this->LatestVersionSourcePath);
      }
      public function GetAcceptableFormats(?string $type = null)
      {

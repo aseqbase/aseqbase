@@ -21,18 +21,18 @@ class PeriodPicker extends Module
       {
             parent::__construct();
             if ($setDefault) {
-                  if (!\Req::ReceiveGet($this->FromTimeRequest) && isValid($fromTime))
+                  if (!receiveGet($this->FromTimeRequest) && isValid($fromTime))
                         self::$FromTime = $this->FromTimeValue = Convert::ToDateTime($fromTime)->format('Y-m-d H:i:s');
-                  if (!\Req::ReceiveGet($this->ToTimeRequest) && isValid($toTime))
+                  if (!receiveGet($this->ToTimeRequest) && isValid($toTime))
                         self::$ToTime = $this->ToTimeValue = Convert::ToDateTime($toTime)->format('Y-m-d H:i:s');
             }
             $fromId = $this->Name . "_" . $this->FromTimeRequest;
             $toId = $this->Name . "_" . $this->ToTimeRequest;
-            $queries = preg_replace("/(^|&)({$this->FromTimeRequest}|{$this->ToTimeRequest}|&+)\=[^&]*(?=$|&)/i", "", "" . \Req::$Query);
+            $queries = preg_replace("/(^|&)({$this->FromTimeRequest}|{$this->ToTimeRequest}|&+)\=[^&]*(?=$|&)/i", "", "" . \_::$Query);
             $this->Children = [
-                  Html::Field(type: "Calendar", title: $this->FromTimeLable, value: \Req::Receive($this->FromTimeRequest, "GET", Convert::ToDateTimeString($fromTime)), key: $this->FromTimeRequest, attributes: ["Id" => $fromId]) .
-                  Html::Field(type: "Calendar", title: $this->ToTimeLable, value: \Req::Receive($this->ToTimeRequest, "GET", Convert::ToDateTimeString($toTime)), key: $this->ToTimeRequest, attributes: ["Id" => $toId]) .
-                  Html::Button("Show", "load(`" . \Req::$Path . "?" . (isEmpty($queries) ? "" : "{$queries}&") . "{$this->FromTimeRequest}=`+(document.getElementById(`$fromId`).value+'').replace('T',' ')+`&{$this->ToTimeRequest}=`+(document.getElementById(`$toId`).value+'').replace('T',' '));")
+                  Html::Field(type: "Calendar", title: $this->FromTimeLable, value: receiveGet($this->FromTimeRequest, Convert::ToDateTimeString($fromTime)), key: $this->FromTimeRequest, attributes: ["Id" => $fromId]) .
+                  Html::Field(type: "Calendar", title: $this->ToTimeLable, value: receiveGet($this->ToTimeRequest, Convert::ToDateTimeString($toTime)), key: $this->ToTimeRequest, attributes: ["Id" => $toId]) .
+                  Html::Button("Show", "load(`" . \_::$Path . "?" . (isEmpty($queries) ? "" : "{$queries}&") . "{$this->FromTimeRequest}=`+(document.getElementById(`$fromId`).value+'').replace('T',' ')+`&{$this->ToTimeRequest}=`+(document.getElementById(`$toId`).value+'').replace('T',' '));")
             ];
       }
 
@@ -48,8 +48,8 @@ class PeriodPicker extends Module
             margin: 1vmin 1vmax;
 		}
 		.{$this->Name} .field .input{
-            background-color: var(--back-color-inside);
-            color: var(--fore-color-inside);
+            background-color: var(--back-color-input);
+            color: var(--fore-color-input);
 		}
 		.{$this->Name} .field .button{
             display: inline-block;
