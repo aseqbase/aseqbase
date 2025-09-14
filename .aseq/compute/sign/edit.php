@@ -60,7 +60,7 @@ try {
         } else
             renderSuccess("Profile updated successfully!");
     } else
-        renderError(get($received, "Signature" )==\_::$Back->User->Signature?"You did not change anythings!":"There a problem occured!" . Html::$Break . "You can not choice a duplicate signature!");
+        renderError(get($received, "Signature" )==\_::$Back->User->Signature?"You did not change anythings!":"Something went wrong!" . Html::$Break . "You can not choice a duplicate signature!");
 } catch (\Exception $ex) {
     renderError($ex);
 }

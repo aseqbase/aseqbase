@@ -8,7 +8,7 @@ use MiMFa\Library\Router;
 use MiMFa\Library\Style;
 use MiMFa\Library\Local;
 use MiMFa\Library\DataTable;
-module("Form");
+module("Table");
 /**
  * To show items in a profile view
  *@copyright All rights are reserved for MiMFa Development Group
@@ -16,7 +16,8 @@ module("Form");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules/Profile See the Documentation
  */
-class Profile extends Form{
+class Profile extends Table{
+	public $Image = null;
 	/**
      * The database table, to get items automatically
      * @var DataTable
@@ -96,19 +97,12 @@ class Profile extends Form{
 
 	/**
      * Create the module
-     * @param array|null $items The module source items
+     * @param array|string|DataTable|null $itemsOrDataTable The module source items
+     * or The name of source table
+     * or The source table
      */
-	public function __construct($itemsOrDataTable =  null){
-        parent::__construct();
-        if($itemsOrDataTable instanceof DataTable)
-            $this->DataTable = $itemsOrDataTable;
-		else $this->Items = $itemsOrDataTable;
-        $a = (new DateTime())->format("z");
-        $this->ViewSecret = sha1("$a-View");
-        $this->DuplicateSecret = sha1("$a-Duplicate");
-        $this->AddSecret = sha1("$a-Add");
-        $this->RemoveSecret = sha1("$a-Remove");
-        $this->ModifySecret = sha1("$a-Modify");
+	public function __construct( $itemsOrDataTable =  null){
+        parent::__construct($itemsOrDataTable);
     }
     
 	public function GetStyle(){
@@ -199,7 +193,7 @@ class Profile extends Form{
         ":""));
 	}
 
-	public function GetFields(){
+	public function Get(){
 		$isc = $this->Controlable;
 		$isu = $isc && $this->Updatable && auth($this->UpdateAccess);
 		if(isValid($this->DataTable) && isValid($this->KeyColumn)){
@@ -207,8 +201,8 @@ class Profile extends Form{
             else $this->Items = isValid($this->SelectQuery)?$this->DataTable->DataBase->SelectRow($this->SelectQuery, $this->SelectParameters, $this->Items):
                     $this->DataTable->SelectRow(
                     isEmpty($this->IncludeColumns)?"*":(in_array($this->KeyColumn, $this->IncludeColumns)?$this->IncludeColumns:[$this->KeyColumn, ...$this->IncludeColumns]),
-                    [$this->SelectCondition, isEmpty("{$this->KeyColumn}=:{$this->KeyColumn}")],
-                    [":{$this->KeyColumn}"=>$this->KeyValue], $this->Items
+                    [$this->SelectCondition, isEmpty($this->KeyValue)?null:"{$this->KeyColumn}=:__{$this->KeyColumn}"],
+                    [...($this->SelectParameters?$this->SelectParameters:[]),...(isEmpty($this->KeyValue)?[]:[":__{$this->KeyColumn}"=>$this->KeyValue])], $this->Items
                 );
         }
 		$key = $this->KeyValue??get($this->Items,$this->KeyColumn);
@@ -219,17 +213,17 @@ class Profile extends Form{
         $raccess = $isu && !is_null($this->RemoveAccess) && auth($this->RemoveAccess);
 		$isc = $isc && ($vaccess || $aaccess || $maccess || $raccess);
         $secret = receive("secret")??$this->ViewSecret;
-        return Html::Division([
-            ...($maccess? [Html::Icon("edit","{$this->Name}_Modify(`$key`);", ["class"=>"table-item-modify"])] : []),
-            ...($raccess? [Html::Icon("trash","{$this->Name}_Delete(`$key`);", ["class"=>"table-item-delete"])] : [])
-        ]).(new Router())
-        ->if($secret === $this->ViewSecret)
-        ->Default(function() use($key) { return $this->GetViewFields($key); })
-        ->else($secret === $this->AddSecret)
-        ->Default(function() use($key) { return $this->GetAddFields($key); })
-        ->else($secret === $this->ModifySecret)
-        ->Default(function() use($key) { return $this->GetModifyFields($key); })
-        ->Handle();
+        $res = Html::Division(
+            ($maccess? Html::Icon("edit","{$this->Name}_Modify(`$key`);", ["class"=>"table-item-modify"]) : "").
+            ($raccess? Html::Icon("trash","{$this->Name}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")
+        );
+        if($secret === $this->ViewSecret)
+            $res .= $this->GetViewFields($key);
+        elseif($secret === $this->AddSecret)
+            $res .= $this->GetAddFields($key);
+        elseif($secret === $this->ModifySecret)
+            $res .= $this->GetModifyFields($key);
+        return $res;
 	}
 
 	public function GetScript(){
@@ -274,9 +268,10 @@ class Profile extends Form{
         if(is_null($value)) return null;
         if(!auth($this->ViewAccess)) return Html::Error("You have not access to see datails!");
         if(isEmpty($this->Items)) return Html::Error("You can not see this item!");
-        $this->Set(
-            title:getBetween($this->Items,"Title","Name" ),
-            description:get($this->Items,"Description"),
+        $form = $this->GetForm();
+        $form->Set(
+            title:getBetween($this->Items,"Title","Name")??$this->Title,
+            description:get($this->Items,"Description")??$this->Description,
             action:'#',
             method:"",
             children:(function(){
@@ -314,16 +309,10 @@ class Profile extends Form{
                     );
                 }
             })());
-        $this->Image = getValid($this->Items,"Image" ,"eye");
-        $this->Template = "b";
-        $this->Class = "container";
-        $this->SubmitLabel = null;
-        $this->ResetLabel = null;
-        $this->SuccessPath = \_::$Url;
-        $this->BackPath = \_::$Url;
-        $this->BackLabel = null;
-        //$this->AllowHeader = false;
-        return $this->Handle();
+        $form->Image = getValid($this->Items,"Image" ,$this->Image??"eye");
+        $form->SubmitLabel = null;
+        $form->ResetLabel = null;
+        return $form->Handle();
     }
 
 	public function GetAddFields($value){
@@ -334,7 +323,8 @@ class Profile extends Form{
         if(count($this->CellsTypes)>0)
             foreach ($this->CellsTypes as $key=>$val)
                 $record[$key] = null;
-        $this->Set(
+        $form = $this->GetForm();
+        $form->Set(
             title:"Add {$this->Title}",
             description:$this->Description,
             children:(function() use($record, $value){
@@ -352,15 +342,9 @@ class Profile extends Form{
                             if(!isEmpty($res)) yield $res;
                         }
             })());
-        $this->Image = getValid($record,"Image" ,"plus");
-        $this->Template = "b";
-        $this->Class = "container";
-        $this->CancelLabel = "Cancel";
-        $this->SuccessPath = \_::$Url;
-        $this->BackPath = \_::$Url;
-        $this->BackLabel = null;
-        //$this->AllowHeader = false;
-        return $this->Handle();
+        $form->Image = getValid($record,"Image" ,$this->Image??"plus");
+        $form->SuccessPath = \_::$Url;
+        return $form->Handle();
     }
 	public function DoAddHandle($value){
         if(is_null($value)) return null;
@@ -379,9 +363,10 @@ class Profile extends Form{
         if(!auth($this->ModifyAccess)) return Html::Error("You have not access to modify!");
         module("Form");
         if(isEmpty($this->Items)) return Html::Error("You can not modify this item!");
-        $this->Set(
-            title:getBetween($this->Items,"Title","Name"),
-            description:get($this->Items,"Description"),
+        $form = $this->GetForm();
+        $form->Set(
+            title:getBetween($this->Items,"Title","Name")??$this->Title,
+            description:get($this->Items,"Description")??$this->Description,
             children:(function() use($value){
                 $schemas = $this->DataTable->DataBase->Select(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
@@ -396,15 +381,8 @@ class Profile extends Form{
                             break;
                         }
             })());
-        $this->Image = getValid($this->Items,"Image" ,"edit");
-        $this->Template = "b";
-        $this->Class = "container";
-        $this->CancelLabel = "Cancel";
-        $this->SuccessPath = \_::$Url;
-        $this->BackPath = \_::$Url;
-        $this->BackLabel = null;
-        //$this->AllowHeader = false;
-        return $this->Handle();
+        $form->Image = getValid($this->Items,"Image" ,$this->Image??"edit");
+        return $form->Handle();
     }
 	public function DoModifyHandle($value){
         if(is_null($value)) return null;

@@ -105,7 +105,7 @@ class SignRecoverForm extends Form{
 				if($res)
                 	return $this->GetSuccess("Dear '".\_::$Back->User->TemporaryName."', your password changed successfully!");
 				else
-					return $this->GetError("There a problem is occured!");
+					return $this->GetError("Something went wrong!");
 			}
 			elseif(isValid($received,"Signature" )){
 				\_::$Back->User->Find(get($received,"Signature" ));
@@ -113,7 +113,7 @@ class SignRecoverForm extends Form{
 				if($res === true)
                 	return $this->GetSuccess("Dear user, the reset password sent to your email successfully!");
 				elseif($res === false)
-					return $this->GetError("There a problem is occured!");
+					return $this->GetError("Something went wrong!");
 				else
 					return $this->GetError($res);
 			}

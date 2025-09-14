@@ -76,7 +76,7 @@ class Form extends Module
 	public $Status = null;
 	public $Result = null;
 	public $SuccessHandler = "The form submitted successfully!";
-	public $ErrorHandler = "There a problem is occured!";
+	public $ErrorHandler = "Something went wrong!";
 	public $WarningHandler = "Please fill all required fields!";
 
 	/**
@@ -659,7 +659,7 @@ class Form extends Module
 			$attr = $this->Method ? [] : ["disabled"];
 			$this->Children = isEmpty($this->FieldsTypes)
 				? iteration($this->Children, function ($v, $k) use ($attr) {
-					if (is_integer($k))
+					if (is_int($k))
 						if ($v instanceof \Base)
 							return $v->ToString();
 						elseif (is_array($v))
@@ -687,7 +687,7 @@ class Form extends Module
 					$v = getValid($this->Children, $k, null);
 					if ($type === false)
 						return null;
-					if (is_integer($k) && isEmpty($type))
+					if (is_int($k) && isEmpty($type))
 						return $v;
 					else
 						return Html::Field(
@@ -767,9 +767,9 @@ class Form extends Module
 	{
 		if (isValid($this->Buttons))
 			yield $this->Buttons;
-		if ($this->Method) {
-			if($this->IsActive)yield (isValid($this->SubmitLabel) ? Html::SubmitButton($this->SubmitLabel, ["Name" => "submit", "class"=>"main"]) : "");
-			yield (isValid($this->ResetLabel) ? Html::ResetButton($this->ResetLabel, ["Name" => "reset"]) : "");
+		if ($this->Method && $this->IsActive) {
+			yield (isValid($this->SubmitLabel) ? Html::SubmitButton($this->SubmitLabel, ["Name" => "submit", "class"=>"main"]) : "");
+			yield (isValid(object: $this->ResetLabel) ? Html::ResetButton($this->ResetLabel, ["Name" => "reset"]) : "");
 		}
 		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \_::$Host, ["Name" => "cancel"]) : "");
 	}

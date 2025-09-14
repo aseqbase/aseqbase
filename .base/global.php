@@ -1743,9 +1743,9 @@ function take($object, $key, int|null &$index = null, $default = null)
 	return isset($object->$key) ? $object->$key : $default;
 }
 /**
- * Find somthing by a callable function on a countable element
+ * Find somthing by an index on a countable element
  * @param mixed $object The source object
- * @param $item The key sample to find
+ * @param string|int|null $item The key sample to find
  * @param $key To get the correct spell of the key (optional)
  * @return mixed
  */

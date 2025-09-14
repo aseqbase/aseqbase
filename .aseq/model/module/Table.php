@@ -445,7 +445,6 @@ class Table extends Module
         $daccess = $isu && !is_null($this->DuplicateAccess) && auth($this->DuplicateAccess);
         $maccess = $isu && !is_null($this->ModifyAccess) && auth($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && auth($this->RemoveAccess);
-        $isc = $isc && ($vaccess || $aaccess || $maccess || $daccess || $raccess);
         $addbutton = fn($text="Add your first item ") => Html::Center(Html::Button($text . Html::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
         if (is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
@@ -459,7 +458,7 @@ class Table extends Module
                     ) {
                         $isrk = ($rkey === $this->KeyRow) || in_array($rkey, $rks) || ($hasid && $rowid === $rkey);
                         if ($rkls)
-                            array_unshift($row, is_integer($rkey) ? ($hrn ? $rkey + $srn : "") : $rkey);
+                            array_unshift($row, is_int($rkey) ? ($hrn ? $rkey + $srn : "") : $rkey);
                         if ($isc) {
                             $row = is_null($rowid) ?
                                 [$uck => ($hrn ? $rn++ : ""), ...$row] :
@@ -488,15 +487,15 @@ class Table extends Module
                                 if ($ick) {
                                     if ($hcn) {
                                         $cells[] = $strow;
-                                        foreach ($icks as $ckey)
+                                        foreach ($icks as $ci => $ckey)
                                             if (!$eck || !in_array($ckey, $ecks))
-                                                $cells[] = $this->GetCell($cn++, $ckey, $row, true);
+                                                $cells[] = $this->GetCell($cn++, is_int($ci)?$ckey:$ci, $row, true);
                                         $cells[] = $etrow;
                                     }
                                     $cells[] = $strow;
-                                    foreach ($icks as $ckey)
+                                    foreach ($icks as $ci => $ckey)
                                         if (!$eck || !in_array($ckey, $ecks))
-                                            $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $ckey, $ckey, $row, true);
+                                            $cells[] = $this->GetCell(is_int($ckey) ? ($hcn ? $ckey + $scn : "") : (is_int($ci)?$ckey:$ci), $ckey, $row, true);
                                     $cells[] = $etrow;
                                 } else {
                                     if ($hcn) {
@@ -509,7 +508,7 @@ class Table extends Module
                                     $cells[] = $strow;
                                     foreach ($row as $ckey => $cel)
                                         if (!$eck || !in_array($ckey, $ecks))
-                                            $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $ckey, $ckey, $row, true);
+                                            $cells[] = $this->GetCell(is_int($ckey) ? ($hcn ? $ckey + $scn : "") : $ckey, $ckey, $row, true);
                                     $cells[] = $etrow;
                                 }
                                 $cells[] = "</thead>";
@@ -519,13 +518,14 @@ class Table extends Module
                         $cells[] = $strow;
                         if ($ick) {
                             $colCount = max($colCount, count($icks));
-                            foreach ($icks as $ckey)
+                            foreach ($icks as  $ci => $ckey)
                                 if (!$eck || !in_array($ckey, $ecks)) {
+                                    $ckey = is_int($ci)?$ckey:$ci;
                                     $cel = isset($row[$ckey]) ? $row[$ckey] : null;
                                     if ($isrk)
-                                        $cells[] = $this->GetCell(is_integer($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, $row, true);
+                                        $cells[] = $this->GetCell(is_int($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, $row, true);
                                     elseif (in_array($ckey, $cks))
-                                        $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $cel, $ckey, $row, true);
+                                        $cells[] = $this->GetCell(is_int($ckey) ? ($hcn ? $ckey + $scn : "") : $cel, $ckey, $row, true);
                                     else
                                         $cells[] = $this->GetCell($cel, $ckey, $row, false);
                                 }
@@ -534,9 +534,9 @@ class Table extends Module
                             foreach ($row as $ckey => $cel)
                                 if (!$eck || !in_array($ckey, $ecks)) {
                                     if ($isrk)
-                                        $cells[] = $this->GetCell(is_integer($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, $row, true);
+                                        $cells[] = $this->GetCell(is_int($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, $row, true);
                                     elseif (in_array($ckey, $cks))
-                                        $cells[] = $this->GetCell(is_integer($ckey) ? ($hcn ? $ckey + $scn : "") : $cel, $ckey, $row, true);
+                                        $cells[] = $this->GetCell(is_int($ckey) ? ($hcn ? $ckey + $scn : "") : $cel, $ckey, $row, true);
                                     else
                                         $cells[] = $this->GetCell($cel, $ckey, $row, false);
                                 }
@@ -727,7 +727,8 @@ class Table extends Module
         if(!$this->Form) {
             $this->Form = new Form();
             $this->Form->Template = "s";
-            $this->Form->Class = "container-fluid";
+            $this->Form->Class = "container";
+            $this->Form->ContentClass = "col-lg-8";
             $this->Form->CancelLabel = "Cancel";
             $this->Form->SuccessPath = \_::$Url;
             $this->Form->BackPath = \_::$Url;

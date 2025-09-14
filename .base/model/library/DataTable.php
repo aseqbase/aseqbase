@@ -261,6 +261,9 @@ class DataTable
 	}
 	
 	
+	public function GetColumnName($name){
+		return $this->Name.".".$this->DataBase->StartWrap.$name.$this->DataBase->EndWrap;
+	}
 	public function GetMetaValue($key, $condition = null, $params = [], $defaultValue = null)
 	{
 		$metadata = Convert::FromJson($this->SelectValue("MetaData", $condition, $params));

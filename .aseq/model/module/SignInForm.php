@@ -143,7 +143,7 @@ class SignInForm extends Form{
 			$user = \_::$Back->User->Get();
 			if (!isValid($user)) return $this->GetSuccess("You are no longer signed in!");
 			elseif(\_::$Back->User->SignOut()) return $this->GetSuccess("You signed out successfully!");
-			else return $this->GetError("There a problem is occured in signing out!");
+			else return $this->GetError("Something went wrong in signing out!");
 		} catch(\Exception $ex) { return $this->GetError($ex); }
 		$this->Result = true;
 		return $this->GetMessage("You are not signed in!");

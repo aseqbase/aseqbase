@@ -88,7 +88,7 @@ class DataBase {
 		if (isEmpty($columns))
 			return "*";
 		if (is_string($columns))
-			if (preg_find('/[\*\=\+\-\\\\\/\`"\'\(\)\[\]\{\}\,\.]|(^\d+$)/', $columns))
+			if (preg_find('/[\*\=\+\-\\\\\/`"\'\(\)\[\]\{\}\,\.]|(^\d+$)/', $columns))
 				return $columns;
 			else
 				return "$this->StartWrap$columns$this->EndWrap";
@@ -98,13 +98,9 @@ class DataBase {
 				array_filter(
 					loop(
 						$columns,
-						function ($v, $k) {
-							return is_int($k) ? $this->ColumnNameNormalization($v) : $this->ColumnNameNormalization($v) . " AS \"$k\"";
-						}
+						fn ($v, $k) => is_int($k) ? $this->ColumnNameNormalization($v) : ($this->ColumnNameNormalization($v) . " AS \"$k\"")
 					),
-					function ($v) {
-						return !is_null($v);
-					}
+					fn ($v)  =>!is_null($v)
 				)
 			);
 		elseif (is_callable($columns) || $columns instanceof \Closure)

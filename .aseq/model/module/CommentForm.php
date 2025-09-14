@@ -31,7 +31,7 @@ class CommentForm extends Form
 	public $AttachPlaceHolder = "Attached link";
 	public $IncompleteWarning = "Please fill all fields correctly!";
 	public $SuccessHandler = 'Thank you very much, Your message received successfully!';
-	public $ErrorHandler = 'There a problem is occured in processing your message!';
+	public $ErrorHandler = 'Something went wrong in processing your message!';
 	public $SigningLabel = "Log in or create an account to leave your message";
 	public $BlockTimeout = 60000;
 	public $ResponseView = null;

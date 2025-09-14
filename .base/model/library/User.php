@@ -152,7 +152,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if (is_null($acceptableAccess))
 			return $access;
 		//if($acceptableAccess === true || $acceptableAccess === false) return $acceptableAccess;
-		if (is_integer($acceptableAccess))
+		if (is_int($acceptableAccess))
 			return $access >= $acceptableAccess;
 		if (is_array($acceptableAccess) && count($acceptableAccess) > 0)
 			if (getBetween($acceptableAccess, "Min", "Max", "Include", "Exclude")??false)

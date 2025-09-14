@@ -206,13 +206,13 @@ class Html
                 break;
         }
         $attachments = "";
-        $attrs = self::Attributes($attributes, $attachments, $allowMA);
+        $attrs = self::Attributes($attributes, $attachments, $prepends,  $appends, $allowMA);
         if ($isSingle)
-            return "<$tagName$attrs data-single/>$attachments";
+            return "$prepends<$tagName$attrs data-single/>$appends$attachments";
         else
-            return join("", ["<$tagName$attrs>", Convert::ToString($content), "</$tagName>$attachments"]);
+            return join("", ["<$tagName$attrs>$prepends", Convert::ToString($content), "$appends</$tagName>$attachments"]);
     }
-    public static function Attributes($attributes, &$attachments = "", $optimization = false)
+    public static function Attributes($attributes, &$attachments = "", &$prepends = "", &$appends = "", $optimization = false)
     {
         $attrs = "";
         if ($attributes) {
@@ -221,7 +221,7 @@ class Html
                 $scripts = [];
                 $id = null;
                 foreach (Convert::ToIteration($attributes) as $key => $value) {
-                    if (isEmpty($key) || is_integer($key))
+                    if (isEmpty($key) || is_int($key))
                         if (isEmpty($value))
                             continue;
                         else
@@ -268,6 +268,9 @@ class Html
                 //Integration
                 foreach ($attrdic as $key => $value)
                     switch ($key) {
+                        case "tooltip":
+                                $appends .= Html::Tooltip(__($value));
+                            break;
                         case "style":
                             if (self::$AttributesOptimization && $optimization) {
                                 if (!isValid($id)) {
@@ -472,9 +475,9 @@ class Html
                 break;
         }
         $attachments = "";
-        $attrs = self::Attributes($attributes, $attachments, $allowMA);
+        $attrs = self::Attributes($attributes, $attachments, $prepends,  $appends, $allowMA);
         self::$TagStack[] = $tagName;
-        return "$attachments<$tagName$attrs>";
+        return "$attachments<$tagName$attrs>$prepends$appends";
     }
     /**
      * Create standard html close tag element
@@ -621,7 +624,7 @@ class Html
         $srcs = [];
         if (is_array($source))
             foreach ($source as $key => $value)
-                if (is_integer($key))
+                if (is_int($key))
                     $srcs[] = self::Element("Source", ["src" => $value]);
                 else
                     $srcs[] = self::Element("Source", ["src" => $value, "type" => $key]);
@@ -647,7 +650,7 @@ class Html
         $srcs = [];
         if (is_array($source))
             foreach ($source as $key => $value)
-                if (is_integer($key))
+                if (is_int($key))
                     $srcs[] = self::Element("Source", ["src" => $value]);
                 else
                     $srcs[] = self::Element("Source", ["src" => $value, "type" => $key]);
@@ -684,7 +687,7 @@ class Html
             if (is_array($source)) {
                 $src = array_shift($source);
                 foreach ($source as $key => $value)
-                    if (is_integer($key))
+                    if (is_int($key))
                         $srcs[] = self::Element("source", ["srcset" => $value]);
                     else
                         $srcs[] = self::Element("source", ["srcset" => $value, "media" => $key]);
@@ -1776,7 +1779,7 @@ class Html
         elseif (is_array($content) || is_iterable($content))
             $content = function () use ($content) {
                 return join(PHP_EOL, loop($content, function ($f, $k) {
-                    if (is_integer($k))
+                    if (is_int($k))
                         if (is_array($f))
                             return self::Field(
                                 type: grab($f, "Type"),

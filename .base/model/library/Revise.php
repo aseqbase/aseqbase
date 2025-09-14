@@ -141,7 +141,7 @@ class Revise{
             foreach ($newValues as $key=>$value)
                 if(isset($object->$key)) $object->$key = $value;
             if(self::Store($object)) return Html::Success("Data updated successfully!");
-            else return Html::Error("There a problem is occured!");
+            else return Html::Error("Something went wrong!");
         } catch(\Exception $ex) { return Html::Error($ex); }
     }
 }

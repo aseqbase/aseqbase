@@ -237,19 +237,19 @@
 	color: var(--color-green);
 }
 .be.blue.fore {
-	color: var(--color-green);
-}
-.be.yellow.fore {
 	color: var(--color-blue);
 }
-.be.cyan.fore {
+.be.yellow.fore {
 	color: var(--color-yellow);
 }
-.be.violet.fore {
+.be.cyan.fore {
 	color: var(--color-cyan);
 }
-.be.white.fore {
+.be.violet.fore {
 	color: var(--color-violet);
+}
+.be.white.fore {
+	color: var(--color-white);
 }
 
 .be.transparent:not(.fore){
@@ -265,19 +265,19 @@
 	background-color: var(--color-green);
 }
 .be.blue:not(.fore) {
-	background-color: var(--color-green);
-}
-.be.yellow:not(.fore) {
 	background-color: var(--color-blue);
 }
-.be.cyan:not(.fore) {
+.be.yellow:not(.fore) {
 	background-color: var(--color-yellow);
 }
-.be.violet:not(.fore){
+.be.cyan:not(.fore) {
 	background-color: var(--color-cyan);
 }
-.be.white:not(.fore) {
+.be.violet:not(.fore){
 	background-color: var(--color-violet);
+}
+.be.white:not(.fore) {
+	background-color: var(--color-white);
 }
 
 .be.blur{

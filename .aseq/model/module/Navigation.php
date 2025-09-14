@@ -1,9 +1,7 @@
 <?php
 namespace MiMFa\Module;
-use \MiMFa\Library\DataBase;
 use \MiMFa\Library\Html;
 use \MiMFa\Library\Style;
-use \MiMFa\Library\Translate;
 use \MiMFa\Library\Convert;
 /**
  * Automatic paging for item iterations or even a direct query to database
@@ -162,7 +160,7 @@ class Navigation extends Module{
      */
 	public function GetItems($iterator=null){
 		if(isValid($iterator??$this->Items)) return array_slice(Convert::ToItems($iterator??$this->Items), $this->GetFromItem(), $this->GetLimit());
-		else return between(\_::$Back->DataBase->FetchRowsExecute($this->Query." LIMIT ".$this->GetFromItem().", ".$this->GetLimit(),$this->QueryParameters),array_slice($this->DefaultItems, $this->GetFromItem(), $this->GetLimit()));
+		elseif($this->Query) return between(\_::$Back->DataBase->FetchRowsExecute($this->Query." LIMIT ".$this->GetFromItem().", ".$this->GetLimit(),$this->QueryParameters),array_slice($this->DefaultItems, $this->GetFromItem(), $this->GetLimit()));
 	}
 	public function GetFromItem(){
 		return min($this->Count, max(0, ($this->Page-1) * $this->Limit));
@@ -325,4 +323,3 @@ class Navigation extends Module{
         });
 	}
 }
-?>
