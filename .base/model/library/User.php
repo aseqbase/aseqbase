@@ -185,7 +185,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			$person = $this->DataTable->SelectRow(
 				"`Signature` , `Id` , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
 				"(`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
-				[":Id" => $signature, ":Signature" => $signature, ":Email" => $signature, ":Contact" => $signature, ":Password" => $password]
+				[":Id" => $signature, ":Signature" => $signature, ":Email" => strtolower($signature), ":Contact" => $signature, ":Password" => $password]
 			);
 			if (isEmpty($person)) {
 				$this->SignOut($signature);
@@ -195,7 +195,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			$person = $this->DataTable->SelectRow(
 				"`Signature` , `Id` , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
 				"`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)",
-				[":Id" => $signature, ":Signature" => $signature, ":Email" => $signature, ":Contact" => $signature]
+				[":Id" => $signature, ":Signature" => $signature, ":Email" => strtolower($signature), ":Contact" => $signature]
 			);
 			if (isEmpty($person)) {
 				$this->SignOut($signature);
@@ -309,7 +309,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->TemporaryImage = null;
 		return $this->DataTable->Insert([
 				":Signature" => $this->TemporarySignature = $signature ?? $email,
-				":Email" => $this->TemporaryEmail = $email,
+				":Email" => $this->TemporaryEmail = strtolower($email),
 				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password),
 				":Name" => $this->TemporaryName = $name ?? trim($firstName . " " . $lastName),
 				":FirstName" => $firstName,

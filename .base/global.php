@@ -679,7 +679,7 @@ function interact($script = null, $callback = null)
 }
 function alert($message = null, $callback = null)
 {
-	renderScript(
+	return injectScript(
 		\MiMFa\Library\Script::Alert($message) . "??true",
 		$callback
 	);
@@ -964,14 +964,8 @@ function render($output = null)
  */
 function renderScript($content, $source = null, ...$attributes)
 {
-	render(\MiMFa\Library\Html::Script(
-		\MiMFa\Library\Internal::MakeScript(
-			\MiMFa\Library\Html::Script($content, $source, ...$attributes),
-			null,
-			"(data,err)=>$('head').append(data??err)"
-			//"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-		)
-	));
+	echo $output = \MiMFa\Library\Html::Script($content, $source, ...$attributes);
+	return $output;
 }
 /**
  * Render Styles in the client side
@@ -979,13 +973,8 @@ function renderScript($content, $source = null, ...$attributes)
  */
 function renderStyle($content, $source = null, ...$attributes)
 {
-	render(\MiMFa\Library\Html::Script(
-		\MiMFa\Library\Internal::MakeScript(
-			\MiMFa\Library\Html::Style($content, $source, ...$attributes),
-			null,
-			"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-		)
-	));
+	echo $output = \MiMFa\Library\Html::Style($content, $source, ...$attributes);
+	return $output;
 }
 /**
  * Render a message result output to the client side
@@ -1033,15 +1022,44 @@ function renderError($output = null)
 /**
  * Execute console.log script
  * @param mixed $message
- * @return void
  */
 function renderLog($message = null)
 {
-	renderScript(
+	return renderScript(
 		\MiMFa\Library\Script::Log($message)
 	);
 }
 
+
+/**
+ * Render Scripts in the client side
+ * @param mixed $output The data that is ready to print
+ */
+function injectScript($content, $source = null, ...$attributes)
+{
+	render(\MiMFa\Library\Html::Script(
+		\MiMFa\Library\Internal::MakeScript(
+			\MiMFa\Library\Html::Script($content, $source, ...$attributes),
+			null,
+			"(data,err)=>$('head').append(data??err)"
+			//"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+		)
+	));
+}
+/**
+ * Render Styles in the client side
+ * @param mixed $output The data that is ready to print
+ */
+function injectStyle($content, $source = null, ...$attributes)
+{
+	render(\MiMFa\Library\Html::Script(
+		\MiMFa\Library\Internal::MakeScript(
+			\MiMFa\Library\Html::Style($content, $source, ...$attributes),
+			null,
+			"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+		)
+	));
+}
 #endregion 
 
 

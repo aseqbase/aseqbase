@@ -99,7 +99,7 @@ class QRCodeScanner extends Module{
 		Html::Division($this->GetTitle(["class"=>$this->TitleClass]).$this->GetDescription(["class"=>$this->DescriptionClass]), ["class"=>"message"]);
 	}
 	public function Toggle(){
-		renderScript($this->ToggleScript());
+		injectScript($this->ToggleScript());
 	}
 	public function ToggleScript(){
 		return "qrscanner = document.querySelector('.{$this->Name} video');
@@ -113,7 +113,7 @@ class QRCodeScanner extends Module{
 
 	public function Active(){
 		$this->ActiveAtBegining = true;
-		renderScript($this->ActiveScript());
+		injectScript($this->ActiveScript());
 		return $this;
 	}
 	public function ActiveScript(){
@@ -147,7 +147,7 @@ class QRCodeScanner extends Module{
 	
 	public function Deactive(){
 		$this->ActiveAtBegining = false;
-		renderScript($this->DeactiveScript());
+		injectScript($this->DeactiveScript());
 		return $this;
 	}
 	public function DeactiveScript(){
