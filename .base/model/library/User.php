@@ -334,7 +334,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$person = null;
 		try{ $person = $this->Find($signature, $password); } catch(\Exception $ex) { return false; }
 		$status = takeValid($person, "Status", self::$InitialStatus);
-		if ($status === false || ((int) $status) < self::$ActiveStatus)
+		if ($status === false || intval($status) < self::$ActiveStatus)
 			return null;
 		$this->Load($person);
 		$this->Session->SetData($this->Signature . "_" . getClientCode(), $this->Signature);

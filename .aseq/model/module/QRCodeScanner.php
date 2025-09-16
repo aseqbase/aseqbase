@@ -11,7 +11,9 @@ use MiMFa\Library\Script;
  */
 class QRCodeScanner extends Module{
 	public $CameraIndex = 1;
+	public $AllowMirrorCamera = false;
 	public $AlternativeCameraIndex = 0;
+	public $AllowMirrorAlternativeCamera = false;
 	/**
 	 * The target JS function name or a function like (content)=>//do process
 	 */
@@ -131,14 +133,20 @@ class QRCodeScanner extends Module{
 				".($this->ActiveAtEnding?"":$this->DeactiveScript())."
 				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.add('success');":"")."
 			});
+			addcam = function (cameras, index, mirror) {
+				if (cameras.length > index) try{
+					{$this->Name}.start(cameras[index]);
+					if({$this->Name}._camera) {$this->Name}._mirror = mirror??{$this->Name}._mirror;
+					else return false;
+					return true;
+				}catch{}
+				return false;
+			};
 			Instascan.Camera.getCameras().then(function (cameras) {
-				if (cameras.length >= {$this->CameraIndex}) try{
-					{$this->Name}.start(cameras[{$this->CameraIndex}]);
-					if(!{$this->Name}._camera)
-						if (cameras.length >= {$this->AlternativeCameraIndex}) {$this->Name}.start(cameras[{$this->AlternativeCameraIndex}]);
-				} catch { if (cameras.length >= {$this->AlternativeCameraIndex}) {$this->Name}.start(cameras[{$this->AlternativeCameraIndex}]); }
-				else if (cameras.length >= {$this->AlternativeCameraIndex}) {$this->Name}.start(cameras[{$this->AlternativeCameraIndex}]);
-				else console.error(".Script::Convert($this->CamerasNotFoundError).");
+				if(!addcam(cameras, {$this->CameraIndex},".($this->AllowMirrorCamera?'true':'false')."))
+					if(!addcam(cameras, {$this->AlternativeCameraIndex},".($this->AllowMirrorAlternativeCamera?'true':'false')."))
+						if(!addcam(cameras, 0, null))
+							console.error(".Script::Convert($this->CamerasNotFoundError).");
 			}).catch(function (e) {
 				console.error(e);
 			});

@@ -1211,9 +1211,16 @@ function addressing(string|null $file = null, $extension = null, string|int $ori
 	$path = null;
 	//$toSeq = $depth < 0 ? (count(\_::$Sequences) + $depth) : ($origin + $depth);
 	if (is_string($origin)) {
-		take(\_::$Sequences, $origin, index: $origin);
-		if (is_null($origin))
-			$origin = 0;
+		$key = null;
+		$index = 0;
+		foreach (\_::$Sequences as $k) {
+			if ($origin === $k){
+				$key = $origin = $index;
+				break;
+			}
+			$index++;
+		}
+		if (is_null($key)) $origin = 0;
 	}
 	$scount = count(\_::$Sequences);
 	$origin = $origin < 0 ? ($scount + $origin) : min($scount, $origin);
@@ -1699,7 +1706,7 @@ function set(&$object, $data)
 		} catch (Exception $ex) {
 		} else {
 		foreach ($data as $k => $v) {
-			find($object, $k, $key, $index);
+			take($object, $k, $key, $index);
 			if ($key)
 				if (is_null($index))
 					set($object->$key, $v);
@@ -1723,7 +1730,7 @@ function swap(&$object, &$data)
 		} catch (Exception $ex) {
 		} else {
 		foreach ($data as $k => $v) {
-			find($object, $k, $key, $index);
+			take($object, $k, $key, $index);
 			if ($key) {
 				if (is_null($index))
 					swap($object->$key, $v);
@@ -1738,36 +1745,14 @@ function swap(&$object, &$data)
 
 
 /**
- * To take somthing by an exact key on a countable element
+ * To seek for a result by a key on a countable element
  * @param mixed $object The source object
- * @param $key The key sample to find
+ * @param $item The key sample to find
+ * @param $key To get the correct spell of the key (optional)
  * @param $index To get the index of the key (optional)
  * @return mixed
  */
-function take($object, $key, int|null &$index = null, $default = null)
-{
-	$index = null;
-	if (is_null($object) || is_null($key))
-		return $object;
-	if (is_array($object)) {
-		$index = 0;
-		foreach ($object as $k => $v) {
-			if ($key === $k)
-				return $v;
-			$index++;
-		}
-	}
-	$index = null;
-	return isset($object->$key) ? $object->$key : $default;
-}
-/**
- * Find somthing by an index on a countable element
- * @param mixed $object The source object
- * @param string|int|null $item The key sample to find
- * @param $key To get the correct spell of the key (optional)
- * @return mixed
- */
-function find($object, $item, &$key = null, int|null &$index = null, $default = null)
+function take($object, string|int|null $item, &$key = null, int|null &$index = null, $default = null)
 {
 	$index = $key = null;
 	if (is_null($object) || is_null($item))
@@ -1795,6 +1780,40 @@ function find($object, $item, &$key = null, int|null &$index = null, $default = 
 				)
 			)
 		);
+}
+/**
+ * To seek for a correct value by a case insensitive value on a countable element
+ * @param mixed $object The source object
+ * @param string|int|null $item The value sample to find
+ * @param $key To get the correct spell of the key (optional)
+ * @return mixed
+ */
+function find($object, $item, &$key = null, int|null &$index = null, $default = null)
+{
+	$index = $key = null;
+	if (is_null($object) || is_null($item))
+		return $object;
+	if (is_array($object)) {
+		$index = 0;
+		foreach ($object as $k => $v) {
+			if ($item === $v) {
+				$key = $k;
+				return $v;
+			}
+			$index++;
+		}
+		$index = 0;
+		$it = strtolower($item);
+		foreach ($object as $k => $v) {
+			if ($it === strtolower($k)) {
+				$key = $k;
+				return $v;
+			}
+			$index++;
+		}
+	}
+	$index = null;
+	return $default;
 }
 /**
  * To seek for a result by a callable function on a countable element

@@ -210,16 +210,15 @@ class General extends Template
 					background-color: var(--back-color-input);
 				}
 
-				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.image,.media,.item,.fa){
-					font-weight: bold;
-				}
-
 				a, a:visited, a:active, a:hover{
 					color: inherit;
 					text-decoration: none;
 				}
-				a:not(.button, .icon):hover{
+				:not(ol,ul,ll,header,footer,.items,.header,.footer,li,lt,ld):hover>:is(a,a:visited,a:active):not(.button,.icon,.image,.media,.item,.fa){
 					text-decoration: underline;
+				}
+				a:not(.button, .icon):hover{
+					font-weight: bold;
 				}
 
 				:is(.button, .icon[onclick]), :is(.button, .icon[onclick]):is(:visited, :active){
