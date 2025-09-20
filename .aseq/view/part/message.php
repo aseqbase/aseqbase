@@ -9,13 +9,13 @@ module("Form");
 		if (!get($received, "Message"))
 			render($form->GetError("Your message could not be empty!"));
 		else {
-			$form->MailSubject = \_::$Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$Back->User, "Name")) . "'";
+			$form->MailSubject = \_::$Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$User, "Name")) . "'";
 			$form->ReceiverEmail = \_::$Info->ReceiverEmail;
-			$form->SenderEmail = get($received, "Email") ?? get(\_::$Back->User, "Email");
+			$form->SenderEmail = get($received, "Email") ?? get(\_::$User, "Email");
 			table("Message")->Insert([
-				"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
+				"UserId" => \_::$User ? \_::$User->Id : null,
 				"Type" => \_::$Url,
-				"Name" => Convert::ToText(getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
+				"Name" => Convert::ToText(getValid($received, "Name", \_::$User ? \_::$User->Name : null)),
 				"From" => $form->SenderEmail,
 				"To" => $form->ReceiverEmail,
 				"Subject" => Convert::ToText(get($received, "Subject")),
@@ -39,11 +39,11 @@ module("Form");
 		$form->BackPath = get($data, "BackPath") ?? null;
 		$form->ContentClass = "col-lg-8";
 		module("Field");
-		$name = get(\_::$Back->User, "Name") ?? receiveGet("Name");
-		$email = get(\_::$Back->User, "Email") ?? receiveGet("Email");
+		$name = get(\_::$User, "Name") ?? receiveGet("Name");
+		$email = get(\_::$User, "Email") ?? receiveGet("Email");
 		$msg = receiveGet("Message");
 		$form->Children = [new MiMFa\Module\Field("text", "Subject", $msg, required: true)];
-		if (!\_::$Back->User->Email) {
+		if (!\_::$User->Email) {
 			$form->Children[] = new MiMFa\Module\Field("text", "Name", $name, required: true, lock: !isEmpty($name));
 			$form->Children[] = new MiMFa\Module\Field("email", "Email", $email, required: true, lock: !isEmpty($email));
 		}

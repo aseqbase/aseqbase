@@ -299,7 +299,7 @@ class Router extends \ArrayObject
         return $this;
     }
     /**
-     * Add new route to other requests methods
+     * Add new route for all other requests methods
      * Leave null to clear other requests
      * @param mixed $handler A route name or handeler function, Leave null to clear other requests
      * @return Router
@@ -315,12 +315,8 @@ class Router extends \ArrayObject
                         Convert::By($handler, $this);
                 };
                 foreach ($this as $mthd => $pttrns)
-                    if ($mthd !== $method && $mthd !== "ALL") {
-                        if (isset($this[$mthd][$pattern]))
-                            $this[$mthd][$pattern][] = $h;
-                        else
+                    if ($mthd !== $method && $mthd !== "ALL" && !isset($this[$mthd][$pattern]))
                             $this[$mthd][$pattern] = [$h];
-                    }
             } else
                 foreach ($this as $mthd => $pttrns)
                     if ($mthd !== $method && $mthd !== "ALL")

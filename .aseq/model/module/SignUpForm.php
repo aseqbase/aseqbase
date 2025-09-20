@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
-use MiMFa\Library\User;
+
 use MiMFa\Library\Convert;
 module("Form");
 class SignUpForm extends Form
@@ -81,9 +81,9 @@ class SignUpForm extends Form
 	public function __construct()
 	{
 		parent::__construct();
-		$this->Action = User::$UpHandlerPath;
-		$this->InitialStatus = User::$InitialStatus;
-		$this->Welcome = function(){ return part(User::$DashboardHandlerPath, print:false); };
+		$this->Action = \User::$UpHandlerPath;
+		$this->InitialStatus = \User::$InitialStatus;
+		$this->Welcome = function(){ return part(\User::$DashboardHandlerPath, print:false); };
 	}
 
 	public function GetStyle()
@@ -227,7 +227,7 @@ class SignUpForm extends Form
 	public function GetFooter()
 	{
 		return parent::GetFooter() . Html::LargeSlot(
-			Html::Link($this->SignInLabel, $this->SignInPath??User::$InHandlerPath)
+			Html::Link($this->SignInLabel, $this->SignInPath??\User::$InHandlerPath)
 			,
 			["class"=> "col"]
 		);
@@ -281,7 +281,7 @@ class SignUpForm extends Form
 					if(!isset($this->GroupOptions[$group])) $group = $this->DefaultGroupId;
 				
 					if (
-						\_::$Back->User->SignUp(
+						\_::$User->SignUp(
 							signature: $signature,
 							password: $password,
 							email: get($received, "Email"),
@@ -295,7 +295,7 @@ class SignUpForm extends Form
 						) !== false
 					) {
 						$this->Result = true;
-						return $this->GetSuccess("Dear '" . \_::$Back->User->TemporaryName . "', You registered successfully");
+						return $this->GetSuccess("Dear '" . \_::$User->TemporaryName . "', You registered successfully");
 					} else
 						return $this->GetError("The user can not register with this email or username!");
 				} else

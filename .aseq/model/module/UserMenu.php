@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\User;
+
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 class UserMenu extends Module
@@ -16,7 +16,7 @@ class UserMenu extends Module
 	public function __construct()
 	{
 		parent::__construct();
-		$this->Path = User::$InHandlerPath;
+		$this->Path = \User::$InHandlerPath;
 	}
 
 	public function GetStyle()
@@ -83,20 +83,20 @@ class UserMenu extends Module
 		if ($this->Items == null) {
 			if (!auth(\_::$Config->UserAccess))
 				$this->Items = array(
-					array("Name" => "Sign In", "Image" => "sign-in", "Path" => User::$InHandlerPath),
-					array("Name" => "Sign Up", "Image" => "user-plus", "Path" => User::$UpHandlerPath)
+					array("Name" => "Sign In", "Image" => "sign-in", "Path" => \User::$InHandlerPath),
+					array("Name" => "Sign Up", "Image" => "user-plus", "Path" => \User::$UpHandlerPath)
 				);
 			else
 				$this->Items = array(
-					array("Name" => takeValid(\_::$Back->User, "Name", "Profile"), "Path" => User::$RouteHandlerPath, "Attributes"=>["class"=>"name main"]),
-					array("Name" => Convert::ToExcerpt(Convert::ToText(takeValid(\_::$Back->User, "Bio", null) ?? between(\_::$Back->User->GetValue("Bio"), "New User..."))), "Attributes" => ["class" => "bio"]),
-					array("Name" => "Dashboard", "Image" => "gamepad", "Path" => User::$DashboardHandlerPath),
-					array("Name" => "Edit Profile", "Image" => "edit", "Path" => User::$EditHandlerPath),
-					array("Name" => "Sign Out", "Image" => "power-off", "Path" => "sendDelete(`" . User::$OutHandlerPath . "`);")
+					array("Name" => \_::$User->Name??"Profile", "Path" => \User::$RouteHandlerPath, "Attributes"=>["class"=>"name main"]),
+					array("Name" => Convert::ToExcerpt(Convert::ToText(between(\_::$User->GetValue("Bio"), "New User..."))), "Attributes" => ["class" => "bio"]),
+					array("Name" => "Dashboard", "Image" => "gamepad", "Path" => \User::$DashboardHandlerPath),
+					array("Name" => "Edit Profile", "Image" => "edit", "Path" => \User::$EditHandlerPath),
+					array("Name" => "Sign Out", "Image" => "power-off", "Path" => "sendDelete(`" . \User::$OutHandlerPath . "`);")
 				);
 		}
 		if (count($this->Items) > 0) {
-			return Html::Button(Html::Media(null, takeValid(\_::$Back->User, "Image", "user")), $this->Path, ["class" => "menu"]) .
+			return Html::Button(Html::Media(null, \_::$User->Image??"user"), $this->Path, ["class" => "menu"]) .
 				Html::Division(function () {
 					foreach ($this->Items as $item)
 						if (is_array($item))

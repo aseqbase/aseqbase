@@ -1,6 +1,6 @@
 <?php
 use MiMFa\Library\Html;
-use MiMFa\Library\User;
+
 use MiMFa\Library\Local;
 
 snapReceive("submit", null, "post");
@@ -8,7 +8,7 @@ $imgchange = false;
 $received = receivePost();
 if ($imgObj = receiveFile("Image")) {
     if (isValid($imgObj, "size") && Local::IsFileObject($imgObj)) {
-        $img = \_::$Back->User->GetValue("Image");
+        $img = \_::$User->GetValue("Image");
         renderMessage("Trying to change the profile picture!");
         if (isValid($img) && !Local::DeleteFile($img))
             renderError("Could not delete your previous picture!");
@@ -23,7 +23,7 @@ if ($imgObj = receiveFile("Image")) {
         unset($received["Image"]);
 } else {
     //if(\_::$Front->Confirm("Are you sure to remove your profile picture?")){
-        $img = \_::$Back->User->GetValue("Image");
+        $img = \_::$User->GetValue("Image");
         renderMessage("Trying to remove the profile picture!");
         if (isValid($img) && !Local::DeleteFile($img)) {
             renderError("Could not delete the profile picture!");
@@ -35,32 +35,32 @@ if ($imgObj = receiveFile("Image")) {
     //}
 }
 try {
-    if (\_::$Back->User->Set($received)) {
-        if (getValid($received, "Email", \_::$Back->User->TemporaryEmail) != \_::$Back->User->TemporaryEmail) {
+    if (\_::$User->Set($received)) {
+        if (getValid($received, "Email", \_::$User->TemporaryEmail) != \_::$User->TemporaryEmail) {
             renderSuccess("The email address modifyed successfully!");
-            \_::$Back->User->SignOut();
-            \_::$Back->User->TemporaryEmail = $received["Email"];
-            load(User::$ActiveHandlerPath);
-        } elseif (getValid($received, "Signature" , \_::$Back->User->Signature) != \_::$Back->User->Signature) {
+            \_::$User->SignOut();
+            \_::$User->TemporaryEmail = $received["Email"];
+            load(\User::$ActiveHandlerPath);
+        } elseif (getValid($received, "Signature" , \_::$User->Signature) != \_::$User->Signature) {
             renderSuccess("The signature modifyed successfully!");
-            \_::$Back->User->SignOut();
-            load(User::$InHandlerPath);
+            \_::$User->SignOut();
+            load(\User::$InHandlerPath);
         } elseif ($imgchange) {
             renderSuccess("Profile picture modifyed successfully!");
-            $img = \_::$Back->User->TemporaryImage;
-            \_::$Back->User->Refresh();
-            if (isValid($img) != isValid(\_::$Back->User->TemporaryImage))
+            $img = \_::$User->TemporaryImage;
+            \_::$User->Refresh();
+            if (isValid($img) != isValid(\_::$User->TemporaryImage))
                 reload();
             else
                 renderScript("
-                    $(\"form .content img\").attr('src','" . \_::$Back->User->TemporaryImage . "');
+                    $(\"form .content img\").attr('src','" . \_::$User->TemporaryImage . "');
                     $('input[type=file]').val(null);
                 ");
             return true;
         } else
             renderSuccess("Profile updated successfully!");
     } else
-        renderError(get($received, "Signature" )==\_::$Back->User->Signature?"You did not change anythings!":"Something went wrong!" . Html::$Break . "You can not choice a duplicate signature!");
+        renderError(get($received, "Signature" )==\_::$User->Signature?"You did not change anythings!":"Something went wrong!" . Html::$Break . "You can not choice a duplicate signature!");
 } catch (\Exception $ex) {
     renderError($ex);
 }

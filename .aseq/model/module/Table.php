@@ -21,8 +21,8 @@ class Table extends Module
 
     public $Modal = null;
     public Navigation|null $NavigationBar = null;
-    public $TopNavigation = true;
-    public $BottomNavigation = false;
+    public $TopNavigation = false;
+    public $BottomNavigation = true;
 
     /**
      * The database table, to get items automatically
@@ -418,7 +418,7 @@ class Table extends Module
         $icks = $this->IncludeColumns;
         $ecks = $this->ExcludeColumns;
         $ick = !isEmpty($icks);
-        $eck = !isEmpty($ecks);
+        $eck = !isEmpty(object: $ecks);
         $irks = $hasid ? [] : $this->IncludeRows;
         $erks = $hasid ? [] : $this->ExcludeRows;
         $irids = $hasid ? $this->IncludeRows : [];
@@ -434,7 +434,7 @@ class Table extends Module
         $rowCount = 0;
         $colCount = $ick ? count($icks) : 0;
         if ($isu) {
-            $uck = Html::Division(auth($this->AddAccess) ? Html::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]) : Html::Image(null, "tasks"));
+            $uck = Html::Division(auth($this->AddAccess) ? Html::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip"=>"Add another Item"]) : Html::Image(null, "tasks"));
             if ($ick)
                 array_unshift($icks, $uck);
         }
@@ -445,12 +445,12 @@ class Table extends Module
         $daccess = $isu && !is_null($this->DuplicateAccess) && auth($this->DuplicateAccess);
         $maccess = $isu && !is_null($this->ModifyAccess) && auth($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && auth($this->RemoveAccess);
-        $addbutton = fn($text="Add your first item ") => Html::Center(Html::Button($text . Html::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
+        $addbutton = fn($text="Add your first item") => Html::Center(Html::Button(__($text) . Html::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
         if (is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey => $row)
                 if (!isEmpty($row)) {
-                    $rowid = getValid($row, $this->KeyColumn, null);
+                    $rowid = getBetween($row, $this->KeyColumn, preg_find("/\w+$/i", $this->KeyColumn));
                     if (
                         (!$irk || in_array($rkey, $irks)) &&
                         (!$erk || !in_array($rkey, $erks)) &&
@@ -465,11 +465,11 @@ class Table extends Module
                                 [
                                     $uck => Html::Division([
                                         ...[($hrn ? Html::Span($rn++, null, ['class' => 'number']) : "")],
-                                        ...Convert::ToSequence(Convert::By($this->PrependControlsCreator,$rowid, $row)??[]),
-                                        ...($vaccess ? [Html::Icon("eye", "{$this->Modal->Name}_View(`$rowid`);", ["class" => "table-item-view"])] : []),
-                                        ...($maccess ? [Html::Icon("edit", "{$this->Modal->Name}_Modify(`$rowid`);", ["class" => "table-item-modify"])] : []),
-                                        ...($daccess ? [Html::Icon("copy", "{$this->Modal->Name}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate"])] : []),
-                                        ...($raccess ? [Html::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete"])] : []),
+                                        ...Convert::ToSequence(Convert::By($this->PrependControlsCreator, $rowid, $row)??[]),
+                                        ...($vaccess ? [Html::Icon("eye", "{$this->Modal->Name}_View(`$rowid`);", ["class" => "table-item-view", "tooltip"=>"Show"])] : []),
+                                        ...($maccess ? [Html::Icon("edit", "{$this->Modal->Name}_Modify(`$rowid`);", ["class" => "table-item-modify", "tooltip"=>"Modify"])] : []),
+                                        ...($daccess ? [Html::Icon("copy", "{$this->Modal->Name}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate", "tooltip"=>"Duplicate Copy"])] : []),
+                                        ...($raccess ? [Html::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete", "tooltip"=>"Remove"])] : []),
                                         ...Convert::ToSequence(Convert::By($this->AppendControlsCreator,$rowid, $row)??[])
                                     ]),
                                     ...$row
@@ -487,15 +487,19 @@ class Table extends Module
                                 if ($ick) {
                                     if ($hcn) {
                                         $cells[] = $strow;
-                                        foreach ($icks as $ci => $ckey)
-                                            if (!$eck || !in_array($ckey, $ecks))
-                                                $cells[] = $this->GetCell($cn++, is_int($ci)?$ckey:$ci, $row, true);
+                                        foreach ($icks as $ci => $ckey){
+                                            $ci = (is_int($ci)?$ckey:$ci);
+                                            if (!$eck || !in_array($ci, $ecks))
+                                                $cells[] = $this->GetCell($cn++, $ci, $row, true);
+                                        }
                                         $cells[] = $etrow;
                                     }
                                     $cells[] = $strow;
-                                    foreach ($icks as $ci => $ckey)
-                                        if (!$eck || !in_array($ckey, $ecks))
-                                            $cells[] = $this->GetCell(is_int($ckey) ? ($hcn ? $ckey + $scn : "") : (is_int($ci)?$ckey:$ci), $ckey, $row, true);
+                                    foreach ($icks as $ci => $ckey){
+                                            $ci = (is_int($ci)?$ckey:$ci);
+                                        if (!$eck || !in_array($ci, $ecks))
+                                            $cells[] = $this->GetCell(is_int($ckey) ? ($hcn ? $ckey + $scn : "") : $ci, $ckey, $row, true);
+                                    }
                                     $cells[] = $etrow;
                                 } else {
                                     if ($hcn) {
@@ -518,9 +522,9 @@ class Table extends Module
                         $cells[] = $strow;
                         if ($ick) {
                             $colCount = max($colCount, count($icks));
-                            foreach ($icks as  $ci => $ckey)
+                            foreach ($icks as  $ci => $ckey){
+                                $ckey = is_int($ci)?$ckey:$ci;
                                 if (!$eck || !in_array($ckey, $ecks)) {
-                                    $ckey = is_int($ci)?$ckey:$ci;
                                     $cel = isset($row[$ckey]) ? $row[$ckey] : null;
                                     if ($isrk)
                                         $cells[] = $this->GetCell(is_int($rkey) ? ($hrn ? $rkey + $srn : "") : $cel, $ckey, $row, true);
@@ -529,6 +533,7 @@ class Table extends Module
                                     else
                                         $cells[] = $this->GetCell($cel, $ckey, $row, false);
                                 }
+                            }
                         } else {
                             $colCount = max($colCount, count($row));
                             foreach ($row as $ckey => $cel)
@@ -556,9 +561,9 @@ class Table extends Module
                     $cells[] = "</tr></tfoot>";
                 } else
                     $cells[] = Convert::ToString($this->Footer);
-            return ($isc ? $this->HandleModal() : "") . parent::Get() . ($aaccess?$addbutton("Add another item "):"") . Html::$Break . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . join(PHP_EOL, $cells);
+            return ($isc ? $this->HandleModal() : "") . parent::Get() . ($aaccess?$addbutton("Add another item" . Html::$Break):"") . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . join(PHP_EOL, $cells);
         } elseif ($aaccess)
-            return ($isc ? $this->HandleModal() : "") . parent::Get() . $addbutton("Add your first item ");
+            return ($isc ? $this->HandleModal() : "") . parent::Get() . $addbutton("Add your first item");
         return ($isc ? $this->HandleModal() : "") . parent::Get();
     }
 
@@ -644,14 +649,14 @@ class Table extends Module
 			});") . ($this->Controlable ?
                 (is_null($this->Modal) ? "" : ("
 				function {$this->Modal->Name}_View(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ViewSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ViewSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" . ($this->Updatable ? (auth($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(defaultValues){
-					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}',{$this->KeyColumn}:'{$this->AddSecret}'}, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
                             if(defaultValues)
@@ -662,14 +667,14 @@ class Table extends Module
 					);
 				}" : "") . (auth($this->ModifyAccess) ? "
 				function {$this->Modal->Name}_Modify(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (auth($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
+					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
@@ -677,7 +682,7 @@ class Table extends Module
 				}" : "") . (auth($this->RemoveAccess) ? "
 				function {$this->Modal->Name}_Delete(key){
 					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?") . "`))" : "") . "
-						sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}',{$this->KeyColumn}:key}, `.{$this->Name}`,
+						sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							load();
 						});
@@ -977,7 +982,7 @@ class Table extends Module
                     case "pass":
                     case "password":
                         if ($this->CryptPassword)
-                            $value = \_::$Back->User->DecryptPassword($value);
+                            $value = \_::$User->DecryptPassword($value);
                         break;
                     // case "file":
                     // case "files":
@@ -1051,7 +1056,7 @@ class Table extends Module
                             if (isEmpty($v))
                                 unset($values[$k]);
                             elseif ($this->CryptPassword)
-                                $values[$k] = \_::$Back->User->EncryptPassword($v);
+                                $values[$k] = \_::$User->EncryptPassword($v);
                             break;
                     }
                 } elseif ($type === false)

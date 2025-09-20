@@ -1,8 +1,6 @@
 <?php
 namespace MiMFa\Library;
 
-use ReturnTypeWillChange;
-
 require_once "DataTable.php";
 require_once "Session.php";
 /**

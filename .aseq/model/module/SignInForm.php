@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-use MiMFa\Library\User;
+
 module("Form");
 class SignInForm extends Form{
 	public $Action = null;
@@ -39,9 +39,9 @@ class SignInForm extends Form{
 	
 	public function __construct(){
         parent::__construct();
-		$this->Action = User::$InHandlerPath;
+		$this->Action = \User::$InHandlerPath;
 		$this->SuccessPath = \_::$Path;
-		$this->Welcome = function(){ return part(User::$DashboardHandlerPath, print:false); };
+		$this->Welcome = function(){ return part(\User::$DashboardHandlerPath, print:false); };
 	}
 
 	public function GetStyle(){
@@ -107,10 +107,10 @@ class SignInForm extends Form{
 	public function GetFooter(){
         return parent::GetFooter()
 			.Html::LargeSlot(
-				Html::Link($this->SignUpLabel, $this->SignUpPath??User::$UpHandlerPath)
+				Html::Link($this->SignUpLabel, $this->SignUpPath??\User::$UpHandlerPath)
 			, ["class"=>"col-lg-12"])
 			.Html::LargeSlot(
-				Html::Link($this->RecoverLabel, $this->RecoverPath??User::$RecoverHandlerPath)
+				Html::Link($this->RecoverLabel, $this->RecoverPath??\User::$RecoverHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 
@@ -121,14 +121,14 @@ class SignInForm extends Form{
 			$password = get($received,"Password" );
 			if(isValid($signature) && isValid($password)) {
 				$res = $this->SignUp && isEmail($signature)?
-						\_::$Back->User->SignInOrSignUp($signature, $password, $signature):
-						\_::$Back->User->SignIn($signature, $password);
+						\_::$User->SignInOrSignUp($signature, $password, $signature):
+						\_::$User->SignIn($signature, $password);
 				if($res === true)
                 	return $this->GetSuccess(Convert::FromDynamicString($this->CorrectConfirmingFormat));
 				elseif($res === false)
 					return $this->GetError($this->IncorrectWarning);
 				elseif(is_null($res))
-					return flipResponse($this->GetError("This account is not active yet!"), null, User::$ActiveHandlerPath . "?signature=$signature".(\_::$Query?"&".\_::$Query:""));
+					return flipResponse($this->GetError("This account is not active yet!"), null, \User::$ActiveHandlerPath . "?signature=$signature".(\_::$Query?"&".\_::$Query:""));
 				else
 					return $this->GetError($res);
 			}
@@ -140,9 +140,9 @@ class SignInForm extends Form{
 	
 	public function Delete(){
 		if(auth(\_::$Config->UserAccess)) try {
-			$user = \_::$Back->User->Get();
+			$user = \_::$User->Get();
 			if (!isValid($user)) return $this->GetSuccess("You are no longer signed in!");
-			elseif(\_::$Back->User->SignOut()) return $this->GetSuccess("You signed out successfully!");
+			elseif(\_::$User->SignOut()) return $this->GetSuccess("You signed out successfully!");
 			else return $this->GetError("Something went wrong in signing out!");
 		} catch(\Exception $ex) { return $this->GetError($ex); }
 		$this->Result = true;

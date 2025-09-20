@@ -129,6 +129,11 @@ class _
 	 * To access all front-end tools
 	 */
 	public static Front $Front;
+	
+	/**
+	 * To access the user service
+	 */
+	public static User $User;
 
 	/**
 	 * To access all addresses to a sequence of the website
@@ -203,13 +208,19 @@ run("global/BackBase");
 run("Back");
 \_::$Back = new Back();
 
+run("global/FrontBase");
+run("Front");
+\_::$Front = new Front();
+
+run("global/UserBase");
+run("User");
+\_::$User = new User();
+
 run("global/InformationBase");
 run("Information");
 \_::$Info = new Information();
 
-run("global/FrontBase");
-run("Front");
-\_::$Front = new Front();
+
 
 \MiMFa\Library\Local::CreateDirectory(\_::$Aseq->LogDirectory);
 \MiMFa\Library\Local::CreateDirectory(\_::$Aseq->TempDirectory);
@@ -752,7 +763,8 @@ function setStatus($status = null)
  */
 function response($output = null, $status = null)
 {
-	if (ob_get_level()) ob_end_clean(); // Clean any remaining output buffers
+	if (ob_get_level())
+		ob_end_clean(); // Clean any remaining output buffers
 	setStatus($status);
 	if ($output)
 		exit(\MiMFa\Library\Convert::ToString($output));
@@ -1069,12 +1081,12 @@ function injectStyle($content, $source = null, ...$attributes)
  * Check if the client has access to the page or assign them to other page, based on thair IP, Accessibility, Restriction and etc.
  * @param int|null $minaccess The minimum accessibility for the client, pass null to give the user access
  * @param bool $assign Assign clients to other page, if they have not enough access
- * @param bool $die Pass true to die the process if clients have not enough access, else pass false
- * @param int|string|null $die Die the process with this status if clients have not enough access
- * @return bool The client has accessibility bigger than $minaccess or not
- * @return int|mixed The user accessibility group
+ * @param bool|int|string|null $exit Pass true to die the process if clients have not enough access, else pass false
+ * Die the process with this status if clients have not enough access
+ * @return bool|int|null The client has accessibility bigger than $minaccess or not
+ * user accessibility group
  */
-function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|null $exit = true): mixed
+function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|null $exit = true)
 {
 	if (isValid(\_::$Config->StatusMode)) {
 		if ($assign) {
@@ -1105,15 +1117,15 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 		}
 	}
 	$b = auth($minaccess);
-	if ($b !== false)
+	if ($b)
 		return $b;
 	if ($assign) {
 		if (is_string($assign))
 			go($assign);
-		elseif (startsWith(\_::$Request, \MiMFa\Library\User::$HandlerPath))
+		elseif (startsWith(\_::$Request, \User::$HandlerPath))
 			return true;
 		else
-			load(\MiMFa\Library\User::$InHandlerPath);
+			load(\User::$InHandlerPath);
 	}
 	if ($exit !== false)
 		exit($exit);
@@ -1122,14 +1134,14 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 /**
  * Check if the user has access to the page or not
  * @param int|array|null $acceptableAccess The minimum accessibility for the user, pass null to give the user access
- * @return int|bool|null The user accessibility group
+ * @return bool|int|null user accessibility group
  */
-function auth($minaccess = null): mixed
+function auth($minaccess = null): bool|int|null
 {
-	if (!\_::$Back->User)
-		return \MiMFa\Library\User::CheckAccess(null, $minaccess);
+	if (!\_::$User)
+		return \User::CheckAccess(null, $minaccess);
 	else
-		return \_::$Back->User->Access($minaccess);
+		return \_::$User->Access($minaccess);
 }
 
 #endregion
@@ -1214,13 +1226,14 @@ function addressing(string|null $file = null, $extension = null, string|int $ori
 		$key = null;
 		$index = 0;
 		foreach (\_::$Sequences as $k) {
-			if ($origin === $k){
+			if ($origin === $k) {
 				$key = $origin = $index;
 				break;
 			}
 			$index++;
 		}
-		if (is_null($key)) $origin = 0;
+		if (is_null($key))
+			$origin = 0;
 	}
 	$scount = count(\_::$Sequences);
 	$origin = $origin < 0 ? ($scount + $origin) : min($scount, $origin);
@@ -2268,9 +2281,9 @@ function getClientIp($version = null): string|null
 	}
 	return null;
 }
-function getClientCode(): string|null
+function getClientCode($key = null): string|null
 {
-	return md5(getClientIp() ?? $_SERVER['HTTP_USER_AGENT']);
+	return md5($key.(getClientIp() ?? $_SERVER['HTTP_USER_AGENT']));
 }
 
 /**
@@ -2332,6 +2345,14 @@ function grabMemo($key)
 	forgetMemo($key);
 	return $val;
 }
+/**
+ * @param mixed $key
+ * @param mixed $value
+ * @param mixed $expires A miliseconds delay to expire
+ * @param mixed $path
+ * @param mixed $secure
+ * @return bool
+ */
 function setMemo($key, $value, $expires = 0, $path = "/", $secure = false)
 {
 	if ($value == null)

@@ -1,9 +1,9 @@
 <?php
 
 use MiMFa\Library\Convert;
-use MiMFa\Library\User;
 
-$user = \_::$Back->User->Get();
+
+$user = \_::$User->Get();
 if (isValid($user)) {
     echo "<div class='page'>";
     module("Form");
@@ -23,14 +23,14 @@ if (isValid($user)) {
         $img = new \MiMFa\Module\Field("image" , "Image" , $user["Image" ], "Click to change the image!", attributes:["id"=>$id]);
         $img->Scripts .= "document.getElementById('$id').onchange = function(){
                     let data = new FormData();
-                    data.append('Signature' , `" . \_::$Back->User->TemporarySignature . "`);
+                    data.append('Signature' , `" . \_::$User->TemporarySignature . "`);
                     data.append('Image' , this.files[0]);
                     data.append('submit', 'upload');
                     sendPost(location.href, data, '.{$form->Name}', (data, err)=>$('.{$form->Name}').append(data+''));
                 };";
         return $img;
     });
-    $form->AddChild(new \MiMFa\Module\Field("email", "Email", $user["Email"], (User::$InitialStatus < User::$ActiveStatus) ? "Your account will need to be activated if you change the field!" : "Each email account can have one profile!"));
+    $form->AddChild(new \MiMFa\Module\Field("email", "Email", $user["Email"], (\User::$InitialStatus < \User::$ActiveStatus) ? "Your account will need to be activated if you change the field!" : "Each email account can have one profile!"));
     $form->AddChild(new \MiMFa\Module\Field("text", "Signature" , $user["Signature" ], "A unique name exclusive for this profile"));
     $form->AddChild(new \MiMFa\Module\Field("dropdown", "GroupId" , $user["GroupId"], null, table("UserGroup")->SelectPairs("`Id`", "`Title`", "`Id`=".$user['GroupId']." OR (`Id`>=".\_::$Config->MinimumGroupId . " AND `Id`<=".\_::$Config->MaximumGroupId.")"), title: "Group"));
     $form->AddChild(new \MiMFa\Module\Field("text", "Name" , $user["Name" ], "Your full name, you will known by this around the site"));

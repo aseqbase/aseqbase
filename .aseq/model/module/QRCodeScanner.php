@@ -1,6 +1,7 @@
 <?php namespace MiMFa\Module;
 use MiMFa\Library\Html;
 use MiMFa\Library\Script;
+use MiMFa\Library\Style;
 
 /**
  * A Real-time webcam-driven HTML5 QR code scanner module.
@@ -13,7 +14,10 @@ class QRCodeScanner extends Module{
 	public $CameraIndex = 1;
 	public $AllowMirrorCamera = false;
 	public $AlternativeCameraIndex = 0;
-	public $AllowMirrorAlternativeCamera = false;
+	public $AllowMirrorAlternativeCamera = true;
+
+	public $ActiveButtonLabel = "<i class='fa fa-power-off'></i>";
+	public $SwitchButtonLabel = "<i class='fa fa-camera-rotate'></i>";
 	/**
 	 * The target JS function name or a function like (content)=>//do process
 	 */
@@ -50,7 +54,7 @@ class QRCodeScanner extends Module{
 				overflow: hidden;
 			}
 			.{$this->Name} video{
-				background-color: black;
+				background-color: var(--color-black);
 				object-fit: cover;
 				width: 100%;
 				height: 100%;
@@ -73,6 +77,21 @@ class QRCodeScanner extends Module{
 				padding:0px;
 				margin:0px;
 			}
+				
+			.{$this->Name} .controls{
+				font-size: var(--size-1);
+				position: absolute;
+				bottom: 0px;
+				padding:5px;
+				display: flex;
+				align-content: center;
+				justify-content: center;
+				align-items: center;
+				gap:var(--size-0);
+			}
+			.{$this->Name} .controls .button{
+				padding:5px;
+			}
 			.{$this->Name} .mask{
 				position: absolute;
 				border: 1px solid white;
@@ -94,23 +113,72 @@ class QRCodeScanner extends Module{
 		//RenderScript(null, \_::$Address->ScriptRoute . "Instascan.js");
 		return Html::Script(null,"https://rawgit.com/schmich/instascan-builds/master/instascan.min.js").
 		Html::OpenTag("video", $this->GetDefaultAttributes()).
-		Html::Script($this->ActiveAtBegining?$this->ActiveScript():$this->DeactiveScript()).
 		$this->BrowserNotSupportError.
 		Html::CloseTag("video").
 		($this->AllowMask?Html::Division($this->GetContent(), ["class"=>"mask"]):"").
+		Html::Division(
+			($this->SwitchButtonLabel?Html::Button($this->SwitchButtonLabel, $this->SwitchScript(), ["class"=>"switchcamera alt be hide"]):"").
+				($this->ActiveButtonLabel?Html::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class"=>"activation alt be"]):"")
+		, ["class"=>"controls"]).
 		Html::Division($this->GetTitle(["class"=>$this->TitleClass]).$this->GetDescription(["class"=>$this->DescriptionClass]), ["class"=>"message"]);
+	}
+	public function GetScript(){
+		return Html::Script("
+		try{
+			if(!Instascan.Scanner) Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');
+			} catch{Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');}
+			{$this->Name} = new Instascan.Scanner({video: document.querySelector('.{$this->Name} video')});
+			{$this->Name}.addListener('scan', function (content) {
+				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);":"")."
+				".($this->TargetScriptFunction?"({$this->TargetScriptFunction})(content);":"")."
+				".($this->TargetId?"document.getElementById(".Script::Convert($this->TargetId).").value = content;":"")."
+				".($this->TargetSelector?"document.querySelector(".Script::Convert($this->TargetSelector).").value = content;":"")."
+				".($this->ActiveAtEnding?"":$this->DeactiveScript())."
+				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.add('success');":"")."
+			});
+			{$this->Name}_selectedCamera = -1;
+			function {$this->Name}_useCamera(cameras, index = 0, mirror = false) {
+				if(cameras.length > 1) {
+					document.querySelector('.{$this->Name} .switchcamera')?.classList.remove('hide');
+					document.querySelector('.{$this->Name} .activation')?.classList.add('hide');
+				}
+				else {
+					document.querySelector('.{$this->Name} .switchcamera')?.classList.add('hide');
+					document.querySelector('.{$this->Name} .activation')?.classList.remove('hide');
+				}
+
+				if (cameras.length > index && {$this->Name}_selectedCamera !== index) {
+					if({$this->Name} && {$this->Name}?._camera?._stream) {$this->Name}.stop();
+					{$this->Name}.start(cameras[index]);
+					{$this->Name}.mirror = mirror;
+					{$this->Name}_selectedCamera = index;
+					return true;
+				}
+				return false;
+			};".
+			($this->ActiveAtBegining?$this->ActiveScript():$this->DeactiveScript())
+		);
 	}
 	public function Toggle(){
 		injectScript($this->ToggleScript());
 	}
 	public function ToggleScript(){
-		return "qrscanner = document.querySelector('.{$this->Name} video');
-		if(qrscanner.style.display =='none') {
-			".$this->ActiveScript()."
+		return "if({$this->Name} && {$this->Name}?._camera?._stream) {
+			".$this->DeactiveScript()."
 		}
 		else {
-			".$this->DeactiveScript()."
+			".$this->ActiveScript()."
 		}";
+	}
+
+	public function Switch(){
+		injectScript($this->SwitchScript());
+	}
+	public function SwitchScript(){
+		return $this->DeactiveScript()."
+		if({$this->Name}_selectedCamera === $this->AlternativeCameraIndex)
+			Instascan.Camera.getCameras().then((cameras) => {$this->Name}_useCamera(cameras, {$this->CameraIndex},".($this->AllowMirrorCamera?'true':'false').")).catch((e)=>console.log(e));
+		else Instascan.Camera.getCameras().then((cameras) => {$this->Name}_useCamera(cameras, {$this->AlternativeCameraIndex},".($this->AllowMirrorAlternativeCamera?'true':'false').")).catch((e)=>console.log(e));";
 	}
 
 	public function Active(){
@@ -120,37 +188,13 @@ class QRCodeScanner extends Module{
 	}
 	public function ActiveScript(){
 		return "
-			document.querySelector('.{$this->Name} video').style.display = null;
-			try{
-				if(!Instascan.Scanner) Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');
-			}catch{Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');}
-			let {$this->Name} = new Instascan.Scanner({ video: document.querySelector('.{$this->Name} video') });
-			{$this->Name}.addListener('scan', function (content) {
-				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);":"")."
-				".($this->TargetScriptFunction?"({$this->TargetScriptFunction})(content);":"")."
-				".($this->TargetId?"document.getElementById(".Script::Convert($this->TargetId).").value = content;":"")."
-				".($this->TargetSelector?"document.querySelector(".Script::Convert($this->TargetSelector).").value = content;":"")."
-				".($this->ActiveAtEnding?"":$this->DeactiveScript())."
-				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.add('success');":"")."
-			});
-			addcam = function (cameras, index, mirror) {
-				if (cameras.length > index) try{
-					{$this->Name}.start(cameras[index]);
-					if({$this->Name}._camera) {$this->Name}._mirror = mirror??{$this->Name}._mirror;
-					else return false;
-					return true;
-				}catch{}
-				return false;
-			};
-			Instascan.Camera.getCameras().then(function (cameras) {
-				if(!addcam(cameras, {$this->CameraIndex},".($this->AllowMirrorCamera?'true':'false')."))
-					if(!addcam(cameras, {$this->AlternativeCameraIndex},".($this->AllowMirrorAlternativeCamera?'true':'false')."))
-						if(!addcam(cameras, 0, null))
-							console.error(".Script::Convert($this->CamerasNotFoundError).");
-			}).catch(function (e) {
-				console.error(e);
-			});
-		";
+		if({$this->Name} && {$this->Name}?._camera && !{$this->Name}?._camera?._stream) {$this->Name}.start();
+		else Instascan.Camera.getCameras().then(function (cameras) {
+			if(!{$this->Name}_useCamera(cameras, {$this->CameraIndex},".($this->AllowMirrorCamera?'true':'false')."))
+				if(!{$this->Name}_useCamera(cameras, {$this->AlternativeCameraIndex},".($this->AllowMirrorAlternativeCamera?'true':'false')."))
+					if(!{$this->Name}_useCamera(cameras))
+						console.error(".Script::Convert($this->CamerasNotFoundError).");
+		}).catch((e)=>console.error(e));";
 	}
 	
 	public function Deactive(){
@@ -159,7 +203,7 @@ class QRCodeScanner extends Module{
 		return $this;
 	}
 	public function DeactiveScript(){
-		return "document.querySelector('.{$this->Name} video').style.display = 'none';";
+		return "if({$this->Name} && {$this->Name}?._camera?._stream) {$this->Name}.stop();";
 	}
 
 	public function MessageScript($message = null){

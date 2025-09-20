@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\User;
+
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 class RingTabs extends Module{
@@ -25,7 +25,7 @@ class RingTabs extends Module{
         $this->Set($items, $path);
     }
 	public function Set($items =  null, $path = null){
-		$this->Path = $path??(\_::$Config->AllowSigning?User::$InHandlerPath:null);
+		$this->Path = $path??(\_::$Config->AllowSigning?\User::$InHandlerPath:null);
 		$this->Items = $items;
     }
 

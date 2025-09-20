@@ -12,7 +12,7 @@ else
     $templ->Content = function() use($path){
         inspect(\_::$Config->UserAccess);
         module("Profile");
-        $module = new Profile(\_::$Back->User->GroupDataTable);
+        $module = new Profile(\_::$User->GroupDataTable);
         $module->KeyColumn = "Name";
         $module->Updatable = false;
         $access = $module->UpdateAccess = \_::$Config->AdminAccess;

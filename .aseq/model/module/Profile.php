@@ -426,7 +426,7 @@ class Profile extends Table{
                 {
                     case "pass":
                     case "password":
-                        if($this->CryptPassword) $value = \_::$Back->User->DecryptPassword($value);
+                        if($this->CryptPassword) $value = \_::$User->DecryptPassword($value);
                         break;
                     case "file":
                     case "files":
@@ -484,7 +484,7 @@ class Profile extends Table{
                         case "pass":
                         case "password":
                             if(isEmpty($v)) unset($values[$k]);
-                            elseif($this->CryptPassword) $values[$k] = \_::$Back->User->EncryptPassword($v);
+                            elseif($this->CryptPassword) $values[$k] = \_::$User->EncryptPassword($v);
                             break;
                     }
                 }

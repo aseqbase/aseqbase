@@ -3,7 +3,7 @@ namespace MiMFa\Module;
 use MiMFa\Library\Html;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
-use MiMFa\Library\User;
+
 class SideMenu extends Module
 {
 	public $Image = null;
@@ -420,7 +420,7 @@ class SideMenu extends Module
 					module("SearchForm");
 					module("TemplateButton"); 
 					$defaultButtons[] = new searchForm();
-					if (\_::$Config->AllowSigning) $defaultButtons[] = Html::Icon("user", User::$InHandlerPath);
+					if (\_::$Config->AllowSigning) $defaultButtons[] = Html::Icon("user", \User::$InHandlerPath);
 					$defaultButtons[] = new TemplateButton();
 				}
 				yield Html::Division([

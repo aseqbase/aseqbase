@@ -1,17 +1,17 @@
 <?php
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-use MiMFa\Library\User;
+
 try {
     $email = receive("Email");
-    if(!$email && $email = receive("Signature")) $email = \_::$Back->User->GetValue("Email", $email);
+    if(!$email && $email = receive("Signature")) $email = \_::$User->GetValue("Email", $email);
 
-    if($email && \_::$Back->User->SendActivationEmail($email)) {
-        echo Html::Success("An activation email sent successfully to your account ('" . Convert::ToSecret(\_::$Back->User->TemporaryEmail, "*", 2, 5) . "')! Please check your email and click on the link.");
+    if($email && \_::$User->SendActivationEmail($email)) {
+        echo Html::Success("An activation email sent successfully to your account ('" . Convert::ToSecret(\_::$User->TemporaryEmail, "*", 2, 5) . "')! Please check your email and click on the link.");
         part("access");
-    } elseif (receive(User::$ActivationTokenKey) && ($res = \_::$Back->User->ReceiveActivationEmail()) != null){
+    } elseif (receive(\User::$ActivationTokenKey) && ($res = \_::$User->ReceiveActivationEmail()) != null){
         if ($res) {
-            echo Html::Success("Dear " . \_::$Back->User->TemporaryName . ", Your account activated successfully!");
+            echo Html::Success("Dear " . \_::$User->TemporaryName . ", Your account activated successfully!");
             part("access");
         } else {
             echo Html::Error("Your account is not activate!");
@@ -22,12 +22,12 @@ try {
         HTML::Form([
             HTML::Field("Email", "Email", $email),
             HTML::SubmitButton("Try to send the activation email again!", $email)
-        ],User::$ActiveHandlerPath);
+        ],\User::$ActiveHandlerPath);
 } catch (\Exception $ex) {
     echo Html::Error($ex) . 
     HTML::Form([
         HTML::Field("Email", "Email", $email),
         HTML::SubmitButton("Try to send the activation email again!", $email)
-    ],User::$ActiveHandlerPath);
+    ],\User::$ActiveHandlerPath);
 }
 ?>

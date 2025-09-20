@@ -1,7 +1,7 @@
 <?php
-use MiMFa\Library\User;
+
 use MiMFa\Library\Html;
-$user = \_::$Back->User->Get();
+$user = \_::$User->Get();
 if (isValid($user))
     echo Html::Style("
 			.page header.header.introduction {
@@ -28,17 +28,17 @@ if (isValid($user))
 	").
 	Html::Center(
 		Html::Header(
-			Html::Media(\_::$Back->User->Image).
-			Html::ExternalHeading(\_::$Back->User->Name).
-			Html::Paragraph(\_::$Back->User->GetValue("Bio" )).
+			Html::Media(\_::$User->Image).
+			Html::ExternalHeading(\_::$User->Name).
+			Html::Paragraph(\_::$User->GetValue("Bio" )).
             Html::$BreakLine
 		,["class"=>"introduction"]).
         Html::Container([
             [
-                Html::Button("Show Profile", User::$RouteHandlerPath),
-                Html::Button("Edit Profile", User::$EditHandlerPath),
-                Html::Button("Reset Password", User::$RecoverHandlerPath),
-                Html::Button("Sign Out", User::$OutHandlerPath)
+                Html::Button("Show Profile", \User::$RouteHandlerPath),
+                Html::Button("Edit Profile", \User::$EditHandlerPath),
+                Html::Button("Reset Password", \User::$RecoverHandlerPath),
+                Html::Button("Sign Out", \User::$OutHandlerPath)
             ]
         ]),["class"=>"page"]
     );

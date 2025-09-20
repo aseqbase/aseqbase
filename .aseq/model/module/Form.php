@@ -4,7 +4,7 @@ namespace MiMFa\Module;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
-use MiMFa\Library\User;
+
 
 class Form extends Module
 {
@@ -88,11 +88,11 @@ class Form extends Module
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
 		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
-		$this->Signing = fn() => part(User::$InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
+		$this->Signing = fn() => part(\User::$InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);
 		// });
-		if (\_::$Back->User->Access(\_::$Config->AdminAccess))
+		if (\_::$User->Access(\_::$Config->AdminAccess))
 			$this->BlockTimeout = 500;
 	}
 
@@ -646,6 +646,7 @@ class Form extends Module
 			}
 		");
 	}
+	
 	public function Get()
 	{
 		if (!auth($this->Access))
@@ -893,7 +894,7 @@ class Form extends Module
 				$module->AllowShare =
 				$module->AllowZoom =
 				$module->AllowDownload = false;
-			$module->Content = part(User::$InHandlerPath, ["ContentClass" => ""], print: false);
+			$module->Content = part(\User::$InHandlerPath, ["ContentClass" => ""], print: false);
 			if ($this->SigningLabel)
 				return $module->Handle() . Html::Center(
 					Html::Button(
@@ -904,7 +905,7 @@ class Form extends Module
 				);
 		} elseif ($this->Signing)
 			return Html::Center(
-				($this->SigningLabel ? Html::SubHeading($this->SigningLabel, User::$InHandlerPath) : "")
+				($this->SigningLabel ? Html::SubHeading($this->SigningLabel, \User::$InHandlerPath) : "")
 				. (is_bool($this->Signing) ? "" : Convert::By($this->Signing))
 			);
 	}

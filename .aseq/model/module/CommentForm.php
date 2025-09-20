@@ -4,7 +4,7 @@ namespace MiMFa\Module;
 use MiMFa\Library\Contact;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-use MiMFa\Library\User;
+
 
 module("Form");
 class CommentForm extends Form
@@ -45,7 +45,7 @@ class CommentForm extends Form
 	{
 		parent::__construct();
 		$this->Access = \_::$Config->WriteCommentAccess;
-		$this->DefaultStatus = \_::$Back->User->Access(\_::$Config->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
+		$this->DefaultStatus = \_::$User->Access(\_::$Config->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
 		$this->Template = "b";
 	}
 
@@ -60,8 +60,8 @@ class CommentForm extends Form
 				$message ?? [
 					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \_::$Path),
 					"Subject" => Convert::ToText(get($data, "Subject")),
-					"Name" => Convert::ToText(getValid($data, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
-					"Contact" => getValid($data, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
+					"Name" => Convert::ToText(getValid($data, "Name", \_::$User ? \_::$User->Name : null)),
+					"Contact" => getValid($data, "Contact", \_::$User ? \_::$User->Email : null),
 					"Content" => Convert::ToText(get($data, "Content")),
 					"Attach" => Convert::ToText(get($data, "Attach"))
 				]
@@ -80,7 +80,7 @@ class CommentForm extends Form
 	}
 	public function GetFields()
 	{
-		if (!(\_::$Back->User && \_::$Back->User->Email)) {
+		if (!(\_::$User && \_::$User->Email)) {
 			if (isValid($this->NameLabel))
 				yield Html::Field(
 					key: "Name",
@@ -128,7 +128,7 @@ class CommentForm extends Form
 	}
 	public function GetFooter()
 	{
-		return $this->AllowHeader || (\_::$Back->User && \_::$Back->User->Email) ? "" : parent::GetFooter()
+		return $this->AllowHeader || (\_::$User && \_::$User->Email) ? "" : parent::GetFooter()
 			. Html::LargeSlot(
 				$this->GetSigning()
 				,
@@ -145,13 +145,13 @@ class CommentForm extends Form
 					$res = null;
 					$rid = get($received, "Reply");
 					$att = get($received, "Attach");
-					if ((\_::$Back->User && \_::$Back->User->Email) || isValid($received, "Contact"))
+					if ((\_::$User && \_::$User->Email) || isValid($received, "Contact"))
 						$res = table("Comment")->Insert([
 							"ReplyId" => $rid,
 							"Relation" => $this->Relation,
-							"UserId" => \_::$Back->User ? \_::$Back->User->Id : null,
-							"Name" => Convert::ToText(getValid($received, "Name", \_::$Back->User ? \_::$Back->User->Name : null)),
-							"Contact" => getValid($received, "Contact", \_::$Back->User ? \_::$Back->User->Email : null),
+							"UserId" => \_::$User ? \_::$User->Id : null,
+							"Name" => Convert::ToText(getValid($received, "Name", \_::$User ? \_::$User->Name : null)),
+							"Contact" => getValid($received, "Contact", \_::$User ? \_::$User->Email : null),
 							"Subject" => Convert::ToText(get($received, "Subject")),
 							"Content" => Convert::ToText(get($received, "Content")),
 							"Attach" => Convert::ToText(isStatic($att) ? $att : Convert::ToJson($att)),
@@ -185,10 +185,10 @@ class CommentForm extends Form
 					$cid = get($received, "Id");
 					$att = get($received, "Attach");
 					if (isValid($cid))
-						$res = table("Comment")->Update("`Id`=:Id AND (" . (\_::$Back->User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
+						$res = table("Comment")->Update("`Id`=:Id AND (" . (\_::$User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
 							":Id" => $cid,
-							":UserId" => \_::$Back->User->Id,
-							":Contact" => \_::$Back->User->Email,
+							":UserId" => \_::$User->Id,
+							":Contact" => \_::$User->Email,
 							"Subject" => Convert::ToText(get($received, "Subject")),
 							"Content" => Convert::ToText(get($received, "Content")),
 							"Attach" => Convert::ToText(isStatic($att) ? $att : Convert::ToJson($att)),
@@ -223,7 +223,7 @@ class CommentForm extends Form
 				$this->ReplyId = get($received, "Reply");
 				$this->Router->Refresh()->Get()->Switch();
 				return $this->Handle();
-			} elseif (isValid($received, "Status") && \_::$Back->User->Access(\_::$Config->AdminAccess)) {
+			} elseif (isValid($received, "Status") && \_::$User->Access(\_::$Config->AdminAccess)) {
 				$res = null;
 				$cid = get($received, "Id");
 				if (isValid($cid))
@@ -248,8 +248,8 @@ class CommentForm extends Form
 				$cid = get($received, "Id");
 				if (isValid($cid))
 					if (
-						isValid($cid) && \_::$Back->User->Id &&
-						table("Comment")->Delete("`Id`=:Id AND (" . (\_::$Back->User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$Back->User->Id, ":UE" => \_::$Back->User->Email])
+						isValid($cid) && \_::$User->Id &&
+						table("Comment")->Delete("`Id`=:Id AND (" . (\_::$User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$User->Id, ":UE" => \_::$User->Email])
 					) {
 						$this->Status = 200;
 						return $this->GetWarning("This comment removed successfuly!");

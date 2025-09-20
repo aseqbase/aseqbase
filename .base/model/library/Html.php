@@ -2261,6 +2261,9 @@ class Html
             case 'imgsubmit':
                 $content = self::Input($key, $title, 'image', ['src' => Convert::ToString($value)], $attributes);
                 break;
+            case 'code':
+                $content = self::CodeInput($key, $value, $options, $attributes);
+                break;
             case 'json':
             case 'javascript':
             case 'js':
@@ -2619,7 +2622,7 @@ class Html
         return self::Input($key, $value, "week", ["class" => "weekinput"], $attributes);
     }
     /**
-     * The \<INPUT\> HTML Tag by a pattern fo input
+     * The \<INPUT\> HTML Tag by a pattern for input
      * @param mixed $key The tag name, id, or placeholder
      * @param mixed $value The tag default value
      * @param mixed $mask A RegEx pattern without wrap slashes
@@ -2628,10 +2631,23 @@ class Html
      */
     public static function MaskInput($key, $value = null, $mask = "\\w+", ...$attributes)
     {
+        $length = self::GrabAttribute($attributes, "Length");
         return self::Input($key, $value, "text", [
             "class" => "maskinput",
-            ...(isPattern($mask ?? "") ? ["onblur" => "this.value = (this.value.match($mask)??[''])[0]??''"] : ["pattern" => $mask, "title" => "Please complete field by correct format..."])
+            ...(isPattern($mask ?? "") ? ["onblur" => "this.value = ((this.value.match($mask)??[''])[0]??'')".($length?".substring(0,$length)":"")] : ["pattern" => $mask, "title" => "Please complete field by correct format..."])
         ], ...$attributes);
+    }
+    /**
+     * The \<INPUT\> HTML Tag to input a code number
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param int|null $length The length of value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function CodeInput($key, $value = null, $length = null, ...$attributes)
+    {
+        return self::MaskInput($key, $value, "\\d+", ["Length"=>$length, "class" => "codeinput"], ...$attributes);
     }
     /**
      * The \<INPUT\> HTML Tag

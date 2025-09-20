@@ -318,9 +318,9 @@ class CommentCollection extends Collection
                     (
                         (
                             !$p_status
-                            || (isValid($p_groupid) && $p_groupid != \_::$Back->User->GroupId)
+                            || (isValid($p_groupid) && $p_groupid != \_::$User->GroupId)
                         )
-                        && !$adminaccess && (!$p_userid || $p_userid != \_::$Back->User->Id)
+                        && !$adminaccess && (!$p_userid || $p_userid != \_::$User->Id)
                     )
                 )
                     continue;
@@ -361,7 +361,7 @@ class CommentCollection extends Collection
                 } else
                     $p_replyes = [];
                 $p_referring = $this->AutoReferring;
-                $updateaccess = $adminaccess || ($p_email && get(\_::$Back->User, "Email") == $p_email) || ($p_userid && get(\_::$Back->User, "UserId") == $p_userid);
+                $updateaccess = $adminaccess || ($p_email && get(\_::$User, "Email") == $p_email) || ($p_userid && get(\_::$User, "UserId") == $p_userid);
                 $p_replybuttontext = !$this->AllowButtons ? null : __($this->ReplyButtonLabel);
                 $p_showreplybutton = !isEmpty($p_replybuttontext);
                 $p_editbuttontext = !$updateaccess || !$this->AllowButtons ? null : __($this->EditButtonLabel);
@@ -445,7 +445,7 @@ class CommentCollection extends Collection
                 if ($this->AllowAuthorImage) {
                     $aimg = get($author, "Image");
                     if (!isEmpty($author))
-                        yield Html::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \MiMFa\Library\User::$DefaultImagePath, ["class" => "author-image"]);
+                        yield Html::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \User::$DefaultImagePath, ["class" => "author-image"]);
                 }
                 if ($this->AllowAuthor) {
                     $au = getValid($author, "Name", $p_name);

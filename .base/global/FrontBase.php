@@ -330,8 +330,7 @@ abstract class FrontBase
 		return injectScript($this->MakeDeleteScript($selector));
 	}
 	/**
-	 * Make a script to
-	 * Delete a special part of client side
+	 * Make a script to Delete a special part of client side
 	 * @param mixed $selector The destination selector
 	 */
 	public function MakeDeleteScript($selector = "body")

@@ -535,25 +535,25 @@ class Convert
             if (!isset($additionalKeys['$URL']))
                 $additionalKeys['$URL'] = \_::$Url;
             if (!isValid($additionalKeys, '$SIGNATURE'))
-                $additionalKeys['$SIGNATURE'] = \_::$Back->User->TemporarySignature;
+                $additionalKeys['$SIGNATURE'] = \_::$User->TemporarySignature;
             if (!isValid($additionalKeys, '$NAME'))
-                $additionalKeys['$NAME'] = \_::$Back->User->TemporaryName;
-            $email = \_::$Back->User->TemporaryEmail;
+                $additionalKeys['$NAME'] = \_::$User->TemporaryName;
+            $email = \_::$User->TemporaryEmail;
             if (!isset($additionalKeys['$EMAILLINK']))
                 $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
             if (!isset($additionalKeys['$EMAIL']))
                     $additionalKeys['$EMAIL'] = $email;
             if (!isset($additionalKeys['$IMAGE']))
-                    $additionalKeys['$IMAGE'] = \_::$Back->User->TemporaryImage;
+                    $additionalKeys['$IMAGE'] = \_::$User->TemporaryImage;
 
-            if (isValid(\_::$Back->User->Id)) {
-                $person = \_::$Back->User->Get(takeValid($additionalKeys, '$SIGNATURE'));
-                $additionalKeys['$SIGNATURE'] = get($person, "Signature") ?? \_::$Back->User->TemporarySignature;
-                $additionalKeys['$NAME'] = get($person, "Name") ?? \_::$Back->User->TemporaryName;
-                $email = get($person, "Email") ?? \_::$Back->User->TemporaryEmail;
+            if (isValid(\_::$User->Id)) {
+                $person = \_::$User->Get(takeValid($additionalKeys, '$SIGNATURE'));
+                $additionalKeys['$SIGNATURE'] = get($person, "Signature") ?? \_::$User->TemporarySignature;
+                $additionalKeys['$NAME'] = get($person, "Name") ?? \_::$User->TemporaryName;
+                $email = get($person, "Email") ?? \_::$User->TemporaryEmail;
                 $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
                 $additionalKeys['$EMAIL'] = $email;
-                $additionalKeys['$IMAGE'] = get($person, "Image") ?? \_::$Back->User->TemporaryImage;
+                $additionalKeys['$IMAGE'] = get($person, "Image") ?? \_::$User->TemporaryImage;
                 if (!isset($additionalKeys['$IMAGETAG']))
                     $additionalKeys['$IMAGETAG'] = Html::Image($additionalKeys['$SIGNATURE'], get($person, "Image"));
                 if (!isset($additionalKeys['$ADDRESS']))

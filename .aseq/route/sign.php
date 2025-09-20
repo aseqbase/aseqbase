@@ -1,5 +1,5 @@
 <?php
-use \MiMFa\Library\User;
+
 use \MiMFa\Library\Router;
 $isuser = auth(\_::$Config->UserAccess);
 $data = $data??[];
@@ -12,7 +12,7 @@ $data = $data??[];
         ->On("sign/out")
         ->Get(function () {
             if (compute("sign/out"))
-                load(User::$InHandlerPath);
+                load(\User::$InHandlerPath);
             else
                 return view("part", ["Name" => "access"]);
         })
@@ -20,7 +20,7 @@ $data = $data??[];
             if (compute("sign/out"))
                 reload();
             else
-                load(User::$InHandlerPath);
+                load(\User::$InHandlerPath);
         })
     ->else(!isEmpty(\_::$Direction))
         ->On()->Get(fn() => view("part", ["Name" => \_::$Direction]))
@@ -33,7 +33,7 @@ $data = $data??[];
         })
         ->On("sign/recover")->Rest(function () {
             if (compute("sign/recover"))
-                load(User::$InHandlerPath);
+                load(\User::$InHandlerPath);
         })
     ->else()
         ->On("sign/edit")->Rest(function () {

@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Html;
-use MiMFa\Library\User;
+
 module("Form");
 class SignRecoverForm extends Form{
 	public $Action = null;
@@ -28,13 +28,13 @@ class SignRecoverForm extends Form{
 
 	public function __construct(){
         parent::__construct();
-		$this->Action = User::$RecoverHandlerPath;
-		$this->SuccessPath = User::$InHandlerPath;
+		$this->Action = \User::$RecoverHandlerPath;
+		$this->SuccessPath = \User::$InHandlerPath;
 	}
 
 	public function GetFields(){
-		if(!is_null($rrk = receive(User::$RecoveryTokenKey))){
-			yield Html::HiddenInput(User::$RecoveryTokenKey, $rrk);
+		if(!is_null($rrk = receive(\User::$RecoveryTokenKey))){
+			yield Html::HiddenInput(\User::$RecoveryTokenKey, $rrk);
 			yield Html::Rack(
 				Html::LargeSlot(
 					Html::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
@@ -90,26 +90,26 @@ class SignRecoverForm extends Form{
 		if(auth(\_::$Config->UserAccess)) return parent::GetFooter();
         else return parent::GetFooter()
 			.Html::LargeSlot(
-				Html::Link($this->SignInLabel, $this->SignInPath??User::$InHandlerPath)
+				Html::Link($this->SignInLabel, $this->SignInPath??\User::$InHandlerPath)
 			, ["class"=>"col-lg-12"])
 			.Html::LargeSlot(
-				Html::Link($this->SignUpLabel, $this->SignUpPath??User::$UpHandlerPath)
+				Html::Link($this->SignUpLabel, $this->SignUpPath??\User::$UpHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 
 	public function Post(){
 		try {
 			$received = receivePost();
-			if(isValid($received, "Password" ) && receive(User::$RecoveryTokenKey)){
-				$res = \_::$Back->User->ReceiveRecoveryEmail();
+			if(isValid($received, "Password" ) && receive(\User::$RecoveryTokenKey)){
+				$res = \_::$User->ReceiveRecoveryEmail();
 				if($res)
-                	return $this->GetSuccess("Dear '".\_::$Back->User->TemporaryName."', your password changed successfully!");
+                	return $this->GetSuccess("Dear '".\_::$User->TemporaryName."', your password changed successfully!");
 				else
 					return $this->GetError("Something went wrong!");
 			}
 			elseif(isValid($received,"Signature" )){
-				\_::$Back->User->Find(get($received,"Signature" ));
-				$res = \_::$Back->User->SendRecoveryEmail();
+				\_::$User->Find(get($received,"Signature" ));
+				$res = \_::$User->SendRecoveryEmail();
 				if($res === true)
                 	return $this->GetSuccess("Dear user, the reset password sent to your email successfully!");
 				elseif($res === false)
