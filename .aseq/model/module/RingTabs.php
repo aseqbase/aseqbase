@@ -151,8 +151,8 @@ class RingTabs extends Module{
 			}
 			.{$this->Name} .menu>.center>a>.button>.media:not(.icon){
 				background-size: 40% 40%;
-				width: {$this->ButtonsSize}px;
-				height: {$this->ButtonsSize}px;
+				width: ".($this->ButtonsSize/2)."px;
+				height: ".($this->ButtonsSize/2)."px;
                 ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-output)"):"")."
 			}
 			.{$this->Name} .menu>.center>a>.button>.media.icon{
@@ -269,4 +269,3 @@ class RingTabs extends Module{
 			"):"");
     }
 }
-?>

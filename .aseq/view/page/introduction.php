@@ -1,5 +1,8 @@
 <div class="page page-introduction">
     <?php
+
+use MiMFa\Library\Html;
+
     module("PrePage");
     $module = new MiMFa\Module\PrePage();
     $module->Title = "Introduction";
@@ -8,10 +11,6 @@
     component("Icons");
     echo MiMFa\Component\Icons::GetStyle(".caselist");
     module("Image");
-    $module = new MiMFa\Module\Image();
-    $module->AllowOrigin = false;
-    $module->MinHeight = "6vh";
-    echo $module->GetStyle();
     ?>
     <style>
         .caselist .icon {
@@ -39,24 +38,23 @@
         <div class="services content row">
             <?php
             foreach (\_::$Info->Services as $value) {
-                $module->Source = get($value, "Image");
                 $p = get($value, "Path");
                 $isp = isValid($p);
                 ?>
                 <div class="col-md">
                     <?php
                     if ($isp)
-                        echo \MiMFa\Library\Html::OpenTag("a", ["href"=>$p]);
+                        echo Html::OpenTag("a", ["href"=>$p]);
                     if ($v = get($value, "Icon"))
                         echo "<i class='$v'></i>";
-                    if (isValid($module->Source))
-                        $module->ReRender();
+                    if (isValid($src = get($value, "Image")))
+                        render(Html::Image($src));
                     ?>
                     <h3 class="title">
                         <?php echo getBetween($value, "Title", "Name"); ?>
                     </h3>
                     <?php if ($isp)
-                        echo \MiMFa\Library\Html::CloseTag(); ?>
+                        echo Html::CloseTag(); ?>
                     <div class="description">
                         <?php echo get($value, "Description"); ?>
                         <?php echo getBetween($value, "Button", "More"); ?>

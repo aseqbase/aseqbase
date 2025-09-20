@@ -38,7 +38,8 @@ class Members extends Module
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
-            .{$this->Name} .teammember div.image {
+            .{$this->Name} .teammember .image {
+                overflow: visible;
                 text-align: center;
             }
 
@@ -106,12 +107,20 @@ class Members extends Module
                 overflow-wrap: anywhere;
             }
 
+            .{$this->Name} .teammember .badge {
+                font-size: inherit;
+                font-weight: normal;
+                background-color: var(--back-color);
+                color: var(--fore-color);
+            }
+
             .{$this->Name} .teammember .badge.main {
                 background-color: var(--fore-color);
                 color: var(--back-color);
             }
 
-            .{$this->Name} .teammember .badge.main:hover {
+            .{$this->Name} .teammember .badge:hover {
+                font-weight: bold;
                 background-color: var(--back-color-output);
                 color: var(--fore-color-output);
             }
@@ -171,4 +180,3 @@ class Members extends Module
         return null;
     }
 }
-?>
