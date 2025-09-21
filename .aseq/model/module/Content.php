@@ -611,7 +611,7 @@ class Content extends Module
           $p_relatedstext = __(Convert::FromSwitch($this->RelatedsLabel, $p_type));
           $p_relatedscount = Convert::FromSwitch($this->RelatedsCount, $p_type) ?? 5;
           $p_relatedsorder = Convert::FromSwitch($this->RelatedsOrder, $p_type);
-          $rels = table("Content")->SelectPairs("Id", "Title", "`Id`!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
+          $rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'". (\_::$Back->Translate->Language?" AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"".\_::$Back->Translate->Language."\"', '$.lang'))":"") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
           if (count($rels) > 0)
                return Html::$BreakLine . Html::Division($p_relatedstext . join(PHP_EOL, loop(
                     $rels,
@@ -650,4 +650,3 @@ class Content extends Module
           return Html::$BreakLine . $this->CommentForm->Handle();
      }
 }
-?>

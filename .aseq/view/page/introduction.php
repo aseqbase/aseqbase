@@ -13,10 +13,24 @@ use MiMFa\Library\Html;
     module("Image");
     ?>
     <style>
-        .caselist .icon {
+        .page-introduction .services {
+            margin-top: var(--size-max);
+        }
+        .page-introduction .services h3 {
             width: 100%;
             text-align: center;
-            font-size: var(--size-5);
+        }
+        .page-introduction .services h3 .icon {
+            margin: var(--size-0);
+            display: block;
+            font-size: var(--size-max);
+        }
+        .page-introduction .services h3 .image {
+            margin: var(--size-0);
+            display: block;
+        }
+        .page-introduction .services h3 .image img {
+            height: var(--size-max);
         }
     </style>
     <div class="center-lead container">
@@ -42,22 +56,22 @@ use MiMFa\Library\Html;
                 $isp = isValid($p);
                 ?>
                 <div class="col-md">
+                    <h3 class="title">
                     <?php
                     if ($isp)
                         echo Html::OpenTag("a", ["href"=>$p]);
                     if ($v = get($value, "Icon"))
-                        echo "<i class='$v'></i>";
+                        render(Html::Icon($v));
                     if (isValid($src = get($value, "Image")))
                         render(Html::Image($src));
                     ?>
-                    <h3 class="title">
                         <?php echo getBetween($value, "Title", "Name"); ?>
                     </h3>
                     <?php if ($isp)
                         echo Html::CloseTag(); ?>
                     <div class="description">
                         <?php echo get($value, "Description"); ?>
-                        <?php echo getBetween($value, "Button", "More"); ?>
+                        <?php render(Html::Center(getBetween($value, "Button", "More"))); ?>
                     </div>
                 </div>
             <?php } ?>
