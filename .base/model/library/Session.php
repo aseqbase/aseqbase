@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Library;
+<?php
+namespace MiMFa\Library;
 require_once "DataTable.php";
 require_once "Cryptograph.php";
 /**
@@ -7,7 +8,7 @@ require_once "Cryptograph.php";
  * @author Mohammad Fathi
  * @see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  * @link https://github.com/aseqbase/aseqbase/wiki/Libraries#session See the Library Documentation
-*/
+ */
 class Session
 {
 	public DataTable $DataTable;
@@ -15,255 +16,429 @@ class Session
 	public $Time = 86400;
 	public $Separator = "\\";
 
-	public function __construct(DataTable $dataTable, Cryptograph $cryptograph){
+	public function __construct(DataTable $dataTable, Cryptograph $cryptograph)
+	{
 		$this->DataTable = $dataTable;
 		$this->Cryptograph = $cryptograph;
-        if(!$this->isAlive()) $this->Start();
-    }
-    /**
-    * Stores datas in the session.
-    * Example: $instance->foo = 'bar';
-    *
-    * @param    $name    Name of the datas.
-    * @param    $value    Your datas.
-    * @return    void
-    **/
-    public function __set( $name , $value )
-    {
-        $_SESSION[$name] = $value;
-    }
-    /**
-    * Gets datas from the session.
-    * Example: echo $instance->foo;
-    *
-    * @param    $name    Name of the datas to get.
-    * @return    mixed    Datas stored in session.
-    **/
-    public function __get( $name )
-    {
-        if ( isset($_SESSION[$name]))
-        {
-            return $_SESSION[$name];
-        }
-    }
-    public function __isset( $name )
-    {
-        return isset($_SESSION[$name]);
-    }
-    public function __unset( $name )
-    {
-        unset( $_SESSION[$name] );
-    }
-    /**
-    * Destroys the current session.
-    *
-    * @return    bool    TRUE is session has been deleted, else FALSE.
-    **/
-    public function destroy()
-    {
-        if ( $this->isAlive() )
-        {
-            session_destroy();
-            unset( $_SESSION );
-            return true;
-        }
-        return false;
-    }
-	public function isAlive()
-    {
-		return session_id() != "";
-    }
-
-	public function Start(){
-        $this->StartSecure();
-		if(is_null($this->GetId())){
-			$this->SetId(\_::$Aseq->Name);
-            $this->Set("Ip" , getClientIp());
-			return true;
-        }
-        return false;
+		if (!$this->isAlive())
+			$this->Start();
 	}
-	public function Restart(){
+	/**
+	 * Stores datas in the session.
+	 * Example: $instance->foo = 'bar';
+	 *
+	 * @param    $name    Name of the datas.
+	 * @param    $value    Your datas.
+	 * @return    void
+	 **/
+	public function __set($name, $value)
+	{
+		$_SESSION[$name] = $value;
+	}
+	/**
+	 * Gets datas from the session.
+	 * Example: echo $instance->foo;
+	 *
+	 * @param    $name    Name of the datas to get.
+	 * @return    mixed    Datas stored in session.
+	 **/
+	public function __get($name)
+	{
+		if (isset($_SESSION[$name])) {
+			return $_SESSION[$name];
+		}
+	}
+	public function __isset($name)
+	{
+		return isset($_SESSION[$name]);
+	}
+	public function __unset($name)
+	{
+		unset($_SESSION[$name]);
+	}
+	/**
+	 * Destroys the current session.
+	 *
+	 * @return    bool    TRUE is session has been deleted, else FALSE.
+	 **/
+	public function destroy()
+	{
+		if ($this->isAlive()) {
+			session_destroy();
+			unset($_SESSION);
+			return true;
+		}
+		return false;
+	}
+	public function isAlive()
+	{
+		return session_id() != "";
+	}
+
+	public function Start()
+	{
+		$this->StartSecure();
+		if (is_null($this->GetId())) {
+			$this->SetId(getClientCode(\_::$Aseq->Name));
+			$this->Set("Ip", getClientIp());
+			return true;
+		}
+		return false;
+	}
+	public function Restart()
+	{
 		$this->Stop();
 		return $this->Start();
 	}
-	public function Stop(){
+	public function Stop()
+	{
 		$this->FlushData();
 		$this->FlushCookie();
 		$this->FlushSecure();
 		$this->FlushId();
 	}
 
-	public function SetId($id){
+	public function SetId($id)
+	{
 		return $_SESSION["SESSION_ID"] = $id;
-    }
-	public function GetId(){
+	}
+	public function GetId()
+	{
 		return takeValid($_SESSION, "SESSION_ID", null);
-    }
-	public function PopId(){
+	}
+	public function PopId()
+	{
 		$val = $this->GetId();
 		$this->ForgetId();
 		return $val;
 	}
-	public function HasId(){
+	public function HasId()
+	{
 		return isset($_SESSION["SESSION_ID"]);
-    }
-	public function ForgetId(){
+	}
+	public function ForgetId()
+	{
 		unset($_SESSION["SESSION_ID"]);
-    }
-	public function FlushId(){
+	}
+	public function FlushId()
+	{
 		unset($_SESSION["SESSION_ID"]);
 	}
 
-	public function Set($key,$val){
-		if(\_::$Config->ClientSession) return $this->SetCookie($key,$val);
-		else return $this->SetData($key,$val);
-    }
-	public function Get($key){
-		if(\_::$Config->ClientSession) return $this->GetCookie($key);
+	/**
+	 * To SetCookie if \_::$Config->ClientSession is true, SetData otherwise
+	 * @param mixed $key
+	 * @param mixed $val
+	 * @return bool|int
+	 */
+	public function Set($key, $val)
+	{
+		if (\_::$Config->ClientSession)
+			return $this->SetCookie($key, $val);
+		else
+			return $this->SetData($key, $val);
+	}
+	/**
+	 * Get the sat Cookie or Data (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * @param mixed $key
+	 */
+	public function Get($key)
+	{
+		if (\_::$Config->ClientSession)
+			return $this->GetCookie($key);
 		return $this->GetData($key);
 	}
-	public function Pop($key){
+	/**
+	 * Pop the sat Cookie or Data (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * @param mixed $key
+	 */
+	public function Pop($key)
+	{
 		$val = $this->Get($key);
 		$this->Forget($key);
 		return $val;
 	}
-	public function Has($key){
-		if(\_::$Config->ClientSession) return $this->GetCookie($key)!= null;
+	/**
+	 * Check if the Cookie or Data is set or not (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function Has($key)
+	{
+		if (\_::$Config->ClientSession)
+			return $this->GetCookie($key) != null;
 		return $this->HasData($key);
 	}
-	public function Forget($key){
-		if(\_::$Config->ClientSession) return $this->ForgetCookie($key);
+	/**
+	 * Forget the sat Cookie or Data (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * @param mixed $key
+	 * @return bool|int
+	 */
+	public function Forget($key)
+	{
+		if (\_::$Config->ClientSession)
+			return $this->ForgetCookie($key);
 		return $this->ForgetData($key);
 	}
-	public function Flush(){
-		if(\_::$Config->ClientSession) return $this->FlushCookie();
+	/**
+	 * Clear the Cookies or Data (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * @return bool|int
+	 */
+	public function Flush()
+	{
+		if (\_::$Config->ClientSession) {
+			$this->FlushCookie();
+			return true;
+		}
 		return $this->FlushData();
 	}
 
-	public function SetData($key,$val){
-		return $this->DataTable->Replace([':Key'=>$this->ToCipherKey($key), ':Value'=>$this->ToCipherValue($val), ':Ip'=>getClientIp()]);
-    }
-	public function GetData($key){
-		return $this->ToPlainValue($this->DataTable->SelectValue("Value" , "`Key`=:Key", [':Key'=>$this->ToCipherKey($key)]));
+	/**
+	 * To set data by a secure and Server side way to store
+	 * @param mixed $key
+	 * @param mixed $val
+	 * @return bool|int
+	 */
+	public function SetData($key, $val)
+	{
+		return $this->DataTable->Replace([':Key' => $this->ToCipherKey($key), ':Value' => $this->ToCipherValue($val), ':Ip' => getClientIp()]);
 	}
-	public function PopData($key){
+	/**
+	 * To get data stored on a secure and Server side way
+	 * @param mixed $key
+	 */
+	public function GetData($key)
+	{
+		return $this->ToPlainValue($this->DataTable->SelectValue("Value", "`Key`=:Key", [':Key' => $this->ToCipherKey($key)]));
+	}
+	/**
+	 * To pop data stored on a secure and Server side way
+	 * @param mixed $key
+	 */
+	public function PopData($key)
+	{
 		$val = $this->GetData($key);
 		$this->ForgetData($key);
 		return $val;
 	}
-	public function HasData($key){
-		return $this->DataTable->Exists("`Key`=:Key",[':Key'=>$this->ToCipherKey($key)]);
+	/**
+	 * To check existence of the data stored on a secure and Server side way
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function HasData($key)
+	{
+		return $this->DataTable->Exists("`Key`=:Key", [':Key' => $this->ToCipherKey($key)]);
 	}
-	public function ForgetData($key){
-		return $this->DataTable->Delete("`Key`=:Key",[':Key'=>$this->ToCipherKey($key)]);
+	/**
+	 * To forget data stored on a secure and Server side way
+	 * @param mixed $key
+	 * @return bool|int
+	 */
+	public function ForgetData($key)
+	{
+		return $this->DataTable->Delete("`Key`=:Key", [':Key' => $this->ToCipherKey($key)]);
 	}
-	public function FlushData(){
-		return $this->DataTable->Delete("`Key` LIKE '".$this->GetId().$this->Separator."%'");
+	/**
+	 * To clear all data stored on a secure and Server side way
+	 * @return bool|int
+	 */
+	public function FlushData()
+	{
+		return $this->DataTable->Delete("`Key` LIKE '" . $this->GetId() . $this->Separator . "%'");
 	}
 
-	public function SetCookie($key,$val){
-		if($val == null) return false;
+	/**
+	 * To set cookie on the client side
+	 * @param mixed $key
+	 * @param mixed $val
+	 * @return bool
+	 */
+	public function SetCookie($key, $val)
+	{
+		if ($val == null)
+			return false;
 		return setcookie($this->ToCipherKey($key), $this->ToCipherValue($val), time() + $this->Time, "/");
 	}
-	public function GetCookie($key){
+	/**
+	 * To get cookie data stored on the client side
+	 * @param mixed $key
+	 */
+	public function GetCookie($key)
+	{
 		$key = $this->ToCipherKey($key);
-		if(isset($_COOKIE[$key])) return $this->ToPlainValue($_COOKIE[$key]);
-		else return null;
+		if (isset($_COOKIE[$key]))
+			return $this->ToPlainValue($_COOKIE[$key]);
+		else
+			return null;
 	}
-	public function PopCookie($key){
+	/**
+	 * To pop cookie data stored on the client side
+	 * @param mixed $key
+	 */
+	public function PopCookie($key)
+	{
 		$val = $this->GetCookie($key);
 		$this->ForgetCookie($key);
 		return $val;
 	}
-	public function HasCookie($key){
+	/**
+	 * To check existence of a cookie data stored on the client side
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function HasCookie($key)
+	{
 		return !is_null($this->GetCookie($key));
 	}
-	public function ForgetCookie($key){
+	/**
+	 * To forget cookie data stored on the client side
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function ForgetCookie($key)
+	{
 		$key = $this->ToCipherKey($key);
 		unset($_COOKIE[$key]);
-		return setcookie($key, "", time() - $this->Time,"/");
+		return setcookie($key, "", time() - $this->Time, "/");
 	}
-	public function FlushCookie(){
-		$sk = $this->GetId().$this->Separator;
-		foreach($_COOKIE as $key => $val)
-			if(startsWith($key,$sk)){
-                unset($_COOKIE[$key]);
-                setcookie($key, "", time() - $this->Time,"/");
-            }
+	/**
+	 * To clear all cookies stored on the client side
+	 * @return void
+	 */
+	public function FlushCookie()
+	{
+		$sk = $this->GetId() . $this->Separator;
+		foreach ($_COOKIE as $key => $val)
+			if (startsWith($key, $sk)) {
+				unset($_COOKIE[$key]);
+				setcookie($key, "", time() - $this->Time, "/");
+			}
 	}
 
 
-	public function StartSecure(){
-        if(session_id() == "")
+	public function StartSecure()
+	{
+		if (session_id() == "")
 			session_start([
 				'cookie_lifetime' => $this->Time
 			]);
-        return session_id() != "";
-    }
-	public function SetSecure($key,$val){
+		return session_id() != "";
+	}
+	/**
+	 * To set session on the server side
+	 * @param mixed $key
+	 * @param mixed $val
+	 */
+	public function SetSecure($key, $val)
+	{
 		return $_SESSION[$this->ToKey($key)] = $this->Encrypt($val);
-    }
-	public function GetSecure($key){
+	}
+	/**
+	 * To get session stored on the server side
+	 * @param mixed $key
+	 */
+	public function GetSecure($key)
+	{
 		$key = $this->ToKey($key);
-		if(isset($_SESSION[$key])) return $this->Decrypt($_SESSION[$key]);
-		else return null;
-    }
-	public function PopSecure($key){
+		if (isset($_SESSION[$key]))
+			return $this->Decrypt($_SESSION[$key]);
+		else
+			return null;
+	}
+	/**
+	 * To pop session stored on the server side
+	 * @param mixed $key
+	 */
+	public function PopSecure($key)
+	{
 		$key = $this->ToKey($key);
 		$val = $this->GetSecure($key);
 		$this->ForgetSecure($key);
 		return $val;
 	}
-	public function HasSecure($key){
+	/**
+	 * To check if the session stored on the server side or not
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function HasSecure($key)
+	{
 		return isset($_SESSION[$this->ToKey($key)]);
 	}
-	public function ForgetSecure($key){
+	/**
+	 * To forget session stored on the server side
+	 * @param mixed $key
+	 * @return void
+	 */
+	public function ForgetSecure($key)
+	{
 		unset($_SESSION[$this->ToKey($key)]);
-    }
-	public function FlushSecure(){
-		$id = $this->GetId().$this->Separator;
-		foreach($_SESSION as $key => $val)
-			if(startsWith($key, $id))
+	}
+	/**
+	 * To clear all related session stored on the server side
+	 * @return void
+	 */
+	public function FlushSecure()
+	{
+		$id = $this->GetId() . $this->Separator;
+		foreach ($_SESSION as $key => $val)
+			if (startsWith($key, $id))
 				unset($_SESSION[$key]);
 	}
 
 
-	protected function ToKey($key){
-		return substr($this->GetId().$this->Separator.$key,0,65);
-    }
-	protected function ToCipherKey($key){
-		if(\_::$Config->EncryptSessionKey) return $this->ToKey($this->Encrypt($key));
-		else return $this->ToKey($key);
-    }
-	protected function ToPlainKey($key){
-		$ks = explode($this->Separator,$key);
-		if(\_::$Config->EncryptSessionKey) return $this->Decrypt(end($ks));
+	protected function ToKey($key)
+	{
+		return substr($this->GetId() . $this->Separator . $key, 0, 65);
+	}
+	protected function ToCipherKey($key)
+	{
+		if (\_::$Config->EncryptSessionKey)
+			return $this->ToKey($this->Encrypt($key));
+		else
+			return $this->ToKey($key);
+	}
+	protected function ToPlainKey($key)
+	{
+		$ks = explode($this->Separator, $key);
+		if (\_::$Config->EncryptSessionKey)
+			return $this->Decrypt(end($ks));
 		return end($ks);
-    }
-	protected function ToCipherValue($value){
-		if(\_::$Config->EncryptSessionValue) return $this->Encrypt($value);
-		else return $value;
-    }
-	protected function ToPlainValue($value){
-		if(\_::$Config->EncryptSessionValue) return $this->Decrypt($value);
-		else return $value;
-    }
+	}
+	protected function ToCipherValue($value)
+	{
+		if (\_::$Config->EncryptSessionValue)
+			return $this->Encrypt($value);
+		else
+			return $value;
+	}
+	protected function ToPlainValue($value)
+	{
+		if (\_::$Config->EncryptSessionValue)
+			return $this->Decrypt($value);
+		else
+			return $value;
+	}
 
-	public function Encrypt($plain){
-		if(is_null($plain)) return null;
-		if(empty($plain)) return $plain;
-		return $this->Cryptograph->Encrypt($plain,\_::$Config->SecretKey, true);
-    }
-	public function Decrypt($cipher){
-		if(is_null($cipher)) return null;
-		if(empty($cipher)) return $cipher;
-		try{
-            return $this->Cryptograph->Decrypt($cipher,\_::$Config->SecretKey, true);
-        }
-        catch (\Exception $exception)
-        {
+	public function Encrypt($plain)
+	{
+		if (is_null($plain))
 			return null;
-        }
-    }
+		if (empty($plain))
+			return $plain;
+		return $this->Cryptograph->Encrypt($plain, \_::$Config->SecretKey, true);
+	}
+	public function Decrypt($cipher)
+	{
+		if (is_null($cipher))
+			return null;
+		if (empty($cipher))
+			return $cipher;
+		try {
+			return $this->Cryptograph->Decrypt($cipher, \_::$Config->SecretKey, true);
+		} catch (\Exception $exception) {
+			return null;
+		}
+	}
 }

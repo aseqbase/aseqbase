@@ -179,7 +179,7 @@ class RingTabs extends Module{
 					if(auth(getValid($v,"Access" ,\_::$Config->VisitAccess))) {
 						$desc = get($v, 'Description' );
 						$more = getBetween($v, "Button","More");
-						$pa = getBetween($v, 'Path' ,'Url' ,'Link');
+						$pa = getBetween($v, 'Path');
 						$this->AllowTab = $desc||$more;
 						$btns[] = Html::Link(
 							Html::Division(

@@ -7,7 +7,10 @@ class FixedBanner extends Module{
 	public $Logo = null;
 	public $Slogan = null;
 	public $Items = null;
-	///$Type:	Options = array("box","transparent","hybrid");
+	/**
+	 * @options "box","transparent","hybrid"
+	 * @var string
+	 */
 	public $Type = "transparent";
 	public $SpecialColor = null;
 	public $ForeColor = null;
@@ -42,7 +45,7 @@ class FixedBanner extends Module{
 				text-align: center;
 				justify-content: center;
 				min-height: 50vh;
-				margin: var(--size-5) 0px;
+				margin: var(--size-max) 0px;
 				box-shadow: var(--shadow-2);
 				padding: 0px;
 				overflow: hidden;
@@ -62,15 +65,17 @@ class FixedBanner extends Module{
 				background-image: url('".($this->HeaderBanner??"var(--pattern-0)")."');
 			}
 			.{$this->Name}:is(.transparent,.hybrid)>.content{
-				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)").";
 				border: none;
 				border-radius: var(--radius-0);
 			}
 
 			.{$this->Name}>.content>.top{
-				padding: 10vmin;
-				padding-bottom: 0px;
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)").";
 				color: ".(isValid($this->ForeColor)?$this->ForeColor:"var(--fore-color-special-input)").";
+				padding: var(--size-max);
+				padding-bottom: 0px;
+				margin-bottom: 0px;
+				opacity: 0.8;
 			}
 			.{$this->Name}.box>.content>.top{
 				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color-special-input)").";
@@ -81,7 +86,7 @@ class FixedBanner extends Module{
 			}
 
 			.{$this->Name}>.content>.bottom{
-				padding: 10vmin;
+				padding: var(--size-max);
 				padding-top: 0px;
 				color: ".(isValid($this->ForeColor)?$this->ForeColor:"var(--fore-color)").";
 			}
@@ -89,17 +94,20 @@ class FixedBanner extends Module{
 				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)").";
 			}
 			.{$this->Name}:is(.transparent,.hybrid)>.content>.bottom{
-				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)")."77;
+				background-color: ".(isValid($this->BackColor)?$this->BackColor:"var(--back-color)").";
 			}
 
 			.{$this->Name}>.content>.top>.image{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 100%;
-				height: 7.5vmax;
+				height: calc(var(--size-max) * 2);
 			}
 			.{$this->Name}>.content>.top>.title{
+				margin-top: var(--size-0);
+				margin-bottom: 0px;
 				padding-top: 0px;
+				padding-bottom: calc(var(--size-0) / 2);
 				font-size: var(--size-3);
     			font-weight: bold;
 				color: ".(isValid($this->SpecialColor)?$this->SpecialColor:"var(--fore-color-special-input)").";
@@ -109,20 +117,28 @@ class FixedBanner extends Module{
 				font-size: var(--size-2);
 			}
 
-			.{$this->Name}>.content>.bottom>.services a:not(.btn),.{$this->Name} .services a:not(.btn):visited,.{$this->Name} .services a:not(.btn):hover{
+			.{$this->Name}>.content>.bottom>.services a:not(.button),.{$this->Name} .services a:not(.button):visited,.{$this->Name} .services a:not(.button):hover{
 				color: unset;
 			}
 			.{$this->Name}>.content>.bottom>.services .row>div{
 				text-align: center;
-				margin-top: 3vmin;
+				margin-top: var(--size-3);
 				font-size: var(--size-1);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				align-content: center;
+				flex-direction: column;
+				flex-wrap: wrap;
+				gap: calc(var(--size-0) / 2);
 			}
 			.{$this->Name}>.content>.bottom>.services .image{
 				display: block;
-				height: 3vmin;
+				height: var(--size-3);
 			}
 			.{$this->Name}>.content>.bottom>.services .icon{
 				display: block;
+				font-size: var(--size-3);
 			}
 			.{$this->Name}>.content>.bottom>.services .title{
 				display: inline-block;
@@ -136,7 +152,7 @@ class FixedBanner extends Module{
 
 	public function Get(){
 		return Convert::ToString(function(){
-			yield Html::Division(null,["class"=>"background", "style"=>"background-image: url('{$this->Image}');"]);
+			yield Html::Division("",["class"=>"background", "style"=>"background-image: url('{$this->Image}');"]);
 			yield Html::Division(
 					Html::Division(
 						(isValid($this->Logo)? Html::Media($this->Logo, ["class"=>'image' , "data-aos"=>'flip-up', "data-aos-delay"=>'500']):"").
@@ -150,13 +166,13 @@ class FixedBanner extends Module{
                                 yield "<div class='row'>";
 								foreach($this->Items as $item){
 									yield "<div class='col-md' data-aos='fade-down' data-aos-offset='-500' data-aos-delay='".($i++*300)."'>";
-									$p = getBetween($item,'Path', 'Url', 'Link');
+									$p = getBetween($item,'Path');
+									if($v = get($item,'Image' )) yield Html::Image(null, $v);
+									if($v = get($item,'Icon' )) yield Html::Icon($v);
 									if($p) yield Html::OpenTag("a", ["href"=>$p]);
-									if(isValid($item,'Image' )) yield Html::Image(null, get($item, "Image" ));
-									if(isValid($item,'Icon')) yield "<i class='icon {$item['Icon']}' aria-hidden='true'></i>";
-									if(isValid($item,'Name' )) yield "<div class='title'>".__($item['Name' ])."</div>";
-									if(isValid($item,'More')) yield "<div class='more'>".__($item['More'])."</div>";
+									if($v = getBetween($item, 'Title', 'Name')) yield Html::Division(__($v), ["class"=>"title"]);
 									if($p) yield Html::CloseTag();
+									if($v = get($item, 'More')) yield Html::Division(__($v), ["class"=>"more"]);
 									yield "</div>";
 								}
 								yield "</div>";
@@ -170,4 +186,3 @@ class FixedBanner extends Module{
 		});
 	}
 }
-?>

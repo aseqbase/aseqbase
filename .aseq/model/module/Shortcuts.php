@@ -29,14 +29,14 @@ class Shortcuts extends Module{
 		return parent::Get().Convert::ToString(function(){
 			if(!isEmpty($this->Items)){
 				$count = count($this->Items);
-				component("Icons");
 				yield \MiMFa\Component\Icons::Render(".".$this->Name);
 				for($i = 0; $i < $count; $i++){
 					$item = $this->Items[$i];
 					yield Html::Link(
-						$this->AllowTitle?(getBetween($item,'Title','Name' )??""):"",
-						$link = getBetween($item,'Path','Link'),
-						["class"=>"item".(endsWith(\_::$Url,$link)?' active':'').(($this->AllowIcon && isValid($item,'Icon'))?' '.$item['Icon']:'')],
+						($this->AllowIcon && ($v = get($item,'Icon'))?Html::Icon($v):'').
+						($this->AllowTitle?(getBetween($item,'Title','Name' )??""):""),
+						$link = getBetween($item,'Path'),
+						["class"=>"item".(endsWith(\_::$Url,$link)?' active':'')],
 						get($item,"Attributes")
 					);
 				}
@@ -44,4 +44,3 @@ class Shortcuts extends Module{
         });
 	}
 }
-?>

@@ -227,6 +227,15 @@
 .be.transparent.fore{
   color: transparent;
 }
+.be.dark.fore {
+	color: var(--color-black);
+}
+.be.grey.fore {
+	color: #888888;
+}
+.be.light.fore {
+	color: var(--color-white);
+}
 .be.black.fore {
 	color: var(--color-black);
 }
@@ -254,6 +263,15 @@
 
 .be.transparent:not(.fore){
   background-color: transparent;
+}
+.be.dark:not(.fore) {
+	background-color: var(--color-black);
+}
+.be.grey:not(.fore) {
+	background-color: #888888;
+}
+.be.light:not(.fore) {
+	background-color: var(--color-white);
 }
 .be.black:not(.fore) {
 	background-color: var(--color-black);

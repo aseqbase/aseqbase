@@ -17,7 +17,7 @@ module("Navigation");
  */
 class Table extends Module
 {
-    public $Tag = "table";
+    //public $Tag = "table";
 
     public $Modal = null;
     public Navigation|null $NavigationBar = null;
@@ -165,6 +165,12 @@ class Table extends Module
 
     public $ExclusiveMethod = "TABLE";
     public $SecretKey = "_secret";
+    
+    /**
+     * A millisecond timeout for count down to refresh
+     * @var int|null
+     */
+    public int|null $RefreshTimeout = null;
     /**
      * A control manager function
      * return null to do default action
@@ -308,45 +314,45 @@ class Table extends Module
 		.{$this->Name} :not(.field) .input {
             max-width: 100px;
 		}
-        table.dataTable.{$this->Name} tbody :is(td, tr) {
+        .{$this->Name} table.dataTable tbody :is(td, tr) {
             text-align: -webkit-auto;
         }
-        table.dataTable.{$this->Name} thead :is(th, tr) {
+        .{$this->Name} table.dataTable thead :is(th, tr) {
             text-align: center;
         }
-        table.dataTable.{$this->Name} tbody tr :is(th, td) span.number {
+        .{$this->Name} table.dataTable tbody tr :is(th, td) span.number {
             margin: calc(var(--size-0) / 2);
         }
 		" . ($this->OddEvenColumns ? "
-            table.dataTable.{$this->Name} tbody tr:nth-child(even) :is(td, th):nth-child(odd) {
+            .{$this->Name} table.dataTable tbody tr:nth-child(even) :is(td, th):nth-child(odd) {
                 background-color: #88888817;
             }
-            table.dataTable.{$this->Name} tbody tr:nth-child(odd) :is(td, th):nth-child(odd) {
+            .{$this->Name} table.dataTable tbody tr:nth-child(odd) :is(td, th):nth-child(odd) {
                 background-color: #88888815;
             }
 		" : "") . ($this->OddEvenRows ? "
-            table.dataTable.{$this->Name} tbody tr:nth-child(odd) {
+            .{$this->Name} table.dataTable tbody tr:nth-child(odd) {
                 background-color: #8881;
             }
 		" : "") . ($this->HoverableRows ? "
-            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)):hover {
+            .{$this->Name} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)):hover {
                 background-color: #8882;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
             }
 		" : "") . ($this->HoverableCells ? "
-            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
+            .{$this->Name} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
                 background-color: transparent;
                 outline: 1px solid var(--color-yellow);
                 border-radius: var(--radius-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
             }
-            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
+            .{$this->Name} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
                 background-color: transparent;
                 outline: 1px solid var(--color-green);
                 border-radius: var(--radius-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
             }
-            table.dataTable.{$this->Name} tfoot :is(th, td) {
+            .{$this->Name} table.dataTable tfoot :is(th, td) {
                 text-align: center;
             }
         " : ""));
@@ -561,10 +567,10 @@ class Table extends Module
                     $cells[] = "</tr></tfoot>";
                 } else
                     $cells[] = Convert::ToString($this->Footer);
-            return ($isc ? $this->HandleModal() : "") . parent::Get() . ($aaccess?$addbutton("Add another item" . Html::$Break):"") . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . join(PHP_EOL, $cells);
+            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag(). ($aaccess?$addbutton("Add another item"):"") . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) .Html::Table(join(PHP_EOL, $cells)).parent::GetCloseTag();
         } elseif ($aaccess)
-            return ($isc ? $this->HandleModal() : "") . parent::Get() . $addbutton("Add your first item");
-        return ($isc ? $this->HandleModal() : "") . parent::Get();
+            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton("Add your first item").Html::Table("").parent::GetCloseTag();
+        return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag().Html::Table("").parent::GetCloseTag();
     }
 
     public function GetCell($value, $key, $record = [], bool $isHead = false)
@@ -596,7 +602,7 @@ class Table extends Module
         return Html::Script(
             "$(document).ready(()=>{" .
             (!$this->AllowDecoration ? "" :
-                "$('.{$this->Name}').DataTable({" .
+                "$('.{$this->Name} table').DataTable({" .
                 join(", ", [
                     ...(is_null($this->AllowCache) ? [] : ["stateSave: " . ($this->AllowCache ? "true" : "false")]),
                     ...(is_null($this->AllowPaging) ? [] : ["paging: " . ($this->AllowPaging ? ($localPaging ? "true" : "false") : "false")]),
@@ -688,7 +694,7 @@ class Table extends Module
 						});
 				}" : "") : "")
                 )) : "")
-        );
+        ).($this->RefreshTimeout?(new (module("Counter"))(max(1, $this->RefreshTimeout/1000),0,"load()"))->GetScript():"");
     }
 
     public function AfterHandle()

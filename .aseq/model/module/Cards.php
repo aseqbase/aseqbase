@@ -105,7 +105,7 @@ class Cards extends Collection
             $p_name = __(getBetween($item, 'Title', 'Name')??$this->DefaultTitle, true, false);
             $p_description = __(getValid($item, 'Description' , $this->DefaultDescription));
             $p_content = __(getValid($item, 'Content' , $this->DefaultContent));
-            $p_link = getBetween($item, 'Link', 'Path')?? $this->DefaultPath;
+            $p_link = getBetween($item, 'Path')?? $this->DefaultPath;
             $p_buttons = getValid($item, 'ButtonsContent', $this->DefaultButtons);
             $img->Source = $p_image;
 

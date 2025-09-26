@@ -55,8 +55,8 @@ class Contacts extends Module
 					yield '<li class="d-flex justify-content-between align-items-center">';
 					yield Html::Image(" " . getBetween($item, 'Name', 'Title'), getBetween($item, 'Icon', 'Image'));
 					yield Html::Link(
-						getBetween($item, 'Value', 'Title', 'Path', 'Url', 'Link', 'Name'),
-						getBetween($item, 'Path', 'Url', 'Link'),
+						getBetween($item, 'Value', 'Title', 'Path', 'Name'),
+						get($item, 'Path'),
 						["target"=>"_blank", "class"=>"badge badge-pill"]);
 					yield '</li>';
 				}

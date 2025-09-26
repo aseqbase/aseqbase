@@ -171,7 +171,7 @@ class Members extends Module
                             }, ["class" => "list-group"]);
 
                             // "Read More" Link
-                            yield Html::Link(__($this->MoreButtonLabel, false), get($menu[$i], 'Link'), ["class" => "btn", "target" => "blank"]);
+                            yield Html::Button($this->MoreButtonLabel, get($menu[$i], "Path"), ["target" => "blank"]);
                         }, ["class" => "teammember", "data-aos" => "down"]); // Close the column div
                     }
                 }, ["class"=>"items"])

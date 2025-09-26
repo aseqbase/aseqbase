@@ -13,6 +13,9 @@ class Math
     public static $Smallest       = -INF;
 
 
+    /**
+     * @param array Free args
+     */
     public static function IsEven()
     {
         foreach(Convert::ToIteration(func_get_args()) as $key=>$val)
@@ -21,6 +24,9 @@ class Math
         return true;
     }
 
+    /**
+     * @param array Free args
+     */
     public static function IsOdd()
     {
         foreach(Convert::ToIteration(func_get_args()) as $key=>$val)
@@ -29,16 +35,25 @@ class Math
         return true;
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Values()
     {
         return Convert::ToSequence(func_get_args());
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Count()
     {
         return count(self::Values(func_get_args()));
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Frequent()
     {
         $arr = [];
@@ -51,6 +66,9 @@ class Math
         return $arr;
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Sort()
     {
         $arr = self::Values(func_get_args());
@@ -58,22 +76,38 @@ class Math
         return $arr;
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Distinct()
     {
         return array_unique(self::Values(func_get_args()));
     }
 
+    /**
+     * @param array Free args
+     * @return float|int
+     */
     public static function Sum()
     {
         return array_sum(self::Values(func_get_args()));
     }
 
+    /**
+     * @param array Free args
+     * @return float|int
+     */
     public static function Mean()
     {
         $arr = self::Values(func_get_args());
         return array_sum($arr)/count($arr);
     }
 
+    /**
+     * Summary of Sum
+     * @param array Free args
+     * @return float|int
+     */
     public static function Median()
     {
         $arr = self::Sort(func_get_args());
@@ -83,12 +117,20 @@ class Math
         return self::Mean($arr[$cd-1],$arr[$cd]);
     }
 
+    /**
+     * @param array Free args
+     * @return float|int
+     */
     public static function Mode()
     {
         $arr = self::Modes(func_get_args());
         return self::Mean($arr);
     }
 
+    /**
+     * @param array Free args
+     * @return array
+     */
     public static function Modes()
     {
         $arr = self::Frequent(func_get_args());
@@ -101,11 +143,18 @@ class Math
         return $mds;
     }
 
+    /**
+     * @param array Free args
+     * @return float|int
+     */
     public static function Range()
     {
         return self::Maximum(func_get_args()) - self::Minimum(func_get_args());
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Minimum()
     {
         $res = self::$Biggest;
@@ -114,6 +163,9 @@ class Math
         return $res;
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Maximum()
     {
         $res = self::$Smallest;
@@ -122,12 +174,18 @@ class Math
         return $res;
     }
 
+    /**
+     * @param array Free args
+     */
     public static function ABS()
     {
         foreach(Convert::ToIteration(func_get_args()) as $key=>$val)
             yield abs($val);
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Sigma($i=0, $k=100, $func = null)
     {
         $func = $func??function($ind){ return $ind; };
@@ -137,6 +195,9 @@ class Math
         return $d;
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Phi($i=0, $k=100, $func = null)
     {
         $func = $func??function($ind){ return $ind; };
@@ -146,6 +207,9 @@ class Math
         return $d;
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Convergences()
     {
         $last = 1;
@@ -157,6 +221,9 @@ class Math
         }
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Peaks()
     {
         $args = self::Values(func_get_args());
@@ -166,6 +233,9 @@ class Math
                 yield $args[$i];
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Valleys()
     {
         $args = self::Values(func_get_args());
@@ -175,6 +245,9 @@ class Math
                 yield $args[$i];
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Variance()
     {
         $mean = self::Mean(func_get_args());
@@ -184,53 +257,83 @@ class Math
         return $res/count(func_get_args());
     }
 
+    /**
+     * @param array Free args
+     */
     public static function STD()
     {
         return sqrt(self::Variance(func_get_args()));
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Logarithm() {
         if(count(func_get_args()) > 1) log(func_get_args()[0], func_get_args()[1]??10);
         else if(is_array(func_get_args()[0])) log(func_get_args()[0][0], func_get_args()[0][1]??10);
         else return log10(func_get_args()[0]);
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Power($x,$b=2)
     {
         return pow($x,$b);
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Radical($x,$b=2)
     {
         return pow($x,1/$b);
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Sin()
     {
         return sin(...func_get_args());
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Cos()
     {
         return cos(...func_get_args());
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Tan()
     {
         return tan(...func_get_args());
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Cot()
     {
         return 1/tan(...func_get_args());
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Decimals($num, $dec = 2)
     {
         $d = 10**$dec;
         return round(round($num * $d) / $d,$dec);
     }
 
+    /**
+     * @param array Free args
+     */
     public static function Slice($slicesNumber, $x = 100, $y = 100, $minX=null, $minY = null)
     {
 	    if ($minX == null) $minX = $x/10;

@@ -1497,18 +1497,11 @@ class Html
     /**
      * The \<P\> HTML Tag
      * @param mixed $content The content of the Tag
-     * @param string|null|array $reference The hyper reference path
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Paragraph($content, $reference = null, ...$attributes)
+    public static function Paragraph($content, ...$attributes)
     {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "p", ["class" => "paragraph"], $attributes);
         return self::Element(__($content, styling: true, referring: true), "p", ["class" => "paragraph"], $attributes);
     }
     /**
@@ -1727,8 +1720,7 @@ class Html
             $reference = $content;
             $content = null;
         }
-        if (is_null($content))
-            $content = getDomain($reference);
+        if (is_null($content)) $content = getDomain($reference);
         return self::Element(__($content), "a", ["href" => $reference, "class" => "link"], $attributes);
     }
     /**
@@ -2071,6 +2063,8 @@ class Html
             case 'collection'://A collection of Base based objects
                 $content = self::CollectionInput($key, $value, $options, $attributes);
                 break;
+            case 'address':
+
             case 'lines':
             case 'texts':
             case 'mediumtext':
@@ -2631,10 +2625,9 @@ class Html
      */
     public static function MaskInput($key, $value = null, $mask = "\\w+", ...$attributes)
     {
-        $length = self::GrabAttribute($attributes, "Length");
         return self::Input($key, $value, "text", [
             "class" => "maskinput",
-            ...(isPattern($mask ?? "") ? ["onblur" => "this.value = ((this.value.match($mask)??[''])[0]??'')".($length?".substring(0,$length)":"")] : ["pattern" => $mask, "title" => "Please complete field by correct format..."])
+            ...(isPattern(text: $mask ?? "") ? ["onblur" => "this.value = ((this.value.match($mask)??[''])[0]??'')"] : ["pattern" => $mask, "title" => "Please complete field by correct format..."])
         ], ...$attributes);
     }
     /**
@@ -2647,7 +2640,7 @@ class Html
      */
     public static function CodeInput($key, $value = null, $length = null, ...$attributes)
     {
-        return self::MaskInput($key, $value, "\\d+", ["Length"=>$length, "class" => "codeinput"], ...$attributes);
+        return self::MaskInput($key, $value, "\\d".($length?"{{$length}}":"+"), ["class" => "codeinput"], ...$attributes);
     }
     /**
      * The \<INPUT\> HTML Tag

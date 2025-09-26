@@ -844,7 +844,7 @@ class Form extends Module
 
 	public function Handler($received = null)
 	{
-		if (!isEmpty($received))
+		if (!isEmpty($received) && $this->ReceiverEmail)
 			try {
 				return $this->Mail($received) ? $this->GetSuccess(null, ["class" => "page"]) : $this->GetError("Could not email the message!");
 			} catch (\Exception $ex) {

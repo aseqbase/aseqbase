@@ -1,6 +1,5 @@
 <?php namespace MiMFa\Module;
 
-use MiMFa\Library\Convert;
 use MiMFa\Library\Html;
 use MiMFa\Library\Script;
 
@@ -44,7 +43,8 @@ class Counter extends Module{
 					return;
 		        }
 				$counter += ".($countDown?-$this->Step:$this->Step).";
-			    document.querySelector('#$this->Id .content').innerHTML = {$this->ShowFunctionName}($counter);
+				elem = document.querySelector('#$this->Id>.content');
+			    if(elem) elem.innerHTML = {$this->ShowFunctionName}($counter);
 			}, {$this->Period});"
 		);
 	}

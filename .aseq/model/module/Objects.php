@@ -26,9 +26,9 @@ class Objects extends Module{
                     if(isValid($item,'Title' ))
                         yield Html::Span($item['Title' ],null,["class"=>'title' ]);
                     if(isValid($item,'Description' ))
-                        yield Html::Paragraph($item['Description' ],null,["class"=>'description' ]);
+                        yield Html::Paragraph($item['Description' ],["class"=>'description' ]);
                     if(isValid($item,'Content' )) yield $item['Content' ];
-                    if(isValid($item,'Link')) yield Html::Link(get($item,'Value' ), $item['Link'], ["target"=>'_blank', "class"=>'btn block btn outline button']);
+                    if($v = get($item,'Path')) yield Html::Link(get($item,'Value' ), $v, ["target"=>'_blank', "class"=>'btn block btn outline button']);
                     yield "</div>";
 					if($i%$this->ColumnsCount == 0) yield "</div>";
                 }

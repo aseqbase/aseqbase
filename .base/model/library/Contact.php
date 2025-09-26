@@ -11,20 +11,21 @@ use ArrayObject;
  */
 class Contact extends ArrayObject
 {
-	public $Protocol = "http";
-	public $Method = "POST";
-	public $Header = "Content-type: application/x-www-form-urlencoded\r\n";
-
 	public $Api = null;
+	public $Method = "POST";
+	public $Secure = false;
+	public $Timeout = 60;
+	public array|null $Header = ["Content-type: application/x-www-form-urlencoded"];
+
 	public $Identifier = null;
 	public $UserName = null;
 	public $Password = null;
 
 	public $UserNameKey = "username";
 	public $PasswordKey = "password";
-	public $SenderKey = "from";
-	public $ReceiverKey = "to";
-	public $MessageKey = "text";
+	public $FromKey = "from";
+	public $ToKey = "to";
+	public $TextKey = "text";
 	public $CountKey = "count";
 
 	/**
@@ -47,33 +48,28 @@ class Contact extends ArrayObject
 	 * @param string|array $to One or multiple recipient(s)
 	 * @param mixed $message
 	 */
-	public function Send($to, $message, $api = null, array $attributes = [])
+	public function Send($to, $message, $path = null, array $attributes = [])
 	{
-		if(is_array($to)) {
-			$res= [];
+		if (is_array($to)) {
+			$res = [];
 			foreach ($to as $key => $value)
 				$res[] = $this->Send($value, $message, $attributes);
 			return $res;
 		}
-		$data = [
-			$this->UserNameKey => $this->UserName,
-			$this->PasswordKey => $this->Password,
-			$this->ReceiverKey => $to,
-			$this->SenderKey => $this->Identifier,
-			$this->MessageKey => $message
-		];
-		array_merge($this->ToArray(), $data, $attributes);
 
-		return file_get_contents(
-			$this->MakeApi($api),
-			false,
-			stream_context_create([
-				$this->Protocol => [
-					'header' => $this->Header,
-					'method' => $this->Method,
-					'content' => http_build_query($data)
-				]
-			])
+		return send(
+			$this->Method,
+			$this->MakeApi($path),
+			array_merge($this->ToArray(), [
+				$this->UserNameKey => $this->UserName,
+				$this->PasswordKey => $this->Password,
+				$this->ToKey => $to,
+				$this->FromKey => $this->Identifier,
+				$this->TextKey => $message
+			], $attributes),
+			$this->Header,
+			$this->Secure,
+			$this->Timeout
 		);
 	}
 
@@ -81,65 +77,54 @@ class Contact extends ArrayObject
 	 * Receive message
 	 * @param string|array $from One or multiple sender(s)
 	 */
-	public function Receive($from, $api = null, array $attributes = [])
+	public function Receive($from, $path = null, array $attributes = [])
 	{
-		if(is_array($from)) {
-			$res= [];
+		if (is_array($from)) {
+			$res = [];
 			foreach ($from as $key => $value)
 				$res[] = $this->Receive($value, $attributes);
 			return $res;
 		}
-		$data = [
-			$this->UserNameKey => $this->UserName,
-			$this->PasswordKey => $this->Password,
-			$this->SenderKey => $from,
-			$this->ReceiverKey => $this->Identifier
-		];
-		array_merge($this->ToArray(), $data, $attributes);
 
-		return file_get_contents(
-			$this->MakeApi($api),
-			false,
-			stream_context_create([
-				$this->Protocol => [
-					'header' => $this->Header,
-					'method' => $this->Method,
-					'content' => http_build_query($data)
-				]
-			])
+		return send(
+			$this->Method,
+			$this->MakeApi($path),
+			array_merge($this->ToArray(), [
+				$this->UserNameKey => $this->UserName,
+				$this->PasswordKey => $this->Password,
+				$this->FromKey => $from,
+				$this->ToKey => $this->Identifier
+			], $attributes),
+			$this->Header,
+			$this->Secure,
+			$this->Timeout
 		);
 	}
-	
+
 	/**
 	 * Get all messages
 	 */
-	public function GetMessages($count, $api = null, array $attributes = [])
+	public function GetMessages($count, $path = null, array $attributes = [])
 	{
-		$data = [
-			$this->UserNameKey => $this->UserName,
-			$this->PasswordKey => $this->Password,
-			$this->CountKey => $count
-		];
-		array_merge($this->ToArray(), $data, $attributes);
-
-		return file_get_contents(
-			$this->MakeApi($api),
-			false,
-			stream_context_create([
-				$this->Protocol => [
-					'header' => $this->Header,
-					'method' => $this->Method,
-					'content' => http_build_query($data)
-				]
-			])
+		return send(
+			$this->Method,
+			$this->MakeApi($path),
+			array_merge($this->ToArray(), [
+				$this->UserNameKey => $this->UserName,
+				$this->PasswordKey => $this->Password,
+				$this->CountKey => $count
+			], $attributes),
+			$this->Header,
+			$this->Secure,
+			$this->Timeout
 		);
 	}
 
-	public function MakeApi($api)
+	public function MakeApi($path)
 	{
-		if(isRelativeUrl($api))
-			return rtrim($this->Api, "/\\")."/".ltrim($api, "/\\");
-		return $api??$this->Api;
+		if (isRelativeUrl($path))
+			return rtrim($this->Api, "/\\") . "/" . ltrim($path, "/\\");
+		return $path ?? $this->Api;
 	}
 
 	public function ToArray()

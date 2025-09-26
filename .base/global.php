@@ -129,7 +129,7 @@ class _
 	 * To access all front-end tools
 	 */
 	public static Front $Front;
-	
+
 	/**
 	 * To access the user service
 	 */
@@ -235,10 +235,10 @@ register_shutdown_function('cleanupTemp', false);
  * Send values to the client side
  * @param string $method The Method to send data
  * @param mixed $path The Url to send data
- * @param mixed $data Desired data
+ * @param object|array $data Desired data
  * @return bool|string Its sent or received response
  */
-function send($method = null, $path = null, ...$data)
+function send($method = null, $path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
 	if (isEmpty($path))
 		$path = getPath();
@@ -246,156 +246,178 @@ function send($method = null, $path = null, ...$data)
 		$method = "POST";
 	else
 		$method = strtoupper($method);
-
-	if (is_string($path) && isAbsoluteUrl($path)) {
-		$ch = curl_init($path);
-		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-		curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Set a timeout to avoid hanging indefinitely
-		$response = curl_exec($ch);
-		if (curl_errno($ch)) {
-			$errorMessage = curl_error($ch);
-			curl_close($ch);
-			trigger_error("cURL Error: $errorMessage", E_USER_WARNING);
-			return false;
-		}
-		curl_close($ch);
-		return $response;
+	switch ($method) {
+		case 'POST':
+			return sendPost($path, $data, $headers, $secure, $timeout);
+		case 'GET':
+			return sendGet($path, $data, $headers, $secure, $timeout);
+		case 'FILE':
+			return sendFile($path, $data, $headers, $secure, $timeout);
 	}
-	return false;
+	$ch = curl_init($path);
+	if (!is_null($headers))
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
+	if (!is_null($secure)) {
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $secure);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
+	}
+	$response = curl_exec($ch);
+	if (curl_errno($ch)) {
+		$errorMessage = curl_error($ch);
+		curl_close($ch);
+		trigger_error("cURL Error: $errorMessage", E_USER_WARNING);
+		return false;
+	}
+	curl_close($ch);
+	return $response;
 }
 /**
  * Send values to the client side
  * @param mixed $path The Url to send GET data from that
- * @param mixed $data Additional data to send as query parameters
+ * @param object|array $data Additional data to send as query parameters
  * @return bool|string Its sent or received response
  */
-function sendGet($path = null, ...$data)
+function sendGet($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
 	if (isEmpty($path))
 		$path = getPath();
-	if (is_string($path) && isAbsoluteUrl($path)) {
-		$ch = curl_init();
-		$queryParams = http_build_query($data);
-		$urlWithParams = $path . (strpos($path, '?') === false ? '?' : '&') . $queryParams;
-		curl_setopt($ch, CURLOPT_URL, $urlWithParams);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$response = curl_exec($ch);
-		curl_close($ch);
-		return $response;
+	$ch = curl_init();
+	$queryParams = http_build_query($data);
+	$urlWithParams = $path . (strpos($path, '?') === false ? '?' : '&') . $queryParams;
+	if (!is_null($headers))
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_URL, $urlWithParams);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
+	if (!is_null($secure)) {
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $secure);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
-	return false;
+	$response = curl_exec($ch);
+	curl_close($ch);
+	return $response;
 }
 /**
  * Send posted values to the client side
  * @param mixed $path The Url to send POST data to that
- * @param mixed $data Desired data to POST
+ * @param object|array $data Desired data to POST
  * @return bool|string Its sent or received response
  */
-function sendPost($path = null, ...$data)
+function sendPost($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
 	if (isEmpty($path))
 		$path = getPath();
-	if (is_string($path) && isAbsoluteUrl($path)) {
-		$ch = curl_init($path);
-		curl_setopt($ch, CURLOPT_POST, true); // Use POST method
-		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-		$response = curl_exec($ch);
-		curl_close($ch);
-		return $response;
+	$ch = curl_init($path);
+	if (!is_null($headers))
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_POST, true); // Use POST method
+	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
+	if (!is_null($secure)) {
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $secure);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
-	return false;
+	$response = curl_exec($ch);
+	curl_close($ch);
+	return $response;
 }
 /**
  * Send putted values to the client side
  * @param mixed $path The Url to send PUT data to that
- * @param mixed $data Desired data to PUT
+ * @param object|array $data Desired data to PUT
  * @return bool|string Its sent or received response
  */
-function sendPut($path = null, ...$data)
+function sendPut($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("put", $path, $data);
+	return send("put", $path, $data, $headers, $secure, $timeout);
 }
 /**
  * Send patched values to the client side
  * @param mixed $path The Url to send PATCH data to that
- * @param mixed $data Desired data to PATCH
+ * @param object|array $data Desired data to PATCH
  * @return bool|string Its sent or received response
  */
-function sendPatch($path = null, ...$data)
+function sendPatch($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("patch", $path, $data);
+	return send("patch", $path, $data, $headers, $secure, $timeout);
 }
 /**
  * Send file values to the client side
  * @param mixed $path The Url to send FILE data to that
- * @param mixed $data Desired data to FILE
+ * @param object|array $data Desired data to FILE
  * @return bool|string Its sent or received response
  */
-function sendFile($path = null, ...$data)
+function sendFile($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
 	if (isEmpty($path))
 		$path = getPath();
-	if (is_string($path) && isAbsoluteUrl($path)) {
-		$ch = curl_init($path);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-		$fields = [];
-		foreach ($data as $key => $value) {
-			if (is_file($value)) {
-				$fields[$key] = curl_file_create($value);
-			} else {
-				$fields[$key] = $value;
-			}
-		}
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-		$response = curl_exec($ch);
-		curl_close($ch);
-		return $response;
+	$ch = curl_init($path);
+	if (!is_null($headers))
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
+	if (!is_null($secure)) {
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $secure);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
-	return false;
+	$fields = [];
+	foreach ($data as $key => $value) {
+		if (is_file($value)) {
+			$fields[$key] = curl_file_create($value);
+		} else {
+			$fields[$key] = $value;
+		}
+	}
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+	$response = curl_exec($ch);
+	curl_close($ch);
+	return $response;
 }
 /**
  * Send delete values to the client side
  * @param mixed $path The Url to send DELETE data to that
- * @param mixed $data Desired data to DELETE
+ * @param object|array $data Desired data to DELETE
  * @return bool|string Its sent or received response
  */
-function sendDelete($path = null, ...$data)
+function sendDelete($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("delete", $path, $data);
+	return send("delete", $path, $data, $headers, $secure, $timeout);
 }
 /**
  * Send stream values to the client side
  * @param mixed $path The Url to send STREAM data to that
- * @param mixed $data Desired data to STREAM
+ * @param object|array $data Desired data to STREAM
  * @return bool|string Its sent or received response
  */
-function sendStream($path = null, ...$data)
+function sendStream($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("stream", $path, $data);
+	return send("stream", $path, $data, $headers, $secure, $timeout);
 }
 /**
  * Send internal values to the client side
  * @param mixed $path The Url to send INTERNAL data to that
- * @param mixed $data Desired data to INTERNAL
+ * @param object|array $data Desired data to INTERNAL
  * @return bool|string Its sent or received response
  */
-function sendInternal($path = null, ...$data)
+function sendInternal($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("internal", $path, $data);
+	return send("internal", $path, $data, $headers, $secure, $timeout);
 }
 /**
  * Send external values to the client side
  * @param mixed $path The Url to send EXTERNAL data to that
- * @param mixed $data Desired data to EXTERNAL
+ * @param object|array $data Desired data to EXTERNAL
  * @return bool|string Its sent or received response
  */
-function sendExternal($path = null, ...$data)
+function sendExternal($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("external", $path, $data);
+	return send("external", $path, $data, $headers, $secure, $timeout);
 }
 
 #endregion
@@ -2283,7 +2305,7 @@ function getClientIp($version = null): string|null
 }
 function getClientCode($key = null): string|null
 {
-	return md5($key.(getClientIp() ?? $_SERVER['HTTP_USER_AGENT']));
+	return md5($key . (getClientIp() ?? $_SERVER['HTTP_USER_AGENT']));
 }
 
 /**

@@ -13,10 +13,13 @@ class PrePage extends Module
 			.{$this->Name}{
 				padding: 3vmax;
 			}
-			.{$this->Name} .title{
+			.{$this->Name}>.rack{
+				align-items: center;
+			}
+			.{$this->Name}:is(.title,.rack>.title){
 				margin-top: var(--size-max);
 			}
-			.{$this->Name} .description{
+			.{$this->Name}>.rack>.description{
 				font-size: var(--size-1);
 				text-align: justify;
 				padding: 3vmax 3vmax;
@@ -39,11 +42,11 @@ class PrePage extends Module
 			return $this->GetTitle() . Html::Rack(
 				$this->GetDescription(["class" => 'description col-md']) .
 				($this->Image ? Html::Image($this->Title, $this->Image, ["class" => "col-md-4"]) : "")
-			) . $this->GetContent("class='content'");
+			) . $this->GetContent(["class"=>"content"]);
 		else
 			return Html::Rack(
 				($this->Image ? Html::Image($this->Title, $this->Image, ["class" => "col-md"]) : "")
-			) . $this->GetTitle() . $this->GetContent("class='content'");
+			) . $this->GetTitle() . $this->GetContent(["class"=>"content"]);
 	}
 }
 ?>

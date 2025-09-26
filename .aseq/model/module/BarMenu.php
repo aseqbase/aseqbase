@@ -166,7 +166,7 @@ class BarMenu extends Module{
 								$this->AllowLabels?Html::Span(getBetween($item, "Title" , 'Name' )):null,
 								getBetween($item, "Image" , 'Icon')
 							)
-							, getBetween($item, 'Path', "Link" )??""
+							, get($item, 'Path')??""
 						, ['class'=>$cls], get($item,"Attributes")??[]);
 						$i++;
                     }

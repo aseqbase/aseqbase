@@ -280,7 +280,11 @@ class Convert
     }
     public static function FromJson($json): null|array
     {
-        if (isEmpty($json) || trim(strtolower($json)) === "null")
+        if (isEmpty($json) || !isStatic($json) || trim(strtolower($json)) === "null")
+            return null;
+        if (!isStatic($json))
+            return $json;
+        if(trim(strtolower($json)) === "null")
             return null;
         if (isJson($json))
             return json_decode($json, flags: JSON_OBJECT_AS_ARRAY);

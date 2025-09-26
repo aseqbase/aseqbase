@@ -120,53 +120,33 @@ class General extends Template
 				:is(h1,h2,h3,h4,h5,h6) strong{
 					font-weight: normal;
 				}
-				h1{
-					font-size: var(--size-5);
-					text-align: center;
-					text-transform: uppercase;
-				}
-				h2{
-					font-size: var(--size-4);
-					text-align: center;
-					text-transform: uppercase;
-				}
-				h3{
-					font-size: var(--size-3);
-					text-transform: uppercase;
-				}
-				h4{
-					font-size: var(--size-2);
-				}
-				h5{
-					font-size: var(--size-1);
-				}
-				h6{
-					font-size: var(--size-1);
-					display: inline-block;
-				}
-				h6:before{
-					display: block;
-				}
 				
-				.heading{
+				.heading,h1,h2,h3,h4,h5,h6{
 					margin-top: var(--size-3);
 				}	
-				.externalheading{
+				.externalheading, h1{
+					text-align: center;
+					text-transform: uppercase;
 					margin-top: max(4vmax, var(--size-5));
 					margin-bottom: var(--size-2);
 				}
-				.superheading{
+				.superheading, h2{
+					text-align: center;
+					text-transform: uppercase;
 					margin-top: var(--size-4);
 				}
-				.subheading{
+				.subheading, h4{
 					margin-top: var(--size-2);
 				}
-				.internalheading{
+				.internalheading, h5{
 					margin-top: var(--size-1);
 				}
-				.inlineheading{
+				.inlineheading, h6{
 					margin-top: var(--size-1);
 					padding-inline-end: var(--size-1);
+				}
+				:is(.inlineheading, h6):before{
+					display: block;
 				}
 
 				p{
@@ -251,7 +231,6 @@ class General extends Template
 					align-items: center;
 					border-radius: var(--radius-1);
 					padding: calc(var(--size-3) / 2) var(--size-3);
-					box-shadow: var(--shadow-1);
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.button:hover{

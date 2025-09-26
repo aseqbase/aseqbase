@@ -28,13 +28,53 @@ class AddressBase extends ArrayObject
 	public string $ScriptDirectory;
 	public string $StyleDirectory;
 
+	/**
+	 * The root Route
+	 * @example: "/"
+	 * @var string|null
+	 */
 	public string|null $Route;
+	/**
+	 * The Asset root Route
+	 * @example: "/asset/"
+	 * @var string
+	 */
 	public string $AssetRoute;
+	/**
+	 * The Script root Route
+	 * @example: "/script/"
+	 * @var string
+	 */
 	public string $ScriptRoute;
+	/**
+	 * The Style root Route
+	 * @example: "/style/"
+	 * @var string
+	 */
 	public string $StyleRoute;
+	/**
+	 * The Content root Route
+	 * @example: "/content/"
+	 * @var string
+	 */
 	public string $ContentRoute;
+	/**
+	 * The Category root Route
+	 * @example: "/category/"
+	 * @var string
+	 */
 	public string $CategoryRoute;
+	/**
+	 * The Tag root Route
+	 * @example: "/tag/"
+	 * @var string
+	 */
 	public string $TagRoute;
+	/**
+	 * The User root Route
+	 * @example: "/user/"
+	 * @var string
+	 */
 	public string $UserRoute;
 
 	public function __construct(?string $name = null, ?string $rootDir = null, ?string $rootRoute = null)

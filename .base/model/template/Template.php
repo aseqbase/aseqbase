@@ -167,6 +167,31 @@ class Template extends \Base{
             line-height: 1.5em;
             direction: var(--dir);
         }
+        h1{
+            font-size: var(--size-5);
+            text-align: center;
+        }
+        h2{
+            font-size: var(--size-4);
+            text-align: center;
+        }
+        h3{
+            font-size: var(--size-3);
+        }
+        h4{
+            font-size: var(--size-2);
+        }
+        h5{
+            font-size: var(--size-1);
+        }
+        h6{
+            font-size: var(--size-1);
+            display: inline-block;
+        }
+        h6:before{
+            display: block;
+        }
+            
         p, .content {
             line-height: 2em;
             direction: var(--dir);
@@ -205,6 +230,12 @@ class Template extends \Base{
             background-color: unset;
             color: unset;
             overflow: unset;
+            display: flex;
+            flex-direction: column;
+            align-content: center;
+            justify-content: center;
+            align-items: center;
+            gap: var(--size-0);
             ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
         }
         :is(button, .button):hover{

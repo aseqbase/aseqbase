@@ -264,30 +264,45 @@ class DataTable
 	public function GetColumnName($name){
 		return $this->Name.".".$this->DataBase->StartWrap.$name.$this->DataBase->EndWrap;
 	}
+	
+	public function HasMetaData($condition = null, $params = [])
+	{
+		return self::GetMetaData($condition, $params)?true:false;
+	}
+	public function GetMetaData($condition = null, $params = [], $defaultValue = [])
+	{
+		return Convert::FromJson($this->SelectValue("MetaData", $condition, $params))??$defaultValue;
+	}
+	public function SetMetaData($metadata, $condition = null, $params = [], $defaultValue = false)
+	{
+		$params["MetaData"] = isStatic($metadata)?$metadata:Convert::ToJson($metadata);
+		return $this->Update($condition, $params, $defaultValue);
+	}
+	public function ForgetMetaData($condition = null, $params = [], $defaultValue = false)
+	{
+		return $this->SetMetaData(null, $condition, $params, $defaultValue);
+	}
+
 	public function HasMetaValue($key, $condition = null, $params = [])
 	{
-		$metadata = Convert::FromJson($this->SelectValue("MetaData", $condition, $params));
-		return has($metadata, $key);
+		return has(self::GetMetaData($condition, $params), $key);
 	}
 	public function GetMetaValue($key, $condition = null, $params = [], $defaultValue = null)
 	{
-		$metadata = Convert::FromJson($this->SelectValue("MetaData", $condition, $params));
-		return get($metadata, $key) ?? $defaultValue;
+		return get(self::GetMetaData($condition, $params), $key) ?? $defaultValue;
 	}
 	public function SetMetaValue($key, $value, $condition = null, $params = [], $defaultValue = false)
 	{
-		$metadata = Convert::FromJson($this->SelectValue("MetaData", $condition, $params));
+		$metadata = self::GetMetaData($condition, $params);
 		if(!$metadata) $metadata = [];
 		$metadata[$key] = $value;
-		$params["MetaData"] = Convert::ToJson($metadata);
-		return $this->Update($condition, $params, $defaultValue);
+		return $this->SetMetaData($metadata, $condition, $params, $defaultValue);
 	}
 	public function ForgetMetaValue($key, $condition = null, $params = [], $defaultValue = false)
 	{
-		$metadata = Convert::FromJson($this->SelectValue("MetaData", $condition, $params));
+		$metadata = self::GetMetaData($condition, $params);
 		if(!$metadata) $metadata = [];
 		unset($metadata[$key]);
-		$params["MetaData"] = Convert::ToJson($metadata);
-		return $this->Update($condition, $params, $defaultValue);
+		return $this->SetMetaData($metadata, $condition, $params, $defaultValue);
 	}
 }

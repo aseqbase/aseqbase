@@ -411,7 +411,7 @@ class MainMenu extends Module
 	{
 		if (!auth(getValid($item, "Access", \_::$Config->VisitAccess)))
 			return null;
-		$path = getBetween($item, "Path", "Link", "Url");
+		$path = getBetween($item, "Path");
 		$act = endsWith(\_::$Path, $path) ? 'active' : '';
 		$ind++;
 		$count = count(getValid($item, "Items", []));
