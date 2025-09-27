@@ -183,9 +183,6 @@ class Math
             yield abs($val);
     }
 
-    /**
-     * @param array Free args
-     */
     public static function Sigma($i=0, $k=100, $func = null)
     {
         $func = $func??function($ind){ return $ind; };
@@ -195,9 +192,6 @@ class Math
         return $d;
     }
 
-    /**
-     * @param array Free args
-     */
     public static function Phi($i=0, $k=100, $func = null)
     {
         $func = $func??function($ind){ return $ind; };
@@ -274,17 +268,11 @@ class Math
         else return log10(func_get_args()[0]);
     }
 
-    /**
-     * @param array Free args
-     */
     public static function Power($x,$b=2)
     {
         return pow($x,$b);
     }
 
-    /**
-     * @param array Free args
-     */
     public static function Radical($x,$b=2)
     {
         return pow($x,1/$b);
@@ -322,18 +310,12 @@ class Math
         return 1/tan(...func_get_args());
     }
 
-    /**
-     * @param array Free args
-     */
     public static function Decimals($num, $dec = 2)
     {
         $d = 10**$dec;
         return round(round($num * $d) / $d,$dec);
     }
 
-    /**
-     * @param array Free args
-     */
     public static function Slice($slicesNumber, $x = 100, $y = 100, $minX=null, $minY = null)
     {
 	    if ($minX == null) $minX = $x/10;

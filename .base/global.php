@@ -88,15 +88,15 @@ class _
 	public static string|null $Fragment = null;
 
 	/**
-	 * A Path=>Fucntion array to apply the Function before using the Path
+	 * A Directory=>Name=>Fucntion array to apply the Function before using the Path
 	 * @var mixed
 	 */
-	public static array $Prepends = array();
+	public static array $BeforeActions = array();
 	/**
-	 * A Path=>Fucntion array to apply the Function after using the Path
+	 * A Directory=>Name=>Fucntion array to apply the Function after using the Path
 	 * @var mixed
 	 */
-	public static array $Appends = array();
+	public static array $AfterActions = array();
 
 	/**
 	 * All sequences from aseq to base
@@ -992,24 +992,7 @@ function render($output = null)
 	echo $output = \MiMFa\Library\Convert::ToString($output);
 	return $output;
 }
-/**
- * Render Scripts in the client side
- * @param mixed $output The data that is ready to print
- */
-function renderScript($content, $source = null, ...$attributes)
-{
-	echo $output = \MiMFa\Library\Html::Script($content, $source, ...$attributes);
-	return $output;
-}
-/**
- * Render Styles in the client side
- * @param mixed $output The data that is ready to print
- */
-function renderStyle($content, $source = null, ...$attributes)
-{
-	echo $output = \MiMFa\Library\Html::Style($content, $source, ...$attributes);
-	return $output;
-}
+
 /**
  * Render a message result output to the client side
  * @param mixed $output The data that is ready to print
@@ -1064,35 +1047,75 @@ function renderLog($message = null)
 	);
 }
 
-
 /**
- * Render Scripts in the client side
+ * Render output append an element by the specific selector
+ * @param mixed $selector Your specific element selector, for example "body>div.title"
  * @param mixed $output The data that is ready to print
  */
-function injectScript($content, $source = null, ...$attributes)
+function renderAppend($selector, $output)
 {
 	render(\MiMFa\Library\Html::Script(
 		\MiMFa\Library\Internal::MakeScript(
-			\MiMFa\Library\Html::Script($content, $source, ...$attributes),
+			$output,
 			null,
-			"(data,err)=>$('head').append(data??err)"
-			//"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			"(data,err)=>$(".\MiMFa\Library\Script::Convert($selector).").append(data??err)"
+			//"(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($selector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 		)
 	));
 }
 /**
- * Render Styles in the client side
+ * Render output prepend an element by the specific selector
+ * @param mixed $selector Your specific element selector, for example "body>div.title"
  * @param mixed $output The data that is ready to print
  */
-function injectStyle($content, $source = null, ...$attributes)
+function renderPrepend($selector, $output)
 {
 	render(\MiMFa\Library\Html::Script(
 		\MiMFa\Library\Internal::MakeScript(
-			\MiMFa\Library\Html::Style($content, $source, ...$attributes),
+			$output,
 			null,
-			"(data,err)=>document.querySelector('head').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			"(data,err)=>$(".\MiMFa\Library\Script::Convert($selector).").prepend(data??err)"
+			//"(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 		)
 	));
+}
+
+/**
+ * Render Scripts in the client side
+ */
+function renderScript($content, $source = null, ...$attributes)
+{
+	echo $output = \MiMFa\Library\Html::Script($content, $source, ...$attributes);
+	return $output;
+}
+/**
+ * Render Styles in the client side
+ */
+function renderStyle($content, $source = null, ...$attributes)
+{
+	echo $output = \MiMFa\Library\Html::Style($content, $source, ...$attributes);
+	return $output;
+}
+
+/**
+ * Render Scripts in the client side, injected to the head
+ */
+function injectScript($content, $source = null, ...$attributes)
+{
+	renderAppend(
+			"head",
+			\MiMFa\Library\Html::Script($content, $source, ...$attributes)
+	);
+}
+/**
+ * Render Styles in the client side, injected to the head
+ */
+function injectStyle($content, $source = null, ...$attributes)
+{
+	renderAppend(
+			"head",
+			\MiMFa\Library\Html::Style($content, $source, ...$attributes)
+	);
 }
 #endregion 
 
@@ -1283,7 +1306,7 @@ function addressing(string|null $file = null, $extension = null, string|int $ori
 function using(string|null $directory, string|null $name = null, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, string|null $extension = null, bool $require = false, bool $once = false, &$used = null)
 {
 	try {
-		renderPrepends($directory, $used = $name);
+		usingBefores($directory, $used = $name);
 		if (
 			$path =
 			addressing("$directory$name", $extension, $origin, $depth) ??
@@ -1295,9 +1318,65 @@ function using(string|null $directory, string|null $name = null, mixed $data = [
 		else
 			$used = null;
 	} finally {
-		renderAppends($directory, $name);
+		usingAfters($directory, $name);
 	}
 }
+
+/**
+ * Render or do something before using any function or directory's files or actions
+ * @param mixed $directory function name or directory
+ * @param null|string $name file name
+ * @param null|string|callable $action the output content or action you want to do
+ */
+function beforeUsing($directory, string|null $name = null, null|string|callable $action = null)
+{
+	if (isValid($action)) {
+		$directory = strtolower($directory ?? "");
+		$name = strtolower($name ?? "");
+		if (!isset(\_::$BeforeActions[$directory]))
+			\_::$BeforeActions[$directory] = array();
+		if (!isset(\_::$BeforeActions[$directory][$name]))
+			\_::$BeforeActions[$directory][$name] = array();
+		array_push(\_::$BeforeActions[$directory][$name], $action);
+	}
+}
+/**
+ * Render or do something after using any function or directory's files or actions
+ * @param mixed $directory function name or directory
+ * @param null|string $name file name
+ * @param null|string|callable $action the output content or action you want to do
+ */
+function afterUsing($directory, string|null $name = null, null|string|callable $action = null)
+{
+	if (isValid($action)) {
+		$directory = strtolower($directory ?? "");
+		$name = strtolower($name ?? "");
+		if (!isset(\_::$AfterActions[$directory]))
+			\_::$AfterActions[$directory] = array();
+		if (!isset(\_::$AfterActions[$directory][$name]))
+			\_::$AfterActions[$directory][$name] = array();
+		array_push(\_::$AfterActions[$directory][$name], $action);
+	}
+}
+function usingBefores($directory, string|null $name = null)
+{
+	$directory = strtolower($directory ?? "");
+	$name = strtolower($name ?? "");
+	if (isset(\_::$BeforeActions[$directory][$name]))
+		render(\_::$BeforeActions[$directory][$name]);
+	elseif (isset(\_::$BeforeActions[$directory . $name]))
+		render(\_::$BeforeActions[$directory . $name]);
+}
+function usingAfters($directory, string|null $name = null)
+{
+	$directory = strtolower($directory ?? "");
+	$name = strtolower($name ?? "");
+	if (isset(\_::$AfterActions[$directory][$name]))
+		render(\_::$AfterActions[$directory][$name]);
+	elseif (isset(\_::$AfterActions[$directory . $name]))
+		render(\_::$AfterActions[$directory . $name]);
+}
+
 /**
  * To grab a hierarchy of keys from the global $data object
  * @param array $hierarchy A hierarchy of desired keys
@@ -1306,61 +1385,6 @@ function data(...$hierarchy)
 {
 	global $data;
 	return grab($data, ...$hierarchy);
-}
-
-/**
- * Prepend something to any function or directory's files or actions
- * @param mixed $directory function name or directory
- * @param null|string $name file name
- * @param null|string|callable $value the action or content tou want to do
- */
-function before($directory, string|null $name = null, null|string|callable $value = null)
-{
-	if (isValid($value)) {
-		$directory = strtolower($directory ?? "");
-		$name = strtolower($name ?? "");
-		if (!isset(\_::$Prepends[$directory]))
-			\_::$Prepends[$directory] = array();
-		if (!isset(\_::$Prepends[$directory][$name]))
-			\_::$Prepends[$directory][$name] = array();
-		array_push(\_::$Prepends[$directory][$name], $value);
-	}
-}
-/**
- * Append something to any function or directory's files or actions
- * @param mixed $directory function name or directory
- * @param null|string $name file name
- * @param null|string|callable $value the action or content tou want to do
- */
-function after($directory, string|null $name = null, null|string|callable $value = null)
-{
-	if (isValid($value)) {
-		$directory = strtolower($directory ?? "");
-		$name = strtolower($name ?? "");
-		if (!isset(\_::$Appends[$directory]))
-			\_::$Appends[$directory] = array();
-		if (!isset(\_::$Appends[$directory][$name]))
-			\_::$Appends[$directory][$name] = array();
-		array_push(\_::$Appends[$directory][$name], $value);
-	}
-}
-function renderPrepends($directory, string|null $name = null)
-{
-	$directory = strtolower($directory ?? "");
-	$name = strtolower($name ?? "");
-	if (isset(\_::$Prepends[$directory][$name]))
-		render(\_::$Prepends[$directory][$name]);
-	elseif (isset(\_::$Prepends[$directory . $name]))
-		render(\_::$Prepends[$directory . $name]);
-}
-function renderAppends($directory, string|null $name = null)
-{
-	$directory = strtolower($directory ?? "");
-	$name = strtolower($name ?? "");
-	if (isset(\_::$Appends[$directory][$name]))
-		render(\_::$Appends[$directory][$name]);
-	elseif (isset(\_::$Appends[$directory . $name]))
-		render(\_::$Appends[$directory . $name]);
 }
 
 /**
@@ -1529,14 +1553,14 @@ function asset($directory, string|null $name = null, string|array|null $extensio
 		$extensions = [$extensions ?? ""];
 	$extension = isset($extensions[$i]) ? $extensions[$i++] : "";
 	try {
-		renderPrepends($directory, $name);
+		usingBefores($directory, $name);
 		do {
 			if ($path = addressing("$directory$name", $extension, $origin, $depth))
 				return getFullUrl($path, $optimize);
 		} while ($extension = isset($extensions[$i]) ? $extensions[$i++] : null);
 		return $default;
 	} finally {
-		renderAppends($directory, $name);
+		usingAfters($directory, $name);
 	}
 }
 

@@ -84,9 +84,10 @@ class MainMenu extends Module
 				background-repeat: no-repeat;
 				background-size: 100% auto;
 				background-color: transparent;
+				min-width: {$this->LogoHeight};
 				width: {$this->LogoWidth};
-				height: {$this->LogoHeight};
 				width: fit-content;
+				height: {$this->LogoHeight};
 				font-size: var(--size-0);
 			}
 
@@ -367,7 +368,7 @@ class MainMenu extends Module
 		return Convert::ToString(function () {
 			if ($this->AllowBranding)
 				yield Html::Division(
-					(isValid($this->Image) ? Html::Link(Html::Media($this->Image, ['class' => 'col-sm image']), \_::$Info->Path) : "") .
+					(isValid($this->Image) ? Html::Link(Html::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Info->Path) : "") .
 					Html::Division(
 						(isValid($this->Description) ? Html::Division(__($this->Description), ['class' => 'description']) : "") .
 						(isValid($this->Title) ? Html::Link(Html::Division(__($this->Title), ['class' => 'title']), \_::$Info->Path) : ""),

@@ -5,7 +5,7 @@ use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 class RingTabs extends Module{
 	public $Name = "RingTabs";
-	public $Class = "row";
+	public $Class = "container";
 	public $Image = null;
 	public $Items = null;
 	public $AllowChangeColor = true;
@@ -114,7 +114,7 @@ class RingTabs extends Module{
 				font-size: 180%;
 				left: 0px;
 				top: 0px;
-				background-image: url('".getUrl($this->Image)."');
+				background-image: url('".getFullUrl($this->Image, false)."');
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: contain;
