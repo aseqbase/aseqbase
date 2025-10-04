@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Library;
+<?php
+namespace MiMFa\Library;
 /**
  * A simple library to connect the database and run the most uses SQL queries
  *@copyright All rights are reserved for MiMFa Development Group
@@ -12,7 +13,7 @@ class DataTable
 	public $MainName = null;
 	public $AlternativeName = null;
 	public \MiMFa\Library\DataBase $DataBase;
-	
+
 	public $PreQuery = null;
 	public $MidQuery = null;
 	public $PostQuery = null;
@@ -27,13 +28,14 @@ class DataTable
 		$this->Name = $name;
 	}
 
-	protected function GetDatabase(){
+	protected function GetDatabase()
+	{
 		$this->DataBase->PreQuery = $this->PreQuery;
 		$this->DataBase->MidQuery = $this->MidQuery;
 		$this->DataBase->PostQuery = $this->PostQuery;
 		return $this->DataBase;
 	}
-	
+
 	public function SessionTimeout($millisecond = 30000)
 	{
 		return $this->GetDatabase()->SessionTimeout($millisecond);
@@ -45,11 +47,11 @@ class DataTable
 
 	public function Create($column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin", $defaultValue = null)
 	{
-		return $this->GetDatabase()->CreateTable($this->Name, $column_types, $configs,$defaultValue);
+		return $this->GetDatabase()->CreateTable($this->Name, $column_types, $configs, $defaultValue);
 	}
 	public function CreateQuery($column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin")
 	{
-		return $this->GetDatabase()->CreateTableQuery($this->Name, $column_types,  $configs);
+		return $this->GetDatabase()->CreateTableQuery($this->Name, $column_types, $configs);
 	}
 
 	public function SelectValue($column = "Id", $condition = null, $params = [], $defaultValue = null)
@@ -84,7 +86,7 @@ class DataTable
 	}
 	public function SelectLastRow($columns = "*", $condition = null, $params = [])
 	{
-		return $this->OrderBy("Id", ascending:false)->SelectFirstRow($columns, $condition, $params);
+		return $this->OrderBy("Id", ascending: false)->SelectFirstRow($columns, $condition, $params);
 	}
 
 	public function SelectColumn($column = "Id", $condition = null, $params = [], $defaultValue = array())
@@ -141,7 +143,7 @@ class DataTable
 		return $this->GetDatabase()->DeleteQuery($this->Name, $condition);
 	}
 
-	
+
 	/**
 	 * Set an Alternative name for the table
 	 * @param string $name
@@ -150,7 +152,7 @@ class DataTable
 	public function As($name)
 	{
 		$this->AlternativeName = $name;
-		$this->MidQuery .= " AS ". $name;
+		$this->MidQuery .= " AS " . $name;
 		return $this;
 	}
 	/**
@@ -161,7 +163,7 @@ class DataTable
 	 */
 	public function Join(DataTable $dataTable, $on = null)
 	{
-		$this->MidQuery .= PHP_EOL."LEFT OUTER JOIN $dataTable->Name $dataTable->MidQuery ON ". ($on??(($this->AlternativeName??$this->Name).".{$dataTable->MainName}Id=".($dataTable->AlternativeName??$dataTable->Name).".Id"));
+		$this->MidQuery .= PHP_EOL . "LEFT OUTER JOIN $dataTable->Name $dataTable->MidQuery ON " . ($on ?? (($this->AlternativeName ?? $this->Name) . ".{$dataTable->MainName}Id=" . ($dataTable->AlternativeName ?? $dataTable->Name) . ".Id"));
 		return $this;
 	}
 	/**
@@ -172,7 +174,7 @@ class DataTable
 	 */
 	public function InnerJoin(DataTable $dataTable, $on = null)
 	{
-		$this->MidQuery .= PHP_EOL."INNER JOIN $dataTable->Name $dataTable->MidQuery ON ". ($on??(($this->AlternativeName??$this->Name).".{$dataTable->MainName}Id=".($dataTable->AlternativeName??$dataTable->Name).".Id"));
+		$this->MidQuery .= PHP_EOL . "INNER JOIN $dataTable->Name $dataTable->MidQuery ON " . ($on ?? (($this->AlternativeName ?? $this->Name) . ".{$dataTable->MainName}Id=" . ($dataTable->AlternativeName ?? $dataTable->Name) . ".Id"));
 		return $this;
 	}
 	/**
@@ -183,7 +185,7 @@ class DataTable
 	 */
 	public function OuterJoin(DataTable $dataTable, $on = null)
 	{
-		$this->MidQuery .= PHP_EOL."RIGHT OUTER JOIN $dataTable->Name $dataTable->MidQuery ON ". ($on??(($this->AlternativeName??$this->Name).".{$dataTable->MainName}Id=".($dataTable->AlternativeName??$dataTable->Name).".Id"));
+		$this->MidQuery .= PHP_EOL . "RIGHT OUTER JOIN $dataTable->Name $dataTable->MidQuery ON " . ($on ?? (($this->AlternativeName ?? $this->Name) . ".{$dataTable->MainName}Id=" . ($dataTable->AlternativeName ?? $dataTable->Name) . ".Id"));
 		return $this;
 	}
 	/**
@@ -194,7 +196,7 @@ class DataTable
 	 */
 	public function CrossJoin(DataTable $dataTable, $on = null)
 	{
-		$this->MidQuery .= PHP_EOL."CROSS JOIN $dataTable->Name $dataTable->MidQuery ON ". ($on??(($this->AlternativeName??$this->Name).".{$dataTable->MainName}Id=".($dataTable->AlternativeName??$dataTable->Name).".Id"));
+		$this->MidQuery .= PHP_EOL . "CROSS JOIN $dataTable->Name $dataTable->MidQuery ON " . ($on ?? (($this->AlternativeName ?? $this->Name) . ".{$dataTable->MainName}Id=" . ($dataTable->AlternativeName ?? $dataTable->Name) . ".Id"));
 		return $this;
 	}
 
@@ -205,7 +207,7 @@ class DataTable
 	 */
 	public function OrderBy($columns = null, bool|null $ascending = null)
 	{
-		$this->PostQuery .= PHP_EOL.$this->GetDatabase()->OrderNormalization($columns, $ascending);
+		$this->PostQuery .= PHP_EOL . $this->GetDatabase()->OrderNormalization($columns, $ascending);
 		return $this;
 	}
 
@@ -216,7 +218,7 @@ class DataTable
 	 */
 	public function Limit($limit = 1)
 	{
-		$this->PostQuery .= PHP_EOL.$this->GetDatabase()->LimitNormalization($limit);
+		$this->PostQuery .= PHP_EOL . $this->GetDatabase()->LimitNormalization($limit);
 		return $this;
 	}
 
@@ -259,23 +261,76 @@ class DataTable
 	{
 		return $this->GetDatabase()->TryFetchValue($this->OrderBy($column, false)->SelectValueQuery($column, $this->DataBase->ConditionNormalization($condition)), $params);
 	}
-	
-	
-	public function GetColumnName($name){
-		return $this->Name.".".$this->DataBase->StartWrap.$name.$this->DataBase->EndWrap;
+
+
+	public function GetValue(array|int|null $id, $key = "Id", $defaultValue = null)
+	{
+		return getValid($this->Get($id), $key, $defaultValue);
 	}
-	
+	public function SetValue(array|int|null $id, $key, $value = null, $defaultValue = false)
+	{
+		return $this->Set($id, [$key=>$value], $defaultValue);
+	}
+	public function Get(array|int|null $id, $defaultValue = [])
+	{
+		if (is_int($id))
+			return $this->SelectRow("*", "Id=:Id", [":Id"=>$id], $defaultValue);
+		elseif(is_iterable($id)) {
+			$params = [];
+			foreach ($id as $key => $value) 
+				$params[":Id$key"] = $value;
+			return $this->Select("*", "Id IN (".join(",", loop($params, fn($v, $k)=>$k)).")", $params, $defaultValue);
+		}
+		return $defaultValue;
+	}
+	public function Set(array|int|null $id, $params = [], $defaultValue = false)
+	{
+		if (is_int($id)) {
+			$params[":Id"] = $id;
+			return $this->Update("Id=:Id", $params, $defaultValue);
+		} elseif(is_iterable($id)) {
+			$nparams = [];
+			foreach ($id as $key => $value) {
+				$params[":Id"] = $value;
+				$nparams[] = $params;
+			}
+			return $this->Update("Id=:Id", $nparams, $defaultValue);
+		}
+		return $defaultValue;
+	}
+	public function Forget(array|int|null $id, $defaultValue = false)
+	{
+		if (is_int($id))
+			return $this->Delete("Id=:Id", [":Id"=>$id], $defaultValue);
+		elseif(is_iterable($id)) {
+			$params = [];
+			foreach ($id as $key => $value) 
+				$params[":Id$key"] = $value;
+			return $this->Delete("Id IN (".join(",", loop($params, fn($v, $k)=>$k)).")", $params, $defaultValue);
+		}
+		return $defaultValue;
+	}
+	public function Has(array|int|null $id)
+	{
+		return self::Get($id, null)?true:false;
+	}
+
+	public function GetColumnName($name)
+	{
+		return $this->Name . "." . $this->DataBase->StartWrap . $name . $this->DataBase->EndWrap;
+	}
+
 	public function HasMetaData($condition = null, $params = [])
 	{
-		return self::GetMetaData($condition, $params)?true:false;
+		return self::GetMetaData($condition, $params) ? true : false;
 	}
 	public function GetMetaData($condition = null, $params = [], $defaultValue = [])
 	{
-		return Convert::FromJson($this->SelectValue("MetaData", $condition, $params))??$defaultValue;
+		return Convert::FromJson($this->SelectValue("MetaData", $condition, $params)) ?? $defaultValue;
 	}
 	public function SetMetaData($metadata, $condition = null, $params = [], $defaultValue = false)
 	{
-		$params["MetaData"] = isStatic($metadata)?$metadata:Convert::ToJson($metadata);
+		$params[":MetaData"] = isStatic($metadata) ? $metadata : Convert::ToJson($metadata);
 		return $this->Update($condition, $params, $defaultValue);
 	}
 	public function ForgetMetaData($condition = null, $params = [], $defaultValue = false)
@@ -294,14 +349,16 @@ class DataTable
 	public function SetMetaValue($key, $value, $condition = null, $params = [], $defaultValue = false)
 	{
 		$metadata = self::GetMetaData($condition, $params);
-		if(!$metadata) $metadata = [];
+		if (!$metadata)
+			$metadata = [];
 		$metadata[$key] = $value;
 		return $this->SetMetaData($metadata, $condition, $params, $defaultValue);
 	}
 	public function ForgetMetaValue($key, $condition = null, $params = [], $defaultValue = false)
 	{
 		$metadata = self::GetMetaData($condition, $params);
-		if(!$metadata) $metadata = [];
+		if (!$metadata)
+			$metadata = [];
 		unset($metadata[$key]);
 		return $this->SetMetaData($metadata, $condition, $params, $defaultValue);
 	}

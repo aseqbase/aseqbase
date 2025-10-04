@@ -161,7 +161,7 @@ class Modal extends Player{
 
 	public function InitializeScript($title = null, $description = null, $content = null, $buttonsContent = null, $source = null){
 		return $this->Name."_Initialize(".
-		Script::Convert(obj: $title??$this->Title).", ".
+		Script::Convert($title??$this->Title).", ".
 		Script::Convert($description??$this->Description).", ".
 		Script::Convert($content??$this->Content).", ".
 		Script::Convert($buttonsContent??$this->ButtonsContent).", ".

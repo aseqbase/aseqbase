@@ -45,6 +45,10 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Category` (
   PRIMARY KEY (`Id` )
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
+REPLACE INTO `%%PREFIX%%Category` (`Id` , `Name` , `Title` , `Description`) VALUES
+(1, 'uncategorized', 'Uncategorized', 'All the uncategorized contents'),
+(2, 'main', 'Main', 'All the main contents');
+
 -- --------------------------------------------------------
 
 --

@@ -41,7 +41,7 @@ $data = $data??[];
                 reload();
         })
     ->else(!isEmpty(\_::$Direction))
-        ->On()->Default(fn() => compute(\_::$Direction))
+        ->On()->Default(fn() => response(compute(\_::$Direction)))
     ->else()
         ->On()->Default(fn() => view("part", ["Name" => "access"]))
     ->Handle();

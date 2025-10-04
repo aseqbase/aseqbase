@@ -39,6 +39,7 @@ class Installer
         $base = self::$Configurations["Destination"]["Root"] ?? (getcwd() . DIRECTORY_SEPARATOR);
         $base = $force?(readline("Destination Directory [$base]: ") ?: $base):$base; // Project root (destination)
         $source = dirname(__DIR__) . DIRECTORY_SEPARATOR;// Source folder (your framework package root)
+        if(!str_ends_with($base, DIRECTORY_SEPARATOR)) $base .= DIRECTORY_SEPARATOR;
         if ($base === $source) {
             echo "✅ All files are ready.\n";
             self::$Configurations["Destination"]["Root"] = $base;

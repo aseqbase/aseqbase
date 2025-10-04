@@ -44,26 +44,30 @@
 	<h4>DataBase Options:</h4>
 		<table>
 			<tr><th>DATABASE</th><th>VER</th></tr>
-			<tr><td>MySQL</td><td>5.1 +</td></tr>
+			<tr><td>MySQL</td><td>5.1 + (5.7 + preferred)</td></tr>
 			<tr><td>SQL Server</td><td>10.50.1600.1 +</td></tr>
 			<tr><td>PostgreSQL</td><td>8.3.18 +</td></tr>
 		</table>
 
 <h3>Installations</h3>
-  1. Install all dependencies
+  1. Install all requirements mention above
  
   #### To make the Main Domain of aseqbase website
   2. Open a terminal in the home directory (public_html) of the website, then install the framework by:
 	
  	> composer create-project aseqbase/aseqbase ./
-  3. Use it through the domain URL (http://[my-domain-name].com)
-  4. Enjoy...
+ 	> composer run-script install
+  3. Follow steps
+  4. Use it through the domain URL (http://[my-domain-name].com)
+  5. Enjoy...
 
   #### To make the subdomain of aseqbase website
   2. Open a terminal in your subdomain directory (public_html/[my-subdomain-name]/), then install the framework by:
 	
  	> composer create-project aseqbase/aseqbase ./
-  3. Create an opitonal file name `global.php` on the root directory with the bellow codes:
+ 	> composer run-script install
+  3. Follow steps
+  4. Create an opitonal file name `global.php` on the root directory with the bellow codes:
   ```
   <?php
   	$ASEQ = '[my-subdomain-name]'; // (Optional) The current subdomain sequence or leave null if this file is in the root directory
@@ -74,8 +78,8 @@
 								// directory, null; // Remove thw directory from the \_::$Sequences
   ?>
   ```
-  4. Use it through its special url (http://[my-subdomain-name].[my-domain-name].com)
-  5. Enjoy...
+  5. Use it through its special url (http://[my-subdomain-name].[my-domain-name].com)
+  6. Enjoy...
 
 <h3>Contributions</h3>
 <p>Contributions can take the form of new components or features, changes to existing features, tests, documentation (such as developer guides, user guides, examples, or specifications), bug fixes, optimizations, or just good suggestions.</p>

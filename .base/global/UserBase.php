@@ -125,7 +125,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->Session->SetSecure("Image", $this->Image = $this->TemporaryImage = takeValid($profile, "Image"));
 		$this->Session->SetSecure("Name", $this->Name = $this->TemporaryName = takeValid($profile, "Name"));
 		$this->Session->SetSecure("Email", $this->Email = $this->TemporaryEmail = takeValid($profile, "Email"));
-		$this->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->SelectValue("`Access`", "`Id`=" . $this->GroupId));
+		$this->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->SelectValue("`Access`", "Id=" . $this->GroupId));
 		if (!$profile) {
 			$this->Session->ForgetSecure("Password");
 			$this->Session->ForgetSecure("Signature");
@@ -188,8 +188,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			if ($hashPassword)
 				$password = $this->EncryptPassword($password);
 			$person = $this->DataTable->SelectRow(
-				"`Signature` , `Id` , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
-				"(`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
+				"`Signature` , Id , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
+				"(Id=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
 				[":Id" => $signature, ":Signature" => $signature, ":Email" => strtolower($signature), ":Contact" => $signature, ":Password" => $password]
 			);
 			if (isEmpty($person)) {
@@ -198,8 +198,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			}
 		} else {
 			$person = $this->DataTable->SelectRow(
-				"`Signature` , `Id` , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
-				"`Id`=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)",
+				"`Signature` , Id , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
+				"Id=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)",
 				[":Id" => $signature, ":Signature" => $signature, ":Email" => strtolower($signature), ":Contact" => $signature]
 			);
 			if (isEmpty($person)) {
@@ -217,7 +217,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : takeValid($this->DataTable->Select("*", "`Id`=:Id", [":Id" => $id]), 0);
+		return is_null($id) ? null : takeValid($this->DataTable->Select("*", "Id=:Id", [":Id" => $id]), 0);
 	}
 	public function Set($fieldsDictionary, $signature = null, $password = null)
 	{
@@ -244,32 +244,32 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->Update("`Id`=$id", [$key => $value]);
+		return is_null($id) ? null : $this->DataTable->Update("Id=$id", [$key => $value]);
 	}
 	public function GetMetaValue($key, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->GetMetaValue($key, "`Id`=$id");
+		return is_null($id) ? null : $this->DataTable->GetMetaValue($key, "Id=$id");
 	}
 	public function SetMetaValue($key, $value, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->SetMetaValue($key, $value, "`Id`=$id");
+		return is_null($id) ? null : $this->DataTable->SetMetaValue($key, $value, "Id=$id");
 	}
 	public function ForgetMetaValue($key, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->ForgetMetaValue($key, "`Id`=$id");
+		return is_null($id) ? null : $this->DataTable->ForgetMetaValue($key, "Id=$id");
 	}
 
 	public function GetGroup($signature = null, $password = null)
 	{
 		if (is_null($id = $this->GroupId) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "GroupId");
-		return is_null($id) ? null : takeValid($this->GroupDataTable->Select("*", "`Id`=:Id", [":Id" => $id]), 0);
+		return is_null($id) ? null : takeValid($this->GroupDataTable->Select("*", "Id=:Id", [":Id" => $id]), 0);
 	}
 	public function SetGroup($fieldsDictionary, $signature = null, $password = null)
 	{
@@ -280,7 +280,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		}
 		if (is_null($id))
 			return null;
-		return $this->GroupDataTable->Update("`Id`='$id'", $fieldsDictionary);
+		return $this->GroupDataTable->Update("Id='$id'", $fieldsDictionary);
 	}
 
 	public function MakeSign($regards = "Kind Regards"){
@@ -320,7 +320,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				":FirstName" => $firstName,
 				":LastName" => $lastName,
 				":Contact" => $phone,
-				":GroupId" => $groupId ?? $this->GroupDataTable->SelectValue("`Id`", "Access=" . \_::$Config->UserAccess) ?? 0,
+				":GroupId" => $groupId ?? $this->GroupDataTable->SelectValue("Id", "Access=" . \_::$Config->UserAccess) ?? 0,
 				":Status" => $status,
 				":MetaData" => $metadata ? (is_string($metadata) ? $metadata : json_encode($metadata)) : null,
 			]

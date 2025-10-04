@@ -104,9 +104,9 @@ class Form extends Module
 				response($this->GetSigning());
 			return false;
 		}
-		if (($message = $this->CheckBlock()) === false) {
+		if (($message = $this->CheckTimeBlock()) === false) {
 			if ($blocking)
-				$this->MakeBlock();
+				setTimeout($this->BlockTimeout);
 		} else {
 			if ($reaction)
 				response($message);
@@ -123,34 +123,16 @@ class Form extends Module
 		}
 		return true;
 	}
-	public function CheckBlock()
+	public function CheckTimeBlock()
 	{
 		if ($this->BlockTimeout < 1)
 			return false;
-		$key = getClientIp() . getDirection();
-		if (hasSession($key)) {
-			$remains = getSession($key) - time();
-			if ($remains <= 0) {
-				grabSession($key);
-				return false;
-			} else {
-				$dt = new \DateTime("@0");
-				$dt->add(new \DateInterval("PT{$remains}S"));
-				$this->Status = 403;
-				return $this->GetError("Please try about {$dt->format('H:i:s')} later!");
-			}
+		$remains = getTimeout();
+		if ($remains>0) {
+			$this->Status = 403;
+			return $this->GetError("Please try about '".Html::Timer($remains / 1000,0, "reload();")."' later!");
 		}
-		return false;
-	}
-	public function MakeBlock()
-	{
-		if ($this->BlockTimeout < 1)
-			return false;
-		return setSession(getClientIp() . getDirection(), time() + max(1, $this->BlockTimeout / 1000));
-	}
-	public function UnBlock()
-	{
-		return grabSession(getClientIp() . getDirection());
+		else return false;
 	}
 
 	/**
@@ -651,7 +633,7 @@ class Form extends Module
 	{
 		if (!auth($this->Access))
 			return null;
-		if (($res = $this->CheckBlock()) !== false)
+		if (($res = $this->CheckTimeBlock()) !== false)
 			return $res;
 		$name = $this->Name . "_Form";
 		$src = $this->Action ?? $this->Path ?? \_::$Path;

@@ -214,7 +214,7 @@ class CommentForm extends Form
 		$received = receivePatch();
 		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: false, reaction: true))
 			if (isValid($received, "Reply")) {
-				$this->UnBlock();
+				forgetTimeout();
 				$this->AllowHeader =
 					$this->AllowFooter = false;
 				$this->ContentClass = "";

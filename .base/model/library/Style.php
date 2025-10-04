@@ -19,7 +19,23 @@ class Style extends \ArrayObject{
 
 	public function Get(){
 		$styles = [];
-		foreach($this as $key=>$val) $styles[] = "$key:$val;";//self::DoProperty($key,$val);
+		foreach($this as $key=>$val)
+			$styles[] = "$key:$val;";
+		return join(" ", $styles);
+	}
+	
+	/**
+	 * To convert everything to a simple css styles
+	 * @param mixed $object
+	 * @return string
+	 */
+	public function Convert($object){
+		$styles = [];
+		if(is_iterable($object))
+			foreach($object as $key=>$val)
+				if(is_numeric($key)) $styles[] = "$val;";
+				else $styles[] = $this->PropertyName($key).":$val;";
+		else return $object;
 		return join(" ", $styles);
 	}
 

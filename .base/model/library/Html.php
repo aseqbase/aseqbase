@@ -27,50 +27,49 @@ class Html
     /**
      * Convert everything to a simple HTML format,
      * Supports all MarkDown markups
-     * @param mixed $value
-     * @return string
+     * @param mixed $object
      */
-    public static function Convert($value)
+    public static function Convert($object)
     {
-        if (!is_null($value)) {
-            if (is_string($value)) {
-                if (preg_match("/(?<!\\\)\<[^\>]+(?<!\\\)\>/i", $value))
-                    return $value;
+        if (!is_null($object)) {
+            if (is_string($object)) {
+                if (preg_match("/(?<!\\\)\<[^\>]+(?<!\\\)\>/i", $object))
+                    return $object;
                 else {
                     $patt = '/((?<==)\s*([\"\'])[\w\W]*\2)|((\<(\/?[A-Za-z0-9-_.?:\/\\\]+)[^>\\\]*[^\\\]?\>)([\w\W]*(\<\/\5[^\\\]?\>))?)/i';
-                    $value = preg_replace('/\\\(?=[<>])/s', "", $value); // Remove Escapes
+                    $object = preg_replace('/\\\(?=[<>])/s', "", $object); // Remove Escapes
                     // Codes
-                    $value = preg_replace('/`?``\s?([\s\S]+?)\s?```?/', self::CodeBlock("$1"), $value); // Code blocks
-                    $value = code($value, $dic, pattern: $patt);// To keep all previous tags unchanged
-                    $value = preg_replace('/`([^`\r\n]+)`/', self::Code("$1"), $value); // Inline code
-                    $value = code($value, $dic, pattern: $patt);// To keep all previous tags unchanged
-                    $value = preg_replace("/((^[ \t]?>.*\s?)+)/m", self::CodeBlock("$1"), $value); // Blockquotes
-                    $value = code($value, $dic, pattern: $patt);// To keep all previous tags unchanged
+                    $object = preg_replace('/`?``\s?([\s\S]+?)\s?```?/', self::CodeBlock("$1"), $object); // Code blocks
+                    $object = code($object, $dic, pattern: $patt);// To keep all previous tags unchanged
+                    $object = preg_replace('/`([^`\r\n]+)`/', self::Code("$1"), $object); // Inline code
+                    $object = code($object, $dic, pattern: $patt);// To keep all previous tags unchanged
+                    $object = preg_replace("/((^[ \t]?>.*\s?)+)/m", self::CodeBlock("$1"), $object); // Blockquotes
+                    $object = code($object, $dic, pattern: $patt);// To keep all previous tags unchanged
                     // Quotes
-                    $value = preg_replace_callback('/(?<!")"(\S[\r\n"]+?\S)"(?!")/', fn($m) => self::Quote($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback('/"?""\s?([\s\S]+?)\s?"""?/s', fn($m) => self::QuoteBlock($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Blockquotes
+                    $object = preg_replace_callback('/(?<!")"(\S[\r\n"]+?\S)"(?!")/', fn($m) => self::Quote($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback('/"?""\s?([\s\S]+?)\s?"""?/s', fn($m) => self::QuoteBlock($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Blockquotes
                     // Headings
-                    $value = preg_replace_callback("/^\s?[ \t]*\#\s(.*)\s?/im", fn($m) => self::ExternalHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{2}\s(.*)\s?/im", fn($m) => self::SuperHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{3}\s(.*)\s?/im", fn($m) => self::Heading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{4}\s(.*)\s?/im", fn($m) => self::SubHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{5}\s(.*)\s?/im", fn($m) => self::InternalHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^\s?[ \t]*\#{6}\s(.*)\s?/im", fn($m) => self::Element($m[1], "h6", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $object = preg_replace_callback("/^\s?[ \t]*\#\s(.*)\s?/im", fn($m) => self::ExternalHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/^\s?[ \t]*\#{2}\s(.*)\s?/im", fn($m) => self::SuperHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/^\s?[ \t]*\#{3}\s(.*)\s?/im", fn($m) => self::Heading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/^\s?[ \t]*\#{4}\s(.*)\s?/im", fn($m) => self::SubHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/^\s?[ \t]*\#{5}\s(.*)\s?/im", fn($m) => self::InternalHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/^\s?[ \t]*\#{6}\s(.*)\s?/im", fn($m) => self::InlineHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
                     // Footnotes
-                    $value = preg_replace_callback("/\[([a-z0-9_\-]+)\](?!\(|:)/i", fn($m) => self::Span("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/\[\^([^\]]+)\](?!\(|:)/i", fn($m) => self::Super("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/\[~([^\]]+)\](?!\(|:)/i", fn($m) => self::Sub("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^[ \t]*\[([a-z0-9_\-]+)\]:\s*(.*)$\s?/im", fn($m) => self::Division("[$m[1]] $m[2]", ["class" => "footnote", "id" => "fn-$1"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/^[ \t]*\[([\^~])([^\]]+)\]:\s*(.*)$\s?/im", fn($m) => self::Division("$m[1]$m[2] $m[3]", ["class" => "footnote", "id" => "fn-$2"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
+                    $object = preg_replace_callback("/\[([a-z0-9_\-]+)\](?!\(|:)/i", fn($m) => self::Span("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/\[\^([^\]]+)\](?!\(|:)/i", fn($m) => self::Super("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/\[~([^\]]+)\](?!\(|:)/i", fn($m) => self::Sub("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/^[ \t]*\[([a-z0-9_\-]+)\]:\s*(.*)$\s?/im", fn($m) => self::Division("[$m[1]] $m[2]", ["class" => "footnote", "id" => "fn-$1"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/^[ \t]*\[([\^~])([^\]]+)\]:\s*(.*)$\s?/im", fn($m) => self::Division("$m[1]$m[2] $m[3]", ["class" => "footnote", "id" => "fn-$2"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
                     // Medias
-                    $value = preg_replace("/\!\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", self::Image("$1", "$2"), $value);
-                    $value = preg_replace("/@\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", self::Media("$1", "$2"), $value);
-                    $value = preg_replace_callback("/\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Link($m[1], $m[2], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", self::Link("$1", "$1"), $value);
-                    $value = preg_replace("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", self::Link("$1", "mailto:$1"), $value);
+                    $object = preg_replace("/\!\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", self::Image("$1", "$2"), $object);
+                    $object = preg_replace("/@\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", self::Media("$1", "$2"), $object);
+                    $object = preg_replace_callback("/\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Link($m[1], $m[2], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", self::Link("$1", "$1"), $object);
+                    $object = preg_replace("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", self::Link("$1", "mailto:$1"), $object);
 
                     // Tables
-                    $value = preg_replace_callback(
+                    $object = preg_replace_callback(
                         "/((?:^[ \t]*\|.*\|?[ \t]*$\s?)+)/m",
                         function ($matches) {
                             return self::Table(
@@ -91,12 +90,13 @@ class Html
                                 )
                             );
                         },
-                        $value
+                        $object
                     );
+                    
                     // Lists
                     $lc = 0;
                     do {
-                        $value = preg_replace_callback(
+                        $object = preg_replace_callback(
                             "/((^([ \t]*)([^\s\w\d+]|(\+|(\d+))\W?)[ \t]+(.*)$\s?)+)/m",
                             function ($wholematches) {
                                 $lines = preg_split("/\r?\n\n?\r?/", trim($wholematches[1], "\r\n"));
@@ -116,44 +116,44 @@ class Html
                                     ? self::List(join("\n", $list), empty($matches[4]) ? [] : ["start" => $matches[4]])
                                     : self::Items(join("\n", $list));
                             },
-                            $value,
+                            $object,
                             -1,
                             $lc
                         );
                     } while ($lc);
 
                     // Texts
-                    $value = preg_replace_callback("/\*\*(\S[^\*\r\n\v]+)\*\*/i", fn($m) => self::Strong($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/\*([^\*\r\n\v]+)\*/i", fn($m) => self::Bold($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/__([^\r\n\v]+)__/i", fn($m) => self::Italic($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/~~([^\r\n\v]+)~~/i", fn($m) => self::Strike($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value);
-                    $value = preg_replace_callback("/(?<!\[)\^\(([^\)]+)\)/i", fn($m) => self::Super($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
-                    $value = preg_replace_callback("/(?<!\[)\~\(([^\)]+)\)/i", fn($m) => self::Sub($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
-                    $value = preg_replace_callback("/(?<!\[)\^([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Super($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Superscript
-                    $value = preg_replace_callback("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Sub($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $value); // Subscript
+                    $object = preg_replace_callback("/\*\*(\S[^\*\r\n\v]+)\*\*/i", fn($m) => self::Strong($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/\*([^\*\r\n\v]+)\*/i", fn($m) => self::Bold($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/__([^\r\n\v]+)__/i", fn($m) => self::Italic($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/~~([^\r\n\v]+)~~/i", fn($m) => self::Strike($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/(?<!\[)\^\(([^\)]+)\)/i", fn($m) => self::Super($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Superscript
+                    $object = preg_replace_callback("/(?<!\[)\~\(([^\)]+)\)/i", fn($m) => self::Sub($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Superscript
+                    $object = preg_replace_callback("/(?<!\[)\^([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Super($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Superscript
+                    $object = preg_replace_callback("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Sub($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Subscript
                     // Signs
-                    $value = preg_replace("/^[ \t]*\-{6,}$\s?/im", self::$BreakLine, $value);
-                    $value = preg_replace("/((\r\n)|(\n\r)|(\r?\n\n\r?))/i", self::$Break, trim($value));
+                    $object = preg_replace("/^[ \t]*\-{6,}$\s?/im", self::$BreakLine, $object);
+                    $object = preg_replace("/((\r\n)|(\n\r)|(\r?\n\n\r?))/i", self::$Break, trim($object));
 
-                    return ($dir = Translate::GetDirection($value)) == \_::$Back->Translate->Direction ? decode($value, $dic) : self::Division(decode($value, $dic), ["class" => "be $dir"]);
+                    return ($dir = Translate::GetDirection($object)) == \_::$Back->Translate->Direction ? decode($object, $dic) : self::Division(decode($object, $dic), ["class" => "be $dir"]);
                 }
             }
-            if (is_subclass_of($value, "\Base"))
-                return $value->ToString();
-            if (is_countable($value) || is_iterable($value)) {
-                if (!is_array($value))
-                    $value = iterator_to_array($value);
+            if (is_subclass_of($object, "\Base"))
+                return $object->ToString();
+            if (is_countable($object) || is_iterable($object)) {
+                if (!is_array($object))
+                    $object = iterator_to_array($object);
                 $texts = array();
-                if (is_numeric(array_key_first($value))) {
-                    foreach ($value as $val)
+                if (is_numeric(array_key_first($object))) {
+                    foreach ($object as $val)
                         $texts[] = self::Item(self::Convert($val));
                     return self::List(join(PHP_EOL, $texts));
-                } elseif ($args = getBetween($value, "Arguments", "Item")) {
-                    $key = get($value, "Key");
-                    $val = get($value, "Value");
-                    $ops = get($value, "Options");
-                    $type = get($value, "Type");
-                    $title = get($value, "Title");
+                } elseif ($args = getBetween($object, "Arguments", "Item")) {
+                    $key = get($object, "Key");
+                    $val = get($object, "Value");
+                    $ops = get($object, "Options");
+                    $type = get($object, "Type");
+                    $title = get($object, "Title");
                     return self::Interactor(
                         key: $key,
                         value: $val,
@@ -163,14 +163,14 @@ class Html
                         attributes: $args
                     );
                 } else {
-                    foreach ($value as $key => $val)
+                    foreach ($object as $key => $val)
                         $texts[] = self::Item(self::Span($key . ": ") . self::Convert($val));
                     return self::Items(join(PHP_EOL, $texts));
                 }
             }
-            if (is_callable($value) || $value instanceof \Closure)
-                return self::Convert($value());
-            return self::Division(Convert::ToString($value));
+            if (is_callable($object) || $object instanceof \Closure)
+                return self::Convert($object());
+            return self::Division(Convert::ToString($object));
         }
         return "";
     }
@@ -206,7 +206,7 @@ class Html
                 break;
         }
         $attachments = "";
-        $attrs = self::Attributes($attributes, $attachments, $prepends,  $appends, $allowMA);
+        $attrs = self::Attributes($attributes, $attachments, $prepends, $appends, $allowMA);
         if ($isSingle)
             return "$prepends<$tagName$attrs data-single/>$appends$attachments";
         else
@@ -269,7 +269,7 @@ class Html
                 foreach ($attrdic as $key => $value)
                     switch ($key) {
                         case "tooltip":
-                                $appends .= Html::Tooltip(__($value));
+                            $appends .= Html::Tooltip(__($value));
                             break;
                         case "style":
                             if (self::$AttributesOptimization && $optimization) {
@@ -333,9 +333,10 @@ class Html
             return $key;
         } else {
             $value = Convert::ToString($value);
+            $sp = '"';
             if (str_contains($value, '"'))
                 if (str_contains($value, "'")) {
-                    $value = str_replace("'", "`", $value);
+                    $value = str_replace("'", "&apos;", $value);
                     $sp = "'";
                 } else
                     $sp = "'";
@@ -475,7 +476,7 @@ class Html
                 break;
         }
         $attachments = "";
-        $attrs = self::Attributes($attributes, $attachments, $prepends,  $appends, $allowMA);
+        $attrs = self::Attributes($attributes, $attachments, $prepends, $appends, $allowMA);
         self::$TagStack[] = $tagName;
         return "$attachments<$tagName$attrs>$prepends$appends";
     }
@@ -1133,7 +1134,7 @@ class Html
      */
     public static function Division($content, ...$attributes)
     {
-        return self::Element($content, "div", ["class" => "division"], $attributes);
+        return self::Element($content??"", "div", ["class" => "division"], $attributes);
     }
     /**
      * The \<CENTER\> HTML Tag
@@ -1143,7 +1144,7 @@ class Html
      */
     public static function Center($content, ...$attributes)
     {
-        return self::Element($content, "center", ["class" => "center"], $attributes);
+        return self::Element($content??"", "center", ["class" => "center"], $attributes);
     }
     /**
      * The \<PRE\> HTML Tag
@@ -1153,7 +1154,7 @@ class Html
      */
     public static function Pre($content, ...$attributes)
     {
-        return self::Element($content, "pre", ["class" => "pre", "ondblclick" => 'copy(this.innerText)'], $attributes);
+        return self::Element($content??"", "pre", ["class" => "pre", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<QOUTE\> HTML Tag
@@ -1163,7 +1164,7 @@ class Html
      */
     public static function Quote($content, ...$attributes)
     {
-        return self::Element($content, "quote", ["class" => "quote", "ondblclick" => 'copy(this.innerText)'], $attributes);
+        return self::Element($content??"", "quote", ["class" => "quote", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<BLOCKQOUTE\> HTML Tag
@@ -1173,7 +1174,7 @@ class Html
      */
     public static function QuoteBlock($content, ...$attributes)
     {
-        return self::Element($content, "blockquote", ["class" => "quoteblock", "ondblclick" => 'copy(this.innerText)'], $attributes);
+        return self::Element($content??"", "blockquote", ["class" => "quoteblock", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<CODE\> HTML Tag
@@ -1183,7 +1184,7 @@ class Html
      */
     public static function Code($content, ...$attributes)
     {
-        return self::Element($content, "code", ["class" => "code", "ondblclick" => 'copy(this.innerText)'], $attributes);
+        return self::Element($content??"", "code", ["class" => "code", "ondblclick" => 'copy(this.innerText)'], $attributes);
     }
     /**
      * The \<BLOCKCODE\> HTML Tag
@@ -1193,7 +1194,7 @@ class Html
      */
     public static function CodeBlock($content, ...$attributes)
     {
-        return self::Element(self::Element($content, "blockcode", ["ondblclick" => 'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
+        return self::Element(self::Element($content??"", "blockcode", ["ondblclick" => 'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
     }
     #endregion
 
@@ -1284,7 +1285,7 @@ class Html
                     else
                         yield self::Row($v, ["Type" => in_array($k, $colHeaders) ? "head" : "cell"]);
                 }
-            })())) : $content,
+            })())) : $content??"",
             "table",
             $options,
             ["class" => "table"],
@@ -1302,7 +1303,7 @@ class Html
         return self::Element(
             is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content) {
                 yield self::Row($content, ["type" => "head"]);
-            })())) : __($content),
+            })())) : __($content??""),
             "thead",
             ["class" => "table-column"],
             $attributes
@@ -1321,7 +1322,7 @@ class Html
             is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $head) {
                 foreach ($content as $k => $v)
                     yield self::Cell($v, ["Type" => $head]);
-            })())) : $content,
+            })())) : $content??"",
             "tr",
             $options,
             ["class" => "table-row"],
@@ -1337,9 +1338,9 @@ class Html
     public static function Cell($content = "", $options = [], ...$attributes)
     {
         if (strtolower(grab($options, "Type") ?? "") === "head")
-            return self::Element(__($content), "th", $options, ["class" => "table-cell"], $attributes);
+            return self::Element(__($content??""), "th", $options, ["class" => "table-cell"], $attributes);
         else
-            return self::Element(__($content, referring: true), "td", $options, ["class" => "table-cell"], $attributes);
+            return self::Element(__($content??"", referring: true), "td", $options, ["class" => "table-cell"], $attributes);
     }
     #endregion
 
@@ -1503,6 +1504,22 @@ class Html
     public static function Paragraph($content, ...$attributes)
     {
         return self::Element(__($content, styling: true, referring: true), "p", ["class" => "paragraph"], $attributes);
+    }
+    /**
+     * The \<Data\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag,
+     * "Splitter"=>".",
+     * "ThousandSplitter"=>",",
+     * @return string
+     */
+    public static function Number($content, ...$attributes)
+    {
+        $content = $content + 0;
+        $decimalPoint = self::GrabAttribute($attributes, "Splitter") ?? ".";
+        $thousandSep = self::GrabAttribute($attributes, "ThousandSplitter") ?? ",";
+        $decimals = is_float($content) ? strlen(substr(strrchr($content, "."), 1)) : 0;
+        return self::Element(number_format($content, $decimals, $decimalPoint, $thousandSep), "data", ["class" => "number", "value" => $content], $attributes);
     }
     /**
      * The \<SPAN\> HTML Tag
@@ -1720,11 +1737,12 @@ class Html
             $reference = $content;
             $content = null;
         }
-        if (is_null($content)) $content = getDomain($reference);
+        if (is_null($content))
+            $content = getDomain($reference);
         return self::Element(__($content), "a", ["href" => $reference, "class" => "link"], $attributes);
     }
     /**
-     * The \<BUTTON\> or \<A\> HTML Tag
+     * The \<BUTTON\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param string|null|array|callable $action The source path or onclick event script, (Use class names with full namespaces in callable references)
      * @param mixed $attributes Other custom attributes of the Tag
@@ -1749,9 +1767,20 @@ class Html
             return null;
         if (isEmpty($action))
             return self::Element("", "i", ["class" => "icon fa fa-" . strtolower($content)], $attributes);
-        if (!isScript($action) && isUrl($action))
+        return self::Action(self::Icon($content, null), $action, ["class" => "icon"], $attributes);
+    }
+    /**
+     * The \<DIV\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null|array|callable $action The source path or onclick event script, (Use class names with full namespaces in callable references)
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Action($content, $action = null, ...$attributes)
+    {
+        if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
             $action = "load(" . Script::Convert($action) . ")";
-        return self::Element(self::Icon($content, null), "button", ["class" => "icon", "type" => "button", "onclick" => $action], $attributes);
+        return self::Element($content, "div", ["class" => "action", "type" => "action"], $action ? ["onclick" => $action] : [], $attributes);
     }
     #endregion
 
@@ -1818,6 +1847,8 @@ class Html
                     return "text";
             else
                 return strtolower(gettype($value));
+        elseif (is_string($type))
+            return strtolower($type);
         elseif (is_callable($type) || ($type instanceof \Closure))
             return self::InputDetector($type($type, $value), $value);
         elseif (is_object($type) || ($type instanceof \stdClass))
@@ -1826,8 +1857,6 @@ class Html
             return "select";
         elseif ($type === true)
             return "text";
-        elseif (is_string($type))
-            return strtolower($type);
         elseif (is_int($type))
             return "number";
         else
@@ -1858,10 +1887,10 @@ class Html
                 (is_object($type) || ($type instanceof \stdClass))
             ) {
                 $description = get($type, "Description") ?? $description;
-                $wrapper = get($type, "Scope") ?? $wrapper;
+                $wrapper = get($type, "Wrapper") ?? $wrapper;
             } elseif (is_countable($type) && !is_null($options)) {
                 $description = get($type, "Description") ?? $description;
-                $wrapper = get($type, "Scope") ?? $wrapper;
+                $wrapper = get($type, "Wrapper") ?? $wrapper;
             }
         }
         $content = self::Interactor(
@@ -1888,13 +1917,14 @@ class Html
         //                 break;
         //         }
         $isRequired = self::HasAttribute($attributes, "required");
-        $isDisabled = self::HasAttribute($attributes, "disabled");
-        if ($isDisabled)
-            $content = Html::Division($value, ["class" => "input"], $attributes);
+        // $isDisabled = self::HasAttribute($attributes, "disabled");
+        // if ($isDisabled)
+        //     $content = Html::Division($value, ["class" => "input"], $attributes);
         $id = self::GetAttribute($attributes, "Id") ?? Convert::ToId($key);
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
         $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title"]));
         $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description"]));
+        $wrapperAttr = self::GrabAttribute($attributes, "WrapperAttributes") ?? [];
         switch ($type) {
             case null:
             case false:
@@ -1907,7 +1937,7 @@ class Html
                 break;
         }
         if ($wrapper)
-            return self::Element(join('', [$titleTag, $content, $descriptionTag]), 'div', ['class' => 'field']);
+            return self::Element(join('', [$titleTag, $content, $descriptionTag]), 'div', ['class' => 'field'], $wrapperAttr);
         else
             return join('', [$titleTag, $content, $descriptionTag]);
     }
@@ -1927,7 +1957,13 @@ class Html
         $prepend = $append = null;
         if (is_null($type))
             $type = self::InputDetector($type, $value);
-        if (is_callable(value: $type) || ($type instanceof \Closure)) {
+        if (is_string($type)) {
+            if (isPattern($type)) {
+                $options = $type;
+                $type = "mask";
+            } else
+                $type = self::InputDetector($type, $value);
+        } elseif (is_callable($type) || ($type instanceof \Closure)) {
             $type = $type($type, $value);
             return self::Interactor(
                 key: $key,
@@ -2005,7 +2041,7 @@ class Html
                     attributes: $attributes
                 );
             }
-            if ($pos = strpos($type, "|") > 0) {
+            if (($pos = strpos($type, "|")) > 0) {
                 $type = first(str_split($type, $pos));
                 return self::Interactor(
                     key: $key,
@@ -2040,6 +2076,9 @@ class Html
             case 'hyperlink':
                 $content = self::Link($titleOrKey, $value, $attributes);
                 break;
+            case 'action':
+                $content = self::Action($titleOrKey, $value, $attributes);
+                break;
             case 'p':
             case 'paragraph':
                 $content = self::Paragraph($value ?? $titleOrKey, null, $attributes);
@@ -2071,7 +2110,7 @@ class Html
             case 'strings':
             case 'multiline':
             case 'textarea':
-                $content = self::TextInput($key, $value, $attributes);
+                $content = self::TextsInput($key, $value, $attributes);
                 break;
             case 'longtext':
             case 'content':
@@ -2084,13 +2123,13 @@ class Html
             case 'line':
             case 'value':
             case 'string':
-            case 'singleline':
             case 'text':
+            case 'singleline':
             case 'shorttext':
             case 'tinytext':
             case 'varchar':
             case 'char':
-                $content = self::ValueInput($key, $value, $attributes);
+                $content = self::TextInput($key, $value, $attributes);
                 break;
             case 'type':
             case 'types':
@@ -2188,9 +2227,9 @@ class Html
                 break;
             case 'map':
             case 'location':
-                $content = self::ValueInput($key, $value = Convert::ToString($value, ","), $attributes);
+                $content = self::TextInput($key, $value = Convert::ToString($value, ","), $attributes);
             case 'path':
-                $content = self::ValueInput($key, $value, $attributes);
+                $content = self::TextInput($key, $value, $attributes);
                 break;
             case 'calendar':
             case 'calendarinput':
@@ -2236,12 +2275,12 @@ class Html
             case 'audios':
             case 'videos':
             case 'files':
-                $content = self::FileInput($key, $value, 'multiple', $attributes);
+                $content = self::FilesInput($key, $value, $attributes);
                 break;
             case 'dir':
             case 'directory':
             case 'folder':
-                $content = self::FileInput($key, $value, 'webkitdirectory multiple', $attributes);
+                $content = self::DirectoryInput($key, $value, $attributes);
                 break;
             case 'submitbutton':
             case 'submit':
@@ -2339,7 +2378,7 @@ class Html
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
-    public static function ValueInput($key, $value = null, ...$attributes)
+    public static function TextInput($key, $value = null, ...$attributes)
     {
         return self::Input($key, $value, "text", ["class" => "valueinput"], $attributes);
     }
@@ -2350,7 +2389,7 @@ class Html
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
-    public static function TextInput($key, $value = null, ...$attributes)
+    public static function TextsInput($key, $value = null, ...$attributes)
     {
         return self::Element($value ?? "", "textarea", ["id" => self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => __(Convert::ToTitle($key)), "class" => "input textinput"], $attributes);
     }
@@ -2403,7 +2442,7 @@ class Html
      */
     public static function ScriptInput($key, $value = null, ...$attributes)
     {
-        return self::TextInput($key, $value, ["class" => "scriptinput", "rows" => "10", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;"], ...$attributes);
+        return self::TextsInput($key, $value, ["class" => "scriptinput", "rows" => "10", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;"], ...$attributes);
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -2414,7 +2453,7 @@ class Html
      */
     public static function ObjectInput($key, $value = null, ...$attributes)
     {
-        return self::TextInput($key, $value, ["class" => "objectinput", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"], ...$attributes);
+        return self::TextsInput($key, $value, ["class" => "objectinput", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"], ...$attributes);
     }
     /**
      * A \<DIV\> HTML Tag contains an array of Inputs
@@ -2449,6 +2488,7 @@ class Html
             elseif (is_string($value)) {
                 $value = is_null($sep) && startsWith($value, "[", "{") ? Convert::FromJson($value) ?? [] : explode($sep ?? "|", trim($value, $sep ?? "|"));
             }
+            
             foreach ($value as $k => $item) {
                 $id = self::GrabAttribute($attributes, "Id") ?? Convert::ToId($key);
                 if (is_null($sample))
@@ -2465,9 +2505,9 @@ class Html
                 );
             }
             if ($add) {
-                $id = Convert::ToId($key) . "_add";
+                $aid = self::GrabAttribute($attributes,"Id")??self::GrabAttribute($attrs,"Id")??Convert::ToId($key) . "_add";
                 $oc = "
-                        let tag = document.getElementById(`$id`).cloneNode(true);
+                        let tag = document.getElementById(`$aid`).cloneNode(true);
                         tag.id = `$key" . getId() . "`;
                         tag.name = `{$key}[]`;
                         tag.removeAttribute(`disabled`);
@@ -2475,14 +2515,14 @@ class Html
                         tag.setAttribute(`style`,``);
                         " . ($rem ? "tag.ondblclick = function(){ this.remove(); };" : "") . "
                         this.parentElement.appendChild(tag);";
+                yield self::Icon("plus", $oc);
                 yield self::Field(
                     type: self::InputDetector($type, $sample),
                     key: $key,
                     value: null,
                     title: false,
-                    description: self::Icon("plus", $oc),
                     options: $options,
-                    attributes: [...$attributes, "onchange" => $oc, "id" => $id, "name" => "", "disabled" => "disabled", "style" => "display: none;", ...$attrs]
+                    attributes: [...$attributes, "Id" => $aid, "name" => "", "disabled" => "disabled", "style" => "display: none;", ...$attrs]
                 );
             }
         }, ["id" => $key, "class" => "collectioninput"]);
@@ -2496,9 +2536,37 @@ class Html
      */
     public static function CheckInput($key, $value = null, ...$attributes)
     {
-        $id = "checkinput_" . getId(true);
-        return self::Input(null, null, "checkbox", ["class" => "checkinput", ...($value ? ["checked" => "checked"] : []), "name" => null, "onchange" => "document.getElementById('$id').value = this.checked?1:0;"]) .
-            self::HiddenInput($key, $value ? "1" : "0", ["class" => "checkinput"], $attributes, ["id" => $id]);
+        //return self::Input($key, $value ? "1" : "0", "checkbox", ["class" => "checkinput", ...($value ? ["checked" => "checked"] : []), "onchange" => "this.value = this.checked?1:0;"], $attributes);
+        $class = "_" . getId();
+        return self::Action(
+            Html::Icon($value ? "turn-on" : "toggle-off", null, ["class" => $class]),
+            "icon_$class = document.querySelector('.icon.$class');
+            cb_$class = document.querySelector('.checkinput.$class');
+                    if(cb_$class.checked){
+                        icon_$class.classList.remove('fa-toggle-on');
+                        icon_$class.classList.add('fa-toggle-off');
+                        cb_$class.click();
+                    } else {
+                        icon_$class.classList.remove('fa-toggle-off');
+                        icon_$class.classList.add('fa-toggle-on');
+                        cb_$class.click();
+                    }",
+            ["class" => "checkinput"]
+        ) .
+            self::Input($key, $value ? "1" : "0", "checkbox", [
+                "class" => "checkinput $class hide",
+                ...($value ? ["checked" => "checked"] : []),
+                "onchange" => "icon_$class = document.querySelector('.icon.$class');
+                    if(this.checked){
+                        icon_$class.classList.remove('fa-toggle-off');
+                        icon_$class.classList.add('fa-toggle-on');
+                        this.value = 1;
+                    } else {
+                        icon_$class.classList.remove('fa-toggle-on');
+                        icon_$class.classList.add('fa-toggle-off');
+                        this.value = 0;
+                    }"
+            ], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2640,7 +2708,7 @@ class Html
      */
     public static function CodeInput($key, $value = null, $length = null, ...$attributes)
     {
-        return self::MaskInput($key, $value, "\\d".($length?"{{$length}}":"+"), ["class" => "codeinput"], ...$attributes);
+        return self::MaskInput($key, $value, "\\d" . ($length ? "{{$length}}" : "+"), ["class" => "codeinput"], ...$attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2732,11 +2800,7 @@ class Html
      */
     public static function FilesInput($key, $value = null, ...$attributes)
     {
-        return self::CollectionInput($key, $value, [
-            "Type" => "file",
-            "Add" => true,
-            "Remove" => true
-        ], ["class" => "fileinput", "multiple" => null], ...$attributes);
+        return self::FileInput($key, $value, "multiple", ["class" => "directoryinput"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2747,7 +2811,7 @@ class Html
      */
     public static function DirectoryInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "file", ["class" => "fileinput", "webkitdirectory", "multiple"], $attributes);
+        return self::FileInput($key, $value, "webkitdirectory multiple", ["class" => "directoryinput"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2878,6 +2942,46 @@ class Html
 
 
     #region MODULE
+    /**
+     * A \<SPAN\> HTML Tag contains a counter
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function Counter($from, $to = 0, $action = null, $step = 1, $period = 1000, $updateValueFunction = null, ...$attributes)
+    {
+        $id = "c_" . getId();
+        $countDown = $from >= $to;
+        $counter = $id;
+        $interval = $id . "_i";
+        return Html::Element($from, "span", ["id" => $id, "class" => "counter"], $attributes) .
+            Html::Script(
+                "let $counter = " . ($countDown ? $from : $to) . ";" .
+                "$interval = setInterval(() => {
+			    if($counter " . ($countDown ? "<" : ">") . "= {$to}) {" . (
+                    $action ? (
+                        (isScript($action) || !isUrl($action)) ?
+                        $action :
+                        ("load(" . Script::Convert($action) . ");")
+                    ) : ""
+                ) . "
+					clearInterval($interval);
+					return;
+		        }
+				$counter += " . ($countDown ? -$step : $step) . ";
+				elem = document.querySelector('.counter#$id');
+			    if(elem) elem.innerHTML = {$updateValueFunction}($counter);
+			}, {$period});"
+            );
+    }
+    /**
+     * A \<SPAN\> HTML Tag contains a timer
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function Timer($from, $to = 0, $action = null, $step = 1, $period = 1000, ...$attributes)
+    {
+        return self::Counter($from, $to, $action, $step, $period, "((sec)=>(new Date(sec * 1000)).toISOString().substring(11, 19))", ["class"=>"timer"], $attributes);
+    }
     /**
      * The Calendar HTML Tag
      * @param mixed $content The tag default value
@@ -3194,7 +3298,6 @@ class Html
                 $attributes
             );
     }
-
     /**
      * The \<DIV\> HTML Tag to make a tab control
      * @param array|callable $content The tabs array with the format [tab1Name=>tab1Content,tab2Name=>tab2Content]

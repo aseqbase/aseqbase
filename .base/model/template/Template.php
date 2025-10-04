@@ -267,6 +267,13 @@ class Template extends \Base{
         .input *{
             font-family: var(--font-input), var(--font-special-input), var(--font);
         }
+        .input[type=file]:not(:disabled,[readonly]) {
+            cursor: pointer;
+        }
+        .input:is(:disabled,[readonly]) {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
         body>*:deactive {
             " . \MiMFa\Library\Style::UniversalProperty("filter", "grayscale(100)") . "
         }

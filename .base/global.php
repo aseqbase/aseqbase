@@ -479,7 +479,7 @@ function receive($key = null, $default = null, array|string|null $method = null)
 	// if (isEmpty($_REQUEST)) parse_str(file_get_contents('php://input'), $method);
 	// else $method = $_REQUEST;
 	if (is_string($method))
-		switch (trim(strtolower($method))) {
+		switch ($method = trim(strtolower($method))) {
 			case "file":
 			case "files":
 				$method = $_FILES;
@@ -489,11 +489,13 @@ function receive($key = null, $default = null, array|string|null $method = null)
 				break;
 			case "private":
 			case "post":
-				$method = $_POST;
-				break;
 			case "put":
 			case "patch":
 			case "delete":
+				if($method === "post" && $_POST) {
+					$method = $_POST;
+					break;
+				}
 				$res = file_get_contents('php://input');
 				if (!isEmpty($res)) {
 					if (isJson($res))
@@ -540,9 +542,7 @@ function receive($key = null, $default = null, array|string|null $method = null)
  */
 function receiveGet($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, "get");
-	return $default;
+	return receive($key, $default, "get");
 }
 /**
  * Received posted values from the client side
@@ -551,9 +551,7 @@ function receiveGet($key = null, $default = null)
  */
 function receivePost($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, "post");
-	return $default;
+	return receive($key, $default, "post");
 }
 /**
  * Received putted values from the client side
@@ -562,9 +560,7 @@ function receivePost($key = null, $default = null)
  */
 function receivePut($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, "put");
-	return $default;
+	return receive($key, $default, "put");
 }
 /**
  * Received patched values from the client side
@@ -573,9 +569,7 @@ function receivePut($key = null, $default = null)
  */
 function receivePatch($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, "patch");
-	return $default;
+	return receive($key, $default, "patch");
 }
 /**
  * Received file values from the client side
@@ -584,9 +578,7 @@ function receivePatch($key = null, $default = null)
  */
 function receiveFile($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, $_FILES);
-	return $default;
+	return receive($key, $default, $_FILES);
 }
 /**
  * Received deleted values from the client side
@@ -595,9 +587,7 @@ function receiveFile($key = null, $default = null)
  */
 function receiveDelete($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, "delete");
-	return $default;
+	return receive($key, $default, "delete");
 }
 /**
  * Received stream values from the client side
@@ -606,9 +596,7 @@ function receiveDelete($key = null, $default = null)
  */
 function receiveStream($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, "stream");
-	return $default;
+	return receive($key, $default, "stream");
 }
 /**
  * Received internal values from the client side
@@ -617,9 +605,7 @@ function receiveStream($key = null, $default = null)
  */
 function receiveInternal($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, "internal");
-	return $default;
+	return receive($key, $default, "internal");
 }
 /**
  * Received external values from the client side
@@ -628,9 +614,7 @@ function receiveInternal($key = null, $default = null)
  */
 function receiveExternal($key = null, $default = null)
 {
-	if (is_string($key ?? ""))
-		return receive($key, $default, "external");
-	return $default;
+	return receive($key, $default, "external");
 }
 
 #endregion 
@@ -1058,7 +1042,7 @@ function renderAppend($selector, $output)
 		\MiMFa\Library\Internal::MakeScript(
 			$output,
 			null,
-			"(data,err)=>$(".\MiMFa\Library\Script::Convert($selector).").append(data??err)"
+			"(data,err)=>$(" . \MiMFa\Library\Script::Convert($selector) . ").append(data??err)"
 			//"(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($selector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 		)
 	));
@@ -1074,7 +1058,7 @@ function renderPrepend($selector, $output)
 		\MiMFa\Library\Internal::MakeScript(
 			$output,
 			null,
-			"(data,err)=>$(".\MiMFa\Library\Script::Convert($selector).").prepend(data??err)"
+			"(data,err)=>$(" . \MiMFa\Library\Script::Convert($selector) . ").prepend(data??err)"
 			//"(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 		)
 	));
@@ -1103,8 +1087,8 @@ function renderStyle($content, $source = null, ...$attributes)
 function injectScript($content, $source = null, ...$attributes)
 {
 	renderAppend(
-			"head",
-			\MiMFa\Library\Html::Script($content, $source, ...$attributes)
+		"head",
+		\MiMFa\Library\Html::Script($content, $source, ...$attributes)
 	);
 }
 /**
@@ -1113,8 +1097,8 @@ function injectScript($content, $source = null, ...$attributes)
 function injectStyle($content, $source = null, ...$attributes)
 {
 	renderAppend(
-			"head",
-			\MiMFa\Library\Html::Style($content, $source, ...$attributes)
+		"head",
+		\MiMFa\Library\Html::Style($content, $source, ...$attributes)
 	);
 }
 #endregion 
@@ -1187,6 +1171,36 @@ function auth($minaccess = null): bool|int|null
 		return \User::CheckAccess(null, $minaccess);
 	else
 		return \_::$User->Access($minaccess);
+}
+
+function setTimeout($timeout = 60000, $key = null)
+{
+	if ($timeout < 1) return false;
+	return setSecret(getClientCode("Timeout_" . ($key ?? \_::$Direction)), time() + max(1, $timeout / 1000));
+}
+function getTimeout($key = null)
+{
+	$key = getClientCode("Timeout_" . ($key ?? \_::$Direction));
+	if (hasSecret($key)) {
+		$remains = getSecret($key) - time();
+		if ($remains <= 0) forgetSecret($key);
+		return $remains * 1000;
+	}
+	return null;
+}
+function grabTimeout($key = null)
+{
+	$remains = getTimeout($key);
+	forgetTimeout($key);
+	return $remains;
+}
+function hasTimeout($key = null)
+{
+	return getTimeout($key) > 0;
+}
+function forgetTimeout($key = null)
+{
+	return grabSecret(getClientCode("Timeout_" . ($key ?? \_::$Direction)));
 }
 
 #endregion
@@ -2379,24 +2393,19 @@ function cleanup($directory = null)
 		$i += cleanup(\_::$Address->LogDirectory);
 		$i += cleanup(\_::$Aseq->LogDirectory);
 		$i += cleanup(\_::$Base->LogDirectory);
-		flushSessions();
+		flushSecrets();
 		\_::$Back->Session->Flush();
 	}
 	return $i;
 }
 
-function grabMemo($key)
-{
-	$val = getMemo($key);
-	forgetMemo($key);
-	return $val;
-}
 /**
- * @param mixed $key
- * @param mixed $value
- * @param mixed $expires A miliseconds delay to expire
- * @param mixed $path
- * @param mixed $secure
+ * This will store on the clients computer; do not use for sensitive information.
+ * @param string $key A special key
+ * @param string $value The target value to store, This value is stored on the clients computer; do not store sensitive information.
+ * @param int $expires A miliseconds delay to expire
+ * @param string $path 
+ * @param bool $secure
  * @return bool
  */
 function setMemo($key, $value, $expires = 0, $path = "/", $secure = false)
@@ -2411,6 +2420,12 @@ function getMemo($key)
 		return urldecode($_COOKIE[$key]);
 	else
 		return null;
+}
+function grabMemo($key)
+{
+	$val = getMemo($key);
+	forgetMemo($key);
+	return $val;
 }
 function hasMemo($key)
 {
@@ -2429,32 +2444,79 @@ function flushMemos()
 	}
 }
 
-function grabSession($key)
+/**
+ * Set somthing as a secure session variable available to the current script.
+ * This will store on the server side; Able to use for sensitive information.
+ * @param string $key A special key
+ * @param string $value The target value to store.
+ * @param mixed $expires A miliseconds delay to expire
+ */
+function setSecret($key, $value, $expires = 0, $path = "/", $secure = false)
 {
-	$val = getSession($key);
-	forgetSession($key);
+    return $_SESSION[$key] = [
+        'value' => $secure?encrypt($value):$value,
+        'expires' => ($expires > 0 ? (int)(microtime(true)) + ($expires / 1000) : 0),
+        'path' => $path,
+        'secure' => $secure
+    ];
+}
+/**
+ * To get the secure session if its timeout is not expired
+ * @param string $key The special key
+ */
+function getSecret($key)
+{
+	if (!isset($_SESSION[$key])) return null;
+    $item = $_SESSION[$key];
+    if ($item['expires'] > 0 && $item['expires'] < (int)microtime(true)) {
+        forgetSecret($key);
+        return null;
+    }
+	if(str_starts_with(\_::$Request??"/", $item['path']))
+    	return $item['secure']?decrypt($item['value']):$item['value'];
+    else return null;
+}
+/**
+ * To get and forget a session
+ * @param string $key The special key
+ */
+function grabSecret($key)
+{
+	$val = getSecret($key);
+	forgetSecret($key);
 	return $val;
 }
-function setSession($key, $value)
+/**
+ * To check if the secure session is exists and not expired
+ * @param string $key The special key
+ * @return bool
+ */
+function hasSecret($key)
 {
-	return $_SESSION[$key] = $value;
+	if (!isset($_SESSION[$key])) return false;
+    $item = $_SESSION[$key];
+    if ($item['expires'] > 0 && $item['expires'] < (int)microtime(true)) {
+        forgetSecret($key);
+        return false;
+    }
+	if(str_starts_with(\_::$Request??"/", $item['path']))
+    	return true;
+    else return false;
 }
-function getSession($key)
-{
-	return get($_SESSION, $key);
-}
-function hasSession($key)
-{
-	return isValid($_SESSION, $key);
-}
-function forgetSession($key)
+/**
+ * To forget a secure session
+ * @param string $key The special key
+ */
+function forgetSecret($key)
 {
 	unset($_SESSION[$key]);
 }
-function flushSessions()
+/**
+ * To forget all secure sessions
+ */
+function flushSecrets()
 {
-	foreach ($_SESSION as $key => $val)
-		unset($_SESSION[$key]);
+	$_SESSION = [];
 }
 
 /**

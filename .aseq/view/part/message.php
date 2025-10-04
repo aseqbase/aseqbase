@@ -34,7 +34,7 @@ module("Form");
 		$form->Description = get($data, "Description");
 		$form->Content = get($data, "Content");
 		$form->Template = get($data, "Template") ?? "t";
-		$form->BlockTimeout = get($data, "BlockTimeout") ?? 12;
+		$form->BlockTimeout = get($data, "BlockTimeout") ?? 60000;
 		$form->BackLabel = get($data, "BackLabel") ?? null;
 		$form->BackPath = get($data, "BackPath") ?? null;
 		$form->ContentClass = "col-lg-8";

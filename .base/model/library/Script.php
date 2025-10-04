@@ -8,36 +8,39 @@
  */
 class Script
 {
-    
-    public static function Convert($obj)
+    /**
+     * To convert everything to scripts
+     * @param mixed $object
+     */
+    public static function Convert($object)
     {
-        if (is_null($obj))
+        if (is_null($object))
             return "null";
         else {
-            if (is_string($obj)) {
-                if($res = preg_find('/(?<=^\\$\{).+(?=\}$)/', $obj)) return $res;
+            if (is_string($object)) {
+                if($res = preg_find('/(?<=^\\$\{).+(?=\}$)/', $object)) return $res;
                 $sp = "`";
-                $obj = str_replace("\\", "\\\\", $obj);
-                // if(preg_match("/\n|(\\$\\{[\w\W]*\\})/",$obj))
-                //     $obj = str_replace(["`", '$'], ["\\`", '\\$'], $obj);
-                if(preg_match("/\n|(\\$\{[\w\W]*\})/",$obj))
-                    $obj = str_replace("`", "\\`", $obj);
+                $object = str_replace("\\", "\\\\", $object);
+                // if(preg_match("/\n|(\\$\\{[\w\W]*\\})/",$object))
+                //     $object = str_replace(["`", '$'], ["\\`", '\\$'], $object);
+                if(preg_match("/\n|(\\$\{[\w\W]*\})/",$object))
+                    $object = str_replace("`", "\\`", $object);
                 else
-                    $obj = str_replace($sp = "\"", "\\\"", $obj);
-                $obj = str_replace("</script>", "<\/script>", $obj);
-                return "$sp$obj$sp";
+                    $object = str_replace($sp = "\"", "\\\"", $object);
+                $object = str_replace("</script>", "<\/script>", $object);
+                return "$sp$object$sp";
             }
-            if (is_numeric($obj))
-                return $obj;
-            if (is_subclass_of($obj, "\Base"))
-                return $obj->ToString();
-            if (is_array($obj) && count($obj) > 0 && !is_int(array_key_first($obj))) 
-                return join("", ["{", join(", ", loop($obj, fn ($v, $k) => Convert::ToStatic($k).":".self::Convert($v))), "}"]);
-            if (is_countable($obj) || is_iterable($obj)) 
-                return join("", ["[", join(", ", loop($obj, fn ($o) => self::Convert($o))), "]"]);
-            if (is_callable($obj) || $obj instanceof \Closure)
-                return Internal::MakeScript($obj);
-            return json_encode($obj, flags: JSON_OBJECT_AS_ARRAY);
+            if (is_numeric($object))
+                return $object;
+            if (is_subclass_of($object, "\Base"))
+                return $object->ToString();
+            if (is_array($object) && count($object) > 0 && !is_int(array_key_first($object))) 
+                return join("", ["{", join(", ", loop($object, fn ($v, $k) => Convert::ToStatic($k).":".self::Convert($v))), "}"]);
+            if (is_countable($object) || is_iterable($object)) 
+                return join("", ["[", join(", ", loop($object, fn ($o) => self::Convert($o))), "]"]);
+            if (is_callable($object) || $object instanceof \Closure)
+                return Internal::MakeScript($object);
+            return json_encode($object, flags: JSON_OBJECT_AS_ARRAY);
         }
     }
 

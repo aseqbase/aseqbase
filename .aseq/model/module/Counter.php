@@ -7,6 +7,10 @@ class Counter extends Module{
 	public $From = 10;
 	public $To = 0;
 	public $Step = 1;
+	/**
+	 * A millisecond value for each interval
+	 * @var int
+	 */
 	public $Period = 1000;
 	public $Action = null;
 	public $ShowFunctionName = null;

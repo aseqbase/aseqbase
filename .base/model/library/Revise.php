@@ -98,7 +98,7 @@ class Revise{
         );
         $form->Id = "{$reflection->getName()}EditForm";
         $form->Template = "both";
-        $form->Timeout = 60000;
+        $form->Timeout = 60;
         $form->SubmitLabel = "Update";
         $form->ResetLabel = "Reset";
         $form->AllowHeader = false;

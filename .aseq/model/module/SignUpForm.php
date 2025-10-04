@@ -149,12 +149,12 @@ class SignUpForm extends Form
 			yield Html::Rack(
 				(isValid($this->FirstNameLabel) ? Html::LargeSlot(
 					Html::Label($this->FirstNameLabel, "FirstName", ["class"=> "prepend"]) .
-					Html::ValueInput("FirstName", ["placeholder" => $this->FirstNamePlaceHolder]),
+					Html::TextInput("FirstName", ["placeholder" => $this->FirstNamePlaceHolder]),
 					["class"=> "field"]
 				) : "") .
 				(isValid($this->LastNameLabel) ? Html::LargeSlot(
 					Html::Label($this->LastNameLabel, "LastName", ["class"=> "prepend"]) .
-					Html::ValueInput("LastName", ["placeholder" => $this->LastNamePlaceHolder]),
+					Html::TextInput("LastName", ["placeholder" => $this->LastNamePlaceHolder]),
 					["class"=> "field"]
 				) : "")
 			);
@@ -202,7 +202,7 @@ class SignUpForm extends Form
 				yield Html::Rack(
 					Html::LargeSlot(
 						Html::Label($this->SignatureLabel, "Signature", ["class"=> "prepend"]) .
-						Html::ValueInput("Signature", $this->SignatureValue, ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "UserName"]),
+						Html::TextInput("Signature", $this->SignatureValue, ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "UserName"]),
 						["class"=> "field"]
 					)
 				);
@@ -257,7 +257,7 @@ class SignUpForm extends Form
 						e.preventDefault();
 						return false;
 					}
-					" . ($this->UseAjax ? "submitForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
+					" . ($this->UseAjax ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
 					return true;
                 });
 			});
@@ -288,7 +288,7 @@ class SignUpForm extends Form
 							name: null,
 							firstName: get($received, "FirstName"),
 							lastName: get($received, "LastName"),
-							phone: (get($received, "CountryCode")??"0") . get($received, "Phone"),
+							phone: (get($received, "CountryCode")??"0") . " " . get($received, "Phone"),
 							groupId: $group,
 							status: $this->InitialStatus,
 							metadata: $route?["Route"=>$route]:null

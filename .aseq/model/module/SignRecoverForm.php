@@ -51,7 +51,7 @@ class SignRecoverForm extends Form{
 			yield Html::Rack(
 				Html::LargeSlot(
 					Html::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
-					Html::ValueInput("Signature" , ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
+					Html::TextInput("Signature" , ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
 				, ["class"=>"field"])
 			);
 		}
@@ -80,7 +80,7 @@ class SignRecoverForm extends Form{
 						e.preventDefault();
 						return false;
 					}
-					" . ($this->UseAjax ? "submitForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
+					" . ($this->UseAjax ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
 					return true;
                 });
 			});

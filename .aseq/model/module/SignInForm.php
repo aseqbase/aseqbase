@@ -94,7 +94,7 @@ class SignInForm extends Form{
 				Html::HiddenInput("Signature", $this->SignatureValue):
 				Html::LargeSlot(
 					Html::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
-					Html::ValueInput("Signature", $this->SignatureValue, ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
+					Html::TextInput("Signature", $this->SignatureValue, ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
 				, ["class"=>"field col"]);
 			yield $this->PasswordValue?
 				Html::HiddenInput("Password", $this->PasswordValue):Html::LargeSlot(

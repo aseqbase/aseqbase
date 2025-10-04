@@ -187,7 +187,7 @@ class DataBase {
 			return [];
 		if (is_string($params))
 			return Convert::FromJson($params);
-		elseif (is_array($params) || is_iterable($params)) {
+		elseif (is_iterable($params)) {
 			foreach ($params as $key => $value)
 				$params[$key] = $this->ParameterNormalization($key, $params[$key]);
 			return $params;
@@ -218,21 +218,23 @@ class DataBase {
 		return isEmpty($result) ? $defaultValue : $result;
 	}
 
-	public function Execute($query, $params = [])
+	public function Execute($query, $params = [], &$isDpne = null)
 	{
 		$Connection = $this->Connection();
 		$stmt = $Connection->prepare($query);
-		$isdone = $stmt->execute($this->ParametersNormalization($params));
+		// foreach ($this->ParametersNormalization($params) as $key => $value) 
+		// 	 $stmt->bindValue($key, $value, \PDO::PARAM_STR);
+		$isDpne = $stmt->execute($this->ParametersNormalization($params));
 		$this->Reset();
-		return $isdone ? $stmt : false;
+		return $stmt;
 	}
-	public function TryExecute($query, $params = [], $defaultValue = null)
+	public function TryExecute($query, $params = [], &$isDpne = null)
 	{
 		try {
-			return $this->ReturnValue($this->Execute($query, $params), $defaultValue);
+			return $this->Execute($query, $params, $isDpne);
 		} catch (\Exception $ex) {
 			$this->Error($ex, $query, $params);
-			return $defaultValue;
+			return null;
 		} finally {$this->Reset();}
 	}
 
@@ -283,11 +285,8 @@ class DataBase {
 
 	public function FetchRowsExecute($query, $params = [])
 	{
-		$Connection = $this->Connection();
-		$stmt = $Connection->prepare($query);
-		$stmt->execute($this->ParametersNormalization($params));
+		$stmt = $this->Execute($query, $params);
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
-		$this->Reset();
 		return $stmt->fetchAll();
 	}
 	public function TryFetchRows($query, $params = [], $defaultValue = array())
@@ -302,12 +301,9 @@ class DataBase {
 
 	public function FetchRowExecute($query, $params = [])
 	{
-		$Connection = $this->Connection();
-		$stmt = $Connection->prepare($query);
-		$stmt->execute($this->ParametersNormalization($params));
+		$stmt = $this->Execute($query, $params);
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 		$result = $stmt->fetch();
-		$this->Reset();
 		return $result?$result:null;
 	}
 	public function TryFetchRow($query, $params = [], $defaultValue = []) {
@@ -321,14 +317,11 @@ class DataBase {
 
 	public function FetchColumnExecute($query, $params = []): array|null
 	{
-		$Connection = $this->Connection();
-		$stmt = $Connection->prepare($query);
-		$stmt->execute($this->ParametersNormalization($params));
+		$stmt = $this->Execute($query, $params);
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 		$result = loop($stmt->fetchAll(), function ($v) {
 			return first($v);
 		}, false);
-		$this->Reset();
 		return $result?$result:null;
 	}
 	public function TryFetchColumn($query, $params = [], array|null $defaultValue = array())
@@ -347,7 +340,6 @@ class DataBase {
 		$k = $v = null;
 		foreach ($this->FetchRowsExecute($query, $params) as $i => $row)
 			$res[count($row) < 2 ? $i : $row[$k = $k ?? array_key_first($row)]] = $row[$v = $v ?? array_key_last($row)];
-		$this->Reset();
 		return $res;
 	}
 	public function TryFetchPairs($query, $params = [], array|null $defaultValue = array()): array|null
@@ -362,10 +354,7 @@ class DataBase {
 
 	public function FetchValueExecute($query, $params = [])
 	{
-		$Connection = $this->Connection();
-		$stmt = $Connection->prepare($query);
-		$stmt->execute($this->ParametersNormalization($params));
-		$this->Reset();
+		$stmt = $this->Execute($query, $params);
 		return $stmt->fetchColumn();
 	}
 	public function TryFetchValue($query, $params = [], $defaultValue = null)
@@ -380,11 +369,8 @@ class DataBase {
 
 	public function FetchChangesExecute($query, $params = []): bool|int
 	{
-		$Connection = $this->Connection();
-		$stmt = $Connection->prepare($query);
-		$isdone = $stmt->execute($this->ParametersNormalization($params));
-		$this->Reset();
-		return $isdone ? ($stmt->rowCount()?: $stmt->columnCount()) : false;
+		$stmt = $this->Execute($query, $params, $isDone);
+		return $isDone ? ($stmt->rowCount()?: ($stmt->columnCount()?:true)) : false;
 	}
 	public function TryFetchChanges($query, $params = [], bool|int $defaultValue = false): bool|int
 	{
@@ -415,7 +401,8 @@ COMMIT;";
 
 	public function Create($name, $configs = "DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", $defaultValue = null)
 	{
-		return $this->TryExecute($this->CreateQuery($name, $configs), [], $defaultValue);
+		$res = $this->TryExecute($this->CreateQuery($name, $configs), [], $isDone);
+		return $isDone? $res : $defaultValue;
 	}
 	public function CreateQuery($name, $configs = "DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
 	{
@@ -424,7 +411,8 @@ COMMIT;";
 
 	public function CreateTable($tableName, $column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin", $defaultValue = null)
 	{
-		return $this->TryExecute($this->CreateTableQuery($tableName, $column_types, $configs), [], $defaultValue);
+		$res = $this->TryExecute($this->CreateTableQuery($tableName, $column_types, $configs), [], $isDone);
+		return $isDone? $res : $defaultValue;
 	}
 	public function CreateTableQuery($tableName, $column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin")
 	{
