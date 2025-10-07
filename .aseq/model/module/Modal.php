@@ -167,8 +167,15 @@ class Modal extends Player{
 		Script::Convert($buttonsContent??$this->ButtonsContent).", ".
 		Script::Convert($source??$this->Source).");";
 	}
-	public function ShowScript(){
-		return $this->Name."_Show();";
+	
+	public function Show($content = null){
+		return render($this->ShowScript($content));
+	}
+	public function ShowScript($content = null){
+		return ($content?$this->InitializeScript(content: $content):"").$this->Name."_Show();";
+	}
+	public function Hide(){
+		return render($this->HideScript());
 	}
 	public function HideScript(){
 		return $this->Name."_Hide();";

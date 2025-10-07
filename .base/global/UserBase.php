@@ -284,7 +284,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 
 	public function MakeSign($regards = "Kind Regards"){
-		return trim(join("\n\r",[
+		return trim(join(PHP_EOL,[
 				$this->Access >= \_::$Config->AdminAccess?\_::$Info->Slogan:"",
 				$regards?"*$regards*":"",
                 "------",

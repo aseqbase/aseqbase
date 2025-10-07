@@ -130,10 +130,12 @@ class Style extends \ArrayObject{
 		if($text === null) return $text;
 		if($keyWords === null) $keyWords = \_::$Info->KeyWords;
 		$dic = array();
-		$text = Code($text, $dic,
-			startCode:"<",
-			endCode:">",
-			pattern:'/(`\S[^`]*`)|("\S[^"]*")|(\'\S[^\']*\')|(\<\/?[A-z]+[^>]*[^\\\\]?\>)/iU'
+		$text = encode(
+			$text,
+			$dic,
+			wrapStart: "<",
+			wrapEnd: ">",
+			pattern: '/(`\S[^`]*`)|("\S[^"]*")|(\'\S[^\']*\')|(\<\/?[A-z]+[^>]*[^\\\\]?\>)/iU'
 		);
         $start = "/(?<=[ \.,;]|^)(?<!\<)(";
         $end = ")(?!\>)(?=[ \.,;]|^)/".($caseSensitive?"":"i").($multiline?"m":"");

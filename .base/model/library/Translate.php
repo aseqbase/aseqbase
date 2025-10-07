@@ -24,11 +24,11 @@ class Translate
 	 * The language default direction (ltr|rtl)
 	 * @var string
 	 */
-	public $Direction = "ltr";
-	public $CodeStart = "<";
-	public $CodeEnd = ">";
 	public $CodeLimit = 160;
-	public $CodePattern = "/(([\"'`])\S+[\w\W]*\\2)|(\<\S+[\w\W]*\>)|(\d*\.?\d+)/U";
+	public $Direction = "ltr";
+	public $WrapStart = "<";
+	public $WrapEnd = ">";
+	public $WrapPattern = "/(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(\<\S+[\w\W]*\>)|(\d*\.?\d+)/U";
 	public $ValidPattern = "/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-z]/m";
 	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
 	public $AllowCache = true;
@@ -82,7 +82,7 @@ class Translate
 		if ($this->IsRootLanguage($text))
 			return $text;
 		$dic = array();
-		$text = Code($text, $dic, $this->CodeStart, $this->CodeEnd, $this->CodePattern);
+		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
@@ -92,7 +92,7 @@ class Translate
 			$this->DataTable->Insert([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $data))]);
 		foreach ($replacements as $key => $val)
 			$data = str_replace($key, $val, $data);
-		$data = Decode($data, $dic);
+		$data = decode($data, $dic);
 		if($this->CaseSensitive) return $data;
 		return self::SetCaseStatus($data, $data);
 	}
@@ -101,7 +101,7 @@ class Translate
 		if ($this->IsRootLanguage($text))
 			return $text;
 		$dic = array();
-		$ntext = Code($text, $dic, $this->CodeStart, $this->CodeEnd, $this->CodePattern);
+		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern);
 		$code = $this->CreateCode($ntext);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
@@ -138,12 +138,12 @@ class Translate
 		if ($this->IsRootLanguage($text))
 			return false;
 		$dic = array();
-		$text = Code($text, $dic, $this->CodeStart, $this->CodeEnd, $this->CodePattern);
+		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if (!$data) $data = array("x" => $text);
 		if (!is_null($val))
-			$data[$lang ?? $this->Language] = Code($val, $dic, $this->CodeStart, $this->CodeEnd, $this->CodePattern);
+			$data[$lang ?? $this->Language] = encode($val, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern);
 		return $this->DataTable->Replace(
 			[":KeyCode" => $code, ":ValueOptions" => Convert::ToJson($data)]
 		);

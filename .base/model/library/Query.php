@@ -119,14 +119,14 @@ class Query
         if (isEmpty($id))
             return $default;
         $condit = \_::$Back->GetAccessCondition(tableName:$table->Name);
-        $parentIds = [$id];
-        $newparentIds = [$id];
+        $parentIds = $id?[$id]:[];
+        $newparentIds = $id?[$id]:[];
         while (
             $nest-- !== 0 && !isEmpty(
                 $newparentIds =
                 $table->SelectColumn(
                     "$table->Name.Id",
-                    (count($newparentIds) > 0 ? " $table->Name.ParentId IN (" . join(",", $newparentIds) . ") AND " : "") . $condit,
+                    ($newparentIds ? " $table->Name.ParentId IN (" . join(",", $newparentIds) . ") AND " : "") . $condit,
                     null
                 )
             )

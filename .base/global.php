@@ -2041,24 +2041,24 @@ function last($array, $default = null)
 
 #region CRYPTION
 
-function code($html, &$dic = null, $startCode = "<", $endCode = ">", $pattern = '/((["\'])\S+[\w\W]*\2)|(\<\S+[\w\W]*[^\\\\]\>)|(\d*\.?\d+)/iU')
+function encode($plain, &$dic = null, $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU')
 {
 	if (!is_array($dic))
 		$dic = array();
 	$c = count($dic);
-	return preg_replace_callback($pattern, function ($a) use (&$dic, &$c, $startCode, $endCode) {
+	return preg_replace_callback($pattern, function ($a) use (&$dic, &$c, $wrapStart, $wrapEnd) {
 		$key = $a[0];
 		if (array_key_exists($key, $dic))
 			return $dic[$key];
-		return $dic[$key] = $startCode . $c++ . $endCode;
-	}, $html);
+		return $dic[$key] = $wrapStart . $c++ . $wrapEnd;
+	}, $plain);
 }
-function decode($html, $dic)
+function decode($cipher, $dic)
 {
 	if (is_array($dic))
 		foreach (array_reverse($dic) as $k => $v)
-			$html = str_replace($v, $k, $html);
-	return $html;
+			$cipher = str_replace($v, $k, $cipher);
+	return $cipher;
 }
 /**
  * Encrypt plain by the key or the website secret key

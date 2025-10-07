@@ -218,20 +218,20 @@ class DataBase {
 		return isEmpty($result) ? $defaultValue : $result;
 	}
 
-	public function Execute($query, $params = [], &$isDpne = null)
+	public function Execute($query, $params = [], &$isDone = null)
 	{
 		$Connection = $this->Connection();
 		$stmt = $Connection->prepare($query);
 		// foreach ($this->ParametersNormalization($params) as $key => $value) 
 		// 	 $stmt->bindValue($key, $value, \PDO::PARAM_STR);
-		$isDpne = $stmt->execute($this->ParametersNormalization($params));
+		$isDone = $stmt->execute($this->ParametersNormalization($params));
 		$this->Reset();
 		return $stmt;
 	}
-	public function TryExecute($query, $params = [], &$isDpne = null)
+	public function TryExecute($query, $params = [], &$isDone = null)
 	{
 		try {
-			return $this->Execute($query, $params, $isDpne);
+			return $this->Execute($query, $params, $isDone);
 		} catch (\Exception $ex) {
 			$this->Error($ex, $query, $params);
 			return null;
@@ -469,16 +469,16 @@ COMMIT;";
 
 	public function Insert($tableName, $params = [], bool|int $defaultValue = false): bool|int
 	{
-		if (is_array(first($params))) {
-			$queries = [];
-			for ($i = 0; $i < count($params); $i++)
-				$queries[] = $this->InsertQuery($tableName, $params[$i]);
-			return $this->TryTransaction($queries, $params, $defaultValue);
-		}
+		if (is_array(first($params)))
+			return $this->TryTransaction($this->InsertQuery($tableName, $params), $params, $defaultValue);
 		return $this->TryFetchChanges($this->InsertQuery($tableName, $params), $params, $defaultValue);
 	}
 	public function InsertQuery($tableName, &$params)
 	{
+		if (is_array(first($params)))
+			return loop($params, function($p,$k) use($tableName, &$params) {
+				return self::InsertQuery($tableName, $params[$k]);
+			});
 		$vals = array();
 		$sets = array();
 		$args = array();
@@ -494,10 +494,16 @@ COMMIT;";
 
 	public function Replace($tableName, $params = [], bool|int $defaultValue = false): bool|int
 	{
+		if (is_array(first($params)))
+			return $this->TryTransaction($this->ReplaceQuery($tableName, $params), $params, $defaultValue);
 		return $this->TryFetchChanges($this->ReplaceQuery($tableName, $params), $params, $defaultValue);
 	}
 	public function ReplaceQuery($tableName, &$params)
 	{
+		if (is_array(first($params)))
+			return loop($params, function($p,$k) use($tableName, &$params) {
+				return self::ReplaceQuery($tableName, $params[$k]);
+			});
 		$vals = array();
 		$sets = array();
 		$args = array();
@@ -539,16 +545,16 @@ COMMIT;";
 
 	public function Update($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
 	{
-		if (is_array(first($params))) {
-			$queries = [];
-			for ($i = 0; $i < count($params); $i++)
-				$queries[] = $this->UpdateQuery($tableName, $condition, $params[$i]);
-			return $this->TryTransaction($queries, $params, $defaultValue);
-		}
+		if (is_array(first($params)))
+			return $this->TryTransaction($this->UpdateQuery($tableName, $condition, $params), $params, $defaultValue);
 		return $this->TryFetchChanges($this->UpdateQuery($tableName, $condition, $params), $params, $defaultValue);
 	}
 	public function UpdateQuery($tableName, $condition, &$params)
 	{
+		if (is_array(first($params)))
+			return loop($params, function($p,$k) use($tableName, $condition, &$params) {
+				return self::UpdateQuery($tableName, $condition, $params[$k]);
+			});
 		$sets = array();
 		$args = array();
 		$condition = $this->ConditionNormalization($condition) . " ";
@@ -564,10 +570,16 @@ COMMIT;";
 
 	public function Delete($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
 	{
+		if (is_array(first($params)))
+			return $this->TryTransaction($this->DeleteQuery($tableName, $condition, $params), $params, $defaultValue);
 		return $this->TryFetchChanges($this->DeleteQuery($tableName, $condition), $params, $defaultValue);
 	}
-	public function DeleteQuery($tableName, $condition = null)
+	public function DeleteQuery($tableName, $condition = null, &$params = [])
 	{
+		if (is_array(first($params)))
+			return loop($params, function($p,$k) use($tableName, $condition, &$params) {
+				return self::DeleteQuery($tableName, $condition, $params[$k]);
+			});
 		return "{$this->PreQuery} DELETE FROM " . $this->NameNormalization($tableName) . " {$this->MidQuery} " . $this->ConditionNormalization($condition) . " " . $this->PostQuery;
 	}
 
