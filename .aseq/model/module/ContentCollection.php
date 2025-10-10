@@ -195,8 +195,8 @@ class ContentCollection extends Collection{
 			.{$this->Name}>*>.item {
 				height: fit-content;
 				max-width: calc(100% - 2 * var(--size-2));
-				background-Color: var(--back-color-special);
-				Color: var(--fore-color-special);
+				background-color: var(--back-color-special);
+				color: var(--fore-color-special);
 				margin: var(--size-2);
             	padding: var(--size-3);
 				font-size: var(--size-0);
@@ -206,10 +206,11 @@ class ContentCollection extends Collection{
 				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 			.{$this->Name}>*>.item:hover{
+				background-color: var(--back-color);
+				color: var(--fore-color);
 				box-shadow: var(--shadow-2);
 				border-radius:  var(--radius-1);
 				border-color: var(--back-color-special-input);
-				background-Color: #88888818;
 				".(\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)"))."
 			}
 

@@ -27,7 +27,7 @@ class MainMenu extends Module
 	public $AllowDefaultButtons = true;
 	public $LogoWidth = "auto";
 	public $LogoHeight = "calc(var(--size-5) - var(--size-0) / 2)";
-	public $FixedMargin = "60px";
+	public $FixedMargin = "calc(var(--size-1) * 3)";
     public $Printable = false;
     public $ZIndex = "9999";
 
@@ -36,26 +36,22 @@ class MainMenu extends Module
 		return parent::GetStyle() . Html::Style(
 			"
 			.{$this->Name} {
-				margin: 0;
-				padding: 0;
+				" . ($this->AllowFixed ? "
 				background-color: var(--back-color-special);
 				color: var(--fore-color-special);
-				" . ($this->AllowFixed ? "
 				opacity: 0.95;
 				position:fixed;
 				top:0;
 				left:0;
 				right:0;
 				z-index: 999;
-            	" : "") . "
 				box-shadow: var(--shadow-2);
 			}
-			" . ($this->AllowFixed ? "
 			.{$this->Name}-margin{
-				height: {$this->FixedMargin};
-				background: transparent;
+				min-height: {$this->FixedMargin};
 			}
-			" : "") . "
+			" : "
+			}") . "
 
 			.{$this->Name} .header{
 				color: var(--back-color-5);
@@ -148,9 +144,9 @@ class MainMenu extends Module
 				display: inline-block;
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active{
-				border-top: var(--border-2) var(--back-color-special);
-				color: var(--fore-color);
 				background-color: var(--back-color);
+				color: var(--fore-color);
+				font-weight: bold;
 				box-shadow: var(--shadow-2);
 			}
 			.{$this->Name} ul:not(.sub-items)>li>:is(.button, .button:visited){
@@ -448,6 +444,6 @@ class MainMenu extends Module
 
 	public function AfterHandle()
 	{
-		return parent::AfterHandle() . ($this->AllowFixed ? "<div class='{$this->Name}-margin be unprintable'></div>" : "");
+		return parent::AfterHandle() . ($this->AllowFixed ? "<div class='{$this->Name}-margin be unprintable top-invisible'></div>" : "");
 	}
 }

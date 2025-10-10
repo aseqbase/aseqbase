@@ -81,16 +81,24 @@ class QRCodeScanner extends Module{
 			.{$this->Name} .controls{
 				font-size: var(--size-1);
 				position: absolute;
-				bottom: 0px;
-				padding:5px;
+				bottom: 0;
+				padding:0;
 				display: flex;
 				align-content: center;
 				justify-content: center;
 				align-items: center;
 				gap:var(--size-0);
+				z-index: 2;
 			}
 			.{$this->Name} .controls .button{
-				padding:5px;
+				background-color: #00000033;
+				color: #ffffff88;
+				padding:1vmin;
+				margin:1vmin;
+			}
+			.{$this->Name} .controls .button:hover{
+				background-color: #88888888;
+				color: #ffffff;
 			}
 			.{$this->Name} .mask{
 				position: absolute;
@@ -117,8 +125,8 @@ class QRCodeScanner extends Module{
 		Html::CloseTag("video").
 		($this->AllowMask?Html::Division($this->GetContent(), ["class"=>"mask"]):"").
 		Html::Division(
-			($this->SwitchButtonLabel?Html::Button($this->SwitchButtonLabel, $this->SwitchScript(), ["class"=>"switchcamera alt be hide"]):"").
-				($this->ActiveButtonLabel?Html::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class"=>"activation alt be"]):"")
+			($this->SwitchButtonLabel?Html::Button($this->SwitchButtonLabel, $this->SwitchScript(), ["class"=>"switchcamera be hide"]):"").
+				($this->ActiveButtonLabel?Html::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class"=>"activation be"]):"")
 		, ["class"=>"controls"]).
 		Html::Division($this->GetTitle(["class"=>$this->TitleClass]).$this->GetDescription(["class"=>$this->DescriptionClass]), ["class"=>"message"]);
 	}

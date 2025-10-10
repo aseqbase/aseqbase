@@ -36,28 +36,31 @@ class Html
                 if (preg_match("/(?<!\\\)\<[^\>]+(?<!\\\)\>/i", $object))
                     return $object;
                 else {
-                    $patt = '/(=\s*(("[^"]*")|(\'[^\']*\')))|((<([A-Za-z0-9_?:][A-Za-z0-9-_.?:\/\\\]*)[^>]*((>[^<]*<\/\7>)|(\/?>))))/i';
+                    $patt = '/(=\s*(("[^"]*")|(\'[^\']*\')))|((<([A-Z\w?:][A-Za-z0-9-_.?:\/\\\]*)[^>]*((>[^<]*<\/\7>)|(\/?>))))/i';
+                    $tagPatt = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)/iU';
                     $object = preg_replace('/\\\(?=[<>])/s', "", $object); // Remove Escapes
 
+                    $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
+
                     // Codes
-                    $object = preg_replace("/`?``\s?([\s\S]+?)\s?```?/", self::CodeBlock("$1"), $object); // Code blocks
+                    $object = preg_replace("/`?``\s?([\s\S]+?)\s?```?(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", self::CodeBlock("$1", ["id"=>"$2", "class"=>"$3"], "$4"), $object); // Code blocks
                     $object = encode($object, $dic, pattern: $patt);// To keep all previous tags unchanged
-                    $object = preg_replace("/(?<!`)`([^`\r\n]+)`(?!`)/", self::Code("$1"), $object); // Inline code
+                    $object = preg_replace("/(?<!`)`([^`\r\n]+)`(?!`)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", self::Code("$1", ["id"=>"$2", "class"=>"$3"], "$4"), $object); // Inline code
                     $object = encode($object, $dic, pattern: $patt);// To keep all previous tags unchanged
-                    $object = preg_replace("/((^[ \t]*>.*$\s?)+)/m", self::CodeBlock("$1"), $object); // Blockquotes
+                    $object = preg_replace("/((^[ \t]*>.*$\s?)+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/im", self::CodeBlock("$1", ["id"=>"$2", "class"=>"$3"], "$4"), $object); // Blockquotes
                     $object = encode($object, $dic, pattern: $patt);// To keep all previous tags unchanged
 
                     // Quotes
-                    $object = preg_replace_callback('/(?<!")"(\S[\r\n"]+?\S)"(?!")/', fn($m) => self::Quote($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback('/"?""\s?([\s\S]+?)\s?"""?/s', fn($m) => self::QuoteBlock($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Blockquotes
+                    $object = preg_replace_callback('/(?<!")"(\S[\r\n"]+?\S)"(?!")(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i', fn($m) => self::Quote($m[1], ["id"=>$m[2]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback('/"?""\s?([\s\S]+?)\s?"""?(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/si', fn($m) => self::QuoteBlock($m[1], ["id"=>$m[2]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object); // Blockquotes
 
                     // Headings
-                    $object = preg_replace_callback("/\s?^[ \t]*\#\s(.*)$/im", fn($m) => self::ExternalHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{2}\s(.*)$/im", fn($m) => self::SuperHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{3}\s(.*)$/im", fn($m) => self::Heading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{4}\s(.*)$/im", fn($m) => self::SubHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{5}\s(.*)$/im", fn($m) => self::InternalHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{6}\s(.*)$/im", fn($m) => self::InlineHeading($m[1], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::ExternalHeading($m[1], null, ["id"=>$m[2]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{2}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::SuperHeading($m[1], null, ["id"=>$m[2]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{3}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Heading($m[1], null, ["id"=>$m[2]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{4}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::SubHeading($m[1], null, ["id"=>$m[2]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{5}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::InternalHeading($m[1], null, ["id"=>$m[2]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{6}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::InlineHeading($m[1], null, ["id"=>$m[2]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
 
                     // Tables
                     $object = preg_replace_callback(
@@ -83,22 +86,18 @@ class Html
                         },
                         $object
                     );
-
-                    // Medias
-                    $object = preg_replace_callback("/@image\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Image($m[1], $m[2]), $object);
-                    $object = preg_replace_callback("/@video\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Video($m[1], $m[2]), $object);
-                    $object = preg_replace_callback("/@audio\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Audio($m[1], $m[2]), $object);
-                    $object = preg_replace_callback("/@icon\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Icon($m[1], $m[2]), $object);
-                    $object = preg_replace_callback("/@button\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Button($m[1], $m[2]), $object);
-                    $object = preg_replace_callback("/@\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Media($m[1], $m[2]), $object);
-                    $object = preg_replace_callback("/\[([^\]]+)\]\(\s*([^\s]+)\s*\)/i", fn($m) => self::Link($m[1], $m[2], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    
+                    // Media
+                    $object = preg_replace_callback("/!\{([^\}]+)\}(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Division($m[1], ["id"=>$m[2]??null], ["class"=>$m[3]??null], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/!(\w*)\[([^\]]+)\]\(\s*([^\s]+)\s*\)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) =>("\\MiMFa\\Library\\Html::".($m[1]?:"Media"))($m[2]??null, $m[3]??null, ["id"=>$m[4]??null], ["class"=>$m[5]??null], $m[6]??[]), $object);
+                    $object = preg_replace_callback("/\[([^\]]+)\]\(\s*([^\s]+)\s*\)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Link($m[1], $m[2], ["id"=>$m[3]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[4]??null)] : ["class" => "be $dir ".($m[4]??null)], $m[5]??[]), $object);
 
                     // Refer
-                    $object = preg_replace_callback("/\[([a-z0-9_\-]+)\](?!\(|:)/i", fn($m) => self::Span("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\[\^([^\]]+)\](?!\(|:)/i", fn($m) => self::Super("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\[~([^\]]+)\](?!\(|:)/i", fn($m) => self::Sub("[$m[1]]", "#fn-$1", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\[([a-z0-9_\-]+)\]:\s*(.*)$/im", fn($m) => self::Division("[$m[1]] " . __($m[2]), ["class" => "footnote", "id" => "fn-$1"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\[([\^~])([^\]]+)\]:\s*(.*)$/im", fn($m) => self::Division($m[1] . __($m[2]) . " " . __($m[3]), ["class" => "footnote", "id" => "fn-$2"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/\[([\w\-]+)\](?!\(|:)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Span("[$m[1]]", "#fn-$m[1]", ["id"=>$m[3]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[4]??null)] : ["class" => "be $dir ".($m[4]??null)], $m[5]??[]), $object);
+                    $object = preg_replace_callback("/\[\^([^\]]+)\](?!\(|:)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Super("[$m[1]]", "#fn-$m[1]", ["id"=>$m[3]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[4]??null)] : ["class" => "be $dir ".($m[4]??null)], $m[5]??[]), $object);
+                    $object = preg_replace_callback("/\[~([^\]]+)\](?!\(:)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Sub("[$m[1]]", "#fn-$m[1]", ["id"=>$m[3]??null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[4]??null)] : ["class" => "be $dir ".($m[4]??null)], $m[5]??[]), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\[([\w\-]+)\]:\s*(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Division("[$m[1]] " . __($m[2]), ["class" => "footnote", "id" => $m[3]??"fn-$m[1]"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? ["class" => ($m[4]??null)] : ["class" => "be $dir ".($m[4]??null)], $m[5]??[]), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\[([\^~])([^\]]+)\]:\s*(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Division($m[1] . __($m[2]) . " " . __($m[3]), ["class" => "footnote", "id" => $m[3]??"fn-$m[2]"], ($dir = Translate::GetDirection($m[2])) == \_::$Back->Translate->Direction ? ["class" => ($m[4]??null)] : ["class" => "be $dir ".($m[4]??null)], $m[5]??[]), $object);
 
                     // Lists
                     $lc = 0;
@@ -107,9 +106,9 @@ class Html
                             "/((\s?^([ \t]*)([^\s\w#@!<\d+]|(\+|(\d+))\W?)[ \t]+(.*)$)+)/m",
                             function ($wholematches) {
                                 $lines = preg_split("/\r?\n\n?\r?/", trim($wholematches[1], "\r\n"));
-                                $linePattern = "/\s?^([ \t]*)([^\s\w#@!<\d+]|(\+|(\d+))\W?)[ \t]+(.*)$/m";
+                                $linePattern = "/\s?^([ \t]*)([^\s\w#@!<\d+]|(\+|(\d+))\W?)[ \t]+(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/mi";
                                 preg_match($linePattern, reset($lines), $matches);
-                                $linePattern = "/\s?^(" . $matches[1] . ")([^\s\w#@!<\d+]|(\+|(\d+))\W?)[ \t]+(.*)$/m";
+                                $linePattern = "/\s?^(" . $matches[1] . ")([^\s\w#@!<\d+]|(\+|(\d+))\W?)[ \t]+(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/mi";
                                 $ordered = empty($matches[3]) ? false : true;
                                 $list = [];
                                 $inlines = [];
@@ -119,7 +118,7 @@ class Html
                                             $list[count($list) - 1] .= self::Convert(join("\n", $inlines));
                                             $inlines = [];
                                         }
-                                        $list[] = self::Item($ms[5], empty($ms[4]) ? [] : ["number" => $ms[4]], ($dir = Translate::GetDirection($ms[5])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]);
+                                        $list[] = self::Item($ms[5], ["id"=>($ms[6]??null)], empty($ms[4]) ? [] : ["number" => $ms[4]], ($dir = Translate::GetDirection($ms[5])) == \_::$Back->Translate->Direction ? ["class"=>($ms[7]??null)] : ["class" => "be $dir ".($ms[7]??null)], $ms[8]??[]);
                                     } else
                                         $inlines[] = $line;
                                 }
@@ -138,25 +137,25 @@ class Html
                     } while ($lc);
 
                     // Texts
-                    $object = preg_replace_callback("/\*\*(\S[^\*\r\n\v]+)\*\*/i", fn($m) => self::Strong($m[1], null, ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/\*([^\*\r\n\v]+)\*/i", fn($m) => self::Bold($m[1], null, ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/__([^\r\n\v]+)__/i", fn($m) => self::Italic($m[1], null, ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/~~([^\r\n\v]+)~~/i", fn($m) => self::Strike($m[1], null, ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
-                    $object = preg_replace_callback("/(?<!\[)\^\(([^\)]+)\)/i", fn($m) => self::Super($m[1], null, ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Superscript
-                    $object = preg_replace_callback("/(?<!\[)\~\(([^\)]+)\)/i", fn($m) => self::Sub($m[1], null, ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Superscript
-                    $object = preg_replace_callback("/(?<!\[)\^([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Super($m[1], null, ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Superscript
-                    $object = preg_replace_callback("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)/i", fn($m) => self::Sub($m[1], null, ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object); // Subscript
+                    $object = preg_replace_callback("/\*\*(\S[^\*\r\n\v]+)\*\*(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Strong($m[1], null, ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/\*([^\*\r\n\v]+)\*(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Bold($m[1], null, ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/__([^\r\n\v]+)__(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Italic($m[1], null, ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/~~([^\r\n\v]+)~~(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Strike($m[1], null, ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
+                    $object = preg_replace_callback("/(?<!\[)\^\(([^\)]+)\)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Super($m[1], null, ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object); // Superscript
+                    $object = preg_replace_callback("/(?<!\[)\~\(([^\)]+)\)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Sub($m[1], null, ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object); // Superscript
+                    $object = preg_replace_callback("/(?<!\[)\^([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Super($m[1], null, ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object); // Superscript
+                    $object = preg_replace_callback("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Sub($m[1], null, ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object); // Subscript
 
-                    $object = encode($object, $dic, pattern: $patt);// To keep all previous tags unchanged
+                    $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
 
                     // Links
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", fn($m) => self::Link($m[1], $m[1]), $object);
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", fn($m) => self::Link($m[1], "mailto:{$m[1]}"), $object);
 
-                    $object = preg_replace_callback("/\s?(^[^\W].*$)/m", fn($m) => self::Element($m[1], "p", ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? [] : ["class" => "be $dir"]), $object);
+                    $object = preg_replace_callback("/\s?(^[^\W].*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/mi", fn($m) => self::Element($m[1], "p", ["id"=>($m[2]??null)], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3]??null)] : ["class" => "be $dir ".($m[3]??null)], $m[4]??[]), $object);
 
                     // Signs
-                    $object = preg_replace("/\s?^\-{6,}(?=<|$)/m", self::$BreakLine, $object);
+                    $object = preg_replace("/\s?^\-{3,6}(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?(?=<|$)/mi", Html::Element(null,"hr", ["id"=>"$1", "class"=>"$2"], "$3"), $object);
                     $object = preg_replace("/(\r\n)|(\n\r)|((?<!>))\r?\n\r?/", self::$Break, $object);
 
                     return ($dir = Translate::GetDirection($object)) == \_::$Back->Translate->Direction ? decode($object, $dic) : self::Division(decode($object, $dic), ["class" => "be $dir"]);

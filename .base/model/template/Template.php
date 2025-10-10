@@ -223,6 +223,7 @@ class Template extends \Base{
         .icon {
             min-height: 1em;
             min-width: 1em;
+            padding: 0;
         }
         button, .button{
             font-family: var(--font-output), var(--font-special-output), var(--font);

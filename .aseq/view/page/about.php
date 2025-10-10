@@ -2,6 +2,7 @@
 
 use MiMFa\Library\Convert;
 use MiMFa\Library\Html;
+use MiMFa\Library\Style;
 
 module("PrePage");
 $module = new MiMFa\Module\PrePage();
@@ -20,8 +21,13 @@ render(
 			text-align: center;
 		}
 		.{$module->Name} .image{
-			max-height: 15vmax;
 			padding: var(--size-5);
+			".Style::UniversalProperty("filter", "drop-shadow(
+					-8px -4px 0 var(--back-color-special)
+				)")."
+		}
+		.{$module->Name} .image img{
+			max-width: 25vmax;
 		}
 		.page *{
 			line-height: 2em;

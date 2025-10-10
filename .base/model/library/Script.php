@@ -11,8 +11,9 @@ class Script
     /**
      * To convert everything to scripts
      * @param mixed $object
+     * @param array $arguments needs for some types like php function
      */
-    public static function Convert($object)
+    public static function Convert($object, ...$arguments)
     {
         if (is_null($object))
             return "null";
@@ -35,11 +36,11 @@ class Script
             if (is_subclass_of($object, "\Base"))
                 return $object->ToString();
             if (is_array($object) && count($object) > 0 && !is_int(array_key_first($object))) 
-                return join("", ["{", join(", ", loop($object, fn ($v, $k) => Convert::ToStatic($k).":".self::Convert($v))), "}"]);
+                return join("", ["{", join(", ", loop($object, function ($v, $k) use($arguments){ return  Convert::ToStatic($k).":".self::Convert($v, ...$arguments);})), "}"]);
             if (is_countable($object) || is_iterable($object)) 
-                return join("", ["[", join(", ", loop($object, fn ($o) => self::Convert($o))), "]"]);
+                return join("", ["[", join(", ", loop($object, function ($o) use($arguments){ return self::Convert($o, ...$arguments);})), "]"]);
             if (is_callable($object) || $object instanceof \Closure)
-                return Internal::MakeScript($object);
+                return Internal::MakeScript($object, $arguments);
             return json_encode($object, flags: JSON_OBJECT_AS_ARRAY);
         }
     }
