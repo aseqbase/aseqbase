@@ -119,7 +119,7 @@ class Internal
                 $source .= $file->current();
                 $file->next();
             }
-            return preg_find("/(fn|function)\s*\([\s\S]+$/", trim($source, ";(),= \n\r\t\v\x00"));
+            return preg_find("/(fn|function)\s*\([^\)]*\)\s*(\=\>)?\s*\{\s*(('[^']*')*|(\"[^\"]*\")*|(\{[^\}]+\})*|([^\}]+)*)*\s*\}/U", trim($source, ";(),= \n\r\t\v\x00"));
         } elseif (is_object($handler)) {
             $reflection = new \ReflectionObject($handler);
             $source = 'fn($args=null)=>';
