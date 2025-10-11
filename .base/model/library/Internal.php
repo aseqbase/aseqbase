@@ -25,7 +25,8 @@ class Internal
         $reses = [];
         foreach ($received as $k => $v) {
             $args = json_decode($v, true, flags: JSON_OBJECT_AS_ARRAY)??[];
-            $reses[] = Convert::By(self::Get($k, fn($a = null) => $a), ...(is_array($args)?$args:[$args]));
+            $args = (is_array($args)?$args:[$args]);
+            $reses[] = Convert::By(self::Get($k, fn($a = null) => $a), ...$args);
         }
         return join("", $reses);
     }
