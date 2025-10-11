@@ -28,6 +28,7 @@ use MiMFa\Library\Html;
         .page-introduction .services h3 .image {
             margin: var(--size-0);
             display: block;
+            width: calc(100% - 2 * var(--size-0));
         }
         .page-introduction .services h3 .image img {
             height: var(--size-max);

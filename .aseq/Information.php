@@ -30,10 +30,8 @@ class Information extends InformationAseq{
 	];
 
 	public $Contacts = [
-		array("Name" => "Instagram", "Path"=> "https://www.instagram.com/aseqbase", "Icon"=> "fa-instagram fa-brands"),
-		array("Name" => "Telegram", "Path"=> "https://t.me/aseqbase", "Icon"=> "fa-telegram fa-brands"),
 		array("Name" => "Email", "Path"=> "mailto:aseqbase@mimfa.net", "Icon"=> "envelope"),
-		array("Name" => "Github", "Path"=> "http://github.com/mimfa", "Icon"=> "fa-github fa-brands"),
+		array("Name" => "Github", "Path"=> "http://github.com/mimfa", "Icon"=> "fa-house"),
 		array("Name" => "Forum", "Path"=> "/chat", "Image" => "comment", "Icon"=> "comments")
 	];
 }
