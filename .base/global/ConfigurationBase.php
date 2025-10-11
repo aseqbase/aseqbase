@@ -107,13 +107,13 @@ abstract class ConfigurationBase extends ArrayObject
       * @var bool
       * @category Optimization
       */
-     public $AllowTextAnalyzing = true;
+     public $AllowTextAnalyzing = false;
      /**
       * Allow to analyze all text and linking contents to their called names or titles, to improve the website's SEO
       * @var bool
       * @category Optimization
       */
-     public $AllowContentReferring = true;
+     public $AllowContentReferring = false;
      /**
       * Allow to analyze all text and linking categories to their called names or titles, to improve the website's SEO
       * @var bool
@@ -125,7 +125,7 @@ abstract class ConfigurationBase extends ArrayObject
       * @var bool
       * @category Optimization
       */
-     public $AllowTagReferring = true;
+     public $AllowTagReferring = false;
      /**
       * Allow to analyze all text and linking users to their called names, to improve the website's SEO
       * @var bool
@@ -170,16 +170,14 @@ abstract class ConfigurationBase extends ArrayObject
       * @category Security
       */
      public $SecretKey = '~a!s@e#q$b%a^s&e*';
-      /**
-       * A special soft key for the default cryption, be sure to change this
-       * @field password
-       * @var string
-       * @category Security
-       */
-     public $SoftKey = null;
      /**
+      * A special soft key for the default cryption, be sure to change this
       * A special key generator for the website, override this for more security
+      * @field password
+      * @var string
+      * @category Security
       */
+     public $SoftKey = null;
      /**
       * Allow to set sessions on the client side (false for default)
       * @var bool
@@ -187,7 +185,7 @@ abstract class ConfigurationBase extends ArrayObject
       */
      public $ClientSession = true;
      /**
-      * Encrypt all session keys (true for default)
+      * Encrypt all session keys (false for default)
       * @var bool
       * @category Security
       */
@@ -227,7 +225,7 @@ abstract class ConfigurationBase extends ArrayObject
       * @var bool
       * @category Security
       */
-     public $AllowSigning = true;
+     public $AllowSigning = false;
      /**
       * Allow Selecting on Page
       * @var bool
@@ -385,7 +383,7 @@ abstract class ConfigurationBase extends ArrayObject
       * @category Security
       */
      public $AcceptableFileFormats = [".zip", ".rar"];
-     
+
      /**
       * 0: Not show Errors; 1: To show Errors
       * @field int
@@ -477,33 +475,42 @@ abstract class ConfigurationBase extends ArrayObject
       * @category DataBase
       */
      public $DataBaseAddNameToPrefix = false;
-	/**
-	 * An array of RegExPattern=>Replacement to convert all requested table names
+     /**
+      * An array of RegExPattern=>Replacement to convert all requested table names
       * @var array
-	 */
-	public $DataTableNameConvertors = [];
+      */
+     public $DataTableNameConvertors = [];
 
      public function __construct()
      {
           \MiMFa\Library\Revise::Load($this);
-		ini_set('display_errors', $this->DisplayError);
-		ini_set('display_startup_errors', $this->DisplayStartupError);
-		error_reporting($this->ReportError);
-		if($this->DataBaseAddNameToPrefix) $this->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_" ;
-		if(!$this->SoftKey) $this->SoftKey = $this->SecretKey;
-		elseif(!$this->SecretKey) $this->SecretKey = $this->SoftKey;
+          ini_set('display_errors', $this->DisplayError);
+          ini_set('display_startup_errors', $this->DisplayStartupError);
+          error_reporting($this->ReportError);
+          if ($this->DataBaseAddNameToPrefix)
+               $this->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_";
+          if (!$this->SoftKey)
+               $this->SoftKey = $this->SecretKey;
+          elseif (!$this->SecretKey)
+               $this->SecretKey = $this->SoftKey;
      }
-	public function __get($name) {
-        return $this[$this->PropertyName($name)]??null;
-    }
-    public function __set($name, $value) {
-        $this[$this->PropertyName($name)] = $value;
-    }
-    public function PropertyName($name) {
-        return preg_replace("/\W+/", "", strToProper($name));
-    }
+     public function __get($name)
+     {
+          return $this[$this->PropertyName($name)] ?? null;
+     }
+     public function __set($name, $value)
+     {
+          $this[$this->PropertyName($name)] = $value;
+     }
+     public function PropertyName($name)
+     {
+          return preg_replace("/\W+/", "", strToProper($name));
+     }
 
-     public function HardKey($seed) { return $seed.$this->SecretKey.$seed; }
+     public function HardKey($seed)
+     {
+          return $seed . $this->SecretKey . $seed;
+     }
 
      public function IsLatestVersion(): bool|null
      {
