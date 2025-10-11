@@ -106,7 +106,7 @@ class Installer
         $name = ($force ? self::$Configurations["DataBase"]["Name"] ?? null : null) ?? (readline("Database Name [" . (self::$Configurations["DataBase"]["Name"] ?? "localhost") . "]: ") ?: 'localhost');
         if (empty($name)) {
             echo "❌ Database name required.\n";
-            return false;
+            return self::ConstructDataBase($force);
         }
         $username = ($force ? self::$Configurations["DataBase"]["Username"] ?? null : null) ?? (readline("Username [" . (self::$Configurations["DataBase"]["Username"] ?? "root") . "]: ") ?: 'root');
         $password = ($force ? self::$Configurations["DataBase"]["Password"] ?? null : null) ?? (readline("Password [" . (self::$Configurations["DataBase"]["Password"] ?? "root") . "]: ") ?: 'root');
@@ -137,12 +137,12 @@ class Installer
             echo "📦 Schema file read successfully!\n";
 
             $pdo->exec($schema);
-            echo "✅ Allcl tables created successfully!\n";
+            echo "✅ All tables created successfully!\n";
             return true;
         } catch (\PDOException $e) {
             self::$Configurations["DataBase"] = [];
             echo "❌ Connection failed: " . $e->getMessage() . "\n";
-            return false;
+            return self::ConstructDataBase($force);
         }
     }
 
