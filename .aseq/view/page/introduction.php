@@ -24,6 +24,7 @@ use MiMFa\Library\Html;
             margin: var(--size-0);
             display: block;
             font-size: var(--size-max);
+            width: calc(100% - 2 * var(--size-0));
         }
         .page-introduction .services h3 .image {
             margin: var(--size-0);
