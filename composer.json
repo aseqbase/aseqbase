@@ -24,10 +24,8 @@
     "require": {
         "composer/installers": "^1.12",
         "php": "^8.2",
-        "ext-zip": "*",
         "ext-pdo": "*",
-        "ext-pdo_mysql": "*",
-        "ext-mysqli": "*"
+        "ext-pdo_mysql": "*"
     },
     "scripts": {
         "dev:start": [
