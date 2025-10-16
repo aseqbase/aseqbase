@@ -187,7 +187,7 @@ class Local
 	}
 	public static function DeleteDirectory($directory)
 	{
-		$directory = trim($directory, DIRECTORY_SEPARATOR);
+		$directory = trim($directory, "/\\");
 		$i = 0;
 		if (empty($directory))
 			return true;
@@ -195,9 +195,8 @@ class Local
 			foreach (glob($directory . DIRECTORY_SEPARATOR . '*') as $file)
 				if (is_file($file) && ++$i)
 					unlink($file);
-				elseif (is_dir($file)) {
+				elseif (is_dir($file))
 					$i += self::DeleteDirectory($file);
-				}
 			if (rmdir($directory))
 				$i++;
 		}

@@ -282,7 +282,7 @@ class Config extends ConfigBase {
         try {
             $i = 0;
             $rl = strlen($source);
-            foreach (glob($source . DIRECTORY_SEPARATOR . '*') as $item) {
+            foreach (glob($source . '*') as $item) {
                 $relPath = substr($item, $rl);
                 if (
                     str_starts_with($relPath, "~") ||
@@ -374,6 +374,7 @@ class Config extends ConfigBase {
     public static function DeleteDirectory($directory = null, $excludePattern = null)
     {
         $i = 0;
+        $directory = rtrim($directory, "/\\");
         if ($directory && is_dir($directory)) {
             foreach (glob($directory . DIRECTORY_SEPARATOR . '*') as $file) {
                 if (!$excludePattern || preg_match($excludePattern, $file)) continue;
