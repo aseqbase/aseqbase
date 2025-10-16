@@ -5,5 +5,5 @@ if(
 ) exit(401);
 
 require_once(__DIR__.DIRECTORY_SEPARATOR."initialize.php");
-if(inspect(\_::$Config->AdminAccess)) run(normalizePath(\_::$Direction));
+if(inspect(\_::$Config->AdminAccess)) run(normalizePath(\_::$Base->Direction));
 ?>

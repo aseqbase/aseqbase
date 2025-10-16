@@ -279,7 +279,7 @@ class Navigation extends Module{
 	public function Get(){
 		return Convert::ToString(function(){
 			yield parent::Get();
-			$url = \_::$Path."?";
+			$url = \_::$Base->Path."?";
 			$fromP = $this->GetFromPage();
 			$toP = $this->GetToPage();
 			$query = receiveGet()??array();
@@ -291,7 +291,7 @@ class Navigation extends Module{
 				$maxLimit = $this->AllowCount?min($this->Count,$this->MaxLimit):$this->MaxLimit;
 				if($this->MinLimit < $maxLimit)
 					yield Html::Division(
-						Html::RangeInput(null,$this->Limit, $this->MinLimit, $maxLimit, ["onchange"=>"load('/".\_::$Direction."?".preg_replace("/\&{$this->LimitRequest}\=\d+/","",\_::$Query??"")."&{$this->LimitRequest}='+this.value);"]).
+						Html::RangeInput(null,$this->Limit, $this->MinLimit, $maxLimit, ["onchange"=>"load('/".\_::$Base->Direction."?".preg_replace("/\&{$this->LimitRequest}\=\d+/","",\_::$Base->Query??"")."&{$this->LimitRequest}='+this.value);"]).
 						($this->AllowCount?Html::Span($this->Count):0)
 					,["class"=>"rangepanel"]);
 

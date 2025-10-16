@@ -18,7 +18,7 @@ class Collection extends Module
 	 * @var null|array<array<enum-string,mixed>>
 	 */
 	public $Items = null;
-	public $RootRoute = null;
+	public $Root = null;
 	/**
 	 * The default Image Path
 	 * @var string|null
@@ -157,7 +157,7 @@ class Collection extends Module
 					$p_name = __(getBetween($item, 'Title', 'Name') ?? $this->DefaultTitle, true, false);
 					$p_description = getValid($item, 'Description', $this->DefaultDescription);
 					$p_description = is_null($p_description) ? null : __($p_description, styling:true, referring:true);
-					$p_link = ($l = get($item, 'Path')) ? $l : ($this->RootRoute ? $this->RootRoute . getBetween($item, 'Id', 'Name') : $this->DefaultPath);
+					$p_link = ($l = get($item, 'Path')) ? $l : ($this->Root ? $this->Root . getBetween($item, 'Id', 'Name') : $this->DefaultPath);
 					$p_buttons = getValid($item, 'Buttons', $this->DefaultButtons);
 					$img->Source = $p_image;
 					if (is_null($p_description))

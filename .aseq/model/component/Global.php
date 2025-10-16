@@ -170,10 +170,10 @@ class GlobalStyle{
 		}";
 	}
 }
-\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'reset.css', optimize: true));
+\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Base->StyleDirectory,'reset.css', optimize: true));
 \_::$Front->Libraries[] = Html::Style(GlobalStyle::Variables());
-\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Math.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Array.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Html.js', optimize: true));
+\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Base->StyleDirectory,'general.css', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Base->ScriptDirectory, 'general.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Base->ScriptDirectory, 'Math.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Base->ScriptDirectory, 'Array.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Base->ScriptDirectory, 'Html.js', optimize: true));

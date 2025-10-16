@@ -3,8 +3,8 @@ route("contents", [
     "View"=>[
         "DefaultTitle" => "Posts",
         "MaximumColumns"=> 2,
-        "RootRoute" => "/post/",
-        "CollectionRoute" => "/posts/"
+        "Root" => "/post/",
+        "CollectionRoot" => "/posts/"
     ],
     "ErrorHandler" => "Could not find related post"
 ]);

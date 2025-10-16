@@ -16,7 +16,7 @@ class Local
 	 */
 	public static function GetUrl($address)
 	{
-		if ((!isValid($address)) || isAbsoluteUrl($address))
+		if ((empty($address)) || isAbsoluteUrl($address))
 			return $address;
 		$address = self::GetRelativePath(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $address));
 		$p = ltrim(str_replace(DIRECTORY_SEPARATOR, "/", $address), "/");
@@ -26,7 +26,7 @@ class Local
 				return $root . $p;
 		$address = str_replace(DIRECTORY_SEPARATOR, "/", $address);
 		if (!startsWith($address, "/")) {
-			$dirs = explode("/", \_::$Direction);
+			$dirs = explode("/", \_::$Base->Direction);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)),"/");
 			if (strlen($dirs) !== 0)
 				$address = "$dirs/$address";
@@ -40,12 +40,12 @@ class Local
 	 */
 	public static function GetAbsoluteUrl($url)
 	{
-		if ((!isValid($url)) || isAbsoluteUrl($url))
+		if ((empty($url)) || isAbsoluteUrl($url))
 			return $url;
 		if (startsWith($url, "/")) 
-			return \_::$Host.$url;
+			return \_::$Base->Host.$url;
 		else {
-			$dirs = explode("/", \_::$Url);
+			$dirs = explode("/", \_::$Base->Url);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
 			return "$dirs/$url";
 		}
@@ -57,7 +57,7 @@ class Local
 	 */
 	public static function GetRelativeUrl($url): string|null
 	{
-		if (!isValid($url)) return null;
+		if (empty($url)) return null;
 		foreach (\_::$Sequences as $dir => $root)
 			if (startsWith($url, $root))
 				return substr($url, strlen($root));
@@ -80,20 +80,19 @@ class Local
 	}
 
 	/**
-	 * Get or Find a file, then return the internal path
+	 * Get the internal path
 	 * @param mixed $address Probable file internal path
-	 * @return
 	 */
 	public static function GetPath($address)
 	{
-		if (!isValid($address)) return null;
+		if (empty($address)) return null;
 		return
 			ltrim(
 				str_replace(
 					["\\", "/"],
 					DIRECTORY_SEPARATOR,
 					preg_replace(
-						"/(^\w+:\/*[^\/]+\/?)|([\?#@].*$)/",
+						"/(^\w+:?\/*[^\/\\\:]+\/?)|([\?#@].*$)/",
 						"",
 						$address
 					)
@@ -108,7 +107,7 @@ class Local
 	 */
 	public static function GetAbsolutePath($path): string|null
 	{
-		if (!isValid($path)) return null;
+		if (empty($path)) return null;
 		foreach (\_::$Sequences as $dir => $root)
 			if (startsWith($path, $dir))
 				return $path;
@@ -122,7 +121,7 @@ class Local
 	 */
 	public static function GetRelativePath($path): string|null
 	{
-		if (!isValid($path)) return null;
+		if (empty($path)) return null;
 		foreach (\_::$Sequences as $dir => $root)
 			if (startsWith($path, $dir))
 				return substr($path, strlen($dir));
@@ -153,7 +152,8 @@ class Local
 	public static function GetDirectory($path)
 	{
 		$path = self::GetPath($path);
-		if (!$path || is_dir($path))
+		if (empty($path)) return null;
+		if (is_dir($path))
 			return $path;
 		if (startsWith($path, \_::$Aseq->Directory))
 			$path = substr($path, strlen(\_::$Aseq->Directory));
@@ -225,7 +225,8 @@ class Local
 	public static function GetFile($path)
 	{
 		$path = self::GetPath($path);
-		if (!$path || file_exists($path))
+		if (empty($path)) return null;
+		if (file_exists($path))
 			return $path;
 		if (startsWith($path, \_::$Aseq->Directory))
 			$path = substr($path, strlen(\_::$Aseq->Directory));
@@ -340,6 +341,7 @@ class Local
 	{
 		if (is_string($content))
 			$content = self::GetFileObject($content);
+		if (!$content) return null;
 		if (!get($content, "name"))
 			throw new \SilentException("There is not any file!");
 		$directory = $directory ?? \_::$Aseq->PublicDirectory;
@@ -353,7 +355,7 @@ class Local
 		foreach ($extensions ?? \_::$Config->GetAcceptableFormats() as $ext)
 			if ($allow = $fileType === $ext || "." . $fileType === $ext)
 				break;
-		$sourceFile = $content["tmp_name"];
+		$sourceFile = $content["temp_name"];
 		if (!$allow) {
 			if ($deleteSource)
 				unlink($sourceFile);
@@ -412,11 +414,12 @@ class Local
 	{
 		if (is_string($content))
 			$content = self::GetFileObject($content);
+		if (!$content) return null;
 		if (!get($content, "name"))
 			throw new \SilentException("There is not any file!");
 
 		// Check if image file is an actual image or fake image
-		if (getimagesize($content["tmp_name"]) === false)
+		if (getimagesize($content["temp_name"]) === false)
 			throw new \SilentException("The image file is not an actual image!");
 		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableImageFormats);
 	}

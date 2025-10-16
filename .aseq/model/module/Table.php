@@ -741,8 +741,8 @@ class Table extends Module
             $this->Form->Class = "container";
             $this->Form->ContentClass = "col-lg-8";
             $this->Form->CancelLabel = "Cancel";
-            $this->Form->SuccessPath = \_::$Url;
-            $this->Form->BackPath = \_::$Url;
+            $this->Form->SuccessPath = \_::$Base->Url;
+            $this->Form->BackPath = \_::$Base->Url;
             $this->Form->BackLabel = null;
             //$form->AllowHeader = false;
         }

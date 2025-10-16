@@ -9,7 +9,7 @@ $tag = grab($filter, "Tag") ?? get($received, "Tag");
 $items = !is_array($computeData)?Convert::By($computeData):compute(grab($computeData, "ComputeName") ?? "content/all", [
     "Filter" => [
         "Query" => grab($filter, "Query") ?? get($received, "Query"),
-        "Category" => $cat??\_::$Back->Router->Direction,
+        "Category" => $cat??\_::$Base->Direction,
         "Type" => $type,
         "Tag" => $tag,
         ...$filter??[]
@@ -26,12 +26,12 @@ if(!is_array($viewData))  return Convert::By($viewData, $items);
 if (isEmpty($items)) {
     $c = get($viewData, "ErrorHandler");
     if ($c)
-        return Convert::By($c, \_::$Back->Router);
+        return Convert::By($c, \_::$Aseq);
 }
 
 view(grab($viewData, "ViewName") ?? "contents", [
-    "Title" => grab($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", \_::$Page), $cat, grab($data, "DefaultTitle") ?? "Contents"),
-    "RootRoute" => grab($viewData, "RootRoute") ?? \_::$Address->ContentRoute,
+    "Title" => grab($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", \_::$Base->Page), $cat, grab($data, "DefaultTitle") ?? "Contents"),
+    "Root" => grab($viewData, "Root") ?? \_::$Base->ContentRoot,
     "Description" => grab($viewData, "Description"),
     "Items" => $items,
     ...$viewData??[]

@@ -353,7 +353,21 @@ class General extends Template
 				body>footer :is(button, .button){
 					box-shadow: var(--shadow-0);
 				}
-
+	
+				.tabs>.tab-titles>.tab-title>:is(*,*:hover){
+					border:none;
+					outline:none;
+				}
+				.tabs>.tab-titles>.tab-title{
+					display:inline-block;
+					padding:calc(var(--size-1) / 5) calc(var(--size-1) / 2);
+					border-bottom: var(--border-1) #8885;
+				}
+				.tabs>.tab-titles>.tab-title.active{
+					border: var(--border-1) #8888;
+					border-bottom: none;
+				}
+        
 				.main-bullet{
 					list-style-type: none;
 					text-align: left;

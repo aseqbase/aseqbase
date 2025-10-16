@@ -6,8 +6,8 @@ route("content", [
         ]
     ],
     "View"=>[
-        "RootRoute" => "/news/",
-        "CollectionRoute" => "/newses/",
+        "Root" => "/news/",
+        "CollectionRoot" => "/newses/",
     ],
     "ErrorHandler" => "Could not find related news"
 ]);

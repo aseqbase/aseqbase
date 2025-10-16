@@ -24,32 +24,45 @@
     "require": {
         "composer/installers": "^1.12",
         "php": "^8.2",
-        "ext-pdo": "*"
+        "ext-zip": "*",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-mysqli": "*"
     },
     "scripts": {
-        "start": [
+        "dev:start": [
             "Composer\\Config::disableProcessTimeout",
-            "php -S localhost:8000", 
-            "net start MySQL",
-            "php index.php"
+            "MiMFa\\Bootstrap::Start",
+            "@php index.php"
         ],
-        "install": [
-            "MiMFa\\Installer::Install"
+        "dev:install": [
+            "MiMFa\\Bootstrap::Install"
         ],
-        "update": [
-            "MiMFa\\Installer::Update"
+        "dev:uninstall": [
+            "MiMFa\\Bootstrap::Uninstall"
+        ],
+        "dev:update": [
+            "MiMFa\\Bootstrap::Update"
         ],
         "post-install-cmd": [
-            "MiMFa\\Installer::Install"
+            "MiMFa\\Bootstrap::Install"
         ],
         "post-update-cmd": [
-            "MiMFa\\Installer::Update"
+            "MiMFa\\Bootstrap::Update"
         ]
     },
     "autoload": {
-        "files": [ "-installer/Installer.php" ],
+        "files": [ "-bootstrap/Bootstrap.php" ],
         "psr-4": {
-            "MiMFa\\": ["model/","-installer/"]
+            "MiMFa\\": ["model/","-bootstrap/", "../model/","../-bootstrap/"]
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "third-party/required-plugin": true,
+            "my-organization/*": true,
+            "unnecessary/plugin": false,
+            "composer/installers": true
         }
     },
     "extra": {
@@ -64,11 +77,6 @@
             "route/": ["type:route"],
             "compute/": ["type:compute"],
             "asset/": ["type:asset"]
-        }
-    },
-    "config": {
-        "allow-plugins": {
-            "composer/installers": true
         }
     }
 }

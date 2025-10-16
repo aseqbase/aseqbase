@@ -4,7 +4,7 @@ use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 module("Collection");
 /**
- * To show comments
+ * To show comments in its collection
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
@@ -452,7 +452,7 @@ class CommentCollection extends Collection
                     if (isEmpty($author))
                         yield Html::Span($au, null, ["class" => "author"]);
                     else
-                        yield Html::Link($au, \_::$Address->UserRoute . get($author, "Signature"), ["class" => "author"]);
+                        yield Html::Link($au, \_::$Base->UserRoot . get($author, "Signature"), ["class" => "author"]);
                 }
                 if ($p_showexcerpt)
                     yield "<div class='excerpt view parent-hover-hide'>$p_excerpt</div>";

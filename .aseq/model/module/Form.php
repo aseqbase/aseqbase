@@ -158,12 +158,12 @@ class Form extends Module
 					align-items: center;
 				}
 				.{$this->Name} .content {
+					padding-top: var(--size-0);
+					padding-bottom: var(--size-0);
 					background-color: var(--back-color);
 					color: var(--fore-color);
 				}
 				.{$this->Name} form {
-					padding-top: var(--size-0);
-					padding-bottom: var(--size-0);
     				position: relative;
 				}
 				.{$this->Name} form .fields {
@@ -636,7 +636,7 @@ class Form extends Module
 		if (($res = $this->CheckTimeBlock()) !== false)
 			return $res;
 		$name = $this->Name . "_Form";
-		$src = $this->Action ?? $this->Path ?? \_::$Path;
+		$src = $this->Action ?? $this->Path ?? \_::$Base->Path;
 		if (is_array($this->Children) && count($this->Children) > 0) {
 			module("Field");
 			$attr = $this->Method ? [] : ["disabled"];
@@ -692,7 +692,7 @@ class Form extends Module
 							$this->GetHeader() .
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
-							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Host, ["class" => "back-button"]) : "")
+							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Base->Host, ["class" => "back-button"]) : "")
 							, ["class" => "header", ...($this->AllowAnimate?["data-aos"=>"fade-left"]:[])]
 						) : "") .
 						Html::LargeSlot(
@@ -720,7 +720,7 @@ class Form extends Module
 						$this->GetHeader() .
 						$this->GetTitle(["class" => "form-title"]) .
 						$this->GetDescription(["class" => "form-description"]) .
-						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Host, ["class" => "back-button"]) : "")
+						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Base->Host, ["class" => "back-button"]) : "")
 						: ""
 					) .
 					Html::Form(
@@ -754,7 +754,7 @@ class Form extends Module
 			yield (isValid($this->SubmitLabel) ? Html::SubmitButton($this->SubmitLabel, ["Name" => "submit", "class"=>"main"]) : "");
 			yield (isValid(object: $this->ResetLabel) ? Html::ResetButton($this->ResetLabel, ["Name" => "reset"]) : "");
 		}
-		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \_::$Host, ["Name" => "cancel"]) : "");
+		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \_::$Base->Host, ["Name" => "cancel"]) : "");
 	}
 	public function GetFooter()
 	{
@@ -844,7 +844,7 @@ class Form extends Module
 				\MiMFa\Library\Contact::SendHtmlEmail(
 					grab($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
 					grab($data, "ReceiverEmail") ?? $this->ReceiverEmail,
-					grab($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Domain . ": A new form submitted"),
+					grab($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Base->Domain . ": A new form submitted"),
 					grab($data, "MailMessage") ?? $data,
 					exception: $ex
 				)

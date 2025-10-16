@@ -34,8 +34,40 @@ class Map extends Module
 	/**
 	 * The default begin [latitude, longitude]
 	 */
-	public array|null $Location = null;
-
+	public array|null $Location = null;	
+	
+	/**
+	 * A Script Function to handle the user location
+	 * default is (map, e, err)=>err?null:L.circle(e.latlng, e.accuracy).addTo(map)
+	 * or a function name to fill an input
+	 * or leave an empty function to only active locate without any other action
+	 * or leave null to deactive it
+	 * @var string|null
+	 */
+	public string|null $LocateScriptFunction = "(map, e, err)=>err?null:L.circle(e.latlng, e.accuracy).addTo(map)";
+	public $LocatePopup = null;
+	
+	/**
+	 * A Script Function to handle user selected location
+	 * for example (location, err)=>err?alert(err):alert('Selected Location: lat='+location[0]+',lng='+location[1])
+	 * or a function name to fill an input
+	 * or leave an empty function to only active selection without any other action
+	 * or leave null to deactive it (default)
+	 * @var string|null
+	 */
+	public string|null $SelectedLocationScriptFunction = null;
+	public $SelectedLocationPopup = null;
+	/**
+	 * A Script Function to handle user selected address
+	 * for example (map, e, err)=>err?alert(err):alert('Selected address(lat='+e.latlng.lat+',lng='+e.latlng.lng+'):\n' + e.address)
+	 * or a function name to fill an input
+	 * or leave an empty function to only active selection without any other action
+	 * or leave null to deactive it (default)
+	 * @var string|null
+	 */
+	public string|null $SelectedAddressScriptFunction = null;
+	public $SelectedAddressPopup = null;
+	
 	/**
 	 * The default Items [
 	 * 		["Type"=>"marker", "Location"=>[latitude1, longitude1], "Popup"=>"It is here...", "Icon"=>"map-marker"],
@@ -401,7 +433,33 @@ class Map extends Module
 	public function Events_InitializeScript()
 	{
 		return join(PHP_EOL, [
-			"{$this->Name}.on('locationfound', function (e) {L.circle(e.latlng, e.accuracy).addTo({$this->Name});});",
+			($this->LocatePopup || $this->LocateScriptFunction? "{$this->Name}.on('locationfound', function (e, err) {
+				".($this->LocateScriptFunction?"return ($this->LocateScriptFunction)({$this->Name}, e, null)":($this->LocatePopup?"L.circle(e.latlng, e.accuracy).addTo({$this->Name})":"")).
+				($this->LocatePopup?"?.bindPopup(".Script::Convert(__($this->LocatePopup)).").openPopup();":";")."
+			});":""),
+			($this->SelectedLocationPopup || $this->SelectedAddressPopup || $this->SelectedLocationScriptFunction || $this->SelectedAddressScriptFunction? "
+			let marker;
+			{$this->Name}.on('click', function (e, err) {
+				const {lat,lng} = e.latlng;
+				if (marker) marker.setLatLng(e.latlng);
+				else marker = L.marker(e.latlng).addTo({$this->Name});
+				".($this->SelectedLocationPopup?"marker.bindPopup(".Script::Convert(__($this->SelectedLocationPopup)).").openPopup();":"")."
+				".($this->SelectedLocationScriptFunction?"($this->SelectedLocationScriptFunction)({$this->Name}, e, err);":"")."
+				".($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction?"fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}".(\_::$Config->AllowTranslate?"&accept-language=".\_::$Back->Translate->Language:"")."`)
+				.then(response => response.json())
+				.then(data => {
+					err = null;
+					if(data.display_name) e.address = data.display_name;
+					else err = 'Address not found';
+					e.metadata = data;
+					".($this->SelectedAddressPopup?"marker.bindPopup(".Script::Convert(__($this->SelectedAddressPopup)).").openPopup();":"")."
+					".($this->SelectedAddressScriptFunction?"($this->SelectedAddressScriptFunction)({$this->Name}, e, err);":"")."
+				})
+				.catch(err => {
+					".($this->SelectedAddressScriptFunction?"($this->SelectedAddressScriptFunction)({$this->Name}, e, err);":"")."
+				});":"")."
+
+			});":""),
 			($this->LocationError ? "{$this->Name}.on('locationerror', function () {" . $this->ErrorScript($this->LocationError) . "});" : ""),
 			($this->TilesError ? "{$this->Name}.on('tileerror', function () {" . $this->ErrorScript($this->TilesError) . "});" : "")
 		]);
@@ -632,18 +690,18 @@ class Map extends Module
 	
 	/**
 	 * To get something from the map
-	 * @param string $type The type of Item to pin for example (marker, circle, polygon, etc.)
+	 * @param string $type The type of pinned Item for example (marker, circle, polygon, etc.)
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
 	public function GetItem($type = "marker", $location = null)
 	{
 		$key = $this->CreateKey($type, $location);
-		return seek($this->Items, function($v) use($key){ return $key === $this->CreateKey($v["Type"]??"marker", $v["Location"]);});
+		return take($this->Items, function($v) use($key){ return $key === $this->CreateKey($v["Type"]??"marker", $v["Location"]);});
 	}
 	/**
 	 * To get a suitable script get something from the map
-	 * @param string $type The type of Item to pin for example (marker, circle, polygon, etc.)
+	 * @param string $type The type of pinned Item for example (marker, circle, polygon, etc.)
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
@@ -736,7 +794,7 @@ class Map extends Module
 	}
 	/**
 	 * To delete something from the map
-	 * @param string $type The type of Item to pin for example (marker, circle, polygon, etc.)
+	 * @param string $type The type of pinned Item for example (marker, circle, polygon, etc.)
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
@@ -751,7 +809,7 @@ class Map extends Module
 	}
 	/**
 	 * To get a suitable script to delete something from the map
-	 * @param string $type The type of Item to pin for example (marker, circle, polygon, etc.)
+	 * @param string $type The type of pinned Item for example (marker, circle, polygon, etc.)
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */

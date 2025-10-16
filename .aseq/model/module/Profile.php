@@ -4,7 +4,6 @@ namespace MiMFa\Module;
 use DateTime;
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Router;
 use MiMFa\Library\Style;
 use MiMFa\Library\Local;
 use MiMFa\Library\DataTable;
@@ -252,7 +251,7 @@ class Profile extends Table{
 	public function Handler($received = null){
         $key = get($received, $this->KeyColumn);
         $secret = grab($received,"secret")??$this->ViewSecret;
-        return (new Router())
+        return $this->Router
         ->if($secret === $this->ModifySecret)
         ->Patch(function() use($key) { return $this->GetModifyFields($key); })
         ->else($secret === $this->RemoveSecret)
@@ -343,7 +342,7 @@ class Profile extends Table{
                         }
             })());
         $form->Image = getValid($record,"Image" ,$this->Image??"plus");
-        $form->SuccessPath = \_::$Url;
+        $form->SuccessPath = \_::$Base->Url;
         return $form->Handle();
     }
 	public function DoAddHandle($value){

@@ -3,10 +3,10 @@
 	Html::Script(null, 'https://code.jquery.com/jquery-3.7.1.min.js'),
 	Html::Script("
 			if(!window.jQuery) {
-				Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "JQuery.js", optimize: true) . "');
-				Html.style.load(null, '" . asset(\_::$Address->StyleDirectory, "DataTable.css", optimize: true) . "');
-				Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "DataTable.js", optimize: true) . "');
-				Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Popper.js", optimize: true) . "');
+				Html.script.load(null, '" . asset(\_::$Base->ScriptDirectory, "JQuery.js", optimize: true) . "');
+				Html.style.load(null, '" . asset(\_::$Base->StyleDirectory, "DataTable.css", optimize: true) . "');
+				Html.script.load(null, '" . asset(\_::$Base->ScriptDirectory, "DataTable.js", optimize: true) . "');
+				Html.script.load(null, '" . asset(\_::$Base->ScriptDirectory, "Popper.js", optimize: true) . "');
 			}
 	"),
 	Html::Style(null, 'https://cdn.datatables.net/2.0.3/css/dataTables.dataTables.min.css'),

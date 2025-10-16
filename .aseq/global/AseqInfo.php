@@ -1,5 +1,5 @@
 <?php
-class InformationAseq extends InformationBase
+class AseqInfo extends InfoBase
 {
 	public $Owner = "MiMFa";
 	public $FullOwner = "Minimal Members Factory";

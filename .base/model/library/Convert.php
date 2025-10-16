@@ -12,17 +12,17 @@ class Convert
     /**
      * Convert everything through the costum converter
      */
-    public static function By($converter, &...$args)
+    public static function By($converter, &...$arguments)
     {
         if (isStatic($converter))
             return $converter;
         if (is_countable($converter) || is_iterable($converter))
-            return iterator_to_array((function () use ($converter, &$args) {
+            return iterator_to_array((function () use ($converter, &$arguments) {
                 foreach ($converter as $k => $c)
-                    yield $k => self::By($c, ...$args);
+                    yield $k => self::By($c, ...$arguments);
             })());
         if (is_callable($converter) || $converter instanceof \Closure)
-            return $converter(...$args);
+            return $converter(...$arguments);
         return $converter;
     }
 
@@ -31,58 +31,78 @@ class Convert
      * @param mixed $value
      * @return string
      */
-    public static function ToStatic($value, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", $default = null)
+    public static function ToStatic($value, ...$arguments)
     {
-        if (!is_null($value)) {
-            if (is_string($value) || is_numeric($value))
-                return $value;
-            if ($value instanceof \Base)
-                return $value->ToString();
-            if (is_countable($value) || is_iterable($value)) {
-                $texts = array();
-                foreach ($value as $key => $val) {
-                    $item = self::ToStatic($val, $separator, $assignFormat);
-                    if (is_numeric($key))
-                        array_push($texts, $item);
-                    elseif (is_countable($val) || is_iterable($val))
-                        array_push($texts, str_replace(["{0}", "{1}"], [$key, $item], $assignFormat));
-                    else {
-                        $sp = "";
-                        if (!is_string($item)) $item = self::ToStatic($item, $separator, $assignFormat, $default);
-                        if (is_string($item)){
-                            if (str_contains($item, '"')) {
-                                if (str_contains($item, "'")) {
-                                    $item = str_replace("'", "\'", $item);
-                                    $sp = "'";
-                                } else
-                                    $sp = "'";
-                            } else
-                                $sp = '"';
-                            $item = "$sp$item$sp";
-                        }
-                        array_push($texts, str_replace(["{0}", "{1}"], [$key, $item], $assignFormat));
-                    }
-                }
-                return str_replace("{0}", join($separator, $texts), $arrayFormat);
-            }
-            if (is_callable($value) || $value instanceof \Closure)
-                return self::ToStatic($value(), $separator, $assignFormat);
-            if ($value instanceof \DateTime)
-                return self::ToShownDateTimeString($value);
-            if ($value instanceof \stdClass)
-                return self::ToStatic((array)$value);
+        if (isStatic($value))
             return $value;
-        }
-        return $default;
+        if ($value instanceof \Base)
+            return $value->ToString();
+        if (is_countable($value) || is_iterable($value))
+            return self::ToString($value);
+        if (is_callable($value) || $value instanceof \Closure)
+            return self::ToStatic($value(...$arguments));
+        if ($value instanceof \DateTime)
+            return self::ToShownDateTimeString($value);
+        if ($value instanceof \stdClass)
+            return self::ToStatic((array) $value, ...$arguments);
+        return $value;
     }
+
     /**
      * Convert everything to a simple string format
      * @param mixed $value
      * @return string
      */
-    public static function ToString($value, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", $default = null)
+    public static function ToString($value, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", string $default = "")
     {
-        return self::ToStatic($value, $separator, $assignFormat,  $arrayFormat , $default) . "";
+        if (is_null($value))
+            return $default;
+        if (isStatic($value))
+            return "$value";
+        if ($value instanceof \Base)
+            return $value->ToString();
+        if (is_countable($value) || is_iterable($value)) {
+            $texts = array();
+            foreach ($value as $key => $val) {
+                $item = self::ToString($val, $separator, $assignFormat, $arrayFormat, $default);
+                if (is_numeric($key))
+                    array_push($texts, $item);
+                elseif (is_countable($val) || is_iterable($val))
+                    array_push($texts, str_replace(["{0}", "{1}"], [$key, $item], $assignFormat));
+                else {
+                    $sp = "";
+                    if (!is_string($item))
+                        $item = self::ToString($item, $separator, $assignFormat, $arrayFormat, $default);
+                    if (is_string($item)) {
+                        if (str_contains($item, '"')) {
+                            if (str_contains($item, "'")) {
+                                $item = str_replace("'", "\'", $item);
+                                $sp = "'";
+                            } else
+                                $sp = "'";
+                        } else
+                            $sp = '"';
+                        $item = "$sp$item$sp";
+                    }
+                    array_push($texts, str_replace(["{0}", "{1}"], [$key, $item], $assignFormat));
+                }
+            }
+            return str_replace("{0}", join($separator, $texts), $arrayFormat);
+        }
+        return (self::ToStatic($value)??$default)."";
+    }
+
+    public static function ToHtml($value, ...$arguments)
+    {
+        return Html::Convert($value, ...$arguments);
+    }
+    public static function ToStyle($value, ...$arguments)
+    {
+        return Style::Convert($value, ...$arguments);
+    }
+    public static function ToScript($value, ...$arguments)
+    {
+        return Script::Convert($value, ...$arguments);
     }
 
     /**
@@ -113,7 +133,7 @@ class Convert
      */
     public static function ToText($html)
     {
-        $html = strip_tags($html??"", '<br><hr><section><content><main><header><footer><p><li><tr><h1><h2><h3><h3><h4><h5><h6>');
+        $html = strip_tags($html ?? "", '<br><hr><section><content><main><header><footer><p><li><tr><h1><h2><h3><h3><h4><h5><h6>');
         return preg_replace('/(\s*<[^>]*>\s*)+/', PHP_EOL, $html);
     }
 
@@ -143,7 +163,7 @@ class Convert
      */
     public static function ToId($text, $random = false)
     {
-        return self::ToKey($text, true, '/[^A-Za-z0-9\_\-\$]/')."_".getId($random);
+        return self::ToKey($text, true, '/[^A-Za-z0-9\_\-\$]/') . "_" . getId($random);
     }
     /**
      * Convert a text to a Key Name
@@ -284,22 +304,23 @@ class Convert
             return null;
         if (!isStatic($json))
             return $json;
-        if(trim(strtolower($json)) === "null")
+        if (trim(strtolower($json)) === "null")
             return null;
         if (isJson($json))
             return json_decode($json, flags: JSON_OBJECT_AS_ARRAY);
         return [$json];
     }
 
-    public static function ToXml($data, \SimpleXMLElement|null $root = null) {
+    public static function ToXml($data, \SimpleXMLElement|null $root = null)
+    {
         if ($root === null) {
             $root = new \SimpleXMLElement('<root/>');
         }
         foreach (self::ToIteration($data) as $key => $value) {
             if (is_array($value) || is_object($value)) {
-            self::ToXml($value, $root->addChild(is_numeric($key) ? "item$key" : $key));
+                self::ToXml($value, $root->addChild(is_numeric($key) ? "item$key" : $key));
             } else {
-            $root->addChild(is_numeric($key) ? "item$key" : $key, htmlspecialchars((string)$value));
+                $root->addChild(is_numeric($key) ? "item$key" : $key, htmlspecialchars((string) $value));
             }
         }
         return $root;
@@ -308,19 +329,20 @@ class Convert
     {
         libxml_use_internal_errors(true); // suppress XML parsing errors
         try {
-                return json_decode(json_encode($data), $asArray); 
+            return json_decode(json_encode($data), $asArray);
         } catch (\Exception $e) {
             return null;
         }
     }
-    public static function ToXmlString($data, \SimpleXMLElement|null $root = null) {
+    public static function ToXmlString($data, \SimpleXMLElement|null $root = null)
+    {
         return self::ToXml($data, $root)->asXML();
     }
     public static function FromXmlString($data, bool $asArray = false): object|array|null
     {
         libxml_use_internal_errors(true); // suppress XML parsing errors
         try {
-                return json_decode(json_encode(new \SimpleXMLElement(self::ToString($data))), $asArray); 
+            return json_decode(json_encode(new \SimpleXMLElement(self::ToString($data))), $asArray);
         } catch (\Exception $e) {
             return null;
         }
@@ -356,22 +378,25 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'tmp_name' => Local::CreatePath($filename, ".tmp", \_::$Aseq->TempDirectory),
+                                'temp_name' => Local::CreatePath($filename, ".tmp", \_::$Aseq->TempDirectory),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );
 
                             // Write file content to the temporary file
-                            file_put_contents($files[$key]['tmp_name'], $body);
+                            file_put_contents($files[$key]['temp_name'], $body);
                         }
                     }
-                } elseif(preg_match("/\[(.*)\]/", $key, $matches)) {// It's an array field
+                } elseif (preg_match("/\[(.*)\]/", $key, $matches)) {// It's an array field
                     $key = preg_find("/^.*(?=\[)/", $key);
-                    if(!isset($res[$key])) $res[$key] = array();
-                    if($v=getValid($matches,1)) $res[$key][$v] = trim($body);
-                    else $res[$key][] = trim($body);
-                }
-                else $res[$key] = trim($body);// It's a regular form field
+                    if (!isset($res[$key]))
+                        $res[$key] = array();
+                    if ($v = getValid($matches, 1))
+                        $res[$key][$v] = trim($body);
+                    else
+                        $res[$key][] = trim($body);
+                } else
+                    $res[$key] = trim($body);// It's a regular form field
             }
         }
         return $res;
@@ -531,13 +556,13 @@ class Convert
             if (!isset($additionalKeys['$HOSTEMAIL']))
                 $additionalKeys['$HOSTEMAIL'] = $email;
             if (!isset($additionalKeys['$HOSTLINK']))
-                $additionalKeys['$HOSTLINK'] = Html::Link(\_::$Site, \_::$Host);
+                $additionalKeys['$HOSTLINK'] = Html::Link(\_::$Base->Site, \_::$Base->Host);
             if (!isset($additionalKeys['$HOST']))
-                $additionalKeys['$HOST'] = \_::$Host;
+                $additionalKeys['$HOST'] = \_::$Base->Host;
             if (!isset($additionalKeys['$URLLINK']))
-                $additionalKeys['$URLLINK'] = Html::Link(\_::$Url, \_::$Url);
+                $additionalKeys['$URLLINK'] = Html::Link(\_::$Base->Url, \_::$Base->Url);
             if (!isset($additionalKeys['$URL']))
-                $additionalKeys['$URL'] = \_::$Url;
+                $additionalKeys['$URL'] = \_::$Base->Url;
             if (!isValid($additionalKeys, '$SIGNATURE'))
                 $additionalKeys['$SIGNATURE'] = \_::$User->TemporarySignature;
             if (!isValid($additionalKeys, '$NAME'))
@@ -546,9 +571,9 @@ class Convert
             if (!isset($additionalKeys['$EMAILLINK']))
                 $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
             if (!isset($additionalKeys['$EMAIL']))
-                    $additionalKeys['$EMAIL'] = $email;
+                $additionalKeys['$EMAIL'] = $email;
             if (!isset($additionalKeys['$IMAGE']))
-                    $additionalKeys['$IMAGE'] = \_::$User->TemporaryImage;
+                $additionalKeys['$IMAGE'] = \_::$User->TemporaryImage;
 
             if (isValid(\_::$User->Id)) {
                 $person = \_::$User->Get(takeValid($additionalKeys, '$SIGNATURE'));

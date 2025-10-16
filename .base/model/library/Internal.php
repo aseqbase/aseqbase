@@ -41,13 +41,13 @@ class Internal
     }
 
     public static function MakeStartScript($multilines = false){
-        if (\_::$Back->Router->DefaultMethodName === "GET" && headers_sent()) {
+        if (\_::$Aseq->DefaultMethodName === "GET" && headers_sent()) {
            return "document.addEventListener('DOMContentLoaded',()=>".($multilines?"{":"");
         }
         return "";
     }
     public static function MakeEndScript($multilines = false){
-        if (\_::$Back->Router->DefaultMethodName === "GET" && headers_sent()) {
+        if (\_::$Aseq->DefaultMethodName === "GET" && headers_sent()) {
             return ($multilines?"}":"").");";
         }
         return "";

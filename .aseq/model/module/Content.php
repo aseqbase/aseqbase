@@ -14,8 +14,8 @@ use MiMFa\Module\CommentForm;
  */
 class Content extends Module
 {
-     public $RootRoute = null;
-     public $CollectionRoute = null;
+     public $Root = null;
+     public $CollectionRoot = null;
 
      public $Tag = "article";
      public $Class = "container";
@@ -101,7 +101,7 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $AllowRoute = true;
+     public $AllowRoot = true;
 
      /**
       * @var bool
@@ -266,8 +266,8 @@ class Content extends Module
           $this->LeaveComment = \_::$Config->AllowWriteComment;
           $this->AllowComments = \_::$Config->AllowReadComment;
           $this->AllowCommentsAccess = \_::$Config->ReadCommentAccess;
-          $this->RootRoute = $this->RootRoute ?? \_::$Address->ContentRoute;
-          $this->CollectionRoute = $this->CollectionRoute ?? \_::$Address->ContentRoute;
+          $this->Root = $this->Root ?? \_::$Base->ContentRoot;
+          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Base->ContentRoot;
           $this->CommentForm = new CommentForm();
           $this->CommentForm->MessageType = "texts";
           $this->CommentForm->Access = \_::$Config->WriteCommentAccess;
@@ -423,8 +423,8 @@ class Content extends Module
           }
           return Html::Rack(
                Html::MediumSlot(
-                    ($this->AllowTitle ? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->RootRoute . $nameOrId : null, ['class' => 'heading']) : "") .
-                    $this->GetDetails($this->CollectionRoute . $nameOrId)
+                    ($this->AllowTitle ? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
+                    $this->GetDetails($this->CollectionRoot . $nameOrId)
                ) .
                $this->GetButtons(),
                ["class" => "title"], $attributes
@@ -507,7 +507,7 @@ class Content extends Module
           $createTime = get($this->Item, 'CreateTime');
           $modifyTime = get($this->Item, 'UpdateTime');
           $p_meta = null;
-          if ($this->AllowRoute) {
+          if ($this->AllowRoot) {
                module("Route");
                $route = new \MiMFa\Module\Route($path);
                $route->Tag = "span";
@@ -520,7 +520,7 @@ class Content extends Module
                          function ($val) use (&$p_meta) {
                               $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
                               if (!isEmpty($authorName))
-                                   $p_meta .= " " . Html::Link($authorName["Name"], \_::$Address->UserRoute . $authorName["Signature"], ["class" => "author"]);
+                                   $p_meta .= " " . Html::Link($authorName["Name"], \_::$Base->UserRoot . $authorName["Signature"], ["class" => "author"]);
                          },
                          $this->Item,
                          'AuthorId'
@@ -593,7 +593,7 @@ class Content extends Module
                                    ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
                                    : $k
                                    ,
-                                   \_::$Address->TagRoute . $k,
+                                   \_::$Base->TagRoot . $k,
                                    ["class" => "btn"]
                               );
                          }
@@ -616,7 +616,7 @@ class Content extends Module
                return Html::$BreakLine . Html::Division($p_relatedstext . join(PHP_EOL, loop(
                     $rels,
                     function ($v, $k) {
-                         return Html::Link(isValid($v) ? $v : $k, $this->RootRoute . $k, ["class" => "btn"]);
+                         return Html::Link(isValid($v) ? $v : $k, $this->Root . $k, ["class" => "btn"]);
                     }
                )), ["class" => "relateds"]);
      }

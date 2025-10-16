@@ -413,9 +413,11 @@ FodyWeavers.xsd
 /vendor
 /MiMFa aseqbase.sln
 /global.php
-/Configuration.php
-/Information.php
-/Front.php
+/Config.php
+/Info.php
 /Back.php
+/Router.php
+/Front.php
+/User.php
 *.zip
 *.rar

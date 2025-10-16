@@ -1,7 +1,7 @@
 <?php
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-$data = !isEmpty($data) ? $data : \_::$User->Get(\_::$Page);
+$data = !isEmpty($data) ? $data : \_::$User->Get(\_::$Base->Page);
 if (!isEmpty($data)) {
     module("Form");
     module("Field");

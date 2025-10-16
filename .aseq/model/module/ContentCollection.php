@@ -11,8 +11,8 @@ module("Collection");
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
 class ContentCollection extends Collection{
-     public $RootRoute = null;
-     public $CollectionRoute = null;
+     public $Root = null;
+     public $CollectionRoot = null;
      public $TitleTag = "h1";
 
     /**
@@ -91,7 +91,7 @@ class ContentCollection extends Collection{
      * @var bool
      * @category Parts
      */
-	public $AllowRoute = true;
+	public $AllowRoot = true;
 	/**
      * @var bool
      * @category Parts
@@ -185,8 +185,8 @@ class ContentCollection extends Collection{
 
 	function __construct($items = null){
         parent::__construct($items);
-        $this->RootRoute = $this->RootRoute??\_::$Address->ContentRoute;
-        $this->CollectionRoute = $this->CollectionRoute??\_::$Address->CategoryRoute;
+        $this->Root = $this->Root??\_::$Base->ContentRoot;
+        $this->CollectionRoot = $this->CollectionRoot??\_::$Base->CategoryRoot;
         $this->CheckAccess = fn($item)=>auth(getValid($item, 'Access' , 0));
     }
 
@@ -296,7 +296,7 @@ class ContentCollection extends Collection{
 		    $img->Class = "image";
 		    yield $img->GetStyle();
             $rout = null;
-            if($this->AllowRoute){
+            if($this->AllowRoot){
                 module("Route");
                 $rout = new \MiMFa\Module\Route();
                 $rout->Class = "route";
@@ -329,13 +329,13 @@ class ContentCollection extends Collection{
 			    $p_showtitle = $this->AllowTitle;
                 $p_showmeta =$this->AllowMetaData;
                 $p_referring =$this->AutoReferring;
-                $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->RootRoute.getValid($item,'Name' ,$p_id)):null;
+                $p_inselflink = (!$p_showcontent&&(!$p_showexcerpt||!$p_showdescription))? (getBetween($item, "Reference")??$this->Root.getValid($item,'Name' ,$p_id)):null;
                 if(!$this->CompressPath) {
                     $catDir = \_::$Back->Query->GetContentCategoryRoute($item);
-                    if(isValid($catDir)) $p_inselflink = $this->CollectionRoute.trim($catDir,"/\\")."/".($p_name??$p_id);
+                    if(isValid($catDir)) $p_inselflink = $this->CollectionRoot.trim($catDir,"/\\")."/".($p_name??$p_id);
                 }
                 $p_path = first(Convert::FromJson(getValid($item,'Path' , $this->DefaultPath)));
-                if($this->AllowRoute) $rout->Set($p_inselflink);
+                if($this->AllowRoot) $rout->Set($p_inselflink);
 			    $hasl = isValid($p_inselflink);
 			    $p_showmorebutton = $hasl && $this->AllowMoreButton;
                 $p_morebuttontext = Convert::FromSwitch($this->MoreButtonLabel, $p_type);
@@ -365,7 +365,7 @@ class ContentCollection extends Collection{
                         doValid(
                             function($val) use(&$p_meta){
                                 $authorName = table("User")->SelectRow("Signature , Name","Id=:Id",[":Id"=>$val]);
-                                if(!isEmpty($authorName)) $p_meta .=  " ".Html::Link($authorName["Name" ],\_::$Address->UserRoute.$authorName["Signature" ],["class"=>"author"]);
+                                if(!isEmpty($authorName)) $p_meta .=  " ".Html::Link($authorName["Name" ],\_::$Base->UserRoot.$authorName["Signature" ],["class"=>"author"]);
                             },
                             $item,
                             'AuthorId'
@@ -413,7 +413,7 @@ class ContentCollection extends Collection{
                         if($p_showtitle) yield Html::SuperHeading($p_title, $lt?$p_inselflink:null, ['class'=>'title']);
                         if($p_showmeta && isValid($p_meta)) {
                             yield "<sub class='metadata'>";
-                            if($this->AllowRoute) yield $rout->ToString();
+                            if($this->AllowRoot) yield $rout->ToString();
                             yield $p_meta."</sub>";
                         }
                     yield "</div>";

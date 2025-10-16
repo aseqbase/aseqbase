@@ -1,6 +1,5 @@
 <?php
 library("Revise");
-library("Router");
 library("DataBase");
 library("DataTable");
 library("Query");
@@ -16,14 +15,8 @@ library("HashCrypt");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/BackBase See the Structures Documentation
  */
-abstract class BackBase
+class BackBase
 {
-	/**
-	 * An array of all method=>patterns=>handler view names to handle all type request virtual pathes
-	 * Empty array causing to pass all patterns to the Handelers
-	 * @internal
-	 */
-	public \MiMFa\Library\Router $Router;
 	/**
 	 * A simple library to Session management
 	 * @internal
@@ -54,7 +47,6 @@ abstract class BackBase
 	{
 		\MiMFa\Library\Revise::Load($this);
 
-		$this->Router = new \MiMFa\Library\Router();
 		$this->DataBase = new \MiMFa\Library\DataBase();
 		$this->Cryptograph = new \MiMFa\Library\HashCrypt();
 		$this->Session = new \MiMFa\Library\Session(table("Session", source:$this->DataBase), $this->Cryptograph);

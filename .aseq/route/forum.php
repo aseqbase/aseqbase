@@ -6,8 +6,8 @@ route("content", [
         ]
     ],
     "View"=>[
-        "RootRoute" => "/forum/",
-        "CollectionRoute" => "/forums/",
+        "Root" => "/forum/",
+        "CollectionRoot" => "/forums/",
     ],
     "ErrorHandler" => "Could not find related forum"
 ]);

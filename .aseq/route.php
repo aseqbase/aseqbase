@@ -1,0 +1,20 @@
+<?php
+\_::$Aseq->On("public|asset/.*\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm|webp)")
+    ->Default(fn()=>responseFile(normalizePath(\_::$Base->Request)));
+\_::$Aseq->On("contents")->Default("contents");
+\_::$Aseq->On("content")->Default("content");
+\_::$Aseq->On("posts")->Default("posts");
+\_::$Aseq->On("post")->Default("post");
+\_::$Aseq->On("newses")->Default("newses");
+\_::$Aseq->On("news")->Default("news");
+\_::$Aseq->On("forums")->Default("forums");
+\_::$Aseq->On("forum")->Default("forum");
+\_::$Aseq->On("(categor(ies|y))|(cats?)")->Default("category");
+\_::$Aseq->On("tags?")->Default("tag");
+\_::$Aseq->On("query")->Default("query");
+\_::$Aseq->On("search")->Default("search");
+\_::$Aseq->On("sign")->Default("sign");
+\_::$Aseq->On("user")->Default("user");
+\_::$Aseq->On("group")->Default("group");
+\_::$Aseq->On()->Default(\_::$Config->DefaultRouteName);
+?>

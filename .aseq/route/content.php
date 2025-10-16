@@ -1,6 +1,6 @@
 <?php
 use MiMFa\Library\Convert;
-use \MiMFa\Library\Router;
+
 $data = $data??[];
 function findContent($router, &$data)
 {

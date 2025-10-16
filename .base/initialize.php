@@ -5,7 +5,7 @@ component("Component");
 template("Template");
 module("Module");
 
-runAll("router");
+runAll("route");
 runAll("customize");
 run("revise");
 ?>

@@ -9,8 +9,8 @@ route("contents", [
         "DefaultTitle" => "Latest News",
         "Image"=>"comments",
         "MaximumColumns"=> 3,
-        "RootRoute" => "/news/",
-        "CollectionRoute" => "/newses/"
+        "Root" => "/news/",
+        "CollectionRoot" => "/newses/"
     ],
     "ErrorHandler" => "Could not find related news"
 ]);

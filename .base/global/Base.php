@@ -1,6 +1,5 @@
 <?php
 
-use MiMFa\Library\Router;
 
 library("Revise");
 /**

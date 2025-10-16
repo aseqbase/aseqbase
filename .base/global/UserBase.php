@@ -250,19 +250,19 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->GetMetaValue($key, "Id=$id");
+		return is_null($id) ? null : $this->DataTable->GetMetaValue($id, $key);
 	}
 	public function SetMetaValue($key, $value, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->SetMetaValue($key, $value, "Id=$id");
+		return is_null($id) ? null : $this->DataTable->SetMetaValue($id, $key, $value);
 	}
 	public function ForgetMetaValue($key, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->ForgetMetaValue($key, "Id=$id");
+		return is_null($id) ? null : $this->DataTable->ForgetMetaValue($id, $key);
 	}
 
 	public function GetGroup($signature = null, $password = null)
@@ -337,13 +337,12 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if (!isValid($password))
 			return false;
 		$person = null;
-		try{ $person = $this->Find($signature, $password); } catch(\Exception $ex) { return false; }
+		try{$person = $this->Find($signature, $password); } catch(\Exception $ex) { return false; }
 		$status = takeValid($person, "Status", self::$InitialStatus);
 		if ($status === false || intval($status) < self::$ActiveStatus)
 			return null;
 		$this->Load($person);
-		$this->Session->SetData($this->Signature . "_" . getClientCode(), $this->Signature);
-		return true;
+		return $this->Session->SetData($this->Signature . "_" . getClientCode(), $this->Signature)?true:false;
 	}
 	/**
 	 * Summary of SignInOrSignUp
@@ -468,7 +467,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->TemporaryName = takeValid($person, "Name");
 		$this->TemporaryImage = takeValid($person, "Image");
 		$this->TemporaryPassword = takeValid($person, "Password");
-		$path = \_::$Host . ($handlerPath ?? self::$HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
+		$path = \_::$Base->Host . ($handlerPath ?? self::$HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
 		$dic = array();
 		$dic['$HYPERLINK'] = Html::Link($linkAnchor, $path);
 		$dic['$LINK'] = Html::Link($path, $path);

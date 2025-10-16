@@ -2,19 +2,19 @@
 use MiMFa\Library\Convert;
 $data = $data ?? [];
 module("Form");
-(new MiMFa\Library\Router())
+(new Router())
 	->Post(function () use ($data) {
 		$form = new MiMFa\Module\Form();
 		$received = receivePost();
 		if (!get($received, "Message"))
 			render($form->GetError("Your message could not be empty!"));
 		else {
-			$form->MailSubject = \_::$Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$User, "Name")) . "'";
+			$form->MailSubject = \_::$Base->Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$User, "Name")) . "'";
 			$form->ReceiverEmail = \_::$Info->ReceiverEmail;
 			$form->SenderEmail = get($received, "Email") ?? get(\_::$User, "Email");
 			table("Message")->Insert([
 				"UserId" => \_::$User ? \_::$User->Id : null,
-				"Type" => \_::$Url,
+				"Type" => \_::$Base->Url,
 				"Name" => Convert::ToText(getValid($received, "Name", \_::$User ? \_::$User->Name : null)),
 				"From" => $form->SenderEmail,
 				"To" => $form->ReceiverEmail,

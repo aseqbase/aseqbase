@@ -7,7 +7,7 @@ library("Revise");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
  */
-abstract class InformationBase extends ArrayObject{
+class InfoBase extends ArrayObject{
 	/**
 	 * The website owner name
 	 * @var mixed

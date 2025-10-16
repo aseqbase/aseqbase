@@ -6,7 +6,7 @@ class Manifest
 {
 	public static function Store($data)
 	{
-		$path = \_::$Aseq->ScriptDirectory . "manifest.json";
+		$path = \_::$Base->ScriptDirectory . "manifest.json";
 		if (!isEmpty($data)) Local::WriteText($path, Convert::ToJson($data), true);
 		return $path;
 	}

@@ -28,11 +28,11 @@ class PeriodPicker extends Module
             }
             $fromId = $this->Name . "_" . $this->FromTimeRequest;
             $toId = $this->Name . "_" . $this->ToTimeRequest;
-            $queries = preg_replace("/(^|&)({$this->FromTimeRequest}|{$this->ToTimeRequest}|&+)\=[^&]*(?=$|&)/i", "", "" . \_::$Query);
+            $queries = preg_replace("/(^|&)({$this->FromTimeRequest}|{$this->ToTimeRequest}|&+)\=[^&]*(?=$|&)/i", "", "" . \_::$Base->Query);
             $this->Children = [
                   Html::Field(type: "Calendar", title: $this->FromTimeLable, value: receiveGet($this->FromTimeRequest, Convert::ToDateTimeString($fromTime)), key: $this->FromTimeRequest, attributes: ["Id" => $fromId]) .
                   Html::Field(type: "Calendar", title: $this->ToTimeLable, value: receiveGet($this->ToTimeRequest, Convert::ToDateTimeString($toTime)), key: $this->ToTimeRequest, attributes: ["Id" => $toId]) .
-                  Html::Button("Show", "load(`" . \_::$Path . "?" . (isEmpty($queries) ? "" : "{$queries}&") . "{$this->FromTimeRequest}=`+(document.getElementById(`$fromId`).value+'').replace('T',' ')+`&{$this->ToTimeRequest}=`+(document.getElementById(`$toId`).value+'').replace('T',' '));")
+                  Html::Button("Show", "load(`" . \_::$Base->Path . "?" . (isEmpty($queries) ? "" : "{$queries}&") . "{$this->FromTimeRequest}=`+(document.getElementById(`$fromId`).value+'').replace('T',' ')+`&{$this->ToTimeRequest}=`+(document.getElementById(`$toId`).value+'').replace('T',' '));")
             ];
       }
 

@@ -462,7 +462,7 @@ class SideMenu extends Module
 		if (!auth(getValid($item, "Access", \_::$Config->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path");
-		$act = endsWith(\_::$Path, $path) ? 'active' : '';
+		$act = endsWith(\_::$Base->Path, $path) ? 'active' : '';
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Html::Item(

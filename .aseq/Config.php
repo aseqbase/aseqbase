@@ -1,6 +1,6 @@
 <?php
-run("ConfigurationAseq");
-class Configuration extends ConfigurationAseq {
+run("global/AseqConfig");
+class Config extends AseqConfig {
 	public $SecretKey = '~a!s@e#q$b%a^s&e*';
 	
 	/**

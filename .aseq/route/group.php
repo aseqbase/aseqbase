@@ -1,7 +1,7 @@
 <?php
 
 use MiMFa\Module\Profile;
-$path = \_::$Page;
+$path = \_::$Base->Page;
 template("Main");
 $templ = new \MiMFa\Template\Main();
 if(!isValid($path))

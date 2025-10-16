@@ -29,13 +29,14 @@ class Style extends \ArrayObject{
 	 * @param mixed $object
 	 * @return string
 	 */
-	public function Convert($object){
+	public static function Convert($object, ...$arguments){
 		$styles = [];
 		if(is_iterable($object))
 			foreach($object as $key=>$val)
 				if(is_numeric($key)) $styles[] = "$val;";
-				else $styles[] = $this->PropertyName($key).":$val;";
-		else return $object;
+				else $styles[] = self::PropertyName($key).":$val;";
+		elseif(isStatic($object)) return $object;
+		else return Convert::ToStatic($object, ...$arguments);
 		return join(" ", $styles);
 	}
 

@@ -118,7 +118,7 @@ class QRCodeScanner extends Module{
 	}
 
 	public function Get(){
-		//RenderScript(null, \_::$Address->ScriptRoute . "Instascan.js");
+		//RenderScript(null, \_::$Base->ScriptRoot . "Instascan.js");
 		return Html::Script(null,"https://rawgit.com/schmich/instascan-builds/master/instascan.min.js").
 		Html::OpenTag("video", $this->GetDefaultAttributes()).
 		$this->BrowserNotSupportError.
@@ -133,8 +133,8 @@ class QRCodeScanner extends Module{
 	public function GetScript(){
 		return Html::Script("
 		try{
-			if(!Instascan.Scanner) Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');
-			} catch{Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');}
+			if(!Instascan.Scanner) Html.script.load(null, '" . asset(\_::$Base->ScriptDirectory, "Instascan.js", optimize: true) . "');
+			} catch{Html.script.load(null, '" . asset(\_::$Base->ScriptDirectory, "Instascan.js", optimize: true) . "');}
 			{$this->Name} = new Instascan.Scanner({video: document.querySelector('.{$this->Name} video')});
 			{$this->Name}.addListener('scan', function (content) {
 				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);":"")."

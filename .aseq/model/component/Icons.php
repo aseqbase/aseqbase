@@ -15,7 +15,7 @@ class Icons
 	{
 		self::$Initialized = true;
 		if(self::$Local)
-			return HTML::Style(null, asset(\_::$Address->StyleDirectory, "Icons.css", optimize: false), ["async"]).HTML::Script(null, asset(\_::$Address->ScriptDirectory, "Icons.js", optimize: false), ["async"]);
+			return HTML::Style(null, asset(\_::$Base->StyleDirectory, "Icons.css", optimize: false), ["async"]).HTML::Script(null, asset(\_::$Base->ScriptDirectory, "Icons.js", optimize: false), ["async"]);
 		else return HTML::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
 			HTML::Script(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js", ["async"]);
 	}

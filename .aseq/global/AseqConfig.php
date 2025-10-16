@@ -1,5 +1,5 @@
 <?php
-class ConfigurationAseq extends ConfigurationBase
+class AseqConfig extends ConfigBase
 {
 	public $DateTimeFormat = 'H:i, d M y';
 

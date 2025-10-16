@@ -174,7 +174,7 @@ class Page extends Module
 				frame.innerHTML = ReadyHtml.load();
 				if(!isEmpty(cls)) frame.addClass(cls);
 				if(!isEmpty(anim)) frame.setAttribute(`data-aos`,(isEmpty(anim)?``:anim));
-				$(selector).load(`/private.php?".(isEmpty(\_::$Query)?"":(\_::$Query))."`".", {name:link,animation:anim,class:cls},
+				$(selector).load(`/private.php?".(isEmpty(\_::$Base->Query)?"":(\_::$Base->Query))."`".", {name:link,animation:anim,class:cls},
 					function(data){
 						if(!data) frame.innerHTML = ReadyHtml.connectionError(`Please check your connection...`);
 					},

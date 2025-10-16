@@ -147,7 +147,7 @@ class Query
             $parentId = $id;
             $id = $table ->SelectValue(
                 "$table->Name.Id",
-                "($table->Name.Id=:Id OR $table->Name.Name=:Name) AND " . (isEmpty($parentId) ? "" : ("$table->Name.ParentId=$parentId AND ")) . $condit,
+                "($table->Name.Id=:Id OR $table->Name.Name=:Name) AND " . ($parentId?"$table->Name.ParentId=$parentId AND ":"") . $condit,
                 [":Id" => $name, ":Name" => $name],
                 null
             );

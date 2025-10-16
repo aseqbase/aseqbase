@@ -1,5 +1,5 @@
 
 <?php
 require_once(__DIR__.DIRECTORY_SEPARATOR."initialize.php");
-if(inspect()) run(normalizePath(\_::$Direction));
+if(inspect()) run(normalizePath(\_::$Base->Direction));
 ?>

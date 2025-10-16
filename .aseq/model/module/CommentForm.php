@@ -58,7 +58,7 @@ class CommentForm extends Form
 				$row["Contact"],
 				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),
 				$message ?? [
-					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \_::$Path),
+					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \_::$Base->Path),
 					"Subject" => Convert::ToText(get($data, "Subject")),
 					"Name" => Convert::ToText(getValid($data, "Name", \_::$User ? \_::$User->Name : null)),
 					"Contact" => getValid($data, "Contact", \_::$User ? \_::$User->Email : null),

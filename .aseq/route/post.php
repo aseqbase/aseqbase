@@ -1,8 +1,8 @@
 <?php
 route("content", [
     "View"=>[
-        "RootRoute" => "/post/",
-        "CollectionRoute" => \_::$Address->CategoryRoute
+        "Root" => "/post/",
+        "CollectionRoot" => \_::$Base->CategoryRoot
     ],
     "ErrorHandler" => "Could not find related post"
 ]);

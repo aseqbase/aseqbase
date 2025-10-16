@@ -18,8 +18,8 @@ return route("contents", [
             "Title" => grab($viewData, "Title") ?? "Search Results",
             "WindowTitle" => grab($viewData, "WindowTitle") ?? get($items, "Title") ?? [$query, $cat],
             "Description" => grab($viewData, "Description") ?? "Found <b>\"" . count($items) . "\"</b> results for searching <b>\"$query\"</b>!",
-            "ShowRoute" => grab($viewData, "ShowRoute") ?? true,
-            "RootRoute" => grab($viewData, "RootRoute") ?? \_::$Address->ContentRoute,
+            "ShowRoot" => grab($viewData, "ShowRoot") ?? true,
+            "Root" => grab($viewData, "Root") ?? \_::$Base->ContentRoot,
             "Items" => $items,
             ...$viewData
         ]);

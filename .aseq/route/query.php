@@ -5,7 +5,7 @@ $filter = grab($computeData, "Filter") ?? [];
 return route("search", [
     "Compute" => [
         "Filter" => [
-            "Category" => implode("/", array_slice(explode("/", \_::$Direction), 1)),
+            "Category" => implode("/", array_slice(explode("/", \_::$Base->Direction), 1)),
             ...$filter
         ],
         ...$computeData

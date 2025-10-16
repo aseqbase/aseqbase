@@ -1,6 +1,6 @@
 <?php
-run("InformationAseq");
-class Information extends InformationAseq{
+run("global/AseqInfo");
+class Info extends AseqInfo{
 	public $Path = "https://aseqbase.ir";
 	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
 	public $Payment = '{"Network":"TRC-20","Unit":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}';
@@ -31,7 +31,7 @@ class Information extends InformationAseq{
 
 	public $Contacts = [
 		array("Name" => "Email", "Path"=> "mailto:aseqbase@mimfa.net", "Icon"=> "envelope"),
-		array("Name" => "Github", "Path"=> "http://github.com/mimfa", "Icon"=> "fa-house"),
+		array("Name" => "Github", "Path"=> "http://github.com/mimfa", "Icon"=> "share-alt"),
 		array("Name" => "Forum", "Path"=> "/chat", "Image" => "comment", "Icon"=> "comments")
 	];
 }

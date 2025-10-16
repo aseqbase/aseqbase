@@ -209,7 +209,7 @@ class DataBase {
 			return $value;
 	}
 
-	public function ReturnArray($result, array|null $defaultValue = []): array|null
+	public function ReturnArray($result, $defaultValue = [])
 	{
 		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
 	}
@@ -273,7 +273,7 @@ class DataBase {
 			$this->Reset();
 		}
 	}
-	public function TryTransaction($queries, $params = [], bool|int $defaultValue = false)
+	public function TryTransaction($queries, $params = [], $defaultValue = false)
 	{
 		try {
 			return $this->ReturnValue($this->TransactionExecute($queries, $params), $defaultValue);
@@ -315,7 +315,7 @@ class DataBase {
 		} finally {$this->Reset();}
 	}
 
-	public function FetchColumnExecute($query, $params = []): array|null
+	public function FetchColumnExecute($query, $params = [])
 	{
 		$stmt = $this->Execute($query, $params);
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
@@ -324,7 +324,7 @@ class DataBase {
 		}, false);
 		return $result?$result:null;
 	}
-	public function TryFetchColumn($query, $params = [], array|null $defaultValue = array())
+	public function TryFetchColumn($query, $params = [], $defaultValue = [])
 	{
 		try {
 			return $this->ReturnArray($this->FetchColumnExecute($query, $params), $defaultValue);
@@ -334,7 +334,7 @@ class DataBase {
 		} finally {$this->Reset();}
 	}
 
-	public function FetchPairsExecute($query, $params = []): array
+	public function FetchPairsExecute($query, $params = []) 
 	{
 		$res = [];
 		$k = $v = null;
@@ -342,7 +342,7 @@ class DataBase {
 			$res[count($row) < 2 ? $i : $row[$k = $k ?? array_key_first($row)]] = $row[$v = $v ?? array_key_last($row)];
 		return $res;
 	}
-	public function TryFetchPairs($query, $params = [], array|null $defaultValue = array()): array|null
+	public function TryFetchPairs($query, $params = [],  $defaultValue = [])
 	{
 		try {
 			return $this->ReturnArray($this->FetchPairsExecute($query, $params), $defaultValue);
@@ -367,12 +367,12 @@ class DataBase {
 		} finally {$this->Reset();}
 	}
 
-	public function FetchChangesExecute($query, $params = []): bool|int
+	public function FetchChangesExecute($query, $params = [])
 	{
 		$stmt = $this->Execute($query, $params, $isDone);
 		return $isDone ? ($stmt->rowCount()?: ($stmt->columnCount()?:true)) : false;
 	}
-	public function TryFetchChanges($query, $params = [], bool|int $defaultValue = false): bool|int
+	public function TryFetchChanges($query, $params = [], $defaultValue = false)
 	{
 		try {
 			return $this->FetchChangesExecute($query, $params)?: $defaultValue;
@@ -384,7 +384,7 @@ class DataBase {
 
 
 
-	public function Transaction($queries, $params = [], bool|int $defaultValue = false): bool|int
+	public function Transaction($queries, $params = [], $defaultValue = false)
 	{
 		return $this->TryTransaction($queries, $params, $defaultValue);
 	}
@@ -422,7 +422,7 @@ COMMIT;";
 			") $configs {$this->PostQuery}";
 	}
 
-	public function Select($tableName, $columns = "*", $condition = null, $params = [], $defaultValue = array())
+	public function Select($tableName, $columns = "*", $condition = null, $params = [], $defaultValue = [])
 	{
 		return $this->TryFetchRows($this->SelectQuery($tableName, $columns, $condition), $params, $defaultValue);
 	}
@@ -431,7 +431,7 @@ COMMIT;";
 		return "{$this->PreQuery} SELECT " . $this->ColumnNameNormalization($columns ?? "*") . " FROM " . $this->NameNormalization($tableName) . " {$this->MidQuery} " . $this->ConditionNormalization($condition) . " " . $this->PostQuery;
 	}
 
-	public function SelectRow($tableName, $columns = "*", $condition = null, $params = [], $defaultValue = array())
+	public function SelectRow($tableName, $columns = "*", $condition = null, $params = [], $defaultValue = [])
 	{
 		return $this->TryFetchRow($this->SelectRowQuery($tableName, $columns, $condition), $params, $defaultValue);
 	}
@@ -440,7 +440,7 @@ COMMIT;";
 		return "{$this->PreQuery} SELECT " . $this->ColumnNameNormalization($columns ?? "*") . " FROM " . $this->NameNormalization($tableName) . " {$this->MidQuery} " . $this->ConditionNormalization($condition) . " {$this->PostQuery} " . $this->LimitNormalization(1);
 	}
 
-	public function SelectColumn($tableName, $column = "Id", $condition = null, $params = [], $defaultValue = array())
+	public function SelectColumn($tableName, $column = "Id", $condition = null, $params = [], $defaultValue = [])
 	{
 		return $this->TryFetchColumn($this->SelectColumnQuery($tableName, $column, $condition), $params, $defaultValue);
 	}
@@ -449,7 +449,7 @@ COMMIT;";
 		return "{$this->PreQuery} SELECT " . $this->ColumnNameNormalization($column ?? "Id") . " FROM " . $this->NameNormalization($tableName) . " {$this->MidQuery} " . $this->ConditionNormalization($condition) . " " . $this->PostQuery;
 	}
 
-	public function SelectPairs($tableName, $key = "Id", $value = "Name", $condition = null, $params = [], array|null $defaultValue = array()): array|null
+	public function SelectPairs($tableName, $key = "Id", $value = "Name", $condition = null, $params = [], $defaultValue = []) 
 	{
 		return $this->TryFetchPairs($this->SelectPairsQuery($tableName, $key, $value, $condition), $params, $defaultValue);
 	}
@@ -467,7 +467,7 @@ COMMIT;";
 		return "{$this->PreQuery} SELECT " . $this->ColumnNameNormalization($column ?? "Id") . " FROM " . $this->NameNormalization($tableName) . " {$this->MidQuery} " . $this->ConditionNormalization($condition) . " " . $this->PostQuery;
 	}
 
-	public function Insert($tableName, $params = [], bool|int $defaultValue = false): bool|int
+	public function Insert($tableName, $params = [], $defaultValue = false)
 	{
 		if (is_array(first($params)))
 			return $this->TryTransaction($this->InsertQuery($tableName, $params), $params, $defaultValue);
@@ -492,7 +492,7 @@ COMMIT;";
 		return "{$this->PreQuery} INSERT INTO " . $this->NameNormalization($tableName) . " {$this->MidQuery} (" . implode(", ", $sets) . ") VALUES (" . implode(", ", $vals) . ") " . $this->PostQuery;
 	}
 
-	public function Replace($tableName, $params = [], bool|int $defaultValue = false): bool|int
+	public function Replace($tableName, $params = [], $defaultValue = false)
 	{
 		if (is_array(first($params)))
 			return $this->TryTransaction($this->ReplaceQuery($tableName, $params), $params, $defaultValue);
@@ -543,7 +543,7 @@ COMMIT;";
 		} else return "{$this->PreQuery} REPLACE INTO " . $this->NameNormalization($tableName) . " {$this->MidQuery} ($this->StartWrap" . implode("$this->EndWrap, $this->StartWrap", $sets) . "$this->EndWrap) VALUES (" . implode("), (", $vals) . ") " . $this->PostQuery;
 	}
 
-	public function Update($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
+	public function Update($tableName, $condition = null, $params = [], $defaultValue = false)
 	{
 		if (is_array(first($params)))
 			return $this->TryTransaction($this->UpdateQuery($tableName, $condition, $params), $params, $defaultValue);
@@ -561,14 +561,14 @@ COMMIT;";
 		foreach ($this->ParametersNormalization($params) as $key => $value) {
 			$k = trim($key, ":`[]");
 			if (!$condition || !preg_match("/\B\:$k\b/", $condition))
-				$sets[] = "$k=:$k";
+				$sets[] = "$this->StartWrap$k$this->EndWrap=:$k";
 			$args[":$k"] = $value;
 		}
 		$params = $args;
 		return "{$this->PreQuery} UPDATE " . $this->NameNormalization($tableName) . " {$this->MidQuery} SET " . implode(", ", $sets) . " " . $condition . " " . $this->PostQuery;
 	}
 
-	public function Delete($tableName, $condition = null, $params = [], bool|int $defaultValue = false): bool|int
+	public function Delete($tableName, $condition = null, $params = [], $defaultValue = false)
 	{
 		if (is_array(first($params)))
 			return $this->TryTransaction($this->DeleteQuery($tableName, $condition, $params), $params, $defaultValue);

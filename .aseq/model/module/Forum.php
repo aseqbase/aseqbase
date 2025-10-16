@@ -13,7 +13,7 @@ module("Content");
  */
 class Forum extends Content
 {
-     public $RootRoute = "/forum/";
+     public $Root = "/forum/";
 
      public $CommentTitle = "Leave Your Thought";
      public $CommentDescription = "Tell us what is your idea!";
