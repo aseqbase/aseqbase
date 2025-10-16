@@ -27,7 +27,7 @@ class Local
 		$address = str_replace(DIRECTORY_SEPARATOR, "/", $address);
 		if (!startsWith($address, "/")) {
 			$dirs = explode("/", \_::$Base->Direction);
-			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)),"/");
+			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
 			if (strlen($dirs) !== 0)
 				$address = "$dirs/$address";
 		}
@@ -42,8 +42,8 @@ class Local
 	{
 		if ((empty($url)) || isAbsoluteUrl($url))
 			return $url;
-		if (startsWith($url, "/")) 
-			return \_::$Base->Host.$url;
+		if (startsWith($url, "/"))
+			return \_::$Base->Host . $url;
 		else {
 			$dirs = explode("/", \_::$Base->Url);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
@@ -57,7 +57,8 @@ class Local
 	 */
 	public static function GetRelativeUrl($url): string|null
 	{
-		if (empty($url)) return null;
+		if (empty($url))
+			return null;
 		foreach (\_::$Sequences as $dir => $root)
 			if (startsWith($url, $root))
 				return substr($url, strlen($root));
@@ -85,7 +86,8 @@ class Local
 	 */
 	public static function GetPath($address)
 	{
-		if (empty($address)) return null;
+		if (empty($address))
+			return null;
 		return
 			ltrim(
 				str_replace(
@@ -107,11 +109,12 @@ class Local
 	 */
 	public static function GetAbsolutePath($path): string|null
 	{
-		if (empty($path)) return null;
+		if (empty($path))
+			return null;
 		foreach (\_::$Sequences as $dir => $root)
 			if (startsWith($path, $dir))
 				return $path;
-		return \_::$Aseq->Directory.ltrim($path, DIRECTORY_SEPARATOR);
+		return \_::$Aseq->Directory . ltrim($path, DIRECTORY_SEPARATOR);
 	}
 	/**
 	 * Get the relative address from a path
@@ -121,7 +124,8 @@ class Local
 	 */
 	public static function GetRelativePath($path): string|null
 	{
-		if (empty($path)) return null;
+		if (empty($path))
+			return null;
 		foreach (\_::$Sequences as $dir => $root)
 			if (startsWith($path, $dir))
 				return substr($path, strlen($dir));
@@ -152,7 +156,8 @@ class Local
 	public static function GetDirectory($path)
 	{
 		$path = self::GetPath($path);
-		if (empty($path)) return null;
+		if (empty($path))
+			return null;
 		if (is_dir($path))
 			return $path;
 		if (startsWith($path, \_::$Aseq->Directory))
@@ -166,12 +171,12 @@ class Local
 	{
 		return is_dir($path);
 	}
-	public static function CreateDirectory($destPath)
+	public static function CreateDirectory($directory)
 	{
 		$dir = "";
-		if (startsWith($destPath, \_::$Aseq->Directory))
-			$destPath = substr($destPath, strlen($dir = \_::$Aseq->Directory));
-		$dirs = explode(DIRECTORY_SEPARATOR, trim($destPath, DIRECTORY_SEPARATOR));
+		if (startsWith($directory, \_::$Aseq->Directory))
+			$directory = substr($directory, strlen($dir = \_::$Aseq->Directory));
+		$dirs = explode(DIRECTORY_SEPARATOR, trim($directory, DIRECTORY_SEPARATOR));
 		foreach ($dirs as $d)
 			if (!file_exists($dir .= $d)) {
 				mkdir($dir, 0777, true);
@@ -180,38 +185,52 @@ class Local
 				$dir .= DIRECTORY_SEPARATOR;
 		return $dir;
 	}
-	public static function DeleteDirectory($destPath)
+	public static function DeleteDirectory($directory)
 	{
-		$dir = trim($destPath, DIRECTORY_SEPARATOR);
-		return empty($dir) || rmdir($dir);
+		$directory = trim($directory, DIRECTORY_SEPARATOR);
+		$i = 0;
+		if (empty($directory))
+			return true;
+		elseif (is_dir($directory)) {
+			foreach (glob($directory . DIRECTORY_SEPARATOR . '*') as $file)
+				if (is_file($file) && ++$i)
+					unlink($file);
+				elseif (is_dir($file)) {
+					$i += self::DeleteDirectory($file);
+				}
+			if (rmdir($directory))
+				$i++;
+		}
+		return $i;
 	}
-	public static function MoveDirectory($sourceDir, $directory, $recursive = true)
+	public static function MoveDirectory($sourceDirectory, $destDirectory, $recursive = true)
 	{
-		if (self::CopyDirectory($sourceDir, $directory, $recursive))
-			return self::DeleteDirectory($sourceDir);
+		if (self::CopyDirectory($sourceDirectory, $destDirectory, $recursive))
+			return self::DeleteDirectory($sourceDirectory);
 		return false;
 	}
-	public static function CopyDirectory($sourceDir, $directory, $recursive = true): bool
+	public static function CopyDirectory($sourceDirectory, $destDirectory, $recursive = true): bool
 	{
 		set_time_limit(24 * 60 * 60);
 		$b = true;
-		$sourcePaths = scandir($sourceDir);
+		$sourcePaths = scandir($sourceDirectory);
 		if ($recursive)
 			foreach ($sourcePaths as $source) {
 				$bn = basename($source);
 				if (is_dir($source)) {
-					self::CreateDirectory($directory . $bn);
-					$b = self::CopyDirectory($source, $directory . $bn) && $b;
+					self::CreateDirectory($destDirectory . $bn);
+					$b = self::CopyDirectory($source, $destDirectory . $bn) && $b;
 				} else
-					$b = self::CopyFile($source, $directory . $bn) && $b;
+					$b = self::CopyFile($source, $destDirectory . $bn) && $b;
 			}
 		return $b;
 	}
-	public static function CopyDirectories($sourceDirs, $directorys, $recursive = true): bool
+	public static function CopyDirectories($sourceDirectories, $destDirectories, $recursive = true): bool
 	{
 		set_time_limit(24 * 60 * 60);
 		$b = true;
-		foreach ($sourceDirs as $s_dir) foreach ($directorys as $d_dir)
+		foreach ($sourceDirectories as $s_dir)
+			foreach ($destDirectories as $d_dir)
 				$b = self::CopyDirectory($s_dir, $d_dir, $recursive) && $b;
 		return $b;
 	}
@@ -225,7 +244,8 @@ class Local
 	public static function GetFile($path)
 	{
 		$path = self::GetPath($path);
-		if (empty($path)) return null;
+		if (empty($path))
+			return null;
 		if (file_exists($path))
 			return $path;
 		if (startsWith($path, \_::$Aseq->Directory))
@@ -288,7 +308,8 @@ class Local
 	{
 		set_time_limit(24 * 60 * 60);
 		$b = true;
-		foreach ($sourcePaths as $s_path) foreach ($destPaths as $d_path)
+		foreach ($sourcePaths as $s_path)
+			foreach ($destPaths as $d_path)
 				$b = self::CopyFile($s_path, $d_path) && $b;
 		return $b;
 	}
@@ -302,7 +323,8 @@ class Local
 	}
 	public static function WriteText($path, string|null $text, bool $ifNeeds = false)
 	{
-		if($ifNeeds && (self::ReadText($path) === $text)) return null;
+		if ($ifNeeds && (self::ReadText($path) === $text))
+			return null;
 		return file_put_contents(self::GetFile($path) ?? self::GetPath($path), $text);
 	}
 
@@ -341,7 +363,8 @@ class Local
 	{
 		if (is_string($content))
 			$content = self::GetFileObject($content);
-		if (!$content) return null;
+		if (!$content)
+			return null;
 		if (!get($content, "name"))
 			throw new \SilentException("There is not any file!");
 		$directory = $directory ?? \_::$Aseq->PublicDirectory;
@@ -414,7 +437,8 @@ class Local
 	{
 		if (is_string($content))
 			$content = self::GetFileObject($content);
-		if (!$content) return null;
+		if (!$content)
+			return null;
 		if (!get($content, "name"))
 			throw new \SilentException("There is not any file!");
 
@@ -474,7 +498,8 @@ class Local
 		// Sanitize the filename
 		$name = preg_replace('/[^\w\-.]/', '_', $name);
 		// Clear output buffer if active
-		if (ob_get_level()) ob_clean();
+		if (ob_get_level())
+			ob_clean();
 
 		// ini_set('mbstring.internal_encoding', \_::$Config->Encoding);//deprecated
 		// ini_set('mbstring.http_input', 'auto');//deprecated
@@ -499,7 +524,8 @@ class Local
 	 * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
 	 * @param string|null $name Optional filename to force download with a specific name.
 	 */
-	public static function LoadFile($path, $name = null, $type = null){
+	public static function LoadFile($path, $name = null, $type = null)
+	{
 		responseFile($path, null, $type, true, $name);
 	}
 }

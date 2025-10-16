@@ -2323,7 +2323,7 @@ function cleanup($directory = null)
 {
 	$i = 0;
 	if ($directory) {
-		foreach (glob("$directory*") as $file)
+		foreach (glob($directory . DIRECTORY_SEPARATOR . '*') as $file)
 			if (is_file($file) && ++$i)
 				unlink($file);
 			elseif (is_dir($file)){
