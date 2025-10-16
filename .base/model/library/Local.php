@@ -183,7 +183,7 @@ class Local
 	public static function DeleteDirectory($destPath)
 	{
 		$dir = trim($destPath, DIRECTORY_SEPARATOR);
-		return unlink($dir);
+		return empty($dir) || rmdir($dir);
 	}
 	public static function MoveDirectory($sourceDir, $directory, $recursive = true)
 	{
@@ -355,7 +355,7 @@ class Local
 		foreach ($extensions ?? \_::$Config->GetAcceptableFormats() as $ext)
 			if ($allow = $fileType === $ext || "." . $fileType === $ext)
 				break;
-		$sourceFile = $content["temp_name"];
+		$sourceFile = $content["tmp_name"];
 		if (!$allow) {
 			if ($deleteSource)
 				unlink($sourceFile);
@@ -419,7 +419,7 @@ class Local
 			throw new \SilentException("There is not any file!");
 
 		// Check if image file is an actual image or fake image
-		if (getimagesize($content["temp_name"]) === false)
+		if (getimagesize($content["tmp_name"]) === false)
 			throw new \SilentException("The image file is not an actual image!");
 		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableImageFormats);
 	}

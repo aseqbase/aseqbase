@@ -2311,8 +2311,8 @@ function cleanupTemp($full = true)
 		return cleanup(\_::$Base->TempDirectory);
 	$i = 0;
 	foreach ($_FILES as $file)
-		if (isset($file["temp_name"]) && is_file($file["temp_name"]) && ++$i)
-			unlink($file["temp_name"]);
+		if (isset($file["tmp_name"]) && is_file($file["tmp_name"]) && ++$i)
+			unlink($file["tmp_name"]);
 	return $i;
 }
 /**
@@ -2326,6 +2326,10 @@ function cleanup($directory = null)
 		foreach (glob("$directory*") as $file)
 			if (is_file($file) && ++$i)
 				unlink($file);
+			elseif (is_dir($file)){
+				$i += cleanup($file);
+				rmdir($file);
+			}
 	} else {
 		$i += cleanup(\_::$Base->TempDirectory);
 		$i += cleanup(\_::$Aseq->TempDirectory);

@@ -7,15 +7,15 @@ class Bootstrap
     public static $DataBaseSchemaFile = 'schema.sql';
     public static $DestinationDirectory = null;
 
-    
+
     public static function Start()
     {
         self::LoadConfig();
         if (!isset(self::$Configurations["Origin"]))
             self::$Configurations["Origin"] = [];
-        [$host, $port] = explode(":", (self::$Configurations["Origin"]["Host"] ?? null) ?: "localhost:8000");
-        $host = $host?:"localhost";
-        $port = $port?:"8000";
+        [$host, $port] = explode(":", isset(self::$Configurations["Origin"]["Host"]) ? self::$Configurations["Origin"]["Host"] . ":" : "localhost:8000");
+        $host = $host ?: "localhost";
+        $port = $port ?: "8000";
         if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
             exec("start /B php -S $host:$port");
             exec('net start MySQL');
@@ -97,8 +97,9 @@ class Bootstrap
             $dirPermission = self::$Configurations["Source"]["DirectoryPermission"] ?? 0755;
 
             $i = 0;
+            $rl = strlen($source);
             foreach ($iterator as $item) {
-                $relPath = substr($item->getPathname(), strlen($source));
+                $relPath = substr($item->getPathname(), $rl);
                 if (
                     str_starts_with($relPath, "~") ||
                     str_starts_with($relPath, "-") ||
@@ -162,14 +163,6 @@ class Bootstrap
         self::$Configurations["DataBase"]["Password"] = $password;
         self::$Configurations["DataBase"]["Prefix"] = $prefix;
 
-
-        // try {
-        //     $pdo = new \PDO("mysql:host=$host;charset=utf8mb4", $username, $password);
-        //     $pdo->exec("CREATE DATABASE IF NOT EXISTS `$name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
-        // } catch (\PDOException $e) {
-        //     echo "❌ Could not create DataBase: " . $e->getMessage() . "\n";
-        // }
-
         try {
             $pdo = new \PDO("mysql:host=$host;charset=" . (self::$Configurations["DataBase"]["Charset"] ?? "utf8mb4"), $username, $password);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -198,13 +191,13 @@ class Bootstrap
             if (!file_exists($configFile) || $force) {
                 if (!isset(self::$Configurations["DataBase"]))
                     self::$Configurations["DataBase"] = [];
-                [$host, $port] = explode(":", (self::$Configurations["DataBase"]["Host"] ?? null) ?: "localhost");
+                [$host, $port] = explode(":", isset(self::$Configurations["DataBase"]["Host"]) ? self::$Configurations["DataBase"]["Host"] . ":" : "localhost");
                 $host = $host ?: "localhost";
                 $port = $port ?: "null";
-                $name = self::$Configurations["DataBase"]["Name"] ?: "localhost";
-                $username = self::$Configurations["DataBase"]["Username"] ?: "root";
-                $password = self::$Configurations["DataBase"]["Password"] ?: "root";
-                $prefix = self::$Configurations["DataBase"]["Prefix"] ?: "";
+                $name = isset(self::$Configurations["DataBase"]["Name"]) ? self::$Configurations["DataBase"]["Name"] : "localhost";
+                $username = isset(self::$Configurations["DataBase"]["Username"]) ? self::$Configurations["DataBase"]["Username"] : "root";
+                $password = isset(self::$Configurations["DataBase"]["Password"]) ? self::$Configurations["DataBase"]["Password"] : "root";
+                $prefix = isset(self::$Configurations["DataBase"]["Prefix"]) ? self::$Configurations["DataBase"]["Prefix"] : "";
                 if (
                     $host === "localhost" &&
                     $port === "null" &&
@@ -284,36 +277,36 @@ class Config extends ConfigBase {
         if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
 
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
-
         $sourceExcludePattern = self::$Configurations["Source"]["ExcludePattern"] ?? "/^.*(composer\.(json|lock))$/i";
 
-        $i = 0;
-        foreach ($iterator as $item) {
-            $relPath = substr($item->getPathname(), strlen($source));
-            if (
-                str_starts_with($relPath, "~") ||
-                str_starts_with($relPath, "-") ||
-                str_starts_with($relPath, ".git" . DIRECTORY_SEPARATOR) ||
-                str_starts_with($relPath, "vendor" . DIRECTORY_SEPARATOR)
-            )
-                continue;
-            $targetPath = self::$DestinationDirectory . $relPath;
+        try {
+            $i = 0;
+            $rl = strlen($source);
+            foreach (glob($source) as $item) {
+                $relPath = substr($item, $rl);
+                if (
+                    str_starts_with($relPath, "~") ||
+                    str_starts_with($relPath, "-") ||
+                    str_starts_with($relPath, ".git" . DIRECTORY_SEPARATOR) ||
+                    str_starts_with($relPath, "vendor" . DIRECTORY_SEPARATOR)
+                )
+                    continue;
+                $targetPath = self::$DestinationDirectory . $relPath;
 
-            if ($item->isDir() && is_dir($targetPath))
-                unlink($targetPath);
-            elseif (!preg_match($sourceExcludePattern, $targetPath)) {
-                unlink($targetPath);
-                $i++;
-                echo "📦 Deleted: '$relPath'\n";
+                if (is_dir($targetPath))
+                    $i += self::DeleteDirectory($targetPath, $sourceExcludePattern);
+                elseif (!preg_match($sourceExcludePattern, $targetPath)) {
+                    unlink($targetPath);
+                    $i++;
+                    echo "📦 Deleted: '$relPath'\n";
+                }
             }
+            echo "✅ $i source files are deleted.\n";
+            self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory;
+        } catch (\Exception $e) {
+            echo "❌ Source failed: " . $e->getMessage() . "\n";
+            return false;
         }
-
-        echo "✅ $i source files are deleted.\n";
-        self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory;
     }
 
     public static function DestructDataBase($force = true)
@@ -376,5 +369,24 @@ class Config extends ConfigBase {
         } catch (\PDOException $e) {
             echo "⚠️ Could not store configurations: " . $e->getMessage() . "\n";
         }
+    }
+
+    public static function DeleteDirectory($directory = null, $excludePattern = null)
+    {
+        $i = 0;
+        if ($directory && is_dir($directory)) {
+            foreach (glob($directory . '/*') as $file) {
+                if (!$excludePattern || preg_match($excludePattern, $file)) continue;
+                elseif (is_file($file)) {
+                    unlink($file);
+                    echo "📦 Deleted: '$file'\n";
+                    $i++;
+                } elseif (is_dir($file))
+                    $i += self::DeleteDirectory($file);
+            }
+            if (count(scandir($directory)) === 2)
+                rmdir($directory); // Remove the root directory itself
+        }
+        return $i; // Number of files deleted
     }
 }
