@@ -49,45 +49,75 @@
 			<tr><td>PostgreSQL</td><td>8.3.18 +</td></tr>
 		</table>
 
-<h3>Installations</h3>
-  1. Install all requirements mention above
- 
-  #### To make the Main Domain of aseqbase website
-  2. Open a terminal in the home directory (public_html) of the website, then install the framework by:
-   ``` shell
- 	> composer create-project aseqbase/aseqbase ./
- 	> composer dev:install
-   ```
-  3. Follow steps
-  4. Use it through the domain URL (http://[my-domain-name].com)
-  5. Enjoy...
+<h3>Managements</h3>
+<h4>Installing</h4>
 
-  #### To make the subdomain of aseqbase website
-  2. Open a terminal in your subdomain directory (public_html/[my-subdomain-name]/), then install the framework by:
-   ``` shell
- 	> composer create-project aseqbase/aseqbase ./
- 	> composer dev:install
-   ```
-  3. Follow steps
-  4. Create an opitonal file name `global.php` on the root directory with the bellow codes:
-  ``` php
-  <?php
-	$ASEQ = '[my-subdomain-name]'; 	// (Optional) The current subdomain sequence or leave null if this file is in the root directory
-	$BASE = '[the-base-directory]'; // (Optional) The base directory you want to inherit all properties except what you changed
-	$SEQUENCES_PATCH = []; 		// (Optional) An array to apply your custom changes in \_::$Sequences
-								// newdirectory, newaseq; // Add new directory to the \_::$Sequences
-								// directory, newaseq; // Update directory in the \_::$Sequences
-								// directory, null; // Remove thw directory from the \_::$Sequences
-  ?>
-  ```
-  5. Use it through its special url (http://[my-subdomain-name].[my-domain-name].com)
-  6. Enjoy...
+  1. Install all requirements mentioned above
+  2. Follow one of these options:
+		* Open a terminal in the destination directory (public_html) of the website, then install the framework by:
+			``` bash
+			> composer create-project aseqbase/aseqbase ./
+			```
+		* Prompts below to create a manageable package (update, uninstall, etc.):
+			``` bash
+			> composer require aseqbase/aseqbase
+			> cd vendor/aseqbase/aseqbase
+			> composer dev:install
+			```
+  3. Put the destination directory of your website on the appeared step (for example, `D:\MyWebsite\`)
+		``` bash
+		Destination Directory [D:\MyWebsite\vendor\aseqbase\aseqbase\]: D:\MyWebsite\
+		```
+  4. Follow the steps to finish the installation of sources, database, etc.
+  * [optional] Create an optional file named `global.php` in the root directory with the following script:
+	  ``` php
+	  <?php
+		$BASE = '[the-base-directory-name]'; 		// (Optional) The base directory you want to inherit all properties except what you changed
+		$ASEQ = '[the-carrent-directory-name]'; 	// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
+		$SEQUENCES_PATCH = [];		// (Optional) An array to apply your custom changes in \_::$Sequences
+									// newdirectory, newaseq; // Add new directory to the \_::$Sequences
+									// directory, newaseq; // Update directory in the \_::$Sequences
+									// directory, null; // Remove thw directory from the \_::$Sequences
+	  ?>
+	  ```
+  5. Enjoy...
+<h4>Using</h4>
+
+  1. Do one of the following options:
+	  	* Visit its special URL (for example, `http://[my-domain-name].com` or `http://[my-subdomain-name].[my-domain-name].com`)
+		* On the local server:
+			* Use the following command
+				``` bash
+				> composer dev:start
+		  		```
+		  	* Visit the URL `localhost:8000` on the local browser
+  2. Enjoy...
+
+<h4>Updating</h4>
+
+  1. Keep your package updated using
+		``` bash
+  		> cd vendor/aseqbase/aseqbase
+		> composer dev:update
+		```
+  2. Follow the steps to finish the update of sources, database, etc.
+  3. Enjoy...
+
+<h4>Uninstalling</h4>
+
+  1. Uninstall the package and the constructed database using
+		``` bash
+  		> cd vendor/aseqbase/aseqbase
+		> composer dev:unistall
+		```
+  2. Follow the steps to finish the uninstallation of sources, database, etc.
+  3. Enjoy...
 
 <h3>Contributions</h3>
-<p>Contributions can take the form of new components or features, changes to existing features, tests, documentation (such as developer guides, user guides, examples, or specifications), bug fixes, optimizations, or just good suggestions.</p>
+	<p>Contributions can take the form of new components or features, changes to existing features, tests, documentation (such as developer guides, user guides, examples, or specifications), bug fixes, optimizations, or just good suggestions.</p>
 
 <h3>License</h3>
-<p>aseqbase Core is released under the terms of the GNU General Public License.</p>
+	<p>aseqbase Core is released under the terms of the GNU General Public License.</p>
 
 <h3>Links</h3>
 	<ul>
