@@ -54,11 +54,11 @@
 
   1. Install all requirements mentioned above
   2. Follow one of these options:
-		* Open a terminal in the destination directory (public_html) of the website, then install the framework by:
+		* Open a terminal in the destination directory (for example, `D:\MyWebsite\`) of the website, then install the framework by:
 			``` bash
 			> composer create-project aseqbase/aseqbase ./
 			```
-		* Prompts below to create a manageable package (update, uninstall, etc.):
+		* Prompts below to create a manageable framework (update, uninstall, etc.):
 			``` bash
 			> composer require aseqbase/aseqbase
 			> cd vendor/aseqbase/aseqbase
@@ -66,7 +66,7 @@
 			```
   3. Put the destination directory of your website on the appeared step (for example, `D:\MyWebsite\`)
 		``` bash
-		Destination Directory [D:\MyWebsite\vendor\aseqbase\aseqbase\]: D:\MyWebsite\
+		Destination Directory [D:\MyWebsite\]: D:\MyWebsite\
 		```
   4. Follow the steps to finish the installation of sources, database, etc.
   * [optional] Create an optional file named `global.php` in the root directory with the following script:
@@ -86,16 +86,16 @@
   1. Do one of the following options:
 	  	* Visit its special URL (for example, `http://[my-domain-name].com` or `http://[my-subdomain-name].[my-domain-name].com`)
 		* On the local server:
-			* Use the following command on the root directory
+			1. Use the following command on the root directory
 				``` bash
 				> composer start
 		  		```
-		  	* Visit the URL `localhost:8000` on the local browser
+		  	2. Visit the URL `localhost:8000` on the local browser
   2. Enjoy...
 
 <h4>Updating</h4>
 
-  1. Keep your package updated using
+  1. Keep your framework updated using
 		``` bash
   		> cd vendor/aseqbase/aseqbase
 		> composer dev:update
@@ -105,7 +105,7 @@
 
 <h4>Uninstalling</h4>
 
-  1. Uninstall the package and the constructed database using
+  1. Uninstall the framework and the constructed database using
 		``` bash
   		> cd vendor/aseqbase/aseqbase
 		> composer dev:unistall
