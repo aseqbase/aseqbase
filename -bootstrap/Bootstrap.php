@@ -31,24 +31,24 @@ class Bootstrap
     public static function Install()
     {
         self::LoadConfig();
-        if (self::ConstructSource(true) !== false)
+        if (self::ConstructSource(false) !== false)
             echo "✅ Source installation is completed successfully.\n";
         if (self::ConstructDataBase(false) !== false)
             echo "✅ DataBase installation is completed successfully.\n";
-        if (self::ConstructSetting(true) !== false)
+        if (self::ConstructSetting(false) !== false)
             echo "✅ Setting installation is completed successfully.\n";
         self::StoreConfig();
-        echo "✅ Finished!\n";
+        echo "\n✅ FINISHED -----------------\n";
     }
 
     public static function Update()
     {
         self::LoadConfig();
-        if (self::ConstructSource(false) !== false)
+        if (self::ConstructSource(true) !== false)
             echo "✅ Source update is completed successfully.\n";
         if (self::ConstructDataBase(true) !== false)
             echo "✅ DataBase update is completed successfully.\n";
-        if (self::ConstructSetting(false) !== false)
+        if (self::ConstructSetting(true) !== false)
             echo "✅ Setting update is completed successfully.\n";
         self::StoreConfig();
         echo "\n✅ FINISHED -----------------\n";
@@ -59,11 +59,11 @@ class Bootstrap
         if (strtolower(readline(("Are you sure to start uninstallation process (y/N)?") . "") ?: "n") === "y") {
             self::LoadConfig();
             if (strtolower(readline(("Are you sure about removing all files and folders permanently (y/N)?") . "") ?: "n") === "y") {
-                if (self::DestructSource(true) !== false)
+                if (self::DestructSource(false) !== false)
                     echo "✅ Source uninstallation is completed successfully.\n";
             }
             if (strtolower(readline(("Are you sure about removing all tables permanently (y/N)?") . "") ?: "n") === "y") {
-                if (self::DestructDataBase(true) !== false)
+                if (self::DestructDataBase(false) !== false)
                     echo "✅ DataBase uninstallation is completed successfully.\n";
             }
             self::StoreConfig();
@@ -74,16 +74,11 @@ class Bootstrap
     public static function ConstructSource($force = true)
     {
         echo "\nSOURCE INSTALLATION -----------------\n";
-        if (!isset(self::$Configurations["Source"]))
-            self::$Configurations["Source"] = [];
-        if (!isset(self::$Configurations["Destination"]))
-            self::$Configurations["Destination"] = [];
-
-        self::$DestinationDirectory = self::$Configurations["Destination"]["Root"] ?? (getcwd() . DIRECTORY_SEPARATOR);
-        self::$DestinationDirectory = $force ? (readline("Destination Directory [" . self::$DestinationDirectory . "]: ") ?: self::$DestinationDirectory) : self::$DestinationDirectory; // Project root (destination)
-        $source = dirname(__DIR__) . DIRECTORY_SEPARATOR;// Source folder (your framework package root)
+        self::$DestinationDirectory = $force ? self::$DestinationDirectory : (readline("Destination Directory [" . self::$DestinationDirectory . "]: ") ?: self::$DestinationDirectory); // Project root (destination)
         if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
+
+        $source = dirname(__DIR__) . DIRECTORY_SEPARATOR;// Source folder (your framework package root)
         if (self::$DestinationDirectory === $source) {
             echo "✅ All files are ready.\n";
             self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory;
@@ -102,7 +97,6 @@ class Bootstrap
                 $relPath = substr($item->getPathname(), $rl);
                 if (
                     str_starts_with($relPath, "~") ||
-                    str_starts_with($relPath, "-") ||
                     str_starts_with($relPath, ".git" . DIRECTORY_SEPARATOR) ||
                     str_starts_with($relPath, "vendor" . DIRECTORY_SEPARATOR)
                 )
@@ -114,7 +108,7 @@ class Bootstrap
                         mkdir($targetPath, $dirPermission, true);
                     }
                 } elseif (!preg_match($sourceExcludePattern, $targetPath) && $item !== $targetPath) {
-                    $shouldCopy = $force || !file_exists($targetPath) || filemtime($item) > filemtime($targetPath);
+                    $shouldCopy = !$force || !file_exists($targetPath) || filemtime($item) > filemtime($targetPath);
                     if ($shouldCopy) {
                         // Create folder if it doesn't exist
                         $targetDir = dirname($targetPath);
@@ -132,8 +126,25 @@ class Bootstrap
             echo "✅ $i source files are copied.\n";
             self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory;
         }
-    }
 
+        $isInVendor = preg_match("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", $source);
+        if ($isInVendor)
+            try {
+                $vc = json_decode(file_get_contents($source . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
+                $c = json_decode(file_get_contents(self::$DestinationDirectory . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
+                if (isset($vc["scripts"]["dev:start"])) {
+                    $c["scripts"] = $c["scripts"] ?? [];
+                    $c["scripts"]["start"] = $vc["scripts"]["dev:start"];
+                }
+                if (file_put_contents(self::$DestinationDirectory . "composer.json", json_encode($c, flags: JSON_OBJECT_AS_ARRAY)))
+                    echo "✅ Scripts in 'composer.json' is updated.\n";
+                else
+                    echo "❌ Could not update scripts in 'composer.json'.\n";
+            } catch (\Exception $e) {
+                echo "❌ Could not update scripts in 'composer.json': " . $e->getMessage() . "\n";
+            }
+        return true;
+    }
     public static function ConstructDataBase($force = true)
     {
         echo "\nDATABASE INSTALLATION -----------------\n";
@@ -182,7 +193,6 @@ class Bootstrap
             return self::ConstructDataBase($force);
         }
     }
-
     public static function ConstructSetting($force = true)
     {
         echo "\nSETTING INSTALLATION -----------------\n";
@@ -263,22 +273,16 @@ class Config extends ConfigBase {
     }
 
 
-    public static function DestructSource($force = true)
+    public static function DestructSource($force = false)
     {
         echo "\nSOURCE UNINSTALLATION -----------------\n";
-        if (!isset(self::$Configurations["Source"]))
-            self::$Configurations["Source"] = [];
-        if (!isset(self::$Configurations["Destination"]))
-            self::$Configurations["Destination"] = [];
-
-        self::$DestinationDirectory = self::$Configurations["Destination"]["Root"] ?? (getcwd() . DIRECTORY_SEPARATOR);
-        self::$DestinationDirectory = $force ? (readline("Destination Directory [" . self::$DestinationDirectory . "]: ") ?: self::$DestinationDirectory) : self::$DestinationDirectory; // Project root (destination)
-        $source = dirname(__DIR__) . DIRECTORY_SEPARATOR;// Source folder (your framework package root)
+        self::$DestinationDirectory = $force ? self::$DestinationDirectory : (readline("Destination Directory [" . self::$DestinationDirectory . "]: ") ?: self::$DestinationDirectory); // Project root (destination)
         if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
 
-        $sourceExcludePattern = self::$Configurations["Source"]["ExcludePattern"] ?? "/^.*(composer\.(json|lock))$/i";
+        $sourceExcludePattern = self::$Configurations["Source"]["ExcludePattern"] ?? "/^vendor$/i";
 
+        $source = dirname(__DIR__) . DIRECTORY_SEPARATOR;// Source folder (your framework package root)
         try {
             $i = 0;
             $rl = strlen($source);
@@ -286,7 +290,6 @@ class Config extends ConfigBase {
                 $relPath = substr($item, $rl);
                 if (
                     str_starts_with($relPath, "~") ||
-                    str_starts_with($relPath, "-") ||
                     str_starts_with($relPath, ".git" . DIRECTORY_SEPARATOR) ||
                     str_starts_with($relPath, "vendor" . DIRECTORY_SEPARATOR)
                 )
@@ -296,9 +299,11 @@ class Config extends ConfigBase {
                 if (is_dir($targetPath))
                     $i += self::DeleteDirectory($targetPath, $sourceExcludePattern);
                 elseif (!preg_match($sourceExcludePattern, $targetPath)) {
-                    unlink($targetPath);
-                    $i++;
-                    echo "📦 Deleted: '$relPath'\n";
+                    if (unlink($targetPath)) {
+                        $i++;
+                        echo "📦 Deleted: '$targetPath'\n";
+                    } else
+                        echo "⚠️ Failed to delete file: $targetPath\n";
                 }
             }
             echo "✅ $i source files are deleted.\n";
@@ -308,8 +313,7 @@ class Config extends ConfigBase {
             return false;
         }
     }
-
-    public static function DestructDataBase($force = true)
+    public static function DestructDataBase($force = false)
     {
         echo "\nDATABASE UNINSTALLATION -----------------\n";
         if (!isset(self::$Configurations["DataBase"]))
@@ -350,6 +354,13 @@ class Config extends ConfigBase {
             $configFile = __DIR__ . DIRECTORY_SEPARATOR . self::$ConfigurationsFile;
             if (file_exists($configFile)) {
                 self::$Configurations = json_decode(file_get_contents($configFile), flags: JSON_OBJECT_AS_ARRAY) ?: [];
+                if (!isset(self::$Configurations["Source"]))
+                    self::$Configurations["Source"] = [];
+                if (!isset(self::$Configurations["Destination"]))
+                    self::$Configurations["Destination"] = [];
+                self::$DestinationDirectory = self::$Configurations["Destination"]["Root"] ?? preg_replace("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", "", getcwd() . DIRECTORY_SEPARATOR);
+                if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
+                    self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
                 echo "✅ Configurations loaded successfully!\n";
                 return self::$Configurations;
             }
@@ -362,6 +373,9 @@ class Config extends ConfigBase {
     {
         try {
             $configFile = __DIR__ . DIRECTORY_SEPARATOR . self::$ConfigurationsFile;
+            if (!isset(self::$Configurations["Destination"]))
+                self::$Configurations["Destination"] = [];
+            self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory ?? preg_replace("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", "", getcwd() . DIRECTORY_SEPARATOR);
             if ($res = file_put_contents($configFile, json_encode(self::$Configurations, flags: JSON_OBJECT_AS_ARRAY))) {
                 echo "✅ Configurations stored successfully!\n";
                 return $res;
@@ -377,13 +391,16 @@ class Config extends ConfigBase {
         $directory = rtrim($directory, "/\\");
         if ($directory && is_dir($directory)) {
             foreach (glob($directory . DIRECTORY_SEPARATOR . '*') as $file) {
-                if (!$excludePattern || preg_match($excludePattern, $file)) continue;
+                if (!$excludePattern || preg_match($excludePattern, basename($file)))
+                    continue;
                 elseif (is_file($file)) {
-                    unlink($file);
-                    echo "📦 Deleted: '$file'\n";
-                    $i++;
+                    if (unlink($file)) {
+                        $i++;
+                        echo "📦 Deleted: '$file'\n";
+                    } else
+                        echo "⚠️ Failed to delete file: $file\n";
                 } elseif (is_dir($file))
-                    $i += self::DeleteDirectory($file);
+                    $i += self::DeleteDirectory($file, $excludePattern);
             }
             if (count(scandir($directory)) === 2)
                 rmdir($directory); // Remove the root directory itself

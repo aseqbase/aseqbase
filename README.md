@@ -86,9 +86,9 @@
   1. Do one of the following options:
 	  	* Visit its special URL (for example, `http://[my-domain-name].com` or `http://[my-subdomain-name].[my-domain-name].com`)
 		* On the local server:
-			* Use the following command
+			* Use the following command on the root directory
 				``` bash
-				> composer dev:start
+				> composer start
 		  		```
 		  	* Visit the URL `localhost:8000` on the local browser
   2. Enjoy...
