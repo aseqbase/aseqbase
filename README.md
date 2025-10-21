@@ -97,6 +97,10 @@
 
   1. Keep your framework updated using
 		``` bash
+		> composer aseqbase:update
+		```
+		or
+		``` bash
   		> cd vendor/aseqbase/aseqbase
 		> composer dev:update
 		```
@@ -107,10 +111,28 @@
 
   1. Uninstall the framework and the constructed database using
 		``` bash
+		> composer aseqbase:unistall
+		```
+		or
+		``` bash
   		> cd vendor/aseqbase/aseqbase
 		> composer dev:unistall
 		```
   2. Follow the steps to finish the uninstallation of sources, database, etc.
+  3. Enjoy...
+
+<h4>Creating</h4>
+
+  1. Create a new file by a predefined template name (such as, global, config, back, router, front, user, info, etc.) using
+		``` bash
+		> composer aseqbase:create [predefined-template-name]
+		```
+		or
+		``` bash
+  		> cd vendor/aseqbase/aseqbase
+		> composer dev:create [predefined-template-name]
+		```
+  2. Follow the steps to finish the creating file.
   3. Enjoy...
 
 <h3>Contributions</h3>
