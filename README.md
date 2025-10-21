@@ -62,25 +62,23 @@
 			``` bash
 			> composer require aseqbase/aseqbase
 			> cd vendor/aseqbase/aseqbase
-			> composer dev:install
+			vendor/aseqbase/aseqbase> composer dev:install
 			```
   3. Put the destination directory of your website on the appeared step (for example, `D:\MyWebsite\`)
 		``` bash
 		Destination Directory [D:\MyWebsite\]: D:\MyWebsite\
 		```
   4. Follow the steps to finish the installation of sources, database, etc.
-  * [optional] Create an optional file named `global.php` in the root directory with the following script:
-	  ``` php
-	  <?php
-		$BASE = '[the-parent-directory-name]'; 		// (Optional) The parent directory you want to inherit all properties except what you changed
-		$ASEQ = '[the-carrent-directory-name]'; 	// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
-		$SEQUENCES_PATCH = [];		// (Optional) An array to apply your custom changes in \_::$Sequences
-									// newdirectory, newaseq; // Add new directory to the \_::$Sequences
-									// directory, newaseq; // Update directory in the \_::$Sequences
-									// directory, null; // Remove thw directory from the \_::$Sequences
-	  ?>
-	  ```
-  5. Enjoy...
+  5. [optional] Create an optional file named `global.php` in the root directory to change your-parent-directory-name (from the `.aseq`) using:
+		``` bash
+		> composer aseqbase:create global --base "your-parent-directory-name" -f
+		```
+		or
+		``` bash
+		vendor/aseqbase/aseqbase> composer dev:create global --base "your-parent-directory-name" -f
+		```
+		**Note**: Do not forget to replace "your-parent-directory-name" with your item (default `.aseq`). 
+  6. Enjoy...
 <h4>Using</h4>
 
   1. Do one of the following options:
@@ -90,47 +88,47 @@
 				``` bash
 				> composer start
 		  		```
-		  	2. Visit the URL `localhost:8000` on the local browser
+		  	2. Visit the URL `localhost:8000` (for default) on the local browser
   2. Enjoy...
 
 <h4>Updating</h4>
 
-  1. Keep your framework updated using
+  1. Keep your framework updated using:
 		``` bash
 		> composer aseqbase:update
 		```
 		or
 		``` bash
   		> cd vendor/aseqbase/aseqbase
-		> composer dev:update
+		vendor/aseqbase/aseqbase> composer dev:update
 		```
   2. Follow the steps to finish the update of sources, database, etc.
   3. Enjoy...
 
 <h4>Uninstalling</h4>
 
-  1. Uninstall the framework and the constructed database using
+  1. Uninstall the framework and the constructed database using:
 		``` bash
 		> composer aseqbase:unistall
 		```
 		or
 		``` bash
   		> cd vendor/aseqbase/aseqbase
-		> composer dev:unistall
+		vendor/aseqbase/aseqbase> composer dev:unistall
 		```
   2. Follow the steps to finish the uninstallation of sources, database, etc.
   3. Enjoy...
 
 <h4>Creating</h4>
 
-  1. Create a new file by a predefined template name (for example, global, config, back, router, front, user, info, etc.) using
+  1. Create a new file by a predefined template name (for example, global, config, back, router, front, user, info, etc.) using:
 		``` bash
 		> composer aseqbase:create [predefined-template-name]
 		```
 		or
 		``` bash
   		> cd vendor/aseqbase/aseqbase
-		> composer dev:create [predefined-template-name]
+		vendor/aseqbase/aseqbase> composer dev:create [predefined-template-name]
 		```
   2. Follow the steps to finish creating the file.
   3. Enjoy...
