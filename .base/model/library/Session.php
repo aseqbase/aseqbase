@@ -15,6 +15,21 @@ class Session
 	public Cryptograph $Cryptograph;
 	public $Time = 86400;
 	public $Separator = "\\";
+	/**
+	 * Allow to set sessions on the client side (false for default)
+	 * @var bool
+	 */
+	public $AccessibleData = true;
+	/**
+	 * Encrypt all session keys (false for default)
+	 * @var bool
+	 */
+	public $EncryptKey = false;
+	/**
+	 * Encrypt all session values (true for default)
+	 * @var bool
+	 */
+	public $EncryptValue = true;
 
 	public function __construct(DataTable $dataTable, Cryptograph $cryptograph)
 	{
@@ -79,7 +94,7 @@ class Session
 	{
 		$this->StartSecure();
 		if (is_null($this->GetId())) {
-			$this->SetId(getClientCode(\_::$Aseq->Name));
+			$this->SetId(getClientCode(\_::$Router->Name));
 			$this->Set("Ip", getClientIp());
 			return true;
 		}
@@ -126,30 +141,30 @@ class Session
 	}
 
 	/**
-	 * To SetCookie if \_::$Config->ClientSession is true, SetData otherwise
+	 * To SetCookie if $this->AccessibleData is true, SetData otherwise
 	 * @param mixed $key
 	 * @param mixed $val
 	 * @return bool|int
 	 */
 	public function Set($key, $val)
 	{
-		if (\_::$Config->ClientSession)
+		if ($this->AccessibleData)
 			return $this->SetCookie($key, $val);
 		else
 			return $this->SetData($key, $val);
 	}
 	/**
-	 * Get the sat Cookie or Data (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * Get the sat Cookie or Data (Cookie if $this->AccessibleData is true, Data otherwise)
 	 * @param mixed $key
 	 */
 	public function Get($key)
 	{
-		if (\_::$Config->ClientSession)
+		if ($this->AccessibleData)
 			return $this->GetCookie($key);
 		return $this->GetData($key);
 	}
 	/**
-	 * Pop the sat Cookie or Data (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * Pop the sat Cookie or Data (Cookie if $this->AccessibleData is true, Data otherwise)
 	 * @param mixed $key
 	 */
 	public function Pop($key)
@@ -159,34 +174,34 @@ class Session
 		return $val;
 	}
 	/**
-	 * Check if the Cookie or Data is set or not (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * Check if the Cookie or Data is set or not (Cookie if $this->AccessibleData is true, Data otherwise)
 	 * @param mixed $key
 	 * @return bool
 	 */
 	public function Has($key)
 	{
-		if (\_::$Config->ClientSession)
+		if ($this->AccessibleData)
 			return $this->GetCookie($key) != null;
 		return $this->HasData($key);
 	}
 	/**
-	 * Forget the sat Cookie or Data (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * Forget the sat Cookie or Data (Cookie if $this->AccessibleData is true, Data otherwise)
 	 * @param mixed $key
 	 * @return bool|int
 	 */
 	public function Forget($key)
 	{
-		if (\_::$Config->ClientSession)
+		if ($this->AccessibleData)
 			return $this->ForgetCookie($key);
 		return $this->ForgetData($key);
 	}
 	/**
-	 * Clear the Cookies or Data (Cookie if \_::$Config->ClientSession is true, Data otherwise)
+	 * Clear the Cookies or Data (Cookie if $this->AccessibleData is true, Data otherwise)
 	 * @return bool|int
 	 */
 	public function Flush()
 	{
-		if (\_::$Config->ClientSession) {
+		if ($this->AccessibleData) {
 			$this->FlushCookie();
 			return true;
 		}
@@ -352,7 +367,6 @@ class Session
 	 */
 	public function PopSecure($key)
 	{
-		$key = $this->ToKey($key);
 		$val = $this->GetSecure($key);
 		$this->ForgetSecure($key);
 		return $val;
@@ -394,7 +408,7 @@ class Session
 	}
 	protected function ToCipherKey($key)
 	{
-		if (\_::$Config->EncryptSessionKey)
+		if ($this->EncryptKey)
 			return $this->ToKey($this->Encrypt($key));
 		else
 			return $this->ToKey($key);
@@ -402,20 +416,20 @@ class Session
 	protected function ToPlainKey($key)
 	{
 		$ks = explode($this->Separator, $key);
-		if (\_::$Config->EncryptSessionKey)
+		if ($this->EncryptKey)
 			return $this->Decrypt(end($ks));
 		return end($ks);
 	}
 	protected function ToCipherValue($value)
 	{
-		if (\_::$Config->EncryptSessionValue)
+		if ($this->EncryptValue)
 			return $this->Encrypt($value);
 		else
 			return $value;
 	}
 	protected function ToPlainValue($value)
 	{
-		if (\_::$Config->EncryptSessionValue)
+		if ($this->EncryptValue)
 			return $this->Decrypt($value);
 		else
 			return $value;
@@ -427,7 +441,7 @@ class Session
 			return null;
 		if (empty($plain))
 			return $plain;
-		return $this->Cryptograph->Encrypt($plain, \_::$Config->SecretKey, true);
+		return $this->Cryptograph->Encrypt($plain, $this->SecretKey, true);
 	}
 	public function Decrypt($cipher)
 	{
@@ -436,7 +450,7 @@ class Session
 		if (empty($cipher))
 			return $cipher;
 		try {
-			return $this->Cryptograph->Decrypt($cipher, \_::$Config->SecretKey, true);
+			return $this->Cryptograph->Decrypt($cipher, $this->SecretKey, true);
 		} catch (\Exception $exception) {
 			return null;
 		}

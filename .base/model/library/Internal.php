@@ -41,13 +41,13 @@ class Internal
     }
 
     public static function MakeStartScript($multilines = false){
-        if (\_::$Aseq->DefaultMethodName === "GET" && headers_sent()) {
+        if (\_::$Router->DefaultMethodName === "GET" && headers_sent()) {
            return "document.addEventListener('DOMContentLoaded',()=>".($multilines?"{":"");
         }
         return "";
     }
     public static function MakeEndScript($multilines = false){
-        if (\_::$Aseq->DefaultMethodName === "GET" && headers_sent()) {
+        if (\_::$Router->DefaultMethodName === "GET" && headers_sent()) {
             return ($multilines?"}":"").");";
         }
         return "";
@@ -181,6 +181,6 @@ class Internal
     }
 }
 
-Internal::$Directory = \_::$Aseq->PrivateDirectory . "internal" . DIRECTORY_SEPARATOR;
-Local::CreateDirectory(\_::$Aseq->PrivateDirectory);
+Internal::$Directory = \_::$Router->PrivateDirectory . "internal" . DIRECTORY_SEPARATOR;
+Local::CreateDirectory(\_::$Router->PrivateDirectory);
 Local::CreateDirectory(Internal::$Directory);

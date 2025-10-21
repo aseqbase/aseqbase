@@ -178,7 +178,7 @@ class Buttons extends Collection
 				yield "<div class='item item-$i  col-md' " . ($this->Animation ? ("data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed / 2) . "' data-aos='{$this->Animation}'") : null) . ">";
 				yield $img->ToString();
 				yield "<div class='description'>";
-				yield Html::SubHeading($p_name, true, false);
+				yield Html::Heading4($p_name, true, false);
 				yield Html::Paragraph($p_description);
 				if (isValid($p_path))
 					yield Html::Button($this->MoreButtonLabel, $clickact, ["class"=> "btn outline btn block"]);

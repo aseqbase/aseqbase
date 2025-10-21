@@ -445,7 +445,7 @@ class Map extends Module
 				else marker = L.marker(e.latlng).addTo({$this->Name});
 				".($this->SelectedLocationPopup?"marker.bindPopup(".Script::Convert(__($this->SelectedLocationPopup)).").openPopup();":"")."
 				".($this->SelectedLocationScriptFunction?"($this->SelectedLocationScriptFunction)({$this->Name}, e, err);":"")."
-				".($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction?"fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}".(\_::$Config->AllowTranslate?"&accept-language=".\_::$Back->Translate->Language:"")."`)
+				".($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction?"fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}".(\_::$Back->AllowTranslate?"&accept-language=".\_::$Back->Translate->Language:"")."`)
 				.then(response => response.json())
 				.then(data => {
 					err = null;

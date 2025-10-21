@@ -1,7 +1,7 @@
 <?php
 
 use MiMFa\Module\Profile;
-$path = \_::$Base->Page;
+$path = \_::$Address->Page;
 template("Main");
 $templ = new \MiMFa\Template\Main();
 if(!isValid($path))
@@ -10,12 +10,12 @@ if(!isValid($path))
     };
 else
     $templ->Content = function() use($path){
-        inspect(\_::$Config->UserAccess);
+        inspect(\_::$User->UserAccess);
         module("Profile");
         $module = new Profile(\_::$User->GroupDataTable);
         $module->KeyColumn = "Name";
         $module->Updatable = false;
-        $access = $module->UpdateAccess = \_::$Config->AdminAccess;
+        $access = $module->UpdateAccess = \_::$User->AdminAccess;
         $module->CellsTypes = [
             "Id" =>false,
             "Status" =>$access,
@@ -26,7 +26,7 @@ else
             "Access" =>function(){
                 $std = new stdClass();
                 $std->Type="number";
-                $std->Attributes=["min"=>\_::$Config->BanAccess,"max"=>\_::$Config->SuperAccess];
+                $std->Attributes=["min"=>\_::$User->BanAccess,"max"=>\_::$User->SuperAccess];
                 return $std;
             },
             "Image" =>"Image" ,

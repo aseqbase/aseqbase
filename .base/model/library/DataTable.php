@@ -18,11 +18,11 @@ class DataTable
 	public $MidQuery = null;
 	public $PostQuery = null;
 
-	public function __construct(\MiMFa\Library\DataBase $dataBase, $name, bool $addPrefix = true)
+	public function __construct(\MiMFa\Library\DataBase $dataBase, $name, $prefix = null)
 	{
 		$this->DataBase = $dataBase;
 		$this->MainName = $name;
-		$name = $addPrefix ? (\_::$Config->DataBasePrefix . $name) : $name;
+		$name = $prefix ? ($prefix . $name) : $name;
 		foreach (\_::$Config->DataTableNameConvertors as $key => $value)
 			$name = preg_replace($key, $value, $name);
 		$this->Name = $name;
@@ -387,7 +387,11 @@ class DataTable
 	 */
 	public function GetMetaData(array|int|null $id, $defaultValue = [])
 	{
-		return Convert::FromJson($this->GetValue($id, "MetaData", $defaultValue));
+		if (is_int($id))
+			return Convert::FromJson($this->GetValue($id, "MetaData", $defaultValue));
+		else
+			return loop($this->GetValue($id, "MetaData", $defaultValue), function ($v, $k) {
+				return [$k => Convert::FromJson($v)]; }, pair: true) ?: $defaultValue;
 	}
 	/**
 	 * To set the record or records metadata value
@@ -441,9 +445,7 @@ class DataTable
 	 */
 	public function SetMetaValue(array|int|null $id, $key, $value, $defaultValue = false)
 	{
-		$metadata = self::GetMetaData($id, []);
-		if (!$metadata)
-			return $defaultValue;
+		$metadata = self::GetMetaData($id, [])??[];
 		if (is_int($id)) {
 			$metadata[$key] = $value;
 			return $this->SetMetaData($id, $metadata, $defaultValue);
@@ -451,7 +453,7 @@ class DataTable
 			$params = [];
 			foreach ($metadata as $k => $md) {
 				$md[$key] = $value;
-				$params[] = [":Id" => $k, "MetaData" => isStatic($md) ? $md : Convert::ToJson($md)];
+				$params[] = [":Id" => $k, "MetaData" => Convert::ToJson($md)];
 			}
 			return $this->Update("Id=:Id", $params, $defaultValue);
 		}

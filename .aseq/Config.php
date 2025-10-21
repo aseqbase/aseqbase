@@ -1,8 +1,6 @@
 <?php
 run("global/AseqConfig");
 class Config extends AseqConfig {
-	public $SecretKey = '~a!s@e#q$b%a^s&e*';
-	
 	/**
 	 * Display exception handling
 	 * @default 1
@@ -18,13 +16,5 @@ class Config extends AseqConfig {
 	 * @default E_ALL
 	 */
 	public $ReportError = E_ALL;
-	/**
-	 * DataBase exception handling
-	 * @default 2
-	 */
-	public $DataBaseError = 3;
-
-	public $AllowSigning = true;
-	public $AllowTranslate = false;
 }
 ?>

@@ -225,7 +225,7 @@ class Translate
 			$this->DataTable->First("ValueOptions", ["KeyCode=''", $condition], $params) ??
 			$this->DataTable->First("ValueOptions", $condition, $params)) ?? []) as $key=>$value){
 			$value = Convert::FromJson($value);
-			if($key=="x") $key = strtolower(\_::$Config->DefaultLanguage??$key);
+			if($key=="x") $key = strtolower(\_::$Back->DefaultLanguage??$key);
 			$arr[$key] = array(
 				"Title" => getBetween($value, "Title", "Name")??strtoupper($key),
 				"Image" => getBetween($value, "Image", "Icon")??"https://unpkg.com/language-icons/icons/$key.svg",

@@ -1,7 +1,7 @@
 <?php
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-$data = !isEmpty($data) ? $data : \_::$User->Get(\_::$Base->Page);
+$data = !isEmpty($data) ? $data : \_::$User->Get(\_::$Address->Page);
 if (!isEmpty($data)) {
     module("Form");
     module("Field");
@@ -13,7 +13,7 @@ if (!isEmpty($data)) {
     $form->SubmitLabel = null;
     $form->ResetLabel = null;
     $form->ResetLabel = null;
-    $form->AddChild(Html::Heading($data["Signature"]));
+    $form->AddChild(Html::Heading3($data["Signature"]));
     $form->AddChild(Html::Paragraph(between(Html::Convert($data["Bio"]), "A New User!")));
     if (isValid($data["Organization"]))
         $form->AddChild(new \MiMFa\Module\Field("label", "Organization", Html::Convert($data["Organization"]), lock: true));

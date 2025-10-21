@@ -387,7 +387,7 @@ class Table extends Module
     public function Get()
     {
         $isc = $this->Controlable;
-        $isu = $isc && $this->Updatable && auth($this->UpdateAccess);
+        $isu = $isc && $this->Updatable && \_::$User->GetAccess($this->UpdateAccess);
         if ($isc)
             $this->CreateModal();
         if (isValid($this->DataTable) && isValid($this->KeyColumn)) {
@@ -440,17 +440,17 @@ class Table extends Module
         $rowCount = 0;
         $colCount = $ick ? count($icks) : 0;
         if ($isu) {
-            $uck = Html::Division(auth($this->AddAccess) ? Html::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip"=>"Add another Item"]) : Html::Image(null, "tasks"));
+            $uck = Html::Division(\_::$User->GetAccess($this->AddAccess) ? Html::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip"=>"Add another Item"]) : Html::Image(null, "tasks"));
             if ($ick)
                 array_unshift($icks, $uck);
         }
         $strow = "<tr>";
         $etrow = "</tr>";
-        $vaccess = auth($this->ViewAccess);
-        $aaccess = $isu && !is_null($this->AddAccess) && auth($this->AddAccess);
-        $daccess = $isu && !is_null($this->DuplicateAccess) && auth($this->DuplicateAccess);
-        $maccess = $isu && !is_null($this->ModifyAccess) && auth($this->ModifyAccess);
-        $raccess = $isu && !is_null($this->RemoveAccess) && auth($this->RemoveAccess);
+        $vaccess = \_::$User->GetAccess($this->ViewAccess);
+        $aaccess = $isu && !is_null($this->AddAccess) && \_::$User->GetAccess($this->AddAccess);
+        $daccess = $isu && !is_null($this->DuplicateAccess) && \_::$User->GetAccess($this->DuplicateAccess);
+        $maccess = $isu && !is_null($this->ModifyAccess) && \_::$User->GetAccess($this->ModifyAccess);
+        $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->GetAccess($this->RemoveAccess);
         $addbutton = fn($text="Add your first item") => Html::Center(Html::Button(__($text) . Html::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
         if (is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
@@ -660,7 +660,7 @@ class Table extends Module
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
-				}" . ($this->Updatable ? (auth($this->AddAccess) ? "
+				}" . ($this->Updatable ? (\_::$User->GetAccess($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(defaultValues){
 					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
@@ -671,21 +671,21 @@ class Table extends Module
                 			}catch{}
 						}
 					);
-				}" : "") . (auth($this->ModifyAccess) ? "
+				}" : "") . (\_::$User->GetAccess($this->ModifyAccess) ? "
 				function {$this->Modal->Name}_Modify(key){
 					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
-				}" : "") . (auth($this->DuplicateAccess) ? "
+				}" : "") . (\_::$User->GetAccess($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
 					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
-				}" : "") . (auth($this->RemoveAccess) ? "
+				}" : "") . (\_::$User->GetAccess($this->RemoveAccess) ? "
 				function {$this->Modal->Name}_Delete(key){
 					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?") . "`))" : "") . "
 						sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
@@ -741,8 +741,8 @@ class Table extends Module
             $this->Form->Class = "container";
             $this->Form->ContentClass = "col-lg-8";
             $this->Form->CancelLabel = "Cancel";
-            $this->Form->SuccessPath = \_::$Base->Url;
-            $this->Form->BackPath = \_::$Base->Url;
+            $this->Form->SuccessPath = \_::$Address->Url;
+            $this->Form->BackPath = \_::$Address->Url;
             $this->Form->BackLabel = null;
             //$form->AllowHeader = false;
         }
@@ -759,7 +759,7 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if (!auth($this->ViewAccess))
+        if (!\_::$User->GetAccess($this->ViewAccess))
             return Html::Error("You have not access to see datails!");
         $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
@@ -821,7 +821,7 @@ class Table extends Module
     public function GetAddForm($value){
         if (is_null($value))
             return null;
-        if (!auth($this->AddAccess))
+        if (!\_::$User->GetAccess($this->AddAccess))
             return Html::Error("You have not access to add!");
         $record = [];
         if (count($this->CellsTypes) > 0)
@@ -859,7 +859,7 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if (!auth($this->AddAccess))
+        if (!\_::$User->GetAccess($this->AddAccess))
             return Html::Error("You have not access to add!");
         $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
@@ -893,7 +893,7 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if (!auth($this->ModifyAccess))
+        if (!\_::$User->GetAccess($this->ModifyAccess))
             return Html::Error("You have not access to modify!");
         $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
@@ -926,7 +926,7 @@ class Table extends Module
 
     public function AddRow($values)
     {
-        if (!auth($this->AddAccess))
+        if (!\_::$User->GetAccess($this->AddAccess))
             return Html::Error("You have not access to modify!");
         unset($values[$this->KeyColumn]);
         $values = $this->NormalizeFormValues($values);
@@ -936,12 +936,12 @@ class Table extends Module
             if (isEmpty($v))
                 unset($values[$k]);
         if ($this->DataTable->Insert($values))
-            return flipResponse(Html::Success("The information added successfully!"));
+            return flipResponse(Html::Success("The ".__("'information")."' added successfully!"));
         return Html::Error("You can not add this item!");
     }
     public function ModifyRow($values)
     {
-        if (!auth(minaccess: $this->ModifyAccess))
+        if (!\_::$User->GetAccess($this->ModifyAccess))
             return Html::Error("You have not access to modify!");
         if (isValid($values, $this->KeyColumn)) {
             $values = $this->NormalizeFormValues($values);
@@ -956,10 +956,10 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if (!auth($this->RemoveAccess))
+        if (!\_::$User->GetAccess($this->RemoveAccess))
             return Html::Error("You have not access to delete!");
         if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
-            return flipResponse(Html::Success("The items removed successfully!"));
+            return flipResponse(Html::Success("The 'items' removed successfully!"));
         return Html::Error("You can not remove this item!");
     }
 

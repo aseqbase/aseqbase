@@ -25,7 +25,7 @@ class RingTabs extends Module{
         $this->Set($items, $path);
     }
 	public function Set($items =  null, $path = null){
-		$this->Path = $path??(\_::$Config->AllowSigning?\User::$InHandlerPath:null);
+		$this->Path = $path??(\_::$User->AllowSigning?\_::$User->InHandlerPath:null);
 		$this->Items = $items;
     }
 
@@ -176,7 +176,7 @@ class RingTabs extends Module{
 				$btns = [];
 				$tags = [];
 				loop($this->Items, function($v,$k,$i) use(&$btns, &$tags){
-					if(auth(getValid($v,"Access" ,\_::$Config->VisitAccess))) {
+					if(\_::$User->GetAccess(getValid($v,"Access" ,\_::$User->VisitAccess))) {
 						$desc = get($v, 'Description' );
 						$more = getBetween($v, "Button","More");
 						$pa = getBetween($v, 'Path');
@@ -191,7 +191,7 @@ class RingTabs extends Module{
 						);
 						
 						if($this->AllowTab) $tags[] = Html::Division(
-							Html::ExternalHeading(get($v,'Title' ), $pa, ["class"=>"title" ]).
+							Html::Heading1(get($v,'Title' ), $pa, ["class"=>"title" ]).
 								Html::Division($desc.$more, ["class"=>"description" ]), 
 							["class"=>"tab fade".($i===0?' active view show':''), "Id" =>"tab$i"]
 						);

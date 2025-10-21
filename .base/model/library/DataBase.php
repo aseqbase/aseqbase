@@ -18,18 +18,20 @@ class DataBase {
 	public $MidQuery = null;
 	public $PostQuery = null;
 	public $Timeout = null;
+	public $ReportLevel = null;
+	public $AllowNormalization = null;
 
-	public function __construct($userName = null, $password = null)
+	public function __construct($type="mysql", $host= "localhost", $port= null,  $name= "localhost", $userName= "root", $password = "root", $encoding = "utf8")
 	{
-		$this->DefaultConnection = \_::$Config->DataBaseType . ":host=" . \_::$Config->DataBaseHost . (\_::$Config->DataBasePort ? ";port=" . \_::$Config->DataBasePort : "") . ";dbname=" . ($this->Name = \_::$Config->DataBaseName) . ";charset=" . preg_replace("/\W/", "", \_::$Config->DataBaseEncoding);
-		$this->UserName = $userName ?? \_::$Config->DataBaseUser;
-		$this->Password = $password ?? \_::$Config->DataBasePassword;
+		$this->DefaultConnection = "$type:host=$host" . ($port ? ";port=$port" : "") . ";dbname=" . ($this->Name = $name) . ";charset=" . preg_replace("/\W/", "", $encoding);
+		$this->UserName = $userName;
+		$this->Password = $password;
 	}
 
 	public function Connection(): \PDO
 	{
 		$conn = new \PDO($this->DefaultConnection, $this->UserName, $this->Password);
-		if (\_::$Config->DataBaseError)
+		if ($this->ReportLevel)
 			$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		return $conn;
 	}
@@ -181,7 +183,7 @@ class DataBase {
 	}
 	public function ParametersNormalization($params = [])
 	{
-		if (!\_::$Config->DataBaseValueNormalization)
+		if (!$this->AllowNormalization)
 			return $params;
 		if (isEmpty($params))
 			return [];
@@ -586,7 +588,7 @@ COMMIT;";
 
 	public function Error(\Exception $ex, $query = null, $params = [])
 	{
-		switch (\_::$Config->DataBaseError) {
+		switch ($this->ReportLevel) {
 			case null:
 			case 0:
 				break;

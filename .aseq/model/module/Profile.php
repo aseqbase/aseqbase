@@ -194,7 +194,7 @@ class Profile extends Table{
 
 	public function Get(){
 		$isc = $this->Controlable;
-		$isu = $isc && $this->Updatable && auth($this->UpdateAccess);
+		$isu = $isc && $this->Updatable && \_::$User->GetAccess($this->UpdateAccess);
 		if(isValid($this->DataTable) && isValid($this->KeyColumn)){
 		    if(isValid($this->KeyValue)) $this->Items = $this->DataTable->SelectRow(count($this->CellsTypes)>0?array_keys($this->CellsTypes):"*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$this->KeyValue]);
             else $this->Items = isValid($this->SelectQuery)?$this->DataTable->DataBase->SelectRow($this->SelectQuery, $this->SelectParameters, $this->Items):
@@ -206,10 +206,10 @@ class Profile extends Table{
         }
 		$key = $this->KeyValue??get($this->Items,$this->KeyColumn);
 		$hasid = is_countable($this->Items) && isValid($key);
-        $vaccess = auth($this->ViewAccess);
-        $aaccess = $isu && !is_null($this->AddAccess) && auth($this->AddAccess);
-        $maccess = $isu && !is_null($this->ModifyAccess) && auth($this->ModifyAccess);
-        $raccess = $isu && !is_null($this->RemoveAccess) && auth($this->RemoveAccess);
+        $vaccess = \_::$User->GetAccess($this->ViewAccess);
+        $aaccess = $isu && !is_null($this->AddAccess) && \_::$User->GetAccess($this->AddAccess);
+        $maccess = $isu && !is_null($this->ModifyAccess) && \_::$User->GetAccess($this->ModifyAccess);
+        $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->GetAccess($this->RemoveAccess);
 		$isc = $isc && ($vaccess || $aaccess || $maccess || $raccess);
         $secret = receive("secret")??$this->ViewSecret;
         $res = Html::Division(
@@ -230,13 +230,13 @@ class Profile extends Table{
         ($this->Controlable?("
 				function {$this->Name}_View(key){
 					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
-				}".($this->Updatable?(auth($this->AddAccess)?"
+				}".($this->Updatable?(\_::$User->GetAccess($this->AddAccess)?"
 				function {$this->Name}_Create(){
 					sendPatch(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->Name}`);
-				}":"").(auth($this->ModifyAccess)?"
+				}":"").(\_::$User->GetAccess($this->ModifyAccess)?"
 				function {$this->Name}_Modify(key){
 					sendPatch(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
-				}":"").(auth($this->RemoveAccess)?"
+				}":"").(\_::$User->GetAccess($this->RemoveAccess)?"
 				function {$this->Name}_Delete(key){
 					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?")."`))":"")."
 						sendDelete(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->Name}`,
@@ -265,7 +265,7 @@ class Profile extends Table{
 
 	public function GetViewFields($value){
         if(is_null($value)) return null;
-        if(!auth($this->ViewAccess)) return Html::Error("You have not access to see datails!");
+        if(!\_::$User->GetAccess($this->ViewAccess)) return Html::Error("You have not access to see datails!");
         if(isEmpty($this->Items)) return Html::Error("You can not see this item!");
         $form = $this->GetForm();
         $form->Set(
@@ -316,7 +316,7 @@ class Profile extends Table{
 
 	public function GetAddFields($value){
         if(is_null($value)) return null;
-        if(!auth($this->AddAccess)) return Html::Error("You have not access to add!");
+        if(!\_::$User->GetAccess($this->AddAccess)) return Html::Error("You have not access to add!");
         module("Form");
         $record = [];
         if(count($this->CellsTypes)>0)
@@ -342,24 +342,24 @@ class Profile extends Table{
                         }
             })());
         $form->Image = getValid($record,"Image" ,$this->Image??"plus");
-        $form->SuccessPath = \_::$Base->Url;
+        $form->SuccessPath = \_::$Address->Url;
         return $form->Handle();
     }
 	public function DoAddHandle($value){
         if(is_null($value)) return null;
         $vals = $this->NormalizeValues(receivePost());
-        if(!auth($this->AddAccess)) return Html::Error("You have not access to modify!");
+        if(!\_::$User->GetAccess($this->AddAccess)) return Html::Error("You have not access to modify!");
         unset($vals[$this->KeyColumn]);
         foreach ($vals as $k=>$v)
             if(isEmpty($v)) unset($vals[$k]);
         if($this->DataTable->Insert($vals))
-            return Html::Success("The information added successfully!");
+            return Html::Success("The '".__("information")."' added successfully!");
         return Html::Error("You can not add this item!");
     }
 
 	public function GetModifyFields($value){
         if(is_null($value)) return null;
-        if(!auth($this->ModifyAccess)) return Html::Error("You have not access to modify!");
+        if(!\_::$User->GetAccess($this->ModifyAccess)) return Html::Error("You have not access to modify!");
         module("Form");
         if(isEmpty($this->Items)) return Html::Error("You can not modify this item!");
         $form = $this->GetForm();
@@ -386,7 +386,7 @@ class Profile extends Table{
 	public function DoModifyHandle($value){
         if(is_null($value)) return null;
         $vals = $this->NormalizeValues(receivePut());
-        if(!auth(minaccess: $this->ModifyAccess)) return Html::Error("You have not access to modify!");
+        if(!\_::$User->GetAccess($this->ModifyAccess)) return Html::Error("You have not access to modify!");
         if($this->DataTable->Update([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
             return Html::Success("The information updated successfully!");
         return Html::Error("You can not update this item!");
@@ -394,9 +394,9 @@ class Profile extends Table{
 
 	public function DoRemoveHandle($value){
         if(is_null($value)) return null;
-        if(!auth($this->RemoveAccess)) return Html::Error("You have not access to delete!");
+        if(!\_::$User->GetAccess($this->RemoveAccess)) return Html::Error("You have not access to delete!");
         if($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]))
-            return Html::Success("The items removed successfully!");
+            return Html::Success("The 'items' removed successfully!");
         return Html::Error("You can not remove this item!");
     }
 

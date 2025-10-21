@@ -29,16 +29,16 @@ if (isValid($user))
 	Html::Center(
 		Html::Header(
 			Html::Media(\_::$User->Image).
-			Html::ExternalHeading(\_::$User->Name).
+			Html::Heading1(\_::$User->Name).
 			Html::Paragraph(\_::$User->GetValue("Bio" )).
             Html::$BreakLine
 		,["class"=>"introduction"]).
         Html::Container([
             [
-                Html::Button("Show Profile", \User::$RouteHandlerPath),
-                Html::Button("Edit Profile", \User::$EditHandlerPath),
-                Html::Button("Reset Password", \User::$RecoverHandlerPath),
-                Html::Button("Sign Out", \User::$OutHandlerPath)
+                Html::Button("Show Profile", \_::$User->ProfileHandlerPath),
+                Html::Button("Edit Profile", \_::$User->EditHandlerPath),
+                Html::Button("Reset Password", \_::$User->RecoverHandlerPath),
+                Html::Button("Sign Out", \_::$User->OutHandlerPath)
             ]
         ]),["class"=>"page"]
     );

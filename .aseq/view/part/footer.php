@@ -5,7 +5,7 @@
     $module->Items = \_::$Info->Contacts;
     swap($module, $data);
     $module->Render();
-    if (\_::$Config->AllowTranslate) {
+    if (\_::$Back->AllowTranslate) {
         $module = new (module("Translator"))();
         $module->Items = \_::$Back->Translate->GetLanguages();
         $module->AllowLabel = true;

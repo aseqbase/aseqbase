@@ -81,9 +81,9 @@ class SignUpForm extends Form
 	public function __construct()
 	{
 		parent::__construct();
-		$this->Action = \User::$UpHandlerPath;
-		$this->InitialStatus = \User::$InitialStatus;
-		$this->Welcome = function(){ return part(\User::$DashboardHandlerPath, print:false); };
+		$this->Action = \_::$User->UpHandlerPath;
+		$this->InitialStatus = \_::$User->InitialStatus;
+		$this->Welcome = function(){ return part(\_::$User->DashboardHandlerPath, print:false); };
 	}
 
 	public function GetStyle()
@@ -132,14 +132,14 @@ class SignUpForm extends Form
 
 	public function Get()
 	{
-		if (auth(\_::$Config->UserAccess) && !$this->MultipleSignIn)
+		if (\_::$User->GetAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
 			return $this->GetHeader().Convert::ToString($this->Welcome);
 		else
 			return parent::Get();
 	}
 	public function GetHeader()
 	{
-        if(auth(\_::$Config->UserAccess) && !isEmpty($this->WelcomeFormat))
+        if(\_::$User->GetAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))
 			return __(Convert::FromDynamicString($this->WelcomeFormat));
 		return parent::GetHeader();
 	}
@@ -227,7 +227,7 @@ class SignUpForm extends Form
 	public function GetFooter()
 	{
 		return parent::GetFooter() . Html::LargeSlot(
-			Html::Link($this->SignInLabel, $this->SignInPath??\User::$InHandlerPath)
+			Html::Link($this->SignInLabel, $this->SignInPath??\_::$User->InHandlerPath)
 			,
 			["class"=> "col"]
 		);
@@ -266,7 +266,7 @@ class SignUpForm extends Form
 
 	public function Post()
 	{
-		if (!auth(\_::$Config->UserAccess))
+		if (!\_::$User->GetAccess(\_::$User->UserAccess))
 			try {
 				$received = receivePost();
 				if (isValid($received, "Email") || isValid($received, "Password" )) {

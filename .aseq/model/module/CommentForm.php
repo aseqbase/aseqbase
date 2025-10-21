@@ -45,7 +45,7 @@ class CommentForm extends Form
 	{
 		parent::__construct();
 		$this->Access = \_::$Config->WriteCommentAccess;
-		$this->DefaultStatus = \_::$User->Access(\_::$Config->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
+		$this->DefaultStatus = \_::$User->GetAccess(\_::$User->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
 		$this->Template = "b";
 	}
 
@@ -58,7 +58,7 @@ class CommentForm extends Form
 				$row["Contact"],
 				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),
 				$message ?? [
-					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \_::$Base->Path),
+					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \_::$Address->Path),
 					"Subject" => Convert::ToText(get($data, "Subject")),
 					"Name" => Convert::ToText(getValid($data, "Name", \_::$User ? \_::$User->Name : null)),
 					"Contact" => getValid($data, "Contact", \_::$User ? \_::$User->Email : null),
@@ -72,7 +72,7 @@ class CommentForm extends Form
 
 	public function Get()
 	{
-		if (!$this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: false)) {
+		if (!$this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false)) {
 			$this->Signing = true;
 			return $this->GetSigning();
 		}
@@ -138,7 +138,7 @@ class CommentForm extends Form
 
 	public function Post()
 	{
-		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: true, reaction: true))
+		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: true, reaction: true))
 			try {
 				$received = receivePost();
 				if (isValid($received, "Name") || isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
@@ -177,7 +177,7 @@ class CommentForm extends Form
 
 	public function Put()
 	{
-		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: true, reaction: true))
+		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: true, reaction: true))
 			try {
 				$received = receivePut();
 				if (isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
@@ -185,7 +185,7 @@ class CommentForm extends Form
 					$cid = get($received, "Id");
 					$att = get($received, "Attach");
 					if (isValid($cid))
-						$res = table("Comment")->Update("`Id`=:Id AND (" . (\_::$User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
+						$res = table("Comment")->Update("`Id`=:Id AND (" . (\_::$User->GetAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
 							":Id" => $cid,
 							":UserId" => \_::$User->Id,
 							":Contact" => \_::$User->Email,
@@ -212,7 +212,7 @@ class CommentForm extends Form
 	public function Patch()
 	{
 		$received = receivePatch();
-		if ($this->CheckAccess(access: $this->Access ?? \_::$Config->UserAccess, blocking: false, reaction: true))
+		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false, reaction: true))
 			if (isValid($received, "Reply")) {
 				forgetTimeout();
 				$this->AllowHeader =
@@ -223,7 +223,7 @@ class CommentForm extends Form
 				$this->ReplyId = get($received, "Reply");
 				$this->Router->Refresh()->Get()->Switch();
 				return $this->Handle();
-			} elseif (isValid($received, "Status") && \_::$User->Access(\_::$Config->AdminAccess)) {
+			} elseif (isValid($received, "Status") && \_::$User->GetAccess(\_::$User->AdminAccess)) {
 				$res = null;
 				$cid = get($received, "Id");
 				if (isValid($cid))
@@ -242,14 +242,14 @@ class CommentForm extends Form
 
 	public function Delete()
 	{
-		if (auth(\_::$Config->UserAccess))
+		if (\_::$User->GetAccess(\_::$User->UserAccess))
 			try {
 				$received = receiveDelete();
 				$cid = get($received, "Id");
 				if (isValid($cid))
 					if (
 						isValid($cid) && \_::$User->Id &&
-						table("Comment")->Delete("`Id`=:Id AND (" . (\_::$User->Access(\_::$Config->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$User->Id, ":UE" => \_::$User->Email])
+						table("Comment")->Delete("`Id`=:Id AND (" . (\_::$User->GetAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$User->Id, ":UE" => \_::$User->Email])
 					) {
 						$this->Status = 200;
 						return $this->GetWarning("This comment removed successfuly!");

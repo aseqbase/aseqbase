@@ -18,11 +18,11 @@ render(
 	") .
 	Html::Page(
 		$module->Handle() .
-		(!\_::$Config->AllowSigning || auth(\_::$Config->UserAccess) ? "" :
+		(!\_::$User->AllowSigning || \_::$User->GetAccess(\_::$User->UserAccess) ? "" :
 			Html::Center(
 				Html::SmallSlot(
-					Html::Button("Sign In", \User::$InHandlerPath, ["class"=>"main"]) .
-					Html::Button("Sign up", \User::$UpHandlerPath)
+					Html::Button("Sign In", \_::$User->InHandlerPath, ["class"=>"main"]) .
+					Html::Button("Sign up", \_::$User->UpHandlerPath)
 					,
 					["data-aos" => "zoom-out", "data-aos-duration" => "600"]
 				),

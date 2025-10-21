@@ -185,9 +185,9 @@ class ContentCollection extends Collection{
 
 	function __construct($items = null){
         parent::__construct($items);
-        $this->Root = $this->Root??\_::$Base->ContentRoot;
-        $this->CollectionRoot = $this->CollectionRoot??\_::$Base->CategoryRoot;
-        $this->CheckAccess = fn($item)=>auth(getValid($item, 'Access' , 0));
+        $this->Root = $this->Root??\_::$Address->ContentRoot;
+        $this->CollectionRoot = $this->CollectionRoot??\_::$Address->CategoryRoot;
+        $this->CheckAccess = fn($item)=>\_::$User->GetAccess(getValid($item, 'Access' , 0));
     }
 
 	public function GetStyle(){
@@ -365,7 +365,7 @@ class ContentCollection extends Collection{
                         doValid(
                             function($val) use(&$p_meta){
                                 $authorName = table("User")->SelectRow("Signature , Name","Id=:Id",[":Id"=>$val]);
-                                if(!isEmpty($authorName)) $p_meta .=  " ".Html::Link($authorName["Name" ],\_::$Base->UserRoot.$authorName["Signature" ],["class"=>"author"]);
+                                if(!isEmpty($authorName)) $p_meta .=  " ".Html::Link($authorName["Name" ],\_::$Address->UserRoot.$authorName["Signature" ],["class"=>"author"]);
                             },
                             $item,
                             'AuthorId'
@@ -410,7 +410,7 @@ class ContentCollection extends Collection{
                 yield "<div class='head row'>";
                     yield "<div class='col-lg'>";
                         $lt = $this->LinkedTitle && $hasl;
-                        if($p_showtitle) yield Html::SuperHeading($p_title, $lt?$p_inselflink:null, ['class'=>'title']);
+                        if($p_showtitle) yield Html::Heading2($p_title, $lt?$p_inselflink:null, ['class'=>'title']);
                         if($p_showmeta && isValid($p_meta)) {
                             yield "<sub class='metadata'>";
                             if($this->AllowRoot) yield $rout->ToString();

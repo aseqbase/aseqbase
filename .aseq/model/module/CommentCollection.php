@@ -308,7 +308,7 @@ class CommentCollection extends Collection
             $i = 0;
             yield $this->GetTitle();
             yield $this->GetDescription();
-            $adminaccess = auth(\_::$Config->AdminAccess);
+            $adminaccess = \_::$User->GetAccess(\_::$User->AdminAccess);
             foreach (Convert::ToItems($items ?? $this->Items) as $k => $item) {
                 $p_userid = get($item, "UserId");
                 $p_groupid = get($item, "GroupId");
@@ -324,8 +324,8 @@ class CommentCollection extends Collection
                     )
                 )
                     continue;
-                $p_access = getValid($item, 'Access', \_::$Config->VisitAccess);
-                if (!auth($p_access))
+                $p_access = getValid($item, 'Access', \_::$User->VisitAccess);
+                if (!\_::$User->GetAccess($p_access))
                     continue;
                 if (isValid($this->Relation) && $this->Relation != get($item, 'Relation'))
                     continue;
@@ -445,14 +445,14 @@ class CommentCollection extends Collection
                 if ($this->AllowAuthorImage) {
                     $aimg = get($author, "Image");
                     if (!isEmpty($author))
-                        yield Html::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \User::$DefaultImagePath, ["class" => "author-image"]);
+                        yield Html::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \_::$User->DefaultImagePath, ["class" => "author-image"]);
                 }
                 if ($this->AllowAuthor) {
                     $au = getValid($author, "Name", $p_name);
                     if (isEmpty($author))
                         yield Html::Span($au, null, ["class" => "author"]);
                     else
-                        yield Html::Link($au, \_::$Base->UserRoot . get($author, "Signature"), ["class" => "author"]);
+                        yield Html::Link($au, \_::$Address->UserRoot . get($author, "Signature"), ["class" => "author"]);
                 }
                 if ($p_showexcerpt)
                     yield "<div class='excerpt view parent-hover-hide'>$p_excerpt</div>";

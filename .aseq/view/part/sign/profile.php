@@ -10,14 +10,14 @@ if (isValid($user)) {
     $form->Title = $user["Name" ];
     $form->Description = between($user["Bio" ], "A New User!") .
         Html::Rack(join(PHP_EOL, [
-            Html::Button("Dashboard", \User::$DashboardHandlerPath, ["class"=> "col-lg"]),
-            Html::Button("Edit Profile", \User::$EditHandlerPath, ["class"=> "col-lg"]),
-            Html::Button("Reset Password", \User::$RecoverHandlerPath, ["class"=> "col-lg"]),
-            Html::Button("Sign Out", \User::$OutHandlerPath, ["class"=> "col-lg"])
+            Html::Button("Dashboard", \_::$User->DashboardHandlerPath, ["class"=> "col-lg"]),
+            Html::Button("Edit Profile", \_::$User->EditHandlerPath, ["class"=> "col-lg"]),
+            Html::Button("Reset Password", \_::$User->RecoverHandlerPath, ["class"=> "col-lg"]),
+            Html::Button("Sign Out", \_::$User->OutHandlerPath, ["class"=> "col-lg"])
         ]));
     $form->Image = $user["Image" ];
     $form->BackLabel = "More";
-    $form->BackPath = \User::$DashboardHandlerPath;
+    $form->BackPath = \_::$User->DashboardHandlerPath;
     $form->SubmitLabel = null;
     $form->ResetLabel = null;
     $form->AddChild(new \MiMFa\Module\Field("label", "Email", $user["Email"], lock: true));

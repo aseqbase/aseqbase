@@ -156,7 +156,7 @@ class FixedBanner extends Module{
 			yield Html::Division(
 					Html::Division(
 						(isValid($this->Logo)? Html::Media($this->Logo, ["class"=>'image' , "data-aos"=>'flip-up', "data-aos-delay"=>'500']):"").
-						(isValid($this->Title)? Html::ExternalHeading($this->Title, null, ["class"=>'title' , "data-aos"=>'zoom-up', "data-aos-delay"=>'1000', "data-aos-offset"=>'-500']):"")
+						(isValid($this->Title)? Html::Heading1($this->Title, null, ["class"=>'title' , "data-aos"=>'zoom-up', "data-aos-delay"=>'1000', "data-aos-offset"=>'-500']):"")
 					,["class"=>"top"]).
 					Html::Division(
 						(isValid($this->Description)? Html::Division(__($this->Description), ["class"=>'description' , "data-aos"=>'flip-right', "data-aos-delay"=>'1500', "data-aos-offset"=>'-500']):"").

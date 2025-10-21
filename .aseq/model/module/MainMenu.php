@@ -294,7 +294,7 @@ class MainMenu extends Module
 				flex-wrap: nowrap;
 				padding: calc(var(--size-0) / 6) var(--size-0);
 				gap: calc(var(--size-0) * 0.5);
-				" . ((\_::$Back->Translate->Direction ?? \_::$Config->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
+				" . ((\_::$Back->Translate->Direction ?? \_::$Back->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
 			}
 
 			.{$this->Name} .other form{
@@ -388,7 +388,7 @@ class MainMenu extends Module
 					module("UserMenu");
 					$defaultButtons[] = new searchForm();
 					$defaultButtons[] = new TemplateButton();
-					if (\_::$Config->AllowSigning) {
+					if (\_::$User->AllowSigning) {
 						$usermenu = new UserMenu();
 						$usermenu->Class = "other-item";
 						$defaultButtons[] = $usermenu;
@@ -406,10 +406,10 @@ class MainMenu extends Module
 
 	protected function CreateItem($item, $ind = 1)
 	{
-		if (!auth(getValid($item, "Access", \_::$Config->VisitAccess)))
+		if (!\_::$User->GetAccess(getValid($item, "Access", \_::$User->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path");
-		$act = endsWith(\_::$Base->Path, $path) ? 'active' : '';
+		$act = endsWith(\_::$Address->Path, $path) ? 'active' : '';
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Html::Item(

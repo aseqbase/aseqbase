@@ -48,21 +48,6 @@ class ConfigBase extends ArrayObject
      public $TimeStampOffset = 0;
 
      /**
-      * The website view name
-      * @var string
-      * @default "main"
-      * @category General
-      */
-     public $DefaultViewName = "main";
-     /**
-      * The view name to show pages
-      * @var string
-      * @default "main"
-      * @category General
-      */
-     public $DefaultRouteName = "main";
-
-     /**
       * Source to get the version of latest aseqbase release
       * @field path
       * @var string
@@ -132,88 +117,7 @@ class ConfigBase extends ArrayObject
       * @category Optimization
       */
      public $AllowUserReferring = false;
-     /**
-      * Allow to translate all text by internal algorithms
-      * @var bool
-      * @category Language
-      */
-     public $AllowTranslate = false;
-     /**
-      * Allow to update the language by translator automatically
-      * @var bool
-      * @category Language
-      */
-     public $AutoUpdateLanguage = false;
-     /**
-      * Allow to cache language for a fast rendering
-      * @var bool
-      * @category Language
-      */
-     public $CacheLanguage = true;
-     /**
-      * Default language to translate all text by internal algorithms
-      * @var string
-      * @category Language
-      */
-     public $DefaultLanguage = null;
-     /**
-      * The website default Direction
-      * @var string
-      * @category Language
-      */
-     public $DefaultDirection = null;
 
-     /**
-      * A special key for the website, be sure to change this
-      * @field password
-      * @var string
-      * @category Security
-      */
-     public $SecretKey = '~a!s@e#q$b%a^s&e*';
-     /**
-      * A special soft key for the default cryption, be sure to change this
-      * A special key generator for the website, override this for more security
-      * @field password
-      * @var string
-      * @category Security
-      */
-     public $SoftKey = null;
-     /**
-      * Allow to set sessions on the client side (false for default)
-      * @var bool
-      * @category Security
-      */
-     public $ClientSession = true;
-     /**
-      * Encrypt all session keys (false for default)
-      * @var bool
-      * @category Security
-      */
-     public $EncryptSessionKey = false;
-     /**
-      * Encrypt all session values (true for default)
-      * @var bool
-      * @category Security
-      */
-     public $EncryptSessionValue = true;
-     /**
-      * Salt and pepper for more strong encryptions, Shake them!
-      * @var string
-      * @category Security
-      */
-     public $EncryptSampleChars = "4wCpq01Ikl2NVmSDKFPJ7fXYijTzAUbE5WxgRuvGQZ3yBo6ncdeLMrst_HhO89a";
-     /**
-      * Salt and pepper picker
-      * @var int
-      * @category Security
-      */
-     public $EncryptSampler = 3;
-     /**
-      * Insert indexer for salt and pepper
-      * @var int
-      * @category Security
-      */
-     public $EncryptIndexer = 7;
      /**
       * Encrypt the name of elements and everything to reduce the possibility of scraping data by robots
       * @var bool
@@ -221,11 +125,12 @@ class ConfigBase extends ArrayObject
       */
      public $EncryptNames = true;
      /**
-      * Allow signing in and up to the guests
-      * @var bool
+      * Default site key for ReCaptcha
+      * @var string
       * @category Security
       */
-     public $AllowSigning = false;
+     public $ReCaptchaSiteKey = null;
+     
      /**
       * Allow Selecting on Page
       * @var bool
@@ -238,75 +143,7 @@ class ConfigBase extends ArrayObject
       * @category Security
       */
      public $AllowContextMenu = true;
-     /**
-      * Default site key for ReCaptcha
-      * @var string
-      * @category Security
-      */
-     public $ReCaptchaSiteKey = null;
-     /**
-      * The minimum group id available to choice by user
-      * @default 100
-      * @var int
-      * @category Security
-      */
-     public $MinimumGroupId = 100;
-     /**
-      * The maximum group id available to choice by user
-      * @default 999999999
-      * @var int
-      * @category Security
-      */
-     public $MaximumGroupId = 999999999;
-     /**
-      * The minimum group of banned user
-      * @default -1
-      * @var int
-      * @category Security
-      */
-     public $BanAccess = -1;
-     /**
-      * Default accessibility for the guests
-      * @default 0
-      * @var int
-      * @category Security
-      */
-     public $GuestAccess = 0;
-     /**
-      * The lowest group that registered user will be on
-      * @default 1
-      * @var int
-      * @category Security
-      */
-     public $UserAccess = 1;
-     /**
-      * The lowest group of administrators
-      * @default 988888888
-      * @var int
-      * @category Security
-      */
-     public $AdminAccess = 988888888;
-     /**
-      * The highest group of administrators
-      * @default 999999999
-      * @var int
-      * @category Security
-      */
-     public $SuperAccess = 999999999;
-     /**
-      * Minimum accessibility needs to visit the website
-      * @default 0
-      * @var int
-      * @category Security
-      */
-     public $VisitAccess = 0;
-     /**
-      * The status of all server response: 400, 404, 500, etc.
-      * @default null
-      * @var mixed
-      * @category Security
-      */
-     public $StatusMode = null;
+
      /**
       * The accessibility mode: 1 for whitelisted IPs, -1 for blacklisted IPs
       * @default null
@@ -323,18 +160,7 @@ class ConfigBase extends ArrayObject
       * @category Security
       */
      public $AccessPatterns = array();
-     /**
-      * Default message to show when restriction
-      * @var string
-      * @category Security
-      */
-     public $RestrictionContent = "Unfortunately, you have no access to the site now!<br>Please try a few minutes later...";
-     /**
-      * The default view name to show when restriction
-      * @var string
-      * @category Security
-      */
-     public $RestrictionRouteName = "403";
+     
 
      /**
       * The minimum file size available to uploud
@@ -383,6 +209,12 @@ class ConfigBase extends ArrayObject
       * @category Security
       */
      public $AcceptableFileFormats = [".zip", ".rar"];
+     
+	/**
+	 * An array of RegExPattern=>Replacement to convert all requested table names
+	 * @var array
+	 */
+	public $DataTableNameConvertors = [];
 
      /**
       * 0: Not show Errors; 1: To show Errors
@@ -405,81 +237,6 @@ class ConfigBase extends ArrayObject
       * @category Debug
       */
      public $ReportError = E_ALL;
-     /**
-      * Database Errors
-      * @field int
-      * @var int|null
-      * @category Debug
-      */
-     public $DataBaseError = 3;
-
-     /**
-      * The database default Encoding
-      * @var string
-      * @category DataBase
-      */
-     public $DataBaseEncoding = "utf8";
-     /**
-      * The database Type
-      * @var string
-      * @category DataBase
-      */
-     public $DataBaseType = 'mysql';
-     /**
-      * Checking and somewhere changing and/or normalizing the values before set on database
-      * @var bool
-      * @category DataBase
-      */
-     public $DataBaseValueNormalization = true;
-     /**
-      * The database HostName or IP
-      * @var string
-      * @category DataBase
-      */
-     public $DataBaseHost = 'localhost';
-     /**
-      * The database Port or null for default
-      * @var string
-      * @category DataBase
-      */
-     public $DataBasePort = null;
-     /**
-      * The database UserName
-      * @field password
-      * @var string
-      * @category DataBase
-      */
-     public $DataBaseUser = 'root';
-     /**
-      * The database Password
-      * @field password
-      * @var string
-      * @category DataBase
-      */
-     public $DataBasePassword = 'root';
-     /**
-      * The database Name
-      * @var string
-      * @category DataBase
-      */
-     public $DataBaseName = 'localhost';
-     /**
-      * The database tables Prefix
-      * @var string
-      * @category DataBase
-      */
-     public $DataBasePrefix = 'aseq_';
-     /**
-      * Add the website name to the selected DataBasePrefix for strongest privacy
-      * @var string
-      * @category DataBase
-      */
-     public $DataBaseAddNameToPrefix = false;
-     /**
-      * An array of RegExPattern=>Replacement to convert all requested table names
-      * @var array
-      */
-     public $DataTableNameConvertors = [];
 
      public function __construct()
      {
@@ -487,12 +244,6 @@ class ConfigBase extends ArrayObject
           ini_set('display_errors', $this->DisplayError);
           ini_set('display_startup_errors', $this->DisplayStartupError);
           error_reporting($this->ReportError);
-          if ($this->DataBaseAddNameToPrefix)
-               $this->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Aseq->Name ?? "qb") . "_";
-          if (!$this->SoftKey)
-               $this->SoftKey = $this->SecretKey;
-          elseif (!$this->SecretKey)
-               $this->SecretKey = $this->SoftKey;
      }
      public function __get($name)
      {
@@ -505,11 +256,6 @@ class ConfigBase extends ArrayObject
      public function PropertyName($name)
      {
           return preg_replace("/\W+/", "", strToProper($name));
-     }
-
-     public function HardKey($seed)
-     {
-          return $seed . $this->SecretKey . $seed;
      }
 
      public function IsLatestVersion(): bool|null

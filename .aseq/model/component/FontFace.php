@@ -5,7 +5,7 @@ foreach (\_::$Front->FontPalette as $fp)
 	foreach (preg_find_all("/(?<=['\"])[\w\- ]+(?=['\"])/", $fp) ?? [] as $key => $value) 
 		if($value) $fonts[strtolower($value)] = $value;
 
-$fdir = \_::$Base->AssetDirectory."font".DIRECTORY_SEPARATOR;
+$fdir = \_::$Address->AssetDirectory."font".DIRECTORY_SEPARATOR;
 \_::$Front->Libraries[] = Html::Style(
 	join(
 		PHP_EOL,

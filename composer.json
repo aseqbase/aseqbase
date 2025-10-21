@@ -30,8 +30,10 @@
     "scripts": {
         "dev:start": [
             "Composer\\Config::disableProcessTimeout",
-            "MiMFa\\Bootstrap::Start",
-            "@php index.php"
+            "MiMFa\\Bootstrap::Start"
+        ],
+        "dev:create": [
+            "MiMFa\\Bootstrap::Create"
         ],
         "dev:install": [
             "MiMFa\\Bootstrap::Install"

@@ -9,7 +9,7 @@ $module->Title = !isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strl
 $module->Description = get($data, 'Description');
 $module->Image = get($data, 'Image');
 
-$Root = grab($data, 'Root') ?? \_::$Base->CategoryRoot;
+$Root = grab($data, 'Root') ?? \_::$Address->CategoryRoot;
 $items = grab($data, "Items");
 $name = $module->Name;// To do not change the name of module
 swap($module, $data);

@@ -111,7 +111,7 @@ class Cards extends Collection
 
             $itemsHtml .= Html::Division(function() use ($img, $p_name, $p_description, $p_content, $p_buttons, $p_link){
                 $imageHtml = $img->ReRender();
-                $titleHtml = Html::SubHeading( $p_name);
+                $titleHtml = Html::Heading4( $p_name);
                 $detailsHtml = Html::Paragraph($p_description .Html::$Break. $p_content, ["class"=> "details"]);
                 $buttonsHtml = $p_buttons; // Assuming $p_buttons is already HTML
                 $linkHtml = "";

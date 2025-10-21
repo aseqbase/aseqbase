@@ -266,15 +266,15 @@ class Content extends Module
           $this->LeaveComment = \_::$Config->AllowWriteComment;
           $this->AllowComments = \_::$Config->AllowReadComment;
           $this->AllowCommentsAccess = \_::$Config->ReadCommentAccess;
-          $this->Root = $this->Root ?? \_::$Base->ContentRoot;
-          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Base->ContentRoot;
+          $this->Root = $this->Root ?? \_::$Address->ContentRoot;
+          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Address->ContentRoot;
           $this->CommentForm = new CommentForm();
           $this->CommentForm->MessageType = "texts";
           $this->CommentForm->Access = \_::$Config->WriteCommentAccess;
           $this->CommentForm->SubjectLabel =
                $this->CommentForm->AttachLabel =
                null;
-          $this->CheckAccess = fn($item) => auth(getValid($item, 'Access', 0));
+          $this->CheckAccess = fn($item) => \_::$User->GetAccess(getValid($item, 'Access', 0));
      }
 
      public function BeforeHandle()
@@ -423,7 +423,7 @@ class Content extends Module
           }
           return Html::Rack(
                Html::MediumSlot(
-                    ($this->AllowTitle ? Html::ExternalHeading(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
+                    ($this->AllowTitle ? Html::Heading1(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
                     $this->GetDetails($this->CollectionRoot . $nameOrId)
                ) .
                $this->GetButtons(),
@@ -520,7 +520,7 @@ class Content extends Module
                          function ($val) use (&$p_meta) {
                               $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
                               if (!isEmpty($authorName))
-                                   $p_meta .= " " . Html::Link($authorName["Name"], \_::$Base->UserRoot . $authorName["Signature"], ["class" => "author"]);
+                                   $p_meta .= " " . Html::Link($authorName["Name"], \_::$Address->UserRoot . $authorName["Signature"], ["class" => "author"]);
                          },
                          $this->Item,
                          'AuthorId'
@@ -593,7 +593,7 @@ class Content extends Module
                                    ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
                                    : $k
                                    ,
-                                   \_::$Base->TagRoot . $k,
+                                   \_::$Address->TagRoot . $k,
                                    ["class" => "btn"]
                               );
                          }
@@ -622,7 +622,7 @@ class Content extends Module
      }
      public function GetCommentsCollection()
      {
-          if ($this->AllowComments && auth($this->AllowCommentsAccess)) {
+          if ($this->AllowComments && \_::$User->GetAccess($this->AllowCommentsAccess)) {
                module("CommentCollection");
                $cc = new CommentCollection();
                $cc->Items = table("Comment")->Select(

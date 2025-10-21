@@ -2,9 +2,9 @@
 
 use MiMFa\Library\Convert;
 
-$path = implode("/", array_slice(explode("/", \_::$Base->Direction), 1));
+$path = implode("/", array_slice(explode("/", \_::$Address->Direction), 1));
 $parent = compute( "category/get", ["Direction" =>$path]);
-if(isEmpty($parent)) view(\_::$Config->DefaultViewName, ["Name" =>404]);
+if(isEmpty($parent)) view(\_::$Front->DefaultViewName, ["Name" =>404]);
 else {
     $data = $data??[];
     (new Router())
@@ -26,11 +26,11 @@ else {
             if (isEmpty($items)) {
                 $c = get($viewData, "ErrorHandler");
                 if ($c)
-                    return Convert::By($c, \_::$Aseq);
+                    return Convert::By($c, \_::$Router);
             } elseif(is_array($items)) array_shift($items);
             else $items = [];
             view(grab($viewData, "ViewName") ?? "category", [
-                "Root" => grab($viewData, "Root") ?? \_::$Base->CategoryRoot,
+                "Root" => grab($viewData, "Root") ?? \_::$Address->CategoryRoot,
                 "Items" => $items,
                 ...$viewData??[], 
                 ...$parent??[]

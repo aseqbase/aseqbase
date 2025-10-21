@@ -1,90 +1,17 @@
 <?php
-
 /**
- * The Global Static Variables
- * It contains the most useful objects along developments
- * Also contains all the Global Static Variables and Functions You need to indicate and handle requests and responses
+ * All the Global Static Variables and Functions You need to indicate and handle requests and responses
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Globals See the Documentation
  */
-class _
-{
-	public static int $DynamicId = 0;
-	/**
-	 * The version of aseqbase framework
-	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
-	 * X			.	xx		xx		x
-	 */
-	public static float $Version = 5.00000;
-	/**
-	 * The default files extensions
-	 * @example: ".php"
-	 */
-	public static string|null $Extension = ".php";
-
-	/**
-	 * A Directory=>Name=>Fucntion array to apply the Function before using the Path
-	 * @var mixed
-	 */
-	public static array $BeforeActions = array();
-	/**
-	 * A Directory=>Name=>Fucntion array to apply the Function after using the Path
-	 * @var mixed
-	 */
-	public static array $AfterActions = array();
-
-	/**
-	 * All sequences from aseq to base
-	 * @example: [
-	 *	'home/domain/aseq/' => 'https://aseq.domain.tld/',
-	 *	'home/domain/1stseq/' => 'https://1stseq.domain.tld/',
-	 *	'home/domain/2ndseq/' => 'https://2ndseq.domain.tld/',
-	 *	'home/domain/3rdseq/' => 'https://3rdseq.domain.tld/',
-	 *	'home/domain/base/' => 'https://base.domain.tld/'
-	 *]
-	 */
-	public static array $Sequences;
-
-	/**
-	 * To access all the website configurations
-	 */
-	public static Config $Config;
-
-	/**
-	 * To access all the website information
-	 */
-	public static Info $Info;
-
-	/**
-	 * To access all back-end tools
-	 */
-	public static Back $Back;
-
-	/**
-	 * To access all front-end tools
-	 */
-	public static Front $Front;
-
-	/**
-	 * To access the user service
-	 */
-	public static User $User;
-
-	/**
-	 * To access all addresses to a sequence of the website
-	 * and an array of all method=>patterns=>handler view names to handle all type request virtual pathes
-	 */
-	public static Router $Aseq;
-	/**
-	 * To access all addresses to the base of the website,
-	 * and an array of all method=>patterns=>handler view names to handle all type request virtual pathes
-	 */
-	public static RouterBase $Base;
-}
 
 #region INITIALIZING
+require_once(__DIR__ . DIRECTORY_SEPARATOR . "_.php");
+require_once(__DIR__ . DIRECTORY_SEPARATOR . "Address.php");
+\_::$Address = new Address();
+\_::$Address->Update();
 
 \_::$Sequences = [
 	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
@@ -94,24 +21,16 @@ class _
 	=> str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
 ];
 
-require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "RouterBase.php");
-\_::$Base = new RouterBase();
+run("global/Base");
+run("global/Types");
 
+run("global/RouterBase");
 run("Router");
-\_::$Aseq = new Router(
+\_::$Router = new Router(
 	$GLOBALS["ASEQBASE"],
 	$GLOBALS["DIR"],
 	getHost() . "/"//??$GLOBALS["ROOT"]
 );
-
-// \_::$Base = new Router(
-// 	$GLOBALS["BASE"],
-// 	__DIR__ . DIRECTORY_SEPARATOR,
-// 	$GLOBALS["BASE_ROOT"]
-// );
-
-run("global/Base");
-run("global/Types");
 
 library("Local");
 library("Convert");
@@ -141,9 +60,8 @@ run("Info");
 \_::$Info = new Info();
 
 
-
-\MiMFa\Library\Local::CreateDirectory(\_::$Aseq->LogDirectory);
-\MiMFa\Library\Local::CreateDirectory(\_::$Aseq->TempDirectory);
+\MiMFa\Library\Local::CreateDirectory(\_::$Router->LogDirectory);
+\MiMFa\Library\Local::CreateDirectory(\_::$Router->TempDirectory);
 register_shutdown_function('cleanupTemp', false);
 
 #endregion 
@@ -1037,12 +955,12 @@ function injectStyle($content, $source = null, ...$attributes)
  */
 function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|null $exit = true)
 {
-	if (isValid(\_::$Config->StatusMode)) {
+	if (isValid(\_::$Router->StatusMode)) {
 		if ($assign) {
 			if (is_string($assign))
 				go($assign);
 			else
-				route(\_::$Config->StatusMode ?? \_::$Config->RestrictionRouteName, alternative: "403");
+				route(\_::$Router->StatusMode ?? \_::$Router->RestrictionRouteName, alternative: "403");
 		}
 		if ($exit !== false)
 			exit($exit);
@@ -1058,50 +976,38 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 				if (is_string($assign))
 					go($assign);
 				else
-					route(\_::$Config->RestrictionRouteName, alternative: "401");
+					route(\_::$Router->RestrictionRouteName, alternative: "401");
 			}
 			if ($exit !== false)
 				exit($exit);
 			return false;
 		}
 	}
-	$b = auth($minaccess);
+	$b = \_::$User->GetAccess($minaccess);
 	if ($b)
 		return $b;
 	if ($assign) {
 		if (is_string($assign))
 			go($assign);
-		elseif (startsWith(\_::$Base->Request, \User::$HandlerPath))
+		elseif (startsWith(\_::$Address->Request, \_::$User->HandlerPath))
 			return true;
 		else
-			load(\User::$InHandlerPath);
+			load(\_::$User->InHandlerPath);
 	}
 	if ($exit !== false)
 		exit($exit);
 	return $b;
-}
-/**
- * Check if the user has access to the page or not
- * @param int|array|null $acceptableAccess The minimum accessibility for the user, pass null to give the user access
- * @return bool|int|null user accessibility group
- */
-function auth($minaccess = null): bool|int|null
-{
-	if (!\_::$User)
-		return \User::CheckAccess(null, $minaccess);
-	else
-		return \_::$User->Access($minaccess);
 }
 
 function setTimeout($timeout = 60000, $key = null)
 {
 	if ($timeout < 1)
 		return false;
-	return setSecret(getClientCode("Timeout_" . ($key ?? \_::$Base->Direction)), time() + max(1, $timeout / 1000));
+	return setSecret(getClientCode("Timeout_" . ($key ?? \_::$Address->Direction)), time() + max(1, $timeout / 1000));
 }
 function getTimeout($key = null)
 {
-	$key = getClientCode("Timeout_" . ($key ?? \_::$Base->Direction));
+	$key = getClientCode("Timeout_" . ($key ?? \_::$Address->Direction));
 	if (hasSecret($key)) {
 		$remains = getSecret($key) - time();
 		if ($remains <= 0)
@@ -1122,7 +1028,7 @@ function hasTimeout($key = null)
 }
 function forgetTimeout($key = null)
 {
-	return grabSecret(getClientCode("Timeout_" . ($key ?? \_::$Base->Direction)));
+	return grabSecret(getClientCode("Timeout_" . ($key ?? \_::$Address->Direction)));
 }
 
 #endregion
@@ -1335,7 +1241,7 @@ function runAll(string|null $name, mixed $data = [], bool $print = true, string|
 	$depth = min($depth, count(\_::$Sequences)) - 1;
 	$res = [];
 	for (; $origin <= $depth; $depth--)
-		$res[] = using(\_::$Base->Directory, $name, $data, $print, $depth, 1, $alternative, $default, require: $require, once: $once);
+		$res[] = using(\_::$Address->Directory, $name, $data, $print, $depth, 1, $alternative, $default, require: $require, once: $once);
 	return $res;
 }
 /**
@@ -1347,7 +1253,7 @@ function runAll(string|null $name, mixed $data = [], bool $print = true, string|
  */
 function run(string|null $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = true, bool $once = true)
 {
-	return using(\_::$Base->Directory, $name, $data, $print, $origin, $depth, $alternative, $default, require: $require, once: $once);
+	return using(\_::$Address->Directory, $name, $data, $print, $origin, $depth, $alternative, $default, require: $require, once: $once);
 }
 
 /**
@@ -1359,7 +1265,7 @@ function run(string|null $name, mixed $data = [], bool $print = true, string|int
  */
 function model(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->ModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true);
+	return using(\_::$Address->ModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true);
 }
 /**
  * To interprete, the specified LibraryName
@@ -1370,7 +1276,7 @@ function model(string $name, mixed $data = [], bool $print = true, string|int $o
  */
 function library(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
+	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
 /**
  * To interprete, the specified ComponentName
@@ -1381,7 +1287,7 @@ function library(string $name, mixed $data = [], bool $print = true, string|int 
  */
 function component(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Component\\$used" : null;
+	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Component\\$used" : null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -1392,7 +1298,7 @@ function component(string $name, mixed $data = [], bool $print = true, string|in
  */
 function module(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Module\\$used" : null;
+	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Module\\$used" : null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -1403,7 +1309,7 @@ function module(string $name, mixed $data = [], bool $print = true, string|int $
  */
 function template(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
+	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
 
 /**
@@ -1415,7 +1321,7 @@ function template(string $name, mixed $data = [], bool $print = true, string|int
  */
 function view(string|null $name = null, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->ViewDirectory, $name ?? \_::$Config->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default, once: true);
+	return using(\_::$Address->ViewDirectory, $name ?? \_::$Front->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default, once: true);
 }
 
 /**
@@ -1427,7 +1333,7 @@ function view(string|null $name = null, mixed $data = [], bool $print = true, st
  */
 function region(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified pagename
@@ -1438,7 +1344,7 @@ function region(string $name, mixed $data = [], bool $print = true, string|int $
  */
 function page(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified partname
@@ -1449,7 +1355,7 @@ function page(string $name, mixed $data = [], bool $print = true, string|int $or
  */
 function part(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified computionname
@@ -1460,7 +1366,7 @@ function part(string $name, mixed $data = [], bool $print = true, string|int $or
  */
 function compute(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->ComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->ComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
@@ -1472,7 +1378,7 @@ function compute(string $name, mixed $data = [], bool $print = true, string|int 
  */
 function route(string|null $name = null, mixed $data = null, bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Base->RouteDirectory, $name ?? \_::$Config->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->RouteDirectory, $name ?? \_::$Router->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
@@ -1483,7 +1389,7 @@ function route(string|null $name = null, mixed $data = null, bool $print = true,
  */
 function asset($directory, string|null $name = null, string|array|null $extensions = null, $optimize = false, string|int $origin = 0, int $depth = 999999, $default = null)
 {
-	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Base->AssetRoot, $directory ?? "");
+	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Address->AssetRoot, $directory ?? "");
 	$i = 0;
 	if (!is_array($extensions))
 		$extensions = [$extensions ?? ""];
@@ -1510,7 +1416,7 @@ function table(string $name, bool $prefix = true, string|int $origin = 0, int $d
 	return new \MiMFa\Library\DataTable(
 		$source ?? \_::$Back->DataBase,
 		$name,
-		$prefix
+		$prefix?\_::$Back->DataBasePrefix:null
 	);
 }
 
@@ -2011,7 +1917,7 @@ function encrypt($plain, $key = null)
 		return null;
 	if (empty($plain))
 		return $plain;
-	return \_::$Back->Cryptograph->Encrypt($plain, $key ?? \_::$Config->SoftKey, true);
+	return \_::$Back->Cryptograph->Encrypt($plain, $key ?? \_::$Back->SoftKey, true);
 }
 /**
  * Decrypt cipher by the key or the website secret key
@@ -2024,7 +1930,7 @@ function decrypt($cipher, $key = null)
 		return null;
 	if (empty($cipher))
 		return $cipher;
-	return \_::$Back->Cryptograph->Decrypt($cipher, $key ?? \_::$Config->SoftKey, true);
+	return \_::$Back->Cryptograph->Decrypt($cipher, $key ?? \_::$Back->SoftKey, true);
 }
 
 #endregion 
@@ -2307,12 +2213,14 @@ function createEmail($name = "do-not-reply", string|null $path = null): string|n
  */
 function cleanupTemp($full = true)
 {
-	if ($full)
-		return cleanup(\_::$Base->TempDirectory);
 	$i = 0;
-	foreach ($_FILES as $file)
-		if (isset($file["tmp_name"]) && is_file($file["tmp_name"]) && ++$i)
-			unlink($file["tmp_name"]);
+	if ($full) {
+		$i += cleanup(\_::$Address->TempDirectory);
+		$i += cleanup(\_::$Router->TempDirectory);
+	} else
+		foreach ($_FILES as $file)
+			if (isset($file["tmp_name"]) && is_file($file["tmp_name"]) && ++$i)
+				unlink($file["tmp_name"]);
 	return $i;
 }
 /**
@@ -2326,17 +2234,15 @@ function cleanup($directory = null)
 		foreach (glob($directory . '*') as $file)
 			if (is_file($file) && ++$i)
 				unlink($file);
-			elseif (is_dir($file)){
+			elseif (is_dir($file)) {
 				$i += cleanup($file);
 				rmdir($file);
 			}
 	} else {
-		$i += cleanup(\_::$Base->TempDirectory);
-		$i += cleanup(\_::$Aseq->TempDirectory);
-		$i += cleanup(\_::$Base->TempDirectory);
-		$i += cleanup(\_::$Base->LogDirectory);
-		$i += cleanup(\_::$Aseq->LogDirectory);
-		$i += cleanup(\_::$Base->LogDirectory);
+		$i += cleanup(\_::$Address->TempDirectory);
+		$i += cleanup(\_::$Router->TempDirectory);
+		$i += cleanup(\_::$Address->LogDirectory);
+		$i += cleanup(\_::$Router->LogDirectory);
 		flushSecrets();
 		\_::$Back->Session->Flush();
 	}
@@ -2417,7 +2323,7 @@ function getSecret($key)
 		forgetSecret($key);
 		return null;
 	}
-	if (str_starts_with(\_::$Base->Request ?? "/", $item['path']))
+	if (str_starts_with(\_::$Address->Request ?? "/", $item['path']))
 		return $item['secure'] ? decrypt($item['value']) : $item['value'];
 	else
 		return null;
@@ -2446,7 +2352,7 @@ function hasSecret($key)
 		forgetSecret($key);
 		return false;
 	}
-	if (str_starts_with(\_::$Base->Request ?? "/", $item['path']))
+	if (str_starts_with(\_::$Address->Request ?? "/", $item['path']))
 		return true;
 	else
 		return false;
@@ -2630,14 +2536,14 @@ function between(...$options)
 	return null;
 }
 
-function isASEQ(string|null $directory): bool
+function isAseq(string|null $directory): bool
 {
 	return !\MiMFa\Library\Local::FileExists($directory . "global/ConfigBase.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "global.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "Info.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "initialize.php");
 }
-function isBASE(string|null $directory): bool
+function isBase(string|null $directory): bool
 {
 	return \MiMFa\Library\Local::FileExists($directory . "Config.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "global/ConfigBase.php")
@@ -2648,16 +2554,16 @@ function isBASE(string|null $directory): bool
 		&& \MiMFa\Library\Local::FileExists($directory . "global.php")
 		&& \MiMFa\Library\Local::FileExists($directory . "initialize.php");
 }
-function isInASEQ(string|null $filePath): bool
+function isInAseq(string|null $filePath): bool
 {
-	$filePath = preg_replace("/^\\\\/", \_::$Aseq->Directory, str_replace(\_::$Aseq->Directory, "", trim($filePath ?? getUrl())));
+	$filePath = preg_replace("/^\\\\/", \_::$Router->Directory, str_replace(\_::$Router->Directory, "", trim($filePath ?? getUrl())));
 	if (isFormat($filePath, \_::$Extension))
 		return file_exists($filePath);
 	return is_dir($filePath) || file_exists($filePath . \_::$Extension);
 }
-function isInBASE(string|null $filePath): bool
+function isInBase(string|null $filePath): bool
 {
-	$filePath = \_::$Base->Directory . preg_replace("/^\\\\/", "", str_replace(\_::$Base->Directory, "", trim($filePath ?? getUrl())));
+	$filePath = __DIR__ . DIRECTORY_SEPARATOR . preg_replace("/^\\\\/", "", str_replace(\_::$Address->Directory, "", trim($filePath ?? getUrl())));
 	if (isFormat($filePath, \_::$Extension))
 		return file_exists($filePath);
 	return is_dir($filePath) || file_exists($filePath . \_::$Extension);
@@ -2899,7 +2805,7 @@ function async($action, $callback = null, ...$args)
 function __(mixed $value, bool $translating = true, bool $styling = false, bool|null $referring = null): string|null
 {
 	$value = MiMFa\Library\Convert::ToString($value);
-	if ($translating && \_::$Config->AllowTranslate)
+	if ($translating && \_::$Back->AllowTranslate)
 		$value = \_::$Back->Translate->Get($value);
 	if ($styling)
 		$value = MiMFa\Library\Style::DoStyle(
@@ -2911,7 +2817,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return \MiMFa\Library\Html::Link($v, \_::$Base->ContentRoot . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->ContentRoot . strtolower($k));
 				},
 				keyWords: table("Content")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2921,7 +2827,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return \MiMFa\Library\Html::Link($v, \_::$Base->CategoryRoot . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->CategoryRoot . strtolower($k));
 				},
 				keyWords: table("Category")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2931,7 +2837,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return \MiMFa\Library\Html::Link($v, \_::$Base->TagRoot . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->TagRoot . strtolower($k));
 				},
 				keyWords: table("Tag")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2941,7 +2847,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = \MiMFa\Library\Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return \MiMFa\Library\Html::Link($v, \_::$Base->UserRoot . strtolower($k));
+					return \MiMFa\Library\Html::Link($v, \_::$Address->UserRoot . strtolower($k));
 				},
 				keyWords: table("User")->SelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
 				both: false,
@@ -3090,30 +2996,30 @@ function array_find_keys($array, callable $searching)
 // }
 // function test_address($directory = null, string $name = "Configuration")
 // {
-// 	echo addressing($directory ?? \_::$Base->Directory, $name);
-// 	echo "<br>ASEQ: " . \_::$Aseq->Name;
-// 	echo "<br>ASEQ->Path: " . \_::$Base->Path;
-// 	echo "<br>ASEQ->Dir: " . \_::$Aseq->Directory;
+// 	echo addressing($directory ?? \_::$Address->Directory, $name);
+// 	echo "<br>ASEQ: " . \_::$Router->Name;
+// 	echo "<br>ASEQ->Path: " . \_::$Address->Path;
+// 	echo "<br>ASEQ->Dir: " . \_::$Router->Directory;
 // 	echo "<br>OTHER ASEQ: <br>";
-// 	var_dump(\_::$Aseq);
-// 	echo "<br>BASE: " . \_::$Base->Name;
-// 	echo "<br>BASE->Path: " . \_::$Base->Path;
-// 	echo "<br>BASE->Dir: " . \_::$Base->Directory;
+// 	var_dump(\_::$Router);
+// 	echo "<br>BASE: " . \_::$Address->Name;
+// 	echo "<br>BASE->Path: " . \_::$Address->Path;
+// 	echo "<br>BASE->Dir: " . \_::$Address->Directory;
 // 	echo "<br>OTHER BASE: <br>";
-// 	var_dump(\_::$Base);
+// 	var_dump(\_::$Address);
 // 	echo "<br><br>ADDRESSES: <br>";
 // 	var_dump(\_::$Router);
 // }
 // function test_url()
 // {
-// 	echo "<br>URL: " . \_::$Base->Url;
-// 	echo "<br>HOST: " . \_::$Base->Host;
-// 	echo "<br>SITE: " . \_::$Base->Site;
-// 	echo "<br>PATH: " . \_::$Base->Path;
-// 	echo "<br>REQUEST: " . \_::$Base->Request;
-// 	echo "<br>DIRECTION: " . \_::$Base->Direction;
-// 	echo "<br>QUERY: " . \_::$Base->Query;
-// 	echo "<br>FRAGMENT: " . \_::$Base->Fragment;
+// 	echo "<br>URL: " . \_::$Address->Url;
+// 	echo "<br>HOST: " . \_::$Address->Host;
+// 	echo "<br>SITE: " . \_::$Address->Site;
+// 	echo "<br>PATH: " . \_::$Address->Path;
+// 	echo "<br>REQUEST: " . \_::$Address->Request;
+// 	echo "<br>DIRECTION: " . \_::$Address->Direction;
+// 	echo "<br>QUERY: " . \_::$Address->Query;
+// 	echo "<br>FRAGMENT: " . \_::$Address->Fragment;
 // }
 // function test_access($func, $res = null)
 // {

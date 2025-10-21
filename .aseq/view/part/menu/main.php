@@ -5,7 +5,7 @@ $module->Title = \_::$Info->Name;
 $module->Description = \_::$Info->Owner;
 $module->Image = \_::$Info->LogoPath;
 $module->Items = \_::$Info->MainMenus;
-if (\_::$Config->AllowTranslate) {
+if (\_::$Back->AllowTranslate) {
     $moduleTranslator = new (module("Translator"))();
     $moduleTranslator->Items = \_::$Back->Translate->GetLanguages();
     $moduleTranslator->Style = new MiMFa\Library\Style();

@@ -39,13 +39,13 @@ class SignInForm extends Form{
 	
 	public function __construct(){
         parent::__construct();
-		$this->Action = \User::$InHandlerPath;
-		$this->SuccessPath = \_::$Base->Path;
-		$this->Welcome = function(){ return part(\User::$DashboardHandlerPath, print:false); };
+		$this->Action = \_::$User->InHandlerPath;
+		$this->SuccessPath = \_::$Address->Path;
+		$this->Welcome = function(){ return part(\_::$User->DashboardHandlerPath, print:false); };
 	}
 
 	public function GetStyle(){
-		if($this->AllowDecoration) return ((auth(\_::$Config->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Html::Style("
+		if($this->AllowDecoration) return ((\_::$User->GetAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Html::Style("
 			.{$this->Name} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}
@@ -80,12 +80,12 @@ class SignInForm extends Form{
 	}
 
 	public function Get(){
-		if(auth(\_::$Config->UserAccess) && !$this->MultipleSignIn)
+		if(\_::$User->GetAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
 			return $this->GetHeader().Convert::ToString($this->Welcome);
         else return parent::Get();
 	}
 	public function GetHeader(){
-        if(auth(\_::$Config->UserAccess) && !isEmpty($this->WelcomeFormat))
+        if(\_::$User->GetAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))
 			return __(Convert::FromDynamicString($this->WelcomeFormat));
     }
 	public function GetFields(){
@@ -107,15 +107,15 @@ class SignInForm extends Form{
 	public function GetFooter(){
         return parent::GetFooter()
 			.Html::LargeSlot(
-				Html::Link($this->SignUpLabel, $this->SignUpPath??\User::$UpHandlerPath)
+				Html::Link($this->SignUpLabel, $this->SignUpPath??\_::$User->UpHandlerPath)
 			, ["class"=>"col-lg-12"])
 			.Html::LargeSlot(
-				Html::Link($this->RecoverLabel, $this->RecoverPath??\User::$RecoverHandlerPath)
+				Html::Link($this->RecoverLabel, $this->RecoverPath??\_::$User->RecoverHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 
 	public function Post(){
-		if(!auth(\_::$Config->UserAccess) || $this->MultipleSignIn) try {
+		if(!\_::$User->GetAccess(\_::$User->UserAccess) || $this->MultipleSignIn) try {
 			$received = receivePost();
 			$signature = get($received,"Signature" );
 			$password = get($received,"Password" );
@@ -128,7 +128,7 @@ class SignInForm extends Form{
 				elseif($res === false)
 					return $this->GetError($this->IncorrectWarning);
 				elseif(is_null($res))
-					return flipResponse($this->GetError("This account is not active yet!"), null, \User::$ActiveHandlerPath . "?signature=$signature".(\_::$Base->Query?"&".\_::$Base->Query:""));
+					return flipResponse($this->GetError("This account is not active yet!"), null, \_::$User->ActiveHandlerPath . "?signature=$signature".(\_::$Address->Query?"&".\_::$Address->Query:""));
 				else
 					return $this->GetError($res);
 			}
@@ -139,7 +139,7 @@ class SignInForm extends Form{
     }
 	
 	public function Delete(){
-		if(auth(\_::$Config->UserAccess)) try {
+		if(\_::$User->GetAccess(\_::$User->UserAccess)) try {
 			$user = \_::$User->Get();
 			if (!isValid($user)) return $this->GetSuccess("You are no longer signed in!");
 			elseif(\_::$User->SignOut()) return $this->GetSuccess("You signed out successfully!");

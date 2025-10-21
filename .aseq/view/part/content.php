@@ -1,8 +1,8 @@
 <?php
 module("Page" );
 $module = new \MiMFa\Module\Page();
-$module->Content = isValid(\_::$Base->Direction)?
-		page(normalizePath(\_::$Base->Direction), alternative:"404", print: false):
+$module->Content = isValid(\_::$Address->Direction)?
+		page(normalizePath(\_::$Address->Direction), alternative:"404", print: false):
 		page("home", alternative:"404", print: false);
 swap($module, $data);
 $module->Render();

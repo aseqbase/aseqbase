@@ -3,8 +3,8 @@ use MiMFa\Library\Html;
 class GlobalStyle{
 	public static function Variables($rootSelector = ":root") { return "
 		$rootSelector{
-			--dir: ".(\_::$Back->Translate->Direction??\_::$Config->DefaultDirection).";
-			--lang: ".(\_::$Back->Translate->Language??\_::$Config->DefaultLanguage).";
+			--dir: ".(\_::$Back->Translate->Direction??\_::$Back->DefaultDirection).";
+			--lang: ".(\_::$Back->Translate->Language??\_::$Back->DefaultLanguage).";
 			--color-black: " . \_::$Front->Color(0) . ";
 			--color-red: " . \_::$Front->Color(1) . ";
 			--color-green: " . \_::$Front->Color(2) . ";
@@ -170,10 +170,10 @@ class GlobalStyle{
 		}";
 	}
 }
-\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Base->StyleDirectory,'reset.css', optimize: true));
+\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'reset.css', optimize: true));
 \_::$Front->Libraries[] = Html::Style(GlobalStyle::Variables());
-\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Base->StyleDirectory,'general.css', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Base->ScriptDirectory, 'general.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Base->ScriptDirectory, 'Math.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Base->ScriptDirectory, 'Array.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Base->ScriptDirectory, 'Html.js', optimize: true));
+\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Math.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Array.js', optimize: true));
+\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Html.js', optimize: true));

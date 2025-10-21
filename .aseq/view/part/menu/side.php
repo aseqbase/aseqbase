@@ -8,7 +8,7 @@ $module->Description = \_::$Info->Owner;
 $module->Items = \_::$Info->SideMenus;
 $module->Image = \_::$Info->LogoPath;
 $module->Shortcuts = \_::$Info->Contacts;
-if (\_::$Config->AllowTranslate) {
+if (\_::$Back->AllowTranslate) {
     $moduleTranslator = new (module("Translator"))();
     $moduleTranslator->Items = \_::$Back->Translate->GetLanguages();
     $moduleTranslator->AllowLabel = true;

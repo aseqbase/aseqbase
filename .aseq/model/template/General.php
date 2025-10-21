@@ -124,28 +124,28 @@ class General extends Template
 				.heading,h1,h2,h3,h4,h5,h6{
 					margin-top: var(--size-3);
 				}	
-				.externalheading, h1{
+				.heading1, h1{
 					text-align: center;
 					text-transform: uppercase;
 					margin-top: max(4vmax, var(--size-5));
 					margin-bottom: var(--size-2);
 				}
-				.superheading, h2{
+				.heading2, h2{
 					text-align: center;
 					text-transform: uppercase;
 					margin-top: var(--size-4);
 				}
-				.subheading, h4{
+				.heading4, h4{
 					margin-top: var(--size-2);
 				}
-				.internalheading, h5{
+				.heading5, h5{
 					margin-top: var(--size-1);
 				}
-				.inlineheading, h6{
+				.heading6, h6{
 					margin-top: var(--size-1);
 					padding-inline-end: var(--size-1);
 				}
-				:is(.inlineheading, h6):before{
+				:is(.heading6, h6):before{
 					display: block;
 				}
 
@@ -210,7 +210,7 @@ class General extends Template
 
 				.icon[onclick]{
 					text-decoration: none;
-					display: initial;
+					display: inline-flex;
 					padding: calc(var(--size-0) / 2);
 					border: var(--border-1) transparent;
 					cursor: pointer;

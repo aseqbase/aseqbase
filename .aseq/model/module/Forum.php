@@ -60,7 +60,7 @@ class Forum extends Content
 
      public function GetCommentsCollection()
      {
-          if ($this->AllowComments && auth($this->AllowCommentsAccess)) {
+          if ($this->AllowComments && \_::$User->GetAccess($this->AllowCommentsAccess)) {
                if ($this->ShowCommentStartTime && Convert::ToDateTime() < $this->ShowCommentStartTime)
                     return null;
                if ($this->ShowCommentEndTime && Convert::ToDateTime() > $this->ShowCommentEndTime)
@@ -80,7 +80,7 @@ class Forum extends Content
 
      public function GetMessage($subject, $message, $icon = "clock")
      {
-          return Html::Division(Html::Image(null, $icon) . Html::Heading($subject) . Html::Result($message), ["class" => "be center"]);
+          return Html::Division(Html::Image(null, $icon) . Html::Heading3($subject) . Html::Result($message), ["class" => "be center"]);
      }
 
 }

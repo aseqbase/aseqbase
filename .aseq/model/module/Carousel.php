@@ -73,7 +73,7 @@ class Carousel extends Collection{
 				$active = $i==$this->ActiveItem;
 				if(is_array($item) && (isValid($item, "Image" ) || isValid($item, "Image" )))
 					$inners[] = Html::Media( Html::Division(
-							Html::Heading(get($item, "Title" ), get($item, "Path" ),["class"=>"title"]).
+							Html::Heading3(get($item, "Title" ), get($item, "Path" ),["class"=>"title"]).
 							Html::Paragraph(getBetween($item, "Description", "Caption"),["class"=>"description"])
 						,["class"=>"carousel-caption"]), get($item, "Image")
 					,["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>"carousel-item".($active?" active":"")]);

@@ -146,7 +146,7 @@ class Collection extends Module
 					yield "<div class='row'>";
 				if (is_string($item))
 					yield $item;
-				else if (auth(getValid($item, 'Access', \_::$Config->VisitAccess))) {
+				else if (\_::$User->GetAccess(getValid($item, 'Access', \_::$User->VisitAccess))) {
 					$p_meta = getValid($item, 'MetaData', null);
 					if ($p_meta !== null) {
 						$p_meta = Convert::FromJson($p_meta);
@@ -164,7 +164,7 @@ class Collection extends Module
 						if (is_null($p_buttons))
 							yield Html::Button(
 								(isEmpty($img->Source) ? "" : $img->ToString()) .
-								Html::SubHeading($p_name),
+								Html::Heading4($p_name),
 								$p_link,
 								["class" => "item col-sm"],
 								$this->Animation ? " data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed) . "' data-aos='{$this->Animation}'" : null
@@ -173,7 +173,7 @@ class Collection extends Module
 							yield Html::Division(
 								Html::Link(
 									(isEmpty($img->Source) ? "" : $img->ToString()) .
-									Html::SubHeading($p_name),
+									Html::Heading4($p_name),
 									$p_link
 								) .
 								Convert::ToString($p_buttons) .
@@ -185,7 +185,7 @@ class Collection extends Module
 						yield Html::Division(
 							Html::Link(
 								(isEmpty($img->Source) ? "" : $img->ToString()) .
-								Html::SubHeading($p_name),
+								Html::Heading4($p_name),
 								$p_link
 							) .
 							Html::Division(Convert::ToExcerpt($p_description, 0, $this->ExcerptLength), ["class" => "description"]) .

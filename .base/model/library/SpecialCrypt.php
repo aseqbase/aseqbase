@@ -75,20 +75,20 @@ class SpecialCrypt extends HashCrypt
 
     protected function AddSampleChars($text)
     {
-        $sampler = \_::$Config->EncryptSampler;
-        $samplechars = \_::$Config->EncryptSampleChars;
+        $sampler = \_::$Back->EncryptSampler;
+        $samplechars = \_::$Back->EncryptSampleChars;
         $samplelen = strlen($samplechars);
-        $indexer = \_::$Config->EncryptIndexer;
-        for (; $indexer < strlen($text); $indexer+=\_::$Config->EncryptIndexer){
+        $indexer = \_::$Back->EncryptIndexer;
+        for (; $indexer < strlen($text); $indexer+=\_::$Back->EncryptIndexer){
             $text = insertToString($text, substr($samplechars, $sampler%$samplelen,1), $indexer);
-            $sampler+=\_::$Config->EncryptSampler;
+            $sampler+=\_::$Back->EncryptSampler;
         }
         return $text;
     }
     protected function RemoveSampleChars($text)
     {
-        $indexer = strlen($text) - strlen($text)%\_::$Config->EncryptIndexer;
-        for (; $indexer > 0 ; $indexer-=\_::$Config->EncryptIndexer)
+        $indexer = strlen($text) - strlen($text)%\_::$Back->EncryptIndexer;
+        for (; $indexer > 0 ; $indexer-=\_::$Back->EncryptIndexer)
             $text = deleteFromString($text, $indexer, 1);
         return $text;
     }

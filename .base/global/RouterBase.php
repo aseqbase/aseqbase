@@ -9,7 +9,7 @@ use MiMFa\Library\Convert;
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#router See the Library Documentation
  */
-class RouterBase extends ArrayObject
+class RouterBase extends Address
 {
     public $Routes = [];
 
@@ -21,6 +21,34 @@ class RouterBase extends ArrayObject
 
 
     public bool $IsActive = true;
+
+    /**
+     * The status of all server response: 400, 404, 500, etc.
+     * @default null
+     * @var mixed
+     * @category Security
+     */
+    public $StatusMode = null;
+    
+    /**
+     * The view name to show pages
+     * @var string|null
+     * @default "main"
+     * @category General
+     */
+    public string|null $DefaultRouteName = "main";
+    /**
+     * The default view name to show when restriction
+     * @var string
+     * @category Security
+     */
+    public $RestrictionRouteName = "403";
+    /**
+     * Default message to show when restriction
+     * @var string
+     * @category Security
+     */
+    public $RestrictionContent = "Unfortunately, you have no access to the site now!<br>Please try a few minutes later...";
 
     /**
      * The request original method index
@@ -77,138 +105,6 @@ class RouterBase extends ArrayObject
     public $Pattern = null;
     public $Taken = null;
 
-    /**
-     * Full part of the current url
-     * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php?p=3&l=10#serp"
-     * @var string|null
-     */
-    public string|null $Url = null;
-    /**
-     * The path part of the current url
-     * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php"
-     * @var string|null
-     */
-    public string|null $Path = null;
-    /**
-     * The host part of the current url
-     * @example: "https://www.mimfa.net:5056"
-     * @var string|null
-     */
-    public string|null $Host = null;
-    /**
-     * The site name part of the current url
-     * @example: "www.mimfa.net"
-     * @var string|null
-     */
-    public string|null $Site = null;
-    /**
-     * The domain name part of the current url
-     * @example: "mimfa.net"
-     * @var string|null
-     */
-    public string|null $Domain = null;
-    /**
-     * The request part of the current url
-     * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
-     * @var string|null
-     */
-    public string|null $Request = null;
-    /**
-     * The direction part of the current url from the root
-     * @example: "Category/mimfa/service/web.php"
-     * @var string|null
-     */
-    public string|null $Direction = null;
-    /**
-     * The last part of the current direction url
-     * @example: "web.php"
-     * @var string|null
-     */
-    public string|null $Page = null;
-    /**
-     * The query part of the current url
-     * @example: "p=3&l=10"
-     * @var string|null
-     */
-    public string|null $Query = null;
-    /**
-     * The fragment or anchor part of the current url
-     * @example: "serp"
-     * @var string|null
-     */
-    public string|null $Fragment = null;
-
-
-    public string|null $Directory;
-    public string $ModelDirectory;
-    public string $ViewDirectory;
-    public string $ComputeDirectory;
-    public string $RouteDirectory;
-    public string $PrivateDirectory;
-    public string $PublicDirectory;
-    public string $AssetDirectory;
-    public string $StorageDirectory;
-    public string $TempDirectory;
-    public string $LogDirectory;
-    public string $LibraryDirectory;
-    public string $ComponentDirectory;
-    public string $TemplateDirectory;
-    public string $ModuleDirectory;
-    public string $PageDirectory;
-    public string $RegionDirectory;
-    public string $PartDirectory;
-    public string $ScriptDirectory;
-    public string $StyleDirectory;
-
-    /**
-     * The root path
-     * @example: "/"
-     * @var string|null
-     */
-    public string|null $Root;
-    /**
-     * The Asset root Route
-     * @example: "/asset/"
-     * @var string
-     */
-    public string $AssetRoot;
-    /**
-     * The Script root Route
-     * @example: "/script/"
-     * @var string
-     */
-    public string $ScriptRoot;
-    /**
-     * The Style root Route
-     * @example: "/style/"
-     * @var string
-     */
-    public string $StyleRoot;
-    /**
-     * The Content root Route
-     * @example: "/content/"
-     * @var string
-     */
-    public string $ContentRoot;
-    /**
-     * The Category root Route
-     * @example: "/category/"
-     * @var string
-     */
-    public string $CategoryRoot;
-    /**
-     * The Tag root Route
-     * @example: "/tag/"
-     * @var string
-     */
-    public string $TagRoot;
-    /**
-     * The User root Route
-     * @example: "/user/"
-     * @var string
-     */
-    public string $UserRoot;
-
     public function __construct(
         ?string $name = null,
         ?string $directory = null,
@@ -218,37 +114,8 @@ class RouterBase extends ArrayObject
         $method = null,
         $global = false
     ) {
+        parent::__construct($directory, $root);
         $this->Name = $name;
-        $this->Directory = str_replace(["\\", "/"], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR], $directory ?? DIRECTORY_SEPARATOR);
-        $this->ModelDirectory = $this->Directory . "model" . DIRECTORY_SEPARATOR;
-        $this->ViewDirectory = $this->Directory . "view" . DIRECTORY_SEPARATOR;
-        $this->ComputeDirectory = $this->Directory . "compute" . DIRECTORY_SEPARATOR;
-        $this->RouteDirectory = $this->Directory . "route" . DIRECTORY_SEPARATOR;
-        $this->PrivateDirectory = $this->Directory . "private" . DIRECTORY_SEPARATOR;
-        $this->PublicDirectory = $this->Directory . "public" . DIRECTORY_SEPARATOR;
-        $this->AssetDirectory = $this->Directory . "asset" . DIRECTORY_SEPARATOR;
-        $this->StorageDirectory = $this->Directory . "storage" . DIRECTORY_SEPARATOR;
-        $this->TempDirectory = "temp" . DIRECTORY_SEPARATOR;
-        $this->LogDirectory = $this->Directory . "log" . DIRECTORY_SEPARATOR;
-        $this->LibraryDirectory = $this->ModelDirectory . "library" . DIRECTORY_SEPARATOR;
-        $this->ComponentDirectory = $this->ModelDirectory . "component" . DIRECTORY_SEPARATOR;
-        $this->TemplateDirectory = $this->ModelDirectory . "template" . DIRECTORY_SEPARATOR;
-        $this->ModuleDirectory = $this->ModelDirectory . "module" . DIRECTORY_SEPARATOR;
-        $this->PageDirectory = $this->ViewDirectory . "page" . DIRECTORY_SEPARATOR;
-        $this->RegionDirectory = $this->ViewDirectory . "region" . DIRECTORY_SEPARATOR;
-        $this->PartDirectory = $this->ViewDirectory . "part" . DIRECTORY_SEPARATOR;
-        $this->ScriptDirectory = $this->AssetDirectory . "script" . DIRECTORY_SEPARATOR;
-        $this->StyleDirectory = $this->AssetDirectory . "style" . DIRECTORY_SEPARATOR;
-
-        $this->Root = str_replace(["\\", "/"], ["/", "/"], $root ?? "/");
-        $this->AssetRoot = $this->Root . "asset/";
-        $this->ScriptRoot = $this->AssetRoot . "script/";
-        $this->StyleRoot = $this->AssetRoot . "style/";
-        $this->ContentRoot = $this->Root . "post/";
-        $this->CategoryRoot = $this->Root . "category/";
-        $this->TagRoot = $this->Root . "tag/";
-        $this->UserRoot = $this->Root . "user/";
-
         $this->Global = $global;
         $this->Refresh($pattern, $method)->Route($handler);
     }
@@ -345,16 +212,16 @@ class RouterBase extends ArrayObject
         $this->Point = 0;
         $this->Taken = null;
 
-        $this->Url = getUrl();
-        $this->Host = getHost();
-        $this->Site = getSite();
-        $this->Domain = getDomain();
-        $this->Path = getPath();
-        $this->Request = getRequest();
-        $this->Direction = getDirection();
-        $this->Page = getPage();
-        $this->Query = getQuery();
-        $this->Fragment = getFragment();
+        $this->Url = \_::$Address->Url;
+        $this->Host = \_::$Address->Host;
+        $this->Site = \_::$Address->Site;
+        $this->Domain = \_::$Address->Domain;
+        $this->Path = \_::$Address->Path;
+        $this->Request = \_::$Address->Request;
+        $this->Direction = \_::$Address->Direction;
+        $this->Page = \_::$Address->Page;
+        $this->Query = \_::$Address->Query;
+        $this->Fragment = \_::$Address->Fragment;
 
         $this->DefaultMethodIndex = getMethodIndex();
         $this->DefaultMethodName = getMethodName();

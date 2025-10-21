@@ -9,7 +9,7 @@ try {
     if($email && \_::$User->SendActivationEmail($email)) {
         echo Html::Success("An activation email sent successfully to your account ('" . Convert::ToSecret(\_::$User->TemporaryEmail, "*", 2, 5) . "')! Please check your email and click on the link.");
         part("access");
-    } elseif (receive(\User::$ActivationTokenKey) && ($res = \_::$User->ReceiveActivationEmail()) != null){
+    } elseif (receive(\_::$User->ActivationTokenKey) && ($res = \_::$User->ReceiveActivationEmail()) != null){
         if ($res) {
             echo Html::Success("Dear " . \_::$User->TemporaryName . ", Your account activated successfully!");
             part("access");
@@ -22,12 +22,12 @@ try {
         HTML::Form([
             HTML::Field("Email", "Email", $email),
             HTML::SubmitButton("Try to send the activation email again!", $email)
-        ],\User::$ActiveHandlerPath);
+        ],\_::$User->ActiveHandlerPath);
 } catch (\Exception $ex) {
     echo Html::Error($ex) . 
     HTML::Form([
         HTML::Field("Email", "Email", $email),
         HTML::SubmitButton("Try to send the activation email again!", $email)
-    ],\User::$ActiveHandlerPath);
+    ],\_::$User->ActiveHandlerPath);
 }
 ?>

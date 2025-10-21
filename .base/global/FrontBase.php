@@ -10,11 +10,25 @@ library("Revise");
  */
 abstract class FrontBase
 {
-	public $AnimationSpeed = 500;
-	public $DetectMode = true;
+	public $AnimationSpeed = 0;
+	public $DetectMode = false;
 	public $SwitchMode = null;
 	public $DefaultMode = null;
 	public $CurrentMode = null;
+	/**
+	 * The website default template class
+	 * @var string
+	 * @default "Template"
+	 * @category General
+	 */
+	public $DefaultTemplate = "Template";
+	/**
+	 * The website view name
+	 * @var string
+	 * @default "main"
+	 * @category General
+	 */
+	public $DefaultViewName = "main";
 	public $DefaultSourceSelector = "body";
 	public $DefaultDestinationSelector = "body";
 
@@ -238,7 +252,7 @@ abstract class FrontBase
 
 	public function CreateTemplate($name = null, $data = [])
 	{
-		return new (template($name, $data, alternative: "Main"))();
+		return new (template($name, $data, alternative: $this->DefaultTemplate))();
 	}
 
 	/**

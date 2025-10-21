@@ -378,7 +378,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'temp_name' => Local::CreatePath($filename, ".tmp", \_::$Aseq->TempDirectory),
+                                'temp_name' => Local::CreatePath($filename, ".tmp", \_::$Router->TempDirectory),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );
@@ -556,13 +556,13 @@ class Convert
             if (!isset($additionalKeys['$HOSTEMAIL']))
                 $additionalKeys['$HOSTEMAIL'] = $email;
             if (!isset($additionalKeys['$HOSTLINK']))
-                $additionalKeys['$HOSTLINK'] = Html::Link(\_::$Base->Site, \_::$Base->Host);
+                $additionalKeys['$HOSTLINK'] = Html::Link(\_::$Address->Site, \_::$Address->Host);
             if (!isset($additionalKeys['$HOST']))
-                $additionalKeys['$HOST'] = \_::$Base->Host;
+                $additionalKeys['$HOST'] = \_::$Address->Host;
             if (!isset($additionalKeys['$URLLINK']))
-                $additionalKeys['$URLLINK'] = Html::Link(\_::$Base->Url, \_::$Base->Url);
+                $additionalKeys['$URLLINK'] = Html::Link(\_::$Address->Url, \_::$Address->Url);
             if (!isset($additionalKeys['$URL']))
-                $additionalKeys['$URL'] = \_::$Base->Url;
+                $additionalKeys['$URL'] = \_::$Address->Url;
             if (!isValid($additionalKeys, '$SIGNATURE'))
                 $additionalKeys['$SIGNATURE'] = \_::$User->TemporarySignature;
             if (!isValid($additionalKeys, '$NAME'))

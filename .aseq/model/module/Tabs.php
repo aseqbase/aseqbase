@@ -90,7 +90,7 @@ class Tabs extends Module
                             $content = get($v, 'Content')??$this->Content;
                             $v = 
                                 ($this->AllowImage?Html::Media(get($v, 'Title')??$this->Title, getBetween($v, "Image", "Icon")??$this->Image, ["class" => "image"]):"") .
-                                ($this->AllowTitle?Html::ExternalHeading(get($v, 'Title')??$this->Title, ["class" => "title"]):"") .
+                                ($this->AllowTitle?Html::Heading1(get($v, 'Title')??$this->Title, ["class" => "title"]):"") .
                                 Html::Division(Convert::ToString($content), ["class" => "content"]);
                         }return Html::Element($v, "div", $name?["name"=>$name]:[], ["class" => "tab-content $this->ContentClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " view show" : " view hide"), "id" => "$this->Name-tab-$i"]);
                     }

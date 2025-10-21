@@ -88,17 +88,17 @@ class Form extends Module
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
 		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
-		$this->Signing = fn() => part(\User::$InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
+		$this->Signing = fn() => part(\_::$User->InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);
 		// });
-		if (\_::$User->Access(\_::$Config->AdminAccess))
+		if (\_::$User->GetAccess(\_::$User->AdminAccess))
 			$this->BlockTimeout = 500;
 	}
 
 	public function CheckAccess($access = 0, $blocking = true, $reaction = false, &$message = null)
 	{
-		if (!auth($access)) {
+		if (!\_::$User->GetAccess($access)) {
 			$message = $this->GetError("You have not enough access!");
 			if ($reaction)
 				response($this->GetSigning());
@@ -631,12 +631,12 @@ class Form extends Module
 	
 	public function Get()
 	{
-		if (!auth($this->Access))
+		if (!\_::$User->GetAccess($this->Access))
 			return null;
 		if (($res = $this->CheckTimeBlock()) !== false)
 			return $res;
 		$name = $this->Name . "_Form";
-		$src = $this->Action ?? $this->Path ?? \_::$Base->Path;
+		$src = $this->Action ?? $this->Path ?? \_::$Address->Path;
 		if (is_array($this->Children) && count($this->Children) > 0) {
 			module("Field");
 			$attr = $this->Method ? [] : ["disabled"];
@@ -692,7 +692,7 @@ class Form extends Module
 							$this->GetHeader() .
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
-							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Base->Host, ["class" => "back-button"]) : "")
+							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Address->Host, ["class" => "back-button"]) : "")
 							, ["class" => "header", ...($this->AllowAnimate?["data-aos"=>"fade-left"]:[])]
 						) : "") .
 						Html::LargeSlot(
@@ -720,7 +720,7 @@ class Form extends Module
 						$this->GetHeader() .
 						$this->GetTitle(["class" => "form-title"]) .
 						$this->GetDescription(["class" => "form-description"]) .
-						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Base->Host, ["class" => "back-button"]) : "")
+						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Address->Host, ["class" => "back-button"]) : "")
 						: ""
 					) .
 					Html::Form(
@@ -754,7 +754,7 @@ class Form extends Module
 			yield (isValid($this->SubmitLabel) ? Html::SubmitButton($this->SubmitLabel, ["Name" => "submit", "class"=>"main"]) : "");
 			yield (isValid(object: $this->ResetLabel) ? Html::ResetButton($this->ResetLabel, ["Name" => "reset"]) : "");
 		}
-		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \_::$Base->Host, ["Name" => "cancel"]) : "");
+		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \_::$Address->Host, ["Name" => "cancel"]) : "");
 	}
 	public function GetFooter()
 	{
@@ -844,7 +844,7 @@ class Form extends Module
 				\MiMFa\Library\Contact::SendHtmlEmail(
 					grab($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
 					grab($data, "ReceiverEmail") ?? $this->ReceiverEmail,
-					grab($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Base->Domain . ": A new form submitted"),
+					grab($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Address->Domain . ": A new form submitted"),
 					grab($data, "MailMessage") ?? $data,
 					exception: $ex
 				)
@@ -876,7 +876,7 @@ class Form extends Module
 				$module->AllowShare =
 				$module->AllowZoom =
 				$module->AllowDownload = false;
-			$module->Content = part(\User::$InHandlerPath, ["ContentClass" => ""], print: false);
+			$module->Content = part(\_::$User->InHandlerPath, ["ContentClass" => ""], print: false);
 			if ($this->SigningLabel)
 				return $module->Handle() . Html::Center(
 					Html::Button(
@@ -887,7 +887,7 @@ class Form extends Module
 				);
 		} elseif ($this->Signing)
 			return Html::Center(
-				($this->SigningLabel ? Html::SubHeading($this->SigningLabel, \User::$InHandlerPath) : "")
+				($this->SigningLabel ? Html::Heading4($this->SigningLabel, \_::$User->InHandlerPath) : "")
 				. (is_bool($this->Signing) ? "" : Convert::By($this->Signing))
 			);
 	}

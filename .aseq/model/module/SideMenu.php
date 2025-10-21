@@ -40,7 +40,7 @@ class SideMenu extends Module
 	public function __construct()
 	{
 		parent::__construct();
-		$this->Direction = \_::$Back->Translate->Direction ?? \_::$Config->DefaultDirection;
+		$this->Direction = \_::$Back->Translate->Direction ?? \_::$Back->DefaultDirection;
 	}
 
 	public function GetStyle()
@@ -420,7 +420,7 @@ class SideMenu extends Module
 					module("SearchForm");
 					module("TemplateButton"); 
 					$defaultButtons[] = new searchForm();
-					if (\_::$Config->AllowSigning) $defaultButtons[] = Html::Icon("user", \User::$InHandlerPath);
+					if (\_::$User->AllowSigning) $defaultButtons[] = Html::Icon("user", \_::$User->InHandlerPath);
 					$defaultButtons[] = new TemplateButton();
 				}
 				yield Html::Division([
@@ -459,10 +459,10 @@ class SideMenu extends Module
 
 	protected function CreateItem($item, $ind = 1)
 	{
-		if (!auth(getValid($item, "Access", \_::$Config->VisitAccess)))
+		if (!\_::$User->GetAccess(getValid($item, "Access", \_::$User->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path");
-		$act = endsWith(\_::$Base->Path, $path) ? 'active' : '';
+		$act = endsWith(\_::$Address->Path, $path) ? 'active' : '';
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Html::Item(

@@ -177,7 +177,7 @@ class Gallery extends Collection{
 			yield Html::Division(
 				$img->ToString().
 				Html::Division(
-					Html::SubHeading($p_name).
+					Html::Heading4($p_name).
 					Html::Paragraph($p_description),
 				["class"=>"description" ]).
 				(isValid($p_path)? Html::Button($this->MoreButtonLabel, $clickact, ["class"=>"btn outline btn block"]):null).

@@ -55,12 +55,12 @@ class Html
                     $object = preg_replace_callback('/"?""\s?([\s\S]+?)\s?"""?(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/si', fn($m) => self::QuoteBlock($m[1], ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object); // Blockquotes
 
                     // Headings
-                    $object = preg_replace_callback("/\s?^[ \t]*\#\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::ExternalHeading($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{2}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::SuperHeading($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{3}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Heading($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{4}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::SubHeading($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{5}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::InternalHeading($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
-                    $object = preg_replace_callback("/\s?^[ \t]*\#{6}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::InlineHeading($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Heading1($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{2}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Heading2($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{3}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Heading3($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{4}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Heading4($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{5}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Heading5($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
+                    $object = preg_replace_callback("/\s?^[ \t]*\#{6}\s(.*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/im", fn($m) => self::Heading6($m[1], null, ["id" => $m[2] ?? null], ($dir = Translate::GetDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
 
                     // Tables
                     $object = preg_replace_callback(
@@ -1255,7 +1255,7 @@ class Html
             $res = [];
             foreach ($content as $k => $item)
                 //$res[] = self::Item($item);
-                $res[] = self::Element((is_numeric($k) ? "" : self::InlineHeading($k)) . __($item), "li", ["class" => "item"]);
+                $res[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
             $content = $res;
             return self::Element($content, "ol", ["class" => "list"], $attributes);
         }
@@ -1273,7 +1273,7 @@ class Html
             $res = [];
             foreach ($content as $k => $item)
                 //$res[] = self::Item($item);
-                $res[] = self::Element((is_numeric($k) ? "" : self::InlineHeading($k)) . __($item), "li", ["class" => "item"]);
+                $res[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
             $content = $res;
             return self::Element($content, "ul", ["class" => "items"], $attributes);
         }
@@ -1378,13 +1378,7 @@ class Html
      */
     public static function ExternalHeading($content, $reference = null, ...$attributes)
     {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "h1", ["class" => "externalheading"], $attributes);
-        return self::Element(__($content), "h1", ["class" => "heading externalheading"], $attributes);
+        return self::Heading1($content, $reference, ["class" => "externalheading"], ...$attributes);
     }
     /**
      * The \<H2\> HTML Tag
@@ -1395,13 +1389,7 @@ class Html
      */
     public static function SuperHeading($content, $reference = null, ...$attributes)
     {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "h2", ["class" => "superheading"], $attributes);
-        return self::Element(__($content), "h2", ["class" => "heading superheading"], $attributes);
+        return self::Heading2($content, $reference, ["class" => "superheading"], ...$attributes);
     }
     /**
      * The \<H3\> HTML Tag
@@ -1412,13 +1400,7 @@ class Html
      */
     public static function Heading($content, $reference = null, ...$attributes)
     {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "h3", ["class" => "heading"], $attributes);
-        return self::Element(__($content), "h3", ["class" => "heading"], $attributes);
+        return self::Heading3($content, $reference, ...$attributes);
     }
     /**
      * The \<H4\> HTML Tag
@@ -1429,13 +1411,7 @@ class Html
      */
     public static function SubHeading($content, $reference = null, ...$attributes)
     {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "h4", ["class" => "subheading"], $attributes);
-        return self::Element(__($content), "h4", ["class" => "heading subheading"], $attributes);
+        return self::Heading4($content, $reference, ["class" => "subheading"], ...$attributes);
     }
     /**
      * The \<H5\> HTML Tag
@@ -1446,13 +1422,93 @@ class Html
      */
     public static function InternalHeading($content, $reference = null, ...$attributes)
     {
+        return self::Heading5($content, $reference, ["class" => "internalheading"], ...$attributes);
+    }
+
+    /*
+     * The \<H1\> HTML Tag
+     * @param mixed $content The heading text
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Heading1($content, $reference = null, ...$attributes)
+    {
         if (!is_null($reference))
             if (is_array($reference)) {
                 $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
-                return self::Element(self::Link($content, $reference), "h5", ["class" => "internalheading"], $attributes);
-        return self::Element(__($content), "h5", ["class" => "heading internalheading"], $attributes);
+                return self::Element(self::Link($content, $reference), "h1", ["class" => "heading heading1"], $attributes);
+        return self::Element(__($content), "h1", ["class" => "heading heading1"], $attributes);
+    }
+    /**
+     * The \<H2\> HTML Tag
+     * @param mixed $content The heading text
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Heading2($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "h2", ["class" => "heading heading2"], $attributes);
+        return self::Element(__($content), "h2", ["class" => "heading heading2"], $attributes);
+    }
+    /**
+     * The \<H3\> HTML Tag
+     * @param mixed $content The heading text
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Heading3($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "h3", ["class" => "heading heading3"], $attributes);
+        return self::Element(__($content), "h3", ["class" => "heading heading3"], $attributes);
+    }
+    /**
+     * The \<H4\> HTML Tag
+     * @param mixed $content The heading text
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Heading4($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "h4", ["class" => "heading heading4"], $attributes);
+        return self::Element(__($content), "h4", ["class" => "heading heading4"], $attributes);
+    }
+    /**
+     * The \<H5\> HTML Tag
+     * @param mixed $content The heading text
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Heading5($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "h5", ["class" => "heading heading5"], $attributes);
+        return self::Element(__($content), "h5", ["class" => "heading heading5"], $attributes);
     }
     /**
      * The \<H6\> HTML Tag
@@ -1461,15 +1517,15 @@ class Html
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function InlineHeading($content, $reference = null, ...$attributes)
+    public static function Heading6($content, $reference = null, ...$attributes)
     {
         if (!is_null($reference))
             if (is_array($reference)) {
                 $attributes = Convert::ToIteration($reference, ...$attributes);
                 $reference = null;
             } else
-                return self::Element(self::Link($content, $reference), "h6", ["class" => "inlineheading"], $attributes);
-        return self::Element(__($content), "h6", ["class" => "heading inlineheading"], $attributes);
+                return self::Element(self::Link($content, $reference), "h6", ["class" => "heading heading6"], $attributes);
+        return self::Element(__($content), "h6", ["class" => "heading heading6"], $attributes);
     }
     #endregion
 
@@ -1832,7 +1888,7 @@ class Html
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
             $action = "load(" . Script::Convert($action) . ")";
-        return self::Element($content, "div", ["class" => "action", "type" => "action"], $action ? ["onclick" => $action] : [], $attributes);
+        return self::Element($content, "action", ["class" => "action"], $action ? ["onclick" => $action] : [], $attributes);
     }
     #endregion
 
@@ -2175,6 +2231,7 @@ class Html
                 break;
             case 'address':
                 $content = self::AddressInput($key, $value, $attributes);
+                break;
             case 'lines':
             case 'texts':
             case 'mediumtext':
@@ -2298,6 +2355,7 @@ class Html
             case 'map':
             case 'location':
                 $content = self::MapInput($key, $value, $attributes);
+                break;
             case 'path':
                 $content = self::TextInput($key, $value, $attributes);
                 break;
@@ -3203,6 +3261,7 @@ class Html
                 }
                 .$uniq :is(span.clickable, .media):hover{
                     cursor: pointer;
+                    background-color: var(--back-color-output);
                     color: var(--fore-color-output);
 				    " . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
                 }
@@ -3616,8 +3675,8 @@ class Html
         $description = __($description);
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
-                self::Heading($title) .
-                renderScript(null, asset(\_::$Base->ScriptDirectory, "Canvas.js")) .
+                self::Heading3($title) .
+                renderScript(null, asset(\_::$Address->ScriptDirectory, "Canvas.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {

@@ -13,7 +13,7 @@ if ($imgObj = receiveFile("Image")) {
         if (isValid($img) && !Local::DeleteFile($img))
             renderError("Could not delete your previous picture!");
         else {
-            $img = Local::StoreImage($imgObj, \_::$Aseq->PublicDirectory . "image".DIRECTORY_SEPARATOR."profile".DIRECTORY_SEPARATOR);
+            $img = Local::StoreImage($imgObj, \_::$Router->PublicDirectory . "image".DIRECTORY_SEPARATOR."profile".DIRECTORY_SEPARATOR);
             if (!is_null($img)) {
                 $received["Image"] = Local::GetUrl($img);
                 $imgchange = true;
@@ -37,16 +37,16 @@ if ($imgObj = receiveFile("Image")) {
 try {
     if (\_::$User->Set($received)) {
         if (getValid($received, "Email", \_::$User->TemporaryEmail) != \_::$User->TemporaryEmail) {
-            renderSuccess("The email address modifyed successfully!");
+            renderSuccess("The '".__("email address")."' modifyed successfully!");
             \_::$User->SignOut();
             \_::$User->TemporaryEmail = $received["Email"];
-            load(\User::$ActiveHandlerPath);
+            load(\_::$User->ActiveHandlerPath);
         } elseif (getValid($received, "Signature" , \_::$User->Signature) != \_::$User->Signature) {
-            renderSuccess("The signature modifyed successfully!");
+            renderSuccess("The '".__("signature")."' modifyed successfully!");
             \_::$User->SignOut();
-            load(\User::$InHandlerPath);
+            load(\_::$User->InHandlerPath);
         } elseif ($imgchange) {
-            renderSuccess("Profile picture modifyed successfully!");
+            renderSuccess("'".__("Profile picture")."' modifyed successfully!");
             $img = \_::$User->TemporaryImage;
             \_::$User->Refresh();
             if (isValid($img) != isValid(\_::$User->TemporaryImage))

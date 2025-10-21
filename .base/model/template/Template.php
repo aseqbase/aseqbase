@@ -97,7 +97,7 @@ class Template extends \Base{
 
 	public function RenderInitial(){
         region("initial");
-        $title = $this->WindowTitle??[preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/","",\_::$Base->Direction)];
+        $title = $this->WindowTitle??[preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/","",\_::$Address->Direction)];
         render(Html::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
 		render(Html::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
         render(Html::Style("

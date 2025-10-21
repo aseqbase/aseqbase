@@ -50,7 +50,7 @@ class Route extends Module{
 
 	public function Set($itemsOrpath = null){
 		if(is_null($itemsOrpath)){
-            $this->Path = "/".\_::$Base->Direction;
+            $this->Path = "/".\_::$Address->Direction;
             $this->Items = null;
         }elseif(is_array($itemsOrpath)){
             $this->Path = null;
