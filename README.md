@@ -123,7 +123,7 @@
 
 <h4>Creating</h4>
 
-  1. Create a new file by a predefined template name (such as, global, config, back, router, front, user, info, etc.) using
+  1. Create a new file by a predefined template name (for example, global, config, back, router, front, user, info, etc.) using
 		``` bash
 		> composer aseqbase:create [predefined-template-name]
 		```
