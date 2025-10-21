@@ -132,7 +132,7 @@
   		> cd vendor/aseqbase/aseqbase
 		> composer dev:create [predefined-template-name]
 		```
-  2. Follow the steps to finish the creating file.
+  2. Follow the steps to finish creating the file.
   3. Enjoy...
 
 <h3>Contributions</h3>
