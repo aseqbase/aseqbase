@@ -4,6 +4,7 @@ class Bootstrap
 {
     public static $Arguments = [];
     public static $Configurations = [];
+    public static $ServerPID = null;
     public static $ConfigurationsFile = 'bootstrap.json';
     public static $DataBaseSchemaFile = 'schema.sql';
     public static $DestinationDirectory = null;
@@ -12,23 +13,107 @@ class Bootstrap
     public static function Start()
     {
         self::LoadConfig();
-        if (!isset(self::$Configurations["Origin"]))
+
+        self::$ServerPID = self::$Configurations["ServerPID"]??self::$ServerPID;
+
+        if (self::$ServerPID) {
+            // Prevent starting if already running (basic check)
+            self::SetWarning("Server appears to be already running with the PID: " . self::$ServerPID);
+            return;
+        }
+
+        if (!isset(self::$Configurations["Origin"])) {
             self::$Configurations["Origin"] = [];
+        }
+
+        // ... (Your host/port and database logic remains the same)
         [$host, $port] = explode(":", isset(self::$Configurations["Origin"]["Host"]) ? self::$Configurations["Origin"]["Host"] . ":" : "localhost:8000");
         $host = (self::$Arguments["host"] ?? $host) ?: "localhost";
         $port = (self::$Arguments["port"] ?? $port) ?: "8000";
         $db = self::$Arguments["db"] ?? self::$Arguments["database"] ?? "MySQL";
+
+        self::$ServerPID = 0; // Initialize PID variable
+
         if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
-            exec("start /B php -S $host:$port");
+            // Windows: Start the server and capture the PID (not trivial with PHP built-in server)
+            // Simplest reliable way is to use a separate script, or rely on a file.
+            // For simplicity and to avoid external scripts, we'll use 'pkill' approximation, 
+            // but it's unreliable. For reliable windows control, you need a different setup.
+            // For this example, we'll use 'start' but you'll have to manually find the process to kill. 
+            // A better approach would be to use 'start /B cmd /C "php -S..." > pid.txt' but 'start' doesn't easily write the PID.
+
+            // Starting the PHP server in the background
+            pclose(popen("start /B php -S $host:$port", "r"));
+
+            // The Windows exec() approach doesn't easily return the PID, 
+            // so we'll leave it as 0, meaning the Stop() function won't work automatically.
+            // You'll have to rely on Task Manager or 'netstat' to kill by port.
+
             exec("net start $db");
             exec('php index.php');
+
+            self::SetSuccess("Server started on $host:$port. Please manually note and store the PID to stop it.");
+
         } else {
-            exec("php -S $host:$port > /dev/null 2>&1 &");
+            // Linux/macOS: Run in background and capture PID
+            $command = "php -S $host:$port > /dev/null 2>&1 & echo $!";
+            self::$ServerPID = exec($command);
+
             exec("sudo service $db start");
             exec('php index.php');
+
+            self::SetSuccess("Server started on $host:$port with the PID ".self::$ServerPID);
         }
+
+        // Store the PID if successful (primarily for Linux/macOS)
+        if (self::$ServerPID > 0)
+            self::$Configurations["ServerPID"] = (int) self::$ServerPID;
+
         self::$Configurations["Origin"]["Host"] = $host;
         self::$Configurations["Origin"]["Port"] = $port;
+        self::StoreConfig();
+    }
+    public static function Stop()
+    {
+        self::LoadConfig();
+
+        self::$ServerPID = self::$Configurations["ServerPID"]??self::$ServerPID;
+
+        if (!self::$ServerPID || self::$ServerPID === 0) {
+            self::SetWarning("No running server PID found in configuration. Check running processes manually.");
+            return;
+        }
+
+        $db = self::$Arguments["db"] ?? self::$Arguments["database"] ?? "MySQL"; // Assuming DB argument is available/same logic
+
+        if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
+            // Windows: Use taskkill with /F (force) and /PID.
+            exec("taskkill /F /PID ".self::$ServerPID, $output, $returnVar);
+
+            if ($returnVar === 0)
+                self::SetSuccess("Successfully terminated server process with the PID: ".self::$ServerPID);
+            else
+                self::SetError("Failed to terminate process with PID: ".self::$ServerPID." (Return Code: $returnVar). It might already be stopped.");
+
+            // Stop the database service on Windows
+            exec("net stop $db");
+
+        } else {
+            // Linux/macOS: Use kill command
+            exec("kill -9 ".self::$ServerPID, $output, $returnVar);
+
+            if ($returnVar === 0) {
+                self::SetSuccess("Successfully terminated server process with the PID: ".self::$ServerPID);
+            } else {
+                self::SetError( "Failed to terminate process with PID: ".self::$ServerPID." (Return Code: $returnVar). It might already be stopped.");
+            }
+
+            // Stop the database service on Linux/macOS
+            exec("sudo service $db stop");
+        }
+
+        // Clean up the stored PID and save config
+        unset(self::$Configurations["ServerPID"]);
         self::StoreConfig();
     }
 
@@ -116,14 +201,14 @@ class Bootstrap
         $isInVendor = preg_match("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", $source);
         if ($isInVendor)
             try {
-                $cmds = ["start", "install",  "reinstall", "uninstall", "update", "create"];
+                $cmds = ["start", "install", "reinstall", "uninstall", "update", "create"];
                 $vc = json_decode(file_get_contents($source . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
                 $c = json_decode(file_get_contents(self::$DestinationDirectory . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
                 if (isset($vc["scripts"]["dev:start"])) {
                     $c["scripts"] = $c["scripts"] ?? [];
                     $c["scripts"]["start"] = $vc["scripts"]["dev:start"];
                     foreach ($cmds as $key => $cmd)
-                        $c["scripts"]["dev:$cmd"] = $vc["scripts"]["dev:$cmd"]??"";
+                        $c["scripts"]["dev:$cmd"] = $vc["scripts"]["dev:$cmd"] ?? "";
                 }
                 $baseDir = preg_replace("/^" . preg_quote(self::$DestinationDirectory) . "/", "", getcwd());
                 $baseName = basename($baseDir);

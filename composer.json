@@ -32,6 +32,9 @@
             "Composer\\Config::disableProcessTimeout",
             "MiMFa\\Bootstrap::Start"
         ],
+        "stop": [
+            "MiMFa\\Bootstrap::Stop"
+        ],
         "dev:create": [
             "MiMFa\\Bootstrap::Create"
         ],
