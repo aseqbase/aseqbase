@@ -32,11 +32,8 @@
             "Composer\\Config::disableProcessTimeout",
             "MiMFa\\Bootstrap::Start"
         ],
-        "stop": [
+        "dev:stop": [
             "MiMFa\\Bootstrap::Stop"
-        ],
-        "dev:create": [
-            "MiMFa\\Bootstrap::Create"
         ],
         "dev:install": [
             "MiMFa\\Bootstrap::Install"
@@ -48,7 +45,11 @@
             "MiMFa\\Bootstrap::Uninstall"
         ],
         "dev:update": [
+            "composer update aseqbase/aseqbase",
             "MiMFa\\Bootstrap::Update"
+        ],
+        "dev:create": [
+            "MiMFa\\Bootstrap::Create"
         ],
         "post-install-cmd": [
             "MiMFa\\Bootstrap::Install"

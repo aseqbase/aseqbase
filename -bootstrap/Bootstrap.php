@@ -14,7 +14,7 @@ class Bootstrap
     {
         self::LoadConfig();
 
-        self::$ServerPID = self::$Configurations["ServerPID"]??self::$ServerPID;
+        self::$ServerPID = self::$Configurations["ServerPID"] ?? self::$ServerPID;
 
         if (self::$ServerPID) {
             // Prevent starting if already running (basic check)
@@ -62,7 +62,7 @@ class Bootstrap
             exec("sudo service $db start");
             exec('php index.php');
 
-            self::SetSuccess("Server started on $host:$port with the PID ".self::$ServerPID);
+            self::SetSuccess("Server started on $host:$port with the PID " . self::$ServerPID);
         }
 
         // Store the PID if successful (primarily for Linux/macOS)
@@ -77,7 +77,7 @@ class Bootstrap
     {
         self::LoadConfig();
 
-        self::$ServerPID = self::$Configurations["ServerPID"]??self::$ServerPID;
+        self::$ServerPID = self::$Configurations["ServerPID"] ?? self::$ServerPID;
 
         if (!self::$ServerPID || self::$ServerPID === 0) {
             self::SetWarning("No running server PID found in configuration. Check running processes manually.");
@@ -88,24 +88,24 @@ class Bootstrap
 
         if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
             // Windows: Use taskkill with /F (force) and /PID.
-            exec("taskkill /F /PID ".self::$ServerPID, $output, $returnVar);
+            exec("taskkill /F /PID " . self::$ServerPID, $output, $returnVar);
 
             if ($returnVar === 0)
-                self::SetSuccess("Successfully terminated server process with the PID: ".self::$ServerPID);
+                self::SetSuccess("Successfully terminated server process with the PID: " . self::$ServerPID);
             else
-                self::SetError("Failed to terminate process with PID: ".self::$ServerPID." (Return Code: $returnVar). It might already be stopped.");
+                self::SetError("Failed to terminate process with PID: " . self::$ServerPID . " (Return Code: $returnVar). It might already be stopped.");
 
             // Stop the database service on Windows
             exec("net stop $db");
 
         } else {
             // Linux/macOS: Use kill command
-            exec("kill -9 ".self::$ServerPID, $output, $returnVar);
+            exec("kill -9 " . self::$ServerPID, $output, $returnVar);
 
             if ($returnVar === 0) {
-                self::SetSuccess("Successfully terminated server process with the PID: ".self::$ServerPID);
+                self::SetSuccess("Successfully terminated server process with the PID: " . self::$ServerPID);
             } else {
-                self::SetError( "Failed to terminate process with PID: ".self::$ServerPID." (Return Code: $returnVar). It might already be stopped.");
+                self::SetError("Failed to terminate process with PID: " . self::$ServerPID . " (Return Code: $returnVar). It might already be stopped.");
             }
 
             // Stop the database service on Linux/macOS
@@ -201,12 +201,13 @@ class Bootstrap
         $isInVendor = preg_match("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", $source);
         if ($isInVendor)
             try {
-                $cmds = ["start", "install", "reinstall", "uninstall", "update", "create"];
+                $cmds = ["start", "stop", "install", "reinstall", "uninstall", "update", "create"];
                 $vc = json_decode(file_get_contents($source . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
                 $c = json_decode(file_get_contents(self::$DestinationDirectory . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
                 if (isset($vc["scripts"]["dev:start"])) {
                     $c["scripts"] = $c["scripts"] ?? [];
                     $c["scripts"]["start"] = $vc["scripts"]["dev:start"];
+                    $c["scripts"]["stop"] = $vc["scripts"]["dev:stop"];
                     foreach ($cmds as $key => $cmd)
                         $c["scripts"]["dev:$cmd"] = $vc["scripts"]["dev:$cmd"] ?? "";
                 }
