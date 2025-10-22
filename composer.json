@@ -38,6 +38,9 @@
         "dev:install": [
             "MiMFa\\Bootstrap::Install"
         ],
+        "dev:reinstall": [
+            "composer clear-cache && composer require aseqbase/aseqbase && composer dev:install"
+        ],
         "dev:uninstall": [
             "MiMFa\\Bootstrap::Uninstall"
         ],
@@ -54,7 +57,7 @@
     "autoload": {
         "files": [ "-bootstrap/Bootstrap.php" ],
         "psr-4": {
-            "MiMFa\\": ["model/","-bootstrap/", "../model/","../-bootstrap/"]
+            "MiMFa\\": ["model/", "-bootstrap/", "../model/", "../-bootstrap/"]
         }
     },
     "config": {

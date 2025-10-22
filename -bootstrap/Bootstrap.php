@@ -116,20 +116,20 @@ class Bootstrap
         $isInVendor = preg_match("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", $source);
         if ($isInVendor)
             try {
-                $cmds = ["start", "create", "install", "update", "uninstall"];
+                $cmds = ["start", "install",  "reinstall", "uninstall", "update", "create"];
                 $vc = json_decode(file_get_contents($source . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
                 $c = json_decode(file_get_contents(self::$DestinationDirectory . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
                 if (isset($vc["scripts"]["dev:start"])) {
                     $c["scripts"] = $c["scripts"] ?? [];
                     $c["scripts"]["start"] = $vc["scripts"]["dev:start"];
                     foreach ($cmds as $key => $cmd)
-                        $c["scripts"][$cmd] = $vc["scripts"]["dev:$cmd"]??"";
+                        $c["scripts"]["dev:$cmd"] = $vc["scripts"]["dev:$cmd"]??"";
                 }
                 $baseDir = preg_replace("/^" . preg_quote(self::$DestinationDirectory) . "/", "", getcwd());
                 $baseName = basename($baseDir);
                 foreach ($cmds as $key => $cmd)
                     $c["scripts"]["$baseName:$cmd"] = [
-                        "cd $baseDir & composer dev:$cmd"
+                        "cd $baseDir && composer dev:$cmd"
                     ];
                 if (file_put_contents(self::$DestinationDirectory . "composer.json", json_encode($c, flags: JSON_OBJECT_AS_ARRAY)))
                     self::SetSuccess("Scripts in 'composer.json' is updated.");
