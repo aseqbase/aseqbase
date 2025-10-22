@@ -7,8 +7,8 @@
  * Change the value, to the current subdomains sequence (like [my-subdomain-name])
  * or if this file is in the root address, leave null for that
  */
-$dirs = preg_split("/[\/\\\]/", trim(__DIR__, "/\\"));
-$GLOBALS["ASEQ"] = null;/* Change it to end($dirs) if the file is in a subdirectory */
+$directories = preg_split("/[\/\\\]/", trim(__DIR__, "/\\"));
+$GLOBALS["ASEQ"] = null;/* Change it to end($directories) if the file is in a subdirectory */
 $GLOBALS["BASE"] = ".aseq";/* Change it to the parent directory if deferents */
 
 /*

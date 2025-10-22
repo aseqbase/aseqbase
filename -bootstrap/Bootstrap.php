@@ -8,6 +8,7 @@ class Bootstrap
     public static $ConfigurationsFile = 'bootstrap.json';
     public static $DataBaseSchemaFile = 'schema.sql';
     public static $DestinationDirectory = null;
+    public static $ScriptsPattern = "/[\{\}\[\]\;\,\"'?=\*<>\$\^&\|\!]|(^\d*\.?\d+$)|(^null$)/";
 
 
     public static function Start()
@@ -17,45 +18,28 @@ class Bootstrap
         self::$ServerPID = self::$Configurations["ServerPID"] ?? self::$ServerPID;
 
         if (self::$ServerPID) {
-            // Prevent starting if already running (basic check)
             self::SetWarning("Server appears to be already running with the PID: " . self::$ServerPID);
             return;
         }
 
-        if (!isset(self::$Configurations["Origin"])) {
+        if (!isset(self::$Configurations["Origin"]))
             self::$Configurations["Origin"] = [];
-        }
 
-        // ... (Your host/port and database logic remains the same)
         [$host, $port] = explode(":", isset(self::$Configurations["Origin"]["Host"]) ? self::$Configurations["Origin"]["Host"] . ":" : "localhost:8000");
         $host = (self::$Arguments["host"] ?? $host) ?: "localhost";
         $port = (self::$Arguments["port"] ?? $port) ?: "8000";
         $db = self::$Arguments["db"] ?? self::$Arguments["database"] ?? "MySQL";
 
-        self::$ServerPID = 0; // Initialize PID variable
+        self::$ServerPID = 0;
 
         if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
-            // Windows: Start the server and capture the PID (not trivial with PHP built-in server)
-            // Simplest reliable way is to use a separate script, or rely on a file.
-            // For simplicity and to avoid external scripts, we'll use 'pkill' approximation, 
-            // but it's unreliable. For reliable windows control, you need a different setup.
-            // For this example, we'll use 'start' but you'll have to manually find the process to kill. 
-            // A better approach would be to use 'start /B cmd /C "php -S..." > pid.txt' but 'start' doesn't easily write the PID.
-
-            // Starting the PHP server in the background
             pclose(popen("start /B php -S $host:$port", "r"));
-
-            // The Windows exec() approach doesn't easily return the PID, 
-            // so we'll leave it as 0, meaning the Stop() function won't work automatically.
-            // You'll have to rely on Task Manager or 'netstat' to kill by port.
-
             exec("net start $db");
             exec('php index.php');
 
             self::SetSuccess("Server started on $host:$port. Please manually note and store the PID to stop it.");
 
         } else {
-            // Linux/macOS: Run in background and capture PID
             $command = "php -S $host:$port > /dev/null 2>&1 & echo $!";
             self::$ServerPID = exec($command);
 
@@ -65,7 +49,6 @@ class Bootstrap
             self::SetSuccess("Server started on $host:$port with the PID " . self::$ServerPID);
         }
 
-        // Store the PID if successful (primarily for Linux/macOS)
         if (self::$ServerPID > 0)
             self::$Configurations["ServerPID"] = (int) self::$ServerPID;
 
@@ -87,7 +70,6 @@ class Bootstrap
         $db = self::$Arguments["db"] ?? self::$Arguments["database"] ?? "MySQL"; // Assuming DB argument is available/same logic
 
         if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
-            // Windows: Use taskkill with /F (force) and /PID.
             exec("taskkill /F /PID " . self::$ServerPID, $output, $returnVar);
 
             if ($returnVar === 0)
@@ -95,24 +77,18 @@ class Bootstrap
             else
                 self::SetError("Failed to terminate process with PID: " . self::$ServerPID . " (Return Code: $returnVar). It might already be stopped.");
 
-            // Stop the database service on Windows
             exec("net stop $db");
 
         } else {
-            // Linux/macOS: Use kill command
             exec("kill -9 " . self::$ServerPID, $output, $returnVar);
 
-            if ($returnVar === 0) {
+            if ($returnVar === 0)
                 self::SetSuccess("Successfully terminated server process with the PID: " . self::$ServerPID);
-            } else {
+            else
                 self::SetError("Failed to terminate process with PID: " . self::$ServerPID . " (Return Code: $returnVar). It might already be stopped.");
-            }
-
-            // Stop the database service on Linux/macOS
             exec("sudo service $db stop");
         }
 
-        // Clean up the stored PID and save config
         unset(self::$Configurations["ServerPID"]);
         self::StoreConfig();
     }
@@ -145,14 +121,20 @@ class Bootstrap
     public static function ConstructSource($force = true)
     {
         self::SetSubject("SOURCE INSTALLATION");
-        self::$DestinationDirectory = self::GetInput("Destination Directory", $force, self::$DestinationDirectory, self::$Configurations["Destination"]["Root"], "destination"); // Project root (destination)
+        self::GetInput("Destination Directory", $force, self::$DestinationDirectory, self::$DestinationDirectory, "destination");
         if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
+        self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
 
         $source = dirname(__DIR__) . DIRECTORY_SEPARATOR;// Source folder (your framework package root)
+        $isInVendor = preg_match("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", $source);
+        if ($isInVendor) {
+            self::$Configurations["Source"]["Path"] = $source;
+            self::StoreConfig();
+        }
         if (self::$DestinationDirectory === $source) {
             self::SetSuccess("All files are ready.");
-            self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory;
+            self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
         } else {
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
@@ -195,35 +177,34 @@ class Bootstrap
             }
 
             self::SetSuccess("$i source files are copied.");
-            self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory;
-        }
+            self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
 
-        $isInVendor = preg_match("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", $source);
-        if ($isInVendor)
-            try {
-                $cmds = ["start", "stop", "install", "reinstall", "uninstall", "update", "create"];
-                $vc = json_decode(file_get_contents($source . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
-                $c = json_decode(file_get_contents(self::$DestinationDirectory . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
-                if (isset($vc["scripts"]["dev:start"])) {
-                    $c["scripts"] = $c["scripts"] ?? [];
-                    $c["scripts"]["start"] = $vc["scripts"]["dev:start"];
-                    $c["scripts"]["stop"] = $vc["scripts"]["dev:stop"];
+            if ($isInVendor)
+                try {
+                    $cmds = ["start", "stop", "install", "reinstall", "uninstall", "update", "create"];
+                    $vc = json_decode(file_get_contents($source . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
+                    $c = json_decode(file_get_contents(self::$DestinationDirectory . "composer.json"), flags: JSON_OBJECT_AS_ARRAY);
+                    if (isset($vc["scripts"]["dev:start"])) {
+                        $c["scripts"] = $c["scripts"] ?? [];
+                        $c["scripts"]["start"] = $vc["scripts"]["dev:start"];
+                        $c["scripts"]["stop"] = $vc["scripts"]["dev:stop"];
+                        foreach ($cmds as $key => $cmd)
+                            $c["scripts"]["dev:$cmd"] = $vc["scripts"]["dev:$cmd"] ?? "";
+                    }
+                    $baseDir = preg_replace("/^" . preg_quote(self::$DestinationDirectory) . "/", "", getcwd());
+                    $baseName = basename($baseDir);
                     foreach ($cmds as $key => $cmd)
-                        $c["scripts"]["dev:$cmd"] = $vc["scripts"]["dev:$cmd"] ?? "";
+                        $c["scripts"]["$baseName:$cmd"] = [
+                            "cd \"$baseDir\" && composer dev:$cmd"
+                        ];
+                    if (file_put_contents(self::$DestinationDirectory . "composer.json", json_encode($c, flags: JSON_OBJECT_AS_ARRAY)))
+                        self::SetSuccess("Scripts in 'composer.json' is updated.");
+                    else
+                        self::SetWarning("Could not update scripts in 'composer.json'.");
+                } catch (\Exception $e) {
+                    self::SetError("Could not update scripts in 'composer.json': " . $e->getMessage() . "");
                 }
-                $baseDir = preg_replace("/^" . preg_quote(self::$DestinationDirectory) . "/", "", getcwd());
-                $baseName = basename($baseDir);
-                foreach ($cmds as $key => $cmd)
-                    $c["scripts"]["$baseName:$cmd"] = [
-                        "cd $baseDir && composer dev:$cmd"
-                    ];
-                if (file_put_contents(self::$DestinationDirectory . "composer.json", json_encode($c, flags: JSON_OBJECT_AS_ARRAY)))
-                    self::SetSuccess("Scripts in 'composer.json' is updated.");
-                else
-                    self::SetWarning("Could not update scripts in 'composer.json'.");
-            } catch (\Exception $e) {
-                self::SetError("Could not update scripts in 'composer.json': " . $e->getMessage() . "");
-            }
+        }
         return true;
     }
     public static function ConstructDataBase($force = true)
@@ -239,15 +220,21 @@ class Bootstrap
             return null;
         }
 
-        $host = self::GetInput("Database Host", $force, self::$Configurations["DataBase"]["Host"] ?? "localhost", self::$Configurations["DataBase"]["Host"], "host");
-        $name = self::GetInput("Database Name", $force, self::$Configurations["DataBase"]["Name"] ?? "localhost", self::$Configurations["DataBase"]["Name"], "name");
+        self::GetInput("Database Host", $force, self::$Configurations["DataBase"]["Host"] ?? "localhost", $host, "host");
+        self::GetInput("Database Name", $force, self::$Configurations["DataBase"]["Name"] ?? "localhost", $name, "name");
         if (empty($name)) {
             self::SetError("Database name required.");
             return self::ConstructDataBase($force);
         }
-        $username = self::GetInput("Database Username", $force, self::$Configurations["DataBase"]["Username"] ?? "root", self::$Configurations["DataBase"]["Username"], "username");
-        $password = self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "root", self::$Configurations["DataBase"]["Password"], "password");
-        $prefix = self::GetInput("Tables prefix", $force, self::$Configurations["DataBase"]["Prefix"] ?? "aseq_", self::$Configurations["DataBase"]["Prefix"], "prefix");
+        self::GetInput("Database Username", $force, self::$Configurations["DataBase"]["Username"] ?? "root", $username, "username");
+        self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "root", $password, "password");
+        self::GetInput("Tables prefix", $force, self::$Configurations["DataBase"]["Prefix"] ?? "aseq_", $prefix, "prefix");
+
+        self::$Configurations["DataBase"]["Host"] = $host;
+        self::$Configurations["DataBase"]["Name"] = $name;
+        self::$Configurations["DataBase"]["Username"] = $username;
+        self::$Configurations["DataBase"]["Password"] = $password;
+        self::$Configurations["DataBase"]["Prefix"] = $prefix;
 
         try {
             $pdo = new \PDO("mysql:host=$host;charset=" . (self::$Configurations["DataBase"]["Charset"] ?? "utf8mb4"), $username, $password);
@@ -272,9 +259,9 @@ class Bootstrap
     {
         self::SetSubject("SETTING INSTALLATION");
         if (self::$Arguments["global"] ?? true)
-            self::CreateGlobalFile($force);
+            self::CreateGlobalFile(true);
         if (self::$Arguments["back"] ?? true)
-            self::CreateBackFile($force);
+            self::CreateBackFile(true);
         if (self::$Arguments["front"] ?? false)
             self::CreateFrontFile($force);
         if (self::$Arguments["route"] ?? false)
@@ -289,13 +276,13 @@ class Bootstrap
     public static function Uninstall()
     {
         $force = self::$Arguments["f"] ?? self::$Arguments["force"] ?? false;
-        if (strtolower(self::GetInput("Are you sure about starting uninstallation process (y/N)?", false, "n")) === "y") {
+        if (strtolower(self::GetInput("Are you sure about starting uninstallation process (y/N)?", false, "n")) === "\"y\"") {
             self::LoadConfig();
-            if ($force || strtolower(self::GetInput("Are you sure about removing all files and folders permanently (y/N)?", $force, "n")) === "y") {
+            if ($force || strtolower(self::GetInput("Are you sure about removing all files and folders permanently (y/N)?", $force, "n")) === "\"y\"") {
                 if (self::DestructSource($force) !== false)
                     self::SetSuccess("Source uninstallation is completed successfully.");
             }
-            if ($force || strtolower(self::GetInput("Are you sure about removing all tables permanently (y/N)?", $force, "n")) === "y") {
+            if ($force || strtolower(self::GetInput("Are you sure about removing all tables permanently (y/N)?", $force, "n")) === "\"y\"") {
                 if (self::DestructDataBase($force) !== false)
                     self::SetSuccess("DataBase uninstallation is completed successfully.");
             }
@@ -306,9 +293,10 @@ class Bootstrap
     public static function DestructSource($force = false)
     {
         self::SetSubject("SOURCE UNINSTALLATION");
-        self::$DestinationDirectory = self::GetInput("Destination Directory", $force, self::$DestinationDirectory, self::$Configurations["Destination"]["Root"], "destination"); // Project root (destination)
+        self::GetInput("Destination Directory", $force, self::$DestinationDirectory, self::$DestinationDirectory, "destination");
         if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
+        self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
 
         $sourceExcludePattern = self::$Configurations["Source"]["ExcludePattern"] ?? "/^vendor$/i";
 
@@ -337,7 +325,7 @@ class Bootstrap
                 }
             }
             self::SetSuccess("$i source files are deleted.");
-            self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory;
+            self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
         } catch (\Exception $e) {
             self::SetError("Source failed: " . $e->getMessage());
             return false;
@@ -349,14 +337,19 @@ class Bootstrap
         if (!isset(self::$Configurations["DataBase"]))
             self::$Configurations["DataBase"] = [];
 
-        $host = self::GetInput("Database Host", $force, self::$Configurations["DataBase"]["Host"] ?? "localhost", self::$Configurations["DataBase"]["Host"], "host");
-        $name = self::GetInput("Database Name", $force, self::$Configurations["DataBase"]["Name"] ?? "localhost", self::$Configurations["DataBase"]["Name"], "name");
+        self::GetInput("Database Host", $force, self::$Configurations["DataBase"]["Host"] ?? "localhost", $host, "host");
+        self::GetInput("Database Name", $force, self::$Configurations["DataBase"]["Name"] ?? "localhost", $name, "name");
         if (empty($name)) {
             self::SetError("Database name required.");
-            return self::DestructDataBase($force);
+            return self::ConstructDataBase($force);
         }
-        $username = self::GetInput("Database Username", $force, self::$Configurations["DataBase"]["Username"] ?? "root", self::$Configurations["DataBase"]["Username"], "username");
-        $password = self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "root", self::$Configurations["DataBase"]["Password"], "password");
+        self::GetInput("Database Username", $force, self::$Configurations["DataBase"]["Username"] ?? "root", $username, "username");
+        self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "root", $password, "password");
+
+        self::$Configurations["DataBase"]["Host"] = $host;
+        self::$Configurations["DataBase"]["Name"] = $name;
+        self::$Configurations["DataBase"]["Username"] = $username;
+        self::$Configurations["DataBase"]["Password"] = $password;
 
         try {
             $pdo = new \PDO("mysql:host=$host;charset=" . (self::$Configurations["DataBase"]["Charset"] ?? "utf8mb4"), $username, $password);
@@ -405,22 +398,19 @@ class Bootstrap
     public static function CreateFile($path = null, $content = null, $force = null)
     {
         try {
-            $path = self::GetInput("Path", $force, (self::$Arguments["name"] ?? null) ? self::$DestinationDirectory . self::$Arguments["name"] : (self::$Arguments["path"] ?? $path), argument: "path");
+            self::GetInput("Path", $force, (self::$Arguments["name"] ?? null) ? self::$DestinationDirectory . self::$Arguments["name"] : (self::$Arguments["path"] ?? $path), $path, "path");
             if (!$path)
                 return self::SetError("The --path or --name is not defined!");
-            if (!isset(self::$Configurations[$path]))
-                self::$Configurations[$path] = "";
-            $content = self::GetInput("Content", $force, $content, self::$Configurations[$path], "content");
+            if (!$force && file_exists($path))
+                return self::SetWarning("The '$path' is created before! Use force (-f) to create anyway...");
+            self::GetInput("Content", $force, $content, $content, argument: "content");
             if (!$content)
-                return self::SetError("The --content is not defined!");
-            if ($force || !file_exists($path)) {
-                if ($res = file_put_contents($path, $content)) {
-                    self::SetSuccess("'$path' created successfully!");
-                    return $res;
-                } else
-                    self::SetError("Could not store '$path'!");
+                return self::SetWarning("The --content is empty!");
+            if ($res = file_put_contents($path, $content)) {
+                self::SetSuccess("'$path' created successfully!");
+                return $res;
             } else
-                self::SetWarning("The '$path' is created before! Use force (-f) to create anyway...");
+                self::SetError("Could not store '$path'!");
         } catch (\PDOException $e) {
             self::SetError("Could not store '$path': " . $e->getMessage());
         }
@@ -441,14 +431,14 @@ class Config extends AseqConfig") . " {
         return self::CreateFile(self::$DestinationDirectory . "Info.php", fn() => "<?php
 " . ((self::$Arguments["b"] ?? null) ? "class Info extends InfoBase" : "run(\"global/AseqInfo\");
 class Info extends AseqInfo") . " {
-    public \$Owner = \"" . self::GetInput("OwnerName", $force, "MiMFa", self::$Configurations["Info"]["Owner"], "owner") . "\";
-	public \$FullOwner = \"" . self::GetInput("FullOwnerName", $force, "MiMFa", self::$Configurations["Info"]["FullOwner"], "full-owner") . "\";
-	public \$Name = \"" . self::GetInput("Name", $force, "aseqbase", self::$Configurations["Info"]["Name"], "name") . "\";
-	public \$FullName = \"" . self::GetInput("FullName", $force, "MiMFa aseqbase", self::$Configurations["Info"]["FullName"], "full-name") . "\";
-	public \$Slogan = \"" . self::GetInput("Slogan", $force, "<u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["Slogan"], "slogan") . "\";
-	public \$FullSlogan = \"" . self::GetInput("FullSlogan", $force, "Develop websites by <u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["FullSlogan"], "full-slogan") . "\";
-	public \$Description = \"" . self::GetInput("Description", $force, "An original, safe, very flexible, and innovative framework for web developments!", self::$Configurations["Info"]["Description"], "description") . "\";
-	public \$FullDescription = \"" . self::GetInput("FullDescription", $force, "A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.", self::$Configurations["Info"]["FullDescription"], "full-description") . "\";
+    public \$Owner = " . self::GetInput("OwnerName", $force, "MiMFa", self::$Configurations["Info"]["Owner"], "owner") . ";
+	public \$FullOwner = " . self::GetInput("FullOwnerName", $force, "MiMFa", self::$Configurations["Info"]["FullOwner"], "full-owner") . ";
+	public \$Name = " . self::GetInput("Name", $force, "aseqbase", self::$Configurations["Info"]["Name"], "name") . ";
+	public \$FullName = " . self::GetInput("FullName", $force, "MiMFa aseqbase", self::$Configurations["Info"]["FullName"], "full-name") . ";
+	public \$Slogan = " . self::GetInput("Slogan", $force, "<u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["Slogan"], "slogan") . ";
+	public \$FullSlogan = " . self::GetInput("FullSlogan", $force, "Develop websites by <u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["FullSlogan"], "full-slogan") . ";
+	public \$Description = " . self::GetInput("Description", $force, "An original, safe, very flexible, and innovative framework for web developments!", self::$Configurations["Info"]["Description"], "description") . ";
+	public \$FullDescription = " . self::GetInput("FullDescription", $force, "A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.", self::$Configurations["Info"]["FullDescription"], "full-description") . ";
 }", $force);
     }
     public static function CreateGlobalFile($force = null)
@@ -457,8 +447,8 @@ class Info extends AseqInfo") . " {
         if (!isset(self::$Configurations["Global"]))
             self::$Configurations["Global"] = [];
         return self::CreateFile(self::$DestinationDirectory . "global.php", fn() => "<?php
-\$ASEQ = \"" . self::GetInput("Current directory name", $force, self::$Configurations["Global"]["Aseq"] ?? "", self::$Configurations["Global"]["Aseq"], argument: "aseq") . "\"?:null; 	// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
-\$BASE = \"" . self::GetInput("Parent directory name", $force, self::$Configurations["Global"]["Base"] ?? $parent, self::$Configurations["Global"]["Base"], argument: "base") . "\"; 	// (Optional) The parent directory you want to inherit all properties except what you changed
+\$ASEQ = " . self::GetInput("Current directory name", $force, self::$Configurations["Global"]["Aseq"] ?? "null", self::$Configurations["Global"]["Aseq"], argument: "aseq") . "; 	// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
+\$BASE = " . self::GetInput("Parent directory name", $force, self::$Configurations["Global"]["Base"] ?? $parent, self::$Configurations["Global"]["Base"], argument: "base") . "; 	// (Optional) The parent directory you want to inherit all properties except what you changed
 // \$SEQUENCES_PATCH = []; 		            // (Optional) An array to apply your custom changes in \\_::\$Sequences
                                             // newdirectory, newaseq; // Add new directory to the \\_::\$Sequences
                                             // directory, newaseq; // Update directory in the \\_::\$Sequences
@@ -500,8 +490,10 @@ class Info extends AseqInfo") . " {
                 $username === "root" &&
                 $password === "root" &&
                 $prefix === "aseq_"
-            )
-                return self::SetSuccess("Backs are default!");
+            ) {
+                self::SetSuccess("Backs are default!");
+                return null;
+            }
             return "<?php
 " . ((self::$Arguments["b"] ?? null) ? "class Back extends BackBase" : "run(\"global/AseqBack\");
 class Back extends AseqBack") . " {
@@ -551,12 +543,6 @@ class Back extends AseqBack") . " {
         return self::CreateFile(self::$DestinationDirectory . "Front.php", function () use ($force) {
             if (!isset(self::$Configurations["Front"]))
                 self::$Configurations["Front"] = [];
-            self::$Configurations["Front"]["DefaultTemplate"] = self::GetInput("Template Name", $force, self::$Configurations["Front"]["DefaultTemplate"] ?? "Main", argument: "template");
-
-            self::$Configurations["Front"]["SpecialBackColor"] = self::GetInput("Special BackColor", $force, self::$Arguments["backcolor"] ?? self::$Configurations["Front"]["SpecialBackColor"] ?? "#3aa3e9", argument: "back-color-special");
-            self::$Configurations["Front"]["SpecialForeColor"] = self::GetInput("Special ForeColor", $force, self::$Arguments["forecolor"] ?? self::$Configurations["Front"]["SpecialForeColor"] ?? "#fdfeff", argument: "fore-color-special");
-            self::$Configurations["Front"]["AlternativeBackColor"] = self::GetInput("Alternative BackColor", $force, self::$Configurations["Front"]["AlternativeBackColor"] ?? "#fdfeff", argument: "fore-color");
-            self::$Configurations["Front"]["AlternativeForeColor"] = self::GetInput("Alternative ForeColor", $force, self::$Configurations["Front"]["AlternativeForeColor"] ?? "#3aa3e9", argument: "back-color");
             return "<?php
 " . ((self::$Arguments["b"] ?? null) ? "class Front extends FrontBase" : "run(\"global/AseqFront\");
 class Front extends AseqFront") . " {
@@ -566,21 +552,29 @@ class Front extends AseqFront") . " {
 	 * @default \"Main\"
 	 * @category General
 	 */
-    public \$DefaultTemplate = \"" . self::$Configurations["Front"]["DefaultTemplate"] . "\";
+    public \$DefaultTemplate = " . self::GetInput("Template Name", $force, self::$Configurations["Front"]["DefaultTemplate"] ?? "Main", self::$Configurations["Front"]["DefaultTemplate"], "template") . ";
     /**
 	 * Fore Colors Palette
 	 * @field array<color>
 	 * @template array [normal, inside, outside, special, special-input, special-output]
 	 * @var mixed
 	 */
-	public \$ForeColorPalette = array(\"#151515\", \"#202020\", \"" . self::$Configurations["Front"]["AlternativeForeColor"] . "\", \"#040506\", \"#030303\", \"" . self::$Configurations["Front"]["SpecialForeColor"] . "\");
+	public \$ForeColorPalette = array(\"#151515\", \"#202020\", " .
+                self::GetInput("Alternative ForeColor", $force, self::$Configurations["Front"]["AlternativeForeColor"] ?? "#3aa3e9", self::$Configurations["Front"]["AlternativeForeColor"], "back-color") .
+                ", \"#040506\", \"#030303\", " .
+                self::GetInput("Special ForeColor", $force, self::$Configurations["Front"]["SpecialForeColor"] ?? self::$Arguments["forecolor"] ?? self::$Configurations["Front"]["AlternativeForeColor"] ?? "#fdfeff", self::$Configurations["Front"]["SpecialForeColor"], "fore-color-special") .
+                ");
 	/**
 	 * Back Colors Palette
 	 * @field array<color>
 	 * @template array [normal, inside, outside, special, special-input, special-output]
 	 * @var mixed
 	 */
-	public \$BackColorPalette = array(\"#fdfeff\", \"#fafbfc\", \"" . self::$Configurations["Front"]["AlternativeBackColor"] . "\", \"#fafcfd\", \"#fdfeff\", \"" . self::$Configurations["Front"]["SpecialBackColor"] . "\");
+	public \$BackColorPalette = array(\"#fdfeff\", \"#fafbfc\", " .
+                self::GetInput("Alternative BackColor", $force, self::$Configurations["Front"]["AlternativeBackColor"] ?? "#fdfeff", self::$Configurations["Front"]["AlternativeBackColor"], "fore-color") .
+                ", \"#fafcfd\", \"#fdfeff\", " .
+                self::GetInput("Special BackColor", $force, self::$Configurations["Front"]["SpecialBackColor"] ?? self::$Arguments["backcolor"] ?? self::$Configurations["Front"]["AlternativeBackColor"] ?? "#3aa3e9", self::$Configurations["Front"]["SpecialBackColor"], "back-color-special") .
+                ");
 }";
         }, $force);
     }
@@ -596,10 +590,10 @@ class Front extends AseqFront") . " {
                     self::$Configurations["Source"] = [];
                 if (!isset(self::$Configurations["Destination"]))
                     self::$Configurations["Destination"] = [];
-                self::$DestinationDirectory = (isset(self::$Configurations["Destination"]["Root"]) ? self::$Configurations["Destination"]["Root"] : null) ?: preg_replace("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", "", getcwd() . DIRECTORY_SEPARATOR);
+                self::$DestinationDirectory = (isset(self::$Configurations["Destination"]["Path"]) ? self::$Configurations["Destination"]["Path"] : null) ?: preg_replace("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", "", getcwd() . DIRECTORY_SEPARATOR);
                 if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
                     self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
-                self::SetSuccess("Configurations loaded successfully!");
+                //self::SetSuccess("Configurations loaded successfully!");
                 return self::$Configurations;
             }
         } catch (\PDOException $e) {
@@ -613,9 +607,9 @@ class Front extends AseqFront") . " {
             $configFile = __DIR__ . DIRECTORY_SEPARATOR . self::$ConfigurationsFile;
             if (!isset(self::$Configurations["Destination"]))
                 self::$Configurations["Destination"] = [];
-            self::$Configurations["Destination"]["Root"] = self::$DestinationDirectory ?? preg_replace("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", "", getcwd() . DIRECTORY_SEPARATOR);
+            self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory ?? preg_replace("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", "", getcwd() . DIRECTORY_SEPARATOR);
             if ($res = file_put_contents($configFile, json_encode(self::$Configurations, flags: JSON_OBJECT_AS_ARRAY))) {
-                self::SetSuccess("Configurations stored successfully!");
+                //self::SetSuccess("Configurations stored successfully!");
                 return $res;
             }
         } catch (\PDOException $e) {
@@ -663,10 +657,24 @@ class Front extends AseqFront") . " {
         return $i; // Number of files deleted
     }
 
-    public static function GetInput($message, $force = false, $default = null, &$config = null, $argument = "arg")
+    public static function GetInput($message, $force = false, $default = null, &$input = null, $argument = "arg")
     {
-        $default = self::$Arguments[str_replace("-", "", $argument)] ?? ($config ?: $default);
-        return $config = ($force && !is_null($default)) ? (is_callable($default) ? $default() : $default) : (readline($message . ($argument === "arg" ? "" : " (--$argument)") . ($default ? (is_callable($default) ? " [...]" : " [$default]") : "") . ": ") ?: (is_callable($default) ? $default() : $default));
+        $ask = self::$Arguments["a"] ?? false;
+        $default = self::$Arguments[str_replace("-", "", $argument)] ?? ($input ?: $default);
+        $input = ($force && !$ask && !is_null($default)) ?
+            (is_callable($default) ? $default() : $default) :
+            (readline($message .
+                ($argument === "arg" ? "" : " (--$argument)") .
+                ($default ? (
+                        is_callable($default) ? " [...]" :
+                        " [" . (preg_match(self::$ScriptsPattern, $default) ? $default : "\"$default\"") .
+                        "]"
+                    ) : ""
+                ) . ": "
+            ) ?: (is_callable($default) ? $default() : $default));
+        if (preg_match("/^\"[\w\W]*[^\\\]\"$/", trim($input), $matches))
+            return $matches[0];
+        return preg_match(self::$ScriptsPattern, $input) ? $input : "\"$input\"";
     }
     public static function SetOutput($message = null)
     {
