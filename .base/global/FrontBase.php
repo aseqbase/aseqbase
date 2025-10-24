@@ -332,7 +332,7 @@ abstract class FrontBase
 	 */
 	public function Set($selector = null, $handler = null, ...$args)
 	{
-		return injectScript($this->MakeSetScript($selector, $handler, ...$args));
+		return renderScript($this->MakeSetScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -355,7 +355,7 @@ abstract class FrontBase
 	 */
 	public function Delete($selector = "body")
 	{
-		return injectScript($this->MakeDeleteScript($selector));
+		return renderScript($this->MakeDeleteScript($selector));
 	}
 	/**
 	 * Make a script to Delete a special part of client side
@@ -373,7 +373,7 @@ abstract class FrontBase
 	 */
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
-		return injectScript($this->MakeBeforeScript($selector, $handler, ...$args));
+		return renderScript($this->MakeBeforeScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -398,7 +398,7 @@ abstract class FrontBase
 	 */
 	public function After($selector = "body", $handler = null, ...$args)
 	{
-		return injectScript($this->MakeAfterScript($selector, $handler, ...$args));
+		return renderScript($this->MakeAfterScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -423,7 +423,7 @@ abstract class FrontBase
 	 */
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
-		return injectScript($this->MakeFillScript($selector, $handler, ...$args));
+		return renderScript($this->MakeFillScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -449,7 +449,7 @@ abstract class FrontBase
 	 */
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
-		return injectScript($this->MakePrependScript($selector, $handler, ...$args));
+		return renderScript($this->MakePrependScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to
@@ -474,7 +474,7 @@ abstract class FrontBase
 	 */
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
-		return injectScript($this->MakeAppendScript($selector, $handler, ...$args));
+		return renderScript($this->MakeAppendScript($selector, $handler, ...$args));
 	}
 	/**
 	 * Make a script to

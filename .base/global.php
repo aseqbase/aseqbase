@@ -496,7 +496,7 @@ function request($intent = null, $callback = null)
 		$start = Internal::MakeStartScript(true);
 		$end = Internal::MakeEndScript(true);
 		$id = "S_" . getID(true);
-		$intent = is_string($intent)?$intent:Script::Convert($intent);
+		$intent = is_string($intent) ? $intent : Script::Convert($intent);
 		if (isStatic($callback))
 			render(Html::Script("$start(" . $callbackScript . ")(" .
 				Script::Convert($callback) . ",$intent);document.getElementById('$id').remove();$end", null, ["id" => $id]));
@@ -559,7 +559,7 @@ function interact($intent = null, $callback = null)
 }
 function alert($message = null, $callback = null)
 {
-	return injectScript(
+	return renderScript(
 		Script::Alert($message) . "??true",
 		$callback
 	);
@@ -593,17 +593,6 @@ function response($content = null, $status = null)
 {
 	setStatus($status);
 	return render($content);
-}
-
-/**
- * Echo content on the client side
- * @param mixed $content The data that is ready to print
- * @return mixed Printed data
- */
-function render($content = null)
-{
-	echo $content = Convert::ToString($content);
-	return $content;
 }
 
 /**
@@ -719,6 +708,80 @@ function setStatus($status = null)
 #endregion 
 
 
+#region RENDERING
+
+/**
+ * Echo content on the client side
+ * @param mixed $content The data that is ready to print
+ * @return mixed Printed data
+ */
+function render($content = null)
+{
+	echo $content = Convert::ToString($content);
+	return $content;
+}
+
+/**
+ * Render output append an element by the specific selector
+ * @param mixed $selector Your specific element selector, for example "body>div.title"
+ * @param mixed $content The data that is ready to print
+ */
+function renderAppend($content, $selector = "body")
+{
+	return beforeUsing(\_::$Address->Directory, "finalize", function () use ($content, $selector) {
+		render(Html::Script(
+			Internal::MakeScript(
+				$content,
+				null,
+				"(data,err)=>$(" . Script::Convert($selector) . ").append(data??err)"
+				//"(data,err)=>document.querySelector(".Script::Convert($selector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			)
+		));
+	});
+}
+/**
+ * Render output prepend an element by the specific selector
+ * @param mixed $selector Your specific element selector, for example "body>div.title"
+ * @param mixed $content The data that is ready to print
+ */
+function renderPrepend($content, $selector = "body")
+{
+	return beforeUsing(\_::$Address->Directory, "finalize", function () use ($content, $selector) {
+		render(Html::Script(
+			Internal::MakeScript(
+				$content,
+				null,
+				"(data,err)=>$(" . Script::Convert($selector) . ").prepend(data??err)"
+				//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			)
+		));
+	});
+}
+
+/**
+ * Inject Scripts to the head of the client side, injected to the head
+ */
+function renderScript($content, $source = null, ...$attributes)
+{
+	renderAppend(
+		Html::Script($content, $source, ...$attributes),
+		"body"
+	);
+}
+/**
+ * Inject Styles to the head of the client side, injected to the head
+ */
+function renderStyle($content, $source = null, ...$attributes)
+{
+	renderAppend(
+		Html::Style($content, $source, ...$attributes),
+		"head"
+	);
+}
+
+#endregion 
+
+
 #region DELIVERING
 
 /**
@@ -772,6 +835,25 @@ function deliverXml($output = null, $status = null)
 		ob_end_clean(); // Clean any remaining output buffers
 	setContentType("application/xml");
 	deliver(is_string($output) ? $output : Convert::ToXmlString($output), $status);
+}
+
+/**
+ * Replace the output with all the document in the client side
+ * @param mixed $output The data that is ready to print
+ * @param string $url The url to show without updating the page
+ */
+function deliverAgain($output = null, $status = null, $url = null)
+{
+	render(Html::Script(
+		Internal::MakeScript(
+			$output,
+			null,
+			"(data,err)=>{"
+			($output ? "document.open();document.write(data??err);document.close();":"") .
+			($url ? "window.history.pushState(null, null, `" . getFullUrl($url) . "`);" : "") .
+			"}"
+		)
+	));
 }
 /**
  * Print only this output on the client side then reload the page
@@ -830,84 +912,6 @@ function deliverFile($output = null, $status = null, $type = null, bool $attachm
 	readfile($output);
 	runSequence("finalize");
 	exit;
-}
-
-#endregion 
-
-
-#region INJECTING
-
-/**
- * Replace the output with all the document in the client side
- * @param mixed $output The data that is ready to print
- * @param string $url The url to show without updating the page
- */
-function inject($content = null, $url = null)
-{
-	render(Html::Script(
-		Internal::MakeScript(
-			$content,
-			null,
-			"(data,err)=>{
-				document.open();document.write(data??err);document.close();" .
-			($url ? "window.history.pushState(null, null, `" . getFullUrl($url) . "`);" : "") .
-			"}"
-		)
-	));
-}
-
-/**
- * Render output append an element by the specific selector
- * @param mixed $selector Your specific element selector, for example "body>div.title"
- * @param mixed $content The data that is ready to print
- */
-function injectAppend($content, $selector = "body")
-{
-	render(Html::Script(
-		Internal::MakeScript(
-			$content,
-			null,
-			"(data,err)=>$(" . Script::Convert($selector) . ").append(data??err)"
-			//"(data,err)=>document.querySelector(".Script::Convert($selector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-		)
-	));
-}
-/**
- * Render output prepend an element by the specific selector
- * @param mixed $selector Your specific element selector, for example "body>div.title"
- * @param mixed $content The data that is ready to print
- */
-function injectPrepend($content, $selector = "body")
-{
-	render(Html::Script(
-		Internal::MakeScript(
-			$content,
-			null,
-			"(data,err)=>$(" . Script::Convert($selector) . ").prepend(data??err)"
-			//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-		)
-	));
-}
-
-/**
- * Inject Scripts to the head of the client side, injected to the head
- */
-function injectScript($content, $source = null, ...$attributes)
-{
-	injectAppend(
-		Html::Script($content, $source, ...$attributes),
-		"head"
-	);
-}
-/**
- * Inject Styles to the head of the client side, injected to the head
- */
-function injectStyle($content, $source = null, ...$attributes)
-{
-	injectAppend(
-		Html::Style($content, $source, ...$attributes),
-		"head"
-	);
 }
 
 #endregion 

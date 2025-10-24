@@ -168,7 +168,7 @@ class QRCodeScanner extends Module{
 		);
 	}
 	public function Toggle(){
-		injectScript($this->ToggleScript());
+		renderScript($this->ToggleScript());
 	}
 	public function ToggleScript(){
 		return "if({$this->Name} && {$this->Name}?._camera?._stream) {
@@ -180,7 +180,7 @@ class QRCodeScanner extends Module{
 	}
 
 	public function Switch(){
-		injectScript($this->SwitchScript());
+		renderScript($this->SwitchScript());
 	}
 	public function SwitchScript(){
 		return $this->DeactiveScript()."
@@ -191,7 +191,7 @@ class QRCodeScanner extends Module{
 
 	public function Active(){
 		$this->ActiveAtBegining = true;
-		injectScript($this->ActiveScript());
+		renderScript($this->ActiveScript());
 		return $this;
 	}
 	public function ActiveScript(){
@@ -207,7 +207,7 @@ class QRCodeScanner extends Module{
 	
 	public function Deactive(){
 		$this->ActiveAtBegining = false;
-		injectScript($this->DeactiveScript());
+		renderScript($this->DeactiveScript());
 		return $this;
 	}
 	public function DeactiveScript(){

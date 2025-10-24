@@ -3110,7 +3110,7 @@ class Html
                 Convert::ToString($onChange, ";
             ")
         ], $attributes).
-        self::TextInput($key, Convert::ToString($value, ","), [
+        self::HiddenInput($key, Convert::ToString($value, ","), [
             "id"=>$id,
             "class" => "mapinput",
             "onchange"=>"
