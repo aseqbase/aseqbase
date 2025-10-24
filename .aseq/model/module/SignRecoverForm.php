@@ -33,7 +33,7 @@ class SignRecoverForm extends Form{
 	}
 
 	public function GetFields(){
-		if(!is_null($rrk = receive(\_::$User->RecoveryTokenKey))){
+		if(!is_null($rrk = getReceived(\_::$User->RecoveryTokenKey))){
 			yield Html::HiddenInput(\_::$User->RecoveryTokenKey, $rrk);
 			yield Html::Rack(
 				Html::LargeSlot(
@@ -100,7 +100,7 @@ class SignRecoverForm extends Form{
 	public function Post(){
 		try {
 			$received = receivePost();
-			if(isValid($received, "Password" ) && receive(\_::$User->RecoveryTokenKey)){
+			if(isValid($received, "Password" ) && getReceived(\_::$User->RecoveryTokenKey)){
 				$res = \_::$User->ReceiveRecoveryEmail();
 				if($res)
                 	return $this->GetSuccess("Dear '".\_::$User->TemporaryName."', your password changed successfully!");

@@ -7,8 +7,8 @@ class JsonLD{
 		if(!isEmpty($data)) 
         return Html::Script(is_iterable($data)?
 			("{
-			  '@context': `".(grab($data, "@context")??"https://schema.org")."`,
-			  '@type': `".(grab($data, "@type")??"Article")."`,
+			  '@context': `".(pop($data, "@context")??"https://schema.org")."`,
+			  '@type': `".(pop($data, "@type")??"Article")."`,
 			  ".loop($data, fn($v, $k)=>'"'.$k.'":'.(is_iterable($v)?Convert::ToJson($v):'"'.$v.'"'))."
 			}"):$data
 		, ['type' =>'application/ld+json']);

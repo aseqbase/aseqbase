@@ -101,7 +101,6 @@ class RouterBase extends Address
     public $Method = null;
     public $Result = null;
     public $Point = 0;
-    public $Global = false;
     public $Pattern = null;
     public $Taken = null;
 
@@ -116,7 +115,6 @@ class RouterBase extends Address
     ) {
         parent::__construct($directory, $root);
         $this->Name = $name;
-        $this->Global = $global;
         $this->Refresh($pattern, $method)->Route($handler);
     }
 
@@ -167,13 +165,11 @@ class RouterBase extends Address
                         $this->Pattern = $pat;
                         $this->Point++;
                         $this->Taken = $matches[0];
-                        $this->Direction = ltrim(preg_replace($this->Pattern, "", $this->Direction ?? ""), "/\\ ");
-                        if (!$this->Global)
-                            $this->Request = preg_replace($this->Pattern, "", $this->Request ?? "");
+                        $this->Request = preg_replace($this->Pattern, "", $this->Request ?? "");
+                        $this->Direction = ltrim($this->Request, "/\\ ");
                         yield $handler;
                     }
-                    if ($this->Point > 0 && !$this->Global)
-                        continue;
+                    if ($this->Point > 0) continue;
                 }
         while ($this->Method != "ALL" && $this->Method = "ALL");
     }
@@ -410,7 +406,7 @@ class RouterBase extends Address
         if ($this->IsActive) {
             $pattern = $this->Pattern;
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                if ($this->Point <= 1 || $this->Global)
+                if ($this->Point <= 1)
                     return (isStatic($handler ?? "")) ? route($handler ?? $this->Direction, $data, $print, $origin, $depth, $alternative, $default) :
                         Convert::By($handler, $this);
                 return null;

@@ -309,7 +309,7 @@ class DataTable
 	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue
 	 */
-	public function Forget(array|int|null $id, $defaultValue = false)
+	public function Pop(array|int|null $id, $defaultValue = false)
 	{
 		if (!$id)
 			return $this->Delete(null, [], $defaultValue);
@@ -364,7 +364,7 @@ class DataTable
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function ForgetValue(array|int|null $id, $key, $defaultValue = false)
+	public function PopValue(array|int|null $id, $key, $defaultValue = false)
 	{
 		return $this->Set($id, [$key => null], $defaultValue);
 	}
@@ -408,9 +408,9 @@ class DataTable
 	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue
 	 */
-	public function ForgetMetaData(array|int|null $id, $defaultValue = false)
+	public function PopMetaData(array|int|null $id, $defaultValue = false)
 	{
-		return $this->ForgetValue($id, "MetaData", $defaultValue);
+		return $this->PopValue($id, "MetaData", $defaultValue);
 	}
 	/**
 	 * To check if the record or records has metadata value or not
@@ -464,7 +464,7 @@ class DataTable
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function ForgetMetaValue(array|int|null $id, $key, $defaultValue = false)
+	public function PopMetaValue(array|int|null $id, $key, $defaultValue = false)
 	{
 		return self::SetMetaValue($id, $key, null, $defaultValue);
 	}

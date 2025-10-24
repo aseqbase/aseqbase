@@ -17,7 +17,7 @@ if (\_::$Back->AllowTranslate) {
 	$moduleTranslator->Style->Padding = "var(--size-2)  var(--size-min)";
     $module->Content = $moduleTranslator->ToString();
 }
-swap($module, $data);
+dip($module, $data);
 $module->Render();
 render(Html::Script("
 	function viewSideMenu(show){

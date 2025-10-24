@@ -1,7 +1,7 @@
 <?php
 use MiMFa\Library\Html;
-$Name = grab($data, 'Name');
-$Title = grab($data, 'Title');
+$Name = pop($data, 'Name');
+$Title = pop($data, 'Title');
 
 module("PrePage");
 $module = new \MiMFa\Module\PrePage();
@@ -9,10 +9,10 @@ $module->Title = !isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strl
 $module->Description = get($data, 'Description');
 $module->Image = get($data, 'Image');
 
-$Root = grab($data, 'Root') ?? \_::$Address->CategoryRoot;
-$items = grab($data, "Items");
+$Root = pop($data, 'Root') ?? \_::$Address->CategoryRoot;
+$items = pop($data, "Items");
 $name = $module->Name;// To do not change the name of module
-swap($module, $data);
+dip($module, $data);
 $module->Name = $name;// To do not change the name of module
 $module->Render();
 if ($items) {

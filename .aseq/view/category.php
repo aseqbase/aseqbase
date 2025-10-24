@@ -1,9 +1,9 @@
 <?php
 $templ = \_::$Front->CreateTemplate("Main");
-$templ->WindowTitle = grab($data, "WindowTitle")??get($data, 'Title' )??get($data, 'Name' );
+$templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??get($data, 'Name' );
 $templ->Content = part(
-    grab($data, "Part")??"category",
+    pop($data, "Part")??"category",
     $data,
-    alternative: grab($data, "Alternative")??"category",
+    alternative: pop($data, "Alternative")??"category",
     print:false);
 $templ->Render();

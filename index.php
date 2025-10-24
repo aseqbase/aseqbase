@@ -12,10 +12,10 @@ $GLOBALS["ASEQ"] = null;/* Change it to end($directories) if the file is in a su
 $GLOBALS["BASE"] = ".aseq";/* Change it to the parent directory if deferents */
 
 /*
-    Change \_::$Sequences
-	newdirectory, newaseq;// Add new directory to the \_::$Sequences
-    directory, newaseq;// Update directory in the \_::$Sequences
-    directory, null;// Remove thw directory from the \_::$Sequences
+    Change \_::$Sequence
+	newdirectory, newaseq;// Add new directory to the \_::$Sequence
+    directory, newaseq;// Update directory in the \_::$Sequence
+    directory, null;// Remove thw directory from the \_::$Sequence
 */
 $GLOBALS["SEQUENCES_PATCH"] = array();
 

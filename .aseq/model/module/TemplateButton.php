@@ -11,7 +11,6 @@ class TemplateButton extends Module{
 	public $DarkIcon = "moon";
 	public $LightLabel = "";
 	public $DarkLabel = "";
-	public $SwitchRequest = "SwitchMode";
     public $Printable = false;
 
 	public function __construct(){
@@ -40,10 +39,10 @@ class TemplateButton extends Module{
 		}
 		if({$this->Name}_SwitchMode) {
 			document.querySelector('.{$this->Name} .media').outerHTML = content;
-			setMemo('{$this->SwitchRequest}', {$this->Name}_SwitchMode = false);
+			setMemo('".\_::$Front->SwitchRequest."', {$this->Name}_SwitchMode = false);
 		} else {
 			document.querySelector('.{$this->Name} .media').outerHTML = switchContent;
-			setMemo('{$this->SwitchRequest}', {$this->Name}_SwitchMode = true);
+			setMemo('".\_::$Front->SwitchRequest."', {$this->Name}_SwitchMode = true);
 		}";
 	}
 	public function Get(){
@@ -55,7 +54,7 @@ class TemplateButton extends Module{
 		$this->GetContent();
     }
 	public function GetScript(){
-		return parent::GetScript().Html::Script("{$this->Name}_SwitchMode = ".(\_::$Front->SwitchMode?"true ":"false").";");
+		return parent::GetScript().Html::Script("var {$this->Name}_SwitchMode = ".(\_::$Front->SwitchMode?"true":"false").";");
     }
 }
 ?>

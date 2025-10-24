@@ -211,7 +211,7 @@ class Profile extends Table{
         $maccess = $isu && !is_null($this->ModifyAccess) && \_::$User->GetAccess($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->GetAccess($this->RemoveAccess);
 		$isc = $isc && ($vaccess || $aaccess || $maccess || $raccess);
-        $secret = receive("secret")??$this->ViewSecret;
+        $secret = getReceived("secret")??$this->ViewSecret;
         $res = Html::Division(
             ($maccess? Html::Icon("edit","{$this->Name}_Modify(`$key`);", ["class"=>"table-item-modify"]) : "").
             ($raccess? Html::Icon("trash","{$this->Name}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")
@@ -229,17 +229,17 @@ class Profile extends Table{
 		return Html::Script("$(document).ready(()=>{".
         ($this->Controlable?("
 				function {$this->Name}_View(key){
-					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
+					sendPatchRequest(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
 				}".($this->Updatable?(\_::$User->GetAccess($this->AddAccess)?"
 				function {$this->Name}_Create(){
-					sendPatch(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->Name}`);
+					sendPatchRequest(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->Name}`);
 				}":"").(\_::$User->GetAccess($this->ModifyAccess)?"
 				function {$this->Name}_Modify(key){
-					sendPatch(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
+					sendPatchRequest(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
 				}":"").(\_::$User->GetAccess($this->RemoveAccess)?"
 				function {$this->Name}_Delete(key){
 					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?")."`))":"")."
-						sendDelete(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->Name}`,
+						sendDeleteRequest(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->Name}`,
 						(data, err)=>{
 							load();
 						});
@@ -250,7 +250,7 @@ class Profile extends Table{
 
 	public function Handler($received = null){
         $key = get($received, $this->KeyColumn);
-        $secret = grab($received,"secret")??$this->ViewSecret;
+        $secret = pop($received,"secret")??$this->ViewSecret;
         return $this->Router
         ->if($secret === $this->ModifySecret)
         ->Patch(function() use($key) { return $this->GetModifyFields($key); })

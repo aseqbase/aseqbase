@@ -6,7 +6,7 @@ use MiMFa\Library\Html;
     module("PrePage");
     $module = new MiMFa\Module\PrePage();
     $module->Title = "Introduction";
-    swap($module, $data);
+    dip($module, $data);
     $module->Render();
     component("Icons");
     echo MiMFa\Component\Icons::GetStyle(".caselist");

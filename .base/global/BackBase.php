@@ -175,6 +175,12 @@ class BackBase
 	 */
 	public $AllowTranslate = false;
 	/**
+	 * Allow to detect the client language automatically
+	 * @var bool
+	 * @category Language
+	 */
+	public $AutoDetectLanguage = false;
+	/**
 	 * Allow to update the language by translator automatically
 	 * @var bool
 	 * @category Language
@@ -231,6 +237,7 @@ class BackBase
 		$this->Translate = new \MiMFa\Library\Translate(new DataTable($this->DataBase, "Translate_Lexicon", null));
 
 		$this->Translate->AutoUpdate = $this->AutoUpdateLanguage;
+		$this->Translate->AutoDetect = $this->AutoDetectLanguage;
 		$this->Translate->Initialize(
 			$this->DefaultLanguage,
 			$this->DefaultDirection,

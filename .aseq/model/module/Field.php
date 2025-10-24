@@ -319,7 +319,7 @@ class Field extends Module{
 				$this->Attributes
 			];
 			$startTag = "";
-            $id = grab($attributes, "id")??Convert::ToID($this->Key);
+            $id = pop($attributes, "id")??Convert::ToID($this->Key);
             if(isValid($this->Title)) $startTag .= Html::Label($this->Title, $id, ["class"=>"title" ]);
 			$endTag = "";
             if(isValid($this->Description)) $endTag .= Html::Label($this->Description, $id, ["class"=>"description" ]);

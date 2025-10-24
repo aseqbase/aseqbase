@@ -107,10 +107,10 @@ class Session
 	}
 	public function Stop()
 	{
-		$this->FlushData();
-		$this->FlushCookie();
-		$this->FlushSecure();
-		$this->FlushId();
+		$this->ClearData();
+		$this->ClearCookie();
+		$this->ClearSecure();
+		$this->ClearId();
 	}
 
 	public function SetId($id)
@@ -124,18 +124,14 @@ class Session
 	public function PopId()
 	{
 		$val = $this->GetId();
-		$this->ForgetId();
+		unset($_SESSION["SESSION_ID"]);
 		return $val;
 	}
 	public function HasId()
 	{
 		return isset($_SESSION["SESSION_ID"]);
 	}
-	public function ForgetId()
-	{
-		unset($_SESSION["SESSION_ID"]);
-	}
-	public function FlushId()
+	public function ClearId()
 	{
 		unset($_SESSION["SESSION_ID"]);
 	}
@@ -169,9 +165,9 @@ class Session
 	 */
 	public function Pop($key)
 	{
-		$val = $this->Get($key);
-		$this->Forget($key);
-		return $val;
+		if ($this->AccessibleData)
+			return $this->PopCookie($key);
+		else return $this->PopData($key);
 	}
 	/**
 	 * Check if the Cookie or Data is set or not (Cookie if $this->AccessibleData is true, Data otherwise)
@@ -185,27 +181,16 @@ class Session
 		return $this->HasData($key);
 	}
 	/**
-	 * Forget the sat Cookie or Data (Cookie if $this->AccessibleData is true, Data otherwise)
-	 * @param mixed $key
-	 * @return bool|int
-	 */
-	public function Forget($key)
-	{
-		if ($this->AccessibleData)
-			return $this->ForgetCookie($key);
-		return $this->ForgetData($key);
-	}
-	/**
 	 * Clear the Cookies or Data (Cookie if $this->AccessibleData is true, Data otherwise)
 	 * @return bool|int
 	 */
-	public function Flush()
+	public function Clear()
 	{
 		if ($this->AccessibleData) {
-			$this->FlushCookie();
+			$this->ClearCookie();
 			return true;
 		}
-		return $this->FlushData();
+		return $this->ClearData();
 	}
 
 	/**
@@ -232,8 +217,9 @@ class Session
 	 */
 	public function PopData($key)
 	{
-		$val = $this->GetData($key);
-		$this->ForgetData($key);
+		$key = $this->ToCipherKey($key);
+		$val = $this->ToPlainValue($this->DataTable->SelectValue("Value", "`Key`=:Key", [':Key' => $key]));
+		$this->DataTable->Delete("`Key`=:Key", [':Key' => $key]);
 		return $val;
 	}
 	/**
@@ -246,19 +232,10 @@ class Session
 		return $this->DataTable->Exists("`Key`=:Key", [':Key' => $this->ToCipherKey($key)]);
 	}
 	/**
-	 * To forget data stored on a secure and Server side way
-	 * @param mixed $key
-	 * @return bool|int
-	 */
-	public function ForgetData($key)
-	{
-		return $this->DataTable->Delete("`Key`=:Key", [':Key' => $this->ToCipherKey($key)]);
-	}
-	/**
 	 * To clear all data stored on a secure and Server side way
 	 * @return bool|int
 	 */
-	public function FlushData()
+	public function ClearData()
 	{
 		return $this->DataTable->Delete("`Key` LIKE '" . $this->GetId() . $this->Separator . "%'");
 	}
@@ -293,8 +270,12 @@ class Session
 	 */
 	public function PopCookie($key)
 	{
-		$val = $this->GetCookie($key);
-		$this->ForgetCookie($key);
+		$key = $this->ToCipherKey($key);
+		$val = null;
+		if (isset($_COOKIE[$key]))
+			$val = $this->ToPlainValue($_COOKIE[$key]);
+		unset($_COOKIE[$key]);
+		setcookie($key, "", time() - $this->Time, "/");
 		return $val;
 	}
 	/**
@@ -307,21 +288,10 @@ class Session
 		return !is_null($this->GetCookie($key));
 	}
 	/**
-	 * To forget cookie data stored on the client side
-	 * @param mixed $key
-	 * @return bool
-	 */
-	public function ForgetCookie($key)
-	{
-		$key = $this->ToCipherKey($key);
-		unset($_COOKIE[$key]);
-		return setcookie($key, "", time() - $this->Time, "/");
-	}
-	/**
 	 * To clear all cookies stored on the client side
 	 * @return void
 	 */
-	public function FlushCookie()
+	public function ClearCookie()
 	{
 		$sk = $this->GetId() . $this->Separator;
 		foreach ($_COOKIE as $key => $val)
@@ -367,8 +337,11 @@ class Session
 	 */
 	public function PopSecure($key)
 	{
-		$val = $this->GetSecure($key);
-		$this->ForgetSecure($key);
+		$key = $this->ToKey($key);
+		$val = null;
+		if (isset($_SESSION[$key]))
+			$val = $this->Decrypt($_SESSION[$key]);
+		unset($_SESSION[$key]);
 		return $val;
 	}
 	/**
@@ -381,19 +354,10 @@ class Session
 		return isset($_SESSION[$this->ToKey($key)]);
 	}
 	/**
-	 * To forget session stored on the server side
-	 * @param mixed $key
-	 * @return void
-	 */
-	public function ForgetSecure($key)
-	{
-		unset($_SESSION[$this->ToKey($key)]);
-	}
-	/**
 	 * To clear all related session stored on the server side
 	 * @return void
 	 */
-	public function FlushSecure()
+	public function ClearSecure()
 	{
 		$id = $this->GetId() . $this->Separator;
 		foreach ($_SESSION as $key => $val)

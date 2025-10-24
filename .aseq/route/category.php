@@ -13,7 +13,7 @@ else {
             if(!is_array($viewData)) return Convert::By($viewData, $doc);
             $c = get($viewData, "ErrorHandler");
             if($c) return Convert::By($c, $router);
-            $computeData = grab($data, "Compute") ?? [];
+            $computeData = pop($data, "Compute") ?? [];
             $items = compute( "category/all", [
                 "Direction" =>$path,
                 ...$computeData??[]
@@ -29,8 +29,8 @@ else {
                     return Convert::By($c, \_::$Router);
             } elseif(is_array($items)) array_shift($items);
             else $items = [];
-            view(grab($viewData, "ViewName") ?? "category", [
-                "Root" => grab($viewData, "Root") ?? \_::$Address->CategoryRoot,
+            view(pop($viewData, "ViewName") ?? "category", [
+                "Root" => pop($viewData, "Root") ?? \_::$Address->CategoryRoot,
                 "Items" => $items,
                 ...$viewData??[], 
                 ...$parent??[]

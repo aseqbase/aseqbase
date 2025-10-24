@@ -449,6 +449,7 @@ class Map extends Module
 				.then(response => response.json())
 				.then(data => {
 					err = null;
+                    e.address = null;
 					if(data.display_name) e.address = data.display_name;
 					else err = 'Address not found';
 					e.metadata = data;

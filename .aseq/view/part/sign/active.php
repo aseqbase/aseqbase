@@ -3,13 +3,13 @@ use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
 
 try {
-    $email = receive("Email");
-    if(!$email && $email = receive("Signature")) $email = \_::$User->GetValue("Email", $email);
+    $email = getReceived("Email");
+    if(!$email && $email = getReceived("Signature")) $email = \_::$User->GetValue("Email", $email);
 
     if($email && \_::$User->SendActivationEmail($email)) {
         echo Html::Success("An activation email sent successfully to your account ('" . Convert::ToSecret(\_::$User->TemporaryEmail, "*", 2, 5) . "')! Please check your email and click on the link.");
         part("access");
-    } elseif (receive(\_::$User->ActivationTokenKey) && ($res = \_::$User->ReceiveActivationEmail()) != null){
+    } elseif (getReceived(\_::$User->ActivationTokenKey) && ($res = \_::$User->ReceiveActivationEmail()) != null){
         if ($res) {
             echo Html::Success("Dear " . \_::$User->TemporaryName . ", Your account activated successfully!");
             part("access");

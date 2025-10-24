@@ -3,7 +3,7 @@
     use MiMFa\Library\Html;
     $module = new (module("Shortcuts"))();
     $module->Items = \_::$Info->Contacts;
-    swap($module, $data);
+    dip($module, $data);
     $module->Render();
     if (\_::$Back->AllowTranslate) {
         $module = new (module("Translator"))();

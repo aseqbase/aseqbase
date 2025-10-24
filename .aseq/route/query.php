@@ -1,7 +1,7 @@
 <?php
-$viewData = grab($data, "View") ?? [];
-$computeData = grab($data, "Compute") ?? [];
-$filter = grab($computeData, "Filter") ?? [];
+$viewData = pop($data, "View") ?? [];
+$computeData = pop($data, "Compute") ?? [];
+$filter = pop($computeData, "Filter") ?? [];
 return route("search", [
     "Compute" => [
         "Filter" => [

@@ -2,7 +2,7 @@
 
 module("SignUpForm");
 $module = new \MiMFa\Module\SignUpForm();
-swap($module, $data);
+dip($module, $data);
 $module->Render();
 if($module->Result)
     if (\_::$User->InitialStatus < \_::$User->ActiveStatus)

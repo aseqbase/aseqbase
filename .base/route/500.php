@@ -1,5 +1,5 @@
 <?php
-$viewData = grab($data, "View");
+$viewData = pop($data, "View");
 view(get($viewData, "ViewName")??"message", data: [
     "WindowTitle" => \_::$Info->FullName,
     "WindowLogo" => MiMFa\Library\Local::GetUrl(\_::$Info->LogoPath),

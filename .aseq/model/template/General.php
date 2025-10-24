@@ -27,7 +27,7 @@ class General extends Template
 	public function RenderInitial()
 	{
 		parent::RenderInitial();
-		renderStyle("
+		style("
 				body {
 				  	display: flex;
 					flex-direction: column;

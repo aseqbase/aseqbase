@@ -345,16 +345,6 @@ class Module extends \Base
           $this->Scripts = $script;
           return $output;
      }
-     /**
-      * Handle Or ReHandle if is Handled.
-      */
-     public function DoHandle()
-     {
-          if ($this->Handled)
-               return $this->ReHandle();
-          else
-               return $this->Handle();
-     }
 
      /**
       * Echo whole the Document contains Elements, Styles, Scripts, etc. completely.
@@ -368,35 +358,19 @@ class Module extends \Base
           }
           return $this->Handle();
      }
-     /**
-      * Echo whole the Document contains Elements except Styles and Scripts.
-      */
-     public function ReRender()
-     {
-          if ($this->Visual) {
-               render($this->ReHandle());
-               $this->Rendered++;
-               return null;
-          }
-          return $this->ReHandle();
-     }
-     /**
-      * Draw Or ReDraw if is Rendered.
-      */
-     public function DoRender()
-     {
-          if ($this->Rendered)
-               return $this->ReRender();
-          else
-               return $this->Render();
-     }
 
 
      public function ToString()
      {
           ob_start();
-          if ($this->Rendered || $this->Handled)
-               $output = $this->ReRender();
+          $output = null;
+          if ($this->Rendered || $this->Handled){
+               if ($this->Visual) {
+                    render($this->ReHandle());
+                    $this->Rendered++;
+               }
+               else $output = $this->ReHandle();
+          }
           else
                $output = $this->Render();
           return ob_get_clean() ?? $output;

@@ -243,7 +243,7 @@ class Table extends Module
         $this->AddSecret = sha1("$a-Add");
         $this->RemoveSecret = sha1("$a-Remove");
         $this->ModifySecret = sha1("$a-Modify");
-        $this->Router->Set($this->ExclusiveMethod)->Route(fn(&$router) => response($this->Exclusive()));
+        $this->Router->Set($this->ExclusiveMethod)->Route(fn(&$router) => deliver($this->Exclusive()));
     }
     /**
      * Set the main properties of module
@@ -707,9 +707,9 @@ class Table extends Module
 
     public function Exclusive()
     {
-        $values = receive(method: $this->ExclusiveMethod) ?? [];
+        $values = receive($this->ExclusiveMethod) ?? [];
         $value = get($values, $this->KeyColumn);
-        $secret = grab($values, $this->SecretKey);
+        $secret = pop($values, $this->SecretKey);
         $recievedData = count($values) > 1;
         if(!$this->ControlHandler) $this->ControlHandler = fn($v,$f)=>null;
         if (!$secret) return Html::Error("Your request is not valid!");
@@ -936,7 +936,7 @@ class Table extends Module
             if (isEmpty($v))
                 unset($values[$k]);
         if ($this->DataTable->Insert($values))
-            return flipResponse(Html::Success("The ".__("'information")."' added successfully!"));
+            return deliverSpark(Html::Success("The ".__("'information")."' added successfully!"));
         return Html::Error("You can not add this item!");
     }
     public function ModifyRow($values)
@@ -948,7 +948,7 @@ class Table extends Module
             if (!is_array($values))
                 return $values;
             if ($this->DataTable->Update([$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumn}"], $values))
-                return flipResponse(Html::Success("The information updated successfully!"));
+                return deliverSpark(Html::Success("The information updated successfully!"));
             return Html::Error("You can not update this item!");
         }
     }
@@ -959,7 +959,7 @@ class Table extends Module
         if (!\_::$User->GetAccess($this->RemoveAccess))
             return Html::Error("You have not access to delete!");
         if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
-            return flipResponse(Html::Success("The 'items' removed successfully!"));
+            return deliverSpark(Html::Success("The 'items' removed successfully!"));
         return Html::Error("You can not remove this item!");
     }
 

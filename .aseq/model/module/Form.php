@@ -101,15 +101,15 @@ class Form extends Module
 		if (!\_::$User->GetAccess($access)) {
 			$message = $this->GetError("You have not enough access!");
 			if ($reaction)
-				response($this->GetSigning());
+				deliver($this->GetSigning());
 			return false;
 		}
 		if (($message = $this->CheckTimeBlock()) === false) {
 			if ($blocking)
-				setTimeout($this->BlockTimeout);
+				setTimer($this->BlockTimeout);
 		} else {
 			if ($reaction)
-				response($message);
+				deliver($message);
 			return false;
 		}
 		if (isValid($this->ReCaptchaSiteKey)) {
@@ -117,7 +117,7 @@ class Form extends Module
 			if (!\MiMFa\Component\reCaptcha::CheckAnswer($this->ReCaptchaSiteKey)) {
 				$message = $this->GetError("Do something to denied access!");
 				if ($reaction)
-					response($message);
+					deliver($message);
 				return false;
 			}
 		}
@@ -127,7 +127,7 @@ class Form extends Module
 	{
 		if ($this->BlockTimeout < 1)
 			return false;
-		$remains = getTimeout();
+		$remains = getTimer();
 		if ($remains>0) {
 			$this->Status = 403;
 			return $this->GetError("Please try about '".Html::Timer($remains / 1000,0, "reload();")."' later!");
@@ -647,14 +647,14 @@ class Form extends Module
 							return $v->ToString();
 						elseif (is_array($v))
 							return Html::Field(
-								type: grab($v, "Type"),
-								key: grab($v, "Key"),
-								value: grab($v, "Value"),
-								description: grab($v, "Description"),
-								options: grab($v, "Options"),
-								title: grab($v, "Title"),
-								wrapper: grab($v, "Wrapper") ?? true,
-								attributes: [...(grab($v, "Attributes") ?? []), ...$v]
+								type: pop($v, "Type"),
+								key: pop($v, "Key"),
+								value: pop($v, "Value"),
+								description: pop($v, "Description"),
+								options: pop($v, "Options"),
+								title: pop($v, "Title"),
+								wrapper: pop($v, "Wrapper") ?? true,
+								attributes: [...(pop($v, "Attributes") ?? []), ...$v]
 							);
 						else
 							return $v;
@@ -842,10 +842,10 @@ class Form extends Module
 		if (count($data) > 0 && get($data, "ReceiverEmail") ?? $this->ReceiverEmail)
 			if (
 				\MiMFa\Library\Contact::SendHtmlEmail(
-					grab($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
-					grab($data, "ReceiverEmail") ?? $this->ReceiverEmail,
-					grab($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Address->Domain . ": A new form submitted"),
-					grab($data, "MailMessage") ?? $data,
+					pop($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
+					pop($data, "ReceiverEmail") ?? $this->ReceiverEmail,
+					pop($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Address->Domain . ": A new form submitted"),
+					pop($data, "MailMessage") ?? $data,
 					exception: $ex
 				)
 			)

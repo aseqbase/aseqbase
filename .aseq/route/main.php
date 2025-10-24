@@ -1,13 +1,13 @@
 <?php
-$viewData = grab($data, "View");
-$computeData = grab($data, "Compute");
+$viewData = pop($data, "View");
+$computeData = pop($data, "Compute");
 if (\_::$Address->Direction === "home" || isEmpty(\_::$Address->Direction))
-    view(grab($viewData, "ViewName")??\_::$Front->DefaultViewName, ["Name" => grab($viewData, "Name")??"home", "Title"=>grab($viewData,  "Title")??\_::$Info->FullName,...($viewData??[])]);
+    view(pop($viewData, "ViewName")??\_::$Front->DefaultViewName, ["Name" => pop($viewData, "Name")??"home", "Title"=>pop($viewData,  "Title")??\_::$Info->FullName,...($viewData??[])]);
 else {
-    $doc = compute( grab($computeData, "ComputeName")??"content/get", ["Name" =>grab($computeData, "Name")??\_::$Address->Direction, ...($computeData??[])] );
+    $doc = compute( pop($computeData, "ComputeName")??"content/get", ["Name" =>pop($computeData, "Name")??\_::$Address->Direction, ...($computeData??[])] );
     if (isEmpty($doc))
-        view(grab($viewData, "ViewName")??\_::$Front->DefaultViewName, ["Name" => grab($viewData, "Name")??between(\_::$Address->Direction, \_::$Address->Direction),...($viewData??[])]);
+        view(pop($viewData, "ViewName")??\_::$Front->DefaultViewName, ["Name" => pop($viewData, "Name")??between(\_::$Address->Direction, \_::$Address->Direction),...($viewData??[])]);
     else
-        view(grab($viewData, "ViewName")??"content", $doc);
+        view(pop($viewData, "ViewName")??"content", $doc);
 }
 ?>

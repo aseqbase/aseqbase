@@ -1,6 +1,6 @@
 <?php
-$viewData = grab($data, "View");
-$computeData = grab($data, "Compute");
+$viewData = pop($data, "View");
+$computeData = pop($data, "Compute");
 $path = implode("/", array_slice(explode("/", \_::$Address->Direction), 1));
 if (!isValid($path) && (\_::$Address->Direction === "home" || isEmpty(\_::$Address->Direction)))
     page("home");

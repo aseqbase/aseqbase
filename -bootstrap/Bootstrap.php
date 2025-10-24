@@ -465,7 +465,7 @@ class Info extends AseqInfo") . " {
  * Use your routers by below formats
  * \_::\$Router->On(\"A Part Of Path?\")->Default(\"Route Name\");
  * Or use a suitable handler for example
- * \_::\$Router->On()->Default(fn(\$router)=>response(\MiMFa\Library\Html::Heading1(\"Hello World!\")));
+ * \_::\$Router->On()->Default(fn(\$router)=>deliver(\MiMFa\Library\Html::Heading1(\"Hello World!\")));
  */
 
 // To route other requests to the DefaultRouteName
@@ -672,6 +672,7 @@ class Front extends AseqFront") . " {
                     ) : ""
                 ) . ": "
             ) ?: (is_callable($default) ? $default() : $default));
+        if(is_null($input)) return $input;
         if (preg_match("/^\"[\w\W]*[^\\\]\"$/", trim($input), $matches))
             return $matches[0];
         return preg_match(self::$ScriptsPattern, $input) ? $input : "\"$input\"";

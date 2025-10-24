@@ -1,3 +1,3 @@
 <?php
-view(grab($data, "View", "ViewName")??"part", ["Name"=>grab($data, "View", "Name")??"sign/view"]);
+view(pop($data, "View", "ViewName")??"part", ["Name"=>pop($data, "View", "Name")??"sign/view"]);
 ?>

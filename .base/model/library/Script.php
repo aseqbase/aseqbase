@@ -19,7 +19,7 @@ class Script
             return "null";
         else {
             if (is_string($object)) {
-                if($res = preg_find('/(?<=^\\$\{).+(?=\}$)/', $object)) return $res;
+                if($res = preg_find('/(?<=^\\$\{)[\W\w]+(?=\}$)/', $object)) return $res;
                 $sp = "`";
                 $object = str_replace("\\", "\\\\", $object);
                 // if(preg_match("/\n|(\\$\\{[\w\W]*\\})/",$object))
@@ -130,13 +130,13 @@ class Script
                         const binaryData = event.target.result;
                         // send binary data as a base64 string
                         const base64Data = btoa(String.fromCharCode(...new Uint8Array(binaryData)));
-                        sendFile(null, 'data=' + encodeURIComponent(base64Data), null, null, null, null, null, $timeout);
+                        sendFileRequest(null, 'data=' + encodeURIComponent(base64Data), null, null, null, null, null, $timeout);
                     });
                     reader.readAsArrayBuffer(file);":
                     "//URL.createObjectUrl(file);
                     const reader = new FileReader();
                     reader.addEventListener('load', (event) => {
-                        sendFile(null, 'data=' + encodeURIComponent(event.target.result), null, null, null, null, null, $timeout);
+                        sendFileRequest(null, 'data=' + encodeURIComponent(event.target.result), null, null, null, null, null, $timeout);
                     });
                     reader.readAsText(file);")."
                 }

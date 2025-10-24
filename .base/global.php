@@ -1,4 +1,14 @@
 <?php
+
+use MiMFa\Library\Convert;
+use MiMFa\Library\DataBase;
+use MiMFa\Library\DataTable;
+use MiMFa\Library\Html;
+use MiMFa\Library\Internal;
+use MiMFa\Library\Local;
+use MiMFa\Library\Script;
+use MiMFa\Library\Style;
+
 /**
  * All the Global Static Variables and Functions You need to indicate and handle requests and responses
  *@copyright All rights are reserved for MiMFa Development Group
@@ -13,7 +23,7 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . "Address.php");
 \_::$Address = new Address();
 \_::$Address->Update();
 
-\_::$Sequences = [
+\_::$Sequence = [
 	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
 	=> str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? ""),
 	...($GLOBALS["SEQUENCES"] ?? []),
@@ -59,10 +69,13 @@ run("global/InfoBase");
 run("Info");
 \_::$Info = new Info();
 
-
-\MiMFa\Library\Local::CreateDirectory(\_::$Router->LogDirectory);
-\MiMFa\Library\Local::CreateDirectory(\_::$Router->TempDirectory);
+Local::CreateDirectory(\_::$Router->LogDirectory);
+Local::CreateDirectory(\_::$Router->TempDirectory);
 register_shutdown_function('cleanupTemp', false);
+
+component("Component");
+template("Template");
+module("Module");
 
 #endregion 
 
@@ -72,27 +85,27 @@ register_shutdown_function('cleanupTemp', false);
 /**
  * Send values to the client side
  * @param string $method The Method to send data
- * @param mixed $path The Url to send data
+ * @param mixed $url The Url to send data
  * @param object|array $data Desired data
  * @return bool|string Its sent or received response
  */
-function send($method = null, $path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function send($method = null, $url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	if (isEmpty($path))
-		$path = getPath();
+	if (isEmpty($url))
+		$url = getPath();
 	if (isEmpty($method))
 		$method = "POST";
 	else
 		$method = strtoupper($method);
 	switch ($method) {
 		case 'POST':
-			return sendPost($path, $data, $headers, $secure, $timeout);
+			return sendPost($url, $data, $headers, $secure, $timeout);
 		case 'GET':
-			return sendGet($path, $data, $headers, $secure, $timeout);
+			return sendGet($url, $data, $headers, $secure, $timeout);
 		case 'FILE':
-			return sendFile($path, $data, $headers, $secure, $timeout);
+			return sendFile($url, $data, $headers, $secure, $timeout);
 	}
-	$ch = curl_init($path);
+	$ch = curl_init($url);
 	if (!is_null($headers))
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
@@ -115,17 +128,17 @@ function send($method = null, $path = null, object|array $data = [], array|null 
 }
 /**
  * Send values to the client side
- * @param mixed $path The Url to send GET data from that
+ * @param mixed $url The Url to send GET data from that
  * @param object|array $data Additional data to send as query parameters
  * @return bool|string Its sent or received response
  */
-function sendGet($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendGet($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	if (isEmpty($path))
-		$path = getPath();
+	if (isEmpty($url))
+		$url = getPath();
 	$ch = curl_init();
 	$queryParams = http_build_query($data);
-	$urlWithParams = $path . (strpos($path, '?') === false ? '?' : '&') . $queryParams;
+	$urlWithParams = $url . (strpos($url, '?') === false ? '?' : '&') . $queryParams;
 	if (!is_null($headers))
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 	curl_setopt($ch, CURLOPT_URL, $urlWithParams);
@@ -141,15 +154,15 @@ function sendGet($path = null, object|array $data = [], array|null $headers = nu
 }
 /**
  * Send posted values to the client side
- * @param mixed $path The Url to send POST data to that
+ * @param mixed $url The Url to send POST data to that
  * @param object|array $data Desired data to POST
  * @return bool|string Its sent or received response
  */
-function sendPost($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPost($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	if (isEmpty($path))
-		$path = getPath();
-	$ch = curl_init($path);
+	if (isEmpty($url))
+		$url = getPath();
+	$ch = curl_init($url);
 	if (!is_null($headers))
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 	curl_setopt($ch, CURLOPT_POST, true); // Use POST method
@@ -166,35 +179,35 @@ function sendPost($path = null, object|array $data = [], array|null $headers = n
 }
 /**
  * Send putted values to the client side
- * @param mixed $path The Url to send PUT data to that
+ * @param mixed $url The Url to send PUT data to that
  * @param object|array $data Desired data to PUT
  * @return bool|string Its sent or received response
  */
-function sendPut($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPut($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("put", $path, $data, $headers, $secure, $timeout);
+	return send("put", $url, $data, $headers, $secure, $timeout);
 }
 /**
  * Send patched values to the client side
- * @param mixed $path The Url to send PATCH data to that
+ * @param mixed $url The Url to send PATCH data to that
  * @param object|array $data Desired data to PATCH
  * @return bool|string Its sent or received response
  */
-function sendPatch($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPatch($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("patch", $path, $data, $headers, $secure, $timeout);
+	return send("patch", $url, $data, $headers, $secure, $timeout);
 }
 /**
  * Send file values to the client side
- * @param mixed $path The Url to send FILE data to that
+ * @param mixed $url The Url to send FILE data to that
  * @param object|array $data Desired data to FILE
  * @return bool|string Its sent or received response
  */
-function sendFile($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendFile($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	if (isEmpty($path))
-		$path = getPath();
-	$ch = curl_init($path);
+	if (isEmpty($url))
+		$url = getPath();
+	$ch = curl_init($url);
 	if (!is_null($headers))
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 	curl_setopt($ch, CURLOPT_POST, true);
@@ -205,13 +218,15 @@ function sendFile($path = null, object|array $data = [], array|null $headers = n
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
 	$fields = [];
-	foreach ($data as $key => $value) {
-		if (is_file($value)) {
-			$fields[$key] = curl_file_create($value);
-		} else {
-			$fields[$key] = $value;
-		}
-	}
+	if (is_iterable($data))
+		foreach ($data as $key => $value) {
+			if (is_file($value)) {
+				$fields[$key] = curl_file_create($value);
+			} else {
+				$fields[$key] = $value;
+			}
+		} else
+		$fields = $data;
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
 	$response = curl_exec($ch);
 	curl_close($ch);
@@ -219,98 +234,55 @@ function sendFile($path = null, object|array $data = [], array|null $headers = n
 }
 /**
  * Send delete values to the client side
- * @param mixed $path The Url to send DELETE data to that
+ * @param mixed $url The Url to send DELETE data to that
  * @param object|array $data Desired data to DELETE
  * @return bool|string Its sent or received response
  */
-function sendDelete($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendDelete($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("delete", $path, $data, $headers, $secure, $timeout);
+	return send("delete", $url, $data, $headers, $secure, $timeout);
 }
 /**
  * Send stream values to the client side
- * @param mixed $path The Url to send STREAM data to that
+ * @param mixed $url The Url to send STREAM data to that
  * @param object|array $data Desired data to STREAM
  * @return bool|string Its sent or received response
  */
-function sendStream($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendStream($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("stream", $path, $data, $headers, $secure, $timeout);
+	return send("stream", $url, $data, $headers, $secure, $timeout);
 }
 /**
  * Send internal values to the client side
- * @param mixed $path The Url to send INTERNAL data to that
+ * @param mixed $url The Url to send INTERNAL data to that
  * @param object|array $data Desired data to INTERNAL
  * @return bool|string Its sent or received response
  */
-function sendInternal($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendInternal($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("internal", $path, $data, $headers, $secure, $timeout);
+	return send("internal", $url, $data, $headers, $secure, $timeout);
 }
 /**
  * Send external values to the client side
- * @param mixed $path The Url to send EXTERNAL data to that
+ * @param mixed $url The Url to send EXTERNAL data to that
  * @param object|array $data Desired data to EXTERNAL
  * @return bool|string Its sent or received response
  */
-function sendExternal($path = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendExternal($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("external", $path, $data, $headers, $secure, $timeout);
+	return send("external", $url, $data, $headers, $secure, $timeout);
 }
 
 #endregion
 
 
 #region RECEIVING
-
-/**
- * Receive requests from the client side then remove it
- * @param mixed $key The key of the received value
- * @param array|string|null $method The the received data source $_GET/$POST/$_FILES/... (by default it is $_REQUEST)
- * @return mixed The value
- */
-function snapReceive($key = null, $default = null, array|string|null $method = null)
-{
-	$val = null;
-	if (is_null($key)) {
-		$val = [];
-		foreach (receive($key, $default ?? [], $method) as $key => $value)
-			$val[$key] = $value;
-		if (is_string($method))
-			switch (trim(strtolower($method))) {
-				case "public":
-				case "get":
-					$_GET = [];
-					break;
-				case "private":
-				case "post":
-					$_POST = [];
-					break;
-				case "file":
-				case "files":
-					$_FILES = [];
-					break;
-				default:
-					$_REQUEST = [];
-					break;
-			}
-	} else {
-		$val = receive($key, $default, $method);
-		unset($_POST[$key]);
-		unset($_GET[$key]);
-		unset($_REQUEST[$key]);
-		unset($_FILES[$key]);
-	}
-	return $val;
-}
-
 /**
  * Receive requests from the client side
- * @param mixed $key The key of the received value
  * @param array|string|null $method The the received data source $_GET/$POST/$_FILES/... (by default it is $_REQUEST)
  * @return mixed The value
  */
-function receive($key = null, $default = null, array|string|null $method = null)
+function receive(array|string|null $method = null)
 {
 	if (is_null($method))
 		$method = getMethodName();
@@ -337,9 +309,9 @@ function receive($key = null, $default = null, array|string|null $method = null)
 				$res = file_get_contents('php://input');
 				if (!isEmpty($res)) {
 					if (isJson($res))
-						$method = \MiMFa\Library\Convert::FromJson($res) ?? $method;
+						$method = Convert::FromJson($res) ?? $method;
 					else if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false)
-						$method = \MiMFa\Library\Convert::FromFormData($res, $_FILES) ?? $method;
+						$method = Convert::FromFormData($res, $_FILES) ?? $method;
 					else
 						parse_str($res, $method);
 				} else
@@ -354,9 +326,9 @@ function receive($key = null, $default = null, array|string|null $method = null)
 					$res = file_get_contents('php://input');
 					if (!isEmpty($res)) {
 						if (isJson($res))
-							$method = \MiMFa\Library\Convert::FromJson($res) ?? $method;
+							$method = Convert::FromJson($res) ?? $method;
 						else if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false)
-							$method = \MiMFa\Library\Convert::FromFormData($res, $_FILES) ?? $method;
+							$method = Convert::FromFormData($res, $_FILES) ?? $method;
 						else
 							parse_str($res, $method);
 					} else
@@ -368,10 +340,7 @@ function receive($key = null, $default = null, array|string|null $method = null)
 		}
 	if (count($method) == 1 && isset($method[0]))
 		$method = decrypt($method[0]);
-	if (is_null($key))
-		return (count($method) > 0 ? $method : $default) ?? [];
-	else
-		return getValid($method, $key, $default);
+	return $method;
 }
 /**
  * Received input from the client side
@@ -380,7 +349,7 @@ function receive($key = null, $default = null, array|string|null $method = null)
  */
 function receiveGet($key = null, $default = null)
 {
-	return receive($key, $default, "get");
+	return getReceived($key, $default, "get");
 }
 /**
  * Received posted values from the client side
@@ -389,7 +358,7 @@ function receiveGet($key = null, $default = null)
  */
 function receivePost($key = null, $default = null)
 {
-	return receive($key, $default, "post");
+	return getReceived($key, $default, "post");
 }
 /**
  * Received putted values from the client side
@@ -398,7 +367,7 @@ function receivePost($key = null, $default = null)
  */
 function receivePut($key = null, $default = null)
 {
-	return receive($key, $default, "put");
+	return getReceived($key, $default, "put");
 }
 /**
  * Received patched values from the client side
@@ -407,7 +376,7 @@ function receivePut($key = null, $default = null)
  */
 function receivePatch($key = null, $default = null)
 {
-	return receive($key, $default, "patch");
+	return getReceived($key, $default, "patch");
 }
 /**
  * Received file values from the client side
@@ -416,7 +385,7 @@ function receivePatch($key = null, $default = null)
  */
 function receiveFile($key = null, $default = null)
 {
-	return receive($key, $default, $_FILES);
+	return getReceived($key, $default, $_FILES);
 }
 /**
  * Received deleted values from the client side
@@ -425,7 +394,7 @@ function receiveFile($key = null, $default = null)
  */
 function receiveDelete($key = null, $default = null)
 {
-	return receive($key, $default, "delete");
+	return getReceived($key, $default, "delete");
 }
 /**
  * Received stream values from the client side
@@ -434,7 +403,7 @@ function receiveDelete($key = null, $default = null)
  */
 function receiveStream($key = null, $default = null)
 {
-	return receive($key, $default, "stream");
+	return getReceived($key, $default, "stream");
 }
 /**
  * Received internal values from the client side
@@ -443,7 +412,7 @@ function receiveStream($key = null, $default = null)
  */
 function receiveInternal($key = null, $default = null)
 {
-	return receive($key, $default, "internal");
+	return getReceived($key, $default, "internal");
 }
 /**
  * Received external values from the client side
@@ -452,7 +421,59 @@ function receiveInternal($key = null, $default = null)
  */
 function receiveExternal($key = null, $default = null)
 {
-	return receive($key, $default, "external");
+	return getReceived($key, $default, "external");
+}
+
+/**
+ * Receive a parameter from the client side
+ * @param mixed $key The key of the received value
+ * @param array|string|null $method The the received data source $_GET/$POST/$_FILES/... (by default it is $_REQUEST)
+ * @return mixed The value
+ */
+function getReceived($key = null, $default = null, array|string|null $method = null)
+{
+	if (is_null($key))
+		return \_::Cache($method, fn() => receive($method)) ?? $default;
+	else
+		return getValid(\_::Cache($method, fn() => receive($method)), $key, $default);
+}
+/**
+ * Receive a parameter from the client side then remove it
+ * @param mixed $key The key of the received value
+ * @param array|string|null $method The the received data source $_GET/$POST/$_FILES/... (by default it is $_REQUEST)
+ * @return mixed The value
+ */
+function popReceived($key = null, $default = null, array|string|null $method = null)
+{
+	$val = null;
+	if (is_null($key)) {
+		$val = getReceived($key, $default, $method);
+		if (is_string($method))
+			switch (trim(strtolower($method))) {
+				case "public":
+				case "get":
+					$_GET = [];
+					break;
+				case "private":
+				case "post":
+					$_POST = [];
+					break;
+				case "file":
+				case "files":
+					$_FILES = [];
+					break;
+				default:
+					$_REQUEST = [];
+					break;
+			}
+	} else {
+		$val = getReceived($key, $default, $method);
+		unset($_POST[$key]);
+		unset($_GET[$key]);
+		unset($_REQUEST[$key]);
+		unset($_FILES[$key]);
+	}
+	return $val;
 }
 
 #endregion 
@@ -461,55 +482,59 @@ function receiveExternal($key = null, $default = null)
 #region REQUESTING
 
 /**
- * Interact with all specific parts of the client side
- * @param mixed $script The front JS codes
+ * Request something from parts of the client side
+ * @param mixed $intent The front JS codes to collect requested thing from the client side 
  * @param mixed $callback The call back handler
  * @example: request('$("body").html', function(selectedHtml)=>{ //do somework })
  */
-function request($script = null, $callback = null)
+function request($intent = null, $callback = null)
 {
-	$callbackScript = "(data,err)=>document.querySelector('body').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
-	$progressScript = "null";
-	$timeout = 60000;
-	$start = \MiMFa\Library\Internal::MakeStartScript(true);
-	$end = \MiMFa\Library\Internal::MakeStartScript(true);
-	$id = "S_" . getID(true);
-	if (isStatic($callback))
-		render(\MiMFa\Library\Html::Script("$start(" . $callbackScript . ")(" .
-			\MiMFa\Library\Script::Convert($callback) . ",$script);document.getElementById('$id').remove();$end", null, ["id" => $id]));
-	else
-		render(\MiMFa\Library\Html::Script(
-			$callback ? "$start" .
-			'sendInternal(null,{"' . \MiMFa\Library\Internal::Set($callback) . '":JSON.stringify(' . $script . ")},'body',$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
-			: $script
-			,
-			null,
-			["id" => $id]
-		));
+	return beforeUsing(\_::$Address->Directory, "finalize", function () use ($intent, $callback) {
+		$callbackScript = "(data,err)=>document.querySelector('body').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
+		$progressScript = "null";
+		$timeout = 60000;
+		$start = Internal::MakeStartScript(true);
+		$end = Internal::MakeEndScript(true);
+		$id = "S_" . getID(true);
+		$intent = is_string($intent)?$intent:Script::Convert($intent);
+		if (isStatic($callback))
+			render(Html::Script("$start(" . $callbackScript . ")(" .
+				Script::Convert($callback) . ",$intent);document.getElementById('$id').remove();$end", null, ["id" => $id]));
+		else
+			render(Html::Script(
+				$callback ? $start .
+				'sendInternalRequest(null,{"' . Internal::Set($callback) . '":JSON.stringify(' . $intent . ")}, null,$callbackScript,$callbackScript, null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
+				: $intent,
+				null,
+				["id" => $id]
+			));
+	});
 }
+
 /**
  * Interact with all specific parts of the client side one by one
- * @param mixed $script The front JS codes
+ * @param mixed $intents The front iterator JS codes like an array 
  * @param mixed $callback The call back handler
  * @example: iterateRequest("document.querySelectorAll('body input')", function(selectedItems)=>{ //do somework })
  */
-function iterateRequest($script = null, $callback = null)
+function bring($intents = null, $callback = null)
 {
 	$callbackScript = "(data,err)=>{el=document.createElement('qb');el.innerHTML=data??err;item.before(...el.childNodes);item.remove();}";
 	$progressScript = "null";
 	$timeout = 60000;
-	$start = \MiMFa\Library\Internal::MakeStartScript(true);
-	$end = \MiMFa\Library\Internal::MakeStartScript(true);
+	$start = Internal::MakeStartScript(true);
+	$end = Internal::MakeEndScript(true);
 	$id = "S_" . getID(true);
+	$intents = Convert::ToString($intents, ",", "{1}", "[{0}]", "[]");
 	if (isStatic($callback))
-		render(\MiMFa\Library\Html::Script("$start for(item of $script)(" . $callbackScript . ")(" .
-			\MiMFa\Library\Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id" => $id]));
+		render(Html::Script("$start for(item of $intents)(" . $callbackScript . ")(" .
+			Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id" => $id]));
 	else
-		render(\MiMFa\Library\Html::Script(
+		render(Html::Script(
 			$callback ? "$start" .
-			"for(item of $script)sendInternal(null,{\"" . \MiMFa\Library\Internal::Set($callback) . '":item.outerHTML},' .
+			"for(item of $intents)sendInternalRequest(null,{\"" . Internal::Set($callback) . '":item.outerHTML},' .
 			"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
-			: $script
+			: $intents
 			,
 			null,
 			["id" => $id]
@@ -518,38 +543,38 @@ function iterateRequest($script = null, $callback = null)
 
 /**
  * Have a dialog with the client side
- * @param mixed $script The front JS codes
+ * @param mixed $intent The front JS codes
  * @param mixed $callback The call back handler
  * @example: interact('$("body").html', function(selectedHtml)=>{ //do somework })
  * @return string|null The result of the client side
  */
-function interact($script = null, $callback = null)
+function interact($intent = null, $callback = null)
 {
 	$id = "Dialog_" . getId(true);
 	request(
-		"setMemo('$id', $script, 60000)",
+		"setMemo('$id', $intent, 60000)",
 		$callback
 	);
-	return grabMemo($id);
+	return popMemo($id);
 }
 function alert($message = null, $callback = null)
 {
 	return injectScript(
-		\MiMFa\Library\Script::Alert($message) . "??true",
+		Script::Alert($message) . "??true",
 		$callback
 	);
 }
 function confirm($message = null, $callback = null)
 {
 	return interact(
-		\MiMFa\Library\Script::Confirm($message),
+		Script::Confirm($message),
 		$callback
 	);
 }
 function prompt($message = null, $callback = null, $default = null)
 {
 	return interact(
-		\MiMFa\Library\Script::Prompt($message, $default),
+		Script::Prompt($message, $default),
 		$callback
 	);
 }
@@ -558,6 +583,97 @@ function prompt($message = null, $callback = null, $default = null)
 
 
 #region RESPONSING
+
+/**
+ * Echo the output on the client side
+ * @param mixed $content The data that is ready to print
+ * @param mixed $status The header status
+ */
+function response($content = null, $status = null)
+{
+	setStatus($status);
+	return render($content);
+}
+
+/**
+ * Echo content on the client side
+ * @param mixed $content The data that is ready to print
+ * @return mixed Printed data
+ */
+function render($content = null)
+{
+	echo $content = Convert::ToString($content);
+	return $content;
+}
+
+/**
+ * Echo scripts to the client side
+ */
+function script($content, $source = null, ...$attributes)
+{
+	echo $content = Html::Script($content, $source, ...$attributes);
+	return $content;
+}
+/**
+ * Echo styles to the client side
+ */
+function style($content, $source = null, ...$attributes)
+{
+	echo $content = Html::Style($content, $source, ...$attributes);
+	return $content;
+}
+
+/**
+ * Show a message result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function message($message = null)
+{
+	echo $message = Html::Result($message);
+	return $message;
+}
+/**
+ * Show a success result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function success($message = null)
+{
+	echo $message = Html::Success($message);
+	return $message;
+}
+/**
+ * Show a warning result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function warning($message = null)
+{
+	echo $message = Html::Warning($message);
+	return $message;
+}
+/**
+ * Show an error result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function error($message = null)
+{
+	setStatus(400);
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return Html::Script(Script::Error($message->getMessage()));
+	echo $message = Html::Error($message);
+	return $message;
+}
+/**
+ * Show message on the console
+ * @param mixed $message
+ */
+function report($message = null)
+{
+	return script(Script::Log($message));
+}
 
 /**
  * To change the header in the client side
@@ -600,34 +716,62 @@ function setStatus($status = null)
 	return false;
 }
 
+#endregion 
+
+
+#region DELIVERING
+
 /**
  * Print only this output on the client side, Clear before then end
  * @param mixed $output The data that is ready to print
  * @param mixed $status The header status
  */
-function response($output = null, $status = null)
+function deliver($output = null, $status = null)
 {
 	if (ob_get_level())
 		ob_end_clean(); // Clean any remaining output buffers
 	setStatus($status);
-	if ($output)
-		exit(\MiMFa\Library\Convert::ToString($output));
-	else
+	if ($output) {
+		echo Convert::ToString($output);
+		runSequence("finalize");
 		exit;
+	} else {
+		runSequence("finalize");
+		exit;
+	}
 }
 /**
- * Replace the output with all the document in the client side
- * @param mixed $output The data that is ready to print
+ * Response scripts to the client side
+ * @param mixed $output The script that is ready to send as the response
+ * @return void
  */
-function replaceResponse($output = null)
+function deliverScript($output = null, $status = null)
 {
-	render(\MiMFa\Library\Html::Script(
-		\MiMFa\Library\Internal::MakeScript(
-			$output,
-			null,
-			"(data,err)=>{document.open();document.write(data??err);document.close();}"
-		)
-	));
+	deliver(Html::Script($output), $status);
+}
+/**
+ * Print only this JSON on the client side, Clear before then end
+ * @param mixed $output The data that is ready to print
+ * @param mixed $status The header status
+ */
+function deliverJson($output = null, $status = null)
+{
+	if (ob_get_level())
+		ob_end_clean(); // Clean any remaining output buffers
+	setContentType("application/json");
+	deliver(isJson($output) ? $output : Convert::ToJson($output), $status);
+}
+/**
+ * Print only this XML on the client side, Clear before then end
+ * @param mixed $output The data that is ready to print
+ * @param mixed $status The header status
+ */
+function deliverXml($output = null, $status = null)
+{
+	if (ob_get_level())
+		ob_end_clean(); // Clean any remaining output buffers
+	setContentType("application/xml");
+	deliver(is_string($output) ? $output : Convert::ToXmlString($output), $status);
 }
 /**
  * Print only this output on the client side then reload the page
@@ -635,57 +779,35 @@ function replaceResponse($output = null)
  * @param mixed $status The header status
  * @param mixed $url The next url to show after rendering output
  */
-function flipResponse($output = null, $status = null, $url = null)
+function deliverSpark($output = null, $status = null, $url = null)
 {
 	ob_clean();
 	setStatus($status);
-	exit(\MiMFa\Library\Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . \MiMFa\Library\Local::GetUrl($url) . "`" : "location.href") . ");</script>");
-}
-
-/**
- * Print only this JSON on the client side, Clear before then end
- * @param mixed $output The data that is ready to print
- * @param mixed $status The header status
- */
-function responseJson($output = null, $status = null)
-{
-	if (ob_get_level())
-		ob_end_clean(); // Clean any remaining output buffers
-	setContentType("application/json");
-	response(isJson($output) ? $output : \MiMFa\Library\Convert::ToJson($output), $status);
-}
-/**
- * Print only this XML on the client side, Clear before then end
- * @param mixed $output The data that is ready to print
- * @param mixed $status The header status
- */
-function responseXml($output = null, $status = null)
-{
-	if (ob_get_level())
-		ob_end_clean(); // Clean any remaining output buffers
-	setContentType("application/xml");
-	response(is_string($output) ? $output : \MiMFa\Library\Convert::ToXmlString($output), $status);
+	echo Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ");</script>";
+	runSequence("finalize");
+	exit;
 }
 /**
  * Sends a file to the client side.
- * @param string $path The absolute or relative path to the file.
+ * @param string $output The absolute or relative path to the file.
  * @param int|null $status The HTTP status code (e.g., 200, 404).
  * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
  * @param bool $attachment Whether to display the file inline in the browser or as an attachment.
  * @param string|null $name Optional filename to force download with a specific name.
  * @throws \Exception If the file path is invalid or the file cannot be read.
  */
-function responseFile($path = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
+function deliverFile($output = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
 {
 	// Clear output buffer if active
 	if (ob_get_level())
 		ob_clean();
 
-	$path = \MiMFa\Library\Local::GetFile($path);
-	if ($path)
+	$output = Local::GetFile($output);
+	if ($output)
 		setStatus($status);
 	else {
 		setStatus(404);
+		runSequence("finalize");
 		exit;
 	}
 	if ($type)
@@ -693,256 +815,166 @@ function responseFile($path = null, $status = null, $type = null, bool $attachme
 	else {
 		// Attempt to guess content type if not provided
 		$finfo = finfo_open(FILEINFO_MIME_TYPE);
-		$type = finfo_file($finfo, $path);
+		$type = finfo_file($finfo, $output);
 		finfo_close($finfo);
 		header("Content-Type: " . $type);
 	}
 	// Sanitize the filename
-	$n = explode("/", $path);
+	$n = explode("/", $output);
 	$name = preg_replace('/[^\w\-.]/', '_', $name ?? end($n));
 	$disposition = $attachment ? 'attachment' : 'inline';
-	header("Content-Disposition: $disposition; filename=\"" . ($name ?? basename($path)) . '"');
-	header('Content-Length: ' . filesize($path));
-	//header("Etag: " . md5_file($path)); // Simple ETag (entity tag) response header is an identifier for a specific version of a resource. It lets caches be more efficient and save
+	header("Content-Disposition: $disposition; filename=\"" . ($name ?? basename($output)) . '"');
+	header('Content-Length: ' . filesize($output));
+	//header("Etag: " . md5_file($output)); // Simple ETag (entity tag) response header is an identifier for a specific version of a resource. It lets caches be more efficient and save
 	//Read and output the file
-	readfile($path);
+	readfile($output);
+	runSequence("finalize");
 	exit;
 }
 
-/**
- * Render a message result output to the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function responseMessage($output = null, $status = null)
-{
-	return response(\MiMFa\Library\Html::Result($output), $status);
-}
-/**
- * Render a success result output to the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function responseSuccess($output = null, $status = 200)
-{
-	return response(\MiMFa\Library\Html::Success($output), $status);
-}
-/**
- * Render a warning result output to the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function responseWarning($output = null, $status = 300)
-{
-	return response(\MiMFa\Library\Html::Warning($output), $status);
-}
-/**
- * Render an error result output to the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function responseError($output = null, $status = 400)
-{
-	if (is_a($output, "Exception") || is_subclass_of($output, "Exception"))
-		return response(\MiMFa\Library\Script::Error($output->getMessage()), $status);
-	return response(\MiMFa\Library\Html::Error($output), $status);
-}
-/**
- * Execute console.log script
- * @param mixed $message
- * @return void
- */
-function responseLog($message = null, $status = null)
-{
-	responseScript(\MiMFa\Library\Script::Log($message), $status);
-}
-/**
- * Execute console.log script
- * @param mixed $message
- * @return void
- */
-function responseScript($message = null, $status = null)
-{
-	response(\MiMFa\Library\Html::Script($message), $status);
-}
 #endregion 
 
 
-#region NAVIGATING
-
-function locate($url = null)
-{
-	responseScript("window.history.replaceState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");");
-}
-function relocate($url = null)
-{
-	responseScript("window.history.pushState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");");
-}
-function go($url, $target = "_self")
-{
-	responseScript("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '$target');");
-}
-function open($url = null, $target = "_blank")
-{
-	response("<html><head><script>window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '$target');</script></head></html>");
-}
-function load($url = null)
-{
-	responseScript("window.history.replaceState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");window.location.reload();");
-}
-function reload()
-{
-	responseScript("window.location.reload();");
-}
-function share($urlOrText = null, $path = null)
-{
-	responseScript("window.open('sms://$path?body='+" . (isValid($urlOrText) ? "'" . __($urlOrText) . "'" : "location.href") . ", '_blank');");
-}
-
-#endregion 
-
-
-#region RENDERING
+#region INJECTING
 
 /**
- * Echo output on the client side
+ * Replace the output with all the document in the client side
  * @param mixed $output The data that is ready to print
- * @return mixed Printed data
+ * @param string $url The url to show without updating the page
  */
-function render($output = null)
+function inject($content = null, $url = null)
 {
-	echo $output = \MiMFa\Library\Convert::ToString($output);
-	return $output;
-}
-
-/**
- * Render a message result output to the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function renderMessage($output = null)
-{
-	echo $output = \MiMFa\Library\Html::Result($output);
-	return $output;
-}
-/**
- * Render a success result output to the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function renderSuccess($output = null)
-{
-	echo $output = \MiMFa\Library\Html::Success($output);
-	return $output;
-}
-/**
- * Render a warning result output to the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function renderWarning($output = null)
-{
-	echo $output = \MiMFa\Library\Html::Warning($output);
-	return $output;
-}
-/**
- * Render an error result output to the client side
- * @param mixed $output The data that is ready to print
- * @return mixed Printed data
- */
-function renderError($output = null)
-{
-	setStatus(400);
-	if (is_a($output, "Exception") || is_subclass_of($output, "Exception"))
-		return \MiMFa\Library\Html::Script(\MiMFa\Library\Script::Error($output->getMessage()));
-	echo $output = \MiMFa\Library\Html::Error($output);
-	return $output;
-}
-/**
- * Execute console.log script
- * @param mixed $message
- */
-function renderLog($message = null)
-{
-	return renderScript(
-		\MiMFa\Library\Script::Log($message)
-	);
+	render(Html::Script(
+		Internal::MakeScript(
+			$content,
+			null,
+			"(data,err)=>{
+				document.open();document.write(data??err);document.close();" .
+			($url ? "window.history.pushState(null, null, `" . getFullUrl($url) . "`);" : "") .
+			"}"
+		)
+	));
 }
 
 /**
  * Render output append an element by the specific selector
  * @param mixed $selector Your specific element selector, for example "body>div.title"
- * @param mixed $output The data that is ready to print
+ * @param mixed $content The data that is ready to print
  */
-function renderAppend($selector, $output)
+function injectAppend($content, $selector = "body")
 {
-	render(\MiMFa\Library\Html::Script(
-		\MiMFa\Library\Internal::MakeScript(
-			$output,
+	render(Html::Script(
+		Internal::MakeScript(
+			$content,
 			null,
-			"(data,err)=>$(" . \MiMFa\Library\Script::Convert($selector) . ").append(data??err)"
-			//"(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($selector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			"(data,err)=>$(" . Script::Convert($selector) . ").append(data??err)"
+			//"(data,err)=>document.querySelector(".Script::Convert($selector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 		)
 	));
 }
 /**
  * Render output prepend an element by the specific selector
  * @param mixed $selector Your specific element selector, for example "body>div.title"
- * @param mixed $output The data that is ready to print
+ * @param mixed $content The data that is ready to print
  */
-function renderPrepend($selector, $output)
+function injectPrepend($content, $selector = "body")
 {
-	render(\MiMFa\Library\Html::Script(
-		\MiMFa\Library\Internal::MakeScript(
-			$output,
+	render(Html::Script(
+		Internal::MakeScript(
+			$content,
 			null,
-			"(data,err)=>$(" . \MiMFa\Library\Script::Convert($selector) . ").prepend(data??err)"
-			//"(data,err)=>document.querySelector(".\MiMFa\Library\Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			"(data,err)=>$(" . Script::Convert($selector) . ").prepend(data??err)"
+			//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 		)
 	));
 }
 
 /**
- * Render Scripts in the client side
- */
-function renderScript($content, $source = null, ...$attributes)
-{
-	echo $output = \MiMFa\Library\Html::Script($content, $source, ...$attributes);
-	return $output;
-}
-/**
- * Render Styles in the client side
- */
-function renderStyle($content, $source = null, ...$attributes)
-{
-	echo $output = \MiMFa\Library\Html::Style($content, $source, ...$attributes);
-	return $output;
-}
-
-/**
- * Render Scripts in the client side, injected to the head
+ * Inject Scripts to the head of the client side, injected to the head
  */
 function injectScript($content, $source = null, ...$attributes)
 {
-	renderAppend(
-		"head",
-		\MiMFa\Library\Html::Script($content, $source, ...$attributes)
+	injectAppend(
+		Html::Script($content, $source, ...$attributes),
+		"head"
 	);
 }
 /**
- * Render Styles in the client side, injected to the head
+ * Inject Styles to the head of the client side, injected to the head
  */
 function injectStyle($content, $source = null, ...$attributes)
 {
-	renderAppend(
-		"head",
-		\MiMFa\Library\Html::Style($content, $source, ...$attributes)
+	injectAppend(
+		Html::Style($content, $source, ...$attributes),
+		"head"
 	);
 }
+
 #endregion 
 
 
-#region PROTECTION
+#region NAVIGATING
+
+/**
+ * Change the location address of the window
+ * @param string $url The url to show for the current page without updating the page
+ * @return void
+ */
+function locate($url = null)
+{
+	deliverScript("window.history.replaceState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");");
+}
+/**
+ * Push the new location address a the url of the window
+ * @param string $url The url to show for the current page without updating the page
+ * @return void
+ */
+function relocate($url = null)
+{
+	deliverScript("window.history.pushState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");");
+}
+/**
+ * Open a url in the current tab, new tab, etc.
+ * @param mixed $url
+ * @param bool|string $target Put true to visit in "_blank" target, false for "_self" or put the name of target otherwise
+ * @return void
+ */
+function open($url, $target = "_self")
+{
+	deliverScript("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '" . ($target === true ? "_blank" : ($target === false ? "_self" : $target)) . "');");
+}
+/**
+ * Load the new address
+ * @param mixed $url
+ * @return void
+ */
+function load($url = null)
+{
+	deliverScript("window.location.href = " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ";");
+}
+/**
+ * Reload the current location
+ * @return void
+ */
+function reload()
+{
+	deliverScript("window.location.reload();");
+}
+/**
+ * Open a message by a sharable app 
+ * @param mixed $output The url or text to share
+ * @param mixed $with The path or phone number to share
+ * @return void
+ */
+function share($output = null, $with = null)
+{
+	deliverScript("window.open('sms://$with?body='+" . (isValid($output) ? "'" . __($output) . "'" : "location.href") . ", '_blank');");
+}
+
+#endregion 
+
+
+#region PROTECTING
 
 /**
  * Check if the client has access to the page or assign them to other page, based on thair IP, Accessibility, Restriction and etc.
@@ -958,12 +990,14 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 	if (isValid(\_::$Router->StatusMode)) {
 		if ($assign) {
 			if (is_string($assign))
-				go($assign);
+				load($assign);
 			else
 				route(\_::$Router->StatusMode ?? \_::$Router->RestrictionRouteName, alternative: "403");
 		}
-		if ($exit !== false)
+		if ($exit !== false) {
+			runSequence("finalize");
 			exit($exit);
+		}
 		return false;
 	} elseif (isValid(\_::$Config->AccessMode)) {
 		$ip = getClientIp();
@@ -974,12 +1008,14 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 		if ((\_::$Config->AccessMode > 0 && !$cip) || (\_::$Config->AccessMode < 0 && $cip)) {
 			if ($assign) {
 				if (is_string($assign))
-					go($assign);
+					load($assign);
 				else
 					route(\_::$Router->RestrictionRouteName, alternative: "401");
 			}
-			if ($exit !== false)
+			if ($exit !== false) {
+				runSequence("finalize");
 				exit($exit);
+			}
 			return false;
 		}
 	}
@@ -988,47 +1024,96 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 		return $b;
 	if ($assign) {
 		if (is_string($assign))
-			go($assign);
-		elseif (startsWith(\_::$Address->Request, \_::$User->HandlerPath))
+			load($assign);
+		elseif (
+			startsWith(\_::$Address->Request, \_::$User->InHandlerPath) ||
+			startsWith(\_::$Address->Request, \_::$User->UpHandlerPath) ||
+			startsWith(\_::$Address->Request, \_::$User->RecoverHandlerPath) ||
+			startsWith(\_::$Address->Request, \_::$User->ActiveHandlerPath)
+		)
 			return true;
 		else
 			load(\_::$User->InHandlerPath);
 	}
-	if ($exit !== false)
+	if ($exit !== false) {
+		runSequence("finalize");
 		exit($exit);
+	}
 	return $b;
 }
 
-function setTimeout($timeout = 60000, $key = null)
+function setTimer($timeout = 60000, $key = null)
 {
 	if ($timeout < 1)
 		return false;
-	return setSecret(getClientCode("Timeout_" . ($key ?? \_::$Address->Direction)), time() + max(1, $timeout / 1000));
+	return setSecret(getClientCode("Timer_" . ($key ?? \_::$Address->Direction)), time() + max(1, $timeout / 1000));
 }
-function getTimeout($key = null)
+function getTimer($key = null)
 {
-	$key = getClientCode("Timeout_" . ($key ?? \_::$Address->Direction));
+	$key = getClientCode("Timer_" . ($key ?? \_::$Address->Direction));
 	if (hasSecret($key)) {
 		$remains = getSecret($key) - time();
 		if ($remains <= 0)
-			forgetSecret($key);
+			popSecret($key);
 		return $remains * 1000;
 	}
 	return null;
 }
-function grabTimeout($key = null)
+function popTimer($key = null)
 {
-	$remains = getTimeout($key);
-	forgetTimeout($key);
+	$remains = getTimer($key);
+	popSecret(getClientCode("Timer_" . ($key ?? \_::$Address->Direction)));
 	return $remains;
 }
-function hasTimeout($key = null)
+function hasTimer($key = null)
 {
-	return getTimeout($key) > 0;
+	return getTimer($key) > 0;
 }
-function forgetTimeout($key = null)
+
+function encode($plain, &$dic = null, $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU')
 {
-	return grabSecret(getClientCode("Timeout_" . ($key ?? \_::$Address->Direction)));
+	if (!is_array($dic))
+		$dic = array();
+	$c = count($dic);
+	return preg_replace_callback($pattern, function ($a) use (&$dic, &$c, $wrapStart, $wrapEnd) {
+		$key = $a[0];
+		if (array_key_exists($key, $dic))
+			return $dic[$key];
+		return $dic[$key] = $wrapStart . $c++ . $wrapEnd;
+	}, $plain);
+}
+function decode($cipher, $dic)
+{
+	if (is_array($dic))
+		foreach (array_reverse($dic) as $k => $v)
+			$cipher = str_replace($v, $k, $cipher);
+	return $cipher;
+}
+/**
+ * Encrypt plain by the key or the website secret key
+ * @param mixed $plain The plain text
+ * @param mixed $key Leave null to use default soft key
+ */
+function encrypt($plain, $key = null)
+{
+	if (is_null($plain))
+		return null;
+	if (empty($plain))
+		return $plain;
+	return \_::$Back->Cryptograph->Encrypt($plain, $key ?? \_::$Back->SoftKey, true);
+}
+/**
+ * Decrypt cipher by the key or the website secret key
+ * @param mixed $cipher The cipher text
+ * @param mixed $key Leave null to use default soft key
+ */
+function decrypt($cipher, $key = null)
+{
+	if (is_null($cipher))
+		return null;
+	if (empty($cipher))
+		return $cipher;
+	return \_::$Back->Cryptograph->Decrypt($cipher, $key ?? \_::$Back->SoftKey, true);
 }
 
 #endregion
@@ -1108,11 +1193,11 @@ function addressing(string|null $file = null, $extension = null, string|int $ori
 	if (!endsWith($file, needles: $extension) && !endsWith($file, DIRECTORY_SEPARATOR))
 		$file .= $extension;
 	$path = null;
-	//$toSeq = $depth < 0 ? (count(\_::$Sequences) + $depth) : ($origin + $depth);
+	//$toSeq = $depth < 0 ? (count(\_::$Sequence) + $depth) : ($origin + $depth);
 	if (is_string($origin)) {
 		$key = null;
 		$index = 0;
-		foreach (\_::$Sequences as $k) {
+		foreach (\_::$Sequence as $k) {
 			if ($origin === $k) {
 				$key = $origin = $index;
 				break;
@@ -1122,12 +1207,12 @@ function addressing(string|null $file = null, $extension = null, string|int $ori
 		if (is_null($key))
 			$origin = 0;
 	}
-	$scount = count(\_::$Sequences);
+	$scount = count(\_::$Sequence);
 	$origin = $origin < 0 ? ($scount + $origin) : min($scount, $origin);
 	$toSeq = $depth < 0 ? ($scount + $depth) : min($scount, $origin + $depth);
 	$seqInd = -1;
 	$file = ltrim($file, DIRECTORY_SEPARATOR);
-	foreach (\_::$Sequences as $dir => $host)
+	foreach (\_::$Sequence as $dir => $host)
 		if (++$seqInd < $origin)
 			continue;
 		elseif ($seqInd < $toSeq) {
@@ -1226,7 +1311,7 @@ function usingAfters($directory, string|null $name = null)
 function data(...$hierarchy)
 {
 	global $data;
-	return grab($data, ...$hierarchy);
+	return pop($data, ...$hierarchy);
 }
 
 /**
@@ -1236,9 +1321,9 @@ function data(...$hierarchy)
  * @param bool $print
  * @return mixed
  */
-function runAll(string|null $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
+function runSequence(string|null $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
 {
-	$depth = min($depth, count(\_::$Sequences)) - 1;
+	$depth = min($depth, count(\_::$Sequence)) - 1;
 	$res = [];
 	for (; $origin <= $depth; $depth--)
 		$res[] = using(\_::$Address->Directory, $name, $data, $print, $depth, 1, $alternative, $default, require: $require, once: $once);
@@ -1409,14 +1494,14 @@ function asset($directory, string|null $name = null, string|array|null $extensio
 /**
  * To get a Table from the DataBase
  * @param string $name The raw table name (Without any prefix)
- * @return \MiMFa\Library\DataTable The selected database's table
+ * @return DataTable The selected database's table
  */
-function table(string $name, bool $prefix = true, string|int $origin = 0, int $depth = 999999, ?\MiMFa\Library\DataBase $source = null, $default = null)
+function table(string $name, bool $prefix = true, string|int $origin = 0, int $depth = 999999, ?DataBase $source = null, $default = null)
 {
-	return new \MiMFa\Library\DataTable(
+	return new DataTable(
 		$source ?? \_::$Back->DataBase,
 		$name,
-		$prefix?\_::$Back->DataBasePrefix:null
+		$prefix ? \_::$Back->DataBasePrefix : null
 	);
 }
 
@@ -1471,11 +1556,11 @@ function has($object, ...$hierarchy)
 		return false;
 	}
 }
-
 /**
- * To get Features of an object from an array
+ * To get some parts of an $object addressed by the $hierarchy
  * @param mixed $object The source object
  * @param array $hierarchy A hierarchy of desired keys
+ * @return mixed The disired value
  */
 function get($object, ...$hierarchy)
 {
@@ -1521,12 +1606,12 @@ function get($object, ...$hierarchy)
 	}
 }
 /**
- * To get Features of an object from an array
- * Then unset that key of the $data
+ * To get some parts of an $object addressed by the $hierarchy, then unset them from the $object
  * @param mixed $object The source object
  * @param array $hierarchy A hierarchy of desired keys
+ * @return mixed The disired value
  */
-function grab(&$object, ...$hierarchy)
+function pop(&$object, ...$hierarchy)
 {
 	if (count($hierarchy) === 0)
 		return $object;
@@ -1542,7 +1627,7 @@ function grab(&$object, ...$hierarchy)
 				if ($rem)
 					unset($object[$data]);
 				else
-					return grab($object[$data], ...$hierarchy);
+					return pop($object[$data], ...$hierarchy);
 			} else {
 				$data = strtolower($data);
 				foreach ($object as $k => $v)
@@ -1551,7 +1636,7 @@ function grab(&$object, ...$hierarchy)
 						if ($rem)
 							unset($object[$k]);
 						else
-							return grab($object[$k], ...$hierarchy);
+							return pop($object[$k], ...$hierarchy);
 						break;
 					}
 			}
@@ -1568,7 +1653,7 @@ function grab(&$object, ...$hierarchy)
 				if ($rem)
 					unset($object->$key);
 				else
-					return grab($object->$key, ...$hierarchy);
+					return pop($object->$key, ...$hierarchy);
 				if (!$object)
 					unset($object);
 			}
@@ -1579,69 +1664,79 @@ function grab(&$object, ...$hierarchy)
 		if (is_array($object)) {
 			foreach ($data as $k => $v)
 				if (is_numeric($k)) {
-					if (($val = grab($object, $v, ...$hierarchy)) !== null)
+					if (($val = pop($object, $v, ...$hierarchy)) !== null)
 						$res[$k] = $val;
 				} else
-					$res[$k] = grab($object, $k, $v, ...$hierarchy);
+					$res[$k] = pop($object, $k, $v, ...$hierarchy);
 		} else {
 			foreach ($data as $k => $v)
 				if (is_numeric($k)) {
-					if (($val = grab($object, $v, ...$hierarchy)) !== null)
+					if (($val = pop($object, $v, ...$hierarchy)) !== null)
 						$res[$k] = $val;
 				} else
-					$res[$k] = grab($object, $k, $v, ...$hierarchy);
+					$res[$k] = pop($object, $k, $v, ...$hierarchy);
 		}
 	}
 	return $res;
 }
-
 /**
- * To set Features of an object from an array or other object
+ * To set some parts of an $object addressed by the $hierarchy
  * @param mixed $object The destination object
+ * @param array $hierarchy A hierarchy of desired keys and values
+ * @return mixed The old values that are sat
  */
-function set(&$object, $data)
+function set(&$object, $hierarchy)
 {
-	if (!is_array($data) || !is_object($object))
+	if (!is_array($hierarchy) || !is_object($object))
 		try {
-			return $object = $data;
+			$m = $object;
+			$object = $hierarchy;
+			return $m;
 		} catch (Exception $ex) {
 		} else {
-		foreach ($data as $k => $v) {
+		$sat = [];
+		foreach ($hierarchy as $k => $v) {
 			take($object, $k, $key, $index);
 			if ($key)
 				if (is_null($index))
-					set($object->$key, $v);
+					$sat[$key] = set($object->$key, $v);
 				else
-					set($object[$key], $v);
+					$sat[$key] = set($object[$key], $v);
 		}
+		return $sat;
 	}
-	return $object;
+	return null;
 }
 /**
- * To set Features of an object from an array or other object
- * Then unset that key of the $data
+ * To set some parts of an $object addressed by the $hierarchy, then unset them from the $hierarchy
  * @param mixed $object The destination object
+ * @param array $hierarchy A hierarchy of desired keys and values
+ * @return mixed The old values that are sat
  */
-function swap(&$object, &$data)
+function dip(&$object, &$hierarchy)
 {
-	if (!is_array($data) || !is_object($object))
+	if (!is_array($hierarchy) || !is_object($object))
 		try {
-			$object = $data;
-			unset($data);
+			$m = $object;
+			$object = $hierarchy;
+			unset($hierarchy);
+			return $m;
 		} catch (Exception $ex) {
 		} else {
-		foreach ($data as $k => $v) {
+		$sat = [];
+		foreach ($hierarchy as $k => $v) {
 			take($object, $k, $key, $index);
 			if ($key) {
 				if (is_null($index))
-					swap($object->$key, $v);
+					$sat[$key] = dip($object->$key, $v);
 				else
-					swap($object[$key], $v);
-				unset($data[$k]);
+					$sat[$key] = dip($object[$key], $v);
+				unset($hierarchy[$k]);
 			}
 		}
+		return $sat;
 	}
-	return $object;
+	return null;
 }
 
 
@@ -1882,61 +1977,105 @@ function last($array, $default = null)
 	return $res;
 }
 
+
+function takeValid($object, string|null $item = null, $defultValue = null)
+{
+	if (isValid($object, $item)) {
+		if ($item === null)
+			return $object;
+		if (isset($object[$item]))
+			return $object[$item];
+		return $object->$item;
+	} else
+		return $defultValue;
+}
+function getValid($object, string|null $item = null, $defultValue = null, &$key = null)
+{
+	if ($object === null || $item === null)
+		return isValid($object) ? $object : $defultValue;
+	if (is_array($object)) {
+		if (isset($object[$item]))
+			return isValid($object[$key = $item]) ? $object[$item] : $defultValue;
+		$item = strtolower($item);
+		foreach ($object as $k => $v)
+			if ($item === strtolower($k)) {
+				$key = $k;
+				return isValid($v) ? $v : $defultValue;
+			}
+	}
+	$res =
+		$object->{$key = $item} ??
+		$object->{$key = strtoproper($item)} ??
+		$object->{$key = strtolower($item)} ??
+		$object->{$key = strtoupper($item)} ??
+		($key = null);
+	return isValid($res) ? $res : $defultValue;
+}
+function popValid(&$object, string|null $item = null, $defultValue = null, &$key = null)
+{
+	if ($object === null || $item === null)
+		return isValid($object) ? $object : $defultValue;
+	if (is_array($object)) {
+		if (isset($object[$item])) {
+			$res = $object[$key = $item] ?? $defultValue;
+			unset($object[$item]);
+			return isValid($res) ? $res : $defultValue;
+		}
+		$item = strtolower($item);
+		foreach ($object as $k => $v)
+			if ($item === strtolower($k)) {
+				$key = $k;
+				unset($object[$k]);
+				return isValid($v) ? $v : $defultValue;
+			}
+	}
+	$res =
+		$object->{$key = $item} ??
+		$object->{$key = strtoproper($item)} ??
+		$object->{$key = strtolower($item)} ??
+		$object->{$key = strtoupper($item)} ??
+		($key = null) ?? $defultValue;
+	if ($key !== null)
+		unset($object->$key);
+	return isValid($res) ? $res : $defultValue;
+}
+function doValid(callable $func, $object, string|null $item = null, $defultValue = null)
+{
+	return isValid($object, $item) ? $func(getValid($object, $item)) : $defultValue;
+}
+function takeBetween($object, ...$items)
+{
+	foreach ($items as $value)
+		if (($value = getValid($object, $value, null)) !== null)
+			return $value;
+	return null;
+}
+function getBetween($object, ...$items)
+{
+	foreach ($items as $value)
+		if (($value = getValid($object, $value, null)) !== null)
+			return $value;
+	return null;
+}
+function popBetween(&$object, ...$items)
+{
+	foreach ($items as $value)
+		if (($value = popValid($object, $value, null)) !== null)
+			return $value;
+	return null;
+}
+function between(...$options)
+{
+	foreach ($options as $value)
+		if (isValid($value))
+			return $value;
+	return null;
+}
+
 #endregion 
 
 
-#region CRYPTION
-
-function encode($plain, &$dic = null, $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU')
-{
-	if (!is_array($dic))
-		$dic = array();
-	$c = count($dic);
-	return preg_replace_callback($pattern, function ($a) use (&$dic, &$c, $wrapStart, $wrapEnd) {
-		$key = $a[0];
-		if (array_key_exists($key, $dic))
-			return $dic[$key];
-		return $dic[$key] = $wrapStart . $c++ . $wrapEnd;
-	}, $plain);
-}
-function decode($cipher, $dic)
-{
-	if (is_array($dic))
-		foreach (array_reverse($dic) as $k => $v)
-			$cipher = str_replace($v, $k, $cipher);
-	return $cipher;
-}
-/**
- * Encrypt plain by the key or the website secret key
- * @param mixed $plain The plain text
- * @param mixed $key Leave null to use default soft key
- */
-function encrypt($plain, $key = null)
-{
-	if (is_null($plain))
-		return null;
-	if (empty($plain))
-		return $plain;
-	return \_::$Back->Cryptograph->Encrypt($plain, $key ?? \_::$Back->SoftKey, true);
-}
-/**
- * Decrypt cipher by the key or the website secret key
- * @param mixed $cipher The cipher text
- * @param mixed $key Leave null to use default soft key
- */
-function decrypt($cipher, $key = null)
-{
-	if (is_null($cipher))
-		return null;
-	if (empty($cipher))
-		return $cipher;
-	return \_::$Back->Cryptograph->Decrypt($cipher, $key ?? \_::$Back->SoftKey, true);
-}
-
-#endregion 
-
-
-#region IDENTIFICATION
+#region IDENTIFICATING
 
 function getId($random = false): int
 {
@@ -1956,8 +2095,8 @@ function getFullUrl(string|null $path = null, bool $optimize = true): string|nul
 	if ($path === null)
 		$path = getUrl();
 	if ($optimize)
-		return \MiMFa\Library\Local::OptimizeUrl(\MiMFa\Library\Local::GetUrl($path));
-	return \MiMFa\Library\Local::GetUrl($path);
+		return Local::OptimizeUrl(Local::GetUrl($path));
+	return Local::GetUrl($path);
 }
 /**
  * Get the full part of a url
@@ -2243,8 +2382,8 @@ function cleanup($directory = null)
 		$i += cleanup(\_::$Router->TempDirectory);
 		$i += cleanup(\_::$Address->LogDirectory);
 		$i += cleanup(\_::$Router->LogDirectory);
-		flushSecrets();
-		\_::$Back->Session->Flush();
+		clearSecrets();
+		\_::$Back->Session->Clear();
 	}
 	return $i;
 }
@@ -2271,22 +2410,19 @@ function getMemo($key)
 	else
 		return null;
 }
-function grabMemo($key)
+function popMemo($key)
 {
 	$val = getMemo($key);
-	forgetMemo($key);
+	$key = urlencode($key);
+	unset($_COOKIE[$key]);
+	setcookie($key, "", 0, "/", "", true, true);
 	return $val;
 }
 function hasMemo($key)
 {
 	return !is_null(getMemo($key));
 }
-function forgetMemo($key)
-{
-	unset($_COOKIE[urlencode($key)]);
-	return setcookie(urlencode($key), "", 0, "/", "", true, true);
-}
-function flushMemos()
+function clearMemos()
 {
 	foreach ($_COOKIE as $key => $val) {
 		unset($_COOKIE[$key]);
@@ -2320,7 +2456,7 @@ function getSecret($key)
 		return null;
 	$item = $_SESSION[$key];
 	if ($item['expires'] > 0 && $item['expires'] < (int) microtime(true)) {
-		forgetSecret($key);
+		popSecret($key);
 		return null;
 	}
 	if (str_starts_with(\_::$Address->Request ?? "/", $item['path']))
@@ -2332,10 +2468,10 @@ function getSecret($key)
  * To get and forget a session
  * @param string $key The special key
  */
-function grabSecret($key)
+function popSecret($key)
 {
 	$val = getSecret($key);
-	forgetSecret($key);
+	unset($_SESSION[$key]);
 	return $val;
 }
 /**
@@ -2349,7 +2485,7 @@ function hasSecret($key)
 		return false;
 	$item = $_SESSION[$key];
 	if ($item['expires'] > 0 && $item['expires'] < (int) microtime(true)) {
-		forgetSecret($key);
+		popSecret($key);
 		return false;
 	}
 	if (str_starts_with(\_::$Address->Request ?? "/", $item['path']))
@@ -2358,17 +2494,9 @@ function hasSecret($key)
 		return false;
 }
 /**
- * To forget a secure session
- * @param string $key The special key
- */
-function forgetSecret($key)
-{
-	unset($_SESSION[$key]);
-}
-/**
  * To forget all secure sessions
  */
-function flushSecrets()
+function clearSecrets()
 {
 	$_SESSION = [];
 }
@@ -2442,117 +2570,23 @@ function isValid($object, string|null $item = null): bool
 	else
 		return isValid($object) && isValid($item) && ((isset($object[$item]) && isValid($object[$item])) || (isset($object->$item) && isValid($object->$item)));
 }
-function takeValid($object, string|null $item = null, $defultValue = null)
-{
-	if (isValid($object, $item)) {
-		if ($item === null)
-			return $object;
-		if (isset($object[$item]))
-			return $object[$item];
-		return $object->$item;
-	} else
-		return $defultValue;
-}
-function getValid($object, string|null $item = null, $defultValue = null, &$key = null)
-{
-	if ($object === null || $item === null)
-		return isValid($object) ? $object : $defultValue;
-	if (is_array($object)) {
-		if (isset($object[$item]))
-			return isValid($object[$key = $item]) ? $object[$item] : $defultValue;
-		$item = strtolower($item);
-		foreach ($object as $k => $v)
-			if ($item === strtolower($k)) {
-				$key = $k;
-				return isValid($v) ? $v : $defultValue;
-			}
-	}
-	$res =
-		$object->{$key = $item} ??
-		$object->{$key = strtoproper($item)} ??
-		$object->{$key = strtolower($item)} ??
-		$object->{$key = strtoupper($item)} ??
-		($key = null);
-	return isValid($res) ? $res : $defultValue;
-}
-function grabValid(&$object, string|null $item = null, $defultValue = null, &$key = null)
-{
-	if ($object === null || $item === null)
-		return isValid($object) ? $object : $defultValue;
-	if (is_array($object)) {
-		if (isset($object[$item])) {
-			$res = $object[$key = $item] ?? $defultValue;
-			unset($object[$item]);
-			return isValid($res) ? $res : $defultValue;
-		}
-		$item = strtolower($item);
-		foreach ($object as $k => $v)
-			if ($item === strtolower($k)) {
-				$key = $k;
-				unset($object[$k]);
-				return isValid($v) ? $v : $defultValue;
-			}
-	}
-	$res =
-		$object->{$key = $item} ??
-		$object->{$key = strtoproper($item)} ??
-		$object->{$key = strtolower($item)} ??
-		$object->{$key = strtoupper($item)} ??
-		($key = null) ?? $defultValue;
-	if ($key !== null)
-		unset($object->$key);
-	return isValid($res) ? $res : $defultValue;
-}
-function doValid(callable $func, $object, string|null $item = null, $defultValue = null)
-{
-	return isValid($object, $item) ? $func(getValid($object, $item)) : $defultValue;
-}
-function takeBetween($object, ...$items)
-{
-	foreach ($items as $value)
-		if (($value = getValid($object, $value, null)) !== null)
-			return $value;
-	return null;
-}
-function getBetween($object, ...$items)
-{
-	foreach ($items as $value)
-		if (($value = getValid($object, $value, null)) !== null)
-			return $value;
-	return null;
-}
-function grabBetween(&$object, ...$items)
-{
-	foreach ($items as $value)
-		if (($value = grabValid($object, $value, null)) !== null)
-			return $value;
-	return null;
-}
-function between(...$options)
-{
-	foreach ($options as $value)
-		if (isValid($value))
-			return $value;
-	return null;
-}
-
 function isAseq(string|null $directory): bool
 {
-	return !\MiMFa\Library\Local::FileExists($directory . "global/ConfigBase.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "global.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "Info.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "initialize.php");
+	return !Local::FileExists($directory . "global/ConfigBase.php")
+		&& Local::FileExists($directory . "global.php")
+		&& Local::FileExists($directory . "Info.php")
+		&& Local::FileExists($directory . "initialize.php");
 }
 function isBase(string|null $directory): bool
 {
-	return \MiMFa\Library\Local::FileExists($directory . "Config.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "global/ConfigBase.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "Info.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "global/InfoBase.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "Front.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "global/FrontBase.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "global.php")
-		&& \MiMFa\Library\Local::FileExists($directory . "initialize.php");
+	return Local::FileExists($directory . "Config.php")
+		&& Local::FileExists($directory . "global/ConfigBase.php")
+		&& Local::FileExists($directory . "Info.php")
+		&& Local::FileExists($directory . "global/InfoBase.php")
+		&& Local::FileExists($directory . "Front.php")
+		&& Local::FileExists($directory . "global/FrontBase.php")
+		&& Local::FileExists($directory . "global.php")
+		&& Local::FileExists($directory . "initialize.php");
 }
 function isInAseq(string|null $filePath): bool
 {
@@ -2725,13 +2759,13 @@ function randomString(int $length = 10, string|null $chars = '_0123456789abcdefg
 {
 	return substr(str_shuffle(str_repeat($chars, ceil($length / strlen($chars)))), 1, $length);
 }
-function insertToString(string $mainstr, string $insertstr, int $index): string
+function putToString(string $string, string $patch, int $index): string
 {
-	return substr($mainstr, 0, $index) . $insertstr . substr($mainstr, $index);
+	return substr($string, 0, $index) . $patch . substr($string, $index);
 }
-function deleteFromString(string $mainstr, int $index, int $length = 1): string
+function popFromString(string $string, int $index, int $length = 1): string
 {
-	return substr($mainstr, 0, $index) . substr($mainstr, $index + $length);
+	return substr($string, 0, $index) . substr($string, $index + $length);
 }
 
 /**
@@ -2789,8 +2823,10 @@ function async($action, $callback = null, ...$args)
 	$result = $action(...$args);
 	if ($callback)
 		$callback($result);
-	if (!$pid)
+	if (!$pid) {
+		runSequence("finalize");
 		exit(0); // End the child process
+	}
 }
 
 
@@ -2814,40 +2850,40 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 		);
 	if ($referring ?? $styling) {
 		if (\_::$Config->AllowContentReferring)
-			$value = \MiMFa\Library\Style::DoProcess(
+			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return \MiMFa\Library\Html::Link($v, \_::$Address->ContentRoot . strtolower($k));
+					return Html::Link($v, \_::$Address->ContentRoot . strtolower($k));
 				},
 				keyWords: table("Content")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
 		if (\_::$Config->AllowCategoryReferring)
-			$value = \MiMFa\Library\Style::DoProcess(
+			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return \MiMFa\Library\Html::Link($v, \_::$Address->CategoryRoot . strtolower($k));
+					return Html::Link($v, \_::$Address->CategoryRoot . strtolower($k));
 				},
 				keyWords: table("Category")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
 		if (\_::$Config->AllowTagReferring)
-			$value = \MiMFa\Library\Style::DoProcess(
+			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return \MiMFa\Library\Html::Link($v, \_::$Address->TagRoot . strtolower($k));
+					return Html::Link($v, \_::$Address->TagRoot . strtolower($k));
 				},
 				keyWords: table("Tag")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
 		if (\_::$Config->AllowUserReferring)
-			$value = \MiMFa\Library\Style::DoProcess(
+			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return \MiMFa\Library\Html::Link($v, \_::$Address->UserRoot . strtolower($k));
+					return Html::Link($v, \_::$Address->UserRoot . strtolower($k));
 				},
 				keyWords: table("User")->SelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
 				both: false,

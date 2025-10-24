@@ -4,6 +4,7 @@ class AseqBack extends BackBase
 	public $DataBaseError = null;
 	
 	public $AllowTranslate = false;
+	public $AutoDetectLanguage = true;
 	public $AutoUpdateLanguage = false;
 	public $CacheLanguage = true;
 	public $DefaultLanguage = null;

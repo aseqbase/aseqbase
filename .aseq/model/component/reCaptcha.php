@@ -58,7 +58,7 @@ class reCaptcha
                 $remoteIp = $remoteIp ?? self::$SiteKey ?? $_SERVER['REMOTE_ADDR'];
                 $siteKey = $siteKey ?? \_::$Config->ReCaptchaSiteKey;
                 $captcha = false;
-                $captcha = snapReceive(self::$FieldName, null, "POST");
+                $captcha = popReceived(self::$FieldName, null, "POST");
                 if ($captcha)
                         return Convert::FromJson(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=" . "$siteKey&response=$captcha&remoteip=$remoteIp"));
                 return [];

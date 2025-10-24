@@ -80,7 +80,7 @@ class SpecialCrypt extends HashCrypt
         $samplelen = strlen($samplechars);
         $indexer = \_::$Back->EncryptIndexer;
         for (; $indexer < strlen($text); $indexer+=\_::$Back->EncryptIndexer){
-            $text = insertToString($text, substr($samplechars, $sampler%$samplelen,1), $indexer);
+            $text = putToString($text, substr($samplechars, $sampler%$samplelen,1), $indexer);
             $sampler+=\_::$Back->EncryptSampler;
         }
         return $text;
@@ -89,7 +89,7 @@ class SpecialCrypt extends HashCrypt
     {
         $indexer = strlen($text) - strlen($text)%\_::$Back->EncryptIndexer;
         for (; $indexer > 0 ; $indexer-=\_::$Back->EncryptIndexer)
-            $text = deleteFromString($text, $indexer, 1);
+            $text = popFromString($text, $indexer, 1);
         return $text;
     }
 }

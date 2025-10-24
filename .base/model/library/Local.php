@@ -21,7 +21,7 @@ class Local
 		$address = self::GetRelativePath(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $address));
 		$p = ltrim(str_replace(DIRECTORY_SEPARATOR, "/", $address), "/");
 		$d = ltrim(preg_replace("/[\?#@].*$/", "", $address), DIRECTORY_SEPARATOR);
-		foreach (\_::$Sequences as $dir => $root)
+		foreach (\_::$Sequence as $dir => $root)
 			if (file_exists($dir . $d))
 				return $root . $p;
 		$address = str_replace(DIRECTORY_SEPARATOR, "/", $address);
@@ -59,7 +59,7 @@ class Local
 	{
 		if (empty($url))
 			return null;
-		foreach (\_::$Sequences as $dir => $root)
+		foreach (\_::$Sequence as $dir => $root)
 			if (startsWith($url, $root))
 				return substr($url, strlen($root));
 		return PREG_Replace("/^\w+:\/*[^\/]+/", "", $url);
@@ -111,7 +111,7 @@ class Local
 	{
 		if (empty($path))
 			return null;
-		foreach (\_::$Sequences as $dir => $root)
+		foreach (\_::$Sequence as $dir => $root)
 			if (startsWith($path, $dir))
 				return $path;
 		return \_::$Router->Directory . ltrim($path, DIRECTORY_SEPARATOR);
@@ -126,7 +126,7 @@ class Local
 	{
 		if (empty($path))
 			return null;
-		foreach (\_::$Sequences as $dir => $root)
+		foreach (\_::$Sequence as $dir => $root)
 			if (startsWith($path, $dir))
 				return substr($path, strlen($dir));
 		return $path;
@@ -162,7 +162,7 @@ class Local
 			return $path;
 		if (startsWith($path, \_::$Router->Directory))
 			$path = substr($path, strlen(\_::$Router->Directory));
-		foreach (\_::$Sequences as $dir => $p)
+		foreach (\_::$Sequence as $dir => $p)
 			if (is_dir($dir . $path))
 				return $dir . $path;
 		return null;
@@ -249,7 +249,7 @@ class Local
 			return $path;
 		if (startsWith($path, \_::$Router->Directory))
 			$path = substr($path, strlen(\_::$Router->Directory));
-		foreach (\_::$Sequences as $dir => $p)
+		foreach (\_::$Sequence as $dir => $p)
 			if (file_exists($dir . $path))
 				return $dir . $path;
 		return null;
@@ -345,7 +345,7 @@ class Local
 	public static function IsFileObject($content)
 	{
 		if (is_string($content))
-			$content = receive($content);
+			$content = getReceived($content);
 		return get($content, "name") ? true : false;
 	}
 
@@ -514,7 +514,7 @@ class Local
 		header('Pragma: public');
 
 		render("\xEF\xBB\xBF");
-		response($content);
+		deliver($content);
 	}
 	/**
 	 * Load (Download from the client side) file from the local storage,
@@ -525,6 +525,6 @@ class Local
 	 */
 	public static function LoadFile($path, $name = null, $type = null)
 	{
-		responseFile($path, null, $type, true, $name);
+		deliverFile($path, null, $type, true, $name);
 	}
 }

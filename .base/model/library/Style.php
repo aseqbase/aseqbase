@@ -35,7 +35,7 @@ class Style extends \ArrayObject{
 			foreach($object as $key=>$val)
 				if(is_numeric($key)) $styles[] = "$val;";
 				else $styles[] = self::PropertyName($key).":$val;";
-		elseif(isStatic($object)) return $object;
+		elseif(isStatic($object)) return $object."";
 		else return Convert::ToStatic($object, ...$arguments);
 		return join(" ", $styles);
 	}

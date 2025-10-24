@@ -72,7 +72,7 @@ class Internal
         if (isStatic($handler))
             return "$start($callbackScript)(" . Script::Convert($handler) . "," . Script::Convert($args) . ")$end";
         return $start .
-            'sendInternal(null,{"' .
+            'sendInternalRequest(null,{"' .
             self::Set($handler) . '":JSON.stringify(' . Script::Convert($args) .
             ")},$selector,$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
     }
@@ -165,7 +165,7 @@ class Internal
      * @param string $name The handler encripted name
      * @return mixed A handler function or data wants to print
      */
-    public static function Forget($name)
+    public static function Pop($name)
     {
         $path = self::$Directory . decrypt($name);
         if (!file_exists($path))
@@ -175,7 +175,7 @@ class Internal
      * To clear all internal handlers of this client
      * @return mixed A handler function or data wants to print
      */
-    public static function Flush()
+    public static function Clear()
     {
         return cleanup(self::$Directory);
     }

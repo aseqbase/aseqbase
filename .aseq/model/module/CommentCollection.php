@@ -332,7 +332,7 @@ class CommentCollection extends Collection
                 $p_meta = getValid($item, 'MetaData', null);
                 if ($p_meta !== null) {
                     $p_meta = Convert::FromJson($p_meta);
-                    swap($this, $p_meta);
+                    dip($this, $p_meta);
                 }
                 $p_meta = null;
                 $p_id = get($item, 'Id');
@@ -494,7 +494,7 @@ class CommentCollection extends Collection
                     data = { Id:forid, Content:msgbox.innerText };
                     if(sbjbox) data.Subject = sbjbox.innerText;
                     if(attbox) data.Attach = attbox.innerText;
-                    sendPut(null, data, selector, function (data, err) {
+                    sendPutRequest(null, data, selector, function (data, err) {
                         try{document.querySelector(selector .result).remove();}catch{}
                         $(selector).prepend(data);
                         if(!err){
@@ -517,7 +517,7 @@ class CommentCollection extends Collection
             }" . "
             function {$this->Name}_Delete(btn, selector, forid) {
                 if(confirm(`" . __("Are you sure to delete this command?") . "`))
-                    sendDelete(
+                    sendDeleteRequest(
                         null,
                         {Id:forid},
                         selector,
@@ -529,7 +529,7 @@ class CommentCollection extends Collection
             "
             {$this->Name}_status = null;
             function {$this->Name}_Status(btn, selector, forid, status) {
-                    sendPatch(
+                    sendPatchRequest(
                         null,
                         {Id:forid, Status:{$this->Name}_status = {$this->Name}_status===0 || status?1:0},
                         selector,
@@ -550,7 +550,7 @@ class CommentCollection extends Collection
             function {$this->Name}_Reply(btn, selector, forid) {
                 rbox = document.querySelector(selector + ' .reply-box');
                 if(!rbox.querySelector('form')) {
-                    sendPatch(
+                    sendPatchRequest(
                         null,
                         {Reply:forid},
                         selector,

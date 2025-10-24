@@ -6,7 +6,7 @@ $module->CheckAccess = fn($item)=>\_::$User->GetAccess(\_::$User->AdminAccess) |
 $module->Item = $data;
 $module->CommentForm->SubjectLabel = null;
 $module->Root = "/query/";
-swap($module, $data);
+dip($module, $data);
 $module->Name = $name;// To do not change the name of module
 $module->Render();
 ?>

@@ -23,18 +23,7 @@ class _
 	public static string|null $Extension = ".php";
 
 	/**
-	 * A Directory=>Name=>Fucntion array to apply the Function before using the Path
-	 * @var mixed
-	 */
-	public static array $BeforeActions = array();
-	/**
-	 * A Directory=>Name=>Fucntion array to apply the Function after using the Path
-	 * @var mixed
-	 */
-	public static array $AfterActions = array();
-
-	/**
-	 * All sequences from aseq to base
+	 * All sequence from aseq to base
 	 * @example: [
 	 *	'home/domain/aseq/' => 'https://aseq.domain.tld/',
 	 *	'home/domain/1stseq/' => 'https://1stseq.domain.tld/',
@@ -43,7 +32,7 @@ class _
 	 *	'home/domain/base/' => 'https://base.domain.tld/'
 	 *]
 	 */
-	public static array $Sequences;
+	public static array $Sequence;
 
 	/**
 	 * To access all addresses to the base of the website,
@@ -80,4 +69,32 @@ class _
 	 * To access all the website information
 	 */
 	public static Info $Info;
+
+	
+	/**
+	 * A Directory=>Name=>Fucntion array to apply the Function before using the Path
+	 * @var mixed
+	 */
+	public static array $BeforeActions = array();
+	/**
+	 * A Directory=>Name=>Fucntion array to apply the Function after using the Path
+	 * @var mixed
+	 */
+	public static array $AfterActions = array();
+	
+	/**
+	 * The storage of all cached data
+	 * @var array
+	 */
+	public static array $Caches = [];
+	/**
+	 * Get the cached data or cache the data by execute the $generator
+	 * @param mixed $key
+	 * @param callable $generator
+	 */
+	public static function Cache($key, callable $generator){
+		$key=isStatic($key)?($key?:0):gettype($key);
+		if(isset(self::$Caches[$key])) return self::$Caches[$key];
+		return self::$Caches[$key] = $generator();
+	}
 }

@@ -12,15 +12,15 @@ function findContent($router, &$data)
         $path = implode("/", array_slice($path, 0, count($path) - 1));
     else
         $path = null;
-    $filter = grab($computeData, "Filter") ?? [];
+    $filter = pop($computeData, "Filter") ?? [];
     $received = receive();
-    return compute(grab($computeData, "ComputeName")??"content/get", [
+    return compute(pop($computeData, "ComputeName")??"content/get", [
         "Name"=>$name,
         "Filter" => [
-            "Query"=> grab($filter, "Query")??getBetween($received, "Query")??$name,
-            "Category" => grab($filter, "Category")??getBetween($received, "Category")??$path,
-            "Type"=> grab($filter, "Type")??get($received, "Type"),
-            "Tag"=> grab($filter, "Tag")??get($received, "Tag"),
+            "Query"=> pop($filter, "Query")??getBetween($received, "Query")??$name,
+            "Category" => pop($filter, "Category")??getBetween($received, "Category")??$path,
+            "Type"=> pop($filter, "Type")??get($received, "Type"),
+            "Tag"=> pop($filter, "Tag")??get($received, "Tag"),
             ...$filter??[]
         ],
         ...$computeData??[]
@@ -37,7 +37,7 @@ function findContent($router, &$data)
             if($c) return Convert::By($c, $router);
             else route("contents", $data);
         } else view(
-                grab($viewData, "ViewName") ?? "content",
+                pop($viewData, "ViewName") ?? "content",
                 isEmpty($viewData) ? $doc : [...$doc, ...$viewData]
             );
     })

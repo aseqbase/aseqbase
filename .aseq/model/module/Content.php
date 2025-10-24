@@ -463,7 +463,7 @@ class Content extends Module
                     module("MediaFrame");
                     if ($p_showmorebutton)
                          return join(PHP_EOL, loop($paths, action: function ($v, $k) use ($p_image, $p_morebuttontext) {
-                              return (new MediaFrame($v, logo: $p_image, name: is_numeric($k) ? $p_morebuttontext : $k))->DoRender();
+                              return (new MediaFrame($v, logo: $p_image, name: is_numeric($k) ? $p_morebuttontext : $k))->Render();
                          })) . Html::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
                               return Html::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
                          }), ["class" => "more view md-show"]);

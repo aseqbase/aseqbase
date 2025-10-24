@@ -150,7 +150,7 @@ class Collection extends Module
 					$p_meta = getValid($item, 'MetaData', null);
 					if ($p_meta !== null) {
 						$p_meta = Convert::FromJson($p_meta);
-						swap($this, $p_meta);
+						dip($this, $p_meta);
 					}
 					$p_meta = null;
 					$p_image = getValid($item, 'Image', $this->DefaultImage);

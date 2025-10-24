@@ -17,5 +17,5 @@ $module->AllowSubItemsDescription =
 $module->AllowSubItemsImage = 
 $module->AllowItemsImage = false;
 $module->AllowFixed = false;
-swap($module, $data);
+dip($module, $data);
 $module->Render();

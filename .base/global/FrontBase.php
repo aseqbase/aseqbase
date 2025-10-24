@@ -32,6 +32,8 @@ abstract class FrontBase
 	public $DefaultSourceSelector = "body";
 	public $DefaultDestinationSelector = "body";
 
+	public $SwitchRequest = "SwitchMode";
+
 	/**
 	 * Default page head Packages
 	 * @field html
@@ -138,6 +140,55 @@ abstract class FrontBase
 	 */
 	public $PatternPalette = array("/asset/pattern/main.svg", "/asset/pattern/doddle.png", "/asset/pattern/doddle-fantasy.png", "/asset/pattern/triangle.png", "/asset/pattern/slicksline.png", "/asset/pattern/doddle-mess.png");
 
+	public function __construct()
+	{
+		\MiMFa\Library\Revise::Load($this);
+		$this->Libraries[] = \MiMFa\Library\Html::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
+		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
+		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
+		if($this->DetectMode && is_null($this->SwitchMode)) {
+			request("window.matchMedia('(prefers-color-scheme: dark)').matches ? -1 : 1", 
+			function($mode){
+				$cmode = \_::$Front->GetMode();
+				if(($mode>0 && $cmode < 0) || ($mode<0 && $cmode > 0)){
+					setMemo(\_::$Front->SwitchRequest, true);
+					\_::$Front->SwitchMode = true;
+				}
+			});
+		}
+		if ($this->SwitchMode) {
+			$middle = $this->ForeColorPalette;
+			$this->ForeColorPalette = $this->BackColorPalette;
+			$this->BackColorPalette = $middle;
+			$this->CurrentMode = $this->GetMode($this->BackColor(0));
+		}
+	}
+
+	public function CreateTemplate($name = null, $data = [])
+	{
+		return new (template($name, $data, alternative: $this->DefaultTemplate))();
+	}
+
+	/**
+	 * Get the lightness of a color with a number between -255 to +255
+	 * @param mixed $color A three, four, six or eight characters hexadecimal color numbers for example #f80 or #ff8800
+	 * @return float|int A number between -255 (for maximum in darkness) to +255 (for maximum in lightness)
+	 */
+	public function GetMode($color = null)
+	{
+		if (!isValid($color))
+			if (!is_null($this->CurrentMode))
+				return $this->CurrentMode;
+			else
+				return $this->GetMode($this->BackColor(0));
+		$l = strlen($color) > 6;
+		$rgb = preg_find_all($l ? '/\w\w/' : '/\w/', $color);
+		$sc = ($l ? hexdec(getValid($rgb, 0, 0)) + hexdec(getValid($rgb, 1, 0)) + hexdec(getValid($rgb, 2, 0)) :
+			hexdec(getValid($rgb, 0, 0)) * 16 + hexdec(getValid($rgb, 1, 0)) * 16 + hexdec(getValid($rgb, 2, 0)) * 16 - 3);
+		return $sc > 510 ? $sc - 510 : ($sc < 255 ? $sc - 255 : $sc - 382.5);
+	}
+
+	
 	public function LoopPalette($palette, int $index = 0)
 	{
 		$index %= count($palette);
@@ -237,43 +288,6 @@ abstract class FrontBase
 		return \MiMFa\Library\Local::GetUrl($this->LoopPalette($this->PatternPalette, $index));
 	}
 
-	public function __construct()
-	{
-		\MiMFa\Library\Revise::Load($this);
-		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
-		$this->SwitchMode = receive("SwitchMode") ?? getMemo("SwitchMode") ?? $this->SwitchMode;
-		if ($this->DetectMode && $this->SwitchMode) {
-			$middle = $this->ForeColorPalette;
-			$this->ForeColorPalette = $this->BackColorPalette;
-			$this->BackColorPalette = $middle;
-			$this->CurrentMode = $this->GetMode($this->BackColor(0));
-		}
-	}
-
-	public function CreateTemplate($name = null, $data = [])
-	{
-		return new (template($name, $data, alternative: $this->DefaultTemplate))();
-	}
-
-	/**
-	 * Get the lightness of a color with a number between -255 to +255
-	 * @param mixed $color A three, four, six or eight characters hexadecimal color numbers for example #f80 or #ff8800
-	 * @return float|int A number between -255 (for maximum in darkness) to +255 (for maximum in lightness)
-	 */
-	public function GetMode($color = null)
-	{
-		if (!isValid($color))
-			if (!is_null($this->CurrentMode))
-				return $this->CurrentMode;
-			else
-				return $this->GetMode($this->BackColor(0));
-		$l = strlen($color) > 6;
-		$rgb = preg_find_all($l ? '/\w\w/' : '/\w/', $color);
-		$sc = ($l ? hexdec(getValid($rgb, 0, 0)) + hexdec(getValid($rgb, 1, 0)) + hexdec(getValid($rgb, 2, 0)) :
-			hexdec(getValid($rgb, 0, 0)) * 16 + hexdec(getValid($rgb, 1, 0)) * 16 + hexdec(getValid($rgb, 2, 0)) * 16 - 3);
-		return $sc > 510 ? $sc - 510 : ($sc < 255 ? $sc - 255 : $sc - 382.5);
-	}
-
 
 	public function GetInitial(): string|null
 	{
@@ -295,9 +309,9 @@ abstract class FrontBase
 	 * @param mixed $callback The call back handler
 	 * @example: get("body", function(selectedHtml)=>{ //do somework })
 	 */
-	public static function Iterate($selector = null, $callback = null)
+	public static function Bring($selector = null, $callback = null)
 	{
-		iterateRequest("document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? 'body') . ")", $callback);
+		bring("document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? 'body') . ")", $callback);
 	}
 
 	/**

@@ -4,6 +4,6 @@ $module = new MiMFa\Module\PrePage();
 $module->Title = "Bad Request 400";
 $module->Image = MiMFa\Library\Local::GetUrl(\_::$Info->ErrorSymbolPath);
 $module->Description = "There was an error in your request.";
-swap($module, $data);
+dip($module, $data);
 $module->Render();
 ?>

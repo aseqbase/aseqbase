@@ -50,5 +50,6 @@ table {
 }
 
 input:is([type=number],[type=range],[type=tel],[type=url],[type=email],[type=file],[type=date],[type=month],[type=week],[type=time],[type=datetime-local]){
+	direction: ltr;
 	text-align: left;
 }

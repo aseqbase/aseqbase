@@ -1,3 +1,3 @@
 <?php
-view(grab($data, "View", "ViewName")??\_::$Front->DefaultViewName, ["Name" => grab($data, "View", "Name")??"home",...(grab($data, "View")??[])]);
+view(pop($data, "View", "ViewName")??\_::$Front->DefaultViewName, ["Name" => pop($data, "View", "Name")??"home",...(pop($data, "View")??[])]);
 ?>

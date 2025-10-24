@@ -1,7 +1,7 @@
 <?php
 return \_::$Back->Query->FindCategory(
-    grabBetween($data, "Direction", "Name"),
-    grab($data, "Default")??[],
-    grab($data, "Table")
+    popBetween($data, "Direction", "Name"),
+    pop($data, "Default")??[],
+    pop($data, "Table")
 );
 ?>

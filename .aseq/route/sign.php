@@ -22,7 +22,7 @@ $data = $data??[];
             })
     ->else(!isEmpty(\_::$Address->Direction))
         ->On()->Get(fn() => view("part", ["Name" => \_::$Address->Direction]))
-    ->else(!$isuser && receive("Signature"))
+    ->else(!$isuser && getReceived("Signature"))
         ->On("sign/up")->Rest(fn () => compute("sign/up"))
     ->else(!$isuser)
         ->On("sign/in")->Rest(function () {
@@ -39,7 +39,7 @@ $data = $data??[];
                 reload();
         })
     ->else(!isEmpty(\_::$Address->Direction))
-        ->On()->Default(fn() => response(compute(\_::$Address->Direction)))
+        ->On()->Default(fn() => deliver(compute(\_::$Address->Direction)))
     ->else()
         ->On()->Default(fn() => view("part", ["Name" => "access"]))
     ->Handle();

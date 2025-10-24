@@ -23,7 +23,7 @@ module("Form");
 				"Access" => \_::$User->AdminAccess,
 				"Status" => -1
 			]);
-			swap($form, $data);
+			dip($form, $data);
 			$form->Render();
 		}
 	})
@@ -48,7 +48,7 @@ module("Form");
 			$form->Children[] = new MiMFa\Module\Field("email", "Email", $email, required: true, lock: !isEmpty($email));
 		}
 		$form->Children[] = new MiMFa\Module\Field("texts", "Message", $msg, required: true);
-		swap($form, $data);
+		dip($form, $data);
 		$form->Render();
 	})->Handle();
 ?>

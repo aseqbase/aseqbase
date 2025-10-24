@@ -190,14 +190,14 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		\_::$Back->Session->SetSecure("Email", $this->Email = $this->TemporaryEmail = takeValid($profile, "Email"));
 		\_::$Back->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->SelectValue("`Access`", "Id=" . $this->GroupId));
 		if (!$profile) {
-			\_::$Back->Session->ForgetSecure("Signature");
-			\_::$Back->Session->ForgetSecure("Password");
-			\_::$Back->Session->ForgetSecure("Id");
-			\_::$Back->Session->ForgetSecure("GroupId");
-			\_::$Back->Session->ForgetSecure("Image");
-			\_::$Back->Session->ForgetSecure("Name");
-			\_::$Back->Session->ForgetSecure("Email");
-			\_::$Back->Session->ForgetSecure("Access");
+			\_::$Back->Session->PopSecure("Signature");
+			\_::$Back->Session->PopSecure("Password");
+			\_::$Back->Session->PopSecure("Id");
+			\_::$Back->Session->PopSecure("GroupId");
+			\_::$Back->Session->PopSecure("Image");
+			\_::$Back->Session->PopSecure("Name");
+			\_::$Back->Session->PopSecure("Email");
+			\_::$Back->Session->PopSecure("Access");
 		}
 	}
 
@@ -311,11 +311,11 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			$id = takeValid($this->Find($signature, $password), "Id");
 		return is_null($id) ? null : $this->DataTable->SetMetaValue($id, $key, $value);
 	}
-	public function ForgetMetaValue($key, $signature = null, $password = null)
+	public function PopMetaValue($key, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->ForgetMetaValue($id, $key);
+		return is_null($id) ? null : $this->DataTable->PopMetaValue($id, $key);
 	}
 
 	public function GetGroup($signature = null, $password = null)
@@ -419,10 +419,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if ($signature === null || $signature === $this->Signature) {
 			$signature = $signature ?? $this->Signature;
-			\_::$Back->Session->ForgetData($signature . "_" . getClientCode());
+			\_::$Back->Session->PopData($signature . "_" . getClientCode());
 			$this->Load();
 		} else
-			\_::$Back->Session->ForgetData($signature . "_" . getClientCode());
+			\_::$Back->Session->PopData($signature . "_" . getClientCode());
 		return !$this->GetAccess($this->UserAccess);
 	}
 
@@ -467,7 +467,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 */
 	public function ReceiveActivationEmail()
 	{
-		$sign = $this->DecryptToken($this->ActivationTokenKey, receive($this->ActivationTokenKey));
+		$sign = $this->DecryptToken($this->ActivationTokenKey, getReceived($this->ActivationTokenKey));
 		if (empty($sign))
 			return null;
 		return $this->DataTable->Update(
@@ -502,10 +502,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 */
 	public function ReceiveRecoveryEmail()
 	{
-		$newPass = receive("Password");
+		$newPass = getReceived("Password");
 		if (isValid($newPass)) {
 			$this->EncryptPassword($newPass);
-			$sign = $this->DecryptToken($this->RecoveryTokenKey, receive($this->RecoveryTokenKey));
+			$sign = $this->DecryptToken($this->RecoveryTokenKey, getReceived($this->RecoveryTokenKey));
 			if (empty($sign))
 				return null;
 			return $this->ResetPassword($sign, $newPass) ? true : false;
@@ -564,7 +564,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			throw new \SilentException("Your request is invalid or used before!");
 		if ($date != date($this->TokenDateTimeFormat))
 			throw new \SilentException("Your request is expired!");
-		\_::$Back->Session->ForgetData($sign);
+		\_::$Back->Session->PopData($sign);
 		return get($this->Find($sign), "Signature");
 	}
 }

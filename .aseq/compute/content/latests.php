@@ -1,4 +1,4 @@
 <?php
-grab($data, "Order");
+pop($data, "Order");
 return compute("content/all",["Order"=>"`UpdateTime` DESC", ...$data]);
 ?>

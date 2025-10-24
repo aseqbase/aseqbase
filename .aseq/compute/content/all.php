@@ -1,18 +1,18 @@
 <?php
-$Filter = grab($data, "Filter");
+$Filter = pop($data, "Filter");
 $cn = \_::$Back->Query->ColumnNames;
-\_::$Back->Query->ColumnNames = grab($Filter, "Columns" ) ?? "*";
+\_::$Back->Query->ColumnNames = pop($Filter, "Columns" ) ?? "*";
 $result = \_::$Back->Query->SearchContents(
-    query: grab($Filter, "Query"),
-    direction: grabBetween($Filter, "Category", "Direction"),
-    type: grab($Filter, "Type" ),
-    tag: grab($Filter, "Tag"),
-    nest: grab($Filter, "Nest")??-1,
-    condition: grab($data, "Condition"),
-    order: grab($data, "Order")??"`Priority` DESC,`UpdateTime` DESC",
-    limit: grab($data, "Limit")??-1,
-    params: grab($data, "Params")??[],
-    table: grab($data, "Table")
+    query: pop($Filter, "Query"),
+    direction: popBetween($Filter, "Category", "Direction"),
+    type: pop($Filter, "Type" ),
+    tag: pop($Filter, "Tag"),
+    nest: pop($Filter, "Nest")??-1,
+    condition: pop($data, "Condition"),
+    order: pop($data, "Order")??"`Priority` DESC,`UpdateTime` DESC",
+    limit: pop($data, "Limit")??-1,
+    params: pop($data, "Params")??[],
+    table: pop($data, "Table")
 );
 \_::$Back->Query->ColumnNames = $cn;
 return $result;
