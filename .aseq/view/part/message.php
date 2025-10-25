@@ -7,7 +7,7 @@ module("Form");
 		$form = new MiMFa\Module\Form();
 		$received = receivePost();
 		if (!get($received, "Message"))
-			render($form->GetError("Your message could not be empty!"));
+			response($form->GetError("Your message could not be empty!"));
 		else {
 			$form->MailSubject = \_::$Address->Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$User, "Name")) . "'";
 			$form->ReceiverEmail = \_::$Info->ReceiverEmail;

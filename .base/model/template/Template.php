@@ -81,26 +81,26 @@ class Template extends \Base{
     }
 
 	public function Render(){
-		if(isValid($this->Initial)) render($this->Initial);
+		if(isValid($this->Initial)) response($this->Initial);
 		else $this->RenderInitial();
-		if(isValid($this->Main)) render($this->Main);
+		if(isValid($this->Main)) response($this->Main);
 		else $this->RenderMain();
-        if(isValid($this->Header)) render($this->Header);
+        if(isValid($this->Header)) response($this->Header);
         else $this->RenderHeader();
-        if(isValid($this->Content)) render($this->Content);
+        if(isValid($this->Content)) response($this->Content);
         else $this->RenderContent();
-        if(isValid($this->Footer)) render($this->Footer);
+        if(isValid($this->Footer)) response($this->Footer);
         else $this->RenderFooter();
-		if(isValid($this->Final)) render($this->Final);
+		if(isValid($this->Final)) response($this->Final);
 		else $this->RenderFinal();
 	}
 
 	public function RenderInitial(){
         region("initial");
         $title = $this->WindowTitle??[preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/","",\_::$Address->Direction)];
-        render(Html::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
-		render(Html::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
-        render(Html::Style("
+        response(Html::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
+		response(Html::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
+        response(Html::Style("
         head, style, script, link, meta, title{
             display: none !important;
             visible: hidden !important;
@@ -280,8 +280,8 @@ class Template extends \Base{
         }
         "));
         foreach ($this as $key=>$value)
-        	if(is_string($key)) render(Html::Meta($key, Convert::ToString($value)));
-            else render($value);
+        	if(is_string($key)) response(Html::Meta($key, Convert::ToString($value)));
+            else response($value);
     }
 	public function RenderMain(){
         region("main");
@@ -290,8 +290,8 @@ class Template extends \Base{
     }
 	public function RenderContent(){
         foreach ($this->Children??[] as $key=>$value)
-        	if(is_string($key)) render(Html::Section($value, ["Id" =>$key]));
-            else render($value);
+        	if(is_string($key)) response(Html::Section($value, ["Id" =>$key]));
+            else response($value);
     }
 	public function RenderFooter(){
     }

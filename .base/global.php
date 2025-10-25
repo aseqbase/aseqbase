@@ -498,10 +498,10 @@ function request($intent = null, $callback = null)
 		$id = "S_" . getID(true);
 		$intent = is_string($intent) ? $intent : Script::Convert($intent);
 		if (isStatic($callback))
-			render(Html::Script("$start(" . $callbackScript . ")(" .
+			response(Html::Script("$start(" . $callbackScript . ")(" .
 				Script::Convert($callback) . ",$intent);document.getElementById('$id').remove();$end", null, ["id" => $id]));
 		else
-			render(Html::Script(
+			response(Html::Script(
 				$callback ? $start .
 				'sendInternalRequest(null,{"' . Internal::Set($callback) . '":JSON.stringify(' . $intent . ")}, null,$callbackScript,$callbackScript, null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
 				: $intent,
@@ -527,10 +527,10 @@ function bring($intents = null, $callback = null)
 	$id = "S_" . getID(true);
 	$intents = Convert::ToString($intents, ",", "{1}", "[{0}]", "[]");
 	if (isStatic($callback))
-		render(Html::Script("$start for(item of $intents)(" . $callbackScript . ")(" .
+		response(Html::Script("$start for(item of $intents)(" . $callbackScript . ")(" .
 			Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id" => $id]));
 	else
-		render(Html::Script(
+		response(Html::Script(
 			$callback ? "$start" .
 			"for(item of $intents)sendInternalRequest(null,{\"" . Internal::Set($callback) . '":item.outerHTML},' .
 			"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
@@ -559,7 +559,7 @@ function interact($intent = null, $callback = null)
 }
 function alert($message = null, $callback = null)
 {
-	return renderScript(
+	return interact(
 		Script::Alert($message) . "??true",
 		$callback
 	);
@@ -592,9 +592,9 @@ function prompt($message = null, $callback = null, $default = null)
 function response($content = null, $status = null)
 {
 	setStatus($status);
-	return render($content);
+	echo $content = Convert::ToString($content);
+	return $content;
 }
-
 /**
  * Echo scripts to the client side
  */
@@ -665,6 +665,20 @@ function report($message = null)
 }
 
 /**
+ * Convert markdown supported data and echo them on the client side
+ * @param mixed $content The data that is ready to print
+ * @param array|null $replacements A key=>value array of all parts to their replacement matchs
+ * @param mixed $status The header status
+ * @return mixed Printed data
+ */
+function render($content = null, $replacements = null, $status = null)
+{
+	setStatus($status);
+	echo $content = Html::Convert($replacements?decode($content, $replacements):$content);
+	return $content;
+}
+
+/**
  * To change the header in the client side
  * @param mixed $key The header key
  * @param mixed $value The header value
@@ -672,7 +686,7 @@ function report($message = null)
  */
 function setHeader($key, $value)
 {
-	if (isValid($key) && !headers_sent()) {
+	if ($key && !headers_sent()) {
 		header("$key: $value");
 		return true;
 	}
@@ -698,85 +712,11 @@ function setContentType($value = null)
  */
 function setStatus($status = null)
 {
-	if (isValid($status) && !headers_sent()) {
+	if ($status && !headers_sent()) {
 		header("HTTP/1.1 " . abs($status));
 		return true;
 	}
 	return false;
-}
-
-#endregion 
-
-
-#region RENDERING
-
-/**
- * Echo content on the client side
- * @param mixed $content The data that is ready to print
- * @return mixed Printed data
- */
-function render($content = null)
-{
-	echo $content = Convert::ToString($content);
-	return $content;
-}
-
-/**
- * Render output append an element by the specific selector
- * @param mixed $selector Your specific element selector, for example "body>div.title"
- * @param mixed $content The data that is ready to print
- */
-function renderAppend($content, $selector = "body")
-{
-	return beforeUsing(\_::$Address->Directory, "finalize", function () use ($content, $selector) {
-		render(Html::Script(
-			Internal::MakeScript(
-				$content,
-				null,
-				"(data,err)=>$(" . Script::Convert($selector) . ").append(data??err)"
-				//"(data,err)=>document.querySelector(".Script::Convert($selector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-			)
-		));
-	});
-}
-/**
- * Render output prepend an element by the specific selector
- * @param mixed $selector Your specific element selector, for example "body>div.title"
- * @param mixed $content The data that is ready to print
- */
-function renderPrepend($content, $selector = "body")
-{
-	return beforeUsing(\_::$Address->Directory, "finalize", function () use ($content, $selector) {
-		render(Html::Script(
-			Internal::MakeScript(
-				$content,
-				null,
-				"(data,err)=>$(" . Script::Convert($selector) . ").prepend(data??err)"
-				//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-			)
-		));
-	});
-}
-
-/**
- * Inject Scripts to the head of the client side, injected to the head
- */
-function renderScript($content, $source = null, ...$attributes)
-{
-	renderAppend(
-		Html::Script($content, $source, ...$attributes),
-		"body"
-	);
-}
-/**
- * Inject Styles to the head of the client side, injected to the head
- */
-function renderStyle($content, $source = null, ...$attributes)
-{
-	renderAppend(
-		Html::Style($content, $source, ...$attributes),
-		"head"
-	);
 }
 
 #endregion 
@@ -844,7 +784,7 @@ function deliverXml($output = null, $status = null)
  */
 function deliverAgain($output = null, $status = null, $url = null)
 {
-	render(Html::Script(
+	response(Html::Script(
 		Internal::MakeScript(
 			$output,
 			null,
@@ -1074,22 +1014,22 @@ function hasTimer($key = null)
 	return getTimer($key) > 0;
 }
 
-function encode($plain, &$dic = null, $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU')
+function encode($plain, &$replacements = null, $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU')
 {
-	if (!is_array($dic))
-		$dic = array();
-	$c = count($dic);
-	return preg_replace_callback($pattern, function ($a) use (&$dic, &$c, $wrapStart, $wrapEnd) {
+	if (!is_array($replacements))
+		$replacements = array();
+	$c = count($replacements);
+	return preg_replace_callback($pattern, function ($a) use (&$replacements, &$c, $wrapStart, $wrapEnd) {
 		$key = $a[0];
-		if (array_key_exists($key, $dic))
-			return $dic[$key];
-		return $dic[$key] = $wrapStart . $c++ . $wrapEnd;
+		if (array_key_exists($key, $replacements))
+			return $replacements[$key];
+		return $replacements[$key] = $wrapStart . $c++ . $wrapEnd;
 	}, $plain);
 }
-function decode($cipher, $dic)
+function decode($cipher, ?array $replacements)
 {
-	if (is_array($dic))
-		foreach (array_reverse($dic) as $k => $v)
+	if (is_array($replacements))
+		foreach (array_reverse($replacements) as $k => $v)
 			$cipher = str_replace($v, $k, $cipher);
 	return $cipher;
 }
@@ -1294,18 +1234,18 @@ function usingBefores($directory, string|null $name = null)
 	$directory = strtolower($directory ?? "");
 	$name = strtolower($name ?? "");
 	if (isset(\_::$BeforeActions[$directory][$name]))
-		render(\_::$BeforeActions[$directory][$name]);
+		response(\_::$BeforeActions[$directory][$name]);
 	elseif (isset(\_::$BeforeActions[$directory . $name]))
-		render(\_::$BeforeActions[$directory . $name]);
+		response(\_::$BeforeActions[$directory . $name]);
 }
 function usingAfters($directory, string|null $name = null)
 {
 	$directory = strtolower($directory ?? "");
 	$name = strtolower($name ?? "");
 	if (isset(\_::$AfterActions[$directory][$name]))
-		render(\_::$AfterActions[$directory][$name]);
+		response(\_::$AfterActions[$directory][$name]);
 	elseif (isset(\_::$AfterActions[$directory . $name]))
-		render(\_::$AfterActions[$directory . $name]);
+		response(\_::$AfterActions[$directory . $name]);
 }
 
 /**

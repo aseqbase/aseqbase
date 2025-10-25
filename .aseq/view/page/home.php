@@ -7,7 +7,7 @@ $module = new \MiMFa\Module\RingTabs();
 $module->Image = \_::$User->Image??\_::$Info->LogoPath;
 $module->Items = \_::$Info->Services;
 //dip($module, $data);
-render(
+response(
 	Html::Style("
 		.page-home {
 			padding: 10px 10px 50px;

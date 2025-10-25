@@ -513,7 +513,7 @@ class Local
 		header('Cache-Control: must-revalidate');
 		header('Pragma: public');
 
-		render("\xEF\xBB\xBF");
+		response("\xEF\xBB\xBF");
 		deliver($content);
 	}
 	/**

@@ -188,7 +188,7 @@ class RouterBase extends Address
      */
     public function Render()
     {
-        return render($this->Handle());
+        return response($this->Handle());
     }
     public function ToString()
     {

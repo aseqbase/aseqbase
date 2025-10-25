@@ -37,7 +37,7 @@ class Internal
      */
     public static function Render($name = null)
     {
-        render(self::Handle($name));
+        response(self::Handle($name));
     }
 
     public static function MakeStartScript($multilines = false){

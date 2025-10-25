@@ -44,7 +44,7 @@ function findContent($router, &$data)
     ->Default(function ($router) use ($data) {
         $doc = findContent($router, $data);
         if (isEmpty($doc))
-            render(__(get($data, "ErrorHandler") ?? "Could not find related content"));
+            response(__(get($data, "ErrorHandler") ?? "Could not find related content"));
         elseif (compute("comment/handle", $doc))
             reload();
     })

@@ -15,7 +15,7 @@ $ops = \_::$Info->OwnerDescription?Convert::ToParagraphs(__(\_::$Info->OwnerDesc
 $dps = \_::$Info->FullDescription?Convert::ToParagraphs(__(\_::$Info->FullDescription)):[];
 $opsc = count($ops);
 $dpsc = count($dps);
-render(
+response(
 	Html::Style("
 		.{$module->Name} .content{
 			text-align: center;

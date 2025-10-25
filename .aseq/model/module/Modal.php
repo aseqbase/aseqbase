@@ -169,13 +169,13 @@ class Modal extends Player{
 	}
 	
 	public function Show($content = null){
-		return render($this->ShowScript($content));
+		return response($this->ShowScript($content));
 	}
 	public function ShowScript($content = null){
 		return ($content?$this->InitializeScript(content: $content):"").$this->Name."_Show();";
 	}
 	public function Hide(){
-		return render($this->HideScript());
+		return response($this->HideScript());
 	}
 	public function HideScript(){
 		return $this->Name."_Hide();";

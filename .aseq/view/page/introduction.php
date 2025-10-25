@@ -63,9 +63,9 @@ use MiMFa\Library\Html;
                     if ($isp)
                         echo Html::OpenTag("a", ["href"=>$p]);
                     if ($v = get($value, "Icon"))
-                        render(Html::Icon($v));
+                        response(Html::Icon($v));
                     if (isValid($src = get($value, "Image")))
-                        render(Html::Image($src));
+                        response(Html::Image($src));
                     ?>
                         <?php echo getBetween($value, "Title", "Name"); ?>
                     </h3>
@@ -73,7 +73,7 @@ use MiMFa\Library\Html;
                         echo Html::CloseTag(); ?>
                     <div class="description">
                         <?php echo get($value, "Description"); ?>
-                        <?php render(Html::Center(getBetween($value, "Button", "More"))); ?>
+                        <?php response(Html::Center(getBetween($value, "Button", "More"))); ?>
                     </div>
                 </div>
             <?php } ?>

@@ -2,6 +2,6 @@
 module("SignInForm");
 $module = new \MiMFa\Module\SignInForm();
 dip($module, $data);
-render($module->Delete());
+response($module->Delete());
 return $module->Result;
 ?>

@@ -1,5 +1,11 @@
 <?php
 
+use MiMFa\Library\Html;
+use MiMFa\Library\Internal;
+use MiMFa\Library\Local;
+use MiMFa\Library\Revise;
+use MiMFa\Library\Script;
+
 library("Revise");
 /**
  *All the basic website front-end settings and functions
@@ -142,19 +148,21 @@ abstract class FrontBase
 
 	public function __construct()
 	{
-		\MiMFa\Library\Revise::Load($this);
-		$this->Libraries[] = \MiMFa\Library\Html::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
+		Revise::Load($this);
+		$this->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
 		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
-		if($this->DetectMode && is_null($this->SwitchMode)) {
-			request("window.matchMedia('(prefers-color-scheme: dark)').matches ? -1 : 1", 
-			function($mode){
-				$cmode = \_::$Front->GetMode();
-				if(($mode>0 && $cmode < 0) || ($mode<0 && $cmode > 0)){
-					setMemo(\_::$Front->SwitchRequest, true);
-					\_::$Front->SwitchMode = true;
+		if ($this->DetectMode && is_null($this->SwitchMode)) {
+			request(
+				"window.matchMedia('(prefers-color-scheme: dark)').matches ? -1 : 1",
+				function ($mode) {
+					$cmode = \_::$Front->GetMode();
+					if (($mode > 0 && $cmode < 0) || ($mode < 0 && $cmode > 0)) {
+						setMemo(\_::$Front->SwitchRequest, true);
+						\_::$Front->SwitchMode = true;
+					}
 				}
-			});
+			);
 		}
 		if ($this->SwitchMode) {
 			$middle = $this->ForeColorPalette;
@@ -188,7 +196,7 @@ abstract class FrontBase
 		return $sc > 510 ? $sc - 510 : ($sc < 255 ? $sc - 255 : $sc - 382.5);
 	}
 
-	
+
 	public function LoopPalette($palette, int $index = 0)
 	{
 		$index %= count($palette);
@@ -277,7 +285,7 @@ abstract class FrontBase
 	 */
 	public function Overlay(int $index = 0)
 	{
-		return \MiMFa\Library\Local::GetUrl($this->LoopPalette($this->OverlayPalette, $index));
+		return Local::GetUrl($this->LoopPalette($this->OverlayPalette, $index));
 	}
 	/**
 	 * To get the Pattern image by index
@@ -285,7 +293,7 @@ abstract class FrontBase
 	 */
 	public function Pattern(int $index = 0)
 	{
-		return \MiMFa\Library\Local::GetUrl($this->LoopPalette($this->PatternPalette, $index));
+		return Local::GetUrl($this->LoopPalette($this->PatternPalette, $index));
 	}
 
 
@@ -311,7 +319,7 @@ abstract class FrontBase
 	 */
 	public static function Bring($selector = null, $callback = null)
 	{
-		bring("document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? 'body') . ")", $callback);
+		bring("document.querySelectorAll(" . Script::Convert($selector ?? 'body') . ")", $callback);
 	}
 
 	/**
@@ -322,7 +330,7 @@ abstract class FrontBase
 	 */
 	public function Get($selector = null, $callback = null)
 	{
-		request("Array.from(document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
+		request("Array.from(document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
 	}
 	/**
 	 * Replace the output with a special part of client side
@@ -332,7 +340,11 @@ abstract class FrontBase
 	 */
 	public function Set($selector = null, $handler = null, ...$args)
 	{
-		return renderScript($this->MakeSetScript($selector, $handler, ...$args));
+		return beforeUsing(
+			\_::$Address->Directory,
+			"finalize",
+			fn() => response(Html::Script($this->MakeSetScript($selector, $handler, ...$args)))
+		);
 	}
 	/**
 	 * Make a script to
@@ -343,10 +355,10 @@ abstract class FrontBase
 	 */
 	public function MakeSetScript($selector = null, $handler = null, ...$args)
 	{
-		return \MiMFa\Library\Internal::MakeScript(
+		return Internal::MakeScript(
 			$handler,
 			$args,
-			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err));l.remove();})"
+			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err));l.remove();})"
 		);
 	}
 	/**
@@ -355,7 +367,11 @@ abstract class FrontBase
 	 */
 	public function Delete($selector = "body")
 	{
-		return renderScript($this->MakeDeleteScript($selector));
+		return beforeUsing(
+			\_::$Address->Directory,
+			"finalize",
+			fn() => self::Append("body", Html::Script($this->MakeDeleteScript($selector)))
+		);
 	}
 	/**
 	 * Make a script to Delete a special part of client side
@@ -363,7 +379,7 @@ abstract class FrontBase
 	 */
 	public function MakeDeleteScript($selector = "body")
 	{
-		return \MiMFa\Library\Internal::MakeStartScript() . "document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultSourceSelector) . ").forEach(el=>el.remove())" . \MiMFa\Library\Internal::MakeEndScript();
+		return Internal::MakeStartScript() . "document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultSourceSelector) . ").forEach(el=>el.remove())" . Internal::MakeEndScript();
 	}
 	/**
 	 * Insert output before a special part of client side
@@ -373,7 +389,11 @@ abstract class FrontBase
 	 */
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
-		return renderScript($this->MakeBeforeScript($selector, $handler, ...$args));
+		return beforeUsing(
+			\_::$Address->Directory,
+			"finalize",
+			fn() => self::Append("body", Html::Script($this->MakeBeforeScript($selector, $handler, ...$args)))
+		);
 	}
 	/**
 	 * Make a script to
@@ -384,10 +404,10 @@ abstract class FrontBase
 	 */
 	public function MakeBeforeScript($selector = "body", $handler = null, ...$args)
 	{
-		return \MiMFa\Library\Internal::MakeScript(
+		return Internal::MakeScript(
 			$handler,
 			$args,
-			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
 		);
 	}
 	/**
@@ -398,7 +418,11 @@ abstract class FrontBase
 	 */
 	public function After($selector = "body", $handler = null, ...$args)
 	{
-		return renderScript($this->MakeAfterScript($selector, $handler, ...$args));
+		return beforeUsing(
+			\_::$Address->Directory,
+			"finalize",
+			fn() => self::Append("body", Html::Script($this->MakeAfterScript($selector, $handler, ...$args)))
+		);
 	}
 	/**
 	 * Make a script to
@@ -409,10 +433,10 @@ abstract class FrontBase
 	 */
 	public function MakeAfterScript($selector = "body", $handler = null, ...$args)
 	{
-		return \MiMFa\Library\Internal::MakeScript(
+		return Internal::MakeScript(
 			$handler,
 			$args,
-			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
 		);
 	}
 	/**
@@ -423,7 +447,11 @@ abstract class FrontBase
 	 */
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
-		return renderScript($this->MakeFillScript($selector, $handler, ...$args));
+		return beforeUsing(
+			\_::$Address->Directory,
+			"finalize",
+			fn() => self::Append("body", Html::Script($this->MakeFillScript($selector, $handler, ...$args)))
+		);
 	}
 	/**
 	 * Make a script to
@@ -434,11 +462,11 @@ abstract class FrontBase
 	 */
 	public function MakeFillScript($selector = "body", $handler = null, ...$args)
 	{
-		return \MiMFa\Library\Internal::MakeScript(
+		return Internal::MakeScript(
 			$handler,
 			$args,
-			//"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
-			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
+			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
 		);
 	}
 	/**
@@ -449,7 +477,11 @@ abstract class FrontBase
 	 */
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
-		return renderScript($this->MakePrependScript($selector, $handler, ...$args));
+		return beforeUsing(
+			\_::$Address->Directory,
+			"finalize",
+			fn() => self::Append("body", Html::Script($this->MakePrependScript($selector, $handler, ...$args)))
+		);
 	}
 	/**
 	 * Make a script to
@@ -460,10 +492,12 @@ abstract class FrontBase
 	 */
 	public function MakePrependScript($selector = "body", $handler = null, ...$args)
 	{
-		return \MiMFa\Library\Internal::MakeScript(
+		return Internal::MakeScript(
 			$handler,
 			$args,
-			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+			"(data,err)=>$(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").prepend(data??err)"
+			//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 		);
 	}
 	/**
@@ -474,7 +508,11 @@ abstract class FrontBase
 	 */
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
-		return renderScript($this->MakeAppendScript($selector, $handler, ...$args));
+		return beforeUsing(
+			\_::$Address->Directory,
+			"finalize",
+			fn() => self::Append("body", Html::Script($this->MakeAppendScript($selector, $handler, ...$args)))
+		);
 	}
 	/**
 	 * Make a script to
@@ -485,10 +523,13 @@ abstract class FrontBase
 	 */
 	public function MakeAppendScript($selector = "body", $handler = null, ...$args)
 	{
-		return \MiMFa\Library\Internal::MakeScript(
+		return Internal::MakeScript(
 			$handler,
 			$args,
-			"(data,err)=>document.querySelectorAll(" . \MiMFa\Library\Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+			//"(data,err)=>document.querySelector(".Script::Convert($selector ?? $this->DefaultDestinationSelector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+			//"(data,err)=>$(" . Script::Convert($selector) . ").append(data??err)"
+
 		);
 	}
 }

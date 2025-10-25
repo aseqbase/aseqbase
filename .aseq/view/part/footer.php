@@ -19,7 +19,7 @@
     $module->Style->Position = "absolute";
     $module->Style->Left = "var(--size-1)";
     $module->Render();
-    render(
+    response(
         Html::Icon("arrow-up", "scrollThere('head');", [
             "class" => "view top-hide",
             "style" => "

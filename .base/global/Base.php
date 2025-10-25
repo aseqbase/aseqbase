@@ -204,7 +204,7 @@ class Base extends \ArrayObject
 	public function Render()
 	{
 		if ($this->Visual) {
-			render($this->Handle());
+			response($this->Handle());
 			$this->Rendered++;
 			return null;
 		}

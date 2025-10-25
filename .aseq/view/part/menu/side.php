@@ -19,7 +19,7 @@ if (\_::$Back->AllowTranslate) {
 }
 dip($module, $data);
 $module->Render();
-render(Html::Script("
+response(Html::Script("
 	function viewSideMenu(show){
 		{$module->Name}_ViewSideMenu(show);
 	}

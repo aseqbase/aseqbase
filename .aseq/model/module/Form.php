@@ -726,8 +726,7 @@ class Form extends Module
 					Html::Form(
 						($this->AllowContent ? $this->GetContent() : "") .
 						Convert::ToString($this->GetFields()) .
-						Html::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
-						,
+						Html::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"]),
 						$src,
 						["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
 					, ...($this->AllowAnimate?["data-aos"=>"fade-left"]:[])) .

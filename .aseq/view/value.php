@@ -1,2 +1,2 @@
 <?php
-render($data);
+response($data);

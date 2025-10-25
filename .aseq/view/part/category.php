@@ -16,7 +16,7 @@ dip($module, $data);
 $module->Name = $name;// To do not change the name of module
 $module->Render();
 if ($items) {
-    render(Html::Style("
+    response(Html::Style("
         .categories{
             display:flex;
             justify-content: center;

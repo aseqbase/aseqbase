@@ -3787,7 +3787,7 @@ class Html
                                 data: $datachart" . ($options == null ? "" : ",
                                 " . $options) . "
                             });
-                            chart.render();
+                            chart.response();
                         });"),
                 ["id" => $id, "style" => ($height ? "height:$height;" : "") . ($width ? "width:$width;" : ""), "class" => "chart"],
                 $attributes

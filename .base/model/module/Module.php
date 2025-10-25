@@ -352,7 +352,7 @@ class Module extends \Base
      public function Render()
      {
           if ($this->Visual) {
-               render($this->Handle());
+               response($this->Handle());
                $this->Rendered++;
                return null;
           }
@@ -366,7 +366,7 @@ class Module extends \Base
           $output = null;
           if ($this->Rendered || $this->Handled){
                if ($this->Visual) {
-                    render($this->ReHandle());
+                    response($this->ReHandle());
                     $this->Rendered++;
                }
                else $output = $this->ReHandle();
