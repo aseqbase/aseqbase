@@ -512,36 +512,6 @@ function request($intent = null, $callback = null)
 }
 
 /**
- * Interact with all specific parts of the client side one by one
- * @param mixed $intents The front iterator JS codes like an array 
- * @param mixed $callback The call back handler
- * @example: iterateRequest("document.querySelectorAll('body input')", function(selectedItems)=>{ //do somework })
- */
-function bring($intents = null, $callback = null)
-{
-	$callbackScript = "(data,err)=>{el=document.createElement('qb');el.innerHTML=data??err;item.before(...el.childNodes);item.remove();}";
-	$progressScript = "null";
-	$timeout = 60000;
-	$start = Internal::MakeStartScript(true);
-	$end = Internal::MakeEndScript(true);
-	$id = "S_" . getID(true);
-	$intents = Convert::ToString($intents, ",", "{1}", "[{0}]", "[]");
-	if (isStatic($callback))
-		response(Html::Script("$start for(item of $intents)(" . $callbackScript . ")(" .
-			Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id" => $id]));
-	else
-		response(Html::Script(
-			$callback ? "$start" .
-			"for(item of $intents)sendInternalRequest(null,{\"" . Internal::Set($callback) . '":item.outerHTML},' .
-			"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
-			: $intents
-			,
-			null,
-			["id" => $id]
-		));
-}
-
-/**
  * Have a dialog with the client side
  * @param mixed $intent The front JS codes
  * @param mixed $callback The call back handler
@@ -674,7 +644,7 @@ function report($message = null)
 function render($content = null, $replacements = null, $status = null)
 {
 	setStatus($status);
-	echo $content = Html::Convert($replacements?decode($content, $replacements):$content);
+	echo $content = Html::Convert($replacements ? decode($content, $replacements) : $content);
 	return $content;
 }
 
@@ -789,7 +759,7 @@ function deliverAgain($output = null, $status = null, $url = null)
 			$output,
 			null,
 			"(data,err)=>{"
-			($output ? "document.open();document.write(data??err);document.close();":"") .
+			($output ? "document.open();document.write(data??err);document.close();" : "") .
 			($url ? "window.history.pushState(null, null, `" . getFullUrl($url) . "`);" : "") .
 			"}"
 		)
@@ -878,23 +848,17 @@ function relocate($url = null)
 	deliverScript("window.history.pushState(null, null, " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ");");
 }
 /**
- * Open a url in the current tab, new tab, etc.
+ * Load the new address
  * @param mixed $url
  * @param bool|string $target Put true to visit in "_blank" target, false for "_self" or put the name of target otherwise
  * @return void
  */
-function open($url, $target = "_self")
+function load($url = null, $target = null)
 {
-	deliverScript("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '" . ($target === true ? "_blank" : ($target === false ? "_self" : $target)) . "');");
-}
-/**
- * Load the new address
- * @param mixed $url
- * @return void
- */
-function load($url = null)
-{
-	deliverScript("window.location.href = " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ";");
+	if (is_null($target))
+		deliverScript("window.location.href = " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ";");
+	else
+		deliverScript("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '" . ($target === true ? "_blank" : ($target === false ? "_self" : $target)) . "');");
 }
 /**
  * Reload the current location
@@ -1122,9 +1086,20 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
 	return $default;
 }
 /**
- * To seacrh and find the correct path of a file between all sequences
- * @param string|null $file The releative file path
- * @param mixed $extension The extention like ".php"
+ * To search and find the correct path of a file between all sequences
+ * @param string|null $path The relative file path
+ * @param string|int $origin The start layer of the sequences (a zero started index)
+ * @param int $depth How much layers it should iterate in searching
+ * @return string|null The correct path of the file or null if its could not find
+ */
+function address(string|null $path = null, string|int $origin = 0, int $depth = 999999)
+{
+	return addressing($path, "", $origin, $depth);
+}
+/**
+ * To search and find the correct path of a file between all sequences
+ * @param string|null $file The relative file path
+ * @param mixed $extension The extention like ".jpg" (leave null for default value ".php")
  * @param string|int $origin The start layer of the sequences (a zero started index)
  * @param int $depth How much layers it should iterate in searching
  * @return string|null The correct path of the file or null if its could not find
@@ -1167,9 +1142,9 @@ function addressing(string|null $file = null, $extension = null, string|int $ori
 	return null;
 }
 /**
- * To seacrh in a specific directory in all sequences, to find a file with the name then including that
- * @param string|null $file The releative file path
- * @param mixed $extension The extention like ".php"
+ * To search in a specific directory in all sequences, to find a file with the name then including that
+ * @param string|null $file The relative file path
+ * @param mixed $extension The extention like ".jpg" (leave null for default value ".php")
  * @param string|int $origin The start layer of the sequences (a zero started index)
  * @param int $depth How much layers it should iterate in searching
  * @return mixed The including results or null if its could not find

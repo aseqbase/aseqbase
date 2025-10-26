@@ -338,11 +338,9 @@ let locate = function (url = null) {
 let reload = function () {
 	window.location.reload();
 };
-let load = function (url = null) {
-	window.location.href = url??window.location.href;
-};
-let open = function (url = null, target = "_blank") {
-	window.open(url ?? location.href, target);
+let load = function (url = null, target = null) {
+	if(target === null) window.location.href = url??window.location.href;
+	else window.open(url ?? location.href, target===true?"_blank":(target===false?"_self":target));
 };
 let share = function (url = null, path = null) {
 	open('sms://' + path + '?body=' + (url ?? location.href), '_blank');

@@ -1,5 +1,6 @@
 <?php
 
+use MiMFa\Library\Convert;
 use MiMFa\Library\Html;
 use MiMFa\Library\Internal;
 use MiMFa\Library\Local;
@@ -310,16 +311,34 @@ abstract class FrontBase
 		return join(PHP_EOL, $this->Finals);
 	}
 
-
 	/**
-	 * Interact with all specific parts of the client side one by one
-	 * @param mixed $selector The source selector
+	 * Interact with all specific script results of the client side one by one
+	 * @param mixed $intents The front iterator JS codes like an array 
 	 * @param mixed $callback The call back handler
-	 * @example: get("body", function(selectedHtml)=>{ //do somework })
+	 * @example: iterateRequest("document.querySelectorAll('body input')", function(selectedItems)=>{ //do somework })
 	 */
-	public static function Bring($selector = null, $callback = null)
+	function Bring($intents = null, $callback = null)
 	{
-		bring("document.querySelectorAll(" . Script::Convert($selector ?? 'body') . ")", $callback);
+		$callbackScript = "(data,err)=>{el=document.createElement('qb');el.innerHTML=data??err;item.before(...el.childNodes);item.remove();}";
+		$progressScript = "null";
+		$timeout = 60000;
+		$start = Internal::MakeStartScript(true);
+		$end = Internal::MakeEndScript(true);
+		$id = "S_" . getID(true);
+		$intents = Convert::ToString($intents, ",", "{1}", "[{0}]", "[]");
+		if (isStatic($callback))
+			response(Html::Script("$start for(item of $intents)(" . $callbackScript . ")(" .
+				Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id" => $id]));
+		else
+			response(Html::Script(
+				$callback ? "$start" .
+				"for(item of $intents)sendInternalRequest(null,{\"" . Internal::Set($callback) . '":item.outerHTML},' .
+				"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
+				: $intents
+				,
+				null,
+				["id" => $id]
+			));
 	}
 
 	/**
