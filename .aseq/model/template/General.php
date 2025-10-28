@@ -95,6 +95,9 @@ class General extends Template
 					right: 0px;
 					z-index: 1111;
 				}
+				body .result{
+				    width: 100% !important;
+				}
 				body .result>.division{
 				    width: -webkit-fill-available;
 				}

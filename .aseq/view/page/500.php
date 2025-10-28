@@ -4,6 +4,6 @@ $module = new MiMFa\Module\PrePage();
 $module->Title =  "Internal Server Error 500";
 $module->Image = MiMFa\Library\Local::GetUrl(\_::$Info->ErrorSymbolPath);
 $module->Description = "The server encountered an internal error or misconfiguration and was unable to complete your request";
-dip($module, $data);
+pod($module, $data);
 $module->Render();
 ?>

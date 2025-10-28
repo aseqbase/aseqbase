@@ -378,7 +378,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'temp_name' => Local::CreatePath($filename, ".tmp", \_::$Router->TempDirectory),
+                                'temp_name' => Local::CreateAddress($filename, ".tmp", \_::$Router->TempDirectory),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );
@@ -532,7 +532,7 @@ class Convert
 
     public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
-        $path = $path ?? Local::CreatePath("table", ".csv", random: false);
+        $path = $path ?? Local::CreateAddress("table", ".csv", random: false);
         $fstream = fopen($path, 'r+b');
         foreach ($cells as $fields)
             fputcsv($fstream, $fields, $delimiter, $enclosure, "\\", $eol);

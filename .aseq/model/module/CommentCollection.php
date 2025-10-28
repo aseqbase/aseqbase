@@ -332,7 +332,7 @@ class CommentCollection extends Collection
                 $p_meta = getValid($item, 'MetaData', null);
                 if ($p_meta !== null) {
                     $p_meta = Convert::FromJson($p_meta);
-                    dip($this, $p_meta);
+                    pod($this, $p_meta);
                 }
                 $p_meta = null;
                 $p_id = get($item, 'Id');

@@ -32,6 +32,7 @@ class Translate
 	public $WrapPattern = "/(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(\<\S+[\w\W]*\>)|(\d*\.?\d+)/U";
 	public $ValidPattern = "/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-z]/m";
 	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
+	public $CorrectorPattern = "/(^')|('$)/";
 	public $AllowCache = true;
 	public $CaseSensitive = false;
 	public $AutoUpdate = false;
@@ -85,7 +86,7 @@ class Translate
 		if ($this->IsRootLanguage($text))
 			return $text;
 		$dic = array();
-		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern);
+		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
@@ -105,7 +106,7 @@ class Translate
 		if ($this->IsRootLanguage($text))
 			return $text;
 		$dic = array();
-		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern);
+		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern);
 		$code = $this->CreateCode($ntext);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
@@ -146,13 +147,13 @@ class Translate
 		if ($this->IsRootLanguage($text))
 			return false;
 		$dic = array();
-		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern);
+		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if (!$data)
 			$data = array("x" => $text);
 		if (!is_null($val))
-			$data[$lang ?? $this->Language] = encode($val, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern);
+			$data[$lang ?? $this->Language] = encode($val, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern);
 		return $this->DataTable->Replace(
 			[":KeyCode" => $code, ":ValueOptions" => Convert::ToJson($data)]
 		);

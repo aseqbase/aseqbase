@@ -978,17 +978,23 @@ function hasTimer($key = null)
 	return getTimer($key) > 0;
 }
 
-function encode($plain, &$replacements = null, $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU')
+function encode($plain, &$replacements = null, $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU', $correctorPattern = null, $correctorReplacement = "")
 {
 	if (!is_array($replacements))
 		$replacements = array();
 	$c = count($replacements);
-	return preg_replace_callback($pattern, function ($a) use (&$replacements, &$c, $wrapStart, $wrapEnd) {
-		$key = $a[0];
+	return $correctorPattern ? preg_replace_callback($pattern, function ($a) use (&$replacements, &$c, $wrapStart, $wrapEnd, $correctorPattern, $correctorReplacement) {
+		$key = preg_replace($correctorPattern, $correctorReplacement, $a[0]);
 		if (array_key_exists($key, $replacements))
 			return $replacements[$key];
 		return $replacements[$key] = $wrapStart . $c++ . $wrapEnd;
-	}, $plain);
+	}, $plain) :
+		preg_replace_callback($pattern, function ($a) use (&$replacements, &$c, $wrapStart, $wrapEnd, $correctorPattern, $correctorReplacement) {
+			$key = $a[0];
+			if (array_key_exists($key, $replacements))
+				return $replacements[$key];
+			return $replacements[$key] = $wrapStart . $c++ . $wrapEnd;
+		}, $plain);
 }
 function decode($cipher, ?array $replacements)
 {
@@ -1030,6 +1036,86 @@ function decrypt($cipher, $key = null)
 #region USING
 
 /**
+ * To search and find the correct path of a file between all sequences
+ * @param string|null $path The relative file or directory path
+ * @param false|null|string|array $extension The extention like ".jpg" (leave null for default value ".php")
+ * @param string|int $origin The start layer of the sequences (a zero started index)
+ * @param int $depth How much layers it should iterate in searching
+ * @param string $address [optional] To get the filal found address.
+ * @return string|null The correct path of the file or null if its could not find
+ */
+function address(string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999)
+{
+	$path = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $path ?? "");
+	$extension = $extension === false ? "" : $extension ?? \_::$Extension;
+	$path = preg_replace("/(?<!\\" . DIRECTORY_SEPARATOR . ")\\" . DIRECTORY_SEPARATOR . "$/", DIRECTORY_SEPARATOR . "index", $path);
+	if (!endsWith($path, $extension) && !endsWith($path, DIRECTORY_SEPARATOR))
+		$path .= $extension;
+	$address = null;
+	//$toSeq = $depth < 0 ? (count(\_::$Sequence) + $depth) : ($origin + $depth);
+	if (is_string($origin)) {
+		$key = null;
+		$index = 0;
+		foreach (\_::$Sequence as $k) {
+			if ($origin === $k) {
+				$key = $origin = $index;
+				break;
+			}
+			$index++;
+		}
+		if (is_null($key))
+			$origin = 0;
+	}
+	$scount = count(\_::$Sequence);
+	$origin = $origin < 0 ? ($scount + $origin) : min($scount, $origin);
+	$toSeq = $depth < 0 ? ($scount + $depth) : min($scount, $origin + $depth);
+	$seqInd = -1;
+	$path = ltrim($path, DIRECTORY_SEPARATOR);
+	foreach (\_::$Sequence as $dir => $host)
+		if (++$seqInd < $origin)
+			continue;
+		elseif ($seqInd < $toSeq) {
+			if (file_exists($address = $dir . $path))
+				return $address;
+		} else
+			return null;
+	return null;
+}
+/**
+ * To reads entire file into a string by a relative path between all sequences
+ * This function is similar to file(),
+ * except that this returns the file in a string,
+ * starting at the specified offset up to length bytes. On failure, this will return false.
+ * @param string|null $path The relative file or directory path
+ * @param false|null|string|array $extension The extention like ".jpg" (leave null for default value ".php")
+ * @param string|int $origin The start layer of the sequences (a zero started index)
+ * @param int $depth How much layers it should iterate to find the correct address
+ * @param int $offset [optional] The offset where the reading starts.
+ * @param int|null $length [optional] Maximum length of data read. The default is to read until end of file is reached.
+ * @param string $address [optional] To get the filal found or maked address.
+ * @return string|false|null The function returns the read data or flse on failure or null if could not find the file.
+ */
+function open(string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $offset = 0, int|null $length = null, &$address = null)
+{
+	$address = address($path, $extension, $origin, $depth);
+	return $address ? file_get_contents($address, offset: $offset, length: $length) : null;
+}
+/**
+ * To write data into an exists file or by a relative path or the new file by the exact path
+ * @param $data The data to write. Can be either a string, an array or a each other data types.
+ * @param string|null $path The relative file or directory path
+ * @param false|null|string|array $extension The extention like ".jpg" (leave null for default value ".php")
+ * @param string|int $origin The start layer of the sequences (a zero started index)
+ * @param int $depth How much layers it should iterate to find the correct address
+ * @return string|false|null The function returns the number of bytes that were written to the file, or false on failure.
+ */
+function save($data, string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $flags = 0, &$address = null)
+{
+	$address = address($path, $extension, $origin, $depth);
+	return file_put_contents($address = $address ?: ($path ? Local::GetAbsoluteAddress(DIRECTORY_SEPARATOR . $path) : Local::CreateAddress()), Convert::ToString($data), flags: $flags);
+}
+
+/**
  * To include once a $path by the specific $data then return results or output
  * @param string $path
  * @param mixed $data
@@ -1044,8 +1130,8 @@ function including(string $path, mixed $data = [], bool $print = true, $default 
 			ob_start();
 		$result = [];
 		if (endsWith($path, DIRECTORY_SEPARATOR)) {
-			foreach (glob($path . "*" . \_::$Extension) as $file)
-				if (!is_null($r = $once ? include_once $file : include $file))
+			foreach (glob($path . "*" . \_::$Extension) as $path)
+				if (!is_null($r = $once ? include_once $path : include $path))
 					$result[] = $r;
 		} else
 			$result = $once ? include_once $path : include $path;
@@ -1086,65 +1172,10 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
 	return $default;
 }
 /**
- * To search and find the correct path of a file between all sequences
- * @param string|null $path The relative file path
- * @param string|int $origin The start layer of the sequences (a zero started index)
- * @param int $depth How much layers it should iterate in searching
- * @return string|null The correct path of the file or null if its could not find
- */
-function address(string|null $path = null, string|int $origin = 0, int $depth = 999999)
-{
-	return addressing($path, "", $origin, $depth);
-}
-/**
- * To search and find the correct path of a file between all sequences
- * @param string|null $file The relative file path
- * @param mixed $extension The extention like ".jpg" (leave null for default value ".php")
- * @param string|int $origin The start layer of the sequences (a zero started index)
- * @param int $depth How much layers it should iterate in searching
- * @return string|null The correct path of the file or null if its could not find
- */
-function addressing(string|null $file = null, $extension = null, string|int $origin = 0, int $depth = 999999)
-{
-	$file = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $file ?? "");
-	$extension = $extension ?? \_::$Extension;
-	$file = preg_replace("/(?<!\\" . DIRECTORY_SEPARATOR . ")\\" . DIRECTORY_SEPARATOR . "$/", DIRECTORY_SEPARATOR . "index", $file);
-	if (!endsWith($file, needles: $extension) && !endsWith($file, DIRECTORY_SEPARATOR))
-		$file .= $extension;
-	$path = null;
-	//$toSeq = $depth < 0 ? (count(\_::$Sequence) + $depth) : ($origin + $depth);
-	if (is_string($origin)) {
-		$key = null;
-		$index = 0;
-		foreach (\_::$Sequence as $k) {
-			if ($origin === $k) {
-				$key = $origin = $index;
-				break;
-			}
-			$index++;
-		}
-		if (is_null($key))
-			$origin = 0;
-	}
-	$scount = count(\_::$Sequence);
-	$origin = $origin < 0 ? ($scount + $origin) : min($scount, $origin);
-	$toSeq = $depth < 0 ? ($scount + $depth) : min($scount, $origin + $depth);
-	$seqInd = -1;
-	$file = ltrim($file, DIRECTORY_SEPARATOR);
-	foreach (\_::$Sequence as $dir => $host)
-		if (++$seqInd < $origin)
-			continue;
-		elseif ($seqInd < $toSeq) {
-			if (file_exists($path = $dir . $file))
-				return $path;
-		} else
-			return null;
-	return null;
-}
-/**
  * To search in a specific directory in all sequences, to find a file with the name then including that
- * @param string|null $file The relative file path
- * @param mixed $extension The extention like ".jpg" (leave null for default value ".php")
+ * @param string|null $directory The relative file directory
+ * @param string|null $name The file name
+ * @param false|null|string|array $extension The extention like ".jpg" (leave null for default value ".php")
  * @param string|int $origin The start layer of the sequences (a zero started index)
  * @param int $depth How much layers it should iterate in searching
  * @return mixed The including results or null if its could not find
@@ -1155,8 +1186,8 @@ function using(string|null $directory, string|null $name = null, mixed $data = [
 		usingBefores($directory, $used = $name);
 		if (
 			$path =
-			addressing("$directory$name", $extension, $origin, $depth) ??
-			addressing($directory . ($used = $alternative), $extension, $origin, $depth)
+			address("$directory$name", $extension, $origin, $depth) ??
+			address($directory . ($used = $alternative), $extension, $origin, $depth)
 		)
 			return $require ?
 				requiring(path: $path, data: $data, print: $print, default: $default, once: $once) :
@@ -1167,7 +1198,6 @@ function using(string|null $directory, string|null $name = null, mixed $data = [
 		usingAfters($directory, $name);
 	}
 }
-
 /**
  * Render or do something before using any function or directory's files or actions
  * @param mixed $directory function name or directory
@@ -1240,7 +1270,7 @@ function data(...$hierarchy)
  * @param bool $print
  * @return mixed
  */
-function runSequence(string|null $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
+function runSequence($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
 {
 	$depth = min($depth, count(\_::$Sequence)) - 1;
 	$res = [];
@@ -1255,7 +1285,7 @@ function runSequence(string|null $name, mixed $data = [], bool $print = true, st
  * @param bool $print
  * @return mixed
  */
-function run(string|null $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = true, bool $once = true)
+function run($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = true, bool $once = true)
 {
 	return using(\_::$Address->Directory, $name, $data, $print, $origin, $depth, $alternative, $default, require: $require, once: $once);
 }
@@ -1267,7 +1297,7 @@ function run(string|null $name, mixed $data = [], bool $print = true, string|int
  * @param bool $print
  * @return mixed
  */
-function model(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function model($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true);
 }
@@ -1278,7 +1308,7 @@ function model(string $name, mixed $data = [], bool $print = true, string|int $o
  * @param bool $print
  * @return string|null The complete name of selected library class or return null if it's not found
  */
-function library(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function library($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
@@ -1289,7 +1319,7 @@ function library(string $name, mixed $data = [], bool $print = true, string|int 
  * @param bool $print
  * @return string|null The complete name of selected component class or return null if it's not found
  */
-function component(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function component($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Component\\$used" : null;
 }
@@ -1300,7 +1330,7 @@ function component(string $name, mixed $data = [], bool $print = true, string|in
  * @param bool $print
  * @return string|null The complete name of selected module class or return null if it's not found
  */
-function module(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function module($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Module\\$used" : null;
 }
@@ -1311,7 +1341,7 @@ function module(string $name, mixed $data = [], bool $print = true, string|int $
  * @param bool $print
  * @return string|null The complete name of selected template class or return null if it's not found
  */
-function template(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function template($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
@@ -1323,7 +1353,7 @@ function template(string $name, mixed $data = [], bool $print = true, string|int
  * @param bool $print
  * @return mixed The result of included view or the printed data
  */
-function view(string|null $name = null, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function view($name = null, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ViewDirectory, $name ?? \_::$Front->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default, once: true);
 }
@@ -1335,7 +1365,7 @@ function view(string|null $name = null, mixed $data = [], bool $print = true, st
  * @param bool $print
  * @return mixed The result of included region or the printed data
  */
-function region(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function region($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -1346,7 +1376,7 @@ function region(string $name, mixed $data = [], bool $print = true, string|int $
  * @param bool $print
  * @return mixed The result of included page or the printed data
  */
-function page(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function page($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -1357,7 +1387,7 @@ function page(string $name, mixed $data = [], bool $print = true, string|int $or
  * @param bool $print
  * @return mixed The result of included part or the printed data
  */
-function part(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function part($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
@@ -1368,26 +1398,27 @@ function part(string $name, mixed $data = [], bool $print = true, string|int $or
  * @param bool $print
  * @return mixed The result of the pointed computed codes or the printed data
  */
-function compute(string $name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function compute($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->ComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
  * To interprete, the specified routename
- * @param non-empty-lowercase-string $name
+ * @param non-empty-lowercase-string|null $name
  * @param mixed $data
  * @param bool $print
  * @return mixed The result of the routers or the printed data
  */
-function route(string|null $name = null, mixed $data = null, bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
+function route($name = null, mixed $data = null, bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
 	return using(\_::$Address->RouteDirectory, $name ?? \_::$Router->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
  * To get the url of the selected asset
- * @param non-empty-string $directory
+ * @param non-empty-string $directory The relative file directory
+ * @param string|null $name The asset file name
  * @param string|array|null $extensions An array of extensions or a string of the disired extension
  * @return string|null The complete path of selected asset or return null if it's not found
  */
@@ -1401,7 +1432,7 @@ function asset($directory, string|null $name = null, string|array|null $extensio
 	try {
 		usingBefores($directory, $name);
 		do {
-			if ($path = addressing("$directory$name", $extension, $origin, $depth))
+			if ($path = address("$directory$name", $extension, $origin, $depth))
 				return getFullUrl($path, $optimize);
 		} while ($extension = isset($extensions[$i]) ? $extensions[$i++] : null);
 		return $default;
@@ -1413,6 +1444,7 @@ function asset($directory, string|null $name = null, string|array|null $extensio
 /**
  * To get a Table from the DataBase
  * @param string $name The raw table name (Without any prefix)
+ * @param bool $prefix Add table prefix to the name or not (default is true)
  * @return DataTable The selected database's table
  */
 function table(string $name, bool $prefix = true, string|int $origin = 0, int $depth = 999999, ?DataBase $source = null, $default = null)
@@ -1632,7 +1664,7 @@ function set(&$object, $hierarchy)
  * @param array $hierarchy A hierarchy of desired keys and values
  * @return mixed The old values that are sat
  */
-function dip(&$object, &$hierarchy)
+function pod(&$object, &$hierarchy)
 {
 	if (!is_array($hierarchy) || !is_object($object))
 		try {
@@ -1647,9 +1679,9 @@ function dip(&$object, &$hierarchy)
 			take($object, $k, $key, $index);
 			if ($key) {
 				if (is_null($index))
-					$sat[$key] = dip($object->$key, $v);
+					$sat[$key] = pod($object->$key, $v);
 				else
-					$sat[$key] = dip($object[$key], $v);
+					$sat[$key] = pod($object[$key], $v);
 				unset($hierarchy[$k]);
 			}
 		}

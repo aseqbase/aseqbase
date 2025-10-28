@@ -1,6 +1,6 @@
 <?php
 module("SignInForm");
 $module = new \MiMFa\Module\SignInForm();
-dip($module, $data);
+pod($module, $data);
 $module->Render();
 return $module->Result;

@@ -3,6 +3,6 @@ module("RingTabs");
 $module = new \MiMFa\Module\RingTabs();
 $module->Image = \_::$Info->FullLogoPath;
 $module->Items = \_::$Info->Services;
-dip($module, $data);
+pod($module, $data);
 $module->Render();
 ?>

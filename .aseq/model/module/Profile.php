@@ -266,7 +266,7 @@ class Profile extends Table{
 	public function GetViewFields($value){
         if(is_null($value)) return null;
         if(!\_::$User->GetAccess($this->ViewAccess)) return Html::Error("You have not access to see datails!");
-        if(isEmpty($this->Items)) return Html::Error("You can not see this item!");
+        if(isEmpty($this->Items)) return Html::Error("You can not '".__("see")."' this item!");
         $form = $this->GetForm();
         $form->Set(
             title:getBetween($this->Items,"Title","Name")??$this->Title,
@@ -354,14 +354,14 @@ class Profile extends Table{
             if(isEmpty($v)) unset($vals[$k]);
         if($this->DataTable->Insert($vals))
             return Html::Success("The '".__("information")."' added successfully!");
-        return Html::Error("You can not add this item!");
+        return Html::Error("You can not '".__("add")."' this item!");
     }
 
 	public function GetModifyFields($value){
         if(is_null($value)) return null;
         if(!\_::$User->GetAccess($this->ModifyAccess)) return Html::Error("You have not access to modify!");
         module("Form");
-        if(isEmpty($this->Items)) return Html::Error("You can not modify this item!");
+        if(isEmpty($this->Items)) return Html::Error("You can not '".__("modify")."' this item!");
         $form = $this->GetForm();
         $form->Set(
             title:getBetween($this->Items,"Title","Name")??$this->Title,
@@ -389,7 +389,7 @@ class Profile extends Table{
         if(!\_::$User->GetAccess($this->ModifyAccess)) return Html::Error("You have not access to modify!");
         if($this->DataTable->Update([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
             return Html::Success("The information updated successfully!");
-        return Html::Error("You can not update this item!");
+        return Html::Error("You can not '".__("update")."' this item!");
     }
 
 	public function DoRemoveHandle($value){
@@ -397,7 +397,7 @@ class Profile extends Table{
         if(!\_::$User->GetAccess($this->RemoveAccess)) return Html::Error("You have not access to delete!");
         if($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]))
             return Html::Success("The 'items' removed successfully!");
-        return Html::Error("You can not remove this item!");
+        return Html::Error("You can not '".__("remove")."' this item!");
     }
 
 	public function PrepareDataToShow(&$key, &$value, &$record, $schema){

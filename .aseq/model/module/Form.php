@@ -602,10 +602,11 @@ class Form extends Module
 				font-size: 0%;
 				line-height: 100%;
 				text-align: initial;
-				border-radius: 3px;
-				border: var(--border-1) var(--back-color-output);
-				background-color: var(--fore-color-output);
-				color: var(--back-color-output);
+				border-radius: var(--radius-1);
+				box-shadow: var(--shadow-5);
+				border: var(--border-1) var(--fore-color-special);
+				color: var(--fore-color-special);
+				background-color: var(--back-color-special);
 				position: absolute;
 				padding: calc(var(--size-0) / 2);
 				z-index: 1;

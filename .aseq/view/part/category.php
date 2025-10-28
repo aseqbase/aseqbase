@@ -12,7 +12,7 @@ $module->Image = get($data, 'Image');
 $Root = pop($data, 'Root') ?? \_::$Address->CategoryRoot;
 $items = pop($data, "Items");
 $name = $module->Name;// To do not change the name of module
-dip($module, $data);
+pod($module, $data);
 $module->Name = $name;// To do not change the name of module
 $module->Render();
 if ($items) {

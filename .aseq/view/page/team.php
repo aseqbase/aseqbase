@@ -9,7 +9,7 @@
 	module("Members");
 	$module = new \MiMFa\Module\Members();
 	$module->Items = \_::$Info->Members;
-    dip($module, $data);
+    pod($module, $data);
 	$module->Render();
 	?>
 </div>

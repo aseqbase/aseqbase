@@ -17,5 +17,5 @@ $module->AllowSubItemsDescription =
 $module->AllowSubItemsImage = 
 $module->AllowItemsImage = false;
 $module->AllowFixed = false;
-dip($module, $data);
+pod($module, $data);
 $module->Render();

@@ -16,5 +16,5 @@
 \_::$Router->On("sign")->Default("sign");
 \_::$Router->On("user")->Default("user");
 \_::$Router->On("group")->Default("group");
+\_::$Router->On("contact/.+")->Default("contact");
 \_::$Router->On()->Default(\_::$Router->DefaultRouteName);
-?>

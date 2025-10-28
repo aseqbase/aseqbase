@@ -49,7 +49,9 @@ table {
 	border-spacing: 0;
 }
 
-input:is([type=number],[type=range],[type=tel],[type=url],[type=email],[type=file],[type=date],[type=month],[type=week],[type=time],[type=datetime-local]){
+input:is([type=number],[type=range],[type=tel],[type=url],[type=email],[type=file],[type=date],[type=month],[type=week],[type=time],[type=datetime-local]),
+code,blockcode,xmp
+{
 	direction: ltr;
 	text-align: left;
 }

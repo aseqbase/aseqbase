@@ -4,4 +4,3 @@
 	$module->Title = "Message Us";
 	$module->Render();
 	part("message", $data);
-?>

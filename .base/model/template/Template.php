@@ -110,6 +110,7 @@ class Template extends \Base{
             font-family: var(--font), var(--font-special);
             font-size: var(--size-1);
             text-align: unset;
+            direction: var(--dir);
         }
         h1, h2, h3, h4, h5, h6 {
             font-family: var(--font-special), var(--font);
@@ -165,7 +166,6 @@ class Template extends \Base{
         }
         :not(h1, h2, h3, h4, h5, h6, p, .content) {
             line-height: 1.5em;
-            direction: var(--dir);
         }
         h1{
             font-size: var(--size-5);

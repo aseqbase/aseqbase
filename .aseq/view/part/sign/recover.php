@@ -7,5 +7,5 @@ try {
 } catch (\Exception $ex) {
     $module->Description = "Send recovery email for the acoount";
 }
-dip($module, $data);
+pod($module, $data);
 return $module->Render();

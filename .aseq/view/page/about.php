@@ -10,7 +10,7 @@ $module->Image = \_::$Info->FullLogoPath;
 //$module->Title = \_::$Info->FullName??"About Us";
 $module->ContentTag = "h4";
 $module->Content = __(\_::$Info->Slogan);
-dip($module, $data);
+pod($module, $data);
 $ops = \_::$Info->OwnerDescription?Convert::ToParagraphs(__(\_::$Info->OwnerDescription)):[];
 $dps = \_::$Info->FullDescription?Convert::ToParagraphs(__(\_::$Info->FullDescription)):[];
 $opsc = count($ops);

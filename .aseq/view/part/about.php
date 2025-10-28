@@ -30,6 +30,6 @@ $module->Title = "Who We Are?";
 $module->Image = null;
 $module->Description = \_::$Info->FullDescription;
 $module->Render();
-dip($module, $data);
+pod($module, $data);
 $separator->Render();
 ?>

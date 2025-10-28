@@ -18,7 +18,7 @@ class Local
 	{
 		if ((empty($address)) || isAbsoluteUrl($address))
 			return $address;
-		$address = self::GetRelativePath(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $address));
+		$address = self::GetRelativeAddress(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $address));
 		$p = ltrim(str_replace(DIRECTORY_SEPARATOR, "/", $address), "/");
 		$d = ltrim(preg_replace("/[\?#@].*$/", "", $address), DIRECTORY_SEPARATOR);
 		foreach (\_::$Sequence as $dir => $root)
@@ -81,69 +81,69 @@ class Local
 	}
 
 	/**
-	 * Get the internal path
-	 * @param mixed $address Probable file internal path
+	 * To normalize the internal path
+	 * @param mixed $path Probable file internal path
 	 */
-	public static function GetPath($address)
+	public static function GetAddress($path)
 	{
-		if (empty($address))
+		if (empty($path))
 			return null;
 		return
 			ltrim(
-				str_replace(
-					["\\", "/"],
+				preg_replace(
+					"/[\/\\\]+/",
 					DIRECTORY_SEPARATOR,
 					preg_replace(
 						"/(^\w+:?\/*[^\/\\\:]+\/?)|([\?#@].*$)/",
 						"",
-						$address
+						$path
 					)
 				),
 				DIRECTORY_SEPARATOR
 			);
 	}
 	/**
-	 * Get absolute path from a relative one
+	 * To get absolute path from a relative one
 	 * @param  $path The relative path
 	 * @return string|null
 	 */
-	public static function GetAbsolutePath($path): string|null
+	public static function GetAbsoluteAddress($path): string|null
 	{
 		if (empty($path))
 			return null;
-		foreach (\_::$Sequence as $dir => $root)
-			if (startsWith($path, $dir))
+		foreach (\_::$Sequence as $directory => $root)
+			if (startsWith($path, $directory))
 				return $path;
-		return \_::$Router->Directory . ltrim($path, DIRECTORY_SEPARATOR);
+		return \_::$Router->Directory . ltrim(self::GetAddress($path), DIRECTORY_SEPARATOR);
 	}
 	/**
-	 * Get the relative address from a path
+	 * To get the relative address from a path
 	 * @param  $path The path
 	 * @example: "Category/mimfa/service/web.php?p=3&l=10#serp"
 	 * @return string|null
 	 */
-	public static function GetRelativePath($path): string|null
+	public static function GetRelativeAddress($path): string|null
 	{
 		if (empty($path))
 			return null;
-		foreach (\_::$Sequence as $dir => $root)
-			if (startsWith($path, $dir))
-				return substr($path, strlen($dir));
+		foreach (\_::$Sequence as $directory => $root)
+			if (startsWith($path, $directory))
+				return substr($path, strlen($directory));
 		return $path;
 	}
 
 	/**
 	 * Create a new unique address
-	 * @param string $dir Root directory, leave null for a temp directory
+	 * @param string $directory Root directory, leave null for a temp directory
 	 * @param string $format The full format of extension (like .html)
 	 * @param int $random Pass 0 or false to get the name sequential from the number 1 to infinity
 	 * @return string
 	 */
-	public static function CreatePath(string $fileName = "new", string $format = "", ?string $dir = null, bool $random = true): string
+	public static function CreateAddress(string $fileName = "new", string $format = "", ?string $directory = null, bool $random = true): string
 	{
-		$dir = $dir ?? \_::$Router->TempDirectory;
+		$directory = $directory ?? \_::$Router->TempDirectory;
 		do
-			$path = $dir . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . "-" . getId($random) . $format;
+			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . "-" . getId($random) . $format;
 		while (file_exists($path));
 		return $path;
 	}
@@ -155,16 +155,16 @@ class Local
 	 */
 	public static function GetDirectory($path)
 	{
-		$path = self::GetPath($path);
+		$path = self::GetAddress($path);
 		if (empty($path))
 			return null;
 		if (is_dir($path))
 			return $path;
 		if (startsWith($path, \_::$Router->Directory))
 			$path = substr($path, strlen(\_::$Router->Directory));
-		foreach (\_::$Sequence as $dir => $p)
-			if (is_dir($dir . $path))
-				return $dir . $path;
+		foreach (\_::$Sequence as $directory => $p)
+			if (is_dir($directory . $path))
+				return $directory . $path;
 		return null;
 	}
 	public static function DirectoryExists($path): bool
@@ -242,16 +242,16 @@ class Local
 	 */
 	public static function GetFile($path)
 	{
-		$path = self::GetPath($path);
+		$path = self::GetAddress($path);
 		if (empty($path))
 			return null;
 		if (file_exists($path))
 			return $path;
 		if (startsWith($path, \_::$Router->Directory))
 			$path = substr($path, strlen(\_::$Router->Directory));
-		foreach (\_::$Sequence as $dir => $p)
-			if (file_exists($dir . $path))
-				return $dir . $path;
+		foreach (\_::$Sequence as $directory => $p)
+			if (file_exists($directory . $path))
+				return $directory . $path;
 		return null;
 	}
 	public static function FileExists($path): bool
@@ -282,7 +282,7 @@ class Local
 		set_time_limit(24 * 60 * 60);
 		$b = false;
 		$sourcePath = self::GetFile($sourcePath);
-		$destPath = self::GetPath($destPath);
+		$destPath = self::GetAddress($destPath);
 		$s_file = fopen($sourcePath, "rb");
 		if ($s_file) {
 			$d_file = fopen($destPath, "wb");
@@ -324,7 +324,7 @@ class Local
 	{
 		if ($ifNeeds && (self::ReadText($path) === $text))
 			return null;
-		return file_put_contents(self::GetFile($path) ?? self::GetPath($path), $text);
+		return file_put_contents(self::GetFile($path) ?? self::GetAddress($path), $text);
 	}
 
 
@@ -401,7 +401,7 @@ class Local
 			if ($t)
 				$dir .= $t . DIRECTORY_SEPARATOR;
 		}
-		$destFile = self::CreatePath($fileName, ".$fileType", $dir);
+		$destFile = self::CreateAddress($fileName, ".$fileType", $dir);
 		if (is_uploaded_file($sourceFile) && move_uploaded_file($sourceFile, $destFile))
 			return $destFile;
 		if (rename($sourceFile, $destFile))

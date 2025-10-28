@@ -2,6 +2,6 @@
 module("Copyright");
 $module = new \MiMFa\Module\Copyright();
 $module->Content = \_::$Info->CopyRight??$module->Content;
-dip($module, $data);
+pod($module, $data);
 $module->Render();
 ?>

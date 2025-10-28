@@ -45,7 +45,7 @@ function findContent($router, &$data)
         $doc = findContent($router, $data);
         if (isEmpty($doc))
             response(__(get($data, "ErrorHandler") ?? "Could not find related content"));
-        elseif (compute("comment/handle", $doc))
+        elseif (compute("contact/comment", $doc))
             reload();
     })
     ->Handle();

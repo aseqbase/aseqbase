@@ -305,6 +305,15 @@ class DataTable
 		return $defaultValue;
 	}
 	/**
+	 * To insert or replace record or records
+	 * @param mixed $params
+	 * @param mixed $defaultValue
+	 */
+	public function Put($params = [], $defaultValue = false)
+	{
+		return $this->Replace($params, $defaultValue);
+	}
+	/**
 	 * To delete a record or records
 	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue

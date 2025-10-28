@@ -13,7 +13,7 @@ $module->DefaultImage = pop($data, 'Image');
 $module->AllowRoot = false;
 $module->Class .= " page";
 $module->Items = $nav->GetItems();
-dip($module, $data);
+pod($module, $data);
 $module->Name = $name;// To do not change the name of module
 $module->Render();
 $nav->Render();

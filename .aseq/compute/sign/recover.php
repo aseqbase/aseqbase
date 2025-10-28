@@ -1,7 +1,7 @@
 <?php
 module("SignRecoverForm");
 $module = new \MiMFa\Module\SignRecoverForm();
-dip($module, $data);
+pod($module, $data);
 $module->Render();
 return $module->Result;
 ?>

@@ -583,12 +583,12 @@ class Html
     }
     public static function Script($content, $source = null, ...$attributes)
     {
-        return self::Element(is_string($content)?$content:Script::Convert($content), "script", is_null($source) ? ["type" => "text/javascript"] : ["src" => $source], $attributes);
+        return self::Element(Convert::ToString($content), "script", is_null($source) ? ["type" => "text/javascript"] : ["src" => $source], $attributes);
     }
     public static function Style($content, $source = null, ...$attributes)
     {
         if (isValid($content))
-            return self::Element(is_string($content)?$content:Style::Convert($content), "style", $attributes);
+            return self::Element(Convert::ToString($content), "style", $attributes);
         else
             return self::Relation("stylesheet", $source, $attributes);
     }
@@ -1370,28 +1370,6 @@ class Html
 
     #region HEADING
     /**
-     * The \<H1\> HTML Tag
-     * @param mixed $content The heading text
-     * @param string|null|array $reference The hyper reference path
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function ExternalHeading($content, $reference = null, ...$attributes)
-    {
-        return self::Heading1($content, $reference, ["class" => "externalheading"], ...$attributes);
-    }
-    /**
-     * The \<H2\> HTML Tag
-     * @param mixed $content The heading text
-     * @param string|null|array $reference The hyper reference path
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function SuperHeading($content, $reference = null, ...$attributes)
-    {
-        return self::Heading2($content, $reference, ["class" => "superheading"], ...$attributes);
-    }
-    /**
      * The \<H3\> HTML Tag
      * @param mixed $content The heading text
      * @param string|null|array $reference The hyper reference path
@@ -1402,29 +1380,7 @@ class Html
     {
         return self::Heading3($content, $reference, ...$attributes);
     }
-    /**
-     * The \<H4\> HTML Tag
-     * @param mixed $content The heading text
-     * @param string|null|array $reference The hyper reference path
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function SubHeading($content, $reference = null, ...$attributes)
-    {
-        return self::Heading4($content, $reference, ["class" => "subheading"], ...$attributes);
-    }
-    /**
-     * The \<H5\> HTML Tag
-     * @param mixed $content The heading text
-     * @param string|null|array $reference The hyper reference path
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function InternalHeading($content, $reference = null, ...$attributes)
-    {
-        return self::Heading5($content, $reference, ["class" => "internalheading"], ...$attributes);
-    }
-
+    
     /*
      * The \<H1\> HTML Tag
      * @param mixed $content The heading text
@@ -1928,7 +1884,7 @@ class Html
                         return self::Field(null, $k, $f);
                 }));
             };
-        return self::Element($content, "form", $action ? ((isScript($action) || !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "class" => "form"], $attributes);
+        return self::Element($content, "form", $action ? ((isScript($action) && !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "class" => "form"], $attributes);
     }
     /**
      * Detect the type of inputed value
@@ -1971,7 +1927,7 @@ class Html
             return $type;
     }
     /**
-     * The \<LABEL\> and any input HTML Tag
+     * The \<LABEL\> and related input HTML Tag
      * @param object|string|array|callable|\Closure|\stdClass|null $type Can be a datatype or an input type
      * @param mixed $key The default key and the name of the field
      * @param mixed $value The default value of the field
@@ -3592,10 +3548,8 @@ class Html
             $attributes
         ) .
             script("function {$id}_openTab(tab, tabId){
-            var contents = document.querySelectorAll('#$id>.tab-contents>.tab-content');
-            contents.forEach(content => content.classList.remove('show') & content.classList.add('hide'));
-            var titles = document.querySelectorAll('#$id>.tab-titles>.tab-title');
-            titles.forEach(title => title.classList.remove('active'));
+            document.querySelectorAll('#$id>.tab-contents>.tab-content').forEach(content => content.classList.remove('show') & content.classList.add('hide'));
+            document.querySelectorAll('#$id>.tab-titles>.tab-title').forEach(title => title.classList.remove('active'));
             document.getElementById(tabId).classList.remove('hide');
             document.getElementById(tabId).classList.add('show');
             tab.classList.add('active');

@@ -100,14 +100,12 @@ class Tabs extends Module
     }
     public function GetScript()
     {
-        return parent::GetScript() . Html::Script("function {$this->Name}_openTab(tab, tabId){
-            let contents = document.querySelectorAll('.$this->Name>.tab-contents>.tab-content');
-            contents.forEach(content => content.classList.remove('show') & content.classList.add('hide'));
-            let titles = document.querySelectorAll('.$this->Name>.tab-titles>.tab-title');
-            titles.forEach(title => title.classList.remove('active'));
-            document.getElementById(tabId).classList.remove('hide');
-            document.getElementById(tabId).classList.add('show');
-            tab.classList.add('active');
+        return parent::GetScript() . Html::Script("function {$this->Name}_openTab({$this->Name}_tab, {$this->Name}_tabId){
+            document.querySelectorAll('.$this->Name>.tab-contents>.tab-content').forEach(content => content.classList.remove('show') & content.classList.add('hide'));
+            document.querySelectorAll('.$this->Name>.tab-titles>.tab-title').forEach(title => title.classList.remove('active'));
+            document.getElementById({$this->Name}_tabId).classList.remove('hide');
+            document.getElementById({$this->Name}_tabId).classList.add('show');
+            {$this->Name}_tab.classList.add('active');
         }");
     }
 }

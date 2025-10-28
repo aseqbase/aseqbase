@@ -6,7 +6,7 @@ module("RingTabs");
 $module = new \MiMFa\Module\RingTabs();
 $module->Image = \_::$User->Image??\_::$Info->LogoPath;
 $module->Items = \_::$Info->Services;
-//dip($module, $data);
+//pod($module, $data);
 response(
 	Html::Style("
 		.page-home {

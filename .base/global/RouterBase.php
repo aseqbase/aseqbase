@@ -29,7 +29,7 @@ class RouterBase extends Address
      * @category Security
      */
     public $StatusMode = null;
-    
+
     /**
      * The view name to show pages
      * @var string|null
@@ -169,7 +169,8 @@ class RouterBase extends Address
                         $this->Direction = ltrim($this->Request, "/\\ ");
                         yield $handler;
                     }
-                    if ($this->Point > 0) continue;
+                    if ($this->Point > 0)
+                        continue;
                 }
         while ($this->Method != "ALL" && $this->Method = "ALL");
     }
@@ -279,11 +280,14 @@ class RouterBase extends Address
      * To change the default method to handle
      * @example: ->Post()->Switch()
      * @example: ->Delete()->Switch()
+     * @example: ->Switch("Get")
      * @return
      */
-    public function Switch()
+    public function Switch($method = null)
     {
         if ($this->IsActive) {
+            if ($method)
+                $this->Set($method);
             $this->DefaultMethodIndex = getMethodIndex($this->Method);
             $this->DefaultMethodName = getMethodName($this->Method);
         }
@@ -306,11 +310,13 @@ class RouterBase extends Address
      * @param int|string|null $method 0: ALL, 1:GET, 2:POST, 3:PUT, 4:FILE, 5:PATCH, 6:DELETE
      * @return
      */
-    public function Set($method = null)
+    public function Set($method = null, $handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        if ($this->IsActive)
+        if ($this->IsActive) {
             if (!isset($this->Routes[$this->Method = getMethodName($method)]))
                 $this->Routes[$this->Method] = [];
+            return $this->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        }
         return $this;
     }
     /**
@@ -429,7 +435,7 @@ class RouterBase extends Address
      */
     public function All($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("ALL")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("ALL", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the GET requests
@@ -438,7 +444,7 @@ class RouterBase extends Address
      */
     public function Get($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("GET")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("GET", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the POST requests
@@ -447,7 +453,7 @@ class RouterBase extends Address
      */
     public function Post($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("POST")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("POST", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the PUT requests
@@ -456,7 +462,7 @@ class RouterBase extends Address
      */
     public function Put($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("PUT")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("PUT", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the FILE requests
@@ -465,7 +471,7 @@ class RouterBase extends Address
      */
     public function File($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("FILE")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("FILE", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the PATCH requests
@@ -474,7 +480,7 @@ class RouterBase extends Address
      */
     public function Patch($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("PATCH")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("PATCH", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
     /**
      * Add new route to the DELETE requests
@@ -483,9 +489,8 @@ class RouterBase extends Address
      */
     public function Delete($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("DELETE")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("DELETE", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
-
     /**
      * Add new route to the STREAM requests
      * @param string|callable $handler A route name or a handeler function
@@ -493,9 +498,8 @@ class RouterBase extends Address
      */
     public function Stream($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("STREAM")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("STREAM", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
-
     /**
      * Add new route to the INTERNAL requests
      * @param string|callable $handler A route name or a handeler function
@@ -503,9 +507,8 @@ class RouterBase extends Address
      */
     public function Internal($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("INTERNAL")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("INTERNAL", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
-
     /**
      * Add new route to the EXTERNAL requests
      * @param string|callable $handler A route name or a handeler function
@@ -513,7 +516,7 @@ class RouterBase extends Address
      */
     public function External($handler = null, mixed $data = null, bool $print = true, int $origin = 0, int $depth = 99, string|null $alternative = null, $default = null)
     {
-        return $this->Set("EXTERNAL")->Route($handler, $data, $print, $origin, $depth, $alternative, $default);
+        return $this->Set("EXTERNAL", $handler, $data, $print, $origin, $depth, $alternative, $default);
     }
 
     /**

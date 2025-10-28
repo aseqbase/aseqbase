@@ -7,7 +7,7 @@
 	$module = new MiMFa\Module\Contacts();
 	$module->Items = \_::$Info->Contacts;
 	$module->Location = \_::$Info->Location;
-    dip($module, $data);
+    pod($module, $data);
 	$module->Render();
 	part("message", $data);
 ?>
