@@ -310,7 +310,7 @@ function receive(array|string|null $method = null)
 				if (!isEmpty($res)) {
 					if (isJson($res))
 						$method = Convert::FromJson($res) ?? $method;
-					else if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false)
+					else if (strpos($_SERVER['CONTENT_TYPE']??"", 'multipart/form-data') !== false)
 						$method = Convert::FromFormData($res, $_FILES) ?? $method;
 					else
 						parse_str($res, $method);
@@ -327,7 +327,7 @@ function receive(array|string|null $method = null)
 					if (!isEmpty($res)) {
 						if (isJson($res))
 							$method = Convert::FromJson($res) ?? $method;
-						else if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false)
+						else if (strpos($_SERVER['CONTENT_TYPE']??"", 'multipart/form-data') !== false)
 							$method = Convert::FromFormData($res, $_FILES) ?? $method;
 						else
 							parse_str($res, $method);
@@ -2058,9 +2058,9 @@ function getUrl(string|null $path = null): string|null
 {
 	if ($path === null)
 		$path = (
-			takeValid($_SERVER, 'SCRIPT_URI') ??
-			(((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http") .
-			"://" . $_SERVER["HTTP_HOST"] . takeBetween($_SERVER, "REQUEST_URI", "PHP_SELF")
+			($_SERVER['SCRIPT_URI']??null) ??
+			(((!empty($_SERVER['HTTPS']??null) && ($_SERVER['HTTPS']??null) != 'off') || ($_SERVER['SERVER_PORT']??null) == 443) ? "https" : "http") .
+			"://" . ($_SERVER["HTTP_HOST"]??null) . takeBetween($_SERVER, "REQUEST_URI", "PHP_SELF")
 		);//.($_SERVER['QUERY_STRING']?"?".$_SERVER['QUERY_STRING']:"");
 	return preg_replace("/^([\/\\\])/", rtrim(getHost(), "/\\") . "$1", $path);
 }
@@ -2073,8 +2073,8 @@ function getHost(string|null $path = null): string|null
 {
 	$pat = "/^\w+\:\/*[^\/]+/";
 	if ($path == null || !preg_match($pat, $path))
-		$path = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'];
-	return PREG_Find($pat, $path);
+		$path = (empty($_SERVER['HTTPS']??null) ? 'http://' : 'https://') . ($_SERVER['HTTP_HOST']??null);
+	return preg_Find($pat, $path)??"";
 }
 /**
  * Get the site name part of a url
@@ -2083,7 +2083,7 @@ function getHost(string|null $path = null): string|null
  */
 function getSite(string|null $path = null): string|null
 {
-	return PREG_replace("/(^\w+:\/*)|(\:\d+$)/", "", getHost($path));
+	return preg_replace("/(^\w+:\/*)|(\:\d+$)/", "", getHost($path));
 }
 /**
  * Get the domain name part of a url
@@ -2092,7 +2092,7 @@ function getSite(string|null $path = null): string|null
  */
 function getDomain(string|null $path = null): string|null
 {
-	return PREG_replace("/(^\w+:\/*(www\.)?)|(\:\d+$)/", "", getHost($path));
+	return preg_replace("/(^\w+:\/*(www\.)?)|(\:\d+$)/", "", getHost($path));
 }
 /**
  * Get the path part of a url
@@ -2101,7 +2101,7 @@ function getDomain(string|null $path = null): string|null
  */
 function getPath(string|null $path = null): string|null
 {
-	return PREG_Find("/(^[^\?#]*)/", $path ?? getUrl());
+	return preg_Find("/(^[^\?#]*)/", $path ?? getUrl());
 }
 /**
  * Get the request part of a url
@@ -2112,7 +2112,7 @@ function getRequest(string|null $path = null): string|null
 {
 	if ($path == null)
 		$path = getUrl();
-	return PREG_Replace("/(^\w+:\/*[^\/]+)/", "", $path);
+	return preg_Replace("/(^\w+:\/*[^\/]+)/", "", $path);
 }
 /**
  * Get the direction part of a url from the root
@@ -2123,7 +2123,7 @@ function getDirection(string|null $path = null): string|null
 {
 	if ($path == null)
 		$path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
-	return PREG_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/", "", $path);
+	return preg_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/", "", $path);
 }
 /**
  * Get the last part of a direction url
@@ -2141,7 +2141,7 @@ function getPage(string|null $path = null): string|null
  */
 function getQuery(string|null $path = null): string|null
 {
-	return PREG_Find("/((?<=\?)[^#]*($|#))/", $path ?? getUrl());
+	return preg_Find("/((?<=\?)[^#]*($|#))/", $path ?? getUrl());
 }
 /**
  * Get the fragment or anchor part of a url
@@ -2150,7 +2150,7 @@ function getQuery(string|null $path = null): string|null
  */
 function getFragment(string|null $path = null): string|null
 {
-	return PREG_Find("/((?<=#)[^\?]*($|\?))/", $path ?? getUrl());
+	return preg_Find("/((?<=#)[^\?]*($|\?))/", $path ?? getUrl());
 }
 
 /**
@@ -2226,7 +2226,7 @@ function getMethodName(string|int|null $method = null)
  */
 function getMethodIndex(string|int|null $method = null)
 {
-	switch (strtoupper($method ?? $_SERVER['HTTP_X_CUSTOM_METHOD'] ?? $_SERVER['REQUEST_METHOD'])) {
+	switch (strtoupper($method ?? $_SERVER['HTTP_X_CUSTOM_METHOD'] ?? $_SERVER['REQUEST_METHOD'] ?? "")) {
 		case 1:
 		case "PUBLIC":
 		case "GET":
@@ -2279,7 +2279,7 @@ function getClientIp($version = null): string|null
 }
 function getClientCode($key = null): string|null
 {
-	return md5($key . (getClientIp() ?? $_SERVER['HTTP_USER_AGENT']));
+	return md5($key . (getClientIp() ?? $_SERVER['HTTP_USER_AGENT']??null));
 }
 
 /**
