@@ -419,5 +419,6 @@ FodyWeavers.xsd
 /Router.php
 /Front.php
 /User.php
+bootstrap.json
 *.zip
 *.rar

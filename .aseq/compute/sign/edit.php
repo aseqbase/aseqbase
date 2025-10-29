@@ -37,16 +37,16 @@ if ($imgObj = receiveFile("Image")) {
 try {
     if (\_::$User->Set($received)) {
         if (getValid($received, "Email", \_::$User->TemporaryEmail) != \_::$User->TemporaryEmail) {
-            success("The '".__("email address")."' modifyed successfully!");
+            success("The 'email address' modifyed successfully!");
             \_::$User->SignOut();
             \_::$User->TemporaryEmail = $received["Email"];
             load(\_::$User->ActiveHandlerPath);
         } elseif (getValid($received, "Signature" , \_::$User->Signature) != \_::$User->Signature) {
-            success("The '".__("signature")."' modifyed successfully!");
+            success("The 'signature' modifyed successfully!");
             \_::$User->SignOut();
             load(\_::$User->InHandlerPath);
         } elseif ($imgchange) {
-            success("'".__("Profile picture")."' modifyed successfully!");
+            success("'Profile picture' modifyed successfully!");
             $img = \_::$User->TemporaryImage;
             \_::$User->Refresh();
             if (isValid($img) != isValid(\_::$User->TemporaryImage))

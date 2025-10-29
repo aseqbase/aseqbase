@@ -378,7 +378,7 @@ class MainMenu extends Module
 								yield $this->CreateItem($item, 1);
 						}
 						,
-						["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : '') . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : '')]
+						["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : "") . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : "")]
 					);
 			if ($this->AllowOthers) {
 				$defaultButtons = [];
@@ -409,7 +409,7 @@ class MainMenu extends Module
 		if (!\_::$User->GetAccess(getValid($item, "Access", \_::$User->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path");
-		$act = endsWith(\_::$Address->Path, $path) ? 'active' : '';
+		$act = endsWith(\_::$Address->Path, $path) ? 'active' : "";
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Html::Item(

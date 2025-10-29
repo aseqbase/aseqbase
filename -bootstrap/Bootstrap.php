@@ -583,7 +583,7 @@ class Front extends AseqFront") . " {
     {
         try {
             self::$Arguments = self::GetArguments();
-            $configFile = __DIR__ . DIRECTORY_SEPARATOR . self::$ConfigurationsFile;
+            $configFile = getcwd() . DIRECTORY_SEPARATOR . self::$ConfigurationsFile;
             if (file_exists($configFile)) {
                 self::$Configurations = json_decode(file_get_contents($configFile), flags: JSON_OBJECT_AS_ARRAY) ?: [];
                 if (!isset(self::$Configurations["Source"]))
@@ -604,7 +604,7 @@ class Front extends AseqFront") . " {
     public static function StoreConfig()
     {
         try {
-            $configFile = __DIR__ . DIRECTORY_SEPARATOR . self::$ConfigurationsFile;
+            $configFile = getcwd() . DIRECTORY_SEPARATOR . self::$ConfigurationsFile;
             if (!isset(self::$Configurations["Destination"]))
                 self::$Configurations["Destination"] = [];
             self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory ?? preg_replace("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", "", getcwd() . DIRECTORY_SEPARATOR);

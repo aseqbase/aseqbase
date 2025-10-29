@@ -310,7 +310,7 @@ function receive(array|string|null $method = null)
 				if (!isEmpty($res)) {
 					if (isJson($res))
 						$method = Convert::FromJson($res) ?? $method;
-					else if (strpos($_SERVER['CONTENT_TYPE']??"", 'multipart/form-data') !== false)
+					else if (strpos($_SERVER['CONTENT_TYPE'] ?? "", 'multipart/form-data') !== false)
 						$method = Convert::FromFormData($res, $_FILES) ?? $method;
 					else
 						parse_str($res, $method);
@@ -327,7 +327,7 @@ function receive(array|string|null $method = null)
 					if (!isEmpty($res)) {
 						if (isJson($res))
 							$method = Convert::FromJson($res) ?? $method;
-						else if (strpos($_SERVER['CONTENT_TYPE']??"", 'multipart/form-data') !== false)
+						else if (strpos($_SERVER['CONTENT_TYPE'] ?? "", 'multipart/form-data') !== false)
 							$method = Convert::FromFormData($res, $_FILES) ?? $method;
 						else
 							parse_str($res, $method);
@@ -775,7 +775,7 @@ function deliverSpark($output = null, $status = null, $url = null)
 {
 	ob_clean();
 	setStatus($status);
-	echo Convert::ToString($output) . "<script>window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ");</script>";
+	echo Convert::ToString($output) . Html::Script("window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ");");
 	runSequence("finalize");
 	exit;
 }
@@ -978,29 +978,31 @@ function hasTimer($key = null)
 	return getTimer($key) > 0;
 }
 
-function encode($plain, &$replacements = null, $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU', $correctorPattern = null, $correctorReplacement = "")
+function encode($plain, &$replacements = [], $wrapStart = "<", $wrapEnd = ">", $pattern = '/("\S+[^"]*")|(\'\S+[^\']*\')|(<\S+[\w\W]*[^\\\\]>)|(\d*\.?\d+)/iU', $correctorPattern = null, $correctorReplacement = "")
 {
 	if (!is_array($replacements))
 		$replacements = array();
 	$c = count($replacements);
 	return $correctorPattern ? preg_replace_callback($pattern, function ($a) use (&$replacements, &$c, $wrapStart, $wrapEnd, $correctorPattern, $correctorReplacement) {
-		$key = preg_replace($correctorPattern, $correctorReplacement, $a[0]);
-		if (array_key_exists($key, $replacements))
-			return $replacements[$key];
-		return $replacements[$key] = $wrapStart . $c++ . $wrapEnd;
+		$val = preg_replace($correctorPattern, $correctorReplacement, $a[0]);
+		$key = array_search($val, $replacements);
+		if (!$key)
+			$replacements[$key = $wrapStart . $c++ . $wrapEnd] = $val;
+		return $key;
 	}, $plain) :
 		preg_replace_callback($pattern, function ($a) use (&$replacements, &$c, $wrapStart, $wrapEnd, $correctorPattern, $correctorReplacement) {
-			$key = $a[0];
-			if (array_key_exists($key, $replacements))
-				return $replacements[$key];
-			return $replacements[$key] = $wrapStart . $c++ . $wrapEnd;
+			$val = $a[0];
+			$key = array_search($val, $replacements);
+			if (!$key)
+				$replacements[$key = $wrapStart . $c++ . $wrapEnd] = $val;
+			return $key;
 		}, $plain);
 }
 function decode($cipher, ?array $replacements)
 {
 	if (is_array($replacements))
 		foreach (array_reverse($replacements) as $k => $v)
-			$cipher = str_replace($v, $k, $cipher);
+			$cipher = str_replace($k, $v, $cipher);
 	return $cipher;
 }
 /**
@@ -2058,9 +2060,9 @@ function getUrl(string|null $path = null): string|null
 {
 	if ($path === null)
 		$path = (
-			($_SERVER['SCRIPT_URI']??null) ??
-			(((!empty($_SERVER['HTTPS']??null) && ($_SERVER['HTTPS']??null) != 'off') || ($_SERVER['SERVER_PORT']??null) == 443) ? "https" : "http") .
-			"://" . ($_SERVER["HTTP_HOST"]??null) . takeBetween($_SERVER, "REQUEST_URI", "PHP_SELF")
+			($_SERVER['SCRIPT_URI'] ?? null) ??
+			(((!empty($_SERVER['HTTPS'] ?? null) && ($_SERVER['HTTPS'] ?? null) != 'off') || ($_SERVER['SERVER_PORT'] ?? null) == 443) ? "https" : "http") .
+			"://" . ($_SERVER["HTTP_HOST"] ?? null) . takeBetween($_SERVER, "REQUEST_URI", "PHP_SELF")
 		);//.($_SERVER['QUERY_STRING']?"?".$_SERVER['QUERY_STRING']:"");
 	return preg_replace("/^([\/\\\])/", rtrim(getHost(), "/\\") . "$1", $path);
 }
@@ -2073,8 +2075,8 @@ function getHost(string|null $path = null): string|null
 {
 	$pat = "/^\w+\:\/*[^\/]+/";
 	if ($path == null || !preg_match($pat, $path))
-		$path = (empty($_SERVER['HTTPS']??null) ? 'http://' : 'https://') . ($_SERVER['HTTP_HOST']??null);
-	return preg_Find($pat, $path)??"";
+		$path = (empty($_SERVER['HTTPS'] ?? null) ? 'http://' : 'https://') . ($_SERVER['HTTP_HOST'] ?? null);
+	return preg_Find($pat, $path) ?? "";
 }
 /**
  * Get the site name part of a url
@@ -2279,7 +2281,7 @@ function getClientIp($version = null): string|null
 }
 function getClientCode($key = null): string|null
 {
-	return md5($key . (getClientIp() ?? $_SERVER['HTTP_USER_AGENT']??null));
+	return md5($key . (getClientIp() ?? $_SERVER['HTTP_USER_AGENT'] ?? null));
 }
 
 /**

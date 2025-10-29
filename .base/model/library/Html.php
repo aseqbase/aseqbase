@@ -29,7 +29,7 @@ class Html
      * Supports all MarkDown markups
      * @param mixed $object
      */
-    public static function Convert($object, ...$arguments)
+    public static function Convert($object, ...$args)
     {
         if (!is_null($object)) {
             if (is_string($object)) {
@@ -169,9 +169,9 @@ class Html
                 $texts = array();
                 if (is_numeric(array_key_first($object))) {
                     foreach ($object as $val)
-                        $texts[] = self::Item(self::Convert($val, ...$arguments));
+                        $texts[] = self::Item(self::Convert($val, ...$args));
                     return self::List(join(PHP_EOL, $texts));
-                } elseif ($args = getBetween($object, "Arguments", "Item")) {
+                } elseif ($nArgs = getBetween($object, "Arguments", "Item")) {
                     $key = get($object, "Key");
                     $val = get($object, "Value");
                     $ops = get($object, "Options");
@@ -183,16 +183,16 @@ class Html
                         type: $type,
                         title: $title,
                         options: $ops,
-                        attributes: $args
+                        attributes: $nArgs
                     );
                 } else {
                     foreach ($object as $key => $val)
-                        $texts[] = self::Item(self::Span($key . ": ") . self::Convert($val, ...$arguments));
+                        $texts[] = self::Item(self::Span($key . ": ") . self::Convert($val, ...$args));
                     return self::Items(join(PHP_EOL, $texts));
                 }
             }
             if (is_callable($object) || $object instanceof \Closure)
-                return self::Convert($object(...$arguments));
+                return self::Convert($object(...$args));
             return self::Division(Convert::ToString($object));
         }
         return "";
@@ -2504,8 +2504,8 @@ class Html
                 self::Action(
                     self::Icon("eye"),
                     Internal::MakeScript(
-                        function ($args) {
-                            return \MiMFa\Library\Html::Convert($args);
+                        function ($nArgs) {
+                            return \MiMFa\Library\Html::Convert($nArgs);
                         }
                         ,
                         "\${document.getElementById('$eid').value}",

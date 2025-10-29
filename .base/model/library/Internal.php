@@ -24,8 +24,8 @@ class Internal
         $received = $name ? [$name => receiveInternal($name)] : receiveInternal();
         $reses = [];
         foreach ($received as $k => $v) {
-            $args = json_decode($v, true, flags: JSON_OBJECT_AS_ARRAY)??[];
-            $args = (is_array($args)?$args:[$args]);
+            $args = json_decode($v, true, flags: JSON_OBJECT_AS_ARRAY) ?? [];
+            $args = (is_array($args) ? $args : [$args]);
             $reses[] = Convert::By(self::Get($k, fn($a = null) => $a), ...$args);
         }
         return join("", $reses);
@@ -40,15 +40,17 @@ class Internal
         response(self::Handle($name));
     }
 
-    public static function MakeStartScript($multilines = false){
-        if (\_::$Router->DefaultMethodName === "GET" && headers_sent()) {
-           return "document.addEventListener('DOMContentLoaded',()=>".($multilines?"{":"");
+    public static function MakeStartScript($multilines = false, $direct = false)
+    {
+        if (\_::$Router->DefaultMethodName === "GET" && !headers_sent() && !$direct) {
+            return "document.addEventListener('DOMContentLoaded',()=>" . ($multilines ? "{" : "");
         }
         return "";
     }
-    public static function MakeEndScript($multilines = false){
-        if (\_::$Router->DefaultMethodName === "GET" && headers_sent()) {
-            return ($multilines?"}":"").");";
+    public static function MakeEndScript($multilines = false, $direct = false)
+    {
+        if (\_::$Router->DefaultMethodName === "GET" && !headers_sent() && !$direct) {
+            return ($multilines ? "}" : "") . ");";
         }
         return "";
     }
@@ -60,15 +62,19 @@ class Internal
      * @param mixed $callbackScript A JS code to handle received data // (data,err)=> received procedure
      * @param mixed $progressScript A JS code to apply while getting data // (data,err)=> progrecing procedure
      * @param mixed $timeout The interaction timeout
+     * @param bool $direct To get the direct executable script, or execute when the document is ready
      * @return string The interaction JS codes
      */
-    public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000)
+    public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000, $direct = false)
     {
         $selector = 'getQuery(this)??"body"';
-        $callbackScript = $callbackScript ?? "(data,err)=>document.querySelector($selector).replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
+        $callbackScript = $callbackScript ?? "(data,err)=>{
+            document.querySelector($selector).replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));
+            document.querySelector($selector).querySelectorAll('script').forEach(script => eval(script.textContent));
+        }";
         $progressScript = $progressScript ?? "null";
-        $start = self::MakeStartScript();
-        $end = self::MakeEndScript();
+        $start = self::MakeStartScript(direct: $direct);
+        $end = self::MakeEndScript(direct: $direct);
         if (isStatic($handler))
             return "$start($callbackScript)(" . Script::Convert($handler) . "," . Script::Convert($args) . ")$end";
         return $start .

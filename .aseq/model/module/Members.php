@@ -164,7 +164,7 @@ class Members extends Module
                                             __(get($item, 'Key')) . __(":"),
                                             null,
                                             ["class" => 'fa ' . get($item, "class"), "aria-hidden" => 'true']
-                                        ) . __(getValid($item, 'Value', '')),
+                                        ) . __(getValid($item, 'Value', "")),
                                         ["class" => "list-item d-flex justify-content-between align-items-center"]
                                     );
                                 }

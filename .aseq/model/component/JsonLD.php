@@ -40,12 +40,12 @@ class JsonLD{
 			  'author': {
 				'@type': 'Person',
 				'name': `".get($author,'Name' )."`,
-				'url': `".getValid($author,'Url',(\_::$Address->Host.(isValid($author,'Name' )?'':'/'.get($author,'Name' ))))."`
+				'url': `".getValid($author,'Url',(\_::$Address->Host.(isValid($author,'Name' )?"":'/'.get($author,'Name' ))))."`
 			  },
 			  'publisher': {
 				'@type': 'Organization',
 				'name': `".get($publisher,'Name' )."`,
-				'url': `".getValid($publisher,'Url',(\_::$Address->Host.(isValid($publisher,'Name' )?'':'/'.get($publisher,'Name' ))))."`
+				'url': `".getValid($publisher,'Url',(\_::$Address->Host.(isValid($publisher,'Name' )?"":'/'.get($publisher,'Name' ))))."`
 				'logo': {
 				  '@type': 'ImageObject',
 				  'url': `".getValid($publisher,'Url',\_::$Info->LogoPath)."`

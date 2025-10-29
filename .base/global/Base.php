@@ -1,6 +1,4 @@
 <?php
-
-
 library("Revise");
 /**
  *Guide for Documentations

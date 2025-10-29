@@ -12,17 +12,17 @@ class Convert
     /**
      * Convert everything through the costum converter
      */
-    public static function By($converter, &...$arguments)
+    public static function By($converter, &...$args)
     {
         if (isStatic($converter))
             return $converter;
         if (is_countable($converter) || is_iterable($converter))
-            return iterator_to_array((function () use ($converter, &$arguments) {
+            return iterator_to_array((function () use ($converter, &$args) {
                 foreach ($converter as $k => $c)
-                    yield $k => self::By($c, ...$arguments);
+                    yield $k => self::By($c, ...$args);
             })());
         if (is_callable($converter) || $converter instanceof \Closure)
-            return $converter(...$arguments);
+            return $converter(...$args);
         return $converter;
     }
 
@@ -31,7 +31,7 @@ class Convert
      * @param mixed $value
      * @return string
      */
-    public static function ToStatic($value, ...$arguments)
+    public static function ToStatic($value, ...$args)
     {
         if (isStatic($value))
             return $value;
@@ -40,11 +40,11 @@ class Convert
         if (is_countable($value) || is_iterable($value))
             return self::ToString($value);
         if (is_callable($value) || $value instanceof \Closure)
-            return self::ToStatic($value(...$arguments));
+            return self::ToStatic($value(...$args));
         if ($value instanceof \DateTime)
             return self::ToShownDateTimeString($value);
         if ($value instanceof \stdClass)
-            return self::ToStatic((array) $value, ...$arguments);
+            return self::ToStatic((array) $value, ...$args);
         return $value;
     }
 
@@ -92,17 +92,17 @@ class Convert
         return (self::ToStatic($value)??$default)."";
     }
 
-    public static function ToHtml($value, ...$arguments)
+    public static function ToHtml($value, ...$args)
     {
-        return Html::Convert($value, ...$arguments);
+        return Html::Convert($value, ...$args);
     }
-    public static function ToStyle($value, ...$arguments)
+    public static function ToStyle($value, ...$args)
     {
-        return Style::Convert($value, ...$arguments);
+        return Style::Convert($value, ...$args);
     }
-    public static function ToScript($value, ...$arguments)
+    public static function ToScript($value, ...$args)
     {
-        return Script::Convert($value, ...$arguments);
+        return Script::Convert($value, ...$args);
     }
 
     /**
@@ -268,11 +268,11 @@ class Convert
     }
     /**
      * Get items of all input arrays into a generator array
-     * @param mixed $arguments
+     * @param mixed $args
      */
-    public static function ToIteration(...$arguments)
+    public static function ToIteration(...$args)
     {
-        foreach ($arguments as $key => $val) {
+        foreach ($args as $key => $val) {
             if (is_countable($val) || is_iterable($val))
                 if (is_array($val))
                     yield from self::ToIteration(...$val);
@@ -284,12 +284,12 @@ class Convert
     }
     /**
      * Get items of all input arrays into one array
-     * @param mixed $arguments
+     * @param mixed $args
      * @return array
      */
-    public static function ToSequence(...$arguments)
+    public static function ToSequence(...$args)
     {
-        return iterator_to_array(self::ToIteration(...$arguments));
+        return iterator_to_array(self::ToIteration(...$args));
     }
 
     public static function ToJson($obj): string

@@ -763,7 +763,7 @@ class Table extends Module
             return Html::Error("You have not access to see datails!");
         $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
-            return Html::Error("You can not '".__("see")."' this item!");
+            return Html::Error("You can not 'see' this item!");
         $form = $this->GetForm();
         $form->Set(
             title: getBetween($record, "Title", "Name"),
@@ -863,7 +863,7 @@ class Table extends Module
             return Html::Error("You have not access to add!");
         $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
-            return Html::Error("You can not '".__("add")."' this item!");
+            return Html::Error("You can not 'add' this item!");
         $form = $this->GetForm();
         $form->Set(
             title: "Add {$this->Title}",
@@ -897,7 +897,7 @@ class Table extends Module
             return Html::Error("You have not access to modify!");
         $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
         if (isEmpty($record))
-            return Html::Error("You can not '".__("modify")."' this item!");
+            return Html::Error("You can not 'modify' this item!");
         $form = $this->GetForm();
         $form->Set(
             title: getBetween($record, "Title", "Name"),
@@ -936,8 +936,8 @@ class Table extends Module
             if (isEmpty($v))
                 unset($values[$k]);
         if ($this->DataTable->Insert($values))
-            return deliverSpark(Html::Success("The ".__("'information")."' added successfully!"));
-        return Html::Error("You can not '".__("add")."' this item!");
+            return deliverSpark(Html::Success("The 'information' added successfully!"));
+        return Html::Error("You can not 'add' this item!");
     }
     public function ModifyRow($values)
     {
@@ -949,7 +949,7 @@ class Table extends Module
                 return $values;
             if ($this->DataTable->Update([$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumn}"], $values))
                 return deliverSpark(Html::Success("The information updated successfully!"));
-            return Html::Error("You can not '".__("update")."' this item!");
+            return Html::Error("You can not 'update' this item!");
         }
     }
     public function RemoveRow($value)
@@ -960,7 +960,7 @@ class Table extends Module
             return Html::Error("You have not access to delete!");
         if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
             return deliverSpark(Html::Success("The 'items' removed successfully!"));
-        return Html::Error("You can not '".__("remove")."' this item!");
+        return Html::Error("You can not 'remove' this item!");
     }
 
     public function PrepareDataToShow(&$value, &$key, &$record, $schema)

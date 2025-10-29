@@ -32,7 +32,8 @@ class Translate
 	public $WrapPattern = "/(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(\<\S+[\w\W]*\>)|(\d*\.?\d+)/U";
 	public $ValidPattern = "/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-z]/m";
 	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
-	public $CorrectorPattern = "/(^')|('$)/";
+	public $CorrectorPattern = "/(?:^'([\w\W]+)'$)|([\w\W]+)/";
+	public $CorrectorReplacement = "$1$2";
 	public $AllowCache = true;
 	public $CaseSensitive = false;
 	public $AutoUpdate = false;
@@ -85,18 +86,18 @@ class Translate
 	{
 		if ($this->IsRootLanguage($text))
 			return $text;
-		$dic = array();
-		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern);
+		$text = encode($text, $replacements, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
+			foreach ($replacements as $key => $value) $replacements[$key] = $this->Get($value, $lang);
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
 			$data = $data[$lang ?? $this->Language] ?? $data["x"];
 		} elseif ($this->AutoUpdate)
 			$this->DataTable->Insert([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $data))]);
 		foreach ($replacements as $key => $val)
 			$data = str_replace($key, $val, $data);
-		$data = decode($data, $dic);
+		$data = decode($data, $replacements);
 		if ($this->CaseSensitive)
 			return $data;
 		return self::DetectCaseStatus($data, $data);
@@ -106,10 +107,11 @@ class Translate
 		if ($this->IsRootLanguage($text))
 			return $text;
 		$dic = array();
-		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern);
+		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($ntext);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
+			foreach ($dic as $key => $value) $dic[$key] = $this->Get($value, $lang);
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
 			$data = Decode($data[$lang ?? $this->Language] ?? $data["x"], $dic);
 			if ($this->CaseSensitive)
@@ -147,13 +149,13 @@ class Translate
 		if ($this->IsRootLanguage($text))
 			return false;
 		$dic = array();
-		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern);
+		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if (!$data)
 			$data = array("x" => $text);
 		if (!is_null($val))
-			$data[$lang ?? $this->Language] = encode($val, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern);
+			$data[$lang ?? $this->Language] = encode($val, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		return $this->DataTable->Replace(
 			[":KeyCode" => $code, ":ValueOptions" => Convert::ToJson($data)]
 		);

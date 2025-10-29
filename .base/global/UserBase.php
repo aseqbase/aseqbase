@@ -242,8 +242,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				$password = $this->EncryptPassword($password);
 			$person = $this->DataTable->SelectRow(
 				"`Signature` , Id , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
-				"(Id=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)) AND `Password`=:Password",
-				[":Id" => $signature, ":Signature" => $signature, ":Email" => strtolower($signature), ":Contact" => $signature, ":Password" => $password]
+				"(Id=:Signature OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Signature)) AND `Password`=:Password",
+				[":Signature" => $signature, ":Email" => strtolower($signature), ":Password" => $password]
 			);
 			if (isEmpty($person)) {
 				$this->SignOut($signature);
@@ -252,8 +252,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		} else {
 			$person = $this->DataTable->SelectRow(
 				"`Signature` , Id , `GroupId` , `Image` , `Name` , `Email` , `Password` , `Status`",
-				"Id=:Id OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Contact)",
-				[":Id" => $signature, ":Signature" => $signature, ":Email" => strtolower($signature), ":Contact" => $signature]
+				"Id=:Signature OR `Signature`=:Signature OR `Email`=:Email OR (`Contact` IS NOT NULL AND `Contact`=:Signature)",
+				[":Signature" => $signature, ":Email" => strtolower($signature)]
 			);
 			if (isEmpty($person)) {
 				$this->SignOut($signature);

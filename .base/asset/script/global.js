@@ -375,7 +375,7 @@ let getMemo = function (key) {
     }
     return null;
 };
-let deleteMemo = function (key, path = "/") {
+let popMemo = function (key, path = "/") {
     document.cookie = `${encodeURIComponent(key)}=; Max-Age=-99999999; Secure; path=${path}`;
 };
 let clearMemos = function () {
