@@ -10,6 +10,8 @@ class Part extends Module
 {
     public $Image = null;
     public $TitleTag = "h2";
+	public $Tag = "section";
+	public $Class = "part";
 
     public function GetStyle()
     {

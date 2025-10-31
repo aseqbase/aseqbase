@@ -72,103 +72,103 @@
 :hover>*>.parent.hover.invisible {
   visibility: hidden !important;
 }
-.xxlg-invisible,
-.xxlg-range-invisible {
+.xxl-invisible,
+.xxl-range-invisible {
   visibility: visible !important;
 }
-.xxlg-visible,
-.xxlg-range-visible {
+.xxl-visible,
+.xxl-range-visible {
   visibility: hidden !important;
 }
-.xxlg-show,
-.xxlg-range-show,
-.xxlg-block,
-.xxlg-range-block {
+.xxl-show,
+.xxl-range-show,
+.xxl-block,
+.xxl-range-block {
   display: none !important;
 }
 
 @media screen and (min-width: 1201px) {
-  .xxlg-visible {
+  .xxl-visible {
     visibility: visible !important;
   }
-  .xxlg-show {
+  .xxl-show {
     display: inherit !important;
   }
-  .xxlg-block {
+  .xxl-block {
     display: block !important;
   }
-  .xxlg-invisible {
+  .xxl-invisible {
     visibility: hidden !important;
   }
-  .xxlg-hide {
+  .xxl-hide {
     display: none !important;
   }
 }
 
 @media screen and (min-width: 1201px) and (max-width: 99999px) {
-  .xxlg-range-visible {
+  .xxl-range-visible {
     visibility: visible !important;
   }
-  .xxlg-range-show {
+  .xxl-range-show {
     display: inherit !important;
   }
-  .xxlg-range-block {
+  .xxl-range-block {
     display: block !important;
   }
-  .xxlg-range-invisible {
+  .xxl-range-invisible {
     visibility: hidden !important;
   }
-  .xxlg-range-hide {
+  .xxl-range-hide {
     display: none !important;
   }
 }
-.xlg-invisible,
-.xlg-range-invisible {
+.xl-invisible,
+.xl-range-invisible {
   visibility: visible !important;
 }
-.xlg-visible,
-.xlg-range-visible {
+.xl-visible,
+.xl-range-visible {
   visibility: hidden !important;
 }
-.xlg-show,
-.xlg-range-show,
-.xlg-block,
-.xlg-range-block {
+.xl-show,
+.xl-range-show,
+.xl-block,
+.xl-range-block {
   display: none !important;
 }
 
 @media screen and (max-width: 1200px) {
-  .xlg-visible {
+  .xl-visible {
     visibility: visible !important;
   }
-  .xlg-show {
+  .xl-show {
     display: inherit !important;
   }
-  .xlg-block {
+  .xl-block {
     display: block !important;
   }
-  .xlg-invisible {
+  .xl-invisible {
     visibility: hidden !important;
   }
-  .xlg-hide {
+  .xl-hide {
     display: none !important;
   }
 }
 
 @media screen and (min-width: 993px) and (max-width: 1200px) {
-  .xlg-range-visible {
+  .xl-range-visible {
     visibility: visible !important;
   }
-  .xlg-range-show {
+  .xl-range-show {
     display: inherit !important;
   }
-  .xlg-range-block {
+  .xl-range-block {
     display: block !important;
   }
-  .xlg-range-invisible {
+  .xl-range-invisible {
     visibility: hidden !important;
   }
-  .xlg-range-hide {
+  .xl-range-hide {
     display: none !important;
   }
 }
@@ -325,103 +325,103 @@
     display: none !important;
   }
 }
-.xsm-invisible,
-.xsm-range-invisible {
+.xs-invisible,
+.xs-range-invisible {
   visibility: visible !important;
 }
-.xsm-visible,
-.xsm-range-visible {
+.xs-visible,
+.xs-range-visible {
   visibility: hidden !important;
 }
-.xsm-show,
-.xsm-range-show,
-.xsm-block,
-.xsm-range-block {
+.xs-show,
+.xs-range-show,
+.xs-block,
+.xs-range-block {
   display: none !important;
 }
 
 @media screen and (max-width: 480px) {
-  .xsm-visible {
+  .xs-visible {
     visibility: visible !important;
   }
-  .xsm-show {
+  .xs-show {
     display: inherit !important;
   }
-  .xsm-block {
+  .xs-block {
     display: block !important;
   }
-  .xsm-invisible {
+  .xs-invisible {
     visibility: hidden !important;
   }
-  .xsm-hide {
+  .xs-hide {
     display: none !important;
   }
 }
 
 @media screen and (min-width: 361px) and (max-width: 480px) {
-  .xsm-range-visible {
+  .xs-range-visible {
     visibility: visible !important;
   }
-  .xsm-range-show {
+  .xs-range-show {
     display: inherit !important;
   }
-  .xsm-range-block {
+  .xs-range-block {
     display: block !important;
   }
-  .xsm-range-invisible {
+  .xs-range-invisible {
     visibility: hidden !important;
   }
-  .xsm-range-hide {
+  .xs-range-hide {
     display: none !important;
   }
 }
-.xxsm-invisible,
-.xxsm-range-invisible {
+.xxs-invisible,
+.xxs-range-invisible {
   visibility: visible !important;
 }
-.xxsm-visible,
-.xxsm-range-visible {
+.xxs-visible,
+.xxs-range-visible {
   visibility: hidden !important;
 }
-.xxsm-show,
-.xxsm-range-show,
-.xxsm-block,
-.xxsm-range-block {
+.xxs-show,
+.xxs-range-show,
+.xxs-block,
+.xxs-range-block {
   display: none !important;
 }
 
 @media screen and (max-width: 360px) {
-  .xxsm-visible {
+  .xxs-visible {
     visibility: visible !important;
   }
-  .xxsm-show {
+  .xxs-show {
     display: inherit !important;
   }
-  .xxsm-block {
+  .xxs-block {
     display: block !important;
   }
-  .xxsm-invisible {
+  .xxs-invisible {
     visibility: hidden !important;
   }
-  .xxsm-hide {
+  .xxs-hide {
     display: none !important;
   }
 }
 
 @media screen and (min-width: 10px) and (max-width: 360px) {
-  .xxsm-range-visible {
+  .xxs-range-visible {
     visibility: visible !important;
   }
-  .xxsm-range-show {
+  .xxs-range-show {
     display: inherit !important;
   }
-  .xxsm-range-block {
+  .xxs-range-block {
     display: block !important;
   }
-  .xxsm-range-invisible {
+  .xxs-range-invisible {
     visibility: hidden !important;
   }
-  .xxsm-range-hide {
+  .xxs-range-hide {
     display: none !important;
   }
 }

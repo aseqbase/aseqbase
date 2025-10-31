@@ -115,6 +115,7 @@ class Template extends \Base{
         h1, h2, h3, h4, h5, h6 {
             font-family: var(--font-special), var(--font);
             direction: var(--dir);
+            line-height: 2em;
         }
         .tooltip {
             position: absolute;

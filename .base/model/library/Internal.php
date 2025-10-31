@@ -13,6 +13,8 @@ use Exception;
 class Internal
 {
     public static $Directory = null;
+    public static $Selector = 'getQuery(this)??"body"';
+    public static $Target = 'after';
 
     /**
      * To handle and return internal requests
@@ -67,11 +69,7 @@ class Internal
      */
     public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000, $direct = false)
     {
-        $selector = 'getQuery(this)??"body"';
-        $callbackScript = $callbackScript ?? "(data,err)=>{
-            document.querySelector($selector).replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));
-            document.querySelector($selector).querySelectorAll('script').forEach(script => eval(script.textContent));
-        }";
+        $callbackScript = $callbackScript ?? "(data,err)=>document.querySelector(".(self::$Selector).").".(self::$Target)."(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err))";
         $progressScript = $progressScript ?? "null";
         $start = self::MakeStartScript(direct: $direct);
         $end = self::MakeEndScript(direct: $direct);
@@ -80,7 +78,7 @@ class Internal
         return $start .
             'sendInternalRequest(null,{"' .
             self::Set($handler) . '":JSON.stringify(' . Script::Convert($args) .
-            ")},$selector,$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
+            ")},".(self::$Selector).",$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
     }
     /**
      * Get the handler encripted name
@@ -126,7 +124,11 @@ class Internal
                 $source .= $file->current();
                 $file->next();
             }
-            return preg_find("/(fn|function)\s*\([^\)]*\)\s*(\=\>)?\s*\{\s*(('[^']*')*|(\"[^\"]*\")*|(\{[^\}]+\})*|([^\}]+)*)*\s*\}/U", trim($source, ";(),= \n\r\t\v\x00"));
+            $code = preg_find("/(fn|function)\s*\([^\)]*\)\s*(\=\>)?\s*\{\s*(('[^']*')*|(\"[^\"]*\")*|(\{[^\}]+\})*|([^\}]+)*)*\s*\}/U", trim($source, ";(),= \n\r\t\v\x00"));
+            $sl = strlen(preg_replace("/('[^']*')*|(\"[^\"]*\")*|\{/","", $code));
+            $el = strlen(preg_replace("/('[^']*')*|(\"[^\"]*\")*|\}/","", $code));
+            if($sl < $el) return $code."}";
+            return $code;
         } elseif (is_object($handler)) {
             $reflection = new \ReflectionObject($handler);
             $source = 'fn($args=null)=>';

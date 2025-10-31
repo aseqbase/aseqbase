@@ -596,6 +596,58 @@ class Html
 
 
     #region NOTIFICATION
+
+    /**
+     * To show a modal tag
+     * @param string $content The modal text or html tags
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Modal($content, ...$attributes)
+    {
+        $id = "_" . getId(true);
+        return self::Style("
+            #$id.modal-overlay {
+                position: fixed;
+                top: 0; bottom: 0; left: 0; right: 0;
+                width: 100%; height: 100%;
+                background: rgba(0,0,0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 999999999;
+            }
+            #$id.modal-overlay>.modal {
+                background-color: var(--back-color-special);
+                color: var(--fore-color-special);
+                padding: var(--size-3);
+                border-radius: var(--radius-3);
+                max-width: 90%;
+                max-haight: 90%;
+                box-shadow: var(--shadow-max);
+                position: relative;
+            }
+            #$id.modal-overlay>.modal>.modal-close {
+                position: absolute;
+                top: 0px; right: 0px;
+            }
+        ") . self::Division(
+                    self::Division(
+                        [
+                            Html::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']),
+                            $content
+                        ]
+                        ,
+                        ["class" => "modal"],
+                        ...$attributes
+                    ),
+                    [
+                        "id"=>$id,
+                        "class" => 'modal-overlay',
+                        "onclick" => "if(event.target.classList.contains('modal-overlay')) event.target.remove();event.preventDefault();"
+                    ]
+                );
+    }
     public static function Result($content, $icon = "bell", $wait = 10000, ...$attributes)
     {
         $id = "_" . getId(true);
@@ -1380,7 +1432,7 @@ class Html
     {
         return self::Heading3($content, $reference, ...$attributes);
     }
-    
+
     /*
      * The \<H1\> HTML Tag
      * @param mixed $content The heading text
@@ -1802,7 +1854,7 @@ class Html
             $content = null;
         }
         if (is_null($content))
-            $content = getDomain($reference);
+            $content = $reference;//getDomain($reference);
         return self::Element(__($content), "a", ["href" => $reference, "class" => "link"], $attributes);
     }
     /**
@@ -1988,7 +2040,7 @@ class Html
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
         $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title"]));
         $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description"]));
-        $wrapperAttr = self::PopAttribute($attributes, "WrapperAttributes") ?? [];
+        $wrapperAttr = self::PopAttribute($attributes, "Wrapper") ?? [];
         switch ($type) {
             case null:
             case false:
@@ -3058,18 +3110,18 @@ class Html
         $name = self::PopAttribute($attributes, "Name");
         $onChange = self::PopAttribute($attributes, "OnChange");
         return
-        self::Map($value, null, [
-            "id"=>"_input$id",
-            "class"=>"input",
-            "onchange"=>"
-                document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;".
-                Convert::ToString($onChange, ";
+            self::Map($value, null, [
+                "id" => "_input$id",
+                "class" => "input",
+                "onchange" => "
+                document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
+                    Convert::ToString($onChange, ";
             ")
-        ], $attributes).
-        self::HiddenInput($key, Convert::ToString($value, ","), [
-            "id"=>$id,
-            "class" => "mapinput",
-            "onchange"=>"
+            ], $attributes) .
+            self::HiddenInput($key, Convert::ToString($value, ","), [
+                "id" => $id,
+                "class" => "mapinput",
+                "onchange" => "
                 setTimeout(()=>{
                     ll = this.value.split(/[,;]/);
                     latlng = {lat:ll[0]??0,lng:ll[1]??0};
@@ -3078,8 +3130,8 @@ class Html
                     map_input$id.flyTo(latlng);
                 }, 2000)
             ",
-            "name"=>$name
-        ]);
+                "name" => $name
+            ]);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3758,7 +3810,8 @@ class Html
     {
         if (!isEmpty($action) && !isScript($action) && isUrl($action))
             $action = "load(" . Script::Convert($action) . ")";
-        if ($action) $action = ".on('click', (e)=>{$action})";
+        if ($action)
+            $action = ".on('click', (e)=>{$action})";
 
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         style(null, "https://unpkg.com/leaflet/dist/leaflet.css");
@@ -3792,11 +3845,11 @@ class Html
                 }
             }
         }
-       
+
         $onchange = self::PopAttribute($attributes, "OnChange");
         $onclick = self::PopAttribute($attributes, "OnClick");
-        
-        $changeable = $onchange?"true":"false";
+
+        $changeable = $onchange ? "true" : "false";
 
         $scripts = <<<JS
 document.addEventListener('DOMContentLoaded', function() {

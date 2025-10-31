@@ -8,6 +8,7 @@ module("Player");
 class Modal extends Player{
 	public $Class = "hide";
 	public $ButtonsContent = null;
+	public $FitContent = false;
 	public $AllowClose = true;
 	public $AllowFocus = true;
 	public $Width = "90vw";
@@ -21,13 +22,16 @@ class Modal extends Player{
 				Color: var(--fore-color-special);
 				border-radius: var(--radius-2);
 				border: var(--border-1) var(--fore-color);
-				height: {$this->Height};
+				".($this->FitContent?
+				"max-height: {$this->Height};
+				max-width: {$this->Width};":
+				"height: {$this->Height};
 				width: {$this->Width};
-				position: fixed;
 				top: calc((100% - {$this->Height})/2);
 				bottom: calc((100% - {$this->Height})/2);
 				left: calc((100% - {$this->Width})/2);
-				right: calc((100% - {$this->Width})/2);
+				right: calc((100% - {$this->Width})/2);")."
+				position: fixed;
 				z-index: 999999999;
 				overflow:hidden;
 				box-shadow: var(--shadow-5);
@@ -169,7 +173,7 @@ class Modal extends Player{
 	}
 	
 	public function Show($content = null){
-		return response($this->ShowScript($content));
+		return script($this->ShowScript($content));
 	}
 	public function ShowScript($content = null){
 		return ($content?$this->InitializeScript(content: $content):"").$this->Name."_Show();";

@@ -3,7 +3,8 @@ namespace MiMFa\Module;
 use MiMFa\Library\Html;
 class PrePage extends Module
 {
-	public $Class = "container";
+	public $Tag = "section";
+	public $Class = "prepage container";
 	public $Image = null;
 	public $TitleTag = "h1";
 

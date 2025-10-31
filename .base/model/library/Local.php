@@ -118,14 +118,14 @@ class Local
 	}
 	/**
 	 * To get the relative address from a path
-	 * @param  $path The path
-	 * @example: "Category/mimfa/service/web.php?p=3&l=10#serp"
-	 * @return string|null
+	 * @param  $path The path "file://D:/MyWebsite/Category/mimfa/service/web.php?p=3&l=10#serp"
+	 * @return string|null "/Category/mimfa/service/web.php?p=3&l=10#serp"
 	 */
 	public static function GetRelativeAddress($path): string|null
 	{
 		if (empty($path))
 			return null;
+		$path = preg_replace("/^file:[\/\\\]+/","",$path);
 		foreach (\_::$Sequence as $directory => $root)
 			if (startsWith($path, $directory))
 				return substr($path, strlen($directory));
@@ -144,7 +144,7 @@ class Local
 		$directory = $directory ?? \_::$Router->TempDirectory;
 		do
 			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . "-" . getId($random) . $format;
-		while (file_exists($path));
+		while (file_exists(filename: $path));
 		return $path;
 	}
 
@@ -405,6 +405,7 @@ class Local
 		if (is_uploaded_file($sourceFile) && move_uploaded_file($sourceFile, $destFile))
 			return $destFile;
 		if (rename($sourceFile, $destFile))
+			return $destFile;
 			return $destFile;
 		if ($deleteSource)
 			unlink($sourceFile);

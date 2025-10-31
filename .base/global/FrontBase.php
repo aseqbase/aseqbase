@@ -98,7 +98,7 @@ abstract class FrontBase
 	/**
 	 * Sizes Palette
 	 * @field array<size>
-	 * @template array [sm, n, lg, xlg, xxlg,...]
+	 * @template array [sm, n, lg, xl, xxl,...]
 	 * @var mixed
 	 */
 	public $SizePalette = array("2.3vh", "2.4vh", "2.6vh", "3vh", "3.6vh", "4.4vh", "5.4vh");
@@ -242,7 +242,7 @@ abstract class FrontBase
 	}
 	/**
 	 * To get the Size by index
-	 * @param int $index 0:sm, 1:n, 2:lg, 3:xlg, 4:xxlg,...
+	 * @param int $index 0:sm, 1:n, 2:lg, 3:xl, 4:xxl,...
 	 */
 	public function Size(int $index = 0)
 	{
@@ -362,7 +362,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => response(Html::Script($this->MakeSetScript($selector, $handler, ...$args)))
+			fn() => response(Html::Script($this->MakeSetScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -372,12 +372,14 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public function MakeSetScript($selector = null, $handler = null, ...$args)
+	public function MakeSetScript($selector = null, $handler = null, $args = [], $direct = true)
 	{
 		return Internal::MakeScript(
 			$handler,
 			$args,
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err));l.remove();})"
+			//"(data,err)=>{elem = \$(" . Script::Convert($selector) . ");elem.before(data??err);elem.remove();}"
+			,direct: $direct
 		);
 	}
 	/**
@@ -389,16 +391,16 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeDeleteScript($selector)))
+			fn() => self::Append("body", Html::Script($this->MakeDeleteScript($selector, false)))
 		);
 	}
 	/**
 	 * Make a script to Delete a special part of client side
 	 * @param mixed $selector The destination selector
 	 */
-	public function MakeDeleteScript($selector = "body")
+	public function MakeDeleteScript($selector = "body", $direct = true)
 	{
-		return Internal::MakeStartScript() . "document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultSourceSelector) . ").forEach(el=>el.remove())" . Internal::MakeEndScript();
+		return Internal::MakeStartScript(direct: $direct) . "document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultSourceSelector) . ").forEach(el=>el.remove())" . Internal::MakeEndScript(direct: $direct);
 	}
 	/**
 	 * Insert output before a special part of client side
@@ -411,7 +413,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeBeforeScript($selector, $handler, ...$args)))
+			fn() => self::Append("body", Html::Script($this->MakeBeforeScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -421,12 +423,13 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public function MakeBeforeScript($selector = "body", $handler = null, ...$args)
+	public function MakeBeforeScript($selector = "body", $handler = null, $args = [], $direct = true)
 	{
 		return Internal::MakeScript(
 			$handler,
 			$args,
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+			, direct: $direct
 		);
 	}
 	/**
@@ -440,7 +443,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeAfterScript($selector, $handler, ...$args)))
+			fn() => self::Append("body", Html::Script($this->MakeAfterScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -450,12 +453,14 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public function MakeAfterScript($selector = "body", $handler = null, ...$args)
+	public function MakeAfterScript($selector = "body", $handler = null, $args = [], $direct = true)
 	{
 		return Internal::MakeScript(
 			$handler,
 			$args,
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+			, direct: $direct
 		);
 	}
 	/**
@@ -469,7 +474,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeFillScript($selector, $handler, ...$args)))
+			fn() => self::Append("body", Html::Script($this->MakeFillScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -479,13 +484,14 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public function MakeFillScript($selector = "body", $handler = null, ...$args)
+	public function MakeFillScript($selector = "body", $handler = null, $args = [], $direct = true)
 	{
 		return Internal::MakeScript(
 			$handler,
 			$args,
 			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+			, direct: $direct
 		);
 	}
 	/**
@@ -499,7 +505,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakePrependScript($selector, $handler, ...$args)))
+			fn() => self::Append("body", Html::Script($this->MakePrependScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -509,7 +515,7 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public function MakePrependScript($selector = "body", $handler = null, ...$args)
+	public function MakePrependScript($selector = "body", $handler = null, $args = [], $direct = true)
 	{
 		return Internal::MakeScript(
 			$handler,
@@ -517,6 +523,7 @@ abstract class FrontBase
 			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
 			"(data,err)=>$(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").prepend(data??err)"
 			//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
+			, direct: $direct
 		);
 	}
 	/**
@@ -530,7 +537,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeAppendScript($selector, $handler, ...$args)))
+			fn() => self::Append("body", Html::Script($this->MakeAppendScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -540,7 +547,7 @@ abstract class FrontBase
 	 * @param mixed $handler The data that is ready to print
 	 * @param mixed $args Handler input arguments
 	 */
-	public function MakeAppendScript($selector = "body", $handler = null, ...$args)
+	public function MakeAppendScript($selector = "body", $handler = null, $args = [], $direct = true)
 	{
 		return Internal::MakeScript(
 			$handler,
@@ -548,7 +555,8 @@ abstract class FrontBase
 			//"(data,err)=>document.querySelector(".Script::Convert($selector ?? $this->DefaultDestinationSelector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
 			//"(data,err)=>$(" . Script::Convert($selector) . ").append(data??err)"
-
+			,
+			direct: $direct
 		);
 	}
 }

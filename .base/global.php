@@ -8,6 +8,7 @@ use MiMFa\Library\Internal;
 use MiMFa\Library\Local;
 use MiMFa\Library\Script;
 use MiMFa\Library\Style;
+use MiMFa\Module\Modal;
 
 /**
  * All the Global Static Variables and Functions You need to indicate and handle requests and responses
@@ -77,6 +78,19 @@ component("Component");
 template("Template");
 module("Module");
 
+function initialize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
+{
+	setStatus($status);
+	runSequence("initialize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+}
+function finalize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
+{
+	runSequence("finalize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+	if (is_null($status))
+		exit;
+	else
+		exit($status);
+}
 #endregion 
 
 
@@ -583,6 +597,16 @@ function style($content, $source = null, ...$attributes)
 }
 
 /**
+ * Show a modal output in the client side
+ * @param mixed $content The data that is ready to print
+ * @return mixed Printed data
+ */
+function modal($content = null)
+{
+	return response(Html::Modal($content));
+}
+
+/**
  * Show a message result output to the client side
  * @param mixed $message The data that is ready to print
  * @return mixed Printed data
@@ -633,6 +657,19 @@ function report($message = null)
 {
 	return script(Script::Log($message));
 }
+/**
+ * Print this content on the client side then reload the page
+ * @param mixed $content The data that is ready to print
+ * @param mixed $url The next url to show after rendering output,
+ * if leave null it will try to find the next or previous request into the getted url,
+ * or will reload the page otherwise
+ */
+function spark($content = null, $url = null)
+{
+	$url = $url ?? receiveGet("next") ?? receiveGet("previous");
+	echo ($content = Convert::ToString($content)) . Html::Script("window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ");");
+	return $content;
+}
 
 /**
  * Convert markdown supported data and echo them on the client side
@@ -648,6 +685,15 @@ function render($content = null, $replacements = null, $status = null)
 	return $content;
 }
 
+/**
+ * Clean (erase) the output buffer and turn off output buffering
+ */
+function erase()
+{
+	if (ob_get_level())
+		return ob_end_clean(); // Clean any remaining output buffers
+	return null;
+}
 /**
  * To change the header in the client side
  * @param mixed $key The header key
@@ -693,7 +739,6 @@ function setStatus($status = null)
 
 
 #region DELIVERING
-
 /**
  * Print only this output on the client side, Clear before then end
  * @param mixed $output The data that is ready to print
@@ -701,17 +746,13 @@ function setStatus($status = null)
  */
 function deliver($output = null, $status = null)
 {
-	if (ob_get_level())
-		ob_end_clean(); // Clean any remaining output buffers
+	erase(); // Clean any remaining output buffers
 	setStatus($status);
 	if ($output) {
 		echo Convert::ToString($output);
-		runSequence("finalize");
-		exit;
-	} else {
-		runSequence("finalize");
-		exit;
-	}
+		finalize();
+	} else
+		finalize();
 }
 /**
  * Response scripts to the client side
@@ -729,8 +770,7 @@ function deliverScript($output = null, $status = null)
  */
 function deliverJson($output = null, $status = null)
 {
-	if (ob_get_level())
-		ob_end_clean(); // Clean any remaining output buffers
+	erase(); // Clean any remaining output buffers
 	setContentType("application/json");
 	deliver(isJson($output) ? $output : Convert::ToJson($output), $status);
 }
@@ -741,8 +781,7 @@ function deliverJson($output = null, $status = null)
  */
 function deliverXml($output = null, $status = null)
 {
-	if (ob_get_level())
-		ob_end_clean(); // Clean any remaining output buffers
+	erase(); // Clean any remaining output buffers
 	setContentType("application/xml");
 	deliver(is_string($output) ? $output : Convert::ToXmlString($output), $status);
 }
@@ -769,15 +808,16 @@ function deliverAgain($output = null, $status = null, $url = null)
  * Print only this output on the client side then reload the page
  * @param mixed $output The data that is ready to print
  * @param mixed $status The header status
- * @param mixed $url The next url to show after rendering output
+ * @param mixed $url The next url to show after rendering output,
+ * if leave null it will try to find the next or previous request into the getted url,
+ * or will reload the page otherwise
  */
 function deliverSpark($output = null, $status = null, $url = null)
 {
-	ob_clean();
+	erase(); // Clean any remaining output buffers
 	setStatus($status);
-	echo Convert::ToString($output) . Html::Script("window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ");");
-	runSequence("finalize");
-	exit;
+	spark($output, $url);
+	finalize();
 }
 /**
  * Sends a file to the client side.
@@ -790,17 +830,14 @@ function deliverSpark($output = null, $status = null, $url = null)
  */
 function deliverFile($output = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
 {
-	// Clear output buffer if active
-	if (ob_get_level())
-		ob_clean();
+	erase(); // Clean any remaining output buffers
 
 	$output = Local::GetFile($output);
 	if ($output)
 		setStatus($status);
 	else {
 		setStatus(404);
-		runSequence("finalize");
-		exit;
+		finalize();
 	}
 	if ($type)
 		header("Content-Type: $type");
@@ -820,8 +857,63 @@ function deliverFile($output = null, $status = null, $type = null, bool $attachm
 	//header("Etag: " . md5_file($output)); // Simple ETag (entity tag) response header is an identifier for a specific version of a resource. It lets caches be more efficient and save
 	//Read and output the file
 	readfile($output);
-	runSequence("finalize");
-	exit;
+	finalize();
+}
+
+/**
+ * To deliver a modal output in the client side
+ * @param mixed $content The data that is ready to print
+ * @return mixed Printed data
+ */
+function deliverModal($content = null)
+{
+	return deliver(Html::Modal($content));
+}
+/**
+ * To deliver a message result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function deliverMessage($message = null)
+{
+	return deliver(Html::Result($message));
+}
+/**
+ * To deliver a success result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function deliverSuccess($message = null)
+{
+	return deliver(Html::Success($message));
+}
+/**
+ * To deliver a warning result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function deliverWarning($message = null)
+{
+	return deliver(Html::Warning($message));
+}
+/**
+ * To deliver an error result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function deliverError($message = null)
+{
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return deliverScript(Script::Error($message->getMessage()), 400);
+	return deliver(Html::Error($message), 400);
+}
+/**
+ * To deliver message on the console
+ * @param mixed $message
+ */
+function deliverReport($message = null)
+{
+	return deliverScript(Script::Log($message));
 }
 
 #endregion 
@@ -902,10 +994,8 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 			else
 				route(\_::$Router->StatusMode ?? \_::$Router->RestrictionRouteName, alternative: "403");
 		}
-		if ($exit !== false) {
-			runSequence("finalize");
-			exit($exit);
-		}
+		if ($exit !== false)
+			finalize($exit);
 		return false;
 	} elseif (isValid(\_::$Config->AccessMode)) {
 		$ip = getClientIp();
@@ -920,10 +1010,8 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 				else
 					route(\_::$Router->RestrictionRouteName, alternative: "401");
 			}
-			if ($exit !== false) {
-				runSequence("finalize");
-				exit($exit);
-			}
+			if ($exit !== false)
+				finalize($exit);
 			return false;
 		}
 	}
@@ -943,10 +1031,8 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 		else
 			load(\_::$User->InHandlerPath);
 	}
-	if ($exit !== false) {
-		runSequence("finalize");
-		exit($exit);
-	}
+	if ($exit !== false)
+		finalize($exit);
 	return $b;
 }
 
@@ -2409,7 +2495,7 @@ function getSecret($key)
 		return null;
 	$item = $_SESSION[$key];
 	if ($item['expires'] > 0 && $item['expires'] < (int) microtime(true)) {
-		popSecret($key);
+		unset($_SESSION[$key]);
 		return null;
 	}
 	if (str_starts_with(\_::$Address->Request ?? "/", $item['path']))
@@ -2776,10 +2862,8 @@ function async($action, $callback = null, ...$args)
 	$result = $action(...$args);
 	if ($callback)
 		$callback($result);
-	if (!$pid) {
-		runSequence("finalize");
-		exit(0); // End the child process
-	}
+	if (!$pid)
+		finalize(0); // End the child process
 }
 
 
@@ -2793,7 +2877,9 @@ function async($action, $callback = null, ...$args)
  */
 function __(mixed $value, bool $translating = true, bool $styling = false, bool|null $referring = null): string|null
 {
-	$value = MiMFa\Library\Convert::ToString($value);
+	$value = MiMFa\Library\Convert::ToString(
+		is_array($value) ? join(" ", loop($value, fn($v) => __($v, $translating, $styling, $referring))) : $value
+	);
 	if ($translating && \_::$Back->AllowTranslate)
 		$value = \_::$Back->Translate->Get($value);
 	if ($styling)

@@ -336,17 +336,21 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return $this->GroupDataTable->Update("Id='$id'", $fieldsDictionary);
 	}
 
-	public function MakeSign($regards = "Kind Regards")
+	public function GenerateSign($slogan = "Kind Regards")
 	{
 		return trim(join(PHP_EOL, [
 			$this->Access >= $this->AdminAccess ? \_::$Info->Slogan : "",
-			$regards ? "*$regards*" : "",
+			$slogan ? "*$slogan*" : "",
 			"------",
 			"*" . $this->Name . "*",
 			get($this->GetGroup(), "Title") . " at " . \_::$Info->Name,
 			$this->Access >= $this->AdminAccess ? \_::$Info->ReceiverEmail ?? $this->Email : $this->Email,
 			"[" . \_::$Info->FullName . "](" . \_::$Info->Path . ")"
 		]));
+	}
+	public function GenerateEmail($name = null, $fake = false)
+	{
+		return ($name??$this->Signature??("user_".getId(true))).($fake?uniqid("+"):"")."@".\_::$Address->Domain;
 	}
 
 	/**
@@ -369,7 +373,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		return $this->DataTable->Insert(
 			[
 				":Signature" => $this->TemporarySignature = $signature ?? $email,
-				":Email" => $this->TemporaryEmail = strtolower($email),
+				":Email" => $this->TemporaryEmail = strtolower($email ?? ""),
 				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password),
 				":Name" => $this->TemporaryName = $name ?? trim($firstName . " " . $lastName),
 				":FirstName" => $firstName,
@@ -384,12 +388,13 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	/**
 	 * Summary of SignIn
 	 * @param mixed $signature
-	 * @param mixed $password
+	 * @param mixed $password  Required to check validation of password before,
+	 * leave null to sign in user only by the "Signature"
 	 * @return bool|null It will return 'true' if logged in 'null' if the account is not active yet, and 'false' otherwise
 	 */
-	public function SignIn($signature, $password)
+	public function SignIn($signature, $password = null)
 	{
-		if (!isValid($password))
+		if (!$password && !is_null($password))
 			return false;
 		$person = null;
 		try {

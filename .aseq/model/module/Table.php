@@ -21,7 +21,7 @@ class Table extends Module
 
     public $Modal = null;
     public Navigation|null $NavigationBar = null;
-    public $TopNavigation = false;
+    public $TopNavigation = true;
     public $BottomNavigation = true;
 
     /**

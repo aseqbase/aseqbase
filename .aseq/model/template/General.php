@@ -20,7 +20,7 @@ class General extends Template
 		component("Icons");
         component("ShortcutKey");
 		component("JQuery");
-		component("Bootstrap");
+		//component("Bootstrap");
 		component("AOS");
 	}
 
@@ -188,9 +188,19 @@ class General extends Template
 					border-inline-start: 3px solid var(--back-color-output);
 				}
 
-				.table :is(thead,tbody,tfoot,tr,td,th) {
-					color: var(--fore-color-input);
-					background-color: var(--back-color-input);
+				.table {
+					border-radius: var(--radius-1);
+					background-color: var(--back-color-special);
+					color: var(--fore-color-special);
+				}
+				.table tbody>tr:nth-child(odd)>:is(td) {
+					background-color: #88888812;
+				}
+				.table tbody>tr:nth-child(even)>:is(td) {
+					background-color: #88888805;
+				}
+				.table :is(td,th) {
+					padding: calc(var(--size-0) / 2)  var(--size-0);
 				}
 
 				a, a:visited, a:active, a:hover{

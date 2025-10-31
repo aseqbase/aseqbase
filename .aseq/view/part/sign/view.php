@@ -1,7 +1,8 @@
 <?php
 use MiMFa\Library\Html;
 use MiMFa\Library\Convert;
-$data = !isEmpty($data) ? $data : \_::$User->Get(\_::$Address->Page);
+try{
+$data = !isEmpty($data) ? $data : \_::$User->Get(preg_find("/\b[^\/\\\\?]+/", \_::$Router->Direction??""));
 if (!isEmpty($data)) {
     module("Form");
     module("Field");
@@ -34,4 +35,7 @@ if (!isEmpty($data)) {
         padding-inline-start: calc(var(--bs-gutter-x) * .5);
     }");
 }
-?>
+}
+catch(\Exception $ex) {
+    route(404);
+}

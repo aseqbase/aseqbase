@@ -29,11 +29,16 @@ class Translate
 	public $Direction = "ltr";
 	public $WrapStart = "<";
 	public $WrapEnd = ">";
-	public $WrapPattern = "/(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(\<\S+[\w\W]*\>)|(\d*\.?\d+)/U";
+	public $WrapPattern = "/(^<[\w\W]*>$)|(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(<\S+[\w\W]*>)|(\d*\.?\d+)/U";
 	public $ValidPattern = "/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-z]/m";
 	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
 	public $CorrectorPattern = "/(?:^'([\w\W]+)'$)|([\w\W]+)/";
 	public $CorrectorReplacement = "$1$2";
+	/**
+	 * To have a deep translate
+	 * @test
+	 */
+	public $Deep = false;
 	public $AllowCache = true;
 	public $CaseSensitive = false;
 	public $AutoUpdate = false;
@@ -50,7 +55,7 @@ class Translate
 	 */
 	public function Initialize(?string $defaultLang = null, ?string $defaultDirection = null, ?string $defaultEncoding = null, bool $caching = true)
 	{
-		$langs = $this->GetLanguages();
+		$langs = $this->GetLanguages(defaultLang: $defaultLang);
 		setMemo("Lang", $this->Language = $this->GetLanguage($langs, $defaultLang));
 		setMemo("Direction", $this->Direction = $this->GetDirection($langs, $defaultDirection));
 		setMemo("Encoding", $this->Encoding = $this->GetEncoding($langs, $defaultEncoding));
@@ -84,41 +89,61 @@ class Translate
 
 	public function GetHybrid($text, $replacements = [], $lang = null)
 	{
-		if ($this->IsRootLanguage($text))
+		if (!$this->IsRootLanguage($text))
 			return $text;
 		$text = encode($text, $replacements, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
-			foreach ($replacements as $key => $value) $replacements[$key] = $this->Get($value, $lang);
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
 			$data = $data[$lang ?? $this->Language] ?? $data["x"];
 		} elseif ($this->AutoUpdate)
 			$this->DataTable->Insert([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $data))]);
-		foreach ($replacements as $key => $val)
+		foreach ($replacements as $key => $val) {
+			$replacements[$key] = $this->Get($val, $lang, 0);
 			$data = str_replace($key, $val, $data);
+		}
 		$data = decode($data, $replacements);
 		if ($this->CaseSensitive)
 			return $data;
 		return self::DetectCaseStatus($data, $data);
 	}
-	public function Get($text, $lang = null)
+	public function Get($text, $lang = null, $depth = 1)
 	{
-		if ($this->IsRootLanguage($text))
+		if (!$this->IsRootLanguage($text))
 			return $text;
 		$dic = array();
 		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($ntext);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
+		if (($d = $depth - 1) >= 0)
+			foreach ($dic as $key => $value)
+				$dic[$key] = $this->Get($value, $lang, $d);
 		if ($data) {
-			foreach ($dic as $key => $value) $dic[$key] = $this->Get($value, $lang);
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
-			$data = Decode($data[$lang ?? $this->Language] ?? $data["x"], $dic);
+			$data = decode($data[$lang ?? $this->Language] ?? $data["x"], $dic);
 			if ($this->CaseSensitive)
-				return $data;
-			return self::DetectCaseStatus($data, $text);
+				return $this->Deep ? $this->DeepReplace($data, $lang) : $data;
+			return self::DetectCaseStatus($this->Deep ? $this->DeepReplace($data, $lang) : $data, $text);
 		} elseif ($this->AutoUpdate)
 			$this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $ntext))]);
+		if ($dic && $depth)
+			if ($this->CaseSensitive)
+				return decode($this->Deep ? $this->DeepReplace($ntext, $lang) : $ntext, $dic);
+			else
+				return self::DetectCaseStatus($this->Deep ? $this->DeepReplace(decode($ntext, $dic), $lang) : decode($ntext, $dic), $text);
+		return $this->Deep ? $this->DeepReplace($text, $lang) : $text;
+	}
+	public function DeepReplace($text, $lang = null)
+	{
+		if (!$this->Cache)
+			return $text;
+		$lang = $lang ?? $this->Language;
+		foreach ($this->Cache as $code => $data) {
+			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
+			if (!$this->IsRootLanguage($text = str_replace($code, $data[$lang] ?? $data["x"], $text)))
+				return $text;
+		}
 		return $text;
 	}
 
@@ -146,7 +171,7 @@ class Translate
 
 	public function Set($text, $val = null, $lang = null)
 	{
-		if ($this->IsRootLanguage($text))
+		if (!$this->IsRootLanguage($text))
 			return false;
 		$dic = array();
 		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
@@ -190,6 +215,8 @@ class Translate
 		else
 			foreach ($this->DataTable->Select("*", $condition, $params) as $value)
 				$this->Cache[strtolower($value["KeyCode"])] = $value["ValueOptions"];
+		unset($this->Cache[""]);
+		if($this->Deep) sort($this->Cache, SORT_DESC);
 	}
 
 	public function ClearAll($condition = null, $params = [])
@@ -223,8 +250,8 @@ class Translate
 	{
 		if (isEmpty($text))
 			return true;
-		return !preg_match($this->ValidPattern, $text) ||
-			preg_match($this->InvalidPattern, $text);
+		return preg_match($this->ValidPattern, $text) &&
+			!preg_match($this->InvalidPattern, $text);
 	}
 
 	/**
@@ -236,7 +263,7 @@ class Translate
 			popReceived("lang", null, "get") ??
 			getMemo("Lang") ??
 			$defaultLang ??
-			(($this->AutoDetect && ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null) && has($languages, $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2)))? $lang : null)??
+			(($this->AutoDetect && ($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null) && has($languages, $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2))) ? $lang : null) ??
 			$this->Language
 		);
 	}
@@ -248,7 +275,7 @@ class Translate
 		return strtolower(
 			popReceived("direction", null, "get") ??
 			getMemo("Direction") ??
-			get($languages, $this->Language, "Direction")??
+			get($languages, $this->Language, "Direction") ??
 			$defaultDirection ??
 			$this->Direction
 		);
@@ -261,7 +288,7 @@ class Translate
 		return strtolower(
 			popReceived("encoding", null, "get") ??
 			getMemo("Encoding") ??
-			get($languages, $this->Language, "Encoding")??
+			get($languages, $this->Language, "Encoding") ??
 			$defaultEncoding ??
 			$this->Encoding
 		);
@@ -273,17 +300,17 @@ class Translate
 	 * @param mixed $params
 	 * @return array{Direction: string, Encoding: mixed, Image: mixed, Title: mixed[]}
 	 */
-	public function GetLanguages($condition = null, $params = [])
+	public function GetLanguages($condition = null, $params = [], $defaultLang = null)
 	{
-		return \_::Cache("Languages", function () use ($condition, $params) {
+		return \_::Cache("Languages", function () use ($condition, $params, $defaultLang) {
 			$arr = [];
 			foreach ((Convert::FromJson(
-				$this->DataTable->First("ValueOptions", ["KeyCode=''", $condition], $params) ??
+				$this->DataTable->SelectValue("ValueOptions", ["KeyCode=''", $condition], $params) ??
 				$this->DataTable->First("ValueOptions", $condition, $params)
 			) ?? []) as $key => $value) {
 				$value = Convert::FromJson($value);
 				if ($key == "x")
-					$key = strtolower(\_::$Back->DefaultLanguage ?? $key);
+					$key = strtolower($defaultLang ?? \_::$Back->DefaultLanguage ?? $key);
 				$arr[$key] = array(
 					"Title" => getBetween($value, "Title", "Name") ?? strtoupper($key),
 					"Image" => getBetween($value, "Image", "Icon") ?? "https://unpkg.com/language-icons/icons/$key.svg",

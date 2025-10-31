@@ -17,6 +17,7 @@ class Page extends Module
     public $AllowImage = true;
     public $Content = null;
     public $Tag = "main";
+	public $Class = "page";
     public $Attributes = " onclick='viewSideMenu(false)'";
 
     public function GetStyle()
