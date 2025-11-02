@@ -11,7 +11,7 @@ class GlobalStyle{
 			--color-blue: " . \_::$Front->Color(3) . ";
 			--color-yellow: " . \_::$Front->Color(4) . ";
 			--color-cyan: " . \_::$Front->Color(5) . ";
-			--color-violet: " . \_::$Front->Color(6) . ";
+			--color-magenta: " . \_::$Front->Color(6) . ";
 			--color-white: " . \_::$Front->Color(7) . ";
 			--fore-color: " . \_::$Front->ForeColor(0) . ";
 			--fore-color-input: " . \_::$Front->ForeColor(1) . ";

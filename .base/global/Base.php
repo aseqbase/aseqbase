@@ -208,6 +208,25 @@ class Base extends \ArrayObject
 		}
 		return $this->Handle();
 	}
+	/**
+	 * To echo as the whole contents then finalize the connection
+	 */
+	public function Deliver()
+	{
+		eraseResponse();
+		$this->Render();
+		finalize();
+	}
+	/**
+	 * To echo as the whole contents then finalize the connection
+	 */
+	public function Breaker($url = null)
+	{
+		eraseResponse();
+		$this->Render();
+		responseBreaker(url:$url);
+		finalize();
+	}
 
 	public function ToString()
 	{

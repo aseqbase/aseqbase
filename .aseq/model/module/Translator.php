@@ -30,13 +30,13 @@ class Translator extends Module{
 				align-content: center;
 				align-items: center;
             }
-            .{$this->Name} button {
+            .{$this->Name} .button {
 				cursor: pointer;
 				".($this->AllowLabel || $this->AllowCode?"padding: calc(var(--size-0) / 2);":"padding: 0px;")."
 				gap: calc(var(--size-0) / 2);
 				color: inherit;
             }
-            .{$this->Name} button .image {
+            .{$this->Name} .button .image {
 				max-width: var(--size-3);
 				text-transform: uppercase;
             }

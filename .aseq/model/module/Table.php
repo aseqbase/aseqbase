@@ -936,7 +936,7 @@ class Table extends Module
             if (isEmpty($v))
                 unset($values[$k]);
         if ($this->DataTable->Insert($values))
-            return deliverSpark(Html::Success("The 'information' added successfully!"));
+            return deliverBreaker(Html::Success("The 'information' added successfully!"));
         return Html::Error("You can not 'add' this item!");
     }
     public function ModifyRow($values)
@@ -948,7 +948,7 @@ class Table extends Module
             if (!is_array($values))
                 return $values;
             if ($this->DataTable->Update([$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumn}"], $values))
-                return deliverSpark(Html::Success("The information updated successfully!"));
+                return deliverBreaker(Html::Success("The information updated successfully!"));
             return Html::Error("You can not 'update' this item!");
         }
     }
@@ -959,7 +959,7 @@ class Table extends Module
         if (!\_::$User->GetAccess($this->RemoveAccess))
             return Html::Error("You have not access to delete!");
         if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
-            return deliverSpark(Html::Success("The 'items' removed successfully!"));
+            return deliverBreaker(Html::Success("The 'items' removed successfully!"));
         return Html::Error("You can not 'remove' this item!");
     }
 

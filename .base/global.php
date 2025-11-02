@@ -80,7 +80,7 @@ module("Module");
 
 function initialize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
 {
-	setStatus($status);
+	responseStatus($status);
 	runSequence("initialize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
 }
 function finalize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
@@ -575,7 +575,7 @@ function prompt($message = null, $callback = null, $default = null)
  */
 function response($content = null, $status = null)
 {
-	setStatus($status);
+	responseStatus($status);
 	echo $content = Convert::ToString($content);
 	return $content;
 }
@@ -643,7 +643,7 @@ function warning($message = null)
  */
 function error($message = null)
 {
-	setStatus(400);
+	responseStatus(400);
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return Html::Script(Script::Error($message->getMessage()));
 	echo $message = Html::Error($message);
@@ -657,19 +657,6 @@ function report($message = null)
 {
 	return script(Script::Log($message));
 }
-/**
- * Print this content on the client side then reload the page
- * @param mixed $content The data that is ready to print
- * @param mixed $url The next url to show after rendering output,
- * if leave null it will try to find the next or previous request into the getted url,
- * or will reload the page otherwise
- */
-function spark($content = null, $url = null)
-{
-	$url = $url ?? receiveGet("next") ?? receiveGet("previous");
-	echo ($content = Convert::ToString($content)) . Html::Script("window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ");");
-	return $content;
-}
 
 /**
  * Convert markdown supported data and echo them on the client side
@@ -680,27 +667,18 @@ function spark($content = null, $url = null)
  */
 function render($content = null, $replacements = null, $status = null)
 {
-	setStatus($status);
+	responseStatus($status);
 	echo $content = Html::Convert($replacements ? decode($content, $replacements) : $content);
 	return $content;
 }
 
-/**
- * Clean (erase) the output buffer and turn off output buffering
- */
-function erase()
-{
-	if (ob_get_level())
-		return ob_end_clean(); // Clean any remaining output buffers
-	return null;
-}
 /**
  * To change the header in the client side
  * @param mixed $key The header key
  * @param mixed $value The header value
  * @return bool True if header is set, false otherwise
  */
-function setHeader($key, $value)
+function responseHeader($key, $value)
 {
 	if ($key && !headers_sent()) {
 		header("$key: $value");
@@ -713,7 +691,7 @@ function setHeader($key, $value)
  * @param mixed $value The header value
  * @return bool True if header is set, false otherwise
  */
-function setContentType($value = null)
+function responseType($value = null)
 {
 	if (!headers_sent()) {
 		header("Content-Type: " . ($value ?? "text/html"));
@@ -726,7 +704,7 @@ function setContentType($value = null)
  * @param mixed $status The header status
  * @return bool True if header is set, false otherwise
  */
-function setStatus($status = null)
+function responseStatus($status = null)
 {
 	if ($status && !headers_sent()) {
 		header("HTTP/1.1 " . abs($status));
@@ -734,7 +712,47 @@ function setStatus($status = null)
 	}
 	return false;
 }
+/**
+ * Print this content on the client side then reload the page
+ * @param mixed $content The data that is ready to print
+ * @param mixed $url The next url to show after rendering output,
+ * if leave null it will try to find the next or previous request into the getted url,
+ * or will reload the page otherwise
+ */
+function responseBreaker($content = null, $url = null)
+{
+	$url = $url ?? receiveGet("next") ?? receiveGet("previous");
+	echo ($content = Convert::ToString($content)) . Html::Script("window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ");");
+	return $content;
+}
 
+/**
+ * Replace the output with all the document in the client side
+ * @param mixed $output The data that is ready to print
+ * @param string $url The url to show without updating the page
+ */
+function entireResponse($output = null, $url = null)
+{
+	response(Html::Script(
+		Internal::MakeScript(
+			$output,
+			null,
+			"(data,err)=>{"
+			($output ? "document.open();document.write(data??err);document.close();" : "") .
+			($url ? "window.history.pushState(null, null, `" . getFullUrl($url) . "`);" : "") .
+			"}"
+		)
+	));
+}
+/**
+ * Clean (erase) the output buffer and turn off output buffering
+ */
+function eraseResponse()
+{
+	if (ob_get_level())
+		return ob_end_clean(); // Clean any remaining output buffers
+	return null;
+}
 #endregion 
 
 
@@ -746,8 +764,8 @@ function setStatus($status = null)
  */
 function deliver($output = null, $status = null)
 {
-	erase(); // Clean any remaining output buffers
-	setStatus($status);
+	eraseResponse(); // Clean any remaining output buffers
+	responseStatus($status);
 	if ($output) {
 		echo Convert::ToString($output);
 		finalize();
@@ -770,8 +788,8 @@ function deliverScript($output = null, $status = null)
  */
 function deliverJson($output = null, $status = null)
 {
-	erase(); // Clean any remaining output buffers
-	setContentType("application/json");
+	eraseResponse(); // Clean any remaining output buffers
+	responseType("application/json");
 	deliver(isJson($output) ? $output : Convert::ToJson($output), $status);
 }
 /**
@@ -781,43 +799,9 @@ function deliverJson($output = null, $status = null)
  */
 function deliverXml($output = null, $status = null)
 {
-	erase(); // Clean any remaining output buffers
-	setContentType("application/xml");
+	eraseResponse(); // Clean any remaining output buffers
+	responseType("application/xml");
 	deliver(is_string($output) ? $output : Convert::ToXmlString($output), $status);
-}
-
-/**
- * Replace the output with all the document in the client side
- * @param mixed $output The data that is ready to print
- * @param string $url The url to show without updating the page
- */
-function deliverAgain($output = null, $status = null, $url = null)
-{
-	response(Html::Script(
-		Internal::MakeScript(
-			$output,
-			null,
-			"(data,err)=>{"
-			($output ? "document.open();document.write(data??err);document.close();" : "") .
-			($url ? "window.history.pushState(null, null, `" . getFullUrl($url) . "`);" : "") .
-			"}"
-		)
-	));
-}
-/**
- * Print only this output on the client side then reload the page
- * @param mixed $output The data that is ready to print
- * @param mixed $status The header status
- * @param mixed $url The next url to show after rendering output,
- * if leave null it will try to find the next or previous request into the getted url,
- * or will reload the page otherwise
- */
-function deliverSpark($output = null, $status = null, $url = null)
-{
-	erase(); // Clean any remaining output buffers
-	setStatus($status);
-	spark($output, $url);
-	finalize();
 }
 /**
  * Sends a file to the client side.
@@ -830,13 +814,13 @@ function deliverSpark($output = null, $status = null, $url = null)
  */
 function deliverFile($output = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
 {
-	erase(); // Clean any remaining output buffers
+	eraseResponse(); // Clean any remaining output buffers
 
 	$output = Local::GetFile($output);
 	if ($output)
-		setStatus($status);
+		responseStatus($status);
 	else {
-		setStatus(404);
+		responseStatus(404);
 		finalize();
 	}
 	if ($type)
@@ -916,6 +900,21 @@ function deliverReport($message = null)
 	return deliverScript(Script::Log($message));
 }
 
+/**
+ * Print only this output on the client side then reload the page
+ * @param mixed $output The data that is ready to print
+ * @param mixed $status The header status
+ * @param mixed $url The next url to show after rendering output,
+ * if leave null it will try to find the next or previous request into the getted url,
+ * or will reload the page otherwise
+ */
+function deliverBreaker($output = null, $status = null, $url = null)
+{
+	eraseResponse(); // Clean any remaining output buffers
+	responseStatus($status);
+	responseBreaker($output, $url);
+	finalize();
+}
 #endregion 
 
 

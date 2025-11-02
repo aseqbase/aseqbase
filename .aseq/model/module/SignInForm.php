@@ -128,7 +128,7 @@ class SignInForm extends Form{
 				elseif($res === false)
 					return $this->GetError($this->IncorrectWarning);
 				elseif(is_null($res))
-					return deliverSpark($this->GetError("This account is not active yet!"), null, \_::$User->ActiveHandlerPath . "?signature=$signature".(\_::$Address->Query?"&".\_::$Address->Query:""));
+					return deliverBreaker($this->GetError("This account is not active yet!"), null, \_::$User->ActiveHandlerPath . "?signature=$signature".(\_::$Address->Query?"&".\_::$Address->Query:""));
 				else
 					return $this->GetError($res);
 			}

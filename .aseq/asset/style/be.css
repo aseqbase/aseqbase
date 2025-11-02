@@ -355,60 +355,118 @@
   color: var(--color-cyan);
 }
 
-.be.violet.fore {
-  color: var(--color-violet);
+.be:is(.magenta,.violet).fore {
+  color: var(--color-magenta);
 }
 
 .be.white.fore {
   color: var(--color-white);
 }
 
-.be.transparent:not(.fore) {
+.be.transparent.back {
   background-color: transparent;
 }
 
-.be.dark:not(.fore) {
+.be.dark.back {
   background-color: var(--color-black);
 }
 
-.be.grey:not(.fore) {
+.be.grey.back {
   background-color: #888888;
 }
 
-.be.light:not(.fore) {
+.be.light.back {
   background-color: var(--color-white);
 }
 
-.be.black:not(.fore) {
+.be.black.back {
   background-color: var(--color-black);
 }
 
-.be.red:not(.fore) {
+.be.red.back {
   background-color: var(--color-red);
 }
 
-.be.green:not(.fore) {
+.be.green.back {
   background-color: var(--color-green);
 }
 
-.be.blue:not(.fore) {
+.be.blue.back {
   background-color: var(--color-blue);
 }
 
-.be.yellow:not(.fore) {
+.be.yellow.back {
   background-color: var(--color-yellow);
 }
 
-.be.cyan:not(.fore) {
+.be.cyan.back {
   background-color: var(--color-cyan);
 }
 
-.be.violet:not(.fore) {
-  background-color: var(--color-violet);
+.be:is(.magenta,.violet).back {
+  background-color: var(--color-magenta);
 }
 
-.be.white:not(.fore) {
+.be.white.back {
   background-color: var(--color-white);
+}
+
+.be.transparent:not(.fore, .back) {
+  background-color: transparent;
+}
+
+.be.dark:not(.fore, .back) {
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.be.grey:not(.fore, .back) {
+  background-color: #888888;
+}
+
+.be.light:not(.fore, .back) {
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+.be.black:not(.fore, .back) {
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.be.red:not(.fore, .back) {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+
+.be.green:not(.fore, .back) {
+  background-color: var(--color-green);
+  color: var(--color-white);
+}
+
+.be.blue:not(.fore, .back) {
+  background-color: var(--color-blue);
+  color: var(--color-white);
+}
+
+.be.yellow:not(.fore, .back) {
+  background-color: var(--color-yellow);
+  color: var(--color-white);
+}
+
+.be.cyan:not(.fore, .back) {
+  background-color: var(--color-cyan);
+  color: var(--color-white);
+}
+
+.be:is(.magenta,.violet):not(.fore, .back) {
+  background-color: var(--color-magenta);
+  color: var(--color-white);
+}
+
+.be.white:not(.fore, .back) {
+  background-color: var(--color-white);
+  color: var(--color-black);
 }
 
 .be.blur {

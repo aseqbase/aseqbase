@@ -1290,8 +1290,7 @@ class Html
                     $res[] = $item;
                 else
                     $res[] = self::Element(__($k), "dt") . self::Element(__($item), "dd");
-            $content = $res;
-            return self::Element($content, "dl", ["class" => "collection"], $attributes);
+            return self::Element($res, "dl", ["class" => "collection"], $attributes);
         }
         return self::Element(__($content), "dl", ["class" => "collection"], $attributes);
     }
@@ -1867,7 +1866,8 @@ class Html
     public static function Button($content, $action = null, ...$attributes)
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
-            $action = "load(" . Script::Convert($action) . ")";
+            //$action = "load(" . Script::Convert($action) . ", ".Script::Convert(self::PopAttribute($attributes, "Target")??"_self").")";
+            return self::Element(__($content), "a", ["class" => "button", "type" => "button", "href" => $action], $attributes);
         return self::Element(__($content), "button", ["class" => "button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
     }
     /**
@@ -1911,6 +1911,8 @@ class Html
      */
     public static function Form($content, $action = null, ...$attributes)
     {
+        $intraction = self::PopAttribute($attributes, "Intraction");
+        $id = self::PopAttribute($attributes, "Id")??("_".getId());
         if (!isValid($content))
             $content = self::SubmitButton();
         elseif (is_array($content) || is_iterable($content))
@@ -1936,7 +1938,8 @@ class Html
                         return self::Field(null, $k, $f);
                 }));
             };
-        return self::Element($content, "form", $action ? ((isScript($action) && !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "class" => "form"], $attributes);
+        return self::Element($content, "form", $action ? ((isScript($action) && !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "Id"=>$id, "class" => "form"], $attributes)
+        .($intraction?Html::Script("handleForm('form#$id');"):"");
     }
     /**
      * Detect the type of inputed value
@@ -2475,7 +2478,7 @@ class Html
             $attributes = Convert::ToIteration($value, ...$attributes);
             $value = null;
         }
-        return self::Element(__($value ?? $key), "button", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit"], $attributes);
+        return self::Element(__($value ?? $key), "button", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit", "value"=>$value], $attributes);
     }
     /**
      * The \<BUTTON\ TYPE="RESET"> HTML Tag
@@ -2490,7 +2493,7 @@ class Html
             $attributes = Convert::ToIteration($value, ...$attributes);
             $value = null;
         }
-        return self::Element(__($value ?? $key), "button", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset"], $attributes);
+        return self::Element(__($value ?? $key), "button", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset", "value"=>$value], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag

@@ -4,7 +4,12 @@ namespace MiMFa\Library;
 use Exception;
 
 /**
- * A simple class to handle and send internal requests
+ * A powerfull class to handle internal requests for RPCs (Remote Procedure Call)
+ * Remote Procedure Call (RPC) is a communication protocol that allows a program
+ * to execute a procedure on a remote server as if it were a local function.
+ * It abstracts the complexities of network communication, enabling developers
+ * to focus on function calls rather than the underlying network details.
+ * RPC is widely used in distributed systems and client-server architectures.
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase

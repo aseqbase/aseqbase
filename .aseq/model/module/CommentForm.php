@@ -12,7 +12,7 @@ class CommentForm extends Form
 	public $Action = null;
 	public $Method = "post";
 	public $Title = "Leave a Comment";
-	public $Description = "Leave your Comment about this post here!";
+	public $Description = "Leave your Comment about this 'item' here!";
 	public $Image = "comment";
 	public $SubmitLabel = "Submit";
 	public $ReplyLabel = "Reply";
@@ -41,10 +41,11 @@ class CommentForm extends Form
 	public $DefaultStatus = 1;
     public $Printable = false;
 
-	public function __construct()
+	public function __construct($relation=null, $access = null)
 	{
 		parent::__construct();
-		$this->Access = \_::$Config->WriteCommentAccess;
+		$this->Relation = $relation;
+		$this->Access = $access ?? \_::$Config->WriteCommentAccess;
 		$this->DefaultStatus = \_::$User->GetAccess(\_::$User->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
 		$this->Template = "b";
 	}
@@ -72,7 +73,7 @@ class CommentForm extends Form
 
 	public function Get()
 	{
-		if (!$this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false)) {
+		if (!$this->CheckAccess($this->Access ?? \_::$User->UserAccess, false)) {
 			$this->Signing = true;
 			return $this->GetSigning();
 		}
@@ -80,7 +81,8 @@ class CommentForm extends Form
 	}
 	public function GetFields()
 	{
-		if (!(\_::$User && \_::$User->Email)) {
+		if($this->Relation) yield Html::HiddenInput("Relation", $this->Relation);
+		if (!\_::$User->Email) {
 			if (isValid($this->NameLabel))
 				yield Html::Field(
 					key: "Name",

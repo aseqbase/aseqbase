@@ -126,7 +126,8 @@ class General extends Template
 				
 				.heading,h1,h2,h3,h4,h5,h6{
 					margin-top: var(--size-3);
-				}	
+            		margin-bottom: var(--size-0);
+				}
 				.heading1, h1{
 					text-align: center;
 					text-transform: uppercase;

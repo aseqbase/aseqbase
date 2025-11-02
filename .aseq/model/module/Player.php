@@ -286,15 +286,15 @@ class Player extends Module
 	public function GetControls()
 	{
 		if ($this->AllowDownload)
-			yield '<div class="icon fa fa-download button" onclick="' . $this->DownloadScript() . '"></div>';
+			yield Html::Icon("download", $this->DownloadScript(), ["class"=>"button"]);
 		if ($this->AllowShare)
-			yield '<div class="icon fa fa-share-alt button" onclick="' . $this->ShareScript() . '"></div>';
+			yield Html::Icon("share-alt", $this->ShareScript(), ["class"=>"button"]);
 		if ($this->AllowZoom)
-			yield '<div class="icon fa fa-minus button" onclick="' . $this->ZoomOutScript() . '"></div>';
+			yield Html::Icon("minus", $this->ZoomOutScript(), ["class"=>"button"]);
 		if ($this->AllowZoom)
-			yield '<div class="icon fa fa-plus button" onclick="' . $this->ZoomInScript() . '"></div>';
+			yield Html::Icon("plus", $this->ZoomInScript(), ["class"=>"button"]);
 		if ($this->AllowZoom)
-			yield '<div class="icon fa fa-refresh button" onclick="' . $this->ResetScript() . '"></div>';
+			yield Html::Icon("refresh", $this->ResetScript(), ["class"=>"button"]);
 	}
 
 	public function SetScript($content = "", $source = null)

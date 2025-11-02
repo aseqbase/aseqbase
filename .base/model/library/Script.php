@@ -10,8 +10,8 @@ class Script
 {
     /**
      * To convert everything to scripts
-     * @param mixed $object
-     * @param array $args needs for some types like php function
+     * @param mixed $object Send a PHP function to give its RPC scripts
+     * @param array $args Needs for some $object like PHP function
      */
     public static function Convert($object, ...$args)
     {

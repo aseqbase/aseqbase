@@ -20,7 +20,7 @@ hr {
   color: inherit;
   border: 0;
   border-top: var(--border-width) solid;
-  opacity: 0.25;
+  opacity: 0.5;
 }
 
 table{
