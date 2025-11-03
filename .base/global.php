@@ -100,10 +100,10 @@ function finalize(string|null|int $status = null, $data = [], bool $print = true
  * Send values to the client side
  * @param string $method The Method to send data
  * @param mixed $url The Url to send data
- * @param object|array $data Desired data
+ * @param mixed $data Desired data
  * @return bool|string Its sent or received response
  */
-function send($method = null, $url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function send($method = null, $url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
 	if (isEmpty($url))
 		$url = getPath();
@@ -113,123 +113,123 @@ function send($method = null, $url = null, object|array $data = [], array|null $
 		$method = strtoupper($method);
 	switch ($method) {
 		case 'POST':
-			return sendPost($url, $data, $headers, $secure, $timeout);
+			return sendPost($url, $data, $options, $headers, $secure, $timeout);
 		case 'GET':
-			return sendGet($url, $data, $headers, $secure, $timeout);
+			return sendGet($url, $data, $options, $headers, $secure, $timeout);
 		case 'FILE':
-			return sendFile($url, $data, $headers, $secure, $timeout);
+			return sendFile($url, $data, $options, $headers, $secure, $timeout);
 	}
-	$ch = curl_init($url);
-	if (!is_null($headers))
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
+	$curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, is_array($data)?http_build_query($data):$data); // Data to be posted
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+	curl_setopt($curl, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
 	if (!is_null($secure)) {
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $secure);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $secure);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
-	$response = curl_exec($ch);
-	if (curl_errno($ch)) {
-		$errorMessage = curl_error($ch);
-		curl_close($ch);
+	if (!is_null($headers))
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+	if (!is_null($options)) curl_setopt_array($curl, $options);
+	$response = curl_exec($curl);
+	if (curl_errno($curl)) {
+		$errorMessage = curl_error($curl);
+		curl_close($curl);
 		trigger_error("cURL Error: $errorMessage", E_USER_WARNING);
 		return false;
 	}
-	curl_close($ch);
+	curl_close($curl);
 	return $response;
 }
 /**
  * Send values to the client side
  * @param mixed $url The Url to send GET data from that
- * @param object|array $data Additional data to send as query parameters
+ * @param mixed $data Additional data to send as query parameters
  * @return bool|string Its sent or received response
  */
-function sendGet($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendGet($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
 	if (isEmpty($url))
 		$url = getPath();
-	$ch = curl_init();
+	$curl = curl_init();
 	$queryParams = http_build_query($data);
 	$urlWithParams = $url . (strpos($url, '?') === false ? '?' : '&') . $queryParams;
-	if (!is_null($headers))
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	curl_setopt($ch, CURLOPT_URL, $urlWithParams);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
+	curl_setopt($curl, CURLOPT_URL, $urlWithParams);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($curl, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
 	if (!is_null($secure)) {
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $secure);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $secure);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
-	$response = curl_exec($ch);
-	curl_close($ch);
+	if (!is_null($headers))
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+	if (!is_null($options)) curl_setopt_array($curl, $options);
+	$response = curl_exec($curl);
+	curl_close($curl);
 	return $response;
 }
 /**
  * Send posted values to the client side
  * @param mixed $url The Url to send POST data to that
- * @param object|array $data Desired data to POST
+ * @param mixed $data Desired data to POST
  * @return bool|string Its sent or received response
  */
-function sendPost($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPost($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
 	if (isEmpty($url))
 		$url = getPath();
-	$ch = curl_init($url);
-	if (!is_null($headers))
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	curl_setopt($ch, CURLOPT_POST, true); // Use POST method
-	curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data)); // Data to be posted
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
+	$curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_POST, true); // Use POST method
+	curl_setopt($curl, CURLOPT_POSTFIELDS, is_array($data)?http_build_query($data):$data); // Data to be posted
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+	curl_setopt($curl, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
 	if (!is_null($secure)) {
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $secure);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $secure);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
-	$response = curl_exec($ch);
-	curl_close($ch);
+	if (!is_null($headers)) curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+	if (!is_null($options)) curl_setopt_array($curl, $options);
+	$response = curl_exec($curl);
+	curl_close($curl);
 	return $response;
 }
 /**
  * Send putted values to the client side
  * @param mixed $url The Url to send PUT data to that
- * @param object|array $data Desired data to PUT
+ * @param mixed $data Desired data
  * @return bool|string Its sent or received response
  */
-function sendPut($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPut($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("put", $url, $data, $headers, $secure, $timeout);
+	return send("put", $url, $data, $options, $headers, $secure, $timeout);
 }
 /**
  * Send patched values to the client side
  * @param mixed $url The Url to send PATCH data to that
- * @param object|array $data Desired data to PATCH
+ * @param mixed $data Desired data
  * @return bool|string Its sent or received response
  */
-function sendPatch($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPatch($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("patch", $url, $data, $headers, $secure, $timeout);
+	return send("patch", $url, $data, $options, $headers, $secure, $timeout);
 }
 /**
  * Send file values to the client side
  * @param mixed $url The Url to send FILE data to that
- * @param object|array $data Desired data to FILE
+ * @param mixed $data Desired data to FILE
  * @return bool|string Its sent or received response
  */
-function sendFile($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendFile($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
 	if (isEmpty($url))
 		$url = getPath();
-	$ch = curl_init($url);
-	if (!is_null($headers))
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	curl_setopt($ch, CURLOPT_POST, true);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
-	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
+	$curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
+	curl_setopt($curl, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
 	if (!is_null($secure)) {
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $secure);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $secure);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $secure);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
 	$fields = [];
 	if (is_iterable($data))
@@ -241,50 +241,53 @@ function sendFile($url = null, object|array $data = [], array|null $headers = nu
 			}
 		} else
 		$fields = $data;
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
-	$response = curl_exec($ch);
-	curl_close($ch);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
+	if (!is_null($headers))
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+	if (!is_null($options)) curl_setopt_array($curl, $options);
+	$response = curl_exec($curl);
+	curl_close($curl);
 	return $response;
 }
 /**
  * Send delete values to the client side
  * @param mixed $url The Url to send DELETE data to that
- * @param object|array $data Desired data to DELETE
+ * @param mixed $data Desired data to DELETE
  * @return bool|string Its sent or received response
  */
-function sendDelete($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendDelete($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("delete", $url, $data, $headers, $secure, $timeout);
+	return send("delete", $url, $data, $options, $headers, $secure, $timeout);
 }
 /**
  * Send stream values to the client side
  * @param mixed $url The Url to send STREAM data to that
- * @param object|array $data Desired data to STREAM
+ * @param mixed $data Desired data to STREAM
  * @return bool|string Its sent or received response
  */
-function sendStream($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendStream($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("stream", $url, $data, $headers, $secure, $timeout);
+	return send("stream", $url, $data, $options, $headers, $secure, $timeout);
 }
 /**
  * Send internal values to the client side
  * @param mixed $url The Url to send INTERNAL data to that
- * @param object|array $data Desired data to INTERNAL
+ * @param mixed $data Desired data to INTERNAL
  * @return bool|string Its sent or received response
  */
-function sendInternal($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendInternal($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("internal", $url, $data, $headers, $secure, $timeout);
+	return send("internal", $url, $data, $options, $headers, $secure, $timeout);
 }
 /**
  * Send external values to the client side
  * @param mixed $url The Url to send EXTERNAL data to that
- * @param object|array $data Desired data to EXTERNAL
+ * @param mixed $data Desired data to EXTERNAL
  * @return bool|string Its sent or received response
  */
-function sendExternal($url = null, object|array $data = [], array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendExternal($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
 {
-	return send("external", $url, $data, $headers, $secure, $timeout);
+	return send("external", $url, $data, $options, $headers, $secure, $timeout);
 }
 
 #endregion
@@ -716,13 +719,16 @@ function responseStatus($status = null)
  * Print this content on the client side then reload the page
  * @param mixed $content The data that is ready to print
  * @param mixed $url The next url to show after rendering output,
+ * @param int $delay A milliseconds number to drop a delay in breaking page
  * if leave null it will try to find the next or previous request into the getted url,
  * or will reload the page otherwise
  */
-function responseBreaker($content = null, $url = null)
+function responseBreaker($content = null, $url = null, $delay = 0)
 {
 	$url = $url ?? receiveGet("next") ?? receiveGet("previous");
-	echo ($content = Convert::ToString($content)) . Html::Script("window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ");");
+	$script = "window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ")";
+	echo ($content = Convert::ToString($content)) . 
+	Html::Script($delay?"setTimeout(()=>$script, $delay);":"$script;");
 	return $content;
 }
 
@@ -905,14 +911,15 @@ function deliverReport($message = null)
  * @param mixed $output The data that is ready to print
  * @param mixed $status The header status
  * @param mixed $url The next url to show after rendering output,
+ * @param int $delay A milliseconds number to drop a delay in breaking page
  * if leave null it will try to find the next or previous request into the getted url,
  * or will reload the page otherwise
  */
-function deliverBreaker($output = null, $status = null, $url = null)
+function deliverBreaker($output = null, $status = null, $url = null, $delay = 0)
 {
 	eraseResponse(); // Clean any remaining output buffers
 	responseStatus($status);
-	responseBreaker($output, $url);
+	responseBreaker($output, $url, $delay);
 	finalize();
 }
 #endregion 

@@ -67,9 +67,9 @@ class Contact extends ArrayObject
 				$this->FromKey => $this->Identifier,
 				$this->TextKey => $message
 			], $attributes),
-			$this->Header,
-			$this->Secure,
-			$this->Timeout
+			headers: $this->Header,
+			secure: $this->Secure,
+			timeout: $this->Timeout
 		);
 	}
 
@@ -95,9 +95,9 @@ class Contact extends ArrayObject
 				$this->FromKey => $from,
 				$this->ToKey => $this->Identifier
 			], $attributes),
-			$this->Header,
-			$this->Secure,
-			$this->Timeout
+			headers: $this->Header,
+			secure: $this->Secure,
+			timeout: $this->Timeout
 		);
 	}
 
@@ -114,9 +114,9 @@ class Contact extends ArrayObject
 				$this->PasswordKey => $this->Password,
 				$this->CountKey => $count
 			], $attributes),
-			$this->Header,
-			$this->Secure,
-			$this->Timeout
+			headers: $this->Header,
+			secure: $this->Secure,
+			timeout: $this->Timeout
 		);
 	}
 

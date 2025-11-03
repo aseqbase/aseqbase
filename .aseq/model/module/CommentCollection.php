@@ -204,9 +204,13 @@ class CommentCollection extends Collection
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->Name} div.item .author{
+                display: flex;
+                align-items: center;
+			}
+			.{$this->Name} div.item .author .author-name{
                 font-weight: bold;
 			}
-			.{$this->Name} div.item .author::after{
+			.{$this->Name} div.item .author .author-name::after{
 				content: ': ';
 				padding-inline-end: calc(var(--size-0) / 2);
 			}
@@ -240,7 +244,7 @@ class CommentCollection extends Collection
 				opacity: 1;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item .message .author-image {
+			.{$this->Name} div.item .author .author-image {
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				opacity: 0.6;
@@ -259,7 +263,7 @@ class CommentCollection extends Collection
                 align-items: center;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item:hover .message .author-image{
+			.{$this->Name} div.item:hover .author .author-image{
 				opacity: 1;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
@@ -281,7 +285,6 @@ class CommentCollection extends Collection
 			}
 			.{$this->Name} div.item .metadata{
 				font-size: calc(var(--size-0) * 0.8);
-                display: inline-block;
                 opacity: 0.8;
 			}
 			.{$this->Name} div.item .metadata>*{
@@ -442,24 +445,28 @@ class CommentCollection extends Collection
                     yield "<h2 class='subject'>" . $p_subject . "</h2>";
                 yield "<div class='message'>";
                 $author = $this->AllowAuthorImage || $this->AllowAuthor ? table("User")->SelectRow("Signature, Name, Image", "Email=:Email", [":Email" => get($item, 'Contact')]) : [];
+                yield Html::OpenTag("div", ["class" => "author"]);
                 if ($this->AllowAuthorImage) {
                     $aimg = get($author, "Image");
                     if (!isEmpty($author))
                         yield Html::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \_::$User->DefaultImagePath, ["class" => "author-image"]);
                 }
+                yield Html::OpenTag("div", ["class" => "author-details"]);
                 if ($this->AllowAuthor) {
                     $au = getValid($author, "Name", $p_name);
                     if (isEmpty($author))
-                        yield Html::Span($au, null, ["class" => "author"]);
+                        yield Html::Span($au, null, ["class" => "author-name"]);
                     else
-                        yield Html::Link($au, \_::$Address->UserRoot . get($author, "Signature"), ["class" => "author"]);
+                        yield Html::Link($au, \_::$Address->UserRoot . get($author, "Signature"), ["class" => "author-name"]);
                 }
+                if ($p_showmeta && isValid($p_meta))
+                    yield "<div class='metadata'>$p_meta</div>";
+                yield Html::CloseTag();
+                yield Html::CloseTag();
                 if ($p_showexcerpt)
                     yield "<div class='excerpt view parent-hover-hide'>$p_excerpt</div>";
                 if ($p_showmessage && !isEmpty($p_message))
                     yield "<div class='full view parent-hover-show'>" . __(Html::Convert($p_message), referring: $p_referring) . "</div>";
-                if ($p_showmeta && isValid($p_meta))
-                    yield "<div class='metadata'>$p_meta</div>";
                 if ($p_showimage && isValid($p_image))
                     yield "<div class='col-lg-3'>" . $img->ToString() . "</div>";
                 if ($p_showattach && isValid($p_attach))
