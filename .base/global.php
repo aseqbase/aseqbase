@@ -20,7 +20,7 @@ use MiMFa\Module\Modal;
 
 #region INITIALIZING
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "_.php");
-require_once(__DIR__ . DIRECTORY_SEPARATOR . "Address.php");
+require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "Address.php");
 \_::$Address = new Address();
 \_::$Address->Update();
 

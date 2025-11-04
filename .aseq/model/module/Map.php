@@ -16,9 +16,9 @@ class Map extends Module
 	public $Tag = "div";
 	public $Class = "be";
 	public static $StyleSource = "https://unpkg.com/leaflet/dist/leaflet.css";
-	public static $AlternativeStyleSource = "/asset/style/leaflet.css";
+	public static $AlternativeStyleSource = null;
 	public static $ScriptSource = "https://unpkg.com/leaflet/dist/leaflet.js";
-	public static $AlternativeScriptSource = "/asset/script/leaflet.js";
+	public static $AlternativeScriptSource = null;
 	public static $PluginsStyleSources = [];
 	public static $PluginsScriptSources = [];
 	public $OtherScripts = [];
