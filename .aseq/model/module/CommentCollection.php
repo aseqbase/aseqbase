@@ -501,7 +501,7 @@ class CommentCollection extends Collection
                     data = { Id:forid, Content:msgbox.innerText };
                     if(sbjbox) data.Subject = sbjbox.innerText;
                     if(attbox) data.Attach = attbox.innerText;
-                    sendPutRequest(null, data, selector, function (data, err) {
+                    sendPut(null, data, selector, function (data, err) {
                         try{document.querySelector(selector .result).remove();}catch{}
                         $(selector).prepend(data);
                         if(!err){
@@ -524,7 +524,7 @@ class CommentCollection extends Collection
             }" . "
             function {$this->Name}_Delete(btn, selector, forid) {
                 if(confirm(`" . __("Are you sure to delete this command?") . "`))
-                    sendDeleteRequest(
+                    sendDelete(
                         null,
                         {Id:forid},
                         selector,
@@ -536,7 +536,7 @@ class CommentCollection extends Collection
             "
             {$this->Name}_status = null;
             function {$this->Name}_Status(btn, selector, forid, status) {
-                    sendPatchRequest(
+                    sendPatch(
                         null,
                         {Id:forid, Status:{$this->Name}_status = {$this->Name}_status===0 || status?1:0},
                         selector,
@@ -557,7 +557,7 @@ class CommentCollection extends Collection
             function {$this->Name}_Reply(btn, selector, forid) {
                 rbox = document.querySelector(selector + ' .reply-box');
                 if(!rbox.querySelector('form')) {
-                    sendPatchRequest(
+                    sendPatch(
                         null,
                         {Reply:forid},
                         selector,

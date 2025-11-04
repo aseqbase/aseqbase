@@ -211,7 +211,7 @@ class Address extends ArrayObject
      * Refresh all properties, have no effect on routes
      * @return
      */
-    public function Update()
+    public function Initial()
     {
         $this->Url = getUrl();
         $this->Host = getHost();

@@ -229,17 +229,17 @@ class Profile extends Table{
 		return Html::Script("$(document).ready(()=>{".
         ($this->Controlable?("
 				function {$this->Name}_View(key){
-					sendPatchRequest(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
+					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
 				}".($this->Updatable?(\_::$User->GetAccess($this->AddAccess)?"
 				function {$this->Name}_Create(){
-					sendPatchRequest(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->Name}`);
+					sendPatch(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->Name}`);
 				}":"").(\_::$User->GetAccess($this->ModifyAccess)?"
 				function {$this->Name}_Modify(key){
-					sendPatchRequest(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
+					sendPatch(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
 				}":"").(\_::$User->GetAccess($this->RemoveAccess)?"
 				function {$this->Name}_Delete(key){
 					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?")."`))":"")."
-						sendDeleteRequest(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->Name}`,
+						sendDelete(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->Name}`,
 						(data, err)=>{
 							load();
 						});

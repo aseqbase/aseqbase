@@ -92,7 +92,7 @@ class UserMenu extends Module
 					array("Name" => Convert::ToExcerpt(Convert::ToText(between(\_::$User->GetValue("Bio"), "New User..."))), "Attributes" => ["class" => "bio"]),
 					array("Name" => "Dashboard", "Image" => "gamepad", "Path" => \_::$User->DashboardHandlerPath),
 					array("Name" => "Edit Profile", "Image" => "edit", "Path" => \_::$User->EditHandlerPath),
-					array("Name" => "Sign Out", "Image" => "power-off", "Path" => "sendDeleteRequest(`" . \_::$User->OutHandlerPath . "`);")
+					array("Name" => "Sign Out", "Image" => "power-off", "Path" => "sendDelete(`" . \_::$User->OutHandlerPath . "`);")
 				);
 		}
 		if (count($this->Items) > 0) {

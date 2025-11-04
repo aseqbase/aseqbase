@@ -332,7 +332,7 @@ abstract class FrontBase
 		else
 			response(Html::Script(
 				$callback ? "$start" .
-				"for(item of $intents)sendInternalRequest(null,{\"" . Internal::Set($callback) . '":item.outerHTML},' .
+				"for(item of $intents)sendInternal(null,{\"" . Internal::Set($callback) . '":item.outerHTML},' .
 				"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
 				: $intents
 				,

@@ -1911,7 +1911,7 @@ class Html
      */
     public static function Form($content, $action = null, ...$attributes)
     {
-        $intraction = self::PopAttribute($attributes, "Intraction");
+        $Interaction = self::PopAttribute($attributes, "Interaction");
         $id = self::PopAttribute($attributes, "Id")??("_".getId());
         if (!isValid($content))
             $content = self::SubmitButton();
@@ -1939,7 +1939,7 @@ class Html
                 }));
             };
         return self::Element($content, "form", $action ? ((isScript($action) && !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "Id"=>$id, "class" => "form"], $attributes)
-        .($intraction?Html::Script("handleForm('form#$id');"):"");
+        .($Interaction?Html::Script("handleForm('form#$id');"):"");
     }
     /**
      * Detect the type of inputed value

@@ -110,12 +110,11 @@ class RouterBase extends Address
         ?string $root = null,
         $pattern = null,
         $handler = null,
-        $method = null,
-        $global = false
+        $method = null
     ) {
         parent::__construct($directory, $root);
         $this->Name = $name;
-        $this->Refresh($pattern, $method)->Route($handler);
+        $this->Initial($pattern, $method)->Route($handler);
     }
 
     // public function __get($name)
@@ -202,7 +201,7 @@ class RouterBase extends Address
      * Refresh all properties, have no effect on routes
      * @return
      */
-    public function Refresh($pattern = null, $method = null)
+    public function Initial($pattern = null, $method = null)
     {
         $this->IsActive = true;
         $this->Result = null;

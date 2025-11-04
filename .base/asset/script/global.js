@@ -303,44 +303,44 @@ let isFocused = (element) => document.activeElement === element;
 // Function to generate a unique Path selector for an element
 let getPath = (element) => {
 	let tagName = element.tagName;
-	if(!tagName) return null;
+	if (!tagName) return null;
 	tagName = tagName.toLowerCase();
-    if (tagName === 'html') return 'html';
-    if (element.parentElement) return `${getPath(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
-    return tagName;
+	if (tagName === 'html') return 'html';
+	if (element.parentElement) return `${getPath(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
+	return tagName;
 }
 // Function to generate a unique XPath selector for an element
 let getXPath = (element) => {
 	let tagName = element.tagName;
-	if(!tagName) return null;
+	if (!tagName) return null;
 	tagName = tagName.toLowerCase();
-    if (tagName === 'html') return 'html';
-    if (element.parentElement) return `${getPath(element.parentElement)}/${tagName}[${(Array.from(element.parentElement.children).indexOf(element))}]`;
-    return tagName;
+	if (tagName === 'html') return 'html';
+	if (element.parentElement) return `${getPath(element.parentElement)}/${tagName}[${(Array.from(element.parentElement.children).indexOf(element))}]`;
+	return tagName;
 }
 // Function to generate a unique CSS selector for an element
 let getQuery = (element) => {
-	if(element.id) return "#"+element.id;
+	if (element.id) return "#" + element.id;
 	let tagName = element.tagName;
-	if(!tagName) return null;
+	if (!tagName) return null;
 	tagName = tagName.toLowerCase();
-    if (tagName === 'html') return 'html';
-    if (element.parentElement) return `${getPath(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
-    return tagName;
+	if (tagName === 'html') return 'html';
+	if (element.parentElement) return `${getPath(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
+	return tagName;
 }
 
 let relocate = function (url = null) {
-	window.history.pushState(null, null, url??location.href);
+	window.history.pushState(null, null, url ?? location.href);
 };
 let locate = function (url = null) {
-	window.history.replaceState(null, null, url??location.href);
+	window.history.replaceState(null, null, url ?? location.href);
 };
 let reload = function () {
 	window.location.reload();
 };
 let load = function (url = null, target = null) {
-	if(target === null) window.location.href = url??window.location.href;
-	else window.open(url ?? location.href, target===true?"_blank":(target===false?"_self":target));
+	if (target === null) window.location.href = url ?? window.location.href;
+	else window.open(url ?? location.href, target === true ? "_blank" : (target === false ? "_self" : target));
 };
 let share = function (url = null, path = null) {
 	open('sms://' + path + '?body=' + (url ?? location.href), '_blank');
@@ -361,34 +361,35 @@ let setMemo = function (key, value, expires = 0, path = "/", $secure = false) {
 		date.setTime(date.getTime() + expires);
 		time = "; expires=" + date.toUTCString();
 	}
-	if($secure) $secure = "; Secure";
+	if ($secure) $secure = "; Secure";
 	else $secure = "";
 	document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value || "")}${time}${$secure}; path=${path}`;
 };
 let getMemo = function (key) {
-    let nameEQ = encodeURIComponent(key) + "=";
-    let ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
-    }
-    return null;
+	let nameEQ = encodeURIComponent(key) + "=";
+	let ca = document.cookie.split(';');
+	for (let i = 0; i < ca.length; i++) {
+		let c = ca[i];
+		while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+		if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+	}
+	return null;
 };
 let popMemo = function (key, path = "/") {
-    document.cookie = `${encodeURIComponent(key)}=; Max-Age=-99999999; Secure; path=${path}`;
+	document.cookie = `${encodeURIComponent(key)}=; Max-Age=-99999999; Secure; path=${path}`;
 };
 let clearMemos = function () {
-    let cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-        let cookie = cookies[i];
-        let eqPos = cookie.indexOf("=");
-        let key = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        document.cookie = key + "=; Max-Age=-99999999; Secure; path=/";
-    }
+	let cookies = document.cookie.split(";");
+	for (let i = 0; i < cookies.length; i++) {
+		let cookie = cookies[i];
+		let eqPos = cookie.indexOf("=");
+		let key = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+		document.cookie = key + "=; Max-Age=-99999999; Secure; path=/";
+	}
 };
 
-let sendRequest = function (
+
+let send = function (
 	method = 'POST',
 	url = null,
 	data = null,
@@ -397,14 +398,15 @@ let sendRequest = function (
 	error = null,
 	ready = null,
 	progress = null,
-	timeout = null) {
+	timeout = null,
+	async = true) {
 	noEffects = false;
 	if (noEffects = !document.querySelector(selector)) selector = 'body';
-	
-	const btns = noEffects?[]:document.querySelectorAll(selector + ' :is(button, [onclick], [ondblclick], input:is([type=button],[type=submit],[type=image],[type=reset]))');
-	const elems = noEffects?[]:document.querySelectorAll(selector);
-	const opacity = noEffects?1:document.querySelector(selector).style.opacity;
-	url = url || location.href;
+
+	const btns = noEffects ? [] : document.querySelectorAll(selector + ' :is(button, [onclick], [ondblclick], input:is([type=button],[type=submit],[type=image],[type=reset]))');
+	const elems = noEffects ? [] : document.querySelectorAll(selector);
+	const opacity = noEffects ? 1 : document.querySelector(selector).style.opacity;
+	url = url ? url : location.href;
 	timeout = timeout || 30000;
 	method = (method || "POST").toUpperCase();
 	let isForm = false;
@@ -477,10 +479,10 @@ let sendRequest = function (
 		case "PATCH":
 		case "PUT":
 		case "DELETE":
-			xhr.open(method, url, true);
+			xhr.open(method, url, async);
 			break;
 		default:
-			xhr.open("POST", url, true);
+			xhr.open("POST", url, async);
 			xhr.setRequestHeader("X-Custom-Method", method);
 			break;
 	}
@@ -498,7 +500,7 @@ let sendRequest = function (
 		if (xhr.status >= 200 && xhr.status < 300) {
 			try {
 				let response = xhr.response;
-				try{response = JSON.parse(response);}catch{}
+				try { response = JSON.parse(response); } catch { }
 				success(response);
 			} catch (e) {
 				error("There was a problem on retrieving data!<br>" + e.message, xhr.status);
@@ -527,10 +529,65 @@ let sendRequest = function (
 	};
 
 	xhr.send(data || null);
-
+	
 	return xhr;
 };
+let sendGet = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return send('GET', url, data, selector, success, error, ready, progress, timeout);
+};
+let sendPost = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return send('POST', url, data, selector, success, error, ready, progress, timeout);
+};
+let sendPut = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return send('PUT', url, data, selector, success, error, ready, progress, timeout);
+};
+let sendPatch = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return send('PATCH', url, data, selector, success, error, ready, progress, timeout);
+};
+let sendDelete = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return send('DELETE', url, data, selector, success, error, ready, progress, timeout);
+};
+let sendFile = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	if (data) return send('POST', url, data, selector, success, error, ready, progress, timeout);
+	else {
+		input.setAttribute('type', 'file');
+		res = null;
+		input.onchange = evt => {
+			const [file] = input.files;
+			if (file) {
+				const reader = new FileReader();
+				reader.addEventListener('load', (event) => {
+					res = send('POST', url, encodeURIComponent(event.target.result), selector, success, error, ready, progress, timeout);
+				});
+				reader.readAsDataURL(file);
+			}
+		}
+		$(input).trigger('click');
+		return res;
+	}
+};
+let sendStream = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return send('STREAM', url, data, selector, success, error, ready, progress, timeout);
+};
+let sendInternal = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return send('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
+};
+let sendExternal = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+	return send('EXTERNAL', url, data, selector, success, error, ready, progress, timeout);
+};
 
+let sendRequest = function (
+	method = 'POST',
+	url = null,
+	data = null,
+	selector = 'body+:nth-child(1)',
+	success = null,
+	error = null,
+	ready = null,
+	progress = null,
+	timeout = null) {
+		return sendRequest(method, url, data, selector, success, error, ready, progress, timeout, false);
+};
 let sendGetRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('GET', url, data, selector, success, error, ready, progress, timeout);
 };

@@ -81,7 +81,7 @@ class Internal
         if (isStatic($handler))
             return "$start($callbackScript)(" . Script::Convert($handler) . "," . Script::Convert($args) . ")$end";
         return $start .
-            'sendInternalRequest(null,{"' .
+            'sendInternal(null,{"' .
             self::Set($handler) . '":JSON.stringify(' . Script::Convert($args) .
             ")},".(self::$Selector).",$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
     }

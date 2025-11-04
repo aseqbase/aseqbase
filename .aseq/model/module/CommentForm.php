@@ -223,7 +223,7 @@ class CommentForm extends Form
 				$this->SubjectLabel = null;
 				$this->SubmitLabel = $this->ReplyLabel;
 				$this->ReplyId = get($received, "Reply");
-				$this->Router->Refresh()->Get()->Switch();
+				$this->Router->Initial()->Get()->Switch();
 				return $this->Handle();
 			} elseif (isValid($received, "Status") && \_::$User->GetAccess(\_::$User->AdminAccess)) {
 				$res = null;
@@ -264,4 +264,3 @@ class CommentForm extends Form
 		return $this->GetSigning();
 	}
 }
-?>

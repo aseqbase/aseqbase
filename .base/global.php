@@ -22,7 +22,7 @@ use MiMFa\Module\Modal;
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "_.php");
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "Address.php");
 \_::$Address = new Address();
-\_::$Address->Update();
+\_::$Address->Initial();
 
 \_::$Sequence = [
 	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
@@ -103,7 +103,7 @@ function finalize(string|null|int $status = null, $data = [], bool $print = true
  * @param mixed $data Desired data
  * @return bool|string Its sent or received response
  */
-function send($method = null, $url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function send($method = null, $url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
 	if (isEmpty($url))
 		$url = getPath();
@@ -121,7 +121,7 @@ function send($method = null, $url = null, mixed $data = [], array|null $options
 	}
 	$curl = curl_init($url);
 	curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-	curl_setopt($curl, CURLOPT_POSTFIELDS, is_array($data)?http_build_query($data):$data); // Data to be posted
+	curl_setopt($curl, CURLOPT_POSTFIELDS, is_array($data) ? http_build_query($data) : $data); // Data to be posted
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
 	curl_setopt($curl, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
 	if (!is_null($secure)) {
@@ -130,7 +130,8 @@ function send($method = null, $url = null, mixed $data = [], array|null $options
 	}
 	if (!is_null($headers))
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-	if (!is_null($options)) curl_setopt_array($curl, $options);
+	if (!is_null($options))
+		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
 	if (curl_errno($curl)) {
 		$errorMessage = curl_error($curl);
@@ -147,7 +148,7 @@ function send($method = null, $url = null, mixed $data = [], array|null $options
  * @param mixed $data Additional data to send as query parameters
  * @return bool|string Its sent or received response
  */
-function sendGet($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendGet($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
 	if (isEmpty($url))
 		$url = getPath();
@@ -163,7 +164,8 @@ function sendGet($url = null, mixed $data = [], array|null $options = null, arra
 	}
 	if (!is_null($headers))
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-	if (!is_null($options)) curl_setopt_array($curl, $options);
+	if (!is_null($options))
+		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
 	curl_close($curl);
 	return $response;
@@ -174,21 +176,23 @@ function sendGet($url = null, mixed $data = [], array|null $options = null, arra
  * @param mixed $data Desired data to POST
  * @return bool|string Its sent or received response
  */
-function sendPost($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPost($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
 	if (isEmpty($url))
 		$url = getPath();
 	$curl = curl_init($url);
 	curl_setopt($curl, CURLOPT_POST, true); // Use POST method
-	curl_setopt($curl, CURLOPT_POSTFIELDS, is_array($data)?http_build_query($data):$data); // Data to be posted
+	curl_setopt($curl, CURLOPT_POSTFIELDS, is_array($data) ? http_build_query($data) : $data); // Data to be posted
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
 	curl_setopt($curl, CURLOPT_TIMEOUT, $timeout); // Set a timeout to avoid hanging indefinitely
 	if (!is_null($secure)) {
 		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $secure);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $secure);
 	}
-	if (!is_null($headers)) curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-	if (!is_null($options)) curl_setopt_array($curl, $options);
+	if (!is_null($headers))
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+	if (!is_null($options))
+		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
 	curl_close($curl);
 	return $response;
@@ -199,9 +203,9 @@ function sendPost($url = null, mixed $data = [], array|null $options = null, arr
  * @param mixed $data Desired data
  * @return bool|string Its sent or received response
  */
-function sendPut($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPut($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
-	return send("put", $url, $data, $options, $headers, $secure, $timeout);
+	return send("put", $url, $data, $options, $headers, $secure, $timeout, $async);
 }
 /**
  * Send patched values to the client side
@@ -209,9 +213,9 @@ function sendPut($url = null, mixed $data = [], array|null $options = null, arra
  * @param mixed $data Desired data
  * @return bool|string Its sent or received response
  */
-function sendPatch($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendPatch($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
-	return send("patch", $url, $data, $options, $headers, $secure, $timeout);
+	return send("patch", $url, $data, $options, $headers, $secure, $timeout, $async);
 }
 /**
  * Send file values to the client side
@@ -219,7 +223,7 @@ function sendPatch($url = null, mixed $data = [], array|null $options = null, ar
  * @param mixed $data Desired data to FILE
  * @return bool|string Its sent or received response
  */
-function sendFile($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendFile($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
 	if (isEmpty($url))
 		$url = getPath();
@@ -244,7 +248,8 @@ function sendFile($url = null, mixed $data = [], array|null $options = null, arr
 	curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
 	if (!is_null($headers))
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-	if (!is_null($options)) curl_setopt_array($curl, $options);
+	if (!is_null($options))
+		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
 	curl_close($curl);
 	return $response;
@@ -255,9 +260,9 @@ function sendFile($url = null, mixed $data = [], array|null $options = null, arr
  * @param mixed $data Desired data to DELETE
  * @return bool|string Its sent or received response
  */
-function sendDelete($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendDelete($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
-	return send("delete", $url, $data, $options, $headers, $secure, $timeout);
+	return send("delete", $url, $data, $options, $headers, $secure, $timeout, $async);
 }
 /**
  * Send stream values to the client side
@@ -265,9 +270,9 @@ function sendDelete($url = null, mixed $data = [], array|null $options = null, a
  * @param mixed $data Desired data to STREAM
  * @return bool|string Its sent or received response
  */
-function sendStream($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendStream($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
-	return send("stream", $url, $data, $options, $headers, $secure, $timeout);
+	return send("stream", $url, $data, $options, $headers, $secure, $timeout, $async);
 }
 /**
  * Send internal values to the client side
@@ -275,9 +280,9 @@ function sendStream($url = null, mixed $data = [], array|null $options = null, a
  * @param mixed $data Desired data to INTERNAL
  * @return bool|string Its sent or received response
  */
-function sendInternal($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendInternal($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
-	return send("internal", $url, $data, $options, $headers, $secure, $timeout);
+	return send("internal", $url, $data, $options, $headers, $secure, $timeout, $async);
 }
 /**
  * Send external values to the client side
@@ -285,15 +290,16 @@ function sendInternal($url = null, mixed $data = [], array|null $options = null,
  * @param mixed $data Desired data to EXTERNAL
  * @return bool|string Its sent or received response
  */
-function sendExternal($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60)
+function sendExternal($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
-	return send("external", $url, $data, $options, $headers, $secure, $timeout);
+	return send("external", $url, $data, $options, $headers, $secure, $timeout, $async);
 }
 
 #endregion
 
 
 #region RECEIVING
+
 /**
  * Receive requests from the client side
  * @param array|string|null $method The the received data source $_GET/$POST/$_FILES/... (by default it is $_REQUEST)
@@ -520,7 +526,7 @@ function request($intent = null, $callback = null)
 		else
 			response(Html::Script(
 				$callback ? $start .
-				'sendInternalRequest(null,{"' . Internal::Set($callback) . '":JSON.stringify(' . $intent . ")}, null,$callbackScript,$callbackScript, null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
+				'sendInternal(null,{"' . Internal::Set($callback) . '":JSON.stringify(' . $intent . ")}, null,$callbackScript,$callbackScript, null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
 				: $intent,
 				null,
 				["id" => $id]
@@ -616,6 +622,8 @@ function modal($content = null)
  */
 function message($message = null)
 {
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return script(Script::Log($message->getMessage(), "message"));
 	echo $message = Html::Result($message);
 	return $message;
 }
@@ -626,6 +634,8 @@ function message($message = null)
  */
 function success($message = null)
 {
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return script(Script::Log($message->getMessage(), "success"));
 	echo $message = Html::Success($message);
 	return $message;
 }
@@ -636,6 +646,8 @@ function success($message = null)
  */
 function warning($message = null)
 {
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return script(Script::Log($message->getMessage(), "warn"));
 	echo $message = Html::Warning($message);
 	return $message;
 }
@@ -648,7 +660,7 @@ function error($message = null)
 {
 	responseStatus(400);
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return Html::Script(Script::Error($message->getMessage()));
+		return script(Script::Log($message->getMessage(), "error"));
 	echo $message = Html::Error($message);
 	return $message;
 }
@@ -656,9 +668,9 @@ function error($message = null)
  * Show message on the console
  * @param mixed $message
  */
-function report($message = null)
+function report($message = null, $type = "log")
 {
-	return script(Script::Log($message));
+	return script(Script::Log($message, $type));
 }
 
 /**
@@ -727,8 +739,8 @@ function responseBreaker($content = null, $url = null, $delay = 0)
 {
 	$url = $url ?? receiveGet("next") ?? receiveGet("previous");
 	$script = "window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ")";
-	echo ($content = Convert::ToString($content)) . 
-	Html::Script($delay?"setTimeout(()=>$script, $delay);":"$script;");
+	echo ($content = Convert::ToString($content)) .
+		Html::Script($delay ? "setTimeout(()=>$script, $delay);" : "$script;");
 	return $content;
 }
 
@@ -866,6 +878,8 @@ function deliverModal($content = null)
  */
 function deliverMessage($message = null)
 {
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return deliverScript(Script::Log($message->getMessage(), "message"), 400);
 	return deliver(Html::Result($message));
 }
 /**
@@ -875,6 +889,8 @@ function deliverMessage($message = null)
  */
 function deliverSuccess($message = null)
 {
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return deliverScript(Script::Log($message->getMessage(), "success"), 400);
 	return deliver(Html::Success($message));
 }
 /**
@@ -884,6 +900,8 @@ function deliverSuccess($message = null)
  */
 function deliverWarning($message = null)
 {
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return deliverScript(Script::Log($message->getMessage(), "warn"), 400);
 	return deliver(Html::Warning($message));
 }
 /**
@@ -894,7 +912,7 @@ function deliverWarning($message = null)
 function deliverError($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Error($message->getMessage()), 400);
+		return deliverScript(Script::Log($message->getMessage(), "error"), 400);
 	return deliver(Html::Error($message), 400);
 }
 /**
@@ -2151,16 +2169,15 @@ function getFullUrl(string|null $path = null, bool $optimize = true): string|nul
 function getUrl(string|null $path = null): string|null
 {
 	if ($path === null)
-		$path = (
-			($_SERVER['SCRIPT_URI'] ?? null) ??
+		$path =
+			($_SERVER['HTTP_REFERER'] ?? /* $_SERVER['SCRIPT_URI'] ?? */ null) ??
 			(((!empty($_SERVER['HTTPS'] ?? null) && ($_SERVER['HTTPS'] ?? null) != 'off') || ($_SERVER['SERVER_PORT'] ?? null) == 443) ? "https" : "http") .
-			"://" . ($_SERVER["HTTP_HOST"] ?? null) . takeBetween($_SERVER, "REQUEST_URI", "PHP_SELF")
-		);//.($_SERVER['QUERY_STRING']?"?".$_SERVER['QUERY_STRING']:"");
+			"://" . ($_SERVER["HTTP_HOST"] ?? null) . ($_SERVER["REQUEST_URI"] ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING'] ? "?" . $_SERVER['QUERY_STRING'] : "")));
 	return preg_replace("/^([\/\\\])/", rtrim(getHost(), "/\\") . "$1", $path);
 }
 /**
  * Get the host part of a url
- * @example: "https://www.mimfa.net:5046"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:5046"
  * @return string|null
  */
 function getHost(string|null $path = null): string|null
@@ -2172,7 +2189,7 @@ function getHost(string|null $path = null): string|null
 }
 /**
  * Get the site name part of a url
- * @example: "www.mimfa.net"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "www.mimfa.net"
  * @return string|null
  */
 function getSite(string|null $path = null): string|null
@@ -2181,7 +2198,7 @@ function getSite(string|null $path = null): string|null
 }
 /**
  * Get the domain name part of a url
- * @example: "mimfa.net"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "mimfa.net"
  * @return string|null
  */
 function getDomain(string|null $path = null): string|null
@@ -2190,7 +2207,7 @@ function getDomain(string|null $path = null): string|null
 }
 /**
  * Get the path part of a url
- * @example: "https://www.mimfa.net/Category/mimfa/service/web.php"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net/Category/mimfa/service/web.php"
  * @return string|null
  */
 function getPath(string|null $path = null): string|null
@@ -2199,7 +2216,7 @@ function getPath(string|null $path = null): string|null
 }
 /**
  * Get the request part of a url
- * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "/Category/mimfa/service/web.php?p=3&l=10#serp"
  * @return string|null
  */
 function getRequest(string|null $path = null): string|null
@@ -2210,7 +2227,7 @@ function getRequest(string|null $path = null): string|null
 }
 /**
  * Get the direction part of a url from the root
- * @example: "Category/mimfa/service/web.php"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "Category/mimfa/service/web.php"
  * @return string|null
  */
 function getDirection(string|null $path = null): string|null
@@ -2221,7 +2238,7 @@ function getDirection(string|null $path = null): string|null
 }
 /**
  * Get the last part of a direction url
- * @example: "web.php"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "web.php"
  * @return string|null
  */
 function getPage(string|null $path = null): string|null
@@ -2230,21 +2247,21 @@ function getPage(string|null $path = null): string|null
 }
 /**
  * Get the query part of a url
- * @example: "p=3&l=10"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "p=3&l=10"
  * @return string|null
  */
 function getQuery(string|null $path = null): string|null
 {
-	return preg_Find("/((?<=\?)[^#]*($|#))/", $path ?? getUrl());
+	return preg_Find("/((?<=\?)[^#]*(?=$|#))/", $path ?? getUrl());
 }
 /**
  * Get the fragment or anchor part of a url
- * @example: "serp"
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "serp"
  * @return string|null
  */
 function getFragment(string|null $path = null): string|null
 {
-	return preg_Find("/((?<=#)[^\?]*($|\?))/", $path ?? getUrl());
+	return preg_Find("/((?<=#)[^\/\?#\\\]*(?=$|[\/\?#\\\]))/", $path ?? getUrl());
 }
 
 /**
@@ -3045,7 +3062,10 @@ function array_find_keys($array, callable $searching)
 
 
 #region TESTING
-
+// /**
+//  * @test
+//  * @return void
+//  */
 // function test_server()
 // {
 // 	foreach ($_SERVER as $k => $v)
@@ -3113,4 +3133,4 @@ function array_find_keys($array, callable $searching)
 // 	}
 // }
 
-#endregion 
+#endregion

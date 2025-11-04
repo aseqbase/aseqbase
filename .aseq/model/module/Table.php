@@ -655,14 +655,14 @@ class Table extends Module
 			});") . ($this->Controlable ?
                 (is_null($this->Modal) ? "" : ("
 				function {$this->Modal->Name}_View(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ViewSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ViewSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" . ($this->Updatable ? (\_::$User->GetAccess($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(defaultValues){
-					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
+					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
                             if(defaultValues)
@@ -673,14 +673,14 @@ class Table extends Module
 					);
 				}" : "") . (\_::$User->GetAccess($this->ModifyAccess) ? "
 				function {$this->Modal->Name}_Modify(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (\_::$User->GetAccess($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
-					sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
@@ -688,7 +688,7 @@ class Table extends Module
 				}" : "") . (\_::$User->GetAccess($this->RemoveAccess) ? "
 				function {$this->Modal->Name}_Delete(key){
 					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?") . "`))" : "") . "
-						sendRequest('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+						send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							load();
 						});

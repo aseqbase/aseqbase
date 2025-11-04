@@ -130,13 +130,13 @@ class Script
                         const binaryData = event.target.result;
                         // send binary data as a base64 string
                         const base64Data = btoa(String.fromCharCode(...new Uint8Array(binaryData)));
-                        sendFileRequest(null, 'data=' + encodeURIComponent(base64Data), null, null, null, null, null, $timeout);
+                        sendFile(null, 'data=' + encodeURIComponent(base64Data), null, null, null, null, null, $timeout);
                     });
                     reader.readAsArrayBuffer(file);":
                     "//URL.createObjectUrl(file);
                     const reader = new FileReader();
                     reader.addEventListener('load', (event) => {
-                        sendFileRequest(null, 'data=' + encodeURIComponent(event.target.result), null, null, null, null, null, $timeout);
+                        sendFile(null, 'data=' + encodeURIComponent(event.target.result), null, null, null, null, null, $timeout);
                     });
                     reader.readAsText(file);")."
                 }
@@ -158,16 +158,20 @@ class Script
     {
         return "prompt(" . self::Convert(__($message)) . ", " . self::Convert(__($default)) . ")";
     }
-    public static function Log($message = "")
+    public static function Log($message = "", $type = null)
     {
-        return "console.log(" . self::Convert(__($message)) . ")";
-    }
-    public static function Error($message = "")
-    {
-        return "console.error(" . self::Convert(__($message)) . ")";
-    }
-    public static function Warning($message = "")
-    {
-        return "console.warn(" . self::Convert(__($message)) . ")";
+        switch($type = strtolower($type??"")){
+            case "message":
+                $type = "info";
+                break;
+            case "warning":
+                $type = "warn";
+                break;
+            case "":
+            case "success":
+                $type = "log";
+                break;
+        }
+        return "console.$type(" . self::Convert(__($message)) . ")";
     }
 }
