@@ -12,7 +12,7 @@ let submitForm = function (selector = 'form', success = null, error = null, read
 		selector = 'form';
 	}
 	if (!form) return null;
-	return sendRequest(form.method, form.action, new FormData(form), selector, success, error, ready, progress, timeout);
+	return send(form.method, form.action, new FormData(form), selector, success, error, ready, progress, timeout);
 };
 let handleForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
 	form = null;
@@ -23,6 +23,6 @@ let handleForm = function (selector = 'form', success = null, error = null, read
 	}
 	if (form) form.onsubmit = function (e) {
 		e.preventDefault();
-		return sendRequest(form.method, form.action, new FormData(form), selector, success, error, ready, progress, timeout);
+		return send(form.method, form.action, new FormData(form), selector, success, error, ready, progress, timeout);
 	}
 };

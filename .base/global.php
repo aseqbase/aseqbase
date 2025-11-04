@@ -734,11 +734,16 @@ function responseStatus($status = null)
  * @param int $delay A milliseconds number to drop a delay in breaking page
  * if leave null it will try to find the next or previous request into the getted url,
  * or will reload the page otherwise
+ * @param $target Send the target url or send true to go next, false to go to the previous page, and null otherwise
  */
-function responseBreaker($content = null, $url = null, $delay = 0)
+function responseBreaker($content = null, $target = null, $delay = 0)
 {
-	$url = $url ?? receiveGet("next") ?? receiveGet("previous");
-	$script = "window.location.assign(" . (isValid($url) ? "`" . Local::GetUrl($url) . "`" : "location.href") . ")";
+	if ($target === false)
+		$target = $_SERVER['HTTP_REFERER'] ?? receiveGet("previous");
+	elseif ($target === true)
+		$target = receiveGet("next");
+	$target = $target ?? receiveGet("next") ?? receiveGet("previous");
+	$script = "window.location.assign(" . (isValid($target) ? "`" . Local::GetUrl($target) . "`" : "location.href") . ")";
 	echo ($content = Convert::ToString($content)) .
 		Html::Script($delay ? "setTimeout(()=>$script, $delay);" : "$script;");
 	return $content;
@@ -747,9 +752,9 @@ function responseBreaker($content = null, $url = null, $delay = 0)
 /**
  * Replace the output with all the document in the client side
  * @param mixed $output The data that is ready to print
- * @param string $url The url to show without updating the page
+ * @param string $target The url to show without updating the page
  */
-function entireResponse($output = null, $url = null)
+function entireResponse($output = null, $target = null)
 {
 	response(Html::Script(
 		Internal::MakeScript(
@@ -757,7 +762,7 @@ function entireResponse($output = null, $url = null)
 			null,
 			"(data,err)=>{"
 			($output ? "document.open();document.write(data??err);document.close();" : "") .
-			($url ? "window.history.pushState(null, null, `" . getFullUrl($url) . "`);" : "") .
+			($target ? "window.history.pushState(null, null, `" . getFullUrl($target) . "`);" : "") .
 			"}"
 		)
 	));
@@ -933,11 +938,11 @@ function deliverReport($message = null)
  * if leave null it will try to find the next or previous request into the getted url,
  * or will reload the page otherwise
  */
-function deliverBreaker($output = null, $status = null, $url = null, $delay = 0)
+function deliverBreaker($output = null, $status = null, $target = null, $delay = 0)
 {
 	eraseResponse(); // Clean any remaining output buffers
 	responseStatus($status);
-	responseBreaker($output, $url, $delay);
+	responseBreaker($output, $target, $delay);
 	finalize();
 }
 #endregion 
@@ -2169,10 +2174,7 @@ function getFullUrl(string|null $path = null, bool $optimize = true): string|nul
 function getUrl(string|null $path = null): string|null
 {
 	if ($path === null)
-		$path =
-			($_SERVER['HTTP_REFERER'] ?? /* $_SERVER['SCRIPT_URI'] ?? */ null) ??
-			(((!empty($_SERVER['HTTPS'] ?? null) && ($_SERVER['HTTPS'] ?? null) != 'off') || ($_SERVER['SERVER_PORT'] ?? null) == 443) ? "https" : "http") .
-			"://" . ($_SERVER["HTTP_HOST"] ?? null) . ($_SERVER["REQUEST_URI"] ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING'] ? "?" . $_SERVER['QUERY_STRING'] : "")));
+		$path = getHost() . ($_SERVER["REQUEST_URI"] ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING'] ? "?" . $_SERVER['QUERY_STRING'] : "")));
 	return preg_replace("/^([\/\\\])/", rtrim(getHost(), "/\\") . "$1", $path);
 }
 /**
@@ -2184,7 +2186,7 @@ function getHost(string|null $path = null): string|null
 {
 	$pat = "/^\w+\:\/*[^\/]+/";
 	if ($path == null || !preg_match($pat, $path))
-		$path = (empty($_SERVER['HTTPS'] ?? null) ? 'http://' : 'https://') . ($_SERVER['HTTP_HOST'] ?? null);
+		$path = ((empty($https = $_SERVER['HTTPS'] ?? null) || $https === 'off' || ($_SERVER['SERVER_PORT'] ?? null) !== 443) ? "http" : "https") . "://" . ($_SERVER["HTTP_HOST"] ?? null);
 	return preg_Find($pat, $path) ?? "";
 }
 /**
@@ -3064,37 +3066,14 @@ function array_find_keys($array, callable $searching)
 #region TESTING
 // /**
 //  * @test
-//  * @return void
 //  */
 // function test_server()
 // {
-// 	foreach ($_SERVER as $k => $v)
-// 		echo "<br>" . "$k: " . $v;
-// 	// echo "<br>"."PHP_SELF: ".$_SERVER['PHP_SELF'];
-// 	// echo "<br>"."GATEWAY_INTERFACE: ".$_SERVER['GATEWAY_INTERFACE'];
-// 	// echo "<br>"."SERVER_ADDR: ".$_SERVER['SERVER_ADDR'];
-// 	// echo "<br>"."SERVER_NAME: ".$_SERVER['SERVER_NAME'];
-// 	// echo "<br>"."SERVER_SOFTWARE: ".$_SERVER['SERVER_SOFTWARE'];
-// 	// echo "<br>"."SERVER_PROTOCOL: ".$_SERVER['SERVER_PROTOCOL'];
-// 	// echo "<br>"."REQUEST_METHOD: ".$_SERVER['REQUEST_METHOD'];
-// 	// echo "<br>"."REQUEST_TIME: ".$_SERVER['REQUEST_TIME'];
-// 	// echo "<br>"."QUERY_STRING: ".$_SERVER['QUERY_STRING'];
-// 	// echo "<br>"."HTTP_ACCEPT: ".$_SERVER['HTTP_ACCEPT'];
-// 	// echo "<br>"."HTTP_ACCEPT_CHARSET: ".$_SERVER['HTTP_ACCEPT_CHARSET'];
-// 	// echo "<br>"."HTTP_HOST: ".$_SERVER['HTTP_HOST'];
-// 	// echo "<br>"."HTTP_REFERER: ".$_SERVER['HTTP_REFERER'];
-// 	// echo "<br>"."HTTPS: ".$_SERVER['HTTPS'];
-// 	// echo "<br>"."REMOTE_ADDR: ".$_SERVER['REMOTE_ADDR'];
-// 	// echo "<br>"."REMOTE_HOST: ".$_SERVER['REMOTE_HOST'];
-// 	// echo "<br>"."REMOTE_PORT: ".$_SERVER['REMOTE_PORT'];
-// 	// echo "<br>"."SCRIPT_FILENAME: ".$_SERVER['SCRIPT_FILENAME'];
-// 	// echo "<br>"."SERVER_ADMIN: ".$_SERVER['SERVER_ADMIN'];
-// 	// echo "<br>"."SERVER_PORT: ".$_SERVER['SERVER_PORT'];
-// 	// echo "<br>"."SERVER_SIGNATURE: ".$_SERVER['SERVER_SIGNATURE'];
-// 	// echo "<br>"."PATH_TRANSLATED: ".$_SERVER['PATH_TRANSLATED'];
-// 	// echo "<br>"."SCRIPT_NAME: ".$_SERVER['SCRIPT_NAME'];
-// 	// echo "<br>"."SCRIPT_URI: ".$_SERVER['SCRIPT_URI'];
+// 	foreach ($_SERVER as $k => $v) echo "<br>" . "$k: " . $v;
 // }
+// /**
+//  * @test
+//  */
 // function test_address($directory = null, string $name = "Configuration")
 // {
 // 	echo addressing($directory ?? \_::$Address->Directory, $name);
