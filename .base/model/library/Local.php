@@ -365,7 +365,7 @@ class Local
 		if (!$content)
 			return null;
 		if (!get($content, "name"))
-			throw new \SilentException("There is not any file!");
+			return null;//throw new \SilentException("There is not any file!");
 		$directory = $directory ?? \_::$Router->PublicDirectory;
 
 		$fileType = strtolower(pathinfo($content["name"], PATHINFO_EXTENSION));
@@ -440,7 +440,7 @@ class Local
 		if (!$content)
 			return null;
 		if (!get($content, "name"))
-			throw new \SilentException("There is not any file!");
+			return null;//throw new \SilentException("There is not any file!");
 
 		// Check if image file is an actual image or fake image
 		if (getimagesize($content["tmp_name"]) === false)

@@ -513,7 +513,7 @@ function popReceived($key = null, $default = null, array|string|null $method = n
 function request($intent = null, $callback = null)
 {
 	return beforeUsing(\_::$Address->Directory, "finalize", function () use ($intent, $callback) {
-		$callbackScript = "(data,err)=>document.querySelector('body').append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
+		$callbackScript = "(data,err)=>document.querySelector('body').after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
 		$progressScript = "null";
 		$timeout = 60000;
 		$start = Internal::MakeStartScript(true);
