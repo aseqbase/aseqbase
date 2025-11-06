@@ -400,6 +400,7 @@ let send = function (
 	progress = null,
 	timeout = null,
 	async = true) {
+		
 	noEffects = false;
 	if (noEffects = !document.querySelector(selector)) selector = 'body';
 

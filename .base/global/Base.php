@@ -220,11 +220,11 @@ class Base extends \ArrayObject
 	/**
 	 * To echo as the whole contents then finalize the connection
 	 */
-	public function Breaker($target = null, $delay = 0)
+	public function Breaker($forward = null, $delay = 0)
 	{
 		eraseResponse();
 		$this->Render();
-		responseBreaker(target:$target, delay:$delay);
+		responseBreaker(forward:$forward, delay:$delay);
 		finalize();
 	}
 

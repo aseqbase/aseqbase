@@ -133,7 +133,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public DataTable $GroupDataTable;
 	public Cryptograph $Cryptograph;
 
-	
+
 	public $Id = null;
 	public $GroupId = null;
 	protected $Access = 0;
@@ -208,7 +208,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 */
 	public function GetAccess($acceptableAccess = null)
 	{
-		$access = $this->Access??$this->GuestAccess;
+		$access = $this->Access ?? $this->GuestAccess;
 		if (is_null($acceptableAccess))
 			return $access;
 		//if($acceptableAccess === true || $acceptableAccess === false) return $acceptableAccess;
@@ -350,7 +350,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 	public function GenerateEmail($name = null, $fake = false)
 	{
-		return ($name??$this->Signature??("user_".getId(true))).($fake?uniqid("+"):"")."@".\_::$Address->Domain;
+		return ($name ?? $this->Signature ?? ("user_" . getId(true))) . ($fake ? uniqid("+") : "") . "@" . \_::$Address->Domain;
 	}
 
 	/**
@@ -361,24 +361,24 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 * @param mixed $name
 	 * @param mixed $firstName
 	 * @param mixed $lastName
-	 * @param mixed $phone
+	 * @param mixed $contact
 	 * @param mixed $groupId
 	 * @param mixed $status
 	 * @param mixed $metadata
 	 * @return bool|null It will return 'true' if signed up 'null' if the account is not active yet, and 'false' otherwise
 	 */
-	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $phone = null, $groupId = null, $status = null, $metadata = null)
+	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
 	{
 		$this->TemporaryImage = null;
 		return $this->DataTable->Insert(
 			[
-				":Signature" => $this->TemporarySignature = $signature ?? $email,
+				":Signature" => $this->TemporarySignature = $signature ?? $email ?? $contact,
 				":Email" => $this->TemporaryEmail = strtolower($email ?? ""),
 				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password),
 				":Name" => $this->TemporaryName = $name ?? trim($firstName . " " . $lastName),
 				":FirstName" => $firstName,
 				":LastName" => $lastName,
-				":Contact" => $phone,
+				":Contact" => $contact,
 				":GroupId" => $groupId ?? $this->GroupDataTable->SelectValue("Id", "Access=" . $this->UserAccess) ?? 0,
 				":Status" => $status,
 				":MetaData" => $metadata ? (is_string($metadata) ? $metadata : json_encode($metadata)) : null,
@@ -415,10 +415,13 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 * @param mixed $email
 	 * @return bool|null It will return 'true' if logged in 'null' if the account is not active yet, and 'false' otherwise
 	 */
-	public function SignInOrSignUp($signature, $password, $email = null)
+	public function SignInOrSignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
 	{
 		return ($res = $this->SignIn($signature ?? $email, $password)) !== false ? $res :
-			$this->SignUp($signature ?? $email, $password, $email);
+			(
+				($res = $this->SignUp($signature ?? $email, $password, $email, $name, $firstName, $lastName, $contact, $groupId, $status, $metadata)) === true ?
+				$this->SignIn($signature ?? $email, $password) : $res
+			);
 	}
 	public function SignOut($signature = null)
 	{

@@ -6,23 +6,44 @@ let scrollThere = function (selector = "head", time = 1000) {
 
 let submitForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
 	form = null;
-	if(isString(selector)) form = document.querySelector(selector);
+	if (isString(selector)) form = document.querySelector(selector);
 	else {
 		form = selector;
-		selector = 'form';
+		selector = getQuery(form);
 	}
 	if (!form) return null;
+	fd = new FormData(form);
+	sb = form.querySelector("[type='submit']");
+	if (sb) {
+		fd.append(sb.name, sb.value);
+		return send(sb.getAttribute("method") ?? form.method, sb.getAttribute("action") ?? form.action, fd, selector, success, error, ready, progress, timeout);
+	}
 	return send(form.method, form.action, new FormData(form), selector, success, error, ready, progress, timeout);
 };
+
 let handleForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
 	form = null;
-	if(isString(selector)) form = document.querySelector(selector);
+	if (isString(selector)) form = document.querySelector(selector);
 	else {
 		form = selector;
-		selector = 'form';
+		selector = getQuery(form);
 	}
+
+	let ClickedFormButton = null;
+	form.querySelectorAll("[type='submit']").forEach(button =>
+		button.addEventListener("click", (e) =>
+			ClickedFormButton = e.target
+		)
+	);
+
 	if (form) form.onsubmit = function (e) {
 		e.preventDefault();
-		return send(form.method, form.action, new FormData(form), selector, success, error, ready, progress, timeout);
+		fd = new FormData(form);
+		sb = ClickedFormButton ?? form.querySelector("[type='submit']");
+		if (sb) {
+			fd.append(sb.name, sb.value);
+			return send(sb.getAttribute("method") ?? form.method, sb.getAttribute("action") ?? form.action, fd, selector, success, error, ready, progress, timeout);
+		}
+		return send(form.method, form.action, fd, selector, success, error, ready, progress, timeout);
 	}
 };

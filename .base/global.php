@@ -716,7 +716,7 @@ function responseType($value = null)
 }
 /**
  * To change the status of the results for the client side
- * @param mixed $status The header status
+ * @param int|null $status The header status
  * @return bool True if header is set, false otherwise
  */
 function responseStatus($status = null)
@@ -734,16 +734,16 @@ function responseStatus($status = null)
  * @param int $delay A milliseconds number to drop a delay in breaking page
  * if leave null it will try to find the next or previous request into the getted url,
  * or will reload the page otherwise
- * @param $target Send the target url or send true to go next, false to go to the previous page, and null otherwise
+ * @param $forward Send the target url or send true to go forward, false to go to the previous page, and null otherwise
  */
-function responseBreaker($content = null, $target = null, $delay = 0)
+function responseBreaker($content = null, $forward = null, $delay = 0)
 {
-	if ($target === false)
-		$target = $_SERVER['HTTP_REFERER'] ?? receiveGet("previous");
-	elseif ($target === true)
-		$target = receiveGet("next");
-	$target = $target ?? receiveGet("next") ?? receiveGet("previous");
-	$script = "window.location.assign(" . (isValid($target) ? "`" . Local::GetUrl($target) . "`" : "location.href") . ")";
+	if ($forward === false)
+		$forward = getBackPath();
+	elseif ($forward === true)
+		$forward = getForePath();
+	$forward = $forward ?? receiveGet("Next") ?? receiveGet("Previous");
+	$script = "window.location.assign(" . (isValid($forward) ? Script::Convert(Local::GetUrl($forward)) : "location.href") . ")";
 	echo ($content = Convert::ToString($content)) .
 		Html::Script($delay ? "setTimeout(()=>$script, $delay);" : "$script;");
 	return $content;
@@ -933,16 +933,16 @@ function deliverReport($message = null)
  * Print only this output on the client side then reload the page
  * @param mixed $output The data that is ready to print
  * @param mixed $status The header status
- * @param mixed $url The next url to show after rendering output,
+ * @param $forward Send the target url or send true to go forward, false to go to the previous page, and null otherwise
  * @param int $delay A milliseconds number to drop a delay in breaking page
  * if leave null it will try to find the next or previous request into the getted url,
  * or will reload the page otherwise
  */
-function deliverBreaker($output = null, $status = null, $target = null, $delay = 0)
+function deliverBreaker($output = null, $status = null, $forward = null, $delay = 0)
 {
 	eraseResponse(); // Clean any remaining output buffers
 	responseStatus($status);
-	responseBreaker($output, $target, $delay);
+	responseBreaker($output, $forward, $delay);
 	finalize();
 }
 #endregion 
@@ -2154,6 +2154,22 @@ function getId($random = false): int
 }
 
 /**
+ * Get the full part of the referrer url
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
+ */
+function getBackPath()
+{
+	return $_SERVER['HTTP_REFERER']??null ?: receiveGet("BackPath")??receiveGet("Previous");
+}
+/**
+ * Get the full part of the referrer url
+ * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
+ */
+function getForePath()
+{
+	return receiveGet("ForePath")??receiveGet("Next");
+}
+/**
  * Get the full part of a url pointed to cache status
  * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
  * @return string|null
@@ -2174,7 +2190,7 @@ function getFullUrl(string|null $path = null, bool $optimize = true): string|nul
 function getUrl(string|null $path = null): string|null
 {
 	if ($path === null)
-		$path = getHost() . ($_SERVER["REQUEST_URI"] ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING'] ? "?" . $_SERVER['QUERY_STRING'] : "")));
+		$path = getHost() . ($_SERVER["REQUEST_URI"]??null ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING']??null ? "?" . $_SERVER['QUERY_STRING'] : "")));
 	return preg_replace("/^([\/\\\])/", rtrim(getHost(), "/\\") . "$1", $path);
 }
 /**
@@ -2186,7 +2202,7 @@ function getHost(string|null $path = null): string|null
 {
 	$pat = "/^\w+\:\/*[^\/]+/";
 	if ($path == null || !preg_match($pat, $path))
-		$path = ((empty($https = $_SERVER['HTTPS'] ?? null) || $https === 'off' || ($_SERVER['SERVER_PORT'] ?? null) !== 443) ? "http" : "https") . "://" . ($_SERVER["HTTP_HOST"] ?? null);
+		$path = ((empty($https = $_SERVER['HTTPS'] ?? null) || $https == 'off' || ($_SERVER['SERVER_PORT'] ?? null) != 443) ? "http" : "https") . "://" . ($_SERVER["HTTP_HOST"] ?? null);
 	return preg_Find($pat, $path) ?? "";
 }
 /**
@@ -2498,15 +2514,18 @@ function clearMemos()
  * Set somthing as a secure session variable available to the current script.
  * This will store on the server side; Able to use for sensitive information.
  * @param string $key A special key
- * @param string $value The target value to store.
+ * @param mixed $value The target value to store.
  * @param mixed $expires A miliseconds delay to expire
  */
 function setSecret($key, $value, $expires = 0, $path = "/", $secure = false)
 {
+	$isObject = !isStatic($value);
+	if($isObject) $value = Convert::ToJson($value);
 	return $_SESSION[$key] = [
 		'value' => $secure ? encrypt($value) : $value,
 		'expires' => ($expires > 0 ? (int) (microtime(true)) + ($expires / 1000) : 0),
 		'path' => $path,
+		'convert' => $isObject,
 		'secure' => $secure
 	];
 }
@@ -2523,9 +2542,10 @@ function getSecret($key)
 		unset($_SESSION[$key]);
 		return null;
 	}
-	if (str_starts_with(\_::$Address->Request ?? "/", $item['path']))
-		return $item['secure'] ? decrypt($item['value']) : $item['value'];
-	else
+	if (str_starts_with(\_::$Address->Request ?? "/", $item['path'])){
+		$value = $item['secure'] ? decrypt($item['value']) : $item['value'];
+		return ($item['convert']??null)?Convert::FromJson($value):$value;
+	} else
 		return null;
 }
 /**

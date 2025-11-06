@@ -642,7 +642,7 @@ class Html
                         ...$attributes
                     ),
                     [
-                        "id"=>$id,
+                        "id" => $id,
                         "class" => 'modal-overlay',
                         "onclick" => "if(event.target.classList.contains('modal-overlay')) event.target.remove();event.preventDefault();"
                     ]
@@ -1912,7 +1912,7 @@ class Html
     public static function Form($content, $action = null, ...$attributes)
     {
         $Interaction = self::PopAttribute($attributes, "Interaction");
-        $id = self::PopAttribute($attributes, "Id")??("_".getId());
+        $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         if (!isValid($content))
             $content = self::SubmitButton();
         elseif (is_array($content) || is_iterable($content))
@@ -1938,8 +1938,8 @@ class Html
                         return self::Field(null, $k, $f);
                 }));
             };
-        return self::Element($content, "form", $action ? ((isScript($action) && !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "Id"=>$id, "class" => "form"], $attributes)
-        .($Interaction?Html::Script("handleForm('form#$id');"):"");
+        return self::Element($content, "form", $action ? ((isScript($action) && !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "Id" => $id, "class" => "form"], $attributes)
+            . ($Interaction ? Html::Script("handleForm('form#$id');") : "");
     }
     /**
      * Detect the type of inputed value
@@ -1950,9 +1950,9 @@ class Html
     public static function InputDetector($type = null, $value = null)
     {
         if ($type === false)
-            return null;
+            return false;
         if (is_null($type))
-            if (isEmpty($value))
+            if (isEmpty(object: $value))
                 return "text";
             elseif (is_string($value))
                 if (isUrl($value))
@@ -1960,6 +1960,8 @@ class Html
                         return "file";
                     else
                         return "url";
+                elseif (preg_match("/<[a-z].*>/i", $value))
+                    return null;
                 elseif (strlen($value) > 100 || count(explode("\r\n\t\f\v", $value)) > 1)
                     return "textarea";
                 else
@@ -2045,9 +2047,9 @@ class Html
         $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description"]));
         $wrapperAttr = self::PopAttribute($attributes, "Wrapper") ?? [];
         switch ($type) {
-            case null:
+            // case null:
+            // case 'null':
             case false:
-            case 'null':
             case 'false':
                 return null;
             case 'hidden':
@@ -2076,52 +2078,53 @@ class Html
         $prepend = $append = null;
         if (is_null($type))
             $type = self::InputDetector($type, $value);
-        if (is_string($type)) {
-            if (isPattern($type)) {
-                $options = $type;
-                $type = "mask";
-            } else
-                $type = self::InputDetector($type, $value);
-        } elseif (is_callable($type) || ($type instanceof \Closure)) {
-            $type = $type($type, $value);
-            return self::Interactor(
-                key: $key,
-                value: $value,
-                type: $type,
-                options: $options,
-                title: $title,
-                attributes: $attributes
-            );
-        } elseif (is_object($type) || ($type instanceof \stdClass)) {
-            $key = get($type, "Key") ?? $key;
-            $value = get($type, "Value") ?? $value;
-            $title = get($type, "Title") ?? $title;
-            $options = get($type, "Options") ?? $options;
-            $prepend = get($type, "Prepend") ?? $prepend;
-            $append = get($type, "Append") ?? $append;
-            $attributes = [...$attributes, ...(getValid($type, "Attributes", []))];
-            $type = self::InputDetector(get($type, "Type"), $value);
-        } elseif (is_countable($type)) {
-            if (is_null($options)) {
-                $options = $type;
-                $type = "select";
-            } else {
+        if (!is_null($type))
+            if (is_string($type)) {
+                if (isPattern($type)) {
+                    $options = $type;
+                    $type = "mask";
+                } else
+                    $type = self::InputDetector($type, $value);
+            } elseif (is_callable($type) || ($type instanceof \Closure)) {
+                $type = $type($type, $value);
+                return self::Interactor(
+                    key: $key,
+                    value: $value,
+                    type: $type,
+                    options: $options,
+                    title: $title,
+                    attributes: $attributes
+                );
+            } elseif (is_object($type) || ($type instanceof \stdClass)) {
                 $key = get($type, "Key") ?? $key;
                 $value = get($type, "Value") ?? $value;
+                $title = get($type, "Title") ?? $title;
                 $options = get($type, "Options") ?? $options;
                 $prepend = get($type, "Prepend") ?? $prepend;
                 $append = get($type, "Append") ?? $append;
                 $attributes = [...$attributes, ...(getValid($type, "Attributes", []))];
                 $type = self::InputDetector(get($type, "Type"), $value);
-            }
-        } elseif (is_int($type)) {
-            $options = [10 ** ($type - 1), 10 ** $type - 1];
-            $type = "number";
-        } elseif (is_string($type) && isPattern($type)) {
-            $options = $type;
-            $type = "mask";
-        } else
-            $type = self::InputDetector($type, $value);
+            } elseif (is_countable($type)) {
+                if (is_null($options)) {
+                    $options = $type;
+                    $type = "select";
+                } else {
+                    $key = get($type, "Key") ?? $key;
+                    $value = get($type, "Value") ?? $value;
+                    $options = get($type, "Options") ?? $options;
+                    $prepend = get($type, "Prepend") ?? $prepend;
+                    $append = get($type, "Append") ?? $append;
+                    $attributes = [...$attributes, ...(getValid($type, "Attributes", []))];
+                    $type = self::InputDetector(get($type, "Type"), $value);
+                }
+            } elseif (is_int($type)) {
+                $options = [10 ** ($type - 1), 10 ** $type - 1];
+                $type = "number";
+            } elseif (is_string($type) && isPattern($type)) {
+                $options = $type;
+                $type = "mask";
+            } else
+                $type = self::InputDetector($type, $value);
         if (!is_null($type) && is_string($type)) {
             if (preg_match("/^\s*((\{[\w\W]*\})|(\[[\w\W]*\]))\s*$/", $type)) {
                 try {
@@ -2177,12 +2180,19 @@ class Html
         $id = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
         $attributes = ["id" => $id, "name" => $key, ...$attributes];
         $options = $options ?? [];
+        $content = null;
         switch ($type) {
             case null:
-            case false:
             case 'null':
+                $content = $value;
+                break;
+            case false:
             case 'false':
                 return null;
+            //case true:
+            case 'true':
+                $content = self::Input($key, $value, null, $attributes);
+                break;
             case 'span':
                 $content = self::Span($value ?? $titleOrKey, null, $attributes);
                 break;
@@ -2456,8 +2466,12 @@ class Html
                 break;
             default:
                 if (is_string($type))
-                    $content = self::Element($value, $type, $attributes);
-                else
+                    if (preg_match("/[^a-z\d\-_:\/\\\]/i", $type))
+                        $content = self::Element($value, $type, $attributes);
+                    else {
+                        $content = $type;
+                        $type = null;
+                    } else
                     $content = self::Input($key, $value, $type, $attributes);
                 break;
         }
@@ -2478,7 +2492,7 @@ class Html
             $attributes = Convert::ToIteration($value, ...$attributes);
             $value = null;
         }
-        return self::Element(__($value ?? $key), "button", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit", "value"=>$value], $attributes);
+        return self::Element(__($value ?? $key), "button", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button submitbutton", "type" => "submit", "value" => $value], $attributes);
     }
     /**
      * The \<BUTTON\ TYPE="RESET"> HTML Tag
@@ -2493,7 +2507,7 @@ class Html
             $attributes = Convert::ToIteration($value, ...$attributes);
             $value = null;
         }
-        return self::Element(__($value ?? $key), "button", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset", "value"=>$value], $attributes);
+        return self::Element(__($value ?? $key), "button", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "class" => "button resetbutton", "type" => "reset", "value" => $value], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3112,20 +3126,17 @@ class Html
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         $name = self::PopAttribute($attributes, "Name");
         $onChange = self::PopAttribute($attributes, "OnChange");
-        return
-            self::Map($value, null, [
+        return self::Map($value, null, [
                 "id" => "_input$id",
                 "class" => "input",
-                "onchange" => "
-                document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
+                "onchange" => "document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
                     Convert::ToString($onChange, ";
             ")
             ], $attributes) .
             self::HiddenInput($key, Convert::ToString($value, ","), [
                 "id" => $id,
                 "class" => "mapinput",
-                "onchange" => "
-                setTimeout(()=>{
+                "onchange" => "setTimeout(()=>{
                     ll = this.value.split(/[,;]/);
                     latlng = {lat:ll[0]??0,lng:ll[1]??0};
                     if(map_marker_input$id) map_marker_input$id.setLatLng(latlng).addTo(map_input$id);

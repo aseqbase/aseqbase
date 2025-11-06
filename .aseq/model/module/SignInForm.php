@@ -21,7 +21,7 @@ class SignInForm extends Form{
 	public $RecoverPath = null;
 	public $SignedInWarning = "You are logged in!";
 	public $IncompleteWarning = "Please fill all fields correctly!";
-	public $IncorrectWarning = "UserName or Password is not correct!";
+	public $IncorrectWarning = "The 'UserName' or 'Password' is incorrect!";
 	public $CorrectConfirmingFormat = 'Dear \'$NAME\', you have logged in successfully';
 	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
 	public $Welcome = null;

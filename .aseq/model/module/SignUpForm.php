@@ -288,7 +288,7 @@ class SignUpForm extends Form
 							name: null,
 							firstName: get($received, "FirstName"),
 							lastName: get($received, "LastName"),
-							phone: (get($received, "CountryCode")??"0") . " " . get($received, "Phone"),
+							contact: (get($received, "CountryCode")??"0") . " " . get($received, "Phone"),
 							groupId: $group,
 							status: $this->InitialStatus,
 							metadata: $route?["Route"=>$route]:null

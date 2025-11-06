@@ -2,7 +2,7 @@ class Evaluate{
     static SignPattern = /^\@/;
     static CodeFormat = "$(`{0}`).{1}()";
 
-    static URL = function () {
+    static Url = function () {
         var urlParams = new URLSearchParams(window.location.search);
         for (let key of urlParams.keys())
             if (key.search(Evaluate.SignPattern) >= 0) {

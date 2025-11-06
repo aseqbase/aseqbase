@@ -1,8 +1,6 @@
 <?php
 namespace MiMFa\Library;
 
-use Exception;
-
 /**
  * A powerfull class to handle internal requests for RPCs (Remote Procedure Call)
  * Remote Procedure Call (RPC) is a communication protocol that allows a program
@@ -31,8 +29,8 @@ class Internal
         $received = $name ? [$name => receiveInternal($name)] : receiveInternal();
         $reses = [];
         foreach ($received as $k => $v) {
-            $args = json_decode($v, true, flags: JSON_OBJECT_AS_ARRAY) ?? [];
-            $args = (is_array($args) ? $args : [$args]);
+            $args = (is_string($v)?json_decode(preg_match("/^\{[\w\W]*\}$/",$v)?$v:decrypt($v), true, flags: JSON_OBJECT_AS_ARRAY):$v) ?? [];
+            $args = is_array($args) ? $args : [$args];
             $reses[] = Convert::By(self::Get($k, fn($a = null) => $a), ...$args);
         }
         return join("", $reses);
@@ -72,18 +70,20 @@ class Internal
      * @param bool $direct To get the direct executable script, or execute when the document is ready
      * @return string The interaction JS codes
      */
-    public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000, $direct = false)
+    public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000, $direct = false, $encrypt = true)
     {
         $callbackScript = $callbackScript ?? "(data,err)=>document.querySelector(".(self::$Selector).").".(self::$Target)."(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err))";
         $progressScript = $progressScript ?? "null";
         $start = self::MakeStartScript(direct: $direct);
         $end = self::MakeEndScript(direct: $direct);
+        $args = Script::Convert($args);
+        if($encrypt) $args = Script::Convert(encrypt($args));
         if (isStatic($handler))
-            return "$start($callbackScript)(" . Script::Convert($handler) . "," . Script::Convert($args) . ")$end";
+            return "$start($callbackScript)(" . Script::Convert($handler) . ",$args)$end";
         return $start .
             'sendInternal(null,{"' .
-            self::Set($handler) . '":JSON.stringify(' . Script::Convert($args) .
-            ")},".(self::$Selector).",$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
+            self::Set($handler) . "\":$args},".
+            (self::$Selector).",$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
     }
     /**
      * Get the handler encripted name

@@ -15,7 +15,7 @@ class General extends Template
         component("View");
         component("Be");
 		component("Live");
-		component("Evaluate");
+		//component("Evaluate");
 		component("FontFace");
 		component("Icons");
         component("ShortcutKey");
