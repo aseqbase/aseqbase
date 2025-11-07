@@ -74,6 +74,10 @@ class Template extends \Base{
      */
 	public $Footer = null;
 
+    public function __construct($setDefaults = true, $setRevises = true){
+        parent::__construct($setDefaults, $setRevises);
+        component("Global");
+    }
 	public function Handler($received = null){
         ob_start();
 		$this->Render();

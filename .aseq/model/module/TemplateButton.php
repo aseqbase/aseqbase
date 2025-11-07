@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Component\GlobalStyle;
+use MiMFa\Component\GeneralStyle;
 use MiMFa\Library\Html;
 use MiMFa\Library\Script;
 class TemplateButton extends Module{
@@ -34,7 +34,7 @@ class TemplateButton extends Module{
 		else {
 			switchStyle = document.createElement('style');
 			switchStyle.id = switchStyleId;
-			switchStyle.innerHTML = `".GlobalStyle::SwitchVariables()."`;
+			switchStyle.innerHTML = `".GeneralStyle::SwitchVariables()."`;
 			document.head.append(switchStyle);
 		}
 		if({$this->Name}_SwitchMode) {

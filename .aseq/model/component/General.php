@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Component;
 use MiMFa\Library\Html;
-class GlobalStyle{
+class GeneralStyle{
 	public static function Variables($rootSelector = ":root") { return "
 		$rootSelector{
 			--dir: ".(\_::$Back->Translate->Direction??\_::$Back->DefaultDirection).";
@@ -171,9 +171,6 @@ class GlobalStyle{
 	}
 }
 \_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'reset.css', optimize: true));
-\_::$Front->Libraries[] = Html::Style(GlobalStyle::Variables());
+\_::$Front->Libraries[] = Html::Style(GeneralStyle::Variables());
 \_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
 \_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Math.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Array.js', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'Html.js', optimize: true));

@@ -5,24 +5,24 @@ let scrollThere = function (selector = "head", time = 1000) {
 };
 
 let submitForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
-	form = null;
+	let form = null;
 	if (isString(selector)) form = document.querySelector(selector);
 	else {
 		form = selector;
 		selector = getQuery(form);
 	}
 	if (!form) return null;
-	fd = new FormData(form);
-	sb = form.querySelector("[type='submit']");
+	let fd = new FormData(form);
+	let sb = form.querySelector("[type='submit']");
 	if (sb) {
 		fd.append(sb.name, sb.value);
-		return send(sb.getAttribute("method") ?? form.method, sb.getAttribute("action") ?? form.action, fd, selector, success, error, ready, progress, timeout);
+		return send(sb.getAttribute("method") ?? form.getAttribute("method"), sb.getAttribute("action") ?? form.getAttribute("action"), fd, selector, success, error, ready, progress, timeout);
 	}
-	return send(form.method, form.action, new FormData(form), selector, success, error, ready, progress, timeout);
+	return send(form.getAttribute("method"), form.getAttribute("action"), new FormData(form), selector, success, error, ready, progress, timeout);
 };
 
 let handleForm = function (selector = 'form', success = null, error = null, ready = null, progress = null, timeout = null) {
-	form = null;
+	let form = null;
 	if (isString(selector)) form = document.querySelector(selector);
 	else {
 		form = selector;
@@ -30,7 +30,7 @@ let handleForm = function (selector = 'form', success = null, error = null, read
 	}
 
 	let ClickedFormButton = null;
-	form.querySelectorAll("[type='submit']").forEach(button =>
+	form.querySelectorAll("[type='submit']")?.forEach(button =>
 		button.addEventListener("click", (e) =>
 			ClickedFormButton = e.target
 		)
@@ -38,12 +38,12 @@ let handleForm = function (selector = 'form', success = null, error = null, read
 
 	if (form) form.onsubmit = function (e) {
 		e.preventDefault();
-		fd = new FormData(form);
-		sb = ClickedFormButton ?? form.querySelector("[type='submit']");
+		let fd = new FormData(form);
+		let sb = ClickedFormButton ?? form.querySelector("[type='submit']");
 		if (sb) {
 			fd.append(sb.name, sb.value);
-			return send(sb.getAttribute("method") ?? form.method, sb.getAttribute("action") ?? form.action, fd, selector, success, error, ready, progress, timeout);
+			return send(sb.getAttribute("method") ?? form.getAttribute("method"), sb.getAttribute("action") ?? form.getAttribute("action"), fd, selector, success, error, ready, progress, timeout);
 		}
-		return send(form.method, form.action, fd, selector, success, error, ready, progress, timeout);
+		return send(form.getAttribute("method"), form.getAttribute("action"), fd, selector, success, error, ready, progress, timeout);
 	}
 };

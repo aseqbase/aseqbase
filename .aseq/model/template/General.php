@@ -10,11 +10,11 @@ class General extends Template
 	{
 		parent::__construct($setDefaults, $setRevises);
         component("Manifest");
-		component("Global");
+		component("Reset");
+		component("General");
         component("JsonLD");
         component("View");
         component("Be");
-		component("Live");
 		//component("Evaluate");
 		component("FontFace");
 		component("Icons");

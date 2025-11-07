@@ -606,7 +606,8 @@ class Html
     public static function Modal($content, ...$attributes)
     {
         $id = "_" . getId(true);
-        return self::Style("
+        return self::Division(
+            self::Style("
             #$id.modal-overlay {
                 position: fixed;
                 top: 0; bottom: 0; left: 0; right: 0;
@@ -631,22 +632,22 @@ class Html
                 position: absolute;
                 top: 0px; right: 0px;
             }
-        ") . self::Division(
-                    self::Division(
-                        [
-                            Html::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']),
-                            $content
-                        ]
-                        ,
-                        ["class" => "modal"],
-                        ...$attributes
-                    ),
-                    [
-                        "id" => $id,
-                        "class" => 'modal-overlay',
-                        "onclick" => "if(event.target.classList.contains('modal-overlay')) event.target.remove();event.preventDefault();"
-                    ]
-                );
+        ") .
+            self::Division(
+                [
+                    Html::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']),
+                    $content
+                ]
+                ,
+                ["class" => "modal"],
+                ...$attributes
+            ),
+            [
+                "id" => $id,
+                "class" => 'modal-overlay',
+                "onclick" => "if(event.target.classList.contains('modal-overlay')) event.target.remove();event.preventDefault();"
+            ]
+        );
     }
     public static function Result($content, $icon = "bell", $wait = 10000, ...$attributes)
     {
@@ -3127,12 +3128,12 @@ class Html
         $name = self::PopAttribute($attributes, "Name");
         $onChange = self::PopAttribute($attributes, "OnChange");
         return self::Map($value, null, [
-                "id" => "_input$id",
-                "class" => "input",
-                "onchange" => "document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
-                    Convert::ToString($onChange, ";
+            "id" => "_input$id",
+            "class" => "input",
+            "onchange" => "document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
+                Convert::ToString($onChange, ";
             ")
-            ], $attributes) .
+        ], $attributes) .
             self::HiddenInput($key, Convert::ToString($value, ","), [
                 "id" => $id,
                 "class" => "mapinput",
@@ -3233,10 +3234,9 @@ class Html
         $countDown = $from >= $to;
         $counter = $id;
         $interval = $id . "_i";
-        return Html::Element($from, "span", ["id" => $id, "class" => "counter"], $attributes) .
-            Html::Script(
-                "let $counter = " . ($countDown ? $from : $to) . ";" .
-                "$interval = setInterval(() => {
+        return Html::Element(Html::Span($from).Html::Script(
+                "var $counter = " . ($countDown ? $from : $to) . ";" .
+                "var $interval = setInterval(() => {
 			    if($counter " . ($countDown ? "<" : ">") . "= {$to}) {" . (
                     $action ? (
                         (isScript($action) || !isUrl($action)) ?
@@ -3248,10 +3248,11 @@ class Html
 					return;
 		        }
 				$counter += " . ($countDown ? -$step : $step) . ";
-				elem = document.querySelector('.counter#$id');
+				elem = document.querySelector('.counter#$id>.span');
 			    if(elem) elem.innerHTML = {$updateValueFunction}($counter);
+                else $counter = $to;
 			}, {$period});"
-            );
+            ), "span", ["id" => $id, "class" => "counter"], $attributes);
     }
     /**
      * A \<SPAN\> HTML Tag contains a timer
