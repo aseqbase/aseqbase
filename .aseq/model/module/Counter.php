@@ -42,19 +42,18 @@ class Counter extends Module
 			"$counter = " . ($countDown ? $this->From : $this->To) . ";" .
 			"$interval = setInterval(() => {
 			    if($counter " . ($countDown ? "<" : ">") . "= {$this->To}) {" . (
-				$this->Action ? (
+					$this->Action ? (
 					(isScript($this->Action) || !isUrl($this->Action)) ?
-					$this->Action :
-					("load(" . Script::Convert($this->Action) . ");")
-				) : ""
-			) . "
+						$this->Action :
+						("load(" . Script::Convert($this->Action) . ");")
+					) : ""
+					) . "
 					clearInterval($interval);
 					return;
 		        }
 				$counter += " . ($countDown ? -$this->Step : $this->Step) . ";
 				elem = document.querySelector('#$this->Id>.content');
 			    if(elem) elem.innerHTML = {$this->ShowFunctionName}($counter);
-                else $counter = {$this->To};
 			}, {$this->Period});"
 		);
 	}

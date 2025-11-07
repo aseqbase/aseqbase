@@ -11,7 +11,7 @@ class Script
     /**
      * To convert everything to scripts
      * @param mixed $object Send a PHP function to give its RPC scripts
-     * @param array $args Needs for some $object like PHP function
+     * @param array $args Needs for some $object like PHP function, It encrypts them for more protection
      */
     public static function Convert($object, ...$args)
     {

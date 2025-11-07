@@ -2578,8 +2578,9 @@ class Html
                             return \MiMFa\Library\Html::Convert($nArgs);
                         }
                         ,
-                        "\${document.getElementById('$eid').value}",
-                        "(data,err)=>document.getElementById('$sid').innerHTML=data??err"
+                        ["\${document.getElementById('$eid').value}"],
+                        "(data,err)=>document.getElementById('$sid').innerHTML=data??err",
+                        encrypt:false
                     )
                 ) =>
                     self::Division(self::Center(self::Media("spinner")), ["id" => $sid])
@@ -3252,7 +3253,7 @@ class Html
 			    if(elem) elem.innerHTML = {$updateValueFunction}($counter);
                 else $counter = $to;
 			}, {$period});"
-            ), "span", ["id" => $id, "class" => "counter"], $attributes);
+            ), "div", ["id" => $id, "class" => "counter"], $attributes);
     }
     /**
      * A \<SPAN\> HTML Tag contains a timer

@@ -441,7 +441,6 @@ class Local
 			return null;
 		if (!get($content, "name"))
 			return null;//throw new \SilentException("There is not any file!");
-
 		// Check if image file is an actual image or fake image
 		if (getimagesize($content["tmp_name"]) === false)
 			throw new \SilentException("The image file is not an actual image!");

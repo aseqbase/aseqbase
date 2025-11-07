@@ -73,7 +73,7 @@ class General extends Template
 				body>.background-screen{
 					background-image: " . (isValid($this->BackgroundImage) ? "url('" . $this->BackgroundImage . "')" : "var(--overlay-url-0)") . "
 				}
-				body>.result{
+				body>.result:is(.message,.success,.error,.warning){
 					position: fixed;
 					top: var(--size-max);
 					left: 0px;
@@ -88,17 +88,10 @@ class General extends Template
 					gap: var(--size-min);
 					z-index: 1111;
 				}
-				body>.result{
-					position: fixed;
-					top: var(--size-max);
-					left: 0px;
-					right: 0px;
-					z-index: 1111;
-				}
-				body .result{
+				body .result:is(.message,.success,.error,.warning){
 				    width: 100% !important;
 				}
-				body .result>.division{
+				body .result:is(.message,.success,.error,.warning)>.division{
 				    width: -webkit-fill-available;
 				}
 				body .result.message{

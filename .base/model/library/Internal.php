@@ -68,6 +68,7 @@ class Internal
      * @param mixed $progressScript A JS code to apply while getting data // (data,err)=> progrecing procedure
      * @param mixed $timeout The interaction timeout
      * @param bool $direct To get the direct executable script, or execute when the document is ready
+     * @param bool $encryot To encrypt the $args for more protection
      * @return string The interaction JS codes
      */
     public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000, $direct = false, $encrypt = true)
