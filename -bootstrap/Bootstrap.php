@@ -37,7 +37,7 @@ class Bootstrap
             exec("net start $db");
             exec('php index.php');
 
-            self::SetSuccess("Server started on $host:$port. Please manually note and store the PID to stop it.");
+            self::SetSuccess("Server started on $host:$port. Please manually note and store the PID, or end the 'CLI' task to stop it.");
 
         } else {
             $command = "php -S $host:$port > /dev/null 2>&1 & echo $!";
@@ -63,7 +63,7 @@ class Bootstrap
         self::$ServerPID = self::$Configurations["ServerPID"] ?? self::$ServerPID;
 
         if (!self::$ServerPID || self::$ServerPID === 0) {
-            self::SetWarning("No running server PID found in configuration. Check running processes manually.");
+            self::SetWarning("No running server PID found in configuration. Check running processes named 'CLI' manually.");
             return;
         }
 
@@ -121,7 +121,7 @@ class Bootstrap
     public static function ConstructSource($force = true)
     {
         self::SetSubject("SOURCE INSTALLATION");
-        self::GetInput("Destination Directory", $force, self::$DestinationDirectory, self::$DestinationDirectory, "destination");
+        self::GetInput("Destination Directory", $force, self::$DestinationDirectory, self::$DestinationDirectory, "dest");
         if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
         self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
@@ -293,7 +293,7 @@ class Bootstrap
     public static function DestructSource($force = false)
     {
         self::SetSubject("SOURCE UNINSTALLATION");
-        self::GetInput("Destination Directory", $force, self::$DestinationDirectory, self::$DestinationDirectory, "destination");
+        self::GetInput("Destination Directory", $force, self::$DestinationDirectory, self::$DestinationDirectory, "dest");
         if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
         self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;

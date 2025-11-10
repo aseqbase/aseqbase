@@ -114,7 +114,7 @@ class BackBase
 	 * @var string
 	 * @category DataBase
 	 */
-	public $DataBasePassword = 'root';
+	public $DataBasePassword = '';
 	/**
 	 * The database Name
 	 * @var string

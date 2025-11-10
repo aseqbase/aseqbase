@@ -29,7 +29,16 @@ class Internal
         $received = $name ? [$name => receiveInternal($name)] : receiveInternal();
         $reses = [];
         foreach ($received as $k => $v) {
-            $args = (is_string($v)?json_decode(preg_match("/^\{[\w\W]*\}$/",$v)?$v:decrypt($v), true, flags: JSON_OBJECT_AS_ARRAY):$v) ?? [];
+            $args = null;
+            if (is_string($v))
+                if (preg_match("/^\{[\w\W]*\}$/", $v))
+                    $args = json_decode($v, true, flags: JSON_OBJECT_AS_ARRAY);
+                else try {
+                    $args = decrypt($v);
+                } catch (\Exception $ex) {
+                    $args = $v;
+                }
+            $args = $args ?? [];
             $args = is_array($args) ? $args : [$args];
             $reses[] = Convert::By(self::Get($k, fn($a = null) => $a), ...$args);
         }
@@ -73,18 +82,19 @@ class Internal
      */
     public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000, $direct = false, $encrypt = true)
     {
-        $callbackScript = $callbackScript ?? "(data,err)=>document.querySelector(".(self::$Selector).").".(self::$Target)."(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err))";
+        $callbackScript = $callbackScript ?? "(data,err)=>document.querySelector(" . (self::$Selector) . ")." . (self::$Target) . "(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err))";
         $progressScript = $progressScript ?? "null";
         $start = self::MakeStartScript(direct: $direct);
         $end = self::MakeEndScript(direct: $direct);
         $args = Script::Convert($args);
-        if($encrypt) $args = Script::Convert(encrypt($args));
+        if ($encrypt)
+            $args = Script::Convert(encrypt($args));
         if (isStatic($handler))
             return "$start($callbackScript)(" . Script::Convert($handler) . ",$args)$end";
         return $start .
             'sendInternal(null,{"' .
-            self::Set($handler) . "\":$args},".
-            (self::$Selector).",$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
+            self::Set($handler) . "\":$args}," .
+            (self::$Selector) . ",$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
     }
     /**
      * Get the handler encripted name
@@ -131,9 +141,10 @@ class Internal
                 $file->next();
             }
             $code = preg_find("/(fn|function)\s*\([^\)]*\)\s*(\=\>)?\s*\{\s*(('[^']*')*|(\"[^\"]*\")*|(\{[^\}]+\})*|([^\}]+)*)*\s*\}/U", trim($source, ";(),= \n\r\t\v\x00"));
-            $sl = strlen(preg_replace("/('[^']*')*|(\"[^\"]*\")*|\{/","", $code));
-            $el = strlen(preg_replace("/('[^']*')*|(\"[^\"]*\")*|\}/","", $code));
-            if($sl < $el) return $code."}";
+            $sl = strlen(preg_replace("/('[^']*')*|(\"[^\"]*\")*|\{/", "", $code));
+            $el = strlen(preg_replace("/('[^']*')*|(\"[^\"]*\")*|\}/", "", $code));
+            if ($sl < $el)
+                return $code . "}";
             return $code;
         } elseif (is_object($handler)) {
             $reflection = new \ReflectionObject($handler);
