@@ -87,6 +87,7 @@ class Address extends ArrayObject
     public string $PageDirectory;
     public string $RegionDirectory;
     public string $PartDirectory;
+    public string $StructDirectory;
     public string $ScriptDirectory;
     public string $StyleDirectory;
 
@@ -161,6 +162,7 @@ class Address extends ArrayObject
         $this->PageDirectory = $this->ViewDirectory . "page" . DIRECTORY_SEPARATOR;
         $this->RegionDirectory = $this->ViewDirectory . "region" . DIRECTORY_SEPARATOR;
         $this->PartDirectory = $this->ViewDirectory . "part" . DIRECTORY_SEPARATOR;
+        $this->StructDirectory = $this->AssetDirectory . "struct" . DIRECTORY_SEPARATOR;
         $this->ScriptDirectory = $this->AssetDirectory . "script" . DIRECTORY_SEPARATOR;
         $this->StyleDirectory = $this->AssetDirectory . "style" . DIRECTORY_SEPARATOR;
 

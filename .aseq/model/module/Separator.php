@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 /**
  * This module creates a visual separator element, optionally with a background image.
@@ -66,7 +66,7 @@ class Separator extends Module
         $marginLeftStyle = $this->MergeLeft ? "margin-left: calc({$this->Width}/-2);" : "";
 
 
-        return Html::Style("
+        return Struct::Style("
             .{$this->Name} {
                 {$backgroundImageStyle}
                 min-height: {$this->Height};

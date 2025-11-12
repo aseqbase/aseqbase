@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 /**
  * Automatic create route map through url or item iterations
  *@copyright All rights are reserved for MiMFa Development Group
@@ -62,7 +62,7 @@ class Route extends Module{
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 			.{$this->Name}{
 				width: 100%;
 				text-align: unset;
@@ -96,13 +96,13 @@ class Route extends Module{
 						elseif($i >= $e){ $i = $key; break;}
 					$this->Items[$i] = $this->ItemsLimitSign;
 				}
-				$route = Html::Link($this->RootLabel??array_keys($this->Items)[0], array_values($this->Items)[0]);
+				$route = Struct::Link($this->RootLabel??array_keys($this->Items)[0], array_values($this->Items)[0]);
 				if($this->AllowProperCase)
 					foreach (array_slice($this->Items,1, $this->AllowCurrent?null:(count($this->Items)-2)) as $key=>$value)
-						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link(ucwords($key), $value));
+						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Struct::Link(ucwords($key), $value));
 				else
 					foreach (array_slice($this->Items,1, $this->AllowCurrent?null:(count($this->Items)-2)) as $key=>$value)
-						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Html::Link($key, $value));
+						$route .= $this->SeparatorSymbol.($value === $this->ItemsLimitSign?$this->ItemsLimitSign:Struct::Link($key, $value));
 						yield $route;
 			}
         })()));

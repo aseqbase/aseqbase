@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 use MiMFa\Library\Style;
 
@@ -42,7 +42,7 @@ class QRCodeScanner extends Module{
 		parent::__construct();
 	}
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 			.{$this->Name}{
 			    position: relative;
 				background-color: black;
@@ -119,22 +119,22 @@ class QRCodeScanner extends Module{
 
 	public function Get(){
 		//RenderScript(null, \_::$Address->ScriptRoot . "Instascan.js");
-		return Html::Script(null,"https://rawgit.com/schmich/instascan-builds/master/instascan.min.js").
-		Html::OpenTag("video", $this->GetDefaultAttributes()).
+		return Struct::Script(null,"https://rawgit.com/schmich/instascan-builds/master/instascan.min.js").
+		Struct::OpenTag("video", $this->GetDefaultAttributes()).
 		$this->BrowserNotSupportError.
-		Html::CloseTag("video").
-		($this->AllowMask?Html::Division($this->GetContent(), ["class"=>"mask"]):"").
-		Html::Division(
-			($this->SwitchButtonLabel?Html::Button($this->SwitchButtonLabel, $this->SwitchScript(), ["class"=>"switchcamera be hide"]):"").
-				($this->ActiveButtonLabel?Html::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class"=>"activation be"]):"")
+		Struct::CloseTag("video").
+		($this->AllowMask?Struct::Division($this->GetContent(), ["class"=>"mask"]):"").
+		Struct::Division(
+			($this->SwitchButtonLabel?Struct::Button($this->SwitchButtonLabel, $this->SwitchScript(), ["class"=>"switchcamera be hide"]):"").
+				($this->ActiveButtonLabel?Struct::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class"=>"activation be"]):"")
 		, ["class"=>"controls"]).
-		Html::Division($this->GetTitle(["class"=>$this->TitleClass]).$this->GetDescription(["class"=>$this->DescriptionClass]), ["class"=>"message"]);
+		Struct::Division($this->GetTitle(["class"=>$this->TitleClass]).$this->GetDescription(["class"=>$this->DescriptionClass]), ["class"=>"message"]);
 	}
 	public function GetScript(){
-		return Html::Script("
+		return Struct::Script("
 		try{
-			if(!Instascan.Scanner) Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');
-			} catch{Html.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');}
+			if(!Instascan.Scanner) Struct.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');
+			} catch{Struct.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');}
 			{$this->Name} = new Instascan.Scanner({video: document.querySelector('.{$this->Name} video')});
 			{$this->Name}.addListener('scan', function (content) {
 				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);":"")."
@@ -216,14 +216,14 @@ class QRCodeScanner extends Module{
 
 	public function MessageScript($message = null){
 		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.remove('success');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Html.division(".Script::Convert(__($message)).");";
+		"document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(".Script::Convert(__($message)).");";
 	}
 	public function SuccessScript($message = null){
 		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.add('success');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Html.division(".Script::Convert(__($message)).", {CLASS:'be fore green'});";
+		"document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(".Script::Convert(__($message)).", {CLASS:'be fore green'});";
 	}
 	public function ErrorScript($message = null){
 		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('success');document.querySelector('.{$this->Name} .mask').classList.add('error');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Html.division(".Script::Convert(__($message)).", {CLASS:'be fore red'});";
+		"document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(".Script::Convert(__($message)).", {CLASS:'be fore red'});";
 	}
 }

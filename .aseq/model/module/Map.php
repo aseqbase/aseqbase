@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 use MiMFa\Library\Style;
 
@@ -267,12 +267,12 @@ class Map extends Module
 			self::$PluginsStyleSources[] = "https://unpkg.com/leaflet-measure/dist/leaflet-measure.css";
 			self::$PluginsScriptSources[] = "https://unpkg.com/leaflet-measure/dist/leaflet-measure.js";
 		}
-		$res = (self::$StyleSource ? Html::Style(null, self::$StyleSource) : "") .
-			(self::$ScriptSource ? Html::Script(null, self::$ScriptSource) : "") .
-			(self::$AlternativeStyleSource ? Html::Style(null, self::$AlternativeStyleSource) : "") .
-			(self::$AlternativeScriptSource ? Html::Script(null, self::$AlternativeScriptSource) : "") .
-			(self::$PluginsStyleSources ? join(PHP_EOL, loop(self::$PluginsStyleSources, fn($v) => Html::Style(null, $v))) : "") .
-			(self::$PluginsScriptSources ? join(PHP_EOL, loop(self::$PluginsScriptSources, fn($v) => Html::Script(null, $v))) : "");
+		$res = (self::$StyleSource ? Struct::Style(null, self::$StyleSource) : "") .
+			(self::$ScriptSource ? Struct::Script(null, self::$ScriptSource) : "") .
+			(self::$AlternativeStyleSource ? Struct::Style(null, self::$AlternativeStyleSource) : "") .
+			(self::$AlternativeScriptSource ? Struct::Script(null, self::$AlternativeScriptSource) : "") .
+			(self::$PluginsStyleSources ? join(PHP_EOL, loop(self::$PluginsStyleSources, fn($v) => Struct::Style(null, $v))) : "") .
+			(self::$PluginsScriptSources ? join(PHP_EOL, loop(self::$PluginsScriptSources, fn($v) => Struct::Script(null, $v))) : "");
 
 		self::$StyleSource = null;
 		self::$ScriptSource = null;
@@ -285,7 +285,7 @@ class Map extends Module
 	}
 
 	public function GetStyle() {
-		return parent::GetStyle() . Html::Style(
+		return parent::GetStyle() . Struct::Style(
 			($this->Fill ? "
 				*:has(.{$this->Name}){
 				    display: flex;
@@ -389,12 +389,12 @@ class Map extends Module
 
 	public function Get()
 	{
-		return Html::Division(parent::Get(), ["class" => "top"]) .
-			Html::Division(
-				Html::Division([
-					($this->MyLocationButton ? Html::Button($this->MyLocationButton, "{$this->Name}.locate({ setView: true, maxZoom: $this->Zoom })", ["class" => "my-location"]) : ""),
+		return Struct::Division(parent::Get(), ["class" => "top"]) .
+			Struct::Division(
+				Struct::Division([
+					($this->MyLocationButton ? Struct::Button($this->MyLocationButton, "{$this->Name}.locate({ setView: true, maxZoom: $this->Zoom })", ["class" => "my-location"]) : ""),
 				], attributes: ["class" => "control-box"]) .
-				Html::Division("", ["class" => "message"])
+				Struct::Division("", ["class" => "message"])
 				,
 				["class" => "bottom"]
 			);
@@ -402,7 +402,7 @@ class Map extends Module
 
 	public function GetScript()
 	{
-		return Html::Script(join(PHP_EOL, [
+		return Struct::Script(join(PHP_EOL, [
 			$this->InitializeScript(),
 			...$this->OtherScripts,
 			$this->Items_InitializeScript(),
@@ -663,7 +663,7 @@ class Map extends Module
 	public function DefineIconScript($name, $icon = "map-marker", $action=null, $attributes = [])
 	{
 		return "const $name = L.divIcon({
-			html: ".(Script::Convert(Html::Icon($icon, $action, ["class"=>"fa-2x"], $attributes))).",
+			html: ".(Script::Convert(Struct::Icon($icon, $action, ["class"=>"fa-2x"], $attributes))).",
 			className: 'custom-icon'
 		})";
 	}
@@ -828,14 +828,14 @@ class Map extends Module
 
 	public function MessageScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.message(" . Script::Convert(__($message)) . ");";
+		return "document.querySelector('.{$this->Name} .message').innerHTML = Struct.message(" . Script::Convert(__($message)) . ");";
 	}
 	public function SuccessScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.success(" . Script::Convert(__($message)) . ");";
+		return "document.querySelector('.{$this->Name} .message').innerHTML = Struct.success(" . Script::Convert(__($message)) . ");";
 	}
 	public function ErrorScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Html.error(" . Script::Convert(__($message)) . ");";
+		return "document.querySelector('.{$this->Name} .message').innerHTML = Struct.error(" . Script::Convert(__($message)) . ");";
 	}
 }

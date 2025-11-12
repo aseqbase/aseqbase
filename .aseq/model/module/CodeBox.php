@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Module;
 
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
 
 /**
@@ -22,7 +22,7 @@ class CodeBox extends Module
 
     public function GetStyle()
     {
-        return Html::Style("
+        return Struct::Style("
             .{$this->Name} {$this->ContentTag} {
                 background-Color: var(--back-color-special-input);
                 Color: var(--fore-color-special-input);
@@ -47,9 +47,9 @@ class CodeBox extends Module
                 $this->ControlBox = new Panel();
                 $this->ControlBox->Content = function () use ($id) {
                     if (isValid($this->CopyButtonLabel))
-                        return Html::Button($this->CopyButtonLabel, "copyFrom('$id');", ["class"=> "btn"]);
+                        return Struct::Button($this->CopyButtonLabel, "copyFrom('$id');", ["class"=> "btn"]);
                     if (isValid($this->PasteButtonLabel))
-                        return Html::Button($this->PasteButtonLabel, "pasteInto('$id');", ["class"=> "btn"]);
+                        return Struct::Button($this->PasteButtonLabel, "pasteInto('$id');", ["class"=> "btn"]);
                     return ""; // Return empty string if neither button is valid
                 };
             }

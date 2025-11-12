@@ -140,8 +140,8 @@ class Revise{
             if(is_null($newValues)) $newValues = receivePost(null);
             foreach ($newValues as $key=>$value)
                 if(isset($object->$key)) $object->$key = $value;
-            if(self::Store($object)) return Html::Success("Data updated successfully!");
-            else return Html::Error("Something went wrong!");
-        } catch(\Exception $ex) { return Html::Error($ex); }
+            if(self::Store($object)) return Struct::Success("Data updated successfully!");
+            else return Struct::Error("Something went wrong!");
+        } catch(\Exception $ex) { return Struct::Error($ex); }
     }
 }

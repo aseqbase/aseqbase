@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 module("Collection");
 /**
  * To show everythings as a slideshow
@@ -32,7 +32,7 @@ class Carousel extends Collection{
     }
 
 	public function GetStyle(){
-		return Html::Style("
+		return Struct::Style("
 		.{$this->Name} .carousel-inner{
 			height: 100%;
 			padding: 0px;
@@ -72,19 +72,19 @@ class Carousel extends Collection{
             foreach(Convert::ToItems($this->Items) as $item) {
 				$active = $i==$this->ActiveItem;
 				if(is_array($item) && (isValid($item, "Image" ) || isValid($item, "Image" )))
-					$inners[] = Html::Media( Html::Division(
-							Html::Heading3(get($item, "Title" ), get($item, "Path" ),["class"=>"title"]).
-							Html::Paragraph(getBetween($item, "Description", "Caption"),["class"=>"description"])
+					$inners[] = Struct::Media( Struct::Division(
+							Struct::Heading3(get($item, "Title" ), get($item, "Path" ),["class"=>"title"]).
+							Struct::Paragraph(getBetween($item, "Description", "Caption"),["class"=>"description"])
 						,["class"=>"carousel-caption"]), get($item, "Image")
 					,["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>"carousel-item".($active?" active":"")]);
-                else $inners[] = Html::Division($item, ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>"carousel-item".($active?" active":"")]);
-                $indicators[] = Html::Element($this->IndicatorLabel, "button", ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>$active?"active":""]);
+                else $inners[] = Struct::Division($item, ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>"carousel-item".($active?" active":"")]);
+                $indicators[] = Struct::Element($this->IndicatorLabel, "button", ["data-bs-target"=>$target, "data-bs-slide-to"=>$i, "class"=>$active?"active":""]);
 				$i++;
             }
-            yield Html::Division($indicators, ["class"=>"carousel-indicators"]);
-            yield Html::Division($inners, ["class"=>"carousel-inner"]);
-            yield Html::Element($this->PreviousLabel,"button", ["data-bs-target"=>$target, "data-bs-slide"=>"prev", "class"=>"carousel-control-prev"]);
-            yield Html::Element($this->NextLabel,"button", ["data-bs-target"=>$target, "data-bs-slide"=>"next", "class"=>"carousel-control-next"]);
+            yield Struct::Division($indicators, ["class"=>"carousel-indicators"]);
+            yield Struct::Division($inners, ["class"=>"carousel-inner"]);
+            yield Struct::Element($this->PreviousLabel,"button", ["data-bs-target"=>$target, "data-bs-slide"=>"prev", "class"=>"carousel-control-prev"]);
+            yield Struct::Element($this->NextLabel,"button", ["data-bs-target"=>$target, "data-bs-slide"=>"next", "class"=>"carousel-control-next"]);
         })()));
 	}
 }

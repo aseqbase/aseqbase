@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Template;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 /**
  * Pre-designed layouts that allow you to arrange content onto a web page to quickly create a well-designed website.
  *
@@ -102,9 +102,9 @@ class Template extends \Base{
 	public function RenderInitial(){
         region("initial");
         $title = $this->WindowTitle??[preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/","",\_::$Address->Direction)];
-        response(Html::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
-		response(Html::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
-        response(Html::Style("
+        response(Struct::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
+		response(Struct::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
+        response(Struct::Style("
         head, style, script, link, meta, title{
             display: none !important;
             visible: hidden !important;
@@ -284,7 +284,7 @@ class Template extends \Base{
         }
         "));
         foreach ($this as $key=>$value)
-        	if(is_string($key)) response(Html::Meta($key, Convert::ToString($value)));
+        	if(is_string($key)) response(Struct::Meta($key, Convert::ToString($value)));
             else response($value);
     }
 	public function RenderMain(){
@@ -294,7 +294,7 @@ class Template extends \Base{
     }
 	public function RenderContent(){
         foreach ($this->Children??[] as $key=>$value)
-        	if(is_string($key)) response(Html::Section($value, ["Id" =>$key]));
+        	if(is_string($key)) response(Struct::Section($value, ["Id" =>$key]));
             else response($value);
     }
 	public function RenderFooter(){

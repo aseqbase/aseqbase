@@ -1,5 +1,5 @@
 <?php
-\_::$Front->Finals[] = \MiMFa\Library\Html::Script('
+\_::$Front->Finals[] = \MiMFa\Library\Struct::Script('
 document.addEventListener("keydown", function(event) {
     const elem = event.target;
     if (elem.matches("input, textarea")) {

@@ -10,7 +10,7 @@ use MiMFa\Library\Convert;
 use MiMFa\Library\Cryptograph;
 use MiMFa\Library\SpecialCrypt;
 use MiMFa\Library\DataTable;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 class UserBase
 {
@@ -138,6 +138,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public $GroupId = null;
 	protected $Access = 0;
 	protected $Accesses = array();
+	public $Authorize;
 
 	public $Signature = null;
 	public $Image = null;
@@ -152,6 +153,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 	public function __construct()
 	{
+		$this->Authorize = fn()=>load($this->InHandlerPath);
 		$this->DataTable = table("User");
 		$this->GroupDataTable = table("UserGroup");
 		$this->Cryptograph = new SpecialCrypt();
@@ -536,8 +538,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->TemporaryPassword = takeValid($person, "Password");
 		$path = \_::$Address->Host . ($handlerPath ?? $this->HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
 		$dic = array();
-		$dic['$HYPERLINK'] = Html::Link($linkAnchor, $path);
-		$dic['$LINK'] = Html::Link($path, $path);
+		$dic['$HYPERLINK'] = Struct::Link($linkAnchor, $path);
+		$dic['$LINK'] = Struct::Link($path, $path);
 		$dic['$PATH'] = $path;
 		$dic['$SIGNATURE'] = $this->TemporarySignature;
 		$subject = Convert::FromDynamicString($subject ?? "", $dic, true);

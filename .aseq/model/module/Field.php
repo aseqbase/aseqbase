@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class Field extends Module{
 	public $Tag = "div";
 	public $Class = "field";
@@ -122,7 +122,7 @@ class Field extends Module{
 		return "";
     }
 	public function GetBothStyle(){
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name}{
 				".Style::DoProperty("min-width",$this->MinWidth)."
 				".Style::DoProperty("min-height", $this->MinHeight)."
@@ -176,7 +176,7 @@ class Field extends Module{
 		");
 	}
 	public function GetHorizontalStyle(){
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name}{
 				".Style::DoProperty("min-width",$this->MinWidth)."
 				".Style::DoProperty("min-height", $this->MinHeight)."
@@ -242,7 +242,7 @@ class Field extends Module{
 		");
 	}
 	public function GetVerticalStyle(){
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name}{
 				".Style::DoProperty("min-width",$this->MinWidth)."
 				".Style::DoProperty("min-height", $this->MinHeight)."
@@ -310,7 +310,7 @@ class Field extends Module{
 
 	public function Get(){
 		return Convert::ToString(function(){
-			$type = Html::InputDetector($this->Type, $this->Value);
+			$type = Struct::InputDetector($this->Type, $this->Value);
             $placeHolder = __($this->PlaceHolder??$this->Title);
             $attributes = [
 				["class"=>"input".($this->Lock?" disabled":"")],
@@ -320,9 +320,9 @@ class Field extends Module{
 			];
 			$startTag = "";
             $id = pop($attributes, "id")??Convert::ToID($this->Key);
-            if(isValid($this->Title)) $startTag .= Html::Label($this->Title, $id, ["class"=>"title" ]);
+            if(isValid($this->Title)) $startTag .= Struct::Label($this->Title, $id, ["class"=>"title" ]);
 			$endTag = "";
-            if(isValid($this->Description)) $endTag .= Html::Label($this->Description, $id, ["class"=>"description" ]);
+            if(isValid($this->Description)) $endTag .= Struct::Label($this->Description, $id, ["class"=>"description" ]);
 			yield $this->GetContent();
 			switch ($type) {
                 case 'doc':
@@ -369,26 +369,26 @@ class Field extends Module{
                             case 'doc':
                             case 'document':
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableDocumentFormats)."'";
-                                $others = is_null($p)?"": Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"": Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "image":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableImageFormats)."'";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "audio":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableAudioFormats)."'";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             case "video":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableVideoFormats)."'";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             default:
                                 $accept = "";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-					yield Html::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput"], $accept, $attributes)
+					yield Struct::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput"], $accept, $attributes)
 						.$others;
 					yield $endTag;
                     break;
@@ -436,31 +436,31 @@ class Field extends Module{
                             case 'docs':
                             case 'documents':
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableDocumentFormats)."'";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "images":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableImageFormats)."'";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "audios":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableAudioFormats)."*'";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             case "videos":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableVideoFormats)."'";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             default:
                                 $accept = "";
-                                $others = is_null($p)?"":Html::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-					yield Html::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput", "multiple" => null], $accept, $attributes)
+					yield Struct::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput", "multiple" => null], $accept, $attributes)
 					.$others;
 					yield $endTag;
                     break;
                 default:
-					yield Html::Field(
+					yield Struct::Field(
 						type: $this->Type,
 						key: $this->Key,
 						value: $this->Value,

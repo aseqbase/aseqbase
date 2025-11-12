@@ -220,65 +220,65 @@ class DataBase {
 		return isEmpty($result) ? $defaultValue : $result;
 	}
 
-	public function Execute($query, $params = [], &$isDone = null)
+	public function Execute($query, $params = [], &$isDone = null, &$connection = null)
 	{
-		$Connection = $this->Connection();
-		$stmt = $Connection->prepare($query);
+		$connection = $this->Connection();
+		$stmt = $connection->prepare($query);
 		// foreach ($this->ParametersNormalization($params) as $key => $value) 
 		// 	 $stmt->bindValue($key, $value, \PDO::PARAM_STR);
 		$isDone = $stmt->execute($this->ParametersNormalization($params));
 		$this->Reset();
 		return $stmt;
 	}
-	public function TryExecute($query, $params = [], &$isDone = null)
+	public function TryExecute($query, $params = [], &$isDone = null, &$connection = null)
 	{
 		try {
-			return $this->Execute($query, $params, $isDone);
+			return $this->Execute($query, $params, $isDone,$connection);
 		} catch (\Exception $ex) {
 			$this->Error($ex, $query, $params);
 			return null;
 		} finally {$this->Reset();}
 	}
 
-	public function TransactionExecute($queries, $params = [])
+	public function TransactionExecute($queries, $params = [], &$connection = null)
 	{
-		$Connection = $this->Connection();
+		$connection = $this->Connection();
 		try {
 			if (is_string($queries))
 				$queries = Convert::ToSequence($queries);
-			$Connection->beginTransaction();
+			$connection->beginTransaction();
 			if (is_array(first($params))) {
 				if (($qc = count($queries)) >= ($pc = count($params))) {
 					$i = 0;
 					foreach ($queries as $query) {
-						$stmt = $Connection->prepare($query);
+						$stmt = $connection->prepare($query);
 						$stmt->execute($this->ParametersNormalization($params[$i++ % $pc]));
 					}
 				} else {
 					$i = 0;
 					foreach ($params as $param) {
-						$stmt = $Connection->prepare($queries[$i++ % $qc]);
+						$stmt = $connection->prepare($queries[$i++ % $qc]);
 						$stmt->execute($this->ParametersNormalization($param));
 					}
 				}
 			} else
 				foreach ($queries as $query) {
-					$stmt = $Connection->prepare($query);
+					$stmt = $connection->prepare($query);
 					$stmt->execute($this->ParametersNormalization($params));
 				}
-			return $Connection->commit();
+			return $connection->commit();
 		} catch (\Exception $ex) {
-			if ($Connection->inTransaction())
-				$Connection->rollBack();
+			if ($connection->inTransaction())
+				$connection->rollBack();
 			return false;
 		} finally{
 			$this->Reset();
 		}
 	}
-	public function TryTransaction($queries, $params = [], $defaultValue = false)
+	public function TryTransaction($queries, $params = [], $defaultValue = false, &$connection = null)
 	{
 		try {
-			return $this->ReturnValue($this->TransactionExecute($queries, $params), $defaultValue);
+			return $this->ReturnValue($this->TransactionExecute($queries, $params,$connection), $defaultValue);
 		} catch (\Exception $ex) {
 			$this->Error($ex, $this->TransactionQuery($queries), $params);
 			return $defaultValue;
@@ -291,7 +291,7 @@ class DataBase {
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 		return $stmt->fetchAll();
 	}
-	public function TryFetchRows($query, $params = [], $defaultValue = array())
+	public function TryFetchRows($query, $params = [], $defaultValue = [])
 	{
 		try {
 			return $this->ReturnArray($this->FetchRowsExecute($query, $params), $defaultValue);
@@ -330,6 +330,20 @@ class DataBase {
 	{
 		try {
 			return $this->ReturnArray($this->FetchColumnExecute($query, $params), $defaultValue);
+		} catch (\Exception $ex) {
+			$this->Error($ex, $query, $params);
+			return $defaultValue;
+		} finally {$this->Reset();}
+	}
+
+	public function FetchRowIdExecute($query, $params = [])
+	{
+		$this->Execute($query, $params, connection:$connection);
+		return $connection->lastInsertId();
+	}
+	public function TryFetchRowId($query, $params = [], $defaultValue = null) {
+		try {
+			return $this->ReturnValue($this->FetchRowIdExecute($query, $params), $defaultValue);
 		} catch (\Exception $ex) {
 			$this->Error($ex, $query, $params);
 			return $defaultValue;
@@ -473,7 +487,7 @@ COMMIT;";
 	{
 		if (is_array(first($params)))
 			return $this->TryTransaction($this->InsertQuery($tableName, $params), $params, $defaultValue);
-		return $this->TryFetchChanges($this->InsertQuery($tableName, $params), $params, $defaultValue);
+		return $this->TryFetchRowId($this->InsertQuery($tableName, $params), $params, $defaultValue);
 	}
 	public function InsertQuery($tableName, &$params)
 	{
@@ -481,9 +495,9 @@ COMMIT;";
 			return loop($params, function($p,$k) use($tableName, &$params) {
 				return self::InsertQuery($tableName, $params[$k]);
 			});
-		$vals = array();
-		$sets = array();
-		$args = array();
+		$vals = [];
+		$sets = [];
+		$args = [];
 		foreach ($this->ParametersNormalization($params) as $key => $value) {
 			$k = trim($key, ":`[]");
 			$sets[] = "$this->StartWrap$k$this->EndWrap";
@@ -506,9 +520,9 @@ COMMIT;";
 			return loop($params, function($p,$k) use($tableName, &$params) {
 				return self::ReplaceQuery($tableName, $params[$k]);
 			});
-		$vals = array();
-		$sets = array();
-		$args = array();
+		$vals = [];
+		$sets = [];
+		$args = [];
 		if (is_array(first($params))) {
 			$vs = [];
 			$i = 0;
@@ -557,8 +571,8 @@ COMMIT;";
 			return loop($params, function($p,$k) use($tableName, $condition, &$params) {
 				return self::UpdateQuery($tableName, $condition, $params[$k]);
 			});
-		$sets = array();
-		$args = array();
+		$sets = [];
+		$args = [];
 		$condition = $this->ConditionNormalization($condition) . " ";
 		foreach ($this->ParametersNormalization($params) as $key => $value) {
 			$k = trim($key, ":`[]");
@@ -593,13 +607,13 @@ COMMIT;";
 			case 0:
 				break;
 			case 1:
-				echo Html::Error($ex->getMessage());
+				echo Struct::Error($ex->getMessage());
 				break;
 			case 2:
-				echo $query . Html::Error($ex);
+				echo $query . Struct::Error($ex);
 				break;
 			case 3:
-				echo $query, Html::Error($ex), "PARAMS{" . ($params ? count($params) : 0) . "}: ", Convert::ToString($params, arrayFormat: "{{0}}");
+				echo $query, Struct::Error($ex), "PARAMS{" . ($params ? count($params) : 0) . "}: ", Convert::ToString($params, arrayFormat: "{{0}}");
 				break;
 			default:
 				throw $ex;

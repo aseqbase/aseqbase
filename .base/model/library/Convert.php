@@ -95,7 +95,7 @@ class Convert
 
     public static function ToHtml($value, ...$args)
     {
-        return Html::Convert($value, ...$args);
+        return Struct::Convert($value, ...$args);
     }
     public static function ToStyle($value, ...$args)
     {
@@ -553,15 +553,15 @@ class Convert
         if ($addDefaultKeys) {
             $email = \_::$Info->ReceiverEmail;
             if (!isset($additionalKeys['$HOSTEMAILLINK']))
-                $additionalKeys['$HOSTEMAILLINK'] = Html::Link($email, "mailto:$email");
+                $additionalKeys['$HOSTEMAILLINK'] = Struct::Link($email, "mailto:$email");
             if (!isset($additionalKeys['$HOSTEMAIL']))
                 $additionalKeys['$HOSTEMAIL'] = $email;
             if (!isset($additionalKeys['$HOSTLINK']))
-                $additionalKeys['$HOSTLINK'] = Html::Link(\_::$Address->Site, \_::$Address->Host);
+                $additionalKeys['$HOSTLINK'] = Struct::Link(\_::$Address->Site, \_::$Address->Host);
             if (!isset($additionalKeys['$HOST']))
                 $additionalKeys['$HOST'] = \_::$Address->Host;
             if (!isset($additionalKeys['$URLLINK']))
-                $additionalKeys['$URLLINK'] = Html::Link(\_::$Address->Url, \_::$Address->Url);
+                $additionalKeys['$URLLINK'] = Struct::Link(\_::$Address->Url, \_::$Address->Url);
             if (!isset($additionalKeys['$URL']))
                 $additionalKeys['$URL'] = \_::$Address->Url;
             if (!isValid($additionalKeys, '$SIGNATURE'))
@@ -570,7 +570,7 @@ class Convert
                 $additionalKeys['$NAME'] = \_::$User->TemporaryName;
             $email = \_::$User->TemporaryEmail;
             if (!isset($additionalKeys['$EMAILLINK']))
-                $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
+                $additionalKeys['$EMAILLINK'] = Struct::Link($email, "mailto:$email");
             if (!isset($additionalKeys['$EMAIL']))
                 $additionalKeys['$EMAIL'] = $email;
             if (!isset($additionalKeys['$IMAGE']))
@@ -581,11 +581,11 @@ class Convert
                 $additionalKeys['$SIGNATURE'] = get($person, "Signature") ?? \_::$User->TemporarySignature;
                 $additionalKeys['$NAME'] = get($person, "Name") ?? \_::$User->TemporaryName;
                 $email = get($person, "Email") ?? \_::$User->TemporaryEmail;
-                $additionalKeys['$EMAILLINK'] = Html::Link($email, "mailto:$email");
+                $additionalKeys['$EMAILLINK'] = Struct::Link($email, "mailto:$email");
                 $additionalKeys['$EMAIL'] = $email;
                 $additionalKeys['$IMAGE'] = get($person, "Image") ?? \_::$User->TemporaryImage;
                 if (!isset($additionalKeys['$IMAGETAG']))
-                    $additionalKeys['$IMAGETAG'] = Html::Image($additionalKeys['$SIGNATURE'], get($person, "Image"));
+                    $additionalKeys['$IMAGETAG'] = Struct::Image($additionalKeys['$SIGNATURE'], get($person, "Image"));
                 if (!isset($additionalKeys['$ADDRESS']))
                     $additionalKeys['$ADDRESS'] = get($person, "Address");
                 if (!isset($additionalKeys['$CONTACT']))

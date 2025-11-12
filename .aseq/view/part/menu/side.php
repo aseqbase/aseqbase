@@ -1,5 +1,5 @@
 <?php
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 module("SideMenu");
 $module = new MiMFa\Module\SideMenu();
@@ -19,7 +19,7 @@ if (\_::$Back->AllowTranslate) {
 }
 pod($module, $data);
 $module->Render();
-response(Html::Script("
+response(Struct::Script("
 	function viewSideMenu(show){
 		{$module->Name}_ViewSideMenu(show);
 	}

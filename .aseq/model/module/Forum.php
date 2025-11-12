@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use DateTime;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 module("Content");
 /**
@@ -73,14 +73,14 @@ class Forum extends Content
                     [":rid" => get($this->Item, 'Id')]
                );
                if (count($cc->Items) > 0)
-                    return Html::$BreakLine . $cc->ToString();
+                    return Struct::$BreakLine . $cc->ToString();
           }
           return null;
      }
 
      public function GetMessage($subject, $message, $icon = "clock")
      {
-          return Html::Division(Html::Image(null, $icon) . Html::Heading3($subject) . Html::Result($message), ["class" => "be center"]);
+          return Struct::Division(Struct::Image(null, $icon) . Struct::Heading3($subject) . Struct::Result($message), ["class" => "be center"]);
      }
 
 }

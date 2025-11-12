@@ -1,7 +1,7 @@
 <?php
 
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
 
 module("PrePage");
@@ -16,7 +16,7 @@ $dps = \_::$Info->FullDescription?Convert::ToParagraphs(__(\_::$Info->FullDescri
 $opsc = count($ops);
 $dpsc = count($dps);
 response(
-	Html::Style("
+	Struct::Style("
 		.{$module->Name} .content{
 			text-align: center;
 		}
@@ -33,16 +33,16 @@ response(
 			line-height: 2em;
 		}
 	").
-	Html::Page(
-		Html::Container(
+	Struct::Page(
+		Struct::Container(
 			[
 				[$module->ToString()],
-				[Html::Paragraph(\_::$Info->Description)],
+				[Struct::Paragraph(\_::$Info->Description)],
 				loop($opsc, function($v,$k,$i) use($ops,$opsc) {return ($i+2)%2==0? array_slice($ops, $i, min(2, $opsc-$i)):null;}, false),
 				loop($dpsc, function($v,$k,$i) use($dps,$dpsc) {return ($i+2)%2==0? array_slice($dps, $i, min(2, $dpsc-$i)):null;}, false),
 				(\_::$Info->FullOwnerDescription?Convert::ToParagraphs(__(\_::$Info->FullOwnerDescription)):[]),
-				[Html::$BreakLine],
-				[Html::Paragraph(__(\_::$Info->FullSlogan), null,["class"=>"be center"])]
+				[Struct::$BreakLine],
+				[Struct::Paragraph(__(\_::$Info->FullSlogan), null,["class"=>"be center"])]
 			]
 		)
 	)

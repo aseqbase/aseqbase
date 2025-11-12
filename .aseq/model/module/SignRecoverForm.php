@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 module("Form");
 class SignRecoverForm extends Form{
@@ -34,24 +34,24 @@ class SignRecoverForm extends Form{
 
 	public function GetFields(){
 		if(!is_null($rrk = getReceived(\_::$User->RecoveryTokenKey))){
-			yield Html::HiddenInput(\_::$User->RecoveryTokenKey, $rrk);
-			yield Html::Rack(
-				Html::LargeSlot(
-					Html::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
-					Html::SecretInput("Password" , ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"Password"])
+			yield Struct::HiddenInput(\_::$User->RecoveryTokenKey, $rrk);
+			yield Struct::Rack(
+				Struct::LargeSlot(
+					Struct::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
+					Struct::SecretInput("Password" , ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"Password"])
 				, ["class"=>"field"])
 			);
-			yield Html::Rack(
-				Html::LargeSlot(
-					Html::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=>"prepend"]).
-					Html::SecretInput("PasswordConfirmation", ["placeholder"=> $this->PasswordConfirmationPlaceHolder, "autocomplete"=>"Password"])
+			yield Struct::Rack(
+				Struct::LargeSlot(
+					Struct::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=>"prepend"]).
+					Struct::SecretInput("PasswordConfirmation", ["placeholder"=> $this->PasswordConfirmationPlaceHolder, "autocomplete"=>"Password"])
 				, ["class"=>"field"])
 			);
         }else{
-			yield Html::Rack(
-				Html::LargeSlot(
-					Html::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
-					Html::TextInput("Signature" , ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
+			yield Struct::Rack(
+				Struct::LargeSlot(
+					Struct::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
+					Struct::TextInput("Signature" , ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
 				, ["class"=>"field"])
 			);
 		}
@@ -60,7 +60,7 @@ class SignRecoverForm extends Form{
 
 	public function GetScript()
 	{
-		return Html::Script("
+		return Struct::Script("
 			$(function () {
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
 					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
@@ -71,16 +71,16 @@ class SignRecoverForm extends Form{
                 $('.{$this->Name} form').submit(function(e) {
 					let error = null;
 					if (!$('.{$this->Name} form [name=Password]')?.val().match({$this->PasswordPattern})) 
-						error = Html.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
+						error = Struct.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
 					else if ($('.{$this->Name} form [name=PasswordConfirmation]')?.val() != $('.{$this->Name} form [name=Password]')?.val()) 
-						error = Html.error('New password and confirm password does not match!');
+						error = Struct.error('New password and confirm password does not match!');
 					if(error) {
 						$('.{$this->Name} form .result').remove();
 						$('.{$this->Name} form').append(error);
 						e.preventDefault();
 						return false;
 					}
-					" . ($this->UseAjax ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
+					" . ($this->Interaction ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
 					return true;
                 });
 			});
@@ -89,11 +89,11 @@ class SignRecoverForm extends Form{
 	public function GetFooter(){
 		if(\_::$User->GetAccess(\_::$User->UserAccess)) return parent::GetFooter();
         else return parent::GetFooter()
-			.Html::LargeSlot(
-				Html::Link($this->SignInLabel, $this->SignInPath??\_::$User->InHandlerPath)
+			.Struct::LargeSlot(
+				Struct::Link($this->SignInLabel, $this->SignInPath??\_::$User->InHandlerPath)
 			, ["class"=>"col-lg-12"])
-			.Html::LargeSlot(
-				Html::Link($this->SignUpLabel, $this->SignUpPath??\_::$User->UpHandlerPath)
+			.Struct::LargeSlot(
+				Struct::Link($this->SignUpLabel, $this->SignUpPath??\_::$User->UpHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 

@@ -1,7 +1,9 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
+use MiMFa\Library\Script;
+
 module("Collection");
 /**
  * To show comments in its collection
@@ -21,6 +23,7 @@ class CommentCollection extends Collection
      * @var string|null
      */
     public $Relation = null;
+    public $Action = null;
 
     /**
      * The Width of thumbnail preshow
@@ -160,7 +163,7 @@ class CommentCollection extends Collection
 
     public function GetStyle()
     {
-        return Html::Style("
+        return Struct::Style("
 			.{$this->Name} div.item {
 				height: fit-attach;
                 width: -webkit-fill-available;
@@ -317,7 +320,7 @@ class CommentCollection extends Collection
                 $p_groupid = get($item, "GroupId");
                 $p_status = get($item, "Status");
                 if (
-                    isValid($item, "ReplyId") ||
+                    isValid($item, "RootId") ||
                     (
                         (
                             !$p_status
@@ -357,9 +360,9 @@ class CommentCollection extends Collection
                 if ($p_replyes) {
                     $p_replyes = [];
                     foreach (Convert::ToItems($this->Items) as $k1 => $item1)
-                        if ($item1["ReplyId"] == $p_id) {
+                        if ($item1["RootId"] == $p_id) {
                             $p_replyes[] = $item1;
-                            $p_replyes[count($p_replyes) - 1]["ReplyId"] = null;
+                            $p_replyes[count($p_replyes) - 1]["RootId"] = null;
                         }
                 } else
                     $p_replyes = [];
@@ -389,7 +392,7 @@ class CommentCollection extends Collection
                         doValid(
                             function ($val) use (&$p_meta) {
                                 if (isValid($val))
-                                    $p_meta .= Html::Span(Convert::ToShownDateTimeString($val), ["class" => 'createtime']);
+                                    $p_meta .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'createtime']);
                             },
                             $item,
                             'CreateTime'
@@ -398,7 +401,7 @@ class CommentCollection extends Collection
                         doValid(
                             function ($val) use (&$p_meta) {
                                 if (isValid($val))
-                                    $p_meta .= Html::Span(Convert::ToShownDateTimeString($val), ["class" => 'updatetime']);
+                                    $p_meta .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'updatetime']);
                             },
                             $item,
                             'UpdateTime'
@@ -422,20 +425,20 @@ class CommentCollection extends Collection
                     yield "<div class='row'>";
                 yield "<div id='$uid' class='item col-lg " . ($p_status ? "" : "deactive") . "'" . ($this->Animation ? " data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed) . "' data-aos='{$this->Animation}'" : "") . ">";
                 if ($p_showreplybutton || $p_showeditbutton || $p_showdeletebutton)
-                    yield Html::Division(
-                        ($p_showdeletebutton ? Html::Button(
+                    yield Struct::Division(
+                        ($p_showdeletebutton ? Struct::Button(
                             $p_deletebuttontext,
                             "{$this->Name}_Delete(this, '.{$this->Name} #{$uid}', $p_id);"
                         ) : null) .
-                        ($p_showeditbutton ? Html::Button(
+                        ($p_showeditbutton ? Struct::Button(
                             $p_editbuttontext,
                             "{$this->Name}_Edit(this, '.{$this->Name} #{$uid}', $p_id);",
                         ) : null) .
-                        ($adminaccess ? Html::Button(
+                        ($adminaccess ? Struct::Button(
                             $p_status ? $this->WaitingLabel : $this->PublishedLabel,
                             "{$this->Name}_Status(this, '.{$this->Name} #{$uid}', $p_id, $p_status?false:true);",
                         ) : null) .
-                        ($p_showreplybutton ? Html::Button(
+                        ($p_showreplybutton ? Struct::Button(
                             $p_replybuttontext,
                             "{$this->Name}_Reply(this, '.{$this->Name} #{$uid}', $p_id);",
                         ) : null),
@@ -445,37 +448,37 @@ class CommentCollection extends Collection
                     yield "<h2 class='subject'>" . $p_subject . "</h2>";
                 yield "<div class='message'>";
                 $author = $this->AllowAuthorImage || $this->AllowAuthor ? table("User")->SelectRow("Signature, Name, Image", "Email=:Email", [":Email" => get($item, 'Contact')]) : [];
-                yield Html::OpenTag("div", ["class" => "author"]);
+                yield Struct::OpenTag("div", ["class" => "author"]);
                 if ($this->AllowAuthorImage) {
                     $aimg = get($author, "Image");
                     if (!isEmpty($author))
-                        yield Html::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \_::$User->DefaultImagePath, ["class" => "author-image"]);
+                        yield Struct::Media($aimg ? " " : strtoupper(substr(getValid($author, "Name", $p_name), 0, 1)), $aimg ?? \_::$User->DefaultImagePath, ["class" => "author-image"]);
                 }
-                yield Html::OpenTag("div", ["class" => "author-details"]);
+                yield Struct::OpenTag("div", ["class" => "author-details"]);
                 if ($this->AllowAuthor) {
                     $au = getValid($author, "Name", $p_name);
                     if (isEmpty($author))
-                        yield Html::Span($au, null, ["class" => "author-name"]);
+                        yield Struct::Span($au, null, ["class" => "author-name"]);
                     else
-                        yield Html::Link($au, \_::$Address->UserRoot . get($author, "Signature"), ["class" => "author-name"]);
+                        yield Struct::Link($au, \_::$Address->UserRoot . get($author, "Signature"), ["class" => "author-name"]);
                 }
                 if ($p_showmeta && isValid($p_meta))
                     yield "<div class='metadata'>$p_meta</div>";
-                yield Html::CloseTag();
-                yield Html::CloseTag();
+                yield Struct::CloseTag();
+                yield Struct::CloseTag();
                 if ($p_showexcerpt)
                     yield "<div class='excerpt view parent-hover-hide'>$p_excerpt</div>";
                 if ($p_showmessage && !isEmpty($p_message))
-                    yield "<div class='full view parent-hover-show'>" . __(Html::Convert($p_message), referring: $p_referring) . "</div>";
+                    yield "<div class='full view parent-hover-show'>" . __(Struct::Convert($p_message), referring: $p_referring) . "</div>";
                 if ($p_showimage && isValid($p_image))
                     yield "<div class='col-lg-3'>" . $img->ToString() . "</div>";
                 if ($p_showattach && isValid($p_attach))
-                    yield "<div class='attach'>" . Html::Convert($p_attach) . "</div>";
+                    yield "<div class='attach'>" . Struct::Convert($p_attach) . "</div>";
                 yield "</div>";
                 if (!isEmpty($p_replyes))
-                    yield Html::Division(Html::Division("", ["class" => "reply-box"]) . $this->Get($p_replyes), ["class" => "replies"]);
+                    yield Struct::Division(Struct::Division("", ["class" => "reply-box"]) . $this->Get($p_replyes), ["class" => "replies"]);
                 else
-                    yield Html::Division("", ["class" => "reply-box"]);
+                    yield Struct::Division("", ["class" => "reply-box"]);
                 yield "</div>";
                 if (++$i % $this->MaximumColumns === 0)
                     yield "</div>";
@@ -486,7 +489,8 @@ class CommentCollection extends Collection
     }
     public function GetScript()
     {
-        return Html::Script(
+        $action = $this->Action?Script::Convert($this->Action):"null";
+        return Struct::Script(
             "
             function {$this->Name}_Edit(btn, selector, forid) {
                 sbjbox = document.querySelector(selector+'>.subject');
@@ -501,7 +505,7 @@ class CommentCollection extends Collection
                     data = { Id:forid, Content:msgbox.innerText };
                     if(sbjbox) data.Subject = sbjbox.innerText;
                     if(attbox) data.Attach = attbox.innerText;
-                    sendPut(null, data, selector, function (data, err) {
+                    sendPut($action, data, selector, function (data, err) {
                         try{document.querySelector(selector .result).remove();}catch{}
                         $(selector).prepend(data);
                         if(!err){
@@ -525,7 +529,7 @@ class CommentCollection extends Collection
             function {$this->Name}_Delete(btn, selector, forid) {
                 if(confirm(`" . __("Are you sure to delete this command?") . "`))
                     sendDelete(
-                        null,
+                        $action,
                         {Id:forid},
                         selector,
                         (data, err)=>{
@@ -537,7 +541,7 @@ class CommentCollection extends Collection
             {$this->Name}_status = null;
             function {$this->Name}_Status(btn, selector, forid, status) {
                     sendPatch(
-                        null,
+                        $action,
                         {Id:forid, Status:{$this->Name}_status = {$this->Name}_status===0 || status?1:0},
                         selector,
                         (data, err)=>{
@@ -558,8 +562,8 @@ class CommentCollection extends Collection
                 rbox = document.querySelector(selector + ' .reply-box');
                 if(!rbox.querySelector('form')) {
                     sendPatch(
-                        null,
-                        {Reply:forid},
+                        $action,
+                        {Root:forid},
                         selector,
                         (data, err)=>{
                             $(rbox).html(data);
@@ -584,4 +588,3 @@ class CommentCollection extends Collection
         );
     }
 }
-?>

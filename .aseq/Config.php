@@ -17,4 +17,3 @@ class Config extends AseqConfig {
 	 */
 	public $ReportError = E_ALL;
 }
-?>

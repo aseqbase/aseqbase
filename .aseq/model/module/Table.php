@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 
 use DateTime;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
 use MiMFa\Library\Local;
@@ -21,7 +21,7 @@ class Table extends Module
 
     public $Modal = null;
     public Navigation|null $NavigationBar = null;
-    public $TopNavigation = true;
+    public $TopNavigation = false;
     public $BottomNavigation = true;
 
     /**
@@ -40,6 +40,12 @@ class Table extends Module
      * @var null|string
      */
     public $KeyColumn = "Id";
+    /**
+     * The database table key column main name, to get items automatically
+     * leave null to set by $KeyColumn automatically
+     * @var null|string
+     */
+    public $KeyColumnName = "Id";
     /**
      * The column keys in data to use for row labels
      * @var array Auto detection
@@ -103,6 +109,12 @@ class Table extends Module
      */
     public $RowsNumbersBegin = null;
 
+    /**
+     * To show only cell types on the forms
+     * @var 
+     */
+    public $FormFilter = false;
+    
     /**
      * An array of all key=>type columns in data to use for each cell type
      * @var array Auto detection
@@ -267,7 +279,7 @@ class Table extends Module
 
     public function GetStyle()
     {
-        return Html::Style("
+        return Struct::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
 			backgroound-color: var(--back-color-input);
 			color: var(--fore-color-input);
@@ -439,8 +451,8 @@ class Table extends Module
         $uck = "";
         $rowCount = 0;
         $colCount = $ick ? count($icks) : 0;
-        if ($isu) {
-            $uck = Html::Division(\_::$User->GetAccess($this->AddAccess) ? Html::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip"=>"Add another Item"]) : Html::Image(null, "tasks"));
+        if ($isc) {
+            $uck = Struct::Division(\_::$User->GetAccess($this->AddAccess) ? Struct::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip"=>"Add another Item"]) : Struct::Image(null, "tasks"));
             if ($ick)
                 array_unshift($icks, $uck);
         }
@@ -451,7 +463,7 @@ class Table extends Module
         $daccess = $isu && !is_null($this->DuplicateAccess) && \_::$User->GetAccess($this->DuplicateAccess);
         $maccess = $isu && !is_null($this->ModifyAccess) && \_::$User->GetAccess($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->GetAccess($this->RemoveAccess);
-        $addbutton = fn($text="Add your first item") => Html::Center(Html::Button(__($text) . Html::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
+        $addbutton = fn($text="Add your first item") => Struct::Center(Struct::Button(__($text) . Struct::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
         if (is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey => $row)
@@ -469,13 +481,13 @@ class Table extends Module
                             $row = is_null($rowid) ?
                                 [$uck => ($hrn ? $rn++ : ""), ...$row] :
                                 [
-                                    $uck => Html::Division([
-                                        ...[($hrn ? Html::Span($rn++, null, ['class' => 'number']) : "")],
+                                    $uck => Struct::Division([
+                                        ...[($hrn ? Struct::Span($rn++, null, ['class' => 'number']) : "")],
                                         ...Convert::ToSequence(Convert::By($this->PrependControlsCreator, $rowid, $row)??[]),
-                                        ...($vaccess ? [Html::Icon("eye", "{$this->Modal->Name}_View(`$rowid`);", ["class" => "table-item-view", "tooltip"=>"Show"])] : []),
-                                        ...($maccess ? [Html::Icon("edit", "{$this->Modal->Name}_Modify(`$rowid`);", ["class" => "table-item-modify", "tooltip"=>"Modify"])] : []),
-                                        ...($daccess ? [Html::Icon("copy", "{$this->Modal->Name}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate", "tooltip"=>"Duplicate Copy"])] : []),
-                                        ...($raccess ? [Html::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete", "tooltip"=>"Remove"])] : []),
+                                        ...($vaccess ? [Struct::Icon("eye", "{$this->Modal->Name}_View(`$rowid`);", ["class" => "table-item-view", "tooltip"=>"Show"])] : []),
+                                        ...($maccess ? [Struct::Icon("edit", "{$this->Modal->Name}_Modify(`$rowid`);", ["class" => "table-item-modify", "tooltip"=>"Modify"])] : []),
+                                        ...($daccess ? [Struct::Icon("copy", "{$this->Modal->Name}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate", "tooltip"=>"Duplicate Copy"])] : []),
+                                        ...($raccess ? [Struct::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete", "tooltip"=>"Remove"])] : []),
                                         ...Convert::ToSequence(Convert::By($this->AppendControlsCreator,$rowid, $row)??[])
                                     ]),
                                     ...$row
@@ -561,16 +573,16 @@ class Table extends Module
                 if (is_bool($this->Footer)) {
                     $cells[] = "<tfoot><tr>";
                     if (0 < $colCount)
-                        $cells[] = Html::Cell("", $isc || $hrn ? ["Type"=>"head", "class" => "view invisible"] : ["Type"=>"head"]);
+                        $cells[] = Struct::Cell("", $isc || $hrn ? ["Type"=>"head", "class" => "view invisible"] : ["Type"=>"head"]);
                     for ($i = 1; $i < $colCount; $i++)
-                        $cells[] = Html::Cell("", ["Type"=>"head"]/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
+                        $cells[] = Struct::Cell("", ["Type"=>"head"]/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
                     $cells[] = "</tr></tfoot>";
                 } else
                     $cells[] = Convert::ToString($this->Footer);
-            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag(). ($aaccess?$addbutton("Add another item"):"") . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) .Html::Table(join(PHP_EOL, $cells)).parent::GetCloseTag();
+            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag(). ($aaccess?$addbutton("Add another item"):"") . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) .Struct::Table(join(PHP_EOL, $cells)).parent::GetCloseTag();
         } elseif ($aaccess)
-            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton("Add your first item").Html::Table("").parent::GetCloseTag();
-        return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag().Html::Table("").parent::GetCloseTag();
+            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton("Add your first item").Struct::Table("").parent::GetCloseTag();
+        return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag().Struct::Table("").parent::GetCloseTag();
     }
 
     public function GetCell($value, $key, $record = [], bool $isHead = false)
@@ -579,8 +591,8 @@ class Table extends Module
             $value = Convert::ToString(Convert::By(get($this->CellsValues, $key), $value, $key, $record) ?? $value);
         if ($isHead) {
             $value = Convert::ToString($value);
-            if (isFile($value)) return "<th>" . Html::Media($value) . "</th>";
-            else if (isAbsoluteUrl($value)) return "<th>" . Html::Link(getPage($value), $value) . "</th>";
+            if (isFile($value)) return "<th>" . Struct::Media($value) . "</th>";
+            else if (isAbsoluteUrl($value)) return "<th>" . Struct::Link(getPage($value), $value) . "</th>";
             else return "<th>" . __($value, translating: $this->AllowLabelTranslation) . "</th>";
         }
         //if($this->Updatable && !$isHead && $key > 1){
@@ -589,17 +601,17 @@ class Table extends Module
         //    $value->MaxHeight = $this->MediaHeight;
         //    return "<td>".Convert::ToString($value)."</td>";
         //}
-        if (isFile($value)) return "<td>" . Html::Media($value) . "</td>";
-        if (isAbsoluteUrl($value)) return "<td>" . Html::Link(getPage($value), $value) . "</td>";
+        if (isFile($value)) return "<td>" . Struct::Media($value) . "</td>";
+        if (isAbsoluteUrl($value)) return "<td>" . Struct::Link(getPage($value), $value) . "</td>";
         $value = __($value, translating: $this->AllowDataTranslation);
         if (!$this->TextWrap && !startsWith($value, "<"))
-            return "<td>" . Convert::ToExcerpt(Convert::ToText($value), 0, $this->TextLength, "..." . Html::Tooltip($value)) . "</td>";
+            return "<td>" . Convert::ToExcerpt(Convert::ToText($value), 0, $this->TextLength, "..." . Struct::Tooltip($value)) . "</td>";
         return "<td>$value</td>";
     }
     public function GetScript()
     {
         $localPaging = is_null($this->NavigationBar);
-        return Html::Script(
+        return Struct::Script(
             "$(document).ready(()=>{" .
             (!$this->AllowDecoration ? "" :
                 "$('.{$this->Name} table').DataTable({" .
@@ -712,7 +724,7 @@ class Table extends Module
         $secret = pop($values, $this->SecretKey);
         $recievedData = count($values) > 1;
         if(!$this->ControlHandler) $this->ControlHandler = fn($v,$f)=>null;
-        if (!$secret) return Html::Error("Your request is not valid!");
+        if (!$secret) return Struct::Error("Your request is not valid!");
         elseif ($secret === $this->ViewSecret)
             return ($this->ControlHandler)($value, "GetViewForm") ?? $this->GetViewForm($value);
         elseif ($secret === $this->DuplicateSecret)
@@ -729,7 +741,7 @@ class Table extends Module
                 return ($this->ControlHandler)($value, "GetModifyForm") ?? $this->GetModifyForm($value);
         elseif ($secret === $this->RemoveSecret)
             return ($this->ControlHandler)($value, "RemoveRow") ?? $this->RemoveRow($value);
-        else return Html::Error("There is not any response for your request!");
+        else return Struct::Error("There is not any response for your request!");
     }
 
     public function GetForm()
@@ -760,10 +772,11 @@ class Table extends Module
         if (is_null($value))
             return null;
         if (!\_::$User->GetAccess($this->ViewAccess))
-            return Html::Error("You have not access to see datails!");
-        $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
+            return Struct::Error("You have not access to see datails!");
+        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
+        $record = $this->DataTable->SelectRow($this->FormFilter ? array_keys($this->CellsTypes) : "*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
         if (isEmpty($record))
-            return Html::Error("You can not 'see' this item!");
+            return Struct::Error("You can not 'see' this item!");
         $form = $this->GetForm();
         $form->Set(
             title: getBetween($record, "Title", "Name"),
@@ -797,7 +810,7 @@ class Table extends Module
                         }
                     }
                     if ($type !== false && !isEmpty($cell))
-                        yield Html::Field(
+                        yield Struct::Field(
                             type: (isEmpty($type) ? null : Convert::By($type, $type, $cell, $k, $record)),
                             key: $k,
                             value: $cell,
@@ -822,9 +835,9 @@ class Table extends Module
         if (is_null($value))
             return null;
         if (!\_::$User->GetAccess($this->AddAccess))
-            return Html::Error("You have not access to add!");
+            return Struct::Error("You have not access to add!");
         $record = [];
-        if (count($this->CellsTypes) > 0)
+        if ($this->FormFilter)
             foreach ($this->CellsTypes as $key => $val)
                 $record[$key] = null;
         $form = $this->GetForm();
@@ -849,7 +862,7 @@ class Table extends Module
                             if (!isEmpty($res))
                                 yield $res;
                         }
-                yield Html::HiddenInput($this->SecretKey, $this->AddSecret);
+                yield Struct::HiddenInput($this->SecretKey, $this->AddSecret);
             })()
         );
         $form->Image = getValid($record, "Image", "plus");
@@ -860,10 +873,11 @@ class Table extends Module
         if (is_null($value))
             return null;
         if (!\_::$User->GetAccess($this->AddAccess))
-            return Html::Error("You have not access to add!");
-        $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
+            return Struct::Error("You have not access to add!");
+        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
+        $record = $this->DataTable->SelectRow($this->FormFilter ? array_keys($this->CellsTypes) : "*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
         if (isEmpty($record))
-            return Html::Error("You can not 'add' this item!");
+            return Struct::Error("You can not 'add' this item!");
         $form = $this->GetForm();
         $form->Set(
             title: "Add {$this->Title}",
@@ -883,7 +897,7 @@ class Table extends Module
                             if (!isEmpty($res))
                                 yield $res;
                         }
-                yield Html::HiddenInput($this->SecretKey, $this->AddSecret);
+                yield Struct::HiddenInput($this->SecretKey, $this->AddSecret);
             })()
         );
         $form->Image = getValid($record, "Image", "plus");
@@ -893,11 +907,12 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
+        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
         if (!\_::$User->GetAccess($this->ModifyAccess))
-            return Html::Error("You have not access to modify!");
-        $record = $this->DataTable->SelectRow(count($this->CellsTypes) > 0 ? array_keys($this->CellsTypes) : "*", [$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]);
+            return Struct::Error("You have not access to modify!");
+        $record = $this->DataTable->SelectRow($this->FormFilter ? array_keys($this->CellsTypes) : "*", [$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
         if (isEmpty($record))
-            return Html::Error("You can not 'modify' this item!");
+            return Struct::Error("You can not 'modify' this item!");
         $form = $this->GetForm();
         $form->Set(
             title: getBetween($record, "Title", "Name"),
@@ -909,15 +924,18 @@ class Table extends Module
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'"
                 );
+                $f = false;
                 foreach ($record as $key => $val) foreach ($schemas as $schema)
                         if ($schema["COLUMN_NAME"] == $key)
                         {
+                            $f = $this->KeyColumnName == $key;
                             $res = $this->PrepareDataToShow($val, $key, $record, $schema);
                             if (!isEmpty($res))
                                 yield $res;
                             break;
                         }
-                yield Html::HiddenInput($this->SecretKey, $this->ModifySecret);
+                if(!$f) yield Struct::HiddenInput($this->KeyColumnName, $value);
+                yield Struct::HiddenInput($this->SecretKey, $this->ModifySecret);
             })()
         );
         $form->Image = getValid($record, "Image", "edit");
@@ -927,7 +945,7 @@ class Table extends Module
     public function AddRow($values)
     {
         if (!\_::$User->GetAccess($this->AddAccess))
-            return Html::Error("You have not access to modify!");
+            return Struct::Error("You have not access to modify!");
         unset($values[$this->KeyColumn]);
         $values = $this->NormalizeFormValues($values);
         if (!is_array($values))
@@ -936,31 +954,33 @@ class Table extends Module
             if (isEmpty($v))
                 unset($values[$k]);
         if ($this->DataTable->Insert($values))
-            return deliverBreaker(Html::Success("The 'information' added successfully!"));
-        return Html::Error("You can not 'add' this item!");
+            return deliverBreaker(Struct::Success("The 'information' added successfully!"));
+        return Struct::Error("You can not 'add' this item!");
     }
     public function ModifyRow($values)
     {
         if (!\_::$User->GetAccess($this->ModifyAccess))
-            return Html::Error("You have not access to modify!");
+            return Struct::Error("You have not access to modify!");
+        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
         if (isValid($values, $this->KeyColumn)) {
             $values = $this->NormalizeFormValues($values);
             if (!is_array($values))
                 return $values;
-            if ($this->DataTable->Update([$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumn}"], $values))
-                return deliverBreaker(Html::Success("The information updated successfully!"));
-            return Html::Error("You can not 'update' this item!");
+            if ($this->DataTable->Update([$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumnName}"], $values))
+                return deliverBreaker(Struct::Success("The information updated successfully!"));
+            return Struct::Error("You can not 'update' this item!");
         }
     }
     public function RemoveRow($value)
     {
         if (is_null($value))
             return null;
+        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
         if (!\_::$User->GetAccess($this->RemoveAccess))
-            return Html::Error("You have not access to delete!");
-        if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}" => $value]))
-            return deliverBreaker(Html::Success("The 'items' removed successfully!"));
-        return Html::Error("You can not 'remove' this item!");
+            return Struct::Error("You have not access to delete!");
+        if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]))
+            return deliverBreaker(Struct::Success("The 'items' removed successfully!"));
+        return Struct::Error("You can not 'remove' this item!");
     }
 
     public function PrepareDataToShow(&$value, &$key, &$record, $schema)
@@ -981,7 +1001,7 @@ class Table extends Module
                     break;
             }
         if ($key == $this->KeyColumn && str_contains($schema["EXTRA"], 'auto_increment'))
-            return Html::HiddenInput($key, $value);
+            return Struct::HiddenInput($key, $value);
         else {
             if (is_string($type))
                 switch (strtolower($type)) {
@@ -1015,7 +1035,7 @@ class Table extends Module
                         break;
                 }
             if ($type !== false)
-                return Html::Field(
+                return Struct::Field(
                     type: isEmpty($type) ? null : Convert::By($type, $type, $value, $key, $record),
                     key: $key,
                     value: $value,
@@ -1048,10 +1068,11 @@ class Table extends Module
                         unset($values[$k]);
             }
         } catch (\Exception $ex) {
-            return Html::Error($ex);
+            return Struct::Error($ex);
         }
         foreach ($values as $k => $v)
-            if ($k !== $this->KeyColumn) {
+            if($k == "submit") unset($values[$k]);
+            elseif ($k !== $this->KeyColumn) {
                 if ($v === '')
                     $values[$k] = null;
                 $type = getValid($this->CellsTypes, $k, "");

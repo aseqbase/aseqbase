@@ -1,9 +1,9 @@
 <?php
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 $user = \_::$User->Get();
 if (isValid($user))
-    echo Html::Style("
+    echo Struct::Style("
 			.page header.header.introduction {
 				text-align: center;
 				margin: var(--size-1);
@@ -26,19 +26,19 @@ if (isValid($user))
 				gap: var(--size-2);
 			}
 	").
-	Html::Center(
-		Html::Header(
-			Html::Media(\_::$User->Image).
-			Html::Heading1(\_::$User->Name).
-			Html::Paragraph(\_::$User->GetValue("Bio" )).
-            Html::$BreakLine
+	Struct::Center(
+		Struct::Header(
+			Struct::Media(\_::$User->Image).
+			Struct::Heading1(\_::$User->Name).
+			Struct::Paragraph(\_::$User->GetValue("Bio" )).
+            Struct::$BreakLine
 		,["class"=>"introduction"]).
-        Html::Container([
+        Struct::Container([
             [
-                Html::Button("Show Profile", \_::$User->ProfileHandlerPath),
-                Html::Button("Edit Profile", \_::$User->EditHandlerPath),
-                Html::Button("Reset Password", \_::$User->RecoverHandlerPath),
-                Html::Button("Sign Out", \_::$User->OutHandlerPath)
+                Struct::Button("Show Profile", \_::$User->ProfileHandlerPath),
+                Struct::Button("Edit Profile", \_::$User->EditHandlerPath),
+                Struct::Button("Reset Password", \_::$User->RecoverHandlerPath),
+                Struct::Button("Sign Out", \_::$User->OutHandlerPath)
             ]
         ]),["class"=>"page"]
     );

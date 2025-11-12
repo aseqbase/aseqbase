@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 module("Collection");
 /**
@@ -191,7 +191,7 @@ class ContentCollection extends Collection{
     }
 
 	public function GetStyle(){
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name}>*>.item {
 				height: fit-content;
 				max-width: calc(100% - 2 * var(--size-2));
@@ -365,7 +365,7 @@ class ContentCollection extends Collection{
                         doValid(
                             function($val) use(&$p_meta){
                                 $authorName = table("User")->SelectRow("Signature , Name","Id=:Id",[":Id"=>$val]);
-                                if(!isEmpty($authorName)) $p_meta .=  " ".Html::Link($authorName["Name" ],\_::$Address->UserRoot.$authorName["Signature" ],["class"=>"author"]);
+                                if(!isEmpty($authorName)) $p_meta .=  " ".Struct::Link($authorName["Name" ],\_::$Address->UserRoot.$authorName["Signature" ],["class"=>"author"]);
                             },
                             $item,
                             'AuthorId'
@@ -373,7 +373,7 @@ class ContentCollection extends Collection{
                     if($this->AllowCreateTime)
                         doValid(
                             function($val) use(&$p_meta){
-                                if(isValid($val)) $p_meta .= Html::Span(Convert::ToShownDateTimeString($val), ["class"=>'createtime' ]);
+                                if(isValid($val)) $p_meta .= Struct::Span(Convert::ToShownDateTimeString($val), ["class"=>'createtime' ]);
                             },
                             $item,
                             'CreateTime'
@@ -381,7 +381,7 @@ class ContentCollection extends Collection{
                     if($this->AllowUpdateTime)
                         doValid(
                             function($val) use(&$p_meta){
-                                if(isValid($val)) $p_meta .= Html::Span(Convert::ToShownDateTimeString($val), ["class"=>'updatetime' ]);
+                                if(isValid($val)) $p_meta .= Struct::Span(Convert::ToShownDateTimeString($val), ["class"=>'updatetime' ]);
                             },
                             $item,
                             'UpdateTime'
@@ -410,7 +410,7 @@ class ContentCollection extends Collection{
                 yield "<div class='head row'>";
                     yield "<div class='col-lg'>";
                         $lt = $this->LinkedTitle && $hasl;
-                        if($p_showtitle) yield Html::Heading2($p_title, $lt?$p_inselflink:null, ['class'=>'title']);
+                        if($p_showtitle) yield Struct::Heading2($p_title, $lt?$p_inselflink:null, ['class'=>'title']);
                         if($p_showmeta && isValid($p_meta)) {
                             yield "<sub class='metadata'>";
                             if($this->AllowRoot) yield $rout->ToString();
@@ -420,9 +420,9 @@ class ContentCollection extends Collection{
                     if($p_showmorebutton || $p_showpathbutton) {
                         yield "<div class='more col col-3 view md-hide'>";
                         if($p_showmorebutton)
-                            yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn main']);
+                            yield Struct::Button($p_morebuttontext, $p_inselflink, ["class"=>'btn main']);
                         if($p_showpathbutton)
-                            yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'btn outline']);
+                            yield Struct::Button($p_pathbuttontext, $p_path, ["class"=>'btn outline']);
                         yield "</div>";
                     }
                 yield "</div>";
@@ -439,9 +439,9 @@ class ContentCollection extends Collection{
                 if($p_showmorebutton || $p_showpathbutton) {
                     yield "<div class='more view md-show'>";
                     if($p_showmorebutton)
-                        yield Html::Button($p_morebuttontext, $p_inselflink, ["class"=>'main']);
+                        yield Struct::Button($p_morebuttontext, $p_inselflink, ["class"=>'main']);
                     if($p_showpathbutton)
-                        yield Html::Button($p_pathbuttontext, $p_path, ["class"=>'outline']);
+                        yield Struct::Button($p_pathbuttontext, $p_path, ["class"=>'outline']);
                     yield "</div>";
                 }
                 yield "</article>";

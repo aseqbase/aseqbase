@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 /**
  * To make a tab control
  *@copyright All rights are reserved for MiMFa Development Group
@@ -53,7 +53,7 @@ class Tabs extends Module
 
     public function GetStyle()
     {
-        return parent::GetStyle() . Html::Style("
+        return parent::GetStyle() . Struct::Style("
         .$this->Name>.tab-titles>.tab-title>:is(*,*:hover){border:none; outline:none;}
         .$this->Name>.tab-titles>.tab-title{display:inline-block; padding:calc(var(--size-1) / 5) calc(var(--size-1) / 2); border-bottom: var(--border-1) #8885;}
         .$this->Name>.tab-titles>.tab-title.active{border: var(--border-1) #8888; border-bottom: none;}
@@ -61,26 +61,26 @@ class Tabs extends Module
     }
     public function Get()
     {
-        return Html::Division(
+        return Struct::Division(
                 $this->PrependTitles .
                     join("", loop(
                     $this->Items,
                     function ($v, $k, $i) {
                         $name = get($v, 'Name');
                         $tooltip = $this->AllowTitlesDescription?(get($v, "Description")??$this->Description):null;
-                        return Html::Button(
-                            ($this->AllowTitlesLabel?Html::Span(get($v, 'Title')??$this->Title):null) . ($this->AllowTitlesImage ? Html::Media("", getBetween($v, "Image", "Icon")??$this->Image) : ""),
+                        return Struct::Button(
+                            ($this->AllowTitlesLabel?Struct::Span(get($v, 'Title')??$this->Title):null) . ($this->AllowTitlesImage ? Struct::Media("", getBetween($v, "Image", "Icon")??$this->Image) : ""),
                             getBetween($v, "Path", "Action")??"{$this->Name}_openTab(this, '$this->Name-tab-$i')",
                             $name?["name"=>$name]:[], 
                             get($v, "Attributes")??[],
                             ["class" => "tab-title $this->TitleClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " active" : "")]). 
-                            ($tooltip?Html::Tooltip($tooltip):"");
+                            ($tooltip?Struct::Tooltip($tooltip):"");
                     }
                 ))
                 . $this->AppendTitles,
                 ["class" => "tab-titles $this->TitlesClass"]
             ) .
-            Html::Division(
+            Struct::Division(
                 $this->PrependContents .
                 join("", loop(
                     $this->Items,
@@ -89,10 +89,10 @@ class Tabs extends Module
                             $name = get($v, 'Name');
                             $content = get($v, 'Content')??$this->Content;
                             $v = 
-                                ($this->AllowImage?Html::Media(get($v, 'Title')??$this->Title, getBetween($v, "Image", "Icon")??$this->Image, ["class" => "image"]):"") .
-                                ($this->AllowTitle?Html::Heading1(get($v, 'Title')??$this->Title, ["class" => "title"]):"") .
-                                Html::Division(Convert::ToString($content), ["class" => "content"]);
-                        }return Html::Element($v, "div", $name?["name"=>$name]:[], ["class" => "tab-content $this->ContentClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " view show" : " view hide"), "id" => "$this->Name-tab-$i"]);
+                                ($this->AllowImage?Struct::Media(get($v, 'Title')??$this->Title, getBetween($v, "Image", "Icon")??$this->Image, ["class" => "image"]):"") .
+                                ($this->AllowTitle?Struct::Heading1(get($v, 'Title')??$this->Title, ["class" => "title"]):"") .
+                                Struct::Division(Convert::ToString($content), ["class" => "content"]);
+                        }return Struct::Element($v, "div", $name?["name"=>$name]:[], ["class" => "tab-content $this->ContentClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " view show" : " view hide"), "id" => "$this->Name-tab-$i"]);
                     }
                 )). $this->AppendContents,
                 ["class" => "tab-contents $this->ContentsClass"]
@@ -100,7 +100,7 @@ class Tabs extends Module
     }
     public function GetScript()
     {
-        return parent::GetScript() . Html::Script("function {$this->Name}_openTab({$this->Name}_tab, {$this->Name}_tabId){
+        return parent::GetScript() . Struct::Script("function {$this->Name}_openTab({$this->Name}_tab, {$this->Name}_tabId){
             document.querySelectorAll('.$this->Name>.tab-contents>.tab-content').forEach(content => content.classList.remove('show') & content.classList.add('hide'));
             document.querySelectorAll('.$this->Name>.tab-titles>.tab-title').forEach(title => title.classList.remove('active'));
             document.getElementById({$this->Name}_tabId).classList.remove('hide');

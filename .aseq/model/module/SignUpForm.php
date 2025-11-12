@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 use MiMFa\Library\Convert;
 module("Form");
@@ -89,7 +89,7 @@ class SignUpForm extends Form
 	public function GetStyle()
 	{
 		if ($this->AllowDecoration)
-			return parent::GetStyle() . Html::Style("
+			return parent::GetStyle() . Struct::Style("
 			.{$this->Name} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}
@@ -146,31 +146,31 @@ class SignUpForm extends Form
 	public function GetFields()
 	{
 		if ($this->AllowInternalMethod) {
-			yield Html::Rack(
-				(isValid($this->FirstNameLabel) ? Html::LargeSlot(
-					Html::Label($this->FirstNameLabel, "FirstName", ["class"=> "prepend"]) .
-					Html::TextInput("FirstName", ["placeholder" => $this->FirstNamePlaceHolder]),
+			yield Struct::Rack(
+				(isValid($this->FirstNameLabel) ? Struct::LargeSlot(
+					Struct::Label($this->FirstNameLabel, "FirstName", ["class"=> "prepend"]) .
+					Struct::TextInput("FirstName", ["placeholder" => $this->FirstNamePlaceHolder]),
 					["class"=> "field"]
 				) : "") .
-				(isValid($this->LastNameLabel) ? Html::LargeSlot(
-					Html::Label($this->LastNameLabel, "LastName", ["class"=> "prepend"]) .
-					Html::TextInput("LastName", ["placeholder" => $this->LastNamePlaceHolder]),
+				(isValid($this->LastNameLabel) ? Struct::LargeSlot(
+					Struct::Label($this->LastNameLabel, "LastName", ["class"=> "prepend"]) .
+					Struct::TextInput("LastName", ["placeholder" => $this->LastNamePlaceHolder]),
 					["class"=> "field"]
 				) : "")
 			);
 			if (isValid($this->EmailLabel))
-				yield Html::Rack(
-					Html::LargeSlot(
-						Html::Label($this->EmailLabel, "Email", ["class"=> "prepend"]) .
-						Html::EmailInput("Email", ["placeholder" => $this->EmailPlaceHolder]),
+				yield Struct::Rack(
+					Struct::LargeSlot(
+						Struct::Label($this->EmailLabel, "Email", ["class"=> "prepend"]) .
+						Struct::EmailInput("Email", ["placeholder" => $this->EmailPlaceHolder]),
 						["class"=> "field"]
 					)
 				);
 			if (isValid($this->ContactLabel))
-				yield Html::Rack(
-					Html::LargeSlot(
-						Html::Label($this->ContactLabel, "Phone", ["class"=> "prepend"]) .
-						(isValid($this->ContactCountryCode) ? Html::SelectInput(
+				yield Struct::Rack(
+					Struct::LargeSlot(
+						Struct::Label($this->ContactLabel, "Phone", ["class"=> "prepend"]) .
+						(isValid($this->ContactCountryCode) ? Struct::SelectInput(
 							"CountryCode",
 							"+1",
 							function () {
@@ -178,44 +178,44 @@ class SignUpForm extends Form
 									yield "<option value='+$i'" . ($this->ContactCountryCode == $i ? " selected" : "") . ">+$i</option>"; }
 						)
 							: "") .
-						Html::TelInput("Phone", ["placeholder" => $this->ContactPlaceHolder]),
+						Struct::TelInput("Phone", ["placeholder" => $this->ContactPlaceHolder]),
 						["class"=> "field"]
 					)
 				);
 			if (isValid($this->GroupLabel) && !isEmpty($this->GroupOptions))
-				yield Html::Rack(
-					Html::LargeSlot(
-						Html::Label($this->GroupLabel, "Group", ["class"=> "prepend"]) .
-						Html::SelectInput("Group", $this->GroupValue, $this->GroupPlaceHolder, $this->GroupOptions),
+				yield Struct::Rack(
+					Struct::LargeSlot(
+						Struct::Label($this->GroupLabel, "Group", ["class"=> "prepend"]) .
+						Struct::SelectInput("Group", $this->GroupValue, $this->GroupPlaceHolder, $this->GroupOptions),
 						["class"=> "field"]
 					)
 				);
 			if (isValid($this->RouteLabel) && !isEmpty($this->RouteOptions))
-				yield Html::Rack(
-					Html::LargeSlot(
-						Html::Label($this->RouteLabel, "Route", ["class"=> "prepend"]) .
-						Html::SelectInput("Route", $this->RoutePlaceHolder, $this->RouteOptions),
+				yield Struct::Rack(
+					Struct::LargeSlot(
+						Struct::Label($this->RouteLabel, "Route", ["class"=> "prepend"]) .
+						Struct::SelectInput("Route", $this->RoutePlaceHolder, $this->RouteOptions),
 						["class"=> "field"]
 					)
 				);
 			if (isValid($this->SignatureLabel))
-				yield Html::Rack(
-					Html::LargeSlot(
-						Html::Label($this->SignatureLabel, "Signature", ["class"=> "prepend"]) .
-						Html::TextInput("Signature", $this->SignatureValue, ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "UserName"]),
+				yield Struct::Rack(
+					Struct::LargeSlot(
+						Struct::Label($this->SignatureLabel, "Signature", ["class"=> "prepend"]) .
+						Struct::TextInput("Signature", $this->SignatureValue, ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "UserName"]),
 						["class"=> "field"]
 					)
 				);
 			if (isValid($this->PasswordLabel))
-				yield Html::Rack(
-					Html::LargeSlot(
-						Html::Label($this->PasswordLabel, "Password" , ["class"=> "prepend"]) .
-						Html::SecretInput("Password", $this->PasswordValue, ["placeholder" => $this->PasswordPlaceHolder, "autocomplete" => "Password"]),
+				yield Struct::Rack(
+					Struct::LargeSlot(
+						Struct::Label($this->PasswordLabel, "Password" , ["class"=> "prepend"]) .
+						Struct::SecretInput("Password", $this->PasswordValue, ["placeholder" => $this->PasswordPlaceHolder, "autocomplete" => "Password"]),
 						["class"=> "field"]
 					) .
-					Html::LargeSlot(
-						Html::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=> "prepend"]) .
-						Html::SecretInput("PasswordConfirmation", $this->PasswordValue, ["placeholder" => $this->PasswordConfirmationPlaceHolder, "autocomplete" => "Password"]),
+					Struct::LargeSlot(
+						Struct::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=> "prepend"]) .
+						Struct::SecretInput("PasswordConfirmation", $this->PasswordValue, ["placeholder" => $this->PasswordConfirmationPlaceHolder, "autocomplete" => "Password"]),
 						["class"=> "field"]
 					)
 				);
@@ -226,8 +226,8 @@ class SignUpForm extends Form
 	}
 	public function GetFooter()
 	{
-		return parent::GetFooter() . Html::LargeSlot(
-			Html::Link($this->SignInLabel, $this->SignInPath??\_::$User->InHandlerPath)
+		return parent::GetFooter() . Struct::LargeSlot(
+			Struct::Link($this->SignInLabel, $this->SignInPath??\_::$User->InHandlerPath)
 			,
 			["class"=> "col"]
 		);
@@ -235,7 +235,7 @@ class SignUpForm extends Form
 
 	public function GetScript()
 	{
-		return Html::Script("
+		return Struct::Script("
 			$(function () {
 				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
 					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
@@ -246,18 +246,18 @@ class SignUpForm extends Form
                 $('.{$this->Name} form').submit(function(e) {
 					let error = null;
 					if (!$('.{$this->Name} form [name=Password]')?.val().match({$this->PasswordPattern})) 
-						error = Html.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
+						error = Struct.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
 					else if (!$('.{$this->Name} form [name=Signature]')?.val().match({$this->SignaturePattern})) 
-						error = Html.error(".\MiMFa\Library\Script::Convert($this->SignatureTip).");
+						error = Struct.error(".\MiMFa\Library\Script::Convert($this->SignatureTip).");
 					else if ($('.{$this->Name} form [name=PasswordConfirmation]')?.val() != $('.{$this->Name} form [name=Password]')?.val()) 
-						error = Html.error('New password and confirm password does not match!');
+						error = Struct.error('New password and confirm password does not match!');
 					if(error) {
 						$('.{$this->Name} form .result').remove();
 						$('.{$this->Name} form').append(error);
 						e.preventDefault();
 						return false;
 					}
-					" . ($this->UseAjax ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
+					" . ($this->Interaction ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
 					return true;
                 });
 			});

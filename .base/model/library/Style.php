@@ -116,7 +116,7 @@ class Style extends \ArrayObject
 
 	public static function DoStyle($text, $keyWords = null)
 	{
-		return self::DoStrong(Html::Convert($text), $keyWords);
+		return self::DoStrong(Struct::Convert($text), $keyWords);
 	}
 
 	/**

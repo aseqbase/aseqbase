@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 class SearchForm extends Module{
     public $Tag = null;
@@ -15,12 +15,12 @@ class SearchForm extends Module{
 	
 	public function Get(){
 		$src = $this->Path??"/search";
-		return Html::Form(
+		return Struct::Form(
 				parent::GetTitle().parent::GetDescription().
-				Html::SearchInput($this->QueryKey, receiveGet($this->QueryKey)??$this->QueryValue, ["placeholder"=>__($this->PlaceHolder),...($this->RealtimeAction?["onkeyup"=>$this->RealtimeAction]:[])])
+				Struct::SearchInput($this->QueryKey, receiveGet($this->QueryKey)??$this->QueryValue, ["placeholder"=>__($this->PlaceHolder),...($this->RealtimeAction?["onkeyup"=>$this->RealtimeAction]:[])])
 				.(
-					$this->SearchAction?Html::Button($this->SubmitLabel, $this->SearchAction, ["class"=>"searchbutton"]):
-					Html::SubmitButton(value: $this->SubmitLabel, attributes:["class"=>"searchbutton"])
+					$this->SearchAction?Struct::Button($this->SubmitLabel, $this->SearchAction, ["class"=>"searchbutton"]):
+					Struct::SubmitButton(value: $this->SubmitLabel, attributes:["class"=>"searchbutton"])
 				).parent::GetContent()
 			, $this->SearchAction??$src, ["method"=>"get"], $this->GetDefaultAttributes());
 	}

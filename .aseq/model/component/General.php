@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Component;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class GeneralStyle{
 	public static function Variables($rootSelector = ":root") { return "
 		$rootSelector{
@@ -13,6 +13,7 @@ class GeneralStyle{
 			--color-cyan: " . \_::$Front->Color(5) . ";
 			--color-magenta: " . \_::$Front->Color(6) . ";
 			--color-white: " . \_::$Front->Color(7) . ";
+			--color-gray: #888888;
 			--fore-color: " . \_::$Front->ForeColor(0) . ";
 			--fore-color-input: " . \_::$Front->ForeColor(1) . ";
 			--fore-color-output: " . \_::$Front->ForeColor(2) . ";
@@ -170,7 +171,7 @@ class GeneralStyle{
 		}";
 	}
 }
-\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'reset.css', optimize: true));
-\_::$Front->Libraries[] = Html::Style(GeneralStyle::Variables());
-\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
-\_::$Front->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));
+\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->StyleDirectory,'reset.css', optimize: true));
+\_::$Front->Libraries[] = Struct::Style(GeneralStyle::Variables());
+\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
+\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));

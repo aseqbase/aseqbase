@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class Translator extends Module{
 	/**
 	 * An array of language metadata
@@ -21,7 +21,7 @@ class Translator extends Module{
     public $Printable = false;
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
             .{$this->Name} {
 				display: flex;
 				gap: var(--size-0);
@@ -48,9 +48,9 @@ class Translator extends Module{
 		$langs = [];
 		foreach ($this->Items??[] as $lng=>$value)
             if($lng != $cur)
-                $langs[] = Html::Element(
+                $langs[] = Struct::Element(
 					($this->AllowCode?strtoupper($lng):"").
-					($this->AllowImage?Html::Image($lng, getBetween($value,"Image","Icon"), ["onerror"=>"this.src='".asset("/asset/overlay/glass.png")."';"]):"").
+					($this->AllowImage?Struct::Image($lng, getBetween($value,"Image","Icon"), ["onerror"=>"this.src='".asset("/asset/overlay/glass.png")."';"]):"").
 					($this->AllowLabel?getBetween($value,"Title","Name" ):""),
 					"button",
 					["class"=>"button", "onclick"=>"load(\"?".(getBetween($value,"Query" )??"lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding"))."\");"]);

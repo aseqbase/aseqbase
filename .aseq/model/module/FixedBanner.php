@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
 class FixedBanner extends Module{
 	public $Image = null;
@@ -22,7 +22,7 @@ class FixedBanner extends Module{
 	public function GetStyle(){
 		$this->Class = $this->Class." ".$this->Type;
 		return parent::GetStyle().
-			Html::Style("
+			Struct::Style("
 			.{$this->Name}{
 				text-align: center;
 			}
@@ -152,27 +152,27 @@ class FixedBanner extends Module{
 
 	public function Get(){
 		return Convert::ToString(function(){
-			yield Html::Division("",["class"=>"background", "style"=>"background-image: url('{$this->Image}');"]);
-			yield Html::Division(
-					Html::Division(
-						(isValid($this->Logo)? Html::Media($this->Logo, ["class"=>'image' , "data-aos"=>'flip-up', "data-aos-delay"=>'500']):"").
-						(isValid($this->Title)? Html::Heading1($this->Title, null, ["class"=>'title' , "data-aos"=>'zoom-up', "data-aos-delay"=>'1000', "data-aos-offset"=>'-500']):"")
+			yield Struct::Division("",["class"=>"background", "style"=>"background-image: url('{$this->Image}');"]);
+			yield Struct::Division(
+					Struct::Division(
+						(isValid($this->Logo)? Struct::Media($this->Logo, ["class"=>'image' , "data-aos"=>'flip-up', "data-aos-delay"=>'500']):"").
+						(isValid($this->Title)? Struct::Heading1($this->Title, null, ["class"=>'title' , "data-aos"=>'zoom-up', "data-aos-delay"=>'1000', "data-aos-offset"=>'-500']):"")
 					,["class"=>"top"]).
-					Html::Division(
-						(isValid($this->Description)? Html::Division(__($this->Description), ["class"=>'description' , "data-aos"=>'flip-right', "data-aos-delay"=>'1500', "data-aos-offset"=>'-500']):"").
-						(isValid($this->Items)? Html::Division(
+					Struct::Division(
+						(isValid($this->Description)? Struct::Division(__($this->Description), ["class"=>'description' , "data-aos"=>'flip-right', "data-aos-delay"=>'1500', "data-aos-offset"=>'-500']):"").
+						(isValid($this->Items)? Struct::Division(
 							Convert::ToString(function(){
 								$i = 6;
                                 yield "<div class='row'>";
 								foreach($this->Items as $item){
 									yield "<div class='col-md' data-aos='fade-down' data-aos-offset='-500' data-aos-delay='".($i++*300)."'>";
 									$p = getBetween($item,'Path');
-									if($v = get($item,'Image' )) yield Html::Image(null, $v);
-									if($v = get($item,'Icon' )) yield Html::Icon($v);
-									if($p) yield Html::OpenTag("a", ["href"=>$p]);
-									if($v = getBetween($item, 'Title', 'Name')) yield Html::Division(__($v), ["class"=>"title"]);
-									if($p) yield Html::CloseTag();
-									if($v = get($item, 'More')) yield Html::Division(__($v), ["class"=>"more"]);
+									if($v = get($item,'Image' )) yield Struct::Image(null, $v);
+									if($v = get($item,'Icon' )) yield Struct::Icon($v);
+									if($p) yield Struct::OpenTag("a", ["href"=>$p]);
+									if($v = getBetween($item, 'Title', 'Name')) yield Struct::Division(__($v), ["class"=>"title"]);
+									if($p) yield Struct::CloseTag();
+									if($v = get($item, 'More')) yield Struct::Division(__($v), ["class"=>"more"]);
 									yield "</div>";
 								}
 								yield "</div>";

@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 module("CommentForm");
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 use MiMFa\Module\CommentForm;
@@ -301,7 +301,7 @@ class Content extends Module
      public function GetStyle()
      {
           $ralign = \_::$Back->Translate->Direction == "rtl" ? "left" : "right";
-          return Html::Style("
+          return Struct::Style("
 			.{$this->Name} {
 				height: fit-content;
 				background-Color: var(--back-color-special);
@@ -421,9 +421,9 @@ class Content extends Module
                if (isValid($catDir))
                     $nameOrId = trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
           }
-          return Html::Rack(
-               Html::MediumSlot(
-                    ($this->AllowTitle ? Html::Heading1(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
+          return Struct::Rack(
+               Struct::MediumSlot(
+                    ($this->AllowTitle ? Struct::Heading1(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
                     $this->GetDetails($this->CollectionRoot . $nameOrId)
                ) .
                $this->GetButtons(),
@@ -432,7 +432,7 @@ class Content extends Module
      }
      public function GetDescription($attributes = null)
      {
-          return Html::Rack(
+          return Struct::Rack(
                ($this->AllowDescription ? $this->GetExcerpt() : "") . $this->GetImage(),
                ["class" => "description"]
           , $attributes);
@@ -442,7 +442,7 @@ class Content extends Module
           if (!$this->AllowContent)
                return null;
           $p_content = getValid($this->Item, 'Content', $this->Content);
-          return (isValid($p_content) ? Html::Division(__(Html::Convert($p_content), styling: true, referring: $this->AutoReferring), ["class" => "content"], $attributes) : null);
+          return (isValid($p_content) ? Struct::Division(__(Struct::Convert($p_content), styling: true, referring: $this->AutoReferring), ["class" => "content"], $attributes) : null);
      }
      public function GetSpecial()
      {
@@ -464,23 +464,23 @@ class Content extends Module
                     if ($p_showmorebutton)
                          return join(PHP_EOL, loop($paths, action: function ($v, $k) use ($p_image, $p_morebuttontext) {
                               return (new MediaFrame($v, logo: $p_image, name: is_numeric($k) ? $p_morebuttontext : $k))->Render();
-                         })) . Html::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
-                              return Html::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
+                         })) . Struct::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
+                              return Struct::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
                          }), ["class" => "more view md-show"]);
                     break;
                default:
                     if ($p_showmorebutton)
-                         return Html::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
-                              return Html::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
+                         return Struct::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
+                              return Struct::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
                          }), ["class" => "more view md-show"]);
                     break;
           }
      }
      public function GetExcerpt()
      {
-          return Html::MediumSlot(
+          return Struct::MediumSlot(
                __(
-                    Html::Convert(getValid($this->Item, 'Description') ?? (
+                    Struct::Convert(getValid($this->Item, 'Description') ?? (
                          $this->AutoExcerpt ? Convert::ToExcerpt(
                               Convert::ToText(getValid($this->Item, 'Content', $this->Content)),
                               0,
@@ -499,7 +499,7 @@ class Content extends Module
           if (!$this->AllowImage)
                return null;
           $p_image = getValid($this->Item, 'Image', $this->Image);
-          return isValid($p_image) ? Html::Division(Html::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg-5", "style" => "text-align: center;"]) : "";
+          return isValid($p_image) ? Struct::Division(Struct::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg-5", "style" => "text-align: center;"]) : "";
      }
      public function GetDetails($path = null)
      {
@@ -520,7 +520,7 @@ class Content extends Module
                          function ($val) use (&$p_meta) {
                               $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
                               if (!isEmpty($authorName))
-                                   $p_meta .= " " . Html::Link($authorName["Name"], \_::$Address->UserRoot . $authorName["Signature"], ["class" => "author"]);
+                                   $p_meta .= " " . Struct::Link($authorName["Name"], \_::$Address->UserRoot . $authorName["Signature"], ["class" => "author"]);
                          },
                          $this->Item,
                          'AuthorId'
@@ -550,7 +550,7 @@ class Content extends Module
                datePublished: $createTime ? explode(" ", $createTime)[0] : null,
                dateModified: $modifyTime ? explode(" ", $modifyTime)[0] : null
           ) .
-               ($p_meta ? Html::Sub($p_meta, null, ["class" => "details"]) : "");
+               ($p_meta ? Struct::Sub($p_meta, null, ["class" => "details"]) : "");
      }
      public function GetButtons()
      {
@@ -558,9 +558,9 @@ class Content extends Module
                return null;
           $paths = Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
           $p_morebuttontext = __(value: Convert::FromSwitch($this->ButtonsLabel, get($this->Item, 'Type')));
-          return Html::SmallSlot(
+          return Struct::SmallSlot(
                loop($paths, function ($v, $k, $i) use ($p_morebuttontext) {
-                    return Html::Button(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn " . ($i < 1 ? "main" : "outline")]);
+                    return Struct::Button(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn " . ($i < 1 ? "main" : "outline")]);
                }),
                attributes: ["class" => "buttons col-md-3 view md-hide"]
           );
@@ -571,7 +571,7 @@ class Content extends Module
                return null;
           $p_attaches = Convert::FromJson(get($this->Item, 'Attach'));
           if (!isEmpty($p_attaches))
-               return Html::Division(__(Convert::FromSwitch($this->AttachesLabel, get($this->Item, 'Type'))) . Html::Convert($p_attaches));
+               return Struct::Division(__(Convert::FromSwitch($this->AttachesLabel, get($this->Item, 'Type'))) . Struct::Convert($p_attaches));
      }
      public function GetTags()
      {
@@ -585,10 +585,10 @@ class Content extends Module
                $p_tagsorder = Convert::FromSwitch($this->TagsOrder, $p_type);
                $tags = table("Tag")->SelectPairs("Name", "Title", "`Id` IN (" . join(",", $p_tags) . ") " . (isEmpty($p_tagsorder) ? "" : "ORDER BY $p_tagsorder") . " LIMIT $p_tagscount");
                if (count($tags) > 0)
-                    return Html::$BreakLine . Html::Division($p_tagstext . join(PHP_EOL, loop(
+                    return Struct::$BreakLine . Struct::Division($p_tagstext . join(PHP_EOL, loop(
                          $tags,
                          function ($v, $k) {
-                              return Html::Link(
+                              return Struct::Link(
                                    isValid($v)
                                    ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
                                    : $k
@@ -613,10 +613,10 @@ class Content extends Module
           $p_relatedsorder = Convert::FromSwitch($this->RelatedsOrder, $p_type);
           $rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'". (\_::$Back->Translate->Language?" AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"".\_::$Back->Translate->Language."\"', '$.lang'))":"") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
           if (count($rels) > 0)
-               return Html::$BreakLine . Html::Division($p_relatedstext . join(PHP_EOL, loop(
+               return Struct::$BreakLine . Struct::Division($p_relatedstext . join(PHP_EOL, loop(
                     $rels,
                     function ($v, $k) {
-                         return Html::Link(isValid($v) ? $v : $k, $this->Root . $k, ["class" => "btn"]);
+                         return Struct::Link(isValid($v) ? $v : $k, $this->Root . $k, ["class" => "btn"]);
                     }
                )), ["class" => "relateds"]);
      }
@@ -639,7 +639,7 @@ class Content extends Module
                     $cc->DeleteButtonLabel = null;
                }
                if (count($cc->Items) > 0)
-                    return Html::$BreakLine . $cc->ToString();
+                    return Struct::$BreakLine . $cc->ToString();
           }
      }
      public function GetCommentForm()
@@ -647,6 +647,6 @@ class Content extends Module
           if (!$this->LeaveComment)
                return null;
           $this->CommentForm->Relation = get($this->Item, 'Id');
-          return Html::$BreakLine . $this->CommentForm->Handle();
+          return Struct::$BreakLine . $this->CommentForm->Handle();
      }
 }

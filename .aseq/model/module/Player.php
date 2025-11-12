@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 
@@ -41,7 +41,7 @@ class Player extends Module
 
 	public function GetStyle()
 	{
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name}>.controls{
 				opacity: 0;
 				display: inline-flex;
@@ -167,19 +167,19 @@ class Player extends Module
 				foreach ($source as $value)
 					yield from $this->ToElements($value);
 			elseif (isFormat($source, ".mpg", ".mpeg", ".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm"))
-				yield Html::Video(null, $source, "controls");
+				yield Struct::Video(null, $source, "controls");
 			elseif (isFormat($source, ".wav", ".mp3", ".aac", ".amr", ".ogg", ".flac", ".wma", ".m4a"))
-				yield Html::Audio($source, "controls");
+				yield Struct::Audio($source, "controls");
 			elseif (isFormat($source, ".png", ".jpg", ".jpeg", ".jiff", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp"))
-				yield Html::Image(null, $source);
+				yield Struct::Image(null, $source);
 			else
-				yield Html::Embed($source);
+				yield Struct::Embed($source);
 			yield "</div>";
 		}
 	}
 
 	public function GetScript(){
-		return Html::Script(($this->AllowZoom ? "
+		return Struct::Script(($this->AllowZoom ? "
 			let {$this->Name}slider = null;
 			let {$this->Name}mouseDown = false;
 			let {$this->Name}startX, {$this->Name}scrollLeft;
@@ -286,15 +286,15 @@ class Player extends Module
 	public function GetControls()
 	{
 		if ($this->AllowDownload)
-			yield Html::Icon("download", $this->DownloadScript(), ["class"=>"button"]);
+			yield Struct::Icon("download", $this->DownloadScript(), ["class"=>"button"]);
 		if ($this->AllowShare)
-			yield Html::Icon("share-alt", $this->ShareScript(), ["class"=>"button"]);
+			yield Struct::Icon("share-alt", $this->ShareScript(), ["class"=>"button"]);
 		if ($this->AllowZoom)
-			yield Html::Icon("minus", $this->ZoomOutScript(), ["class"=>"button"]);
+			yield Struct::Icon("minus", $this->ZoomOutScript(), ["class"=>"button"]);
 		if ($this->AllowZoom)
-			yield Html::Icon("plus", $this->ZoomInScript(), ["class"=>"button"]);
+			yield Struct::Icon("plus", $this->ZoomInScript(), ["class"=>"button"]);
 		if ($this->AllowZoom)
-			yield Html::Icon("refresh", $this->ResetScript(), ["class"=>"button"]);
+			yield Struct::Icon("refresh", $this->ResetScript(), ["class"=>"button"]);
 	}
 
 	public function SetScript($content = "", $source = null)

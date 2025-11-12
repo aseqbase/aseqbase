@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class Members extends Module
 {
     public $Items = null;
@@ -14,7 +14,7 @@ class Members extends Module
 
     public function GetStyle()
     {
-        return Html::Style("
+        return Struct::Style("
             .{$this->Name} .items {
                 gap: var(--size-1);
             }
@@ -133,34 +133,34 @@ class Members extends Module
         $count = count($menu);
         if ($count > 0) {
             // Start the container div
-            return Html::Container(
-                Html::Rack(function () use ($menu, $count) {
+            return Struct::Container(
+                Struct::Rack(function () use ($menu, $count) {
                     for ($i = 0; $i < $count; $i++) {
                         // Start a column for each team member
-                        yield Html::MediumSlot(function () use ($menu, $i) {
+                        yield Struct::MediumSlot(function () use ($menu, $i) {
                             // Image
-                            yield Html::Division(Html::Image(null, get($menu[$i], 'Image')), ["class" => "image"]);
+                            yield Struct::Division(Struct::Image(null, get($menu[$i], 'Image')), ["class" => "image"]);
 
                             // Title (Name and Titles)
-                            yield Html::Division(function () use ($menu, $i) {
-                                yield Html::Super(get($menu[$i], 'PreName'));
-                                yield Html::Division(
-                                    Html::Strong(__(get($menu[$i], 'FirstName')) . " " . __(get($menu[$i], 'MiddleName')) . " " . __(get($menu[$i], 'LastName')))
+                            yield Struct::Division(function () use ($menu, $i) {
+                                yield Struct::Super(get($menu[$i], 'PreName'));
+                                yield Struct::Division(
+                                    Struct::Strong(__(get($menu[$i], 'FirstName')) . " " . __(get($menu[$i], 'MiddleName')) . " " . __(get($menu[$i], 'LastName')))
                                 );
-                                yield Html::Sub(get($menu[$i], 'PostName'));
+                                yield Struct::Sub(get($menu[$i], 'PostName'));
                             }, ["class" => "title"]);
 
                             // Features (Assignees)
-                            yield Html::Division(function () use ($menu, $i) {
+                            yield Struct::Division(function () use ($menu, $i) {
                                 foreach (getValid($menu[$i], 'Assignees', []) as $assignee)
-                                    yield Html::Division(__($assignee)) . Html::$Break;
+                                    yield Struct::Division(__($assignee)) . Struct::$Break;
                             }, ["class" => "features"]);
 
                             // List of Items (Details)
-                            yield Html::Items(function () use ($menu, $i) {
+                            yield Struct::Items(function () use ($menu, $i) {
                                 foreach (getValid($menu[$i], 'Items', []) as $item) {
-                                    yield Html::Item(
-                                        Html::Italic(
+                                    yield Struct::Item(
+                                        Struct::Italic(
                                             __(get($item, 'Key')) . __(":"),
                                             null,
                                             ["class" => 'fa ' . get($item, "class"), "aria-hidden" => 'true']
@@ -171,7 +171,7 @@ class Members extends Module
                             }, ["class" => "list-group"]);
 
                             // "Read More" Link
-                            yield Html::Button($this->MoreButtonLabel, get($menu[$i], "Path"), ["target" => "blank"]);
+                            yield Struct::Button($this->MoreButtonLabel, get($menu[$i], "Path"), ["target" => "blank"]);
                         }, ["class" => "teammember", "data-aos" => "down"]); // Close the column div
                     }
                 }, ["class"=>"items"])

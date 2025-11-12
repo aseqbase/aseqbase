@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 /**
  * The main and basic module to implement any other collection module
  *@copyright All rights are reserved for MiMFa Development Group
@@ -74,7 +74,7 @@ class Collection extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Html::Style("
+		return parent::GetStyle() . Struct::Style("
 			.{$this->Name}{
 				display: grid;
 				gap: 3vmax;
@@ -162,35 +162,35 @@ class Collection extends Module
 					$img->Source = $p_image;
 					if (is_null($p_description))
 						if (is_null($p_buttons))
-							yield Html::Button(
+							yield Struct::Button(
 								(isEmpty($img->Source) ? "" : $img->ToString()) .
-								Html::Heading4($p_name),
+								Struct::Heading4($p_name),
 								$p_link,
 								["class" => "item col-sm"],
 								$this->Animation ? " data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed) . "' data-aos='{$this->Animation}'" : null
 							);
 						else
-							yield Html::Division(
-								Html::Link(
+							yield Struct::Division(
+								Struct::Link(
 									(isEmpty($img->Source) ? "" : $img->ToString()) .
-									Html::Heading4($p_name),
+									Struct::Heading4($p_name),
 									$p_link
 								) .
 								Convert::ToString($p_buttons) .
-								(isValid($p_link) ? Html::Button($this->MoreButtonLabel, $p_link, ["target" => "blank"]) : ""),
+								(isValid($p_link) ? Struct::Button($this->MoreButtonLabel, $p_link, ["target" => "blank"]) : ""),
 								["class" => "item col-sm"],
 								$this->Animation ? "data-aos='{$this->Animation}'" : null
 							);
 					else
-						yield Html::Division(
-							Html::Link(
+						yield Struct::Division(
+							Struct::Link(
 								(isEmpty($img->Source) ? "" : $img->ToString()) .
-								Html::Heading4($p_name),
+								Struct::Heading4($p_name),
 								$p_link
 							) .
-							Html::Division(Convert::ToExcerpt($p_description, 0, $this->ExcerptLength), ["class" => "description"]) .
+							Struct::Division(Convert::ToExcerpt($p_description, 0, $this->ExcerptLength), ["class" => "description"]) .
 							Convert::ToString($p_buttons) .
-							(isValid($p_link) ? Html::Button($this->MoreButtonLabel, $p_link, ["target" => "blank"]) : ""),
+							(isValid($p_link) ? Struct::Button($this->MoreButtonLabel, $p_link, ["target" => "blank"]) : ""),
 							["class" => "item col-sm"],
 							$this->Animation ? "data-aos='{$this->Animation}'" : null
 						);

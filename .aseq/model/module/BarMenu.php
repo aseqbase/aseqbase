@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 class BarMenu extends Module{
 	public $Items = null;
@@ -13,7 +13,7 @@ class BarMenu extends Module{
     public $Printable = false;
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 			.{$this->Name}{
 				color: var(--fore-color-output);
 				text-transform: uppercase;
@@ -161,9 +161,9 @@ class BarMenu extends Module{
                         elseif(($i <= $m) && (($i+1) >= $m)) $cls = $rtl?"right":"left";
                         elseif((($i-1) >= $m) && ($i >= $m)) $cls = $rtl?"left":"right";
                         elseif($ism =((($i-1) <= $m) && (($i+1) >= $m))) $cls = "middle";
-                        yield Html::Button(
-							Html::Media(
-								$this->AllowLabels?Html::Span(getBetween($item, "Title" , 'Name' )):null,
+                        yield Struct::Button(
+							Struct::Media(
+								$this->AllowLabels?Struct::Span(getBetween($item, "Title" , 'Name' )):null,
 								getBetween($item, "Image" , 'Icon')
 							)
 							, get($item, 'Path')??""

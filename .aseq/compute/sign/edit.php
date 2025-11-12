@@ -1,5 +1,5 @@
 <?php
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 use MiMFa\Library\Local;
 
@@ -60,7 +60,7 @@ try {
         } else
             success("Profile updated successfully!");
     } else
-        error(get($received, "Signature" )==\_::$User->Signature?"You did not change anythings!":"Something went wrong!" . Html::$Break . "You can not choice a duplicate signature!");
+        error(get($received, "Signature" )==\_::$User->Signature?"You did not change anythings!":"Something went wrong!" . Struct::$Break . "You can not choice a duplicate signature!");
 } catch (\Exception $ex) {
     error($ex);
 }

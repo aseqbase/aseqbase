@@ -1,11 +1,11 @@
 <?php namespace MiMFa\Component;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 
 class JsonLD{
 	public static function Create($data){
 		if(!isEmpty($data)) 
-        return Html::Script(is_iterable($data)?
+        return Struct::Script(is_iterable($data)?
 			("{
 			  '@context': `".(pop($data, "@context")??"https://schema.org")."`,
 			  '@type': `".(pop($data, "@type")??"Article")."`,
@@ -15,7 +15,7 @@ class JsonLD{
 	}
 
 	public static function Website($name = null, $url = null, $searchUrl = null){
-        return "<!---prepend:<\/head>--->".Html::Script(
+        return "<!---prepend:<\/head>--->".Struct::Script(
 			"{
 			  '@context': 'https://schema.org/',
 			  '@type': 'WebSite',
@@ -30,7 +30,7 @@ class JsonLD{
 		,['type' =>'application/ld+json'])."<!---prepend--->";
 	}
 	public static function Article($title = null, $excerpt = null, $image = null, $author = ["Name" => null, "Url" =>null, "Image" =>null],$publisher = ["Name" => null, "Url" =>null, "Image" =>null], $datePublished = null, $dateModified = null, $type="Article"){
-        return "<!---prepend:<\/head>--->".Html::Script(
+        return "<!---prepend:<\/head>--->".Struct::Script(
 			"{
 			  '@context': 'https://schema.org',
 			  '@type': `$type`,

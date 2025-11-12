@@ -2,7 +2,7 @@
 
 namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 module("Separator"); // Assuming this function is defined elsewhere
 
@@ -15,7 +15,7 @@ class Part extends Module
 
     public function GetStyle()
     {
-        return Html::Style("
+        return Struct::Style("
             .{$this->Name} {
                 font-size: var(--size-1);
                 padding: 3vmax; /* Simplified padding */
@@ -39,12 +39,12 @@ class Part extends Module
     {
         $titleHtml = $this->GetTitle(); // Assuming getTitle() returns HTML
 
-        $rowContent = Html::Rack(function () {
+        $rowContent = Struct::Rack(function () {
             $descriptionHtml = $this->GetDescription(["class"=> "col-md description"]); // Assuming getDescription() returns HTML
 
             $imageHtml = "";
             if (isValid($this->Image)) {
-                $imageHtml = Html::Division("", ["class"=> "col-md-4 image", "style" => "background-image: url('{$this->Image}')"]);
+                $imageHtml = Struct::Division("", ["class"=> "col-md-4 image", "style" => "background-image: url('{$this->Image}')"]);
             }
 
             return $descriptionHtml . $imageHtml;

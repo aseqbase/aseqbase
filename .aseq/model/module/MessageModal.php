@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 module("Modal");
 class MessageModal extends Modal{
@@ -14,7 +14,7 @@ class MessageModal extends Modal{
 		$this->Image = $image;
 	}
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 		");
 	}
 }

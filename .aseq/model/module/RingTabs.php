@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 class RingTabs extends Module{
 	public $Name = "RingTabs";
@@ -30,7 +30,7 @@ class RingTabs extends Module{
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 			.{$this->Name} {
 				min-height: 50vh;
 				display: flex;
@@ -181,31 +181,31 @@ class RingTabs extends Module{
 						$more = getBetween($v, "Button","More");
 						$pa = getBetween($v, 'Path');
 						$this->AllowTab = $desc||$more;
-						$btns[] = Html::Link(
-							Html::Division(
-								Html::Media("", getBetween($v,'Image' , "Icon")),
+						$btns[] = Struct::Link(
+							Struct::Division(
+								Struct::Media("", getBetween($v,'Image' , "Icon")),
 								["class"=>"button"]
-							).Html::Tooltip(getBetween($v,'Name' , "Title")),
+							).Struct::Tooltip(getBetween($v,'Name' , "Title")),
 							$this->AllowTab?"#tab$i":$pa,
 							$this->AllowTab?["data-target"=>".tab", "data-toggle"=>'tab']:[]
 						);
 						
-						if($this->AllowTab) $tags[] = Html::Division(
-							Html::Heading1(get($v,'Title' ), $pa, ["class"=>"title" ]).
-								Html::Division($desc.$more, ["class"=>"description" ]), 
+						if($this->AllowTab) $tags[] = Struct::Division(
+							Struct::Heading1(get($v,'Title' ), $pa, ["class"=>"title" ]).
+								Struct::Division($desc.$more, ["class"=>"description" ]), 
 							["class"=>"tab fade".($i===0?' active view show':''), "Id" =>"tab$i"]
 						);
 					}
 				});
-				yield Html::Division(
-					Html::Division(
-						Html::Division($btns,["class"=>"center"]),
+				yield Struct::Division(
+					Struct::Division(
+						Struct::Division($btns,["class"=>"center"]),
 						["class"=>"menu {$this->MenuClass}"]
 					),
 					["class"=>"col-md", "data-aos"=>"zoom-out", "data-aos-duration"=>"1000"]
 				);
-				if($tags) yield Html::Division(
-					Html::Division($tags,["class"=>"tabs"]),
+				if($tags) yield Struct::Division(
+					Struct::Division($tags,["class"=>"tabs"]),
 					["class"=>$this->TabsClass, "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]
 				);
 			});
@@ -213,7 +213,7 @@ class RingTabs extends Module{
 	}
 
 	public function GetScript(){
-		return parent::GetScript().(count($this->Items) > 0? Html::Script("
+		return parent::GetScript().(count($this->Items) > 0? Struct::Script("
 			$(document).ready(function(){
 				".(isValid($this->Path)?"$('.{$this->Name} .menu>.center:before').click(function () { load('{$this->Path}'); });":"")."
 				const bselector = '.{$this->Name} .menu>.center>a';

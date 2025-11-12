@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 class UserMenu extends Module
 {
@@ -21,7 +21,7 @@ class UserMenu extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Html::Style("
+		return parent::GetStyle() . Struct::Style("
 			.{$this->Name} .menu{
 				overflow: hidden;
 			}
@@ -96,20 +96,20 @@ class UserMenu extends Module
 				);
 		}
 		if (count($this->Items) > 0) {
-			return Html::Button(Html::Media(null, \_::$User->Image??"user"), $this->Path, ["class" => "menu"]) .
-				Html::Division(function () {
+			return Struct::Button(Struct::Media(null, \_::$User->Image??"user"), $this->Path, ["class" => "menu"]) .
+				Struct::Division(function () {
 					foreach ($this->Items as $item)
 						if (is_array($item))
 							if (isValid($item, 'Path'))
-								yield Html::Button(
-									doValid(fn($v)=>$v?Html::Image($v):"", $item,"Image").
-									Html::Division(__(getBetween($item, "Name", "Title"))),
+								yield Struct::Button(
+									doValid(fn($v)=>$v?Struct::Image($v):"", $item,"Image").
+									Struct::Division(__(getBetween($item, "Name", "Title"))),
 									get($item, 'Path'),
 									get($item, "Attributes")
 								);
 							else
-								yield Html::Span(
-									Html::Division(__(getBetween($item, "Name", "Title")), ["style" => (isValid($item, 'Image') ? ("background-image: url('" . $item['Image'] . "')") : "")]),
+								yield Struct::Span(
+									Struct::Division(__(getBetween($item, "Name", "Title")), ["style" => (isValid($item, 'Image') ? ("background-image: url('" . $item['Image'] . "')") : "")]),
 									null,
 									get($item, "Attributes")
 								);

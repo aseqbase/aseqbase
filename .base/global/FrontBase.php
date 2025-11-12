@@ -1,7 +1,7 @@
 <?php
 
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Internal;
 use MiMFa\Library\Local;
 use MiMFa\Library\Revise;
@@ -150,7 +150,7 @@ abstract class FrontBase
 	public function __construct()
 	{
 		Revise::Load($this);
-		$this->Libraries[] = Html::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
+		$this->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
 		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
 		if ($this->DetectMode && is_null($this->SwitchMode)) {
@@ -327,10 +327,10 @@ abstract class FrontBase
 		$id = "S_" . getID(true);
 		$intents = Convert::ToString($intents, ",", "{1}", "[{0}]", "[]");
 		if (isStatic($callback))
-			response(Html::Script("$start for(item of $intents)(" . $callbackScript . ")(" .
+			response(Struct::Script("$start for(item of $intents)(" . $callbackScript . ")(" .
 				Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id" => $id]));
 		else
-			response(Html::Script(
+			response(Struct::Script(
 				$callback ? "$start" .
 				"for(item of $intents)sendInternal(null,{\"" . Internal::Set($callback) . '":item.outerHTML},' .
 				"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
@@ -362,7 +362,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => response(Html::Script($this->MakeSetScript($selector, $handler, $args, false)))
+			fn() => response(Struct::Script($this->MakeSetScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -391,7 +391,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeDeleteScript($selector, false)))
+			fn() => self::Append("body", Struct::Script($this->MakeDeleteScript($selector, false)))
 		);
 	}
 	/**
@@ -413,7 +413,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeBeforeScript($selector, $handler, $args, false)))
+			fn() => self::Append("body", Struct::Script($this->MakeBeforeScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -443,7 +443,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeAfterScript($selector, $handler, $args, false)))
+			fn() => self::Append("body", Struct::Script($this->MakeAfterScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -474,7 +474,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeFillScript($selector, $handler, $args, false)))
+			fn() => self::Append("body", Struct::Script($this->MakeFillScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -505,7 +505,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakePrependScript($selector, $handler, $args, false)))
+			fn() => self::Append("body", Struct::Script($this->MakePrependScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -537,7 +537,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => self::Append("body", Html::Script($this->MakeAppendScript($selector, $handler, $args, false)))
+			fn() => self::Append("body", Struct::Script($this->MakeAppendScript($selector, $handler, $args, false)))
 		);
 	}
 	/**

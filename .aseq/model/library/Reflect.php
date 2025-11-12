@@ -170,11 +170,11 @@ class Reflect{
             if(is_null($newValues)) $newValues = receivePost(null);
             $objectOrReflection = self::Update($objectOrReflection, $newValues);
             $c = count($objectOrReflection);
-            if($c < 1) return Html::Warning("Here is no unsaved change!");
+            if($c < 1) return Struct::Warning("Here is no unsaved change!");
             else $c = self::Write($objectOrReflection);
-            if($c < 1) return Html::Warning("Here is not anythings to update!");
-            else return Html::Success("'$c' field(s) of data updated successfully!");
-        } catch(\Exception $ex) { return Html::Error($ex); }
+            if($c < 1) return Struct::Warning("Here is not anythings to update!");
+            else return Struct::Success("'$c' field(s) of data updated successfully!");
+        } catch(\Exception $ex) { return Struct::Error($ex); }
     }
 }
 

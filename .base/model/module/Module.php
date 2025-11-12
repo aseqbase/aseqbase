@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 library("Style");
 library("Convert");
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 /**
@@ -173,10 +173,10 @@ class Module extends \Base
           parent::__construct();
           $this->Router->On()->Get()->Unset()->Route(fn() => Convert::ToString(function () {
                if ($this->Styles === null) yield $this->GetStyle();
-               elseif ($this->Styles) yield Html::Style($this->Styles);
+               elseif ($this->Styles) yield Struct::Style($this->Styles);
                yield $this->GetOpenTag() . $this->Get() . $this->GetCloseTag();
                if ($this->Scripts === null) yield $this->GetScript();
-               elseif ($this->Scripts) yield Html::Script($this->Scripts);
+               elseif ($this->Scripts) yield Struct::Script($this->Scripts);
           }));
      }
 
@@ -189,7 +189,7 @@ class Module extends \Base
           $st = null;
           if ($this->Style) $st = is_string($this->Style) ? $this->Style : $this->Style->Get();
           if ($tag = $tag ?? $this->Tag)
-               return join("", ["<$tag ", Html::Attributes($this->GetDefaultAttributes(), $this->Attachments), $st ? " style=\"{$st}\">" : ">"]);
+               return join("", ["<$tag ", Struct::Attributes($this->GetDefaultAttributes(), $this->Attachments), $st ? " style=\"{$st}\">" : ">"]);
           elseif ($st) return "<style>.{$this->Name}{ $st }</style>";
           return null;
      }
@@ -246,7 +246,7 @@ class Module extends \Base
      public function GetTitle($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Html::Attributes([["class"=> $this->TitleClass], $attrs], $atcm);
+               $attrs = Struct::Attributes([["class"=> $this->TitleClass], $attrs], $atcm);
                if (isValid($this->Title)) {
                     yield (isValid($this->TitleTag) ? "<" . $this->TitleTag . " $attrs>" : "");
                     if (is_string($this->Title))
@@ -262,7 +262,7 @@ class Module extends \Base
      public function GetDescription($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Html::Attributes([["class"=> $this->DescriptionClass], $attrs], $atcm);
+               $attrs = Struct::Attributes([["class"=> $this->DescriptionClass], $attrs], $atcm);
                if (isValid($this->Description)) {
                     yield (isValid($this->DescriptionTag) ? "<" . $this->DescriptionTag . " $attrs>" : "");
                     if (is_string($this->Description))
@@ -278,11 +278,11 @@ class Module extends \Base
      public function GetContent($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Html::Attributes([["class"=> $this->ContentClass], $attrs], $atcm);
+               $attrs = Struct::Attributes([["class"=> $this->ContentClass], $attrs], $atcm);
                if (isValid($this->Content)) {
                     yield (isValid($this->ContentTag) ? "<" . $this->ContentTag . " $attrs>" : "");
                     if (is_string($this->Content))
-                         yield __(Html::Convert($this->Content));
+                         yield __(Struct::Convert($this->Content));
                     elseif (is_callable($this->Content))
                          yield ($this->Content)($attrs);
                     else

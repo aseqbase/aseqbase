@@ -35,4 +35,3 @@ class Info extends AseqInfo{
 		array("Name" => "Forum", "Path"=> "/chat", "Image" => "comment", "Icon"=> "comments")
 	];
 }
-?>

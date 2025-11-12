@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Local;
 module("Collection");
 /**
@@ -68,7 +68,7 @@ class Gallery extends Collection{
 	public $Animation = "flip-up";
 
 	public function GetStyle(){
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name} {
 			}
 
@@ -174,14 +174,14 @@ class Gallery extends Collection{
                 $img->Source = $p_image;
                 $clickact = $viewer->InitializeScript($p_title, $p_description, ($p_link??$p_path??$p_image),$p_buttons, getFullUrl($p_download??$p_path??$p_link??$p_image));
                 $img->Attributes = ["onclick"=>$clickact];
-			yield Html::Division(
+			yield Struct::Division(
 				$img->ToString().
-				Html::Division(
-					Html::Heading4($p_name).
-					Html::Paragraph($p_description),
+				Struct::Division(
+					Struct::Heading4($p_name).
+					Struct::Paragraph($p_description),
 				["class"=>"description" ]).
-				(isValid($p_path)? Html::Button($this->MoreButtonLabel, $clickact, ["class"=>"btn outline btn block"]):null).
-				Html::Division(__($p_content??$p_description, styling:true),["class"=>"hide"]),
+				(isValid($p_path)? Struct::Button($this->MoreButtonLabel, $clickact, ["class"=>"btn outline btn block"]):null).
+				Struct::Division(__($p_content??$p_description, styling:true),["class"=>"hide"]),
 				["class"=>"item item-$i col-md"], $this->Animation? "data-aos-delay='".($i % $this->MaximumColumns*\_::$Front->AnimationSpeed)."' data-aos='{$this->Animation}'":null);
                 if(++$i % $this->MaximumColumns === 0) yield "</div>";
             }

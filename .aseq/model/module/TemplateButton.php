@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 
 use MiMFa\Component\GeneralStyle;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 class TemplateButton extends Module{
 	public $Tag = "button";
@@ -23,12 +23,12 @@ class TemplateButton extends Module{
 		switchStyleId = '{$this->Name}-switch-styles';
 		switchStyle = document.getElementById(switchStyleId);
 		switchContent = ".Script::Convert($isDark?
-			Html::Media($this->DarkLabel, $this->DarkIcon):
-			Html::Media($this->LightLabel, $this->LightIcon)
+			Struct::Media($this->DarkLabel, $this->DarkIcon):
+			Struct::Media($this->LightLabel, $this->LightIcon)
 		).";
 		content = ".Script::Convert($isDark?
-			Html::Media($this->LightLabel, $this->LightIcon):
-			Html::Media($this->DarkLabel, $this->DarkIcon)
+			Struct::Media($this->LightLabel, $this->LightIcon):
+			Struct::Media($this->DarkLabel, $this->DarkIcon)
 		).";
 		if(switchStyle) switchStyle.remove();
 		else {
@@ -48,13 +48,13 @@ class TemplateButton extends Module{
 	public function Get(){
 		return $this->GetTitle().$this->GetDescription().
 		(\_::$Front->GetMode() < 0?
-			Html::Media($this->LightLabel, $this->LightIcon):
-			Html::Media($this->DarkLabel, $this->DarkIcon)
+			Struct::Media($this->LightLabel, $this->LightIcon):
+			Struct::Media($this->DarkLabel, $this->DarkIcon)
 	    ).
 		$this->GetContent();
     }
 	public function GetScript(){
-		return parent::GetScript().Html::Script("var {$this->Name}_SwitchMode = ".(\_::$Front->SwitchMode?"true":"false").";");
+		return parent::GetScript().Struct::Script("var {$this->Name}_SwitchMode = ".(\_::$Front->SwitchMode?"true":"false").";");
     }
 }
 ?>

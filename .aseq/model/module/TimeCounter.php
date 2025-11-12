@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 
 module("Counter");
@@ -17,7 +17,7 @@ class TimeCounter extends Counter{
 	}
 
 	public function GetContent($attrs = null){
-		return Html::Element(gmdate("H:i:s", $this->From), $this->ContentTag, ["class"=>"content"], $attrs);
+		return Struct::Element(gmdate("H:i:s", $this->From), $this->ContentTag, ["class"=>"content"], $attrs);
 	}
 }
 ?>

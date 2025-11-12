@@ -1,6 +1,6 @@
 <?php
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 $user = \_::$User->Get();
 if (isValid($user)) {
@@ -9,11 +9,11 @@ if (isValid($user)) {
     $form = new \MiMFa\Module\Form();
     $form->Title = $user["Name" ];
     $form->Description = between($user["Bio" ], "A New User!") .
-        Html::Rack(join(PHP_EOL, [
-            Html::Button("Dashboard", \_::$User->DashboardHandlerPath, ["class"=> "col-lg"]),
-            Html::Button("Edit Profile", \_::$User->EditHandlerPath, ["class"=> "col-lg"]),
-            Html::Button("Reset Password", \_::$User->RecoverHandlerPath, ["class"=> "col-lg"]),
-            Html::Button("Sign Out", \_::$User->OutHandlerPath, ["class"=> "col-lg"])
+        Struct::Rack(join(PHP_EOL, [
+            Struct::Button("Dashboard", \_::$User->DashboardHandlerPath, ["class"=> "col-lg"]),
+            Struct::Button("Edit Profile", \_::$User->EditHandlerPath, ["class"=> "col-lg"]),
+            Struct::Button("Reset Password", \_::$User->RecoverHandlerPath, ["class"=> "col-lg"]),
+            Struct::Button("Sign Out", \_::$User->OutHandlerPath, ["class"=> "col-lg"])
         ]));
     $form->Image = $user["Image" ];
     $form->BackLabel = "More";
@@ -43,7 +43,7 @@ if (isValid($user)) {
 
    $form->Render();
 
-   echo Html::Style("
+   echo Struct::Style("
     .{$form->Name} .image {
         border-radius: 100%;
         margin: var(--size-1) 25%;

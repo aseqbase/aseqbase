@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 
 module("Form");
@@ -45,7 +45,7 @@ class SignInForm extends Form{
 	}
 
 	public function GetStyle(){
-		if($this->AllowDecoration) return ((\_::$User->GetAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Html::Style("
+		if($this->AllowDecoration) return ((\_::$User->GetAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Struct::Style("
 			.{$this->Name} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}
@@ -91,26 +91,26 @@ class SignInForm extends Form{
 	public function GetFields(){
         if($this->AllowInternalMethod){
 			yield $this->SignatureValue?
-				Html::HiddenInput("Signature", $this->SignatureValue):
-				Html::LargeSlot(
-					Html::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
-					Html::TextInput("Signature", $this->SignatureValue, ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
+				Struct::HiddenInput("Signature", $this->SignatureValue):
+				Struct::LargeSlot(
+					Struct::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
+					Struct::TextInput("Signature", $this->SignatureValue, ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
 				, ["class"=>"field col"]);
 			yield $this->PasswordValue?
-				Html::HiddenInput("Password", $this->PasswordValue):Html::LargeSlot(
-					Html::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
-					Html::SecretInput("Password", $this->PasswordValue, ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"password"])
+				Struct::HiddenInput("Password", $this->PasswordValue):Struct::LargeSlot(
+					Struct::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
+					Struct::SecretInput("Password", $this->PasswordValue, ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"password"])
 				, ["class"=>"field col"]);
 		}
 		yield from parent::GetFields();
     }
 	public function GetFooter(){
         return parent::GetFooter()
-			.Html::LargeSlot(
-				Html::Link($this->SignUpLabel, $this->SignUpPath??\_::$User->UpHandlerPath)
+			.Struct::LargeSlot(
+				Struct::Link($this->SignUpLabel, $this->SignUpPath??\_::$User->UpHandlerPath)
 			, ["class"=>"col-lg-12"])
-			.Html::LargeSlot(
-				Html::Link($this->RecoverLabel, $this->RecoverPath??\_::$User->RecoverHandlerPath)
+			.Struct::LargeSlot(
+				Struct::Link($this->RecoverLabel, $this->RecoverPath??\_::$User->RecoverHandlerPath)
 			, ["class"=>"col-lg-12"]);
     }
 

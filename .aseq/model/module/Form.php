@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
 
@@ -19,12 +19,15 @@ class Form extends Module
 	 */
 	public $Template = null;
 	public $Access = 0;
+	public $TargetKey = "Target";
+	public $Target = null;
 	public $IsActive = true;
 	public $Path = null;
 	public $Action = null;
 	public $Image = null;
 	public $Title = "Form";
 	public $SubmitLabel = "Submit";
+	public $SubmitValue = null;
 	public $Buttons = null;
 	public $ResetLabel = "Reset";
 	public $CancelLabel = null;
@@ -48,7 +51,7 @@ class Form extends Module
 	public $AllowFooter = true;
 	public $Class = "container";
 	public $ContentClass = "col-lg-6";
-	public $UseAjax = true;
+	public $Interaction = true;
 
 	/**
 	 * A function to check received values before accepting
@@ -81,7 +84,7 @@ class Form extends Module
 
 	/**
 	 * Create the module
-     * @param string|null|array|callable $action The action reference path
+	 * @param string|null|array|callable $action The action reference path
 	 */
 	public function __construct($title = null, $action = null, $method = null, mixed $children = [], $description = null, $image = null)
 	{
@@ -128,16 +131,16 @@ class Form extends Module
 		if ($this->BlockTimeout < 1)
 			return false;
 		$remains = getTimer();
-		if ($remains>0) {
+		if ($remains > 0) {
 			$this->Status = 403;
-			return $this->GetError("Please try about '".Html::Timer($remains / 1000,0, "reload();")."' later!");
-		}
-		else return false;
+			return $this->GetError("Please try about '" . Struct::Timer($remains / 1000, 0, "reload();", attributes: ["class" => "be inline"]) . "' later!");
+		} else
+			return false;
 	}
 
 	/**
 	 * Set the main properties of module
-     * @param string|null|array|callable $action The action reference path
+	 * @param string|null|array|callable $action The action reference path
 	 */
 	public function Set($title = null, $action = null, $method = null, mixed $children = [], $description = null, $image = null)
 	{
@@ -153,7 +156,7 @@ class Form extends Module
 	public function GetStyle()
 	{
 		if ($this->AllowDecoration) {
-			$style = parent::GetStyle() . Html::Style("
+			$style = parent::GetStyle() . Struct::Style("
 				.{$this->Name} .rack {
 					align-items: center;
 				}
@@ -251,7 +254,7 @@ class Form extends Module
 	}
 	public function GetFieldsDefaultStyle()
 	{
-		return Html::Style("
+		return Struct::Style("
 				.{$this->Name} .field {
 					" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 					" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -339,7 +342,7 @@ class Form extends Module
 	}
 	public function GetFieldsBothStyle()
 	{
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -402,7 +405,7 @@ class Form extends Module
 	}
 	public function GetFieldsHorizontalStyle()
 	{
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -475,7 +478,7 @@ class Form extends Module
 	}
 	public function GetFieldsVerticalStyle()
 	{
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -553,7 +556,7 @@ class Form extends Module
 	}
 	public function GetFieldsTableStyle()
 	{
-		return Html::Style("
+		return Struct::Style("
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -629,7 +632,7 @@ class Form extends Module
 			}
 		");
 	}
-	
+
 	public function Get()
 	{
 		if (!\_::$User->GetAccess($this->Access))
@@ -647,7 +650,7 @@ class Form extends Module
 						if ($v instanceof \Base)
 							return $v->ToString();
 						elseif (is_array($v))
-							return Html::Field(
+							return Struct::Field(
 								type: pop($v, "Type"),
 								key: pop($v, "Key"),
 								value: pop($v, "Value"),
@@ -660,7 +663,7 @@ class Form extends Module
 						else
 							return $v;
 					else
-						return Html::Field(
+						return Struct::Field(
 							type: null,
 							key: $k,
 							value: $v,
@@ -674,7 +677,7 @@ class Form extends Module
 					if (is_int($k) && isEmpty($type))
 						return $v;
 					else
-						return Html::Field(
+						return Struct::Field(
 							type: $type,
 							key: $k,
 							value: $v,
@@ -687,50 +690,55 @@ class Form extends Module
 			$this->Status = $this->Status ?? 200;
 			if ($this->AllowDecoration)
 				return
-					Html::Rack(
-						($this->AllowHeader ? Html::LargeSlot(
-							Html::Media(null, $this->Image, ["class" => "form-image"]) .
+					Struct::Rack(
+						($this->AllowHeader ? Struct::LargeSlot(
+							Struct::Media(null, $this->Image, ["class" => "form-image"]) .
 							$this->GetHeader() .
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
-							(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Address->Host, ["class" => "back-button"]) : "")
-							, ["class" => "header", ...($this->AllowAnimate?["data-aos"=>"fade-left"]:[])]
+							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$Address->Host, ["class" => "back-button"]) : "")
+							,
+							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => "fade-left"] : [])]
 						) : "") .
-						Html::LargeSlot(
-							Html::Form(
-								Html::Rack(
+						Struct::LargeSlot(
+							Struct::Form(
+								Struct::Rack(
+									($this->Target ? Struct::HiddenInput($this->TargetKey, $this->Target) : "") .
 									($this->AllowContent ? $this->GetContent() : "") .
 									Convert::ToString($this->GetFields()),
 									["class" => "group fields"]
 								) .
-								Html::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
+								Struct::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
 								,
 								$src,
 								["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
 							) .
 							($this->AllowFooter ? $this->GetFooter() : "")
 							,
-							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate?["data-aos"=>"fade-right"]:[])]
+							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate ? ["data-aos" => "fade-right"] : [])]
 						)
 					);
 			else
 				return
 					(
 						$this->AllowHeader ?
-						Html::Media(null, $this->Image, ["class" => "image"]) .
+						Struct::Media(null, $this->Image, ["class" => "image"]) .
 						$this->GetHeader() .
 						$this->GetTitle(["class" => "form-title"]) .
 						$this->GetDescription(["class" => "form-description"]) .
-						(isValid($this->BackLabel) ? Html::Link($this->BackLabel, $this->BackPath ?? \_::$Address->Host, ["class" => "back-button"]) : "")
+						(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$Address->Host, ["class" => "back-button"]) : "")
 						: ""
 					) .
-					Html::Form(
+					Struct::Form(
+						($this->Target ? Struct::HiddenInput($this->TargetKey, $this->Target) : "") .
 						($this->AllowContent ? $this->GetContent() : "") .
 						Convert::ToString($this->GetFields()) .
-						Html::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"]),
+						Struct::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"]),
 						$src,
 						["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
-					, ...($this->AllowAnimate?["data-aos"=>"fade-left"]:[])) .
+						,
+						...($this->AllowAnimate ? ["data-aos" => "fade-left"] : [])
+					) .
 					($this->AllowFooter ? $this->GetFooter() : "");
 		}
 		return null;
@@ -751,10 +759,10 @@ class Form extends Module
 		if (isValid($this->Buttons))
 			yield $this->Buttons;
 		if ($this->Method && $this->IsActive) {
-			yield (isValid($this->SubmitLabel) ? Html::SubmitButton($this->SubmitLabel, ["Name" => "submit", "class"=>"main"]) : "");
-			yield (isValid(object: $this->ResetLabel) ? Html::ResetButton($this->ResetLabel, ["Name" => "reset"]) : "");
+			yield (isValid($this->SubmitLabel) ? Struct::SubmitButton($this->SubmitLabel, $this->SubmitValue, ["Name" => "submit", "class" => "main"]) : "");
+			yield (isValid(object: $this->ResetLabel) ? Struct::ResetButton($this->ResetLabel, null, ["Name" => "reset"]) : "");
 		}
-		yield (isValid($this->CancelLabel) ? Html::Button($this->CancelLabel, $this->CancelPath ?? \_::$Address->Host, ["Name" => "cancel"]) : "");
+		yield (isValid($this->CancelLabel) ? Struct::Button($this->CancelLabel, $this->CancelPath ?? \_::$Address->Host, ["Name" => "cancel"]) : "");
 	}
 	public function GetFooter()
 	{
@@ -762,9 +770,9 @@ class Form extends Module
 	}
 	public function GetScript()
 	{
-		return parent::GetScript() . Html::Script("
+		return parent::GetScript() . Struct::Script("
 			$(document).ready(function () {
-				" . ($this->UseAjax ? "handleForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
+				" . ($this->Interaction ? "handleForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
 				$('.{$this->Name} :is(input, select, textarea)').on('focus', function () {
 					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-output)');
 				});
@@ -778,25 +786,25 @@ class Form extends Module
 
 	public function GetMessage($msg, ...$attr)
 	{
-		return Html::Result($msg, attributes: $attr);
+		return Struct::Result($msg, attributes: $attr);
 	}
 	public function GetSuccess($msg = null, ...$attr)
 	{
 		$this->Result = $this->Result ?? true;
 		$this->Status = $this->Status ?? 200;
-		return Html::Success($msg ?? $this->SuccessHandler, ...$attr);
+		return Struct::Success($msg ?? $this->SuccessHandler, ...$attr);
 	}
 	public function GetWarning($msg = null, ...$attr)
 	{
 		$this->Result = $this->Result ?? null;
 		$this->Status = $this->Status ?? 500;
-		return Html::Warning($msg ?? $this->WarningHandler, ...$attr);
+		return Struct::Warning($msg ?? $this->WarningHandler, ...$attr);
 	}
 	public function GetError($msg = null, ...$attr)
 	{
 		$this->Result = $this->Result ?? false;
 		$this->Status = $this->Status ?? 400;
-		return Html::Error($msg ?? $this->ErrorHandler, ...$attr);
+		return Struct::Error($msg ?? $this->ErrorHandler, ...$attr);
 	}
 
 	public function Post()
@@ -878,16 +886,16 @@ class Form extends Module
 				$module->AllowDownload = false;
 			$module->Content = part(\_::$User->InHandlerPath, ["ContentClass" => ""], print: false);
 			if ($this->SigningLabel)
-				return $module->Handle() . Html::Center(
-					Html::Button(
+				return $module->Handle() . Struct::Center(
+					Struct::Button(
 						$this->SigningLabel,
 						$module->ShowScript()
 					),
 					["style" => "padding: var(--size-5); background-color: #88888808;"]
 				);
 		} elseif ($this->Signing)
-			return Html::Center(
-				($this->SigningLabel ? Html::Heading4($this->SigningLabel, \_::$User->InHandlerPath) : "")
+			return Struct::Center(
+				($this->SigningLabel ? Struct::Heading4($this->SigningLabel, \_::$User->InHandlerPath) : "")
 				. (is_bool($this->Signing) ? "" : Convert::By($this->Signing))
 			);
 	}

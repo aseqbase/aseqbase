@@ -1,5 +1,5 @@
 <?php
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 $Name = pop($data, 'Name');
 $Title = pop($data, 'Title');
 
@@ -16,7 +16,7 @@ pod($module, $data);
 $module->Name = $name;// To do not change the name of module
 $module->Render();
 if ($items) {
-    response(Html::Style("
+    response(Struct::Style("
         .categories{
             display:flex;
             justify-content: center;
@@ -36,12 +36,12 @@ if ($items) {
         .categories .span:hover{
             box-shadow:var(--shadow-3);
         }
-    ").Html::Division(loop($items, function ($v) use ($Root) {
+    ").Struct::Division(loop($items, function ($v) use ($Root) {
                 $n = get($v, "Name");
                 $t = get($v, "Title") ?? $n;
                 $p = getBetween($v, "Path", "Route") ?? $n;
                 $tt = get($v, "Description");
-                return Html::Span($t, $Root . ltrim($p, "/\\"), [
+                return Struct::Span($t, $Root . ltrim($p, "/\\"), [
                     ...($tt ? ["ToolTip" => $tt] : [])
                 ]);
             }),

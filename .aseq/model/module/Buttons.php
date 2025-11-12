@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 module("Collection");
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
 /**
  * To show a gallery of images
@@ -68,7 +68,7 @@ class Buttons extends Collection
 
 	public function GetStyle()
 	{
-		return Html::Style("
+		return Struct::Style("
 			.$this->Name {
 			}
 
@@ -178,11 +178,11 @@ class Buttons extends Collection
 				yield "<div class='item item-$i  col-md' " . ($this->Animation ? ("data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed / 2) . "' data-aos='{$this->Animation}'") : null) . ">";
 				yield $img->ToString();
 				yield "<div class='description'>";
-				yield Html::Heading4($p_name, true, false);
-				yield Html::Paragraph($p_description);
+				yield Struct::Heading4($p_name, true, false);
+				yield Struct::Paragraph($p_description);
 				if (isValid($p_path))
-					yield Html::Button($this->MoreButtonLabel, $clickact, ["class"=> "btn outline btn block"]);
-				yield Html::Division(__($p_content ?? $p_description, true, false), ["class"=> "hide"]);
+					yield Struct::Button($this->MoreButtonLabel, $clickact, ["class"=> "btn outline btn block"]);
+				yield Struct::Division(__($p_content ?? $p_description, true, false), ["class"=> "hide"]);
 				yield "</div>
 			</div>";
 				if (++$i % $this->MaximumColumns === 0)

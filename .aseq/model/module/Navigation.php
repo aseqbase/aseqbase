@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 use \MiMFa\Library\Style;
 use \MiMFa\Library\Convert;
 /**
@@ -197,7 +197,7 @@ class Navigation extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Html::Style("
+		return parent::GetStyle() . Struct::Style("
 			.{$this->Name}{
 				padding: 10px;
 				margin: 0px;
@@ -318,41 +318,41 @@ class Navigation extends Module
 			yield "<div class='contents'>";
 			$maxLimit = $this->AllowCount ? min($this->Count, $this->MaxLimit) : $this->MaxLimit;
 			if ($this->MinLimit < $maxLimit)
-				yield Html::Division(
-					Html::RangeInput(null, $this->Limit, $this->MinLimit, $maxLimit, ["onchange" => "load('/" . \_::$Address->Direction . "?" . preg_replace("/\&{$this->LimitRequest}\=\d+/", "", \_::$Address->Query ?? "") . "&{$this->LimitRequest}='+this.value);"]) .
-					($this->AllowCount ? Html::Span($this->Count) : 0)
+				yield Struct::Division(
+					Struct::RangeInput(null, $this->Limit, $this->MinLimit, $maxLimit, ["onchange" => "load('/" . \_::$Address->Direction . "?" . preg_replace("/\&{$this->LimitRequest}\=\d+/", "", \_::$Address->Query ?? "") . "&{$this->LimitRequest}='+this.value);"]) .
+					($this->AllowCount ? Struct::Span($this->Count) : 0)
 					,
 					["class" => "rangepanel"]
 				);
 
-			yield Html::OpenTag("div", ["class" => "buttonspanel"]);
+			yield Struct::OpenTag("div", ["class" => "buttonspanel"]);
 			if (isValid($this->BackLink))
-				yield Html::Link(Html::Icon("arrow-$left", null, ["class" => "item"]), $this->BackLink, ["class" => "item back"]);
+				yield Struct::Link(Struct::Icon("arrow-$left", null, ["class" => "item"]), $this->BackLink, ["class" => "item back"]);
 			elseif ($this->Page > 1) {
 				if ($this->AllowFirst && $fromP > 1)
-					yield Html::Link($query[$this->PageRequest] = 1, $url . http_build_query($query), ["class" => "item first"]);
+					yield Struct::Link($query[$this->PageRequest] = 1, $url . http_build_query($query), ["class" => "item first"]);
 				$query[$this->PageRequest] = $this->Page - 1;
-				yield Html::Link(Html::Icon("arrow-$left", null, ["class" => "item"]), $url . http_build_query($query), ["class" => "item back"]);
+				yield Struct::Link(Struct::Icon("arrow-$left", null, ["class" => "item"]), $url . http_build_query($query), ["class" => "item back"]);
 			}
 
 			if ($this->Numbers > 1)
 				for ($i = $fromP; $i <= $toP; $i++)
 					if ($i == $this->Page)
-						yield Html::Span($i, null, ["class" => "item active"]);
+						yield Struct::Span($i, null, ["class" => "item active"]);
 					else {
 						$query[$this->PageRequest] = $i . "";
-						yield Html::Link($i, $url . http_build_query($query), ["class" => "item"]);
+						yield Struct::Link($i, $url . http_build_query($query), ["class" => "item"]);
 					}
 
 			if (isValid($this->NextLink))
-				yield Html::Link(Html::Icon("arrow-$right", null, ["class" => "item"]), $this->NextLink, ["class" => "item next"]);
+				yield Struct::Link(Struct::Icon("arrow-$right", null, ["class" => "item"]), $this->NextLink, ["class" => "item next"]);
 			elseif ($this->Page * $this->Limit < $this->Count) {
 				$query[$this->PageRequest] = $this->Page + 1;
-				yield Html::Link(Html::Icon("arrow-$right", null, ["class" => "item"]), $url . http_build_query($query), ["class" => "item next"]);
+				yield Struct::Link(Struct::Icon("arrow-$right", null, ["class" => "item"]), $url . http_build_query($query), ["class" => "item next"]);
 				if ($this->AllowLast && $toP < $this->Numbers)
-					yield Html::Link($query[$this->PageRequest] = $this->Numbers, $url . http_build_query($query), ["class" => "item last"]);
+					yield Struct::Link($query[$this->PageRequest] = $this->Numbers, $url . http_build_query($query), ["class" => "item last"]);
 			}
-			yield Html::CloseTag();
+			yield Struct::CloseTag();
 			yield "</div>";
 		});
 	}

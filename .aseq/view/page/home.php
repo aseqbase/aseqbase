@@ -1,5 +1,5 @@
 <?php
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 
 
 module("RingTabs");
@@ -8,7 +8,7 @@ $module->Image = \_::$User->Image??\_::$Info->LogoPath;
 $module->Items = \_::$Info->Services;
 //pod($module, $data);
 response(
-	Html::Style("
+	Struct::Style("
 		.page-home {
 			padding: 10px 10px 50px;
 		}
@@ -16,13 +16,13 @@ response(
 			padding: 10vh;
 		}
 	") .
-	Html::Page(
+	Struct::Page(
 		$module->Handle() .
 		(!\_::$User->AllowSigning || \_::$User->GetAccess(\_::$User->UserAccess) ? "" :
-			Html::Center(
-				Html::SmallSlot(
-					Html::Button("Sign In", \_::$User->InHandlerPath, ["class"=>"main"]) .
-					Html::Button("Sign up", \_::$User->UpHandlerPath)
+			Struct::Center(
+				Struct::SmallSlot(
+					Struct::Button("Sign In", \_::$User->InHandlerPath, ["class"=>"main"]) .
+					Struct::Button("Sign up", \_::$User->UpHandlerPath)
 					,
 					["data-aos" => "zoom-out", "data-aos-duration" => "600"]
 				),

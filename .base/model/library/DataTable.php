@@ -28,12 +28,20 @@ class DataTable
 		$this->Name = $name;
 	}
 
-	protected function GetDatabase()
+	public function GetDatabase()
 	{
 		$this->DataBase->PreQuery = $this->PreQuery;
 		$this->DataBase->MidQuery = $this->MidQuery;
 		$this->DataBase->PostQuery = $this->PostQuery;
 		return $this->DataBase;
+	}
+	public function Reset()
+	{
+		$this->AlternativeName = null;
+		$this->PreQuery = null;
+		$this->MidQuery = null;
+		$this->PostQuery = null;
+		return $this;
 	}
 
 	public function SessionTimeout($millisecond = 30000)
@@ -63,7 +71,7 @@ class DataTable
 		return $this->GetDatabase()->SelectValueQuery($this->Name, $column, $condition);
 	}
 
-	public function Select($columns = "*", $condition = null, $params = [], $defaultValue = array())
+	public function Select($columns = "*", $condition = null, $params = [], $defaultValue = [])
 	{
 		return $this->GetDatabase()->Select($this->Name, $columns, $condition, $params, $defaultValue);
 	}
@@ -72,7 +80,7 @@ class DataTable
 		return $this->GetDatabase()->SelectQuery($this->Name, $columns, $condition);
 	}
 
-	public function SelectRow($columns = "*", $condition = null, $params = [], $defaultValue = array())
+	public function SelectRow($columns = "*", $condition = null, $params = [], $defaultValue = [])
 	{
 		return $this->GetDatabase()->SelectRow($this->Name, $columns, $condition, $params, $defaultValue);
 	}
@@ -89,7 +97,7 @@ class DataTable
 		return $this->OrderBy("Id", ascending: false)->SelectFirstRow($columns, $condition, $params);
 	}
 
-	public function SelectColumn($column = "Id", $condition = null, $params = [], $defaultValue = array())
+	public function SelectColumn($column = "Id", $condition = null, $params = [], $defaultValue = [])
 	{
 		return $this->GetDatabase()->SelectColumn($this->Name, $column, $condition, $params, $defaultValue);
 	}
@@ -98,7 +106,7 @@ class DataTable
 		return $this->GetDatabase()->SelectColumnQuery($this->Name, $column, $condition);
 	}
 
-	public function SelectPairs($key = "Id", $value = "Name", $condition = null, $params = [], $defaultValue = array())
+	public function SelectPairs($key = "Id", $value = "Name", $condition = null, $params = [], $defaultValue = [])
 	{
 		return $this->GetDatabase()->SelectPairs($this->Name, $key, $value, $condition, $params, $defaultValue);
 	}

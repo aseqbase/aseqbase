@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class Contacts extends Module
 {
 	public $Class = "container";
@@ -9,7 +9,7 @@ class Contacts extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Html::Style("
+		return parent::GetStyle() . Struct::Style("
 			.{$this->Name} ul.contacts{
 				margin:0px !important;
 			}
@@ -53,8 +53,8 @@ class Contacts extends Module
 				for ($i = 0; $i < $count; $i++) {
 					$item = $this->Items[$i];
 					yield '<li class="d-flex justify-content-between align-items-center">';
-					yield Html::Image(" " . getBetween($item, 'Name', 'Title'), getBetween($item, 'Icon', 'Image'));
-					yield Html::Link(
+					yield Struct::Image(" " . getBetween($item, 'Name', 'Title'), getBetween($item, 'Icon', 'Image'));
+					yield Struct::Link(
 						getBetween($item, 'Value', 'Title', 'Path', 'Name'),
 						get($item, 'Path'),
 						["target"=>"_blank", "class"=>"badge badge-pill"]);
@@ -62,8 +62,8 @@ class Contacts extends Module
 				}
 				yield '</ul>';
 				if (isValid($this->Location)) {
-					yield Html::Division(
-						Html::Embed(null,$this->Location,[
+					yield Struct::Division(
+						Struct::Embed(null,$this->Location,[
 							'data-aos'=>'filp-left',
 							'data-src'=>'$this->Location',
 							'frameborder'=>'0',

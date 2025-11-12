@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Module;
 
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
 
 /**
@@ -22,7 +22,7 @@ class Page extends Module
 
     public function GetStyle()
     {
-        return Html::Style("
+        return Struct::Style("
             .{$this->Name} {
                 width: 100%;
                 height: max-content;
@@ -57,22 +57,22 @@ class Page extends Module
             yield $this->GetDescription();  // Handle and yield the description
 
             // Internal Page
-            yield Html::Division(
-				Html::Division(
+            yield Struct::Division(
+				Struct::Division(
 					Convert::ToString($this->Content)
 				, ["class"=>"frame"]),
 			["class"=> "page internal-page active", "Id" => "internal"]);
 
             // External Page (using iframe)
-            yield Html::Division(Html::Embed("", null, ["class"=> "frame"]), ["class"=> "page external-page", "Id" => "external", "style" => "display:none;"]);
+            yield Struct::Division(Struct::Embed("", null, ["class"=> "frame"]), ["class"=> "page external-page", "Id" => "external", "style" => "display:none;"]);
 
             // Embed Page (using iframe)
-            yield Html::Division(Html::Embed("",  null,["class"=> "frame"]), ["class"=> "page embed-page", "Id" => "embed", "style" => "display:none;"]);
+            yield Struct::Division(Struct::Embed("",  null,["class"=> "frame"]), ["class"=> "page embed-page", "Id" => "embed", "style" => "display:none;"]);
         });
     }
 
 	public function GetScript(){
-		return parent::GetScript().Html::Script("
+		return parent::GetScript().Struct::Script("
 			var ReadyHtml = {
 				load: (data=``)=> [
 					`<style>

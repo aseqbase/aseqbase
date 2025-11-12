@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 module("Modal");
 class ImageModal extends Modal
@@ -10,7 +10,7 @@ class ImageModal extends Modal
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Html::Style("
+		return parent::GetStyle() . Struct::Style("
 		.{$this->Name} .content .image{
 			background-position: center;
 			background-repeat: no-repeat;
@@ -22,7 +22,7 @@ class ImageModal extends Modal
 	}
 	public function GetScript()
 	{
-		return parent::GetScript() . Html::Script("
+		return parent::GetScript() . Struct::Script("
 			function {$this->Name}_Set(content, source = null){
 				{$this->Name}_Source = source??{$this->Name}_Source??content;
 				if(content !== null) $('.{$this->Name}>.content').html(
@@ -41,12 +41,12 @@ class ImageModal extends Modal
 		if (isValid($content))
 			if ($this->AllowOrigin)
 				if (isFormat($content, ".svg"))
-					return Html::Embed(null, $content, ["class" => "image", "style" => "height: 100%;width: auto;"]);
+					return Struct::Embed(null, $content, ["class" => "image", "style" => "height: 100%;width: auto;"]);
 				//return parent::GetContents("<iframe class=\"image\" style=\"height: 100%;width: auto;\" src=\"".$content."\"></iframe>");
 				else
-					return Html::Media(null, $content, ["class" => "image"]);
+					return Struct::Media(null, $content, ["class" => "image"]);
 			else
-				return Html::Media(null, $content, ["class" => "image"]);
+				return Struct::Media(null, $content, ["class" => "image"]);
 		else
 			return parent::GetContents($content ?? $this->Content);
 	}

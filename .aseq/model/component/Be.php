@@ -1,2 +1,2 @@
-<?php use \MiMFa\Library\Html;
-\_::$Front->Libraries[] = Html::Style(null, asset(\_::$Address->StyleDirectory, "Be.css", optimize: true));
+<?php use \MiMFa\Library\Struct;
+\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->StyleDirectory, "Be.css", optimize: true));

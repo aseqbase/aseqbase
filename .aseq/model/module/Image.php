@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class Image extends Module{
 	public $Source = null;
 	public $Tag = null;
@@ -55,7 +55,7 @@ class Image extends Module{
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 		.{$this->Name}{
 			min-width: {$this->MinWidth};
 			min-height: {$this->MinHeight};
@@ -78,9 +78,9 @@ class Image extends Module{
 					preg_match('/^\s*<\w+/', $src)? preg_replace("/(^\s*<\w+)/", "$1 ".$this->GetDefaultAttributes(), $src):
 					(
 						$this->AllowOrigin? (
-								isFormat($src,".svg")? Html::Embed($this->Content, $src, $this->GetDefaultAttributes())
-									:Html::Image($this->Content, $src, $this->GetDefaultAttributes())
-						) :Html::Media($this->Content, $src, $this->GetDefaultAttributes())
+								isFormat($src,".svg")? Struct::Embed($this->Content, $src, $this->GetDefaultAttributes())
+									:Struct::Image($this->Content, $src, $this->GetDefaultAttributes())
+						) :Struct::Media($this->Content, $src, $this->GetDefaultAttributes())
 					)
 				) :null
 			).parent::GetDescription();

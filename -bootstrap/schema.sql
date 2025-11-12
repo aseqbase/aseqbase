@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Content` (
 
 CREATE TABLE IF NOT EXISTS `%%PREFIX%%Comment` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
-  `ReplyId` int(11) DEFAULT NULL,
+  `RootId` int(11) DEFAULT NULL,
   `GroupId` int(11) DEFAULT NULL,
   `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
@@ -110,15 +110,15 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Comment` (
 
 CREATE TABLE IF NOT EXISTS `%%PREFIX%%Message` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
-  `ReplyId` int(11) DEFAULT NULL,
+  `RootId` int(11) DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
+  `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Name` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `From` varchar(256) NOT NULL,
-  `To` longtext NOT NULL,
+  `From` varchar(256) DEFAULT NULL,
+  `To` varchar(256) DEFAULT NULL,
   `Subject` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Attach` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Type` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Access` int(11) DEFAULT 0,
   `Status` tinytext DEFAULT NULL,
   `CreateTime` datetime NOT NULL DEFAULT current_timestamp(),

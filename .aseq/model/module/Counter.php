@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 
 class Counter extends Module
@@ -30,7 +30,7 @@ class Counter extends Module
 
 	public function GetContent($attrs = null)
 	{
-		return Html::Element($this->From, $this->ContentTag, ["class" => "content"], $attrs);
+		return Struct::Element($this->From, $this->ContentTag, ["class" => "content"], $attrs);
 	}
 
 	public function GetScript()
@@ -38,7 +38,7 @@ class Counter extends Module
 		$countDown = $this->From >= $this->To;
 		$counter = $this->Id;
 		$interval = $this->Id . "_i";
-		return Html::Script(
+		return Struct::Script(
 			"$counter = " . ($countDown ? $this->From : $this->To) . ";" .
 			"$interval = setInterval(() => {
 			    if($counter " . ($countDown ? "<" : ">") . "= {$this->To}) {" . (

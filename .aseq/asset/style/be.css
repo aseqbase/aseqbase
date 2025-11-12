@@ -324,7 +324,7 @@
 }
 
 .be.grey.fore {
-  color: #888888;
+  color: var(--color-gray);
 }
 
 .be.light.fore {
@@ -372,7 +372,7 @@
 }
 
 .be.grey.back {
-  background-color: #888888;
+  background-color: var(--color-gray);
 }
 
 .be.light.back {
@@ -421,7 +421,7 @@
 }
 
 .be.grey:not(.fore, .back) {
-  background-color: #888888;
+  background-color: var(--color-gray);
 }
 
 .be.light:not(.fore, .back) {

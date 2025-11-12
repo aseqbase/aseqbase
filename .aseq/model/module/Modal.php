@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Script;
 
@@ -16,7 +16,7 @@ class Modal extends Player{
 	public $BackgroundMask = "#00000099";
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 			.{$this->Name} {
 				background-Color: var(--back-color-special);
 				Color: var(--fore-color-special);
@@ -104,7 +104,7 @@ class Modal extends Player{
 	}
 
 	public function GetScript(){
-		return parent::GetScript().Html::Script("
+		return parent::GetScript().Struct::Script("
 			function {$this->Name}_Initialize(title = null, description = null, content = null, buttonsContent = null, source = null){
 				if(content === null) {
 					content = title;
@@ -147,8 +147,8 @@ class Modal extends Player{
 		"</div>";
 	}
 	public function GetControls(){
-		if($this->AllowClose) yield Html::Icon("close", $this->HideScript(), ["class"=>"button be square circle"]);
-		if($this->AllowFocus) yield Html::Icon("info", $this->ModalInfoScript(), ["class"=>"button"]);
+		if($this->AllowClose) yield Struct::Icon("close", $this->HideScript(), ["class"=>"button be square circle"]);
+		if($this->AllowFocus) yield Struct::Icon("info", $this->ModalInfoScript(), ["class"=>"button"]);
 		yield from parent::GetControls();
 	}
 	public function GetButtons($buttonsContent){

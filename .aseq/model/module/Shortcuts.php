@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
 class Shortcuts extends Module{
 	public $AllowTitle = false;
@@ -10,7 +10,7 @@ class Shortcuts extends Module{
     public $Printable = false;
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 			.{$this->Name}{
 				text-align: center;
 			}
@@ -32,8 +32,8 @@ class Shortcuts extends Module{
 				yield \MiMFa\Component\Icons::Render(".".$this->Name);
 				for($i = 0; $i < $count; $i++){
 					$item = $this->Items[$i];
-					yield Html::Link(
-						($this->AllowIcon && ($v = get($item,'Icon'))?Html::Icon($v):'').
+					yield Struct::Link(
+						($this->AllowIcon && ($v = get($item,'Icon'))?Struct::Icon($v):'').
 						($this->AllowTitle?(getBetween($item,'Title','Name' )??""):""),
 						$link = getBetween($item,'Path'),
 						["class"=>"item".(endsWith(\_::$Address->Url,$link)?' active':'')],

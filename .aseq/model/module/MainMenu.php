@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 class MainMenu extends Module
@@ -33,7 +33,7 @@ class MainMenu extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Html::Style(
+		return parent::GetStyle() . Struct::Style(
 			"
 			.{$this->Name} {
 				" . ($this->AllowFixed ? "
@@ -363,16 +363,16 @@ class MainMenu extends Module
 	{
 		return Convert::ToString(function () {
 			if ($this->AllowBranding)
-				yield Html::Division(
-					(isValid($this->Image) ? Html::Link(Html::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Info->Path) : "") .
-					Html::Division(
-						(isValid($this->Description) ? Html::Division(__($this->Description), ['class' => 'description']) : "") .
-						(isValid($this->Title) ? Html::Link(Html::Division(__($this->Title), ['class' => 'title']), \_::$Info->Path) : ""),
+				yield Struct::Division(
+					(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Info->Path) : "") .
+					Struct::Division(
+						(isValid($this->Description) ? Struct::Division(__($this->Description), ['class' => 'description']) : "") .
+						(isValid($this->Title) ? Struct::Link(Struct::Division(__($this->Title), ['class' => 'title']), \_::$Info->Path) : ""),
 					["class" => "brand"]),
 				["class" => "header"]);
 			if ($this->AllowItems)
 				if (count($this->Items) > 0)
-					yield Html::Items(
+					yield Struct::Items(
 						function () {
 							foreach ($this->Items as $item)
 								yield $this->CreateItem($item, 1);
@@ -394,7 +394,7 @@ class MainMenu extends Module
 						$defaultButtons[] = $usermenu;
 					}
 				}
-				yield Html::Division([
+				yield Struct::Division([
 						...($this->Content? (is_array($this->Content)?$this->Content:[$this->Content]) : []),
 						...($defaultButtons? $defaultButtons : [])
 					],
@@ -412,24 +412,24 @@ class MainMenu extends Module
 		$act = endsWith(\_::$Address->Path, $path) ? 'active' : "";
 		$ind++;
 		$count = count(getValid($item, "Items", []));
-		return Html::Item(
-			($ind <=2? Html::Button(
-				($this->AllowItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
+		return Struct::Item(
+			($ind <=2? Struct::Button(
+				($this->AllowItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
 				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name")):"").
-				($this->AllowItemsDescription?Html::Division(__(get($item, "Description")), ["class"=>"description"]):""),
+				($this->AllowItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 				$path,
 				get($item, "Attributes")
 				) :
-				Html::Button(
-					($this->AllowSubItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
+				Struct::Button(
+					($this->AllowSubItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
 					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name")):"").
-					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description")), ["class"=>"description"]):""),
+					($this->AllowSubItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 					$path,
 					get($item, "Attributes")
 				)
 			) .
 			($count > 0 ?
-				Html::Items(
+				Struct::Items(
 					function () use ($item, $ind) {
 						foreach ($item["Items"] as $itm)
 							yield $this->CreateItem($itm, $ind);

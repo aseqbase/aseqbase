@@ -1,7 +1,7 @@
 <div class="page page-introduction">
     <?php
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
     module("PrePage");
     $module = new MiMFa\Module\PrePage();
@@ -61,19 +61,19 @@ use MiMFa\Library\Html;
                     <h3 class="title">
                     <?php
                     if ($isp)
-                        echo Html::OpenTag("a", ["href"=>$p]);
+                        echo Struct::OpenTag("a", ["href"=>$p]);
                     if ($v = get($value, "Icon"))
-                        response(Html::Icon($v));
+                        response(Struct::Icon($v));
                     if (isValid($src = get($value, "Image")))
-                        response(Html::Image($src));
+                        response(Struct::Image($src));
                     ?>
                         <?php echo getBetween($value, "Title", "Name"); ?>
                     </h3>
                     <?php if ($isp)
-                        echo Html::CloseTag(); ?>
+                        echo Struct::CloseTag(); ?>
                     <div class="description">
                         <?php echo get($value, "Description"); ?>
-                        <?php response(Html::Center(getBetween($value, "Button", "More"))); ?>
+                        <?php response(Struct::Center(getBetween($value, "Button", "More"))); ?>
                     </div>
                 </div>
             <?php } ?>

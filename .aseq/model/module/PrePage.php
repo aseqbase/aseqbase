@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class PrePage extends Module
 {
 	public $Tag = "section";
@@ -10,7 +10,7 @@ class PrePage extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Html::Style("
+		return parent::GetStyle() . Struct::Style("
 			.{$this->Name}{
 				padding: 3vmax;
 			}
@@ -40,13 +40,13 @@ class PrePage extends Module
 	public function Get()
 	{
 		if (isValid($this->Description))
-			return $this->GetTitle() . Html::Rack(
+			return $this->GetTitle() . Struct::Rack(
 				$this->GetDescription(["class" => 'description col-md']) .
-				($this->Image ? Html::Image($this->Title, $this->Image, ["class" => "col-md-4"]) : "")
+				($this->Image ? Struct::Image($this->Title, $this->Image, ["class" => "col-md-4"]) : "")
 			) . $this->GetContent(["class"=>"content"]);
 		else
-			return Html::Rack(
-				($this->Image ? Html::Image($this->Title, $this->Image, ["class" => "col-md"]) : "")
+			return Struct::Rack(
+				($this->Image ? Struct::Image($this->Title, $this->Image, ["class" => "col-md"]) : "")
 			) . $this->GetTitle() . $this->GetContent(["class"=>"content"]);
 	}
 }

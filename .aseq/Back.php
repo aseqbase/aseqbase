@@ -9,4 +9,3 @@ class Back extends AseqBack {
 
 	public $AllowTranslate = false;
 }
-?>

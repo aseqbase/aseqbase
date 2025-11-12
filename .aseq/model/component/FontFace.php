@@ -1,12 +1,12 @@
 <?php
-use \MiMFa\Library\Html;
+use \MiMFa\Library\Struct;
 $fonts = [];
 foreach (\_::$Front->FontPalette as $fp)
 	foreach (preg_find_all("/(?<=['\"])[\w\- ]+(?=['\"])/", $fp) ?? [] as $key => $value) 
 		if($value) $fonts[strtolower($value)] = $value;
 
 $fdir = \_::$Address->AssetDirectory."font".DIRECTORY_SEPARATOR;
-\_::$Front->Libraries[] = Html::Style(
+\_::$Front->Libraries[] = Struct::Style(
 	join(
 		PHP_EOL,
 		loop($fonts, function ($v) use($fdir) {

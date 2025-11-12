@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Component;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class Icons
 {
 	public static $Local = false;
@@ -15,14 +15,14 @@ class Icons
 	{
 		self::$Initialized = true;
 		if(self::$Local)
-			return HTML::Style(null, asset(\_::$Address->StyleDirectory, "Icons.css", optimize: false), ["async"]).HTML::Script(null, asset(\_::$Address->ScriptDirectory, "Icons.js", optimize: false), ["async"]);
-		else return HTML::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
-			HTML::Script(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js", ["async"]);
+			return Struct::Style(null, asset(\_::$Address->StyleDirectory, "Icons.css", optimize: false), ["async"]).Struct::Script(null, asset(\_::$Address->ScriptDirectory, "Icons.js", optimize: false), ["async"]);
+		else return Struct::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
+			Struct::Script(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js", ["async"]);
 	}
 	public static function GetStyle($root = null)
 	{
 		$root = $root ?? self::$DefaultRoot;
-		return Html::Style("
+		return Struct::Style("
 			$root .fa:not(.icon) {
 				aspect-ratio: 1;
 				padding: 20px;
@@ -56,7 +56,7 @@ class Icons
 	public static function GetTechnologyStyle($root = null)
 	{
 		$root = $root ?? self::$DefaultRoot;
-		return Html::Style("
+		return Struct::Style("
 			$root :is(.fa, .icon):hover {
 				opacity: 1;
 				color: var(--back-color-input);

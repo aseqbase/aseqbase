@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Component;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 /**
  * A PHP component that handles calling Google reCAPTCHA V3.
@@ -24,8 +24,8 @@ class reCaptcha
         public static function GetScript(string|null $siteKey)
         {
                 $siteKey = $siteKey ?? self::$SiteKey ?? \_::$Config->ReCaptchaSiteKey;
-                return Html::Script(null, 'https://www.google.com/recaptcha/api.js?render=' . \_::$Config->ReCaptchaSiteKey) .
-                        Html::Script(
+                return Struct::Script(null, 'https://www.google.com/recaptcha/api.js?render=' . \_::$Config->ReCaptchaSiteKey) .
+                        Struct::Script(
                         "grecaptcha.ready(function() {
                                         grecaptcha.execute('" . \_::$Config->ReCaptchaSiteKey . "', {action: 'submit'}).then(function(token) {
                                         document.getElementById('" . self::$FieldName . "').value = token;

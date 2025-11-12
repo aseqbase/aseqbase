@@ -3,7 +3,7 @@
 use MiMFa\Library\Convert;
 use MiMFa\Library\DataBase;
 use MiMFa\Library\DataTable;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Internal;
 use MiMFa\Library\Local;
 use MiMFa\Library\Script;
@@ -45,7 +45,7 @@ run("Router");
 
 library("Local");
 library("Convert");
-library("Html");
+library("Struct");
 library("Style");
 library("Script");
 library("Internal");
@@ -521,10 +521,10 @@ function request($intent = null, $callback = null)
 		$id = "S_" . getID(true);
 		$intent = is_string($intent) ? $intent : Script::Convert($intent);
 		if (isStatic($callback))
-			response(Html::Script("$start(" . $callbackScript . ")(" .
+			response(Struct::Script("$start(" . $callbackScript . ")(" .
 				Script::Convert($callback) . ",$intent);document.getElementById('$id').remove();$end", null, ["id" => $id]));
 		else
-			response(Html::Script(
+			response(Struct::Script(
 				$callback ? $start .
 				'sendInternal(null,{"' . Internal::Set($callback) . '":JSON.stringify(' . $intent . ")}, null,$callbackScript,$callbackScript, null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
 				: $intent,
@@ -593,15 +593,19 @@ function response($content = null, $status = null)
  */
 function script($content, $source = null, ...$attributes)
 {
-	echo $content = Html::Script($content, $source, ...$attributes);
-	return $content;
+	// if (getMethodIndex() != 1)
+	// 	\_::$Front->Append("head", Struct::Script($content, $source, ...$attributes));
+	// else {
+		echo $content = Struct::Script($content, $source, ...$attributes);
+		return $content;
+	//}
 }
 /**
  * Echo styles to the client side
  */
 function style($content, $source = null, ...$attributes)
 {
-	echo $content = Html::Style($content, $source, ...$attributes);
+	echo $content = Struct::Style($content, $source, ...$attributes);
 	return $content;
 }
 
@@ -612,7 +616,7 @@ function style($content, $source = null, ...$attributes)
  */
 function modal($content = null)
 {
-	return response(Html::Modal($content));
+	return response(Struct::Modal($content));
 }
 
 /**
@@ -624,7 +628,7 @@ function message($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return script(Script::Log($message->getMessage(), "message"));
-	echo $message = Html::Result($message);
+	echo $message = Struct::Result($message);
 	return $message;
 }
 /**
@@ -636,7 +640,7 @@ function success($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return script(Script::Log($message->getMessage(), "success"));
-	echo $message = Html::Success($message);
+	echo $message = Struct::Success($message);
 	return $message;
 }
 /**
@@ -648,7 +652,7 @@ function warning($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return script(Script::Log($message->getMessage(), "warn"));
-	echo $message = Html::Warning($message);
+	echo $message = Struct::Warning($message);
 	return $message;
 }
 /**
@@ -661,7 +665,7 @@ function error($message = null)
 	responseStatus(400);
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return script(Script::Log($message->getMessage(), "error"));
-	echo $message = Html::Error($message);
+	echo $message = Struct::Error($message);
 	return $message;
 }
 /**
@@ -683,7 +687,7 @@ function report($message = null, $type = "log")
 function render($content = null, $replacements = null, $status = null)
 {
 	responseStatus($status);
-	echo $content = Html::Convert($replacements ? decode($content, $replacements) : $content);
+	echo $content = Struct::Convert($replacements ? decode($content, $replacements) : $content);
 	return $content;
 }
 
@@ -745,7 +749,7 @@ function responseBreaker($content = null, $forward = null, $delay = 0)
 	$forward = $forward ?? receiveGet("Next") ?? receiveGet("Previous");
 	$script = "window.location.assign(" . (isValid($forward) ? Script::Convert(Local::GetUrl($forward)) : "location.href") . ")";
 	echo ($content = Convert::ToString($content)) .
-		Html::Script($delay ? "setTimeout(()=>$script, $delay);" : "$script;");
+		Struct::Script($delay ? "setTimeout(()=>$script, $delay);" : "$script;");
 	return $content;
 }
 
@@ -756,7 +760,7 @@ function responseBreaker($content = null, $forward = null, $delay = 0)
  */
 function entireResponse($output = null, $target = null)
 {
-	response(Html::Script(
+	response(Struct::Script(
 		Internal::MakeScript(
 			$output,
 			null,
@@ -802,7 +806,7 @@ function deliver($output = null, $status = null)
  */
 function deliverScript($output = null, $status = null)
 {
-	deliver(Html::Script($output), $status);
+	deliver(Struct::Script($output), $status);
 }
 /**
  * Print only this JSON on the client side, Clear before then end
@@ -874,7 +878,7 @@ function deliverFile($output = null, $status = null, $type = null, bool $attachm
  */
 function deliverModal($content = null)
 {
-	return deliver(Html::Modal($content));
+	return deliver(Struct::Modal($content));
 }
 /**
  * To deliver a message result output to the client side
@@ -885,7 +889,7 @@ function deliverMessage($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return deliverScript(Script::Log($message->getMessage(), "message"), 400);
-	return deliver(Html::Result($message));
+	return deliver(Struct::Result($message));
 }
 /**
  * To deliver a success result output to the client side
@@ -896,7 +900,7 @@ function deliverSuccess($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return deliverScript(Script::Log($message->getMessage(), "success"), 400);
-	return deliver(Html::Success($message));
+	return deliver(Struct::Success($message));
 }
 /**
  * To deliver a warning result output to the client side
@@ -907,7 +911,7 @@ function deliverWarning($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return deliverScript(Script::Log($message->getMessage(), "warn"), 400);
-	return deliver(Html::Warning($message));
+	return deliver(Struct::Warning($message));
 }
 /**
  * To deliver an error result output to the client side
@@ -918,7 +922,7 @@ function deliverError($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		return deliverScript(Script::Log($message->getMessage(), "error"), 400);
-	return deliver(Html::Error($message), 400);
+	return deliver(Struct::Error($message), 400);
 }
 /**
  * To deliver message on the console
@@ -1006,7 +1010,7 @@ function share($output = null, $with = null)
 #region PROTECTING
 
 /**
- * Check if the client has access to the page or assign them to other page, based on thair IP, Accessibility, Restriction and etc.
+ * Check Authorizations: if the client has access to the page or assign them to other page, based on thair IP, Accessibility, Restriction and etc.
  * @param int|null $minaccess The minimum accessibility for the client, pass null to give the user access
  * @param bool $assign Assign clients to other page, if they have not enough access
  * @param bool|int|string|null $exit Pass true to die the process if clients have not enough access, else pass false
@@ -1014,7 +1018,7 @@ function share($output = null, $with = null)
  * @return bool|int|null The client has accessibility bigger than $minaccess or not
  * user accessibility group
  */
-function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|null $exit = true)
+function auth($minaccess = 0, bool|string $assign = true, bool|string|int|null $exit = true)
 {
 	if (isValid(\_::$Router->StatusMode)) {
 		if ($assign) {
@@ -1058,7 +1062,7 @@ function inspect($minaccess = 0, bool|string $assign = true, bool|string|int|nul
 		)
 			return true;
 		else
-			load(\_::$User->InHandlerPath);
+			(\_::$User->Authorize)();
 	}
 	if ($exit !== false)
 		finalize($exit);
@@ -1755,7 +1759,7 @@ function pop(&$object, ...$hierarchy)
  */
 function set(&$object, $hierarchy)
 {
-	if (!is_array($hierarchy) || !is_object($object))
+	if (!is_array($hierarchy) || (!is_object($object) && !is_array($object)))
 		try {
 			$m = $object;
 			$object = $hierarchy;
@@ -1783,7 +1787,7 @@ function set(&$object, $hierarchy)
  */
 function pod(&$object, &$hierarchy)
 {
-	if (!is_array($hierarchy) || !is_object($object))
+	if (!is_array($hierarchy) || (!is_object($object) && !is_array($object)))
 		try {
 			$m = $object;
 			$object = $hierarchy;
@@ -2159,7 +2163,7 @@ function getId($random = false): int
  */
 function getBackPath()
 {
-	return $_SERVER['HTTP_REFERER']??null ?: receiveGet("BackPath")??receiveGet("Previous");
+	return $_SERVER['HTTP_REFERER'] ?? null ?: receiveGet("BackPath") ?? receiveGet("Previous");
 }
 /**
  * Get the full part of the referrer url
@@ -2167,7 +2171,7 @@ function getBackPath()
  */
 function getForePath()
 {
-	return receiveGet("ForePath")??receiveGet("Next");
+	return receiveGet("ForePath") ?? receiveGet("Next");
 }
 /**
  * Get the full part of a url pointed to cache status
@@ -2190,7 +2194,7 @@ function getFullUrl(string|null $path = null, bool $optimize = true): string|nul
 function getUrl(string|null $path = null): string|null
 {
 	if ($path === null)
-		$path = getHost() . ($_SERVER["REQUEST_URI"]??null ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING']??null ? "?" . $_SERVER['QUERY_STRING'] : "")));
+		$path = getHost() . ($_SERVER["REQUEST_URI"] ?? null ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING'] ?? null ? "?" . $_SERVER['QUERY_STRING'] : "")));
 	return preg_replace("/^([\/\\\])/", rtrim(getHost(), "/\\") . "$1", $path);
 }
 /**
@@ -2520,7 +2524,8 @@ function clearMemos()
 function setSecret($key, $value, $expires = 0, $path = "/", $secure = false)
 {
 	$isObject = !isStatic($value);
-	if($isObject) $value = Convert::ToJson($value);
+	if ($isObject)
+		$value = Convert::ToJson($value);
 	return $_SESSION[$key] = [
 		'value' => $secure ? encrypt($value) : $value,
 		'expires' => ($expires > 0 ? (int) (microtime(true)) + ($expires / 1000) : 0),
@@ -2542,9 +2547,9 @@ function getSecret($key)
 		unset($_SESSION[$key]);
 		return null;
 	}
-	if (str_starts_with(\_::$Address->Request ?? "/", $item['path'])){
+	if (str_starts_with(\_::$Address->Request ?? "/", $item['path'])) {
 		$value = $item['secure'] ? decrypt($item['value']) : $item['value'];
-		return ($item['convert']??null)?Convert::FromJson($value):$value;
+		return ($item['convert'] ?? null) ? Convert::FromJson($value) : $value;
 	} else
 		return null;
 }
@@ -2923,7 +2928,7 @@ function async($action, $callback = null, ...$args)
 function __(mixed $value, bool $translating = true, bool $styling = false, bool|null $referring = null): string|null
 {
 	$value = MiMFa\Library\Convert::ToString(
-		is_array($value) ? join(" ", loop($value, fn($v) => __($v, $translating, $styling, $referring))) : $value
+		is_array($value) ? join("\n", loop($value, fn($v) => __($v, $translating, $styling, $referring))) : $value
 	);
 	if ($translating && \_::$Back->AllowTranslate)
 		$value = \_::$Back->Translate->Get($value);
@@ -2937,7 +2942,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Html::Link($v, \_::$Address->ContentRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->ContentRoot . strtolower($k));
 				},
 				keyWords: table("Content")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2947,7 +2952,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Html::Link($v, \_::$Address->CategoryRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->CategoryRoot . strtolower($k));
 				},
 				keyWords: table("Category")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2957,7 +2962,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Html::Link($v, \_::$Address->TagRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->TagRoot . strtolower($k));
 				},
 				keyWords: table("Tag")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2967,7 +2972,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Html::Link($v, \_::$Address->UserRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->UserRoot . strtolower($k));
 				},
 				keyWords: table("User")->SelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
 				both: false,
@@ -3124,12 +3129,28 @@ function array_find_keys($array, callable $searching)
 // function test_access($func, $res = null)
 // {
 // 	$r = null;
-// 	if (inspect(0, false, false)) {
+// 	if (auth(0, false, false)) {
 // 		if ($r = $func())
 // 			echo "<b>TRUE: " . ($r ?? $res) . "</b><br>";
 // 		else
 // 			echo "FALSE: " . $res . "<br>";
 // 	}
 // }
-
+// function test_Set_Pop()
+// {
+// 	$s = new stdClass();
+// 	$s->A = 1;
+// 	$s->B = ["b" => 22];
+// 	$s->C = 3;
+// 	$a = ["A" => 1, "B" => ["b" => 22], "C" => 3];
+// 	render("OBJECT:".json_encode($a));
+// 	$b = ["B" => ["b" => 33]];
+// 	render("DATA:".json_encode($b));
+// 	$c = set($a, $b);
+// 	render("Set():".json_encode($a));
+// 	$c = pod($s, $b);
+// 	render("Pod():".json_encode($s));
+// 	render($a === ["A" => 1, "B" => ["b" => 33], "C" => 3]?"Did True":"Did False");
+// 	exit;
+// }
 #endregion

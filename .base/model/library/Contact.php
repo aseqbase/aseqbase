@@ -188,11 +188,11 @@ class Contact extends ArrayObject
 			$header .= "MIME-Version: 1.0\r\n"
 				. "Content-Type: text/html; charset=UTF-8\r\n";
 
-			$message = Html::Convert($message);
+			$message = Struct::Convert($message);
 			$tos = is_array($to) ? $to : preg_split("/[,; ><\[\](){}&#\|!~\'\"`\*=^%\$\s]+/", Convert::ToString($to));
 			$i = 0;
 			foreach ($tos as $t)
-				if (mail($t, $subject, $message . Html::$Break . Convert::ToString($attaches), $header))
+				if (mail($t, $subject, $message . Struct::$Break . Convert::ToString($attaches), $header))
 					$i++;
 			return $i;
 		} catch (\Exception $ex) {

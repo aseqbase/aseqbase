@@ -30,14 +30,17 @@ class Internal
         $reses = [];
         foreach ($received as $k => $v) {
             $args = null;
-            if (is_string($v))
+            if (is_string($v)) {
                 if (preg_match("/^\{[\w\W]*\}$/", $v))
                     $args = json_decode($v, true, flags: JSON_OBJECT_AS_ARRAY);
-                else try {
-                    $args = decrypt($v);
-                } catch (\Exception $ex) {
-                    $args = $v;
-                }
+                else
+                    try {
+                        $args = decrypt($v);
+                    } catch (\Exception $ex) {
+                        $args = $v;
+                    }
+            } else
+                $args = $v;
             $args = $args ?? [];
             $args = is_array($args) ? $args : [$args];
             $reses[] = Convert::By(self::Get($k, fn($a = null) => $a), ...$args);

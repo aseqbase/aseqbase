@@ -10,7 +10,7 @@ if(!isValid($path))
     };
 else
     $templ->Content = function() use($path){
-        inspect(\_::$User->UserAccess);
+        auth(\_::$User->UserAccess);
         module("Profile");
         $module = new Profile(\_::$User->GroupDataTable);
         $module->KeyColumn = "Name";

@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 
 use DateTime;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
 use MiMFa\Library\Local;
@@ -105,7 +105,7 @@ class Profile extends Table{
     }
     
 	public function GetStyle(){
-		return Html::Style("
+		return Struct::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
 			backgroound-color: var(--back-color-input);
 			color: var(--fore-color-input);
@@ -212,9 +212,9 @@ class Profile extends Table{
         $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->GetAccess($this->RemoveAccess);
 		$isc = $isc && ($vaccess || $aaccess || $maccess || $raccess);
         $secret = getReceived("secret")??$this->ViewSecret;
-        $res = Html::Division(
-            ($maccess? Html::Icon("edit","{$this->Name}_Modify(`$key`);", ["class"=>"table-item-modify"]) : "").
-            ($raccess? Html::Icon("trash","{$this->Name}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")
+        $res = Struct::Division(
+            ($maccess? Struct::Icon("edit","{$this->Name}_Modify(`$key`);", ["class"=>"table-item-modify"]) : "").
+            ($raccess? Struct::Icon("trash","{$this->Name}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")
         );
         if($secret === $this->ViewSecret)
             $res .= $this->GetViewFields($key);
@@ -226,7 +226,7 @@ class Profile extends Table{
 	}
 
 	public function GetScript(){
-		return Html::Script("$(document).ready(()=>{".
+		return Struct::Script("$(document).ready(()=>{".
         ($this->Controlable?("
 				function {$this->Name}_View(key){
 					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
@@ -265,8 +265,8 @@ class Profile extends Table{
 
 	public function GetViewFields($value){
         if(is_null($value)) return null;
-        if(!\_::$User->GetAccess($this->ViewAccess)) return Html::Error("You have not access to see datails!");
-        if(isEmpty($this->Items)) return Html::Error("You can not 'see' this item!");
+        if(!\_::$User->GetAccess($this->ViewAccess)) return Struct::Error("You have not access to see datails!");
+        if(isEmpty($this->Items)) return Struct::Error("You can not 'see' this item!");
         $form = $this->GetForm();
         $form->Set(
             title:getBetween($this->Items,"Title","Name")??$this->Title,
@@ -299,7 +299,7 @@ class Profile extends Table{
                                 break;
                         }
                     }
-                    if($type !== false && !isEmpty($cell)) yield Html::Field(
+                    if($type !== false && !isEmpty($cell)) yield Struct::Field(
                         type:(isEmpty($type)?null:Convert::By($type, $type, $cell, $k)),
                         key:$k,
                         value:$cell,
@@ -316,7 +316,7 @@ class Profile extends Table{
 
 	public function GetAddFields($value){
         if(is_null($value)) return null;
-        if(!\_::$User->GetAccess($this->AddAccess)) return Html::Error("You have not access to add!");
+        if(!\_::$User->GetAccess($this->AddAccess)) return Struct::Error("You have not access to add!");
         module("Form");
         $record = [];
         if(count($this->CellsTypes)>0)
@@ -348,20 +348,20 @@ class Profile extends Table{
 	public function DoAddHandle($value){
         if(is_null($value)) return null;
         $vals = $this->NormalizeValues(receivePost());
-        if(!\_::$User->GetAccess($this->AddAccess)) return Html::Error("You have not access to modify!");
+        if(!\_::$User->GetAccess($this->AddAccess)) return Struct::Error("You have not access to modify!");
         unset($vals[$this->KeyColumn]);
         foreach ($vals as $k=>$v)
             if(isEmpty($v)) unset($vals[$k]);
         if($this->DataTable->Insert($vals))
-            return Html::Success("The 'information' added successfully!");
-        return Html::Error("You can not 'add' this item!");
+            return Struct::Success("The 'information' added successfully!");
+        return Struct::Error("You can not 'add' this item!");
     }
 
 	public function GetModifyFields($value){
         if(is_null($value)) return null;
-        if(!\_::$User->GetAccess($this->ModifyAccess)) return Html::Error("You have not access to modify!");
+        if(!\_::$User->GetAccess($this->ModifyAccess)) return Struct::Error("You have not access to modify!");
         module("Form");
-        if(isEmpty($this->Items)) return Html::Error("You can not 'modify' this item!");
+        if(isEmpty($this->Items)) return Struct::Error("You can not 'modify' this item!");
         $form = $this->GetForm();
         $form->Set(
             title:getBetween($this->Items,"Title","Name")??$this->Title,
@@ -386,18 +386,18 @@ class Profile extends Table{
 	public function DoModifyHandle($value){
         if(is_null($value)) return null;
         $vals = $this->NormalizeValues(receivePut());
-        if(!\_::$User->GetAccess($this->ModifyAccess)) return Html::Error("You have not access to modify!");
+        if(!\_::$User->GetAccess($this->ModifyAccess)) return Struct::Error("You have not access to modify!");
         if($this->DataTable->Update([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
-            return Html::Success("The information updated successfully!");
-        return Html::Error("You can not 'update' this item!");
+            return Struct::Success("The information updated successfully!");
+        return Struct::Error("You can not 'update' this item!");
     }
 
 	public function DoRemoveHandle($value){
         if(is_null($value)) return null;
-        if(!\_::$User->GetAccess($this->RemoveAccess)) return Html::Error("You have not access to delete!");
+        if(!\_::$User->GetAccess($this->RemoveAccess)) return Struct::Error("You have not access to delete!");
         if($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]))
-            return Html::Success("The 'items' removed successfully!");
-        return Html::Error("You can not 'remove' this item!");
+            return Struct::Success("The 'items' removed successfully!");
+        return Struct::Error("You can not 'remove' this item!");
     }
 
 	public function PrepareDataToShow(&$key, &$value, &$record, $schema){
@@ -418,7 +418,7 @@ class Profile extends Table{
                     break;
             }
         if($key == $this->KeyColumn && str_contains($schema["EXTRA"] ,'auto_increment'))
-            return Html::HiddenInput($key, $value);
+            return Struct::HiddenInput($key, $value);
         else {
             if(is_string($type))
                 switch (strtolower($type))
@@ -452,7 +452,7 @@ class Profile extends Table{
                         break;
                 }
             if($type !== false)
-                return Html::Field(
+                return Struct::Field(
                         type:isEmpty($type)?null:Convert::By($type, $type, $value, $key, $record),
                         key:$key,
                         value:$value,
@@ -473,7 +473,7 @@ class Profile extends Table{
                     $values[$k] = Local::GetUrl(Local::StoreFile($v, extensions:$type));
                 }
                 else unset($values[$k]);
-        }catch(\Exception $ex){ return Html::Error($ex); }
+        }catch(\Exception $ex){ return Struct::Error($ex); }
         foreach ($values as $k=>$v)
             if($k !== $this->KeyColumn){
                 if($v === '') $values[$k] = null;

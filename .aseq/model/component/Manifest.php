@@ -12,7 +12,7 @@ class Manifest
 	}
 }
 
-// \_::$Front->Libraries[] = Html::Relation(
+// \_::$Front->Libraries[] = Struct::Relation(
 // 	"manifest",
 // 	getFullUrl(Manifest::Store([
 // 		'short_name' => 'Digikala',

@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class Copyright extends Module{
 	public $Title = "Developed By:";
 	public $TitleTag = "span";
@@ -10,7 +10,7 @@ class Copyright extends Module{
 	public $Source = "http://mimfa.net";
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 			.{$this->Name}, .{$this->Name} :is(a, a:visited){
 				text-align: center;
 				font-size: var(--size-0);
@@ -20,7 +20,7 @@ class Copyright extends Module{
 	}
 
 	public function Get(){
-		return $this->GetContent().Html::Link($this->GetTitle()." ".$this->GetDescription(), $this->Source);
+		return $this->GetContent().Struct::Link($this->GetTitle()." ".$this->GetDescription(), $this->Source);
 	}
 }
 ?>

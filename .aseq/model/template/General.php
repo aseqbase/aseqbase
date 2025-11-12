@@ -1,5 +1,5 @@
 <?php namespace MiMFa\Template;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class General extends Template
 {
 	public $WindowTitle = null;
@@ -416,7 +416,7 @@ class General extends Template
 					" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 		");
-		echo Html::Script("
+		echo Struct::Script("
 			for(const slider of document.querySelectorAll(`input[type='range'].rangeinput`)){
 				const min = slider.min
 				const max = slider.max

@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 
 use MiMFa\Library\Contact;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 
 
@@ -35,7 +35,7 @@ class CommentForm extends Form
 	public $SigningLabel = "Log in or create an account to leave your message";
 	public $BlockTimeout = 60000;
 	public $ResponseView = null;
-	public $ReplyId = null;
+	public $RootId = null;
 	public $Relation = null;
 	public $DefaultAccess = 0;
 	public $DefaultStatus = 1;
@@ -59,7 +59,7 @@ class CommentForm extends Form
 				$row["Contact"],
 				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),
 				$message ?? [
-					$notification => Html::Link(getValid($row, "Subject", "Your Comment"), \_::$Address->Path),
+					$notification => Struct::Link(getValid($row, "Subject", "Your Comment"), \_::$Address->Path),
 					"Subject" => Convert::ToText(get($data, "Subject")),
 					"Name" => Convert::ToText(getValid($data, "Name", \_::$User ? \_::$User->Name : null)),
 					"Contact" => getValid($data, "Contact", \_::$User ? \_::$User->Email : null),
@@ -81,10 +81,10 @@ class CommentForm extends Form
 	}
 	public function GetFields()
 	{
-		if($this->Relation) yield Html::HiddenInput("Relation", $this->Relation);
+		if($this->Relation) yield Struct::HiddenInput("Relation", $this->Relation);
 		if (!\_::$User->Email) {
 			if (isValid($this->NameLabel))
-				yield Html::Field(
+				yield Struct::Field(
 					key: "Name",
 					value: null,
 					type: "text",
@@ -92,7 +92,7 @@ class CommentForm extends Form
 					attributes: ["placeholder" => $this->NamePlaceHolder, "required" => "required", "autocomplete" => "Name"]
 				);
 			if (isValid($this->ContactLabel))
-				yield Html::Field(
+				yield Struct::Field(
 					key: "Contact",
 					value: null,
 					type: "email",
@@ -101,7 +101,7 @@ class CommentForm extends Form
 				);
 		}
 		if (isValid($this->SubjectLabel))
-			yield Html::Field(
+			yield Struct::Field(
 				key: "Subject",
 				value: null,
 				type: "text",
@@ -109,7 +109,7 @@ class CommentForm extends Form
 				attributes: ["placeholder" => $this->SubjectPlaceHolder, "required" => "required", "autocomplete" => "Subject"]
 			);
 		if (isValid($this->MessageLabel))
-			yield Html::Field(
+			yield Struct::Field(
 				key: "Content",
 				value: null,
 				type: $this->MessageType,
@@ -117,21 +117,21 @@ class CommentForm extends Form
 				attributes: ["placeholder" => $this->MessagePlaceHolder, "required" => "required"]
 			);
 		if (isValid($this->AttachLabel))
-			yield Html::Field(
+			yield Struct::Field(
 				key: "Attach",
 				value: null,
 				type: $this->AttachType,
 				title: $this->AttachLabel,
 				attributes: ["placeholder" => $this->AttachPlaceHolder, "autocomplete" => "Attach"]
 			);
-		if ($this->ReplyId)
-			yield Html::HiddenInput("Reply", $this->ReplyId);
+		if ($this->RootId)
+			yield Struct::HiddenInput("Root", $this->RootId);
 		yield from parent::GetFields();
 	}
 	public function GetFooter()
 	{
 		return $this->AllowHeader || (\_::$User && \_::$User->Email) ? "" : parent::GetFooter()
-			. Html::LargeSlot(
+			. Struct::LargeSlot(
 				$this->GetSigning()
 				,
 				["class" => "col-lg-12"]
@@ -145,11 +145,11 @@ class CommentForm extends Form
 				$received = receivePost();
 				if (isValid($received, "Name") || isValid($received, "Content") || isValid($received, "Subject") || isValid($received, "Attach")) {
 					$res = null;
-					$rid = get($received, "Reply");
+					$rid = get($received, "Root");
 					$att = get($received, "Attach");
 					if ((\_::$User && \_::$User->Email) || isValid($received, "Contact"))
 						$res = table("Comment")->Insert([
-							"ReplyId" => $rid,
+							"RootId" => $rid,
 							"Relation" => $this->Relation,
 							"UserId" => \_::$User ? \_::$User->Id : null,
 							"Name" => Convert::ToText(getValid($received, "Name", \_::$User ? \_::$User->Name : null)),
@@ -215,14 +215,14 @@ class CommentForm extends Form
 	{
 		$received = receivePatch();
 		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false, reaction: true))
-			if (isValid($received, "Reply")) {
+			if (isValid($received, "Root")) {
 				popTimer();
 				$this->AllowHeader =
 					$this->AllowFooter = false;
 				$this->ContentClass = "";
 				$this->SubjectLabel = null;
 				$this->SubmitLabel = $this->ReplyLabel;
-				$this->ReplyId = get($received, "Reply");
+				$this->RootId = get($received, "Root");
 				$this->Router->Initial()->Get()->Switch();
 				return $this->Handle();
 			} elseif (isValid($received, "Status") && \_::$User->GetAccess(\_::$User->AdminAccess)) {

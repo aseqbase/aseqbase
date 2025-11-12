@@ -5,6 +5,6 @@ $templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??between($
 $alternative = pop($data, "Alternative") ?? "404";
 $content = pop($data, "Content");
 $templ->Content = isValid($content)?
-        \MiMFa\Library\Html::Page($content):
+        \MiMFa\Library\Struct::Page($content):
         function() use($name, $data, $alternative) { return page($name, data: $data, print:false, alternative: $alternative); };
 $templ->Render();

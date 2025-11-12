@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 class IFrame extends Module{
 	public $Name = "IFrame";
 	public $Source = null;
@@ -34,7 +34,7 @@ class IFrame extends Module{
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().Html::Style("
+		return parent::GetStyle().Struct::Style("
 			.{$this->Name}{
 				".\MiMFa\Library\Style::DoProperty("color", $this->ForeColor)."
 				text-align: center;
@@ -60,7 +60,7 @@ class IFrame extends Module{
 	}
 
 	public function Get(){
-		return parent::Get().Html::Embed(null,$this->Source, ["class"=>"block","allowfullscreen"=>$this->AllowFullScreen]);
+		return parent::Get().Struct::Embed(null,$this->Source, ["class"=>"block","allowfullscreen"=>$this->AllowFullScreen]);
 	}
 }
 ?>

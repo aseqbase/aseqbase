@@ -1,6 +1,6 @@
 <footer><?php
     use MiMFa\Library\Style;
-    use MiMFa\Library\Html;
+    use MiMFa\Library\Struct;
     $module = new (module("Shortcuts"))();
     $module->Items = \_::$Info->Contacts;
     pod($module, $data);
@@ -20,7 +20,7 @@
     $module->Style->Left = "var(--size-1)";
     $module->Render();
     response(
-        Html::Icon("arrow-up", "scrollThere('head');", [
+        Struct::Icon("arrow-up", "scrollThere('head');", [
             "class" => "view top-hide",
             "style" => "
                 display: var(--display-scrollThere, inline-flex);

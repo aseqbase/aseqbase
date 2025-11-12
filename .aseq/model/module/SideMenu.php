@@ -1,6 +1,6 @@
 <?php
 namespace MiMFa\Module;
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 
@@ -49,7 +49,7 @@ class SideMenu extends Module
 		$sdir = ($this->Direction == "rtl") ? "left" : "right";
 		$activeselector = $this->AllowHoverable ? ".{$this->Name}:is(.active, :hover)" : ".{$this->Name}.active";
 		$notactiveselector = ".{$this->Name}:not(.active)";
-		return parent::GetStyle() . Html::Style("
+		return parent::GetStyle() . Struct::Style("
 			.{$this->Name}{
 				background-color: var(--fore-color-output);
 				color: var(--back-color-output);
@@ -403,11 +403,11 @@ class SideMenu extends Module
 	{
 		return Convert::ToString(function () {
 			if ($this->AllowBranding)
-				yield Html::Header(
-					(isValid($this->Image) ? Html::Media("", $this->Image, ["class" => 'td image', "rowspan" => '2']) : "") .
-					Html::Division(
-						(isValid($this->Description) ? Html::Division(__($this->Description), ["class" => "td description"]) : "") .
-						(isValid($this->Title) ? Html::Division(Html::Link(__($this->Title), '/'), ["class" => "td title"]) : "")
+				yield Struct::Header(
+					(isValid($this->Image) ? Struct::Media("", $this->Image, ["class" => 'td image', "rowspan" => '2']) : "") .
+					Struct::Division(
+						(isValid($this->Description) ? Struct::Division(__($this->Description), ["class" => "td description"]) : "") .
+						(isValid($this->Title) ? Struct::Division(Struct::Link(__($this->Title), '/'), ["class" => "td title"]) : "")
 						,
 						["class" => "td branding"]
 					)
@@ -420,10 +420,10 @@ class SideMenu extends Module
 					module("SearchForm");
 					module("TemplateButton"); 
 					$defaultButtons[] = new searchForm();
-					if (\_::$User->AllowSigning) $defaultButtons[] = Html::Icon("user", \_::$User->InHandlerPath);
+					if (\_::$User->AllowSigning) $defaultButtons[] = Struct::Icon("user", \_::$User->InHandlerPath);
 					$defaultButtons[] = new TemplateButton();
 				}
-				yield Html::Division([
+				yield Struct::Division([
 						...($defaultButtons? $defaultButtons : []),
 						...($this->Buttons? (is_array($this->Buttons)?$this->Buttons:[$this->Buttons]) : [])
 					],
@@ -432,7 +432,7 @@ class SideMenu extends Module
 			}
 			if ($this->AllowItems)
 				if (count($this->Items) > 0)
-					yield Html::Items(
+					yield Struct::Items(
 						function () {
 							foreach ($this->Items as $item)
 								{
@@ -451,7 +451,7 @@ class SideMenu extends Module
 				$module->Items = $this->Shortcuts;
 				yield $module->ToString();
 				if (!$this->AllowHide)
-					yield Html::Icon("map-pin", "$('.{$this->Name}').toggleClass('active')", ["class" => "btn pin-button"]);
+					yield Struct::Icon("map-pin", "$('.{$this->Name}').toggleClass('active')", ["class" => "btn pin-button"]);
 				yield "</div>";
 			}
 		});
@@ -465,24 +465,24 @@ class SideMenu extends Module
 		$act = endsWith(\_::$Address->Path, $path) ? 'active' : '';
 		$ind++;
 		$count = count(getValid($item, "Items", []));
-		return Html::Item(
-			($ind <=2? Html::Button(
-				($this->AllowItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
+		return Struct::Item(
+			($ind <=2? Struct::Button(
+				($this->AllowItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
 				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name")):"").
-				($this->AllowItemsDescription?Html::Division(__(get($item, "Description")), ["class"=>"description"]):""),
+				($this->AllowItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 				$path,
 				get($item, "Attributes")
 				) :
-				Html::Button(
-					($this->AllowSubItemsImage?Html::Image(null, getBetween($item, "Image", "Icon")):"").
+				Struct::Button(
+					($this->AllowSubItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
 					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name")):"").
-					($this->AllowSubItemsDescription?Html::Division(__(get($item, "Description")), ["class"=>"description"]):""),
+					($this->AllowSubItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 					$path,
 					get($item, "Attributes")
 				)
 			) .
 			($count > 0 ?
-				Html::Items(
+				Struct::Items(
 					function () use ($item, $ind) {
 						foreach ($item["Items"] as $itm)
 							yield $this->CreateItem($itm, $ind);
@@ -505,7 +505,7 @@ class SideMenu extends Module
 	{
 		return parent::AfterHandle() .
 			($this->AllowSignButton ?
-				Html::Division(
+				Struct::Division(
 					$this->SignButtonText,
 					[
 						"class" => "{$this->Name}-sign-button-menu view {$this->SignButtonScreenSize}-show",
@@ -517,7 +517,7 @@ class SideMenu extends Module
 
 	public function GetScript()
 	{
-		return parent::GetScript() . Html::Script("
+		return parent::GetScript() . Struct::Script("
 			function {$this->Name}_ViewSideMenu(show){
 				if(show === undefined) show = !document.querySelector('.{$this->Name}').classList.contains('active');
 				if(show) {

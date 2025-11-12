@@ -12,7 +12,7 @@ else {
 	$form->SenderEmail = get($received, "Email") ?? get(\_::$User, "Email");
 	table("Message")->Insert([
 		"UserId" => \_::$User ? \_::$User->Id : null,
-		"Type" => \_::$Address->Url,
+		"Relation" => \_::$Address->Url,
 		"Name" => Convert::ToText(getValid($received, "Name", \_::$User ? \_::$User->Name : null)),
 		"From" => $form->SenderEmail,
 		"To" => $form->ReceiverEmail,

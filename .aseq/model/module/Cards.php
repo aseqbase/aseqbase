@@ -2,7 +2,7 @@
 
 namespace MiMFa\Module;
 
-use MiMFa\Library\Html;
+use MiMFa\Library\Struct;
 
 module("Collection");
 
@@ -29,7 +29,7 @@ class Cards extends Collection
 
     public function GetStyle()
     {
-        return Html::Style("
+        return Struct::Style("
             .{$this->Name} .items .item {
                 background-color: var(--back-color)99;
                 color: var(--fore-color);
@@ -99,7 +99,7 @@ class Cards extends Collection
         $itemsHtml = "";
         foreach ($this->Items as $item) {
             if ($i % $this->MaximumColumns === 0)
-                $itemsHtml .= Html::OpenTag("div", ["class"=> "row items"]);
+                $itemsHtml .= Struct::OpenTag("div", ["class"=> "row items"]);
 
             $p_image = getValid($item, 'Image' , $this->DefaultImage);
             $p_name = __(getBetween($item, 'Title', 'Name')??$this->DefaultTitle, true, false);
@@ -109,26 +109,26 @@ class Cards extends Collection
             $p_buttons = getValid($item, 'ButtonsContent', $this->DefaultButtons);
             $img->Source = $p_image;
 
-            $itemsHtml .= Html::Division(function() use ($img, $p_name, $p_description, $p_content, $p_buttons, $p_link){
+            $itemsHtml .= Struct::Division(function() use ($img, $p_name, $p_description, $p_content, $p_buttons, $p_link){
                 $imageHtml = $img->Render();
-                $titleHtml = Html::Heading4( $p_name);
-                $detailsHtml = Html::Paragraph($p_description .Html::$Break. $p_content, ["class"=> "details"]);
+                $titleHtml = Struct::Heading4( $p_name);
+                $detailsHtml = Struct::Paragraph($p_description .Struct::$Break. $p_content, ["class"=> "details"]);
                 $buttonsHtml = $p_buttons; // Assuming $p_buttons is already HTML
                 $linkHtml = "";
                 if (isValid($p_link)) {
-                    $linkHtml = Html::Link($this->MoreButtonLabel, $p_link, ["class"=> "btn", "target" => "blank"]);
+                    $linkHtml = Struct::Link($this->MoreButtonLabel, $p_link, ["class"=> "btn", "target" => "blank"]);
                 }
                 return $imageHtml . $titleHtml . $detailsHtml . $buttonsHtml . $linkHtml;
             }, ["class"=> "item col-sm", "data-aos" => "fade-up"]);
 
             if (++$i % $this->MaximumColumns === 0) {
-                $itemsHtml .= Html::CloseTag(); // Close the row
+                $itemsHtml .= Struct::CloseTag(); // Close the row
             }
         }
         if ($i % $this->MaximumColumns !== 0) {
-            $itemsHtml .= Html::CloseTag(); // Close the row if not fully divisible by MaximumColumns
+            $itemsHtml .= Struct::CloseTag(); // Close the row if not fully divisible by MaximumColumns
         }
 
-        return Html::Division($itemsHtml, ["class"=> $this->Class]); // Wrap everything in the container
+        return Struct::Division($itemsHtml, ["class"=> $this->Class]); // Wrap everything in the container
     }
 }
