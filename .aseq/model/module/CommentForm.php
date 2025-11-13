@@ -214,15 +214,17 @@ class CommentForm extends Form
 	public function Patch()
 	{
 		$received = receivePatch();
-		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false, reaction: true))
-			if (isValid($received, "Root")) {
+		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false, reaction: true)){
+			$rootId = get($received, "Root");
+			if (isValid($rootId)) {
 				popTimer();
 				$this->AllowHeader =
 					$this->AllowFooter = false;
 				$this->ContentClass = "";
 				$this->SubjectLabel = null;
 				$this->SubmitLabel = $this->ReplyLabel;
-				$this->RootId = get($received, "Root");
+				$this->Relation = table("Message")->GetValue($rootId, "Relation");
+				$this->RootId = $rootId;
 				$this->Router->Initial()->Get()->Switch();
 				return $this->Handle();
 			} elseif (isValid($received, "Status") && \_::$User->GetAccess(\_::$User->AdminAccess)) {
@@ -239,6 +241,7 @@ class CommentForm extends Form
 				} else
 					return $this->GetError();
 			}
+		}
 		return $this->GetSigning();
 	}
 

@@ -307,7 +307,9 @@ class General extends Template
 					background-color: var(--back-color-output);
 					border-radius: var(--radius-5);
 				}
-
+				.contentinput{
+    				width: 100%;
+				}
 				.media{
 					background-position: center;
 					background-repeat: no-repeat;

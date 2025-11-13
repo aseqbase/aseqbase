@@ -32,16 +32,15 @@ class Internal
             $args = null;
             if (is_string($v)) {
                 if (preg_match("/^\{[\w\W]*\}$/", $v))
-                    $args = json_decode($v, true, flags: JSON_OBJECT_AS_ARRAY);
+                    $args = $v;
                 else
                     try {
                         $args = decrypt($v);
                     } catch (\Exception $ex) {
                         $args = $v;
                     }
-            } else
-                $args = $v;
-            $args = $args ?? [];
+                $args = json_decode($args, true, flags: JSON_OBJECT_AS_ARRAY)??[];
+            } else $args = $v??[];
             $args = is_array($args) ? $args : [$args];
             $reses[] = Convert::By(self::Get($k, fn($a = null) => $a), ...$args);
         }
@@ -57,20 +56,6 @@ class Internal
         response(self::Handle($name));
     }
 
-    public static function MakeStartScript($multilines = false, $direct = false)
-    {
-        if (\_::$Router->DefaultMethodName === "GET" && !headers_sent() && !$direct) {
-            return "document.addEventListener('DOMContentLoaded',()=>" . ($multilines ? "{" : "");
-        }
-        return "";
-    }
-    public static function MakeEndScript($multilines = false, $direct = false)
-    {
-        if (\_::$Router->DefaultMethodName === "GET" && !headers_sent() && !$direct) {
-            return ($multilines ? "}" : "") . ");";
-        }
-        return "";
-    }
     /**
      * 
      * To convert a PHP handler to a JS codes
@@ -89,9 +74,8 @@ class Internal
         $progressScript = $progressScript ?? "null";
         $start = self::MakeStartScript(direct: $direct);
         $end = self::MakeEndScript(direct: $direct);
-        $args = Script::Convert($args);
-        if ($encrypt)
-            $args = Script::Convert(encrypt($args));
+        if ($encrypt) $args = Script::Convert(encrypt(json_encode($args, flags: JSON_OBJECT_AS_ARRAY)));
+        else $args = Script::Convert($args);
         if (isStatic($handler))
             return "$start($callbackScript)(" . Script::Convert($handler) . ",$args)$end";
         return $start .
@@ -99,6 +83,21 @@ class Internal
             self::Set($handler) . "\":$args}," .
             (self::$Selector) . ",$callbackScript,$callbackScript,null,$progressScript,$timeout)$end";
     }
+    public static function MakeStartScript($multilines = false, $direct = false)
+    {
+        if (\_::$Router->DefaultMethodName === "GET" && !headers_sent() && !$direct) {
+            return "document.addEventListener('DOMContentLoaded',()=>" . ($multilines ? "{" : "");
+        }
+        return "";
+    }
+    public static function MakeEndScript($multilines = false, $direct = false)
+    {
+        if (\_::$Router->DefaultMethodName === "GET" && !headers_sent() && !$direct) {
+            return ($multilines ? "}" : "") . ");";
+        }
+        return "";
+    }
+
     /**
      * Get the handler encripted name
      * @param mixed $handler A handler function or data wants to print

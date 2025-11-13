@@ -272,14 +272,14 @@ class DataTable
 
 	/**
 	 * To get a record or records
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue
 	 */
-	public function Get(array|int|null $id, $defaultValue = [])
+	public function Get(array|int|string|null $id, $defaultValue = [])
 	{
-		if (!$id)
+		if (is_null($id))
 			return loop($this->Select("*", null, [], []), fn($v) => [$v["Id"] => $v], pair: true) ?: $defaultValue;
-		elseif (is_int($id))
+		elseif (isStatic($id))
 			return $this->SelectRow("*", "Id=:Id", [":Id" => $id], $defaultValue);
 		elseif (is_iterable($id)) {
 			$params = [];
@@ -291,15 +291,15 @@ class DataTable
 	}
 	/**
 	 * To update record or records
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $params
 	 * @param mixed $defaultValue
 	 */
-	public function Set(array|int|null $id, $params = [], $defaultValue = false)
+	public function Set(array|int|string|null $id, $params = [], $defaultValue = false)
 	{
-		if (!$id)
+		if (is_null($id))
 			return $this->Update(null, $params, $defaultValue);
-		elseif (is_int($id)) {
+		elseif (isStatic($id)) {
 			$params[":Id"] = $id;
 			return $this->Update("Id=:Id", $params, $defaultValue);
 		} elseif (is_iterable($id)) {
@@ -323,14 +323,14 @@ class DataTable
 	}
 	/**
 	 * To delete a record or records
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue
 	 */
-	public function Pop(array|int|null $id, $defaultValue = false)
+	public function Pop(array|int|string|null $id, $defaultValue = false)
 	{
-		if (!$id)
+		if (is_null($id))
 			return $this->Delete(null, [], $defaultValue);
-		elseif (is_int($id))
+		elseif (isStatic($id))
 			return $this->Delete("Id=:Id", [":Id" => $id], $defaultValue);
 		elseif (is_iterable($id)) {
 			$params = [];
@@ -342,23 +342,23 @@ class DataTable
 	}
 	/**
 	 * To check if a record or records is exists or not
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @return bool
 	 */
-	public function Has(array|int|null $id)
+	public function Has(array|int|string|null $id)
 	{
 		return self::Get($id, null) ? true : false;
 	}
 
 	/**
 	 * To get a specific column value of a record or records
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function GetValue(array|int|null $id, $key = "Id", $defaultValue = null)
+	public function GetValue(array|int|string|null $id, $key = "Id", $defaultValue = null)
 	{
-		if (is_int($id))
+		if (isStatic($id))
 			return getValid($this->Get($id), $key, $defaultValue);
 		else
 			return loop($this->Get($id), function ($v, $k) use ($key) {
@@ -366,45 +366,45 @@ class DataTable
 	}
 	/**
 	 * To set a specific column value of a record or records
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $key
 	 * @param mixed $value
 	 * @param mixed $defaultValue
 	 */
-	public function SetValue(array|int|null $id, $key, $value = null, $defaultValue = false)
+	public function SetValue(array|int|string|null $id, $key, $value = null, $defaultValue = false)
 	{
 		return $this->Set($id, [$key => $value], $defaultValue);
 	}
 	/**
 	 * To forget a specific column value of a record or records
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function PopValue(array|int|null $id, $key, $defaultValue = false)
+	public function PopValue(array|int|string|null $id, $key, $defaultValue = false)
 	{
 		return $this->Set($id, [$key => null], $defaultValue);
 	}
 	/**
 	 * To check if the record or records has value
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $key
 	 * @return bool
 	 */
-	public function HasValue(array|int|null $id, $key)
+	public function HasValue(array|int|string|null $id, $key)
 	{
 		return self::GetValue($id, $key, null) ? true : false;
 	}
 	
 	/**
 	 * To get the record or records metadata value
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue
 	 * @return array|null
 	 */
-	public function GetMetaData(array|int|null $id, $defaultValue = [])
+	public function GetMetaData(array|int|string|null $id, $defaultValue = [])
 	{
-		if (is_int($id))
+		if (isStatic($id))
 			return Convert::FromJson($this->GetValue($id, "MetaData", $defaultValue));
 		else
 			return loop($this->GetValue($id, "MetaData", $defaultValue), function ($v, $k) {
@@ -412,42 +412,42 @@ class DataTable
 	}
 	/**
 	 * To set the record or records metadata value
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $metadata
 	 * @param mixed $defaultValue
 	 */
-	public function SetMetaData(array|int|null $id, $metadata, $defaultValue = false)
+	public function SetMetaData(array|int|string|null $id, $metadata, $defaultValue = false)
 	{
 		return $this->SetValue($id, "MetaData", isStatic($metadata) ? $metadata : Convert::ToJson($metadata), $defaultValue);
 	}
 	/**
 	 * To forget the record or records metadata value
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue
 	 */
-	public function PopMetaData(array|int|null $id, $defaultValue = false)
+	public function PopMetaData(array|int|string|null $id, $defaultValue = false)
 	{
 		return $this->PopValue($id, "MetaData", $defaultValue);
 	}
 	/**
 	 * To check if the record or records has metadata value or not
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @return bool
 	 */
-	public function HasMetaData(array|int|null $id)
+	public function HasMetaData(array|int|string|null $id)
 	{
 		return self::HasValue($id, "MetaData");
 	}
 
 	/**
 	 * To get the metadata value by the specific $key
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function GetMetaValue(array|int|null $id, $key, $defaultValue = null)
+	public function GetMetaValue(array|int|string|null $id, $key, $defaultValue = null)
 	{
-		if (is_int($id))
+		if (isStatic($id))
 			return getValid($this->GetMetaData($id), $key, $defaultValue);
 		else
 			return loop($this->GetMetaData($id), function ($v, $k) use ($key) {
@@ -455,15 +455,15 @@ class DataTable
 	}
 	/**
 	 * To set the metadata value by the specific $key
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $key
 	 * @param mixed $value
 	 * @param mixed $defaultValue
 	 */
-	public function SetMetaValue(array|int|null $id, $key, $value, $defaultValue = false)
+	public function SetMetaValue(array|int|string|null $id, $key, $value, $defaultValue = false)
 	{
 		$metadata = self::GetMetaData($id, [])??[];
-		if (is_int($id)) {
+		if (isStatic($id)) {
 			$metadata[$key] = $value;
 			return $this->SetMetaData($id, $metadata, $defaultValue);
 		} else {
@@ -477,21 +477,21 @@ class DataTable
 	}
 	/**
 	 * To forget the metadata value by the specific $key
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function PopMetaValue(array|int|null $id, $key, $defaultValue = false)
+	public function PopMetaValue(array|int|string|null $id, $key, $defaultValue = false)
 	{
 		return self::SetMetaValue($id, $key, null, $defaultValue);
 	}
 	/**
 	 * To check if the metadata column has the specific $key or not
-	 * @param array|int|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $key
 	 * @return bool
 	 */
-	public function HasMetaValue(array|int|null $id, $key)
+	public function HasMetaValue(array|int|string|null $id, $key)
 	{
 		return self::GetMetaValue($id, $key) ? true : false;
 	}

@@ -490,7 +490,7 @@ let send = function (
 
 	if (contentType) xhr.setRequestHeader('Content-Type', contentType);
 
-	xhr.timeout = timeout;
+	if(async) xhr.timeout = timeout;
 
 	xhr.upload.addEventListener('progress', progress);
 
@@ -587,7 +587,7 @@ let sendRequest = function (
 	ready = null,
 	progress = null,
 	timeout = null) {
-		return sendRequest(method, url, data, selector, success, error, ready, progress, timeout, false);
+		return send(method, url, data, selector, success, error, ready, progress, timeout, false);
 };
 let sendGetRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('GET', url, data, selector, success, error, ready, progress, timeout);

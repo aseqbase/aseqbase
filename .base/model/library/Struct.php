@@ -626,7 +626,11 @@ class Struct
                 max-width: 90%;
                 max-haight: 90%;
                 box-shadow: var(--shadow-max);
-                position: relative;
+                position: sticky;
+                top: var(--size-max);
+                bottom: var(--size-max);
+                right: var(--size-max);
+                left: var(--size-max);
             }
             #$id.modal-overlay>.modal>.modal-close {
                 position: absolute;
