@@ -140,8 +140,6 @@ class Template extends \Base{
         }
         .result{
             font-size: var(--size-min);
-            background-color: var(--back-color-special);
-            border: var(--border-2);
             padding: calc(var(--size-min) / 2) var(--size-min);
             display: flex;
             align-content: center;

@@ -35,6 +35,7 @@ if ($imgObj = receiveFile("Image")) {
     //}
 }
 try {
+    pop($received, "Submit");
     if (\_::$User->Set($received)) {
         if (getValid($received, "Email", \_::$User->TemporaryEmail) != \_::$User->TemporaryEmail) {
             success("The 'email address' modifyed successfully!");

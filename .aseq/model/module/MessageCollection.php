@@ -93,6 +93,9 @@ class MessageCollection extends Collection
                 margin-inline-end: auto;
                 border-top-left-radius: var(--size-0); /* Smaller radius for the tail side */
             }
+            .{$this->Name} div.item:not(.sender) .author {
+				color: var(--color-blue);
+            }
             .{$this->Name} div.item::before {
                 content: '';
                 position: absolute;
@@ -116,7 +119,6 @@ class MessageCollection extends Collection
                 font-size: var(--size-0);
                 font-weight: bold;
                 display: block;
-                border-bottom: var(--border-2) #8884;
                 padding-bottom: 2px;
                 margin-bottom: 2px;
             }
@@ -125,17 +127,19 @@ class MessageCollection extends Collection
             }
             .{$this->Name} div.item .quote {
                 opacity: 0.6;
-                border-inline-start: 4px solid var(--color-gray); /* Messenger quote bar */
+                border-inline-start: 4px solid var(--color-blue); /* Messenger quote bar */
                 padding: calc(var(--size-0) / 2) var(--size-0);
                 margin-bottom: calc(var(--size-0) / 2);
                 margin-inline-start: calc(-1 * var(--size-0));
                 margin-inline-end: calc(-1 * var(--size-0));
                 padding-inline-start: var(--size-0);
                 background-color: rgba(0, 0, 0, 0.2);
-                border-radius: var(--radius-0);
-                font-size: calc(var(--size-1) * 0.9);
+                border-radius: 0px;
                 overflow: hidden;
                 max-height: calc(var(--size-1) * 5);
+            }
+            .{$this->Name} div.item .quote *{
+                font-size: 90%;
             }
             .{$this->Name} div.item .quote .content {
                 overflow: hidden;

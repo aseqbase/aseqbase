@@ -3265,7 +3265,7 @@ class Struct
 			    if(elem) elem.innerHTML = {$updateValueFunction}($counter);
                 else $counter = $to;
 			}, {$period});"
-        ), "div", ["id" => $id, "class" => "counter"], $attributes);
+        ), "span", ["id" => $id, "class" => "counter"], $attributes);
     }
     /**
      * A \<SPAN\> HTML Tag contains a timer
