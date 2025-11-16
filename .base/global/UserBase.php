@@ -352,7 +352,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 	public function GenerateEmail($name = null, $fake = false)
 	{
-		return ($name ?? $this->Signature ?? ("user_" . getId(true))) . ($fake ? uniqid("+") : "") . "@" . \_::$Address->Domain;
+		return Convert::ToKey($name ?? $this->Signature ?? ("user_" . getId(true))) . ($fake ? uniqid("+") : "") . "@" . \_::$Address->Domain;
 	}
 
 	/**
@@ -372,10 +372,11 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
 	{
 		$this->TemporaryImage = null;
+		$email = $email?:$this->GenerateEmail($signature);
 		return $this->DataTable->Insert(
 			[
-				":Signature" => $this->TemporarySignature = $signature ?? $email ?? $contact,
-				":Email" => $this->TemporaryEmail = strtolower($email ?? ""),
+				":Signature" => $this->TemporarySignature = $signature ?? $contact ?? $email,
+				":Email" => $this->TemporaryEmail = strtolower($email),
 				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password),
 				":Name" => $this->TemporaryName = $name ?? trim($firstName . " " . $lastName),
 				":FirstName" => $firstName,
