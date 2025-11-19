@@ -98,6 +98,8 @@ class GeneralStyle{
 			--transition-5: " . \_::$Front->Transition(5) . ";
 			--transition-min: " . first(\_::$Front->TransitionPalette) . ";
 			--transition-max: " . last(\_::$Front->TransitionPalette) . ";
+			--animation-speed: " . \_::$Front->AnimationSpeed . "ms;
+			
 			--overlay-0: \"" . \_::$Front->Overlay(0) . "\";
 			--overlay-1: \"" . \_::$Front->Overlay(1) . "\";
 			--overlay-2: \"" . \_::$Front->Overlay(2) . "\";
@@ -130,7 +132,7 @@ class GeneralStyle{
 			--pattern-url-5: URL(\"" . \_::$Front->Pattern(5) . "\");
 			--pattern-url-min: URL(\"" . first(\_::$Front->PatternPalette) . "\");
 			--pattern-url-max: URL(\"" . last(\_::$Front->PatternPalette) . "\");
-
+			
 			--owner: \"" . __(\_::$Info->Owner, true, false) . "\";
 			--name: \"" . __(\_::$Info->Name, true, false) . "\";
 			--slogan: \"" . __(\_::$Info->Slogan, true, false) . "\";
@@ -171,7 +173,6 @@ class GeneralStyle{
 		}";
 	}
 }
-\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->StyleDirectory,'reset.css', optimize: true));
 \_::$Front->Libraries[] = Struct::Style(GeneralStyle::Variables());
 \_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
 \_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));

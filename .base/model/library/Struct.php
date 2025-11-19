@@ -229,13 +229,21 @@ class Struct
                 break;
         }
         $attachments = "";
-        $attrs = self::Attributes($attributes, $attachments, $prepends, $appends, $allowMA);
+        $attrs = self::Attributes($attributes, $attachments, $inners, $outers, $allowMA);
         if ($isSingle)
-            return "$prepends<$tagName$attrs data-single/>$appends$attachments";
+            return "$outers<$tagName$attrs data-single/>$inners$attachments";
         else
-            return join("", ["<$tagName$attrs>$prepends", Convert::ToString($content), "$appends</$tagName>$attachments"]);
+            switch ($tagName) {
+                case "textarea":
+                case "code":
+                case "blockcode":
+                case "xmp":
+                    return join("", ["$outers<$tagName$attrs>", Convert::ToString($content), "</$tagName>$inners$attachments"]);
+                default:
+                    return join("", ["$outers<$tagName$attrs>", Convert::ToString($content), "$inners</$tagName>$attachments"]);
+            }
     }
-    public static function Attributes($attributes, &$attachments = "", &$prepends = "", &$appends = "", $optimization = false)
+    public static function Attributes($attributes, &$attachments = "", &$inners = "", &$outers = "", $optimization = false)
     {
         $attrs = "";
         if ($attributes) {
@@ -292,7 +300,7 @@ class Struct
                 foreach ($attrdic as $key => $value)
                     switch ($key) {
                         case "tooltip":
-                            $appends .= Struct::Tooltip(__($value));
+                            $inners .= Struct::Tooltip(__($value));
                             break;
                         case "style":
                             if (self::$AttributesOptimization && $optimization) {
@@ -499,9 +507,9 @@ class Struct
                 break;
         }
         $attachments = "";
-        $attrs = self::Attributes($attributes, $attachments, $prepends, $appends, $allowMA);
+        $attrs = self::Attributes($attributes, $attachments, $inners, $outers, $allowMA);
         self::$TagStack[] = $tagName;
-        return "$attachments<$tagName$attrs>$prepends$appends";
+        return "$attachments<$tagName$attrs>$outers$inners";
     }
     /**
      * Create standard html close tag element
@@ -628,8 +636,6 @@ class Struct
                 box-shadow: var(--shadow-max);
                 position: sticky;
                 top: var(--size-max);
-                bottom: var(--size-max);
-                right: var(--size-max);
                 left: var(--size-max);
             }
             #$id.modal-overlay>.modal>.modal-close {
@@ -651,7 +657,7 @@ class Struct
                 "class" => 'modal-overlay',
                 "onclick" => "if(event.target.classList.contains('modal-overlay')) event.target.remove();event.preventDefault();"
             ]
-        );
+        ) . self::Script("scrollThere('#$id');");
     }
     public static function Result($content, $icon = "bell", $wait = 10000, ...$attributes)
     {
@@ -2048,8 +2054,8 @@ class Struct
         //     $content = Struct::Division($value, ["class" => "input"], $attributes);
         $id = self::GetAttribute($attributes, "Id") ?? Convert::ToId($key);
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
-        $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title"]));
-        $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description"]));
+        $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title", "placeholder" => self::PopAttribute($attributes, "PlaceHolder")]));
+        $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description", "placeholder" => self::PopAttribute($attributes, "PlaceHolder")]));
         $wrapperAttr = self::PopAttribute($attributes, "Wrapper") ?? [];
         switch ($type) {
             // case null:
@@ -2186,10 +2192,10 @@ class Struct
         $attributes = ["id" => $id, "name" => $key, ...$attributes];
         $options = $options ?? [];
         $dataOptions = function ($options, &$attributes) {
-            if($options && !self::HasAttribute($attributes, "list")) {
-                $id = "dl_".getId();
+            if ($options && !self::HasAttribute($attributes, "list")) {
+                $id = "dl_" . getId();
                 $attributes["list"] = $id;
-                return self::DataList($options, null, ["Id"=>$id]);
+                return self::DataList($options, null, ["Id" => $id]);
             }
             return null;
         };
@@ -2204,7 +2210,7 @@ class Struct
                 return null;
             //case true:
             case 'true':
-                $content = $dataOptions($options, $attributes).self::Input($key, $value, null, $attributes);
+                $content = $dataOptions($options, $attributes) . self::Input($key, $value, null, $attributes);
                 break;
             case 'span':
                 $content = self::Span($value ?? $titleOrKey, null, $attributes);
@@ -2236,7 +2242,7 @@ class Struct
                 $content = self::Label($value ?? $titleOrKey, $id, $attributes);
                 break;
             case 'object':
-                $content = $dataOptions($options, $attributes).self::ObjectInput($key, Convert::ToString($value), $attributes);
+                $content = $dataOptions($options, $attributes) . self::ObjectInput($key, Convert::ToString($value), $attributes);
                 break;
             case 'countable':
             case 'iterable':
@@ -2246,7 +2252,7 @@ class Struct
                 break;
             case 'longtext':
             case 'content':
-                $content = $dataOptions($options, $attributes).self::ContentInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::ContentInput($key, $value, $attributes);
                 break;
             case 'size':
             case 'font':
@@ -2261,10 +2267,10 @@ class Struct
             case 'tinytext':
             case 'varchar':
             case 'char':
-                $content = $dataOptions($options, $attributes).self::TextInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::TextInput($key, $value, $attributes);
                 break;
             case 'address':
-                $content = $dataOptions($options, $attributes).self::AddressInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::AddressInput($key, $value, $attributes);
                 break;
             case 'lines':
             case 'texts':
@@ -2272,7 +2278,7 @@ class Struct
             case 'strings':
             case 'multiline':
             case 'textarea':
-                $content = $dataOptions($options, $attributes).self::TextsInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::TextsInput($key, $value, $attributes);
                 break;
             case 'tag':
             case 'combobox':
@@ -2299,7 +2305,7 @@ class Struct
             case 'radio':
             case 'radiobox':
             case 'radiobutton':
-                $content = $dataOptions($options, $attributes).self::RadioInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::RadioInput($key, $value, $attributes);
                 break;
             case 'choices':
             case 'choiceboxes':
@@ -2317,7 +2323,7 @@ class Struct
             case 'check':
             case 'checkbox':
             case 'checkbutton':
-                $content = $dataOptions($options, $attributes).self::CheckInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::CheckInput($key, $value, $attributes);
                 break;
             case 'bools':
             case 'booleans':
@@ -2378,50 +2384,50 @@ class Struct
             case 'phone':
             case 'tel':
             case 'telephone':
-                $content = $dataOptions($options, $attributes).self::TelInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::TelInput($key, $value, $attributes);
                 break;
             case 'mask':
                 $content = self::MaskInput($key, $value, $options, $attributes);
                 break;
             case 'url':
-                $content = $dataOptions($options, $attributes).self::UrlInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::UrlInput($key, $value, $attributes);
                 break;
             case 'map':
             case 'location':
-                $content = $dataOptions($options, $attributes).self::MapInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::MapInput($key, $value, $attributes);
                 break;
             case 'path':
-                $content = $dataOptions($options, $attributes).self::TextInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::TextInput($key, $value, $attributes);
                 break;
             case 'calendar':
             case 'calendarinput':
             case 'datetime-local':
             case 'cal':
-                $content = $dataOptions($options, $attributes).self::CalendarInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::CalendarInput($key, $value, $attributes);
                 break;
             case 'datetime':
-                $content = $dataOptions($options, $attributes).self::DateTimeInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::DateTimeInput($key, $value, $attributes);
                 break;
             case 'date':
-                $content = $dataOptions($options, $attributes).self::DateInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::DateInput($key, $value, $attributes);
                 break;
             case 'time':
-                $content = $dataOptions($options, $attributes).self::TimeInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::TimeInput($key, $value, $attributes);
                 break;
             case 'week':
-                $content = $dataOptions($options, $attributes).self::WeekInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::WeekInput($key, $value, $attributes);
                 break;
             case 'month':
-                $content = $dataOptions($options, $attributes).self::MonthInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::MonthInput($key, $value, $attributes);
                 break;
             case 'hidden':
             case 'hide':
-                $content = $dataOptions($options, $attributes).self::HiddenInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::HiddenInput($key, $value, $attributes);
                 break;
             case 'secret':
             case 'pass':
             case 'password':
-                $content = $dataOptions($options, $attributes).self::SecretInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::SecretInput($key, $value, $attributes);
                 break;
             case 'doc':
             case 'document':
@@ -2429,7 +2435,7 @@ class Struct
             case 'audio':
             case 'video':
             case 'file':
-                $content = $dataOptions($options, $attributes).self::FileInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::FileInput($key, $value, $attributes);
                 break;
             case 'docs':
             case 'documents':
@@ -2437,24 +2443,24 @@ class Struct
             case 'audios':
             case 'videos':
             case 'files':
-                $content = $dataOptions($options, $attributes).self::FilesInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::FilesInput($key, $value, $attributes);
                 break;
             case 'dir':
             case 'directory':
             case 'folder':
-                $content = $dataOptions($options, $attributes).self::DirectoryInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::DirectoryInput($key, $value, $attributes);
                 break;
             case 'submitbutton':
             case 'submit':
-                $content = $dataOptions($options, $attributes).self::SubmitButton($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::SubmitButton($key, $value, $attributes);
                 break;
             case 'resetbutton':
             case 'reset':
-                $content = $dataOptions($options, $attributes).self::ResetButton($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::ResetButton($key, $value, $attributes);
                 break;
             case 'imagesubmit':
             case 'imgsubmit':
-                $content = $dataOptions($options, $attributes).self::Input($key, $title, 'image', ['src' => Convert::ToString($value)], $attributes);
+                $content = $dataOptions($options, $attributes) . self::Input($key, $title, 'image', ['src' => Convert::ToString($value)], $attributes);
                 break;
             case 'code':
                 $content = self::CodeInput($key, $value, $options, $attributes);
@@ -2465,27 +2471,27 @@ class Struct
             case 'html':
             case 'css':
             case 'codes':
-                $content = $dataOptions($options, $attributes).self::ScriptInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::ScriptInput($key, $value, $attributes);
                 break;
             case 'mail':
             case 'email':
-                $content = $dataOptions($options, $attributes).self::EmailInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::EmailInput($key, $value, $attributes);
                 break;
             case 'color':
-                $content = $dataOptions($options, $attributes).self::ColorInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::ColorInput($key, $value, $attributes);
                 break;
             case 'search':
-                $content = $dataOptions($options, $attributes).self::SearchInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::SearchInput($key, $value, $attributes);
                 break;
             default:
                 if (is_string($type))
                     if (preg_match("/[^a-z\d\-_:\/\\\]/i", $type))
-                        $content = $dataOptions($options, $attributes).self::Element($value, $type, $attributes);
+                        $content = $dataOptions($options, $attributes) . self::Element($value, $type, $attributes);
                     else {
                         $content = $type;
                         $type = null;
                     } else
-                    $content = $dataOptions($options, $attributes).self::Input($key, $value, $type, $attributes);
+                    $content = $dataOptions($options, $attributes) . self::Input($key, $value, $type, $attributes);
                 break;
         }
         if (is_null($prepend) && is_null($content) && is_null($append))
@@ -2535,7 +2541,7 @@ class Struct
             $attributes = Convert::ToIteration($type, ...$attributes);
             $type = "text";
         }
-        return self::Element("input", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => self::PopAttribute($attributes, "name") ?? Convert::ToKey($key), "placeholder" => self::PopAttribute($attributes, "placeholder") ?? Convert::ToTitle($key), "type" => $type, "value" => $value, "class" => "input"], $attributes);
+        return self::Element("input", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => self::PopAttribute($attributes, "name") ?? Convert::ToKey($key), ...($key?["autocomplete" => self::PopAttribute($attributes, "AutoComplete")??$key]:[]), "placeholder" => self::PopAttribute($attributes, "placeholder") ?? Convert::ToTitle($key), "type" => $type, "value" => $value, "class" => "input"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2852,14 +2858,38 @@ class Struct
      */
     public static function FindInput($key, $value = null, $options = [], ...$attributes)
     {
+        $ph = self::PopAttribute($attributes, "PlaceHolder") ?? Convert::ToTitle($key);
         $id = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
+        $name = self::PopAttribute($attributes, "Name");
+        $id_fore = "{$id}_fore";
         $id_options = "{$id}_options";
-        return self::Element(
-            null,
-            "input",
-            ["id" => $id, "name" => Convert::ToKey($key), "placeholder" => Convert::ToTitle($key), "value" => $value, "class" => "input findinput", "list" => $id_options],
-            $attributes
-        ) . self::DataList($options, $value, ["id" => $id_options]);
+        return
+            self::HiddenInput(
+                $key,
+                $value,
+                [
+                    "id" => $id,
+                    "Name"=>$name
+                ]
+            ) .
+            self::Element(
+                null,
+                "input",
+                [
+                    "id" => $id_fore,
+                    "value" => $value,
+                    "placeholder" => $ph,
+                    "oninput" => "const val = this.value;
+                    const option = Array.from(document.querySelectorAll('#$id_options>option')).find(opt => opt.value === val);
+                    if (option) {
+                        this.value = option.textContent;
+                        document.getElementById('$id').value = option.value;
+                    }",
+                    "class" => "input findinput",
+                    "list" => $id_options
+                ],
+                $attributes
+            ) . self::DataList($options, $value, ["id" => $id_options]);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3034,44 +3064,149 @@ class Struct
      */
     public static function FileInput($key, $value = null, ...$attributes)
     {
-        $id1 = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
-        $id2 = Convert::ToId($key);
-        $key = Convert::ToKey($key);
-        return self::Input($key, null, "file", $attributes, [
-            "class" => "fileinput",
-            "id" => $id1,
-            "style" => $value ? "display:none;" : "",
-            ...($value ? ["name" => ""] : ["name" => "$key"]),
-            "oninput" => "
-            elem = document.getElementById('$id2');
-            if(this.files.length>0){
-                this.setAttribute('name', '$key');
-                elem.removeAttribute('name');
-                elem.setAttribute('disabled', 'disabled');
+        //     $id1 = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
+        //     $id2 = Convert::ToId($key);
+        //     $key = Convert::ToKey($key);
+        //     return self::Input($key, null, "file", $attributes, [
+        //         "class" => "fileinput",
+        //         "id" => $id1,
+        //         "style" => $value ? "display:none;" : "",
+        //         ...($value ? ["name" => ""] : ["name" => "$key"]),
+        //         "oninput" => "
+        //         elem = document.getElementById('$id2');
+        //         if(this.files.length>0){
+        //             this.setAttribute('name', '$key');
+        //             elem.removeAttribute('name');
+        //             elem.setAttribute('disabled', 'disabled');
+        //         } else {
+        //             this.removeAttribute('name');
+        //             elem.setAttribute('name', '$key');
+        //             elem.removeAttribute('disabled');
+        //         }"
+        //     ]) .
+        //         self::Input($key, $value, "text", $attributes, [
+        //             "class" => "fileinput",
+        //             "id" => $id2,
+        //             ...($value ? ["name" => "$key"] : ["name" => ""]),
+        //             "oninput" => "
+        //         elem = document.getElementById('$id1');
+        //         if(!isEmpty(this.value)){
+        //             this.setAttribute('name', '$key');
+        //             elem.removeAttribute('name');
+        //             elem.setAttribute('disabled', 'disabled');
+        //             elem.style.display='none';
+        //         } else {
+        //             this.removeAttribute('name');
+        //             elem.setAttribute('name', '$key');
+        //             elem.removeAttribute('disabled');
+        //             elem.style.display='inherit';
+        //         }"
+        //         ]);
+        $name = Convert::ToKey($key);
+        $id = self::PopAttribute($attributes, "Id") ?? ("fi_" . getId());
+        $m = self::HasAttribute($attributes, "Multiple");
+        $d = self::HasAttribute($attributes, "WebkitDirectory");
+        $ph = self::PopAttribute($attributes, "PlaceHolder");
+        $class = self::PopAttribute($attributes, "Class");
+        $style = self::PopAttribute($attributes, "Style");
+        return self::Style("
+        #$id {
+            display: flex;
+            align-items: center;
+            align-content: center;
+            justify-content: space-between;
+        }
+        #$id>*>:is(.browse,.close) {
+            aspect-ratio: 1;
+            border-radius: var(--radius-3);
+        }
+        #$id.dragover {
+            background-color: #01b64622;
+        }
+        #$id>.collection>div{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            align-content: center;
+            text-align: center;
+            max-width: calc(2 * var(--size-max));
+        }
+        #$id>.collection>div>.icon{
+            opacity: 0.7;
+            font-size: var(--size-max);
+        }
+        #$id>.collection>div>span{
+            font-size: var(--size-0);
+        }
+        ") . self::Division([
+                        self::Input($value ? null : $name, $value, "file", [
+                            "style" => "display:none;",
+                            "oninput" => "{$id}_Update(true);"
+                        ], $attributes),
+                        self::Input($value ? $name : null, $value, "text", [
+                            "placeholder" => $ph ?? $key ?? "📁 'Drag & drop files here' or 'click to select'",
+                            "oninput" => "{$id}_Update(false);",
+                            "ondblclick" => "document.querySelector('#$id>input[type=\"file\"]').click();"
+                        ]),
+                        "<div class='collection'></div>",
+                        self::Division([
+                            self::Icon("close", "document.querySelector('#$id>input[type=\"file\"]').value='';{$id}_Update();", ["class" => "close", "style" => "display:none"]),
+                            self::Icon("folder-open", "document.querySelector('#$id>input[type=\"file\"]').click();", ["class" => "browse"])
+                        ])
+                    ], ["id" => $id, "class" => "input fileinput $class", "style" => $style]) .
+            self::Script("
+        const {$id}dropzone = document.querySelector('#$id');
+        const {$id}fileInput = document.querySelector('#$id>input[type=\"file\"]');
+        const {$id}fileList = document.querySelector('#$id>.collection');
+
+        {$id}fileInput.addEventListener('change', () => {
+            {$id}_DisplayFiles({$id}fileInput.files);
+        });
+        {$id}dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            {$id}dropzone.classList.add('dragover');
+        });
+        {$id}dropzone.addEventListener('dragleave', () => {
+            {$id}dropzone.classList.remove('dragover');
+        });
+        {$id}dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            {$id}dropzone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            {$id}fileInput.files = files;
+            {$id}_DisplayFiles(files);
+            {$id}_Update();
+        });
+        
+        function {$id}_Update(isInput = true) {
+            elem = document.querySelector('#$id>input[type=\"file\"]');
+            telem = document.querySelector('#$id>input[type=\"text\"]');
+            felem = document.querySelector('#$id>.collection');
+            celem = document.querySelector('#$id>*>.close');
+            if(elem.files.length>0){
+                elem.setAttribute('name', '$name');
+                telem.removeAttribute('name');
+                telem.setAttribute('disabled', 'disabled');
+                telem.style.display='none';
+                celem.style.display='inherit';
             } else {
-                this.removeAttribute('name');
-                elem.setAttribute('name', '$key');
-                elem.removeAttribute('disabled');
-            }"
-        ]) .
-            self::Input($key, $value, "text", $attributes, [
-                "class" => "fileinput",
-                "id" => $id2,
-                ...($value ? ["name" => "$key"] : ["name" => ""]),
-                "oninput" => "
-            elem = document.getElementById('$id1');
-            if(!isEmpty(this.value)){
-                this.setAttribute('name', '$key');
                 elem.removeAttribute('name');
-                elem.setAttribute('disabled', 'disabled');
-                elem.style.display='none';
-            } else {
-                this.removeAttribute('name');
-                elem.setAttribute('name', '$key');
-                elem.removeAttribute('disabled');
-                elem.style.display='inherit';
-            }"
-            ]);
+                telem.setAttribute('name', '$name');
+                telem.removeAttribute('disabled');
+                telem.style.display='inherit';
+                celem.style.display='none';
+                felem.innerHTML = '';
+            }
+        }
+        function {$id}_DisplayFiles(files) {
+            {$id}fileList.innerHTML = '';
+            Array.from(files).forEach(file => {
+            const item = document.createElement('div');
+            item.innerHTML = " . Script::Convert(self::Icon($d ? "folder" : "file")) . "+`<span>\${file.name}<br><small>(\${(file.size / 1024).toFixed(1)} KB)</small></span>`;
+            {$id}fileList.appendChild(item);
+            });
+        }");
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3243,7 +3378,7 @@ class Struct
      */
     public static function Counter($from, $to = 0, $action = null, $step = 1, $period = 1000, $updateValueFunction = null, ...$attributes)
     {
-        $id = "c_" . getId();
+        $id = self::PopAttribute($attributes, "Id") ?? ("c_" . getId());
         $countDown = $from >= $to;
         $counter = $id;
         $interval = $id . "_i";
@@ -3757,7 +3892,7 @@ class Struct
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading3($title) .
-                script(null, asset(\_::$Address->ScriptDirectory, "Canvas.js")) .
+                script(null, asset(\_::$Address->PackageDirectory, "Chart/Script.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {
@@ -3842,10 +3977,16 @@ class Struct
             $action = ".on('click', (e)=>{$action})";
 
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
-        style(null, "https://unpkg.com/leaflet/dist/leaflet.css");
-        style(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css");
-        script(null, "https://unpkg.com/leaflet/dist/leaflet.js");
-        script(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js");
+
+        style(null,asset(\_::$Address->PackageDirectory, "Map/Style.css"));
+        style(null,asset(\_::$Address->PackageDirectory, "Map/Locate.css"));
+        script(null,asset(\_::$Address->PackageDirectory, "Map/Script.js"));
+        script(null,asset(\_::$Address->PackageDirectory, "Map/Locate.js"));
+
+        //style(null, "https://unpkg.com/leaflet/dist/leaflet.css");
+        //style(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css");
+        //script(null, "https://unpkg.com/leaflet/dist/leaflet.js");
+        //script(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js");
 
         // Normalize content
         $markersJS = "";
@@ -3892,18 +4033,9 @@ class Struct
 
     map_marker$id = null;
     $markersJS
-
-    L.control.locate({
-				position: 'bottomright',
-				drawCircle: false,
-				follow: true,
-				setView: true,
-				keepCurrentZoomLevel: false,
-				icon: 'icon fa fa-crosshairs',
-				iconLoading: 'icon fa fa-spinner fa-spin',
-			}).addTo(map$id);
+    map_onClick_$id = null;
     if ($changeable) {
-        map$id.on('click', function(e) {
+        map$id.on('click', map_onClick_$id = function(e) {
             if (map_marker$id) {
                 map_marker$id.setLatLng(e.latlng);
                 $onchange;
@@ -3916,16 +4048,28 @@ class Struct
         });
     }
     else {
-        map$id.on('click', function(e) {
+        map$id.on('click', map_onClick_$id = function(e) {
             $onclick;
         });
-    }");
+    }
+    L.control.locate({
+            position: 'bottomright',  drawCircle: false,
+            drawCircle: false,
+            follow: true,
+            setView: true,
+            keepCurrentZoomLevel: false,
+            icon: 'icon fa fa-crosshairs',
+            iconLoading: 'icon fa fa-spinner fa-spin',
+            showPopup: false,
+            onLocationOutsideMapBounds:map_onClick_$id,
+        }).addTo(map$id);
+    ");
     }
     #endregion
 }
 
 /**
- * @obsolete - Use Struct insted of this class
+ * @deprecated - Use MiMFa\Library\Struct insted of this class
  */
 class Html extends Struct
 {

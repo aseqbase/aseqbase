@@ -126,7 +126,7 @@ class Template extends \Base{
             font-family: var(--font);
             font-size: var(--size-0);
             font-weight: lighter;
-            max-width: 70vw;
+            max-width: 80%;
             min-width: 120px;
             width: max-content;
             background-color: var(--fore-color);
@@ -137,6 +137,13 @@ class Template extends \Base{
             padding: 9px 9px;
             z-index: -999;
             transition: var(--transition-0);
+        }
+        :not(html,head,body,style,script,link,meta,title):hover>.tooltip {
+            opacity: 0.7;
+            z-index: 999;
+            transition: var(--transition-1) 2s;
+            animation: fade-out var(--animation-speed) forwards;
+            animation-delay: 7s;
         }
         .result{
             font-size: var(--size-min);
@@ -160,11 +167,6 @@ class Template extends \Base{
         }
         .result.warning{
             color: var(--color-yellow);
-        }
-        :not(html,head,body,style,script,link,meta,title):hover>.tooltip {
-            opacity: 1;
-            z-index: 999;
-            transition: var(--transition-1) 2s;
         }
         :not(h1, h2, h3, h4, h5, h6, p, .content) {
             line-height: 1.5em;

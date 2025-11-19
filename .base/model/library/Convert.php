@@ -39,7 +39,7 @@ class Convert
             return $value->ToString();
         if (is_countable($value) || is_iterable($value))
             return self::ToString($value);
-            //return self::ToJson($value);
+        //return self::ToJson($value);
         if (is_callable($value) || $value instanceof \Closure)
             return self::ToStatic($value(...$args));
         if ($value instanceof \DateTime)
@@ -90,7 +90,7 @@ class Convert
             }
             return str_replace("{0}", join($separator, $texts), $arrayFormat);
         }
-        return (self::ToStatic($value)??$default)."";
+        return (self::ToStatic($value) ?? $default) . "";
     }
 
     public static function ToHtml($value, ...$args)
@@ -291,6 +291,41 @@ class Convert
     public static function ToSequence(...$args)
     {
         return iterator_to_array(self::ToIteration(...$args));
+    }
+    /**
+     * To convert a value to Imag, and write text to the image using TrueType fonts
+     * @param mixed $value
+     * @param int $width To Pixels
+     * @param int $height To Pixels
+     * @param array $backColor An array of one byte (0-255) values for [Red, Green, Blue, Alpha (A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent)] 
+     * @param array $foreColor An array of one byte (0-255) values for [Red, Green, Blue, Alpha (A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent)]  
+     * @param int $fontSize Font size in points
+     * @param string|null $fontPath A TrueType font (Leave null for default)
+     * @return bool|string The image/png data ready to convert to Data URI
+     */
+    public static function ToImage($value, $width = 100, $height = 100, $backColor = [0, 0, 0, 127], $foreColor = [255, 255, 255, 0], $fontSize = 50, $fontPath = null, $angle = 0, $multipleX = 0.1, $multipleY = 0.75)
+    {
+        $image = imagecreatetruecolor($width, $height);
+        imagesavealpha($image, true);
+        $background = imagecolorallocatealpha($image, $backColor[0]??0, $backColor[1]??0, $backColor[2]??0, $backColor[3]??127);
+        $textColor = imagecolorallocatealpha($image, $foreColor[0]??255, $foreColor[1]??255, $foreColor[2]??255, $foreColor[3]??0);
+        imagefilledrectangle($image, 0, 0, $width, $height, $background);
+        $fontPath = $fontPath ?? address("/asset/font/Default.ttf");
+        imagettftext($image, $fontSize, $angle, intval($multipleX * $width), intval($multipleY * $height), $textColor, $fontPath, self::ToString($value ?? ""));
+        ob_start();
+        imagepng($image);
+        imagedestroy($image);
+        return ob_get_clean();
+    }
+    /**
+     * To convert a value to its useable Data URI
+     * @param mixed $value
+     * @param mixed $mime
+     * @return string
+     */
+    public static function ToDataUri($value, $mime)
+    {
+        return 'data:' . $mime . ';base64,' . base64_encode(self::ToString($value));
     }
 
     public static function ToJson($obj): string

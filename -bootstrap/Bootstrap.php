@@ -8,7 +8,7 @@ class Bootstrap
     public static $ConfigurationsFile = 'bootstrap.json';
     public static $DataBaseSchemaFile = 'schema.sql';
     public static $DestinationDirectory = null;
-    public static $ScriptsPattern = "/[\{\}\[\]\;\,\"'?=\*<>\$\^&\|\!]|(^\d*\.?\d+$)|(^null$)/";
+    public static $ScriptsPattern = "/[\{\}\[\]\;\,\"?=\*\$\^&\|\!]|(^\d*\.?\d+$)|(^null$)/";
 
 
     public static function Start()
@@ -226,6 +226,7 @@ class Bootstrap
             self::SetError("Database name required.");
             return self::ConstructDataBase($force);
         }
+        $prefix = "aseq_";
         self::GetInput("Database Username", $force, self::$Configurations["DataBase"]["Username"] ?? "root", $username, "username");
         self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "root", $password, "password");
         self::GetInput("Tables prefix", $force, self::$Configurations["DataBase"]["Prefix"] ?? "aseq_", $prefix, "prefix");
@@ -438,7 +439,7 @@ class Info extends AseqInfo") . " {
 	public \$Slogan = " . self::GetInput("Slogan", $force, "<u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["Slogan"], "slogan") . ";
 	public \$FullSlogan = " . self::GetInput("FullSlogan", $force, "Develop websites by <u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["FullSlogan"], "full-slogan") . ";
 	public \$Description = " . self::GetInput("Description", $force, "An original, safe, very flexible, and innovative framework for web developments!", self::$Configurations["Info"]["Description"], "description") . ";
-	public \$FullDescription = " . self::GetInput("FullDescription", $force, "A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.", self::$Configurations["Info"]["FullDescription"], "full-description") . ";
+	public \$FullDescription = " . self::GetInput("FullDescription", $force, "A special framework for web development called 'aseqbase' (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.", self::$Configurations["Info"]["FullDescription"], "full-description") . ";
 }", $force);
     }
     public static function CreateGlobalFile($force = null)

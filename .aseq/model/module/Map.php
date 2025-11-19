@@ -15,12 +15,14 @@ class Map extends Module
 {
 	public $Tag = "div";
 	public $Class = "be";
-	public static $StyleSource = "https://unpkg.com/leaflet/dist/leaflet.css";
-	public static $AlternativeStyleSource = null;
-	public static $ScriptSource = "https://unpkg.com/leaflet/dist/leaflet.js";
-	public static $AlternativeScriptSource = null;
-	public static $PluginsStyleSources = [];
-	public static $PluginsScriptSources = [];
+	public $Local = true;
+	public $StyleSource = "https://unpkg.com/leaflet/dist/leaflet.css";
+	public $AlternativeStyleSource = null;
+	public $ScriptSource = "https://unpkg.com/leaflet/dist/leaflet.js";
+		
+	public $AlternativeScriptSource = null;
+	public $PluginsStyleSources = [];
+	public $PluginsScriptSources = [];
 	public $OtherScripts = [];
 	public $Printable = true;
 	public bool $Fill = true;
@@ -34,8 +36,8 @@ class Map extends Module
 	/**
 	 * The default begin [latitude, longitude]
 	 */
-	public array|null $Location = null;	
-	
+	public array|null $Location = null;
+
 	/**
 	 * A Script Function to handle the user location
 	 * default is (map, e, err)=>err?null:L.circle(e.latlng, e.accuracy).addTo(map)
@@ -46,7 +48,7 @@ class Map extends Module
 	 */
 	public string|null $LocateScriptFunction = "(map, e, err)=>err?null:L.circle(e.latlng, e.accuracy).addTo(map)";
 	public $LocatePopup = null;
-	
+
 	/**
 	 * A Script Function to handle user selected location
 	 * for example (location, err)=>err?alert(err):alert('Selected Location: lat='+location[0]+',lng='+location[1])
@@ -67,7 +69,7 @@ class Map extends Module
 	 */
 	public string|null $SelectedAddressScriptFunction = null;
 	public $SelectedAddressPopup = null;
-	
+
 	/**
 	 * The default Items [
 	 * 		["Type"=>"marker", "Location"=>[latitude1, longitude1], "Popup"=>"It is here...", "Icon"=>"map-marker"],
@@ -237,54 +239,92 @@ class Map extends Module
 		parent::__construct();
 		$this->Id = "_" . getId();
 		$this->Invert = $this->Invert ?? \_::$Front->SwitchMode;
-	}
 
+	}
 	public function BeforeHandle()
 	{
+		if ($this->Local) {
+			$this->StyleSource = asset(\_::$Address->PackageDirectory, "Map/Style.css");
+			$this->ScriptSource = asset(\_::$Address->PackageDirectory, "Map/Script.js");
+		}
 		$this->Location = $this->Location ?? get($this->Item = $this->Item ?? first($this->Items), "Location") ?? [0, 0];
-		self::$PluginsStyleSources[] = "https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css";
-		self::$PluginsScriptSources[] = "https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js";
+		if ($this->Local) {
+			$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Button.css");
+			$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Button.js");
+		} else {
+			$this->PluginsStyleSources[] = "https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css";
+			$this->PluginsScriptSources[] = "https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js";
+		}
 		if ($this->DrawPosition) {
-			self::$PluginsStyleSources[] = "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css";
-			self::$PluginsScriptSources[] = "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js";
+			if ($this->Local) {
+				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Draw.css");
+				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Draw.js");
+			} else {
+				$this->PluginsStyleSources[] = "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css";
+				$this->PluginsScriptSources[] = "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js";
+			}
 		}
 		if ($this->LocatePosition) {
-			self::$PluginsStyleSources[] = "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css";
-			self::$PluginsScriptSources[] = "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js";
+			if ($this->Local) {
+				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Locate.css");
+				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Locate.js");
+			} else {
+				$this->PluginsStyleSources[] = "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css";
+				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js";
+			}
 		}
 		if ($this->FullScreenPosition) {
-			self::$PluginsStyleSources[] = "https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css";
-			self::$PluginsScriptSources[] = "https://unpkg.com/leaflet.fullscreen/Control.FullScreen.js";
+			if ($this->Local) {
+				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/FullScreen.css");
+				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/FullScreen.js");
+			} else {
+				$this->PluginsStyleSources[] = "https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css";
+				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet.fullscreen/Control.FullScreen.js";
+			}
 		}
 		if ($this->PrintPosition) {
-			self::$PluginsScriptSources[] = "https://unpkg.com/leaflet.browser.print/dist/leaflet.browser.print.min.js";
+			if ($this->Local)
+				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Print.js");
+			else
+				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet.browser.print/dist/leaflet.browser.print.min.js";
 		}
 		if ($this->CompassPosition) {
-			self::$PluginsStyleSources[] = "https://unpkg.com/leaflet-compass/dist/leaflet-compass.css";
-			self::$PluginsScriptSources[] = "https://unpkg.com/leaflet-compass/dist/leaflet-compass.min.js";
+			if ($this->Local) {
+				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Compass.css");
+				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Compass.js");
+			} else {
+				$this->PluginsStyleSources[] = "https://unpkg.com/leaflet-compass/dist/leaflet-compass.min.css";
+				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet-compass/dist/leaflet-compass.min.js";
+			}
 		}
 		if ($this->MeasurePosition) {
-			self::$PluginsStyleSources[] = "https://unpkg.com/leaflet-measure/dist/leaflet-measure.css";
-			self::$PluginsScriptSources[] = "https://unpkg.com/leaflet-measure/dist/leaflet-measure.js";
+			if ($this->Local) {
+				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Measure.css");
+				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Measure.js");
+			} else {
+				$this->PluginsStyleSources[] = "https://unpkg.com/leaflet-measure/dist/leaflet-measure.css";
+				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet-measure/dist/leaflet-measure.js";
+			}
 		}
-		$res = (self::$StyleSource ? Struct::Style(null, self::$StyleSource) : "") .
-			(self::$ScriptSource ? Struct::Script(null, self::$ScriptSource) : "") .
-			(self::$AlternativeStyleSource ? Struct::Style(null, self::$AlternativeStyleSource) : "") .
-			(self::$AlternativeScriptSource ? Struct::Script(null, self::$AlternativeScriptSource) : "") .
-			(self::$PluginsStyleSources ? join(PHP_EOL, loop(self::$PluginsStyleSources, fn($v) => Struct::Style(null, $v))) : "") .
-			(self::$PluginsScriptSources ? join(PHP_EOL, loop(self::$PluginsScriptSources, fn($v) => Struct::Script(null, $v))) : "");
+		$res = ($this->StyleSource ? Struct::Style(null, $this->StyleSource) : "") .
+			($this->ScriptSource ? Struct::Script(null, $this->ScriptSource) : "") .
+			($this->AlternativeStyleSource ? Struct::Style(null, $this->AlternativeStyleSource) : "") .
+			($this->AlternativeScriptSource ? Struct::Script(null, $this->AlternativeScriptSource) : "") .
+			($this->PluginsStyleSources ? join(PHP_EOL, loop($this->PluginsStyleSources, fn($v) => Struct::Style(null, $v))) : "") .
+			($this->PluginsScriptSources ? join(PHP_EOL, loop($this->PluginsScriptSources, fn($v) => Struct::Script(null, $v))) : "");
 
-		self::$StyleSource = null;
-		self::$ScriptSource = null;
-		self::$AlternativeStyleSource = null;
-		self::$AlternativeScriptSource = null;
-		self::$PluginsStyleSources = [];
-		self::$PluginsScriptSources = [];
+		$this->StyleSource = null;
+		$this->ScriptSource = null;
+		$this->AlternativeStyleSource = null;
+		$this->AlternativeScriptSource = null;
+		$this->PluginsStyleSources = [];
+		$this->PluginsScriptSources = [];
 
 		return $res;
 	}
 
-	public function GetStyle() {
+	public function GetStyle()
+	{
 		return parent::GetStyle() . Struct::Style(
 			($this->Fill ? "
 				*:has(.{$this->Name}){
@@ -428,24 +468,24 @@ class Map extends Module
 			if (invert) mc.classList.add(invertattach);
 			else mc.classList.remove(invertattach);
 		}
-		".($this->Invert?"{$this->Name}_MapColor(false, true);":"");
+		" . ($this->Invert ? "{$this->Name}_MapColor(false, true);" : "");
 	}
 	public function Events_InitializeScript()
 	{
 		return join(PHP_EOL, [
-			($this->LocatePopup || $this->LocateScriptFunction? "{$this->Name}.on('locationfound', function (e, err) {
-				".($this->LocateScriptFunction?"return ($this->LocateScriptFunction)({$this->Name}, e, null)":($this->LocatePopup?"L.circle(e.latlng, e.accuracy).addTo({$this->Name})":"")).
-				($this->LocatePopup?"?.bindPopup(".Script::Convert(__($this->LocatePopup)).").openPopup();":";")."
-			});":""),
-			($this->SelectedLocationPopup || $this->SelectedAddressPopup || $this->SelectedLocationScriptFunction || $this->SelectedAddressScriptFunction? "
+			($this->LocatePopup || $this->LocateScriptFunction ? "{$this->Name}.on('locationfound', function (e, err) {
+				" . ($this->LocateScriptFunction ? "return ($this->LocateScriptFunction)({$this->Name}, e, null)" : ($this->LocatePopup ? "L.circle(e.latlng, e.accuracy).addTo({$this->Name})" : "")) .
+				($this->LocatePopup ? "?.bindPopup(" . Script::Convert(__($this->LocatePopup)) . ").openPopup();" : ";") . "
+			});" : ""),
+			($this->SelectedLocationPopup || $this->SelectedAddressPopup || $this->SelectedLocationScriptFunction || $this->SelectedAddressScriptFunction ? "
 			let marker;
 			{$this->Name}.on('click', function (e, err) {
 				const {lat,lng} = e.latlng;
 				if (marker) marker.setLatLng(e.latlng);
 				else marker = L.marker(e.latlng).addTo({$this->Name});
-				".($this->SelectedLocationPopup?"marker.bindPopup(".Script::Convert(__($this->SelectedLocationPopup)).").openPopup();":"")."
-				".($this->SelectedLocationScriptFunction?"($this->SelectedLocationScriptFunction)({$this->Name}, e, err);":"")."
-				".($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction?"fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}".(\_::$Back->AllowTranslate?"&accept-language=".\_::$Back->Translate->Language:"")."`)
+				" . ($this->SelectedLocationPopup ? "marker.bindPopup(" . Script::Convert(__($this->SelectedLocationPopup)) . ").openPopup();" : "") . "
+				" . ($this->SelectedLocationScriptFunction ? "($this->SelectedLocationScriptFunction)({$this->Name}, e, err);" : "") . "
+				" . ($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction ? "fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}" . (\_::$Back->AllowTranslate ? "&accept-language=" . \_::$Back->Translate->Language : "") . "`)
 				.then(response => response.json())
 				.then(data => {
 					err = null;
@@ -453,14 +493,14 @@ class Map extends Module
 					if(data.display_name) e.address = data.display_name;
 					else err = 'Address not found';
 					e.metadata = data;
-					".($this->SelectedAddressPopup?"marker.bindPopup(".Script::Convert(__($this->SelectedAddressPopup)).").openPopup();":"")."
-					".($this->SelectedAddressScriptFunction?"($this->SelectedAddressScriptFunction)({$this->Name}, e, err);":"")."
+					" . ($this->SelectedAddressPopup ? "marker.bindPopup(" . Script::Convert(__($this->SelectedAddressPopup)) . ").openPopup();" : "") . "
+					" . ($this->SelectedAddressScriptFunction ? "($this->SelectedAddressScriptFunction)({$this->Name}, e, err);" : "") . "
 				})
 				.catch(err => {
-					".($this->SelectedAddressScriptFunction?"($this->SelectedAddressScriptFunction)({$this->Name}, e, err);":"")."
-				});":"")."
+					" . ($this->SelectedAddressScriptFunction ? "($this->SelectedAddressScriptFunction)({$this->Name}, e, err);" : "") . "
+				});" : "") . "
 
-			});":""),
+			});" : ""),
 			($this->LocationError ? "{$this->Name}.on('locationerror', function () {" . $this->ErrorScript($this->LocationError) . "});" : ""),
 			($this->TilesError ? "{$this->Name}.on('tileerror', function () {" . $this->ErrorScript($this->TilesError) . "});" : "")
 		]);
@@ -521,18 +561,19 @@ class Map extends Module
 	public function Items_InitializeScript()
 	{
 		return join(PHP_EOL, [
-			$this->Item ? $this->AddItemScript($this->Item["Type"] ?? "marker", $this->Item["Location"] ?? $this->Location, $this->Item["Popup"] ?? null, $this->Item["Active"] ?? true, $this->Item["Attributes"]??[]) : "",
+			$this->Item ? $this->AddItemScript($this->Item["Type"] ?? "marker", $this->Item["Location"] ?? $this->Location, $this->Item["Id"] ?? null, $this->Item["Popup"] ?? null, $this->Item["Active"] ?? true, $this->Item["Attributes"] ?? []) : "",
 			...loop(
 				$this->Items,
-				fn($v, $k) => isset($v["Location"])?$this->AddItemScript($v["Type"]??"marker", $v["Location"], $v["Popup"] ?? null, $v["Active"] ?? false, $v["Attributes"]??[]):null
+				fn($v, $k) => isset($v["Location"]) ? $this->AddItemScript($v["Type"] ?? "marker", $v["Location"], $v["Id"] ?? null, $v["Popup"] ?? null, $v["Active"] ?? false, $v["Attributes"] ?? []) : null
 			)
 		]);
 	}
 
-	public static function AttributesScript(string|array $attributes){
-		return (is_array($attributes)? 
-			("{".join(", ", loop($attributes, fn($v, $k) => strToCamel($k).":" . Script::Convert($v)))."}")
-		: Script::Convert($attributes?:"{}"));
+	public static function AttributesScript(string|array $attributes)
+	{
+		return (is_array($attributes) ?
+			("{" . join(", ", loop($attributes, fn($v, $k) => strToCamel($k) . ":" . Script::Convert($v))) . "}")
+			: Script::Convert($attributes ?: "{}"));
 	}
 
 	/**
@@ -543,7 +584,7 @@ class Map extends Module
 	 */
 	public function Locate($location = null, $zoom = null, $animate = true)
 	{
-		return $this->OtherScripts[] = $this->LocateScript($location, $zoom, $animate).";";
+		return $this->OtherScripts[] = $this->LocateScript($location, $zoom, $animate) . ";";
 	}
 	/**
 	 * Get script to locate map to a location
@@ -553,7 +594,7 @@ class Map extends Module
 	 */
 	public function LocateScript($location = null, $zoom = null, $animate = true)
 	{
-		return is_null($location)?"{$this->Name}.locate(".($zoom??$this->Zoom).")":"{$this->Name}.".($animate?"flyTo":"setView")."(". Script::Convert($location) . ", ".($zoom??$this->Zoom).")";
+		return is_null($location) ? "{$this->Name}.locate(" . ($zoom ?? $this->Zoom) . ")" : "{$this->Name}." . ($animate ? "flyTo" : "setView") . "(" . Script::Convert($location) . ", " . ($zoom ?? $this->Zoom) . ")";
 	}
 
 	/**
@@ -575,7 +616,7 @@ class Map extends Module
 			attributes: $attributes,
 			stylesLibrary: $stylesLibrary,
 			scriptsLibrary: $scriptsLibrary
-		).";";
+		) . ";";
 	}
 	/**
 	 * To get a suitable script to add a Control Plugin on the map
@@ -592,9 +633,9 @@ class Map extends Module
 	{
 		$attributes["position"] = Script::Convert($position);
 		if ($stylesLibrary)
-			array_push(self::$PluginsStyleSources, ...(is_array($stylesLibrary) ? $stylesLibrary : [$stylesLibrary]));
+			array_push($this->PluginsStyleSources, ...(is_array($stylesLibrary) ? $stylesLibrary : [$stylesLibrary]));
 		if ($scriptsLibrary)
-			array_push(self::$PluginsScriptSources, ...(is_array($scriptsLibrary) ? $scriptsLibrary : [$scriptsLibrary]));
+			array_push($this->PluginsScriptSources, ...(is_array($scriptsLibrary) ? $scriptsLibrary : [$scriptsLibrary]));
 		return "L.control.$name(" . self::AttributesScript($attributes) . ").addTo({$this->Name})";
 	}
 	/**
@@ -616,7 +657,7 @@ class Map extends Module
 			action: $action,
 			position: $position,
 			attributes: $attributes
-		).";";
+		) . ";";
 	}
 	/**
 	 * To get a suitable script to add a button on the map
@@ -650,7 +691,7 @@ class Map extends Module
 			icon: $icon,
 			action: $action,
 			attributes: $attributes
-		).";";
+		) . ";";
 	}
 	/**
 	 * To get a suitable script to Define an icon for the map
@@ -660,23 +701,23 @@ class Map extends Module
 	 * @param array|string $attributes
 	 * @return string
 	 */
-	public function DefineIconScript($name, $icon = "map-marker", $action=null, $attributes = [])
+	public function DefineIconScript($name, $icon = "map-marker", $action = null, $attributes = [])
 	{
 		return "const $name = L.divIcon({
-			html: ".(Script::Convert(Struct::Icon($icon, $action, ["class"=>"fa-2x"], $attributes))).",
+			html: " . (Script::Convert(Struct::Icon($icon, $action, ["class" => "fa-2x"], $attributes))) . ",
 			className: 'custom-icon'
 		})";
 	}
-	
+
 	/**
 	 * To get a suitable key for a layer
 	 * @param string $type The type of Item to pin for example (marker, circle, polygon, etc.)
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
-	public function CreateKey($type = "marker", $location = null)
+	public function CreateKey($type = "marker", $location = null, $id = null)
 	{
-		return "$type:".(is_array($location)?"{$location[0]},{$location[1]}":$location);
+		return "$type:" . ($id ?? (is_array($location) ? "{$location[0]},{$location[1]}" : $location ?? ""));
 	}
 	/**
 	 * To get a suitable key for a layer
@@ -684,21 +725,23 @@ class Map extends Module
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
-	public function CreateKeyScript($type = "marker", $location = null)
+	public function CreateKeyScript($type = "marker", $location = null, $id = null)
 	{
-		return Script::Convert("$type:".(is_array($location)?"{$location[0]},{$location[1]}":$location));
+		return Script::Convert("$type:" . ($id ?? (is_array($location) ? "{$location[0]},{$location[1]}" : $location)));
 	}
-	
+
 	/**
 	 * To get something from the map
 	 * @param string $type The type of pinned Item for example (marker, circle, polygon, etc.)
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
-	public function GetItem($type = "marker", $location = null)
+	public function GetItem($type = "marker", $location = null, $id = null)
 	{
-		$key = $this->CreateKey($type, $location);
-		return take($this->Items, function($v) use($key){ return $key === $this->CreateKey($v["Type"]??"marker", $v["Location"]);});
+		$key = $this->CreateKey($type, $location, $id);
+		return take($this->Items, function ($v) use ($key) {
+			return $key === $this->CreateKey($v["Type"] ?? "marker", $v["Location"], get($v, "Id"));
+		});
 	}
 	/**
 	 * To get a suitable script get something from the map
@@ -706,9 +749,9 @@ class Map extends Module
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
-	public function GetItemScript($type = "marker", $location = null)
+	public function GetItemScript($type = "marker", $location = null, $id = null)
 	{
-		return "{$this->Name}_Items.get(".$this->CreateKeyScript($type, $location).")";
+		return "{$this->Name}_Items.get(" . $this->CreateKeyScript($type, $location, $id) . ")";
 	}
 	/**
 	 * To set something to the map
@@ -718,11 +761,13 @@ class Map extends Module
 	 * @param bool|string|null $active
 	 * @param array|string $attributes
 	 */
-	public function SetItem($type = "marker", $location = null, $popup = null, $active = false, $attributes = [])
+	public function SetItem($type = "marker", $location = null, $id = null, $popup = null, $active = false, $attributes = [])
 	{
-		$key = $this->CreateKey($type, $location);
-		filter($this->Items, function($v) use($key){ return $key === $this->CreateKey($v["Type"]??"marker", $v["Location"]);});
-		return $this->Items[] = ["Type"=>$type??"marker", "Location"=>$location, "Popup"=>$popup, "Active"=>$active, "Attributes"=>$attributes];
+		$key = $this->CreateKey($type, $location, $id);
+		filter($this->Items, function ($v) use ($key) {
+			return $key === $this->CreateKey($v["Type"] ?? "marker", $v["Location"], get($v, "Id"));
+		});
+		return $this->Items[] = ["Type" => $type ?? "marker", "Location" => $location, "Popup" => $popup, "Active" => $active, "Attributes" => $attributes];
 	}
 	/**
 	 * To get a suitable script to set something to the map
@@ -733,20 +778,20 @@ class Map extends Module
 	 * @param array|string $attributes
 	 * @return string
 	 */
-	public function SetItemScript($type = "marker", $location = null, $popup = null, $active = false, $attributes = [])
+	public function SetItemScript($type = "marker", $location = null, $id = null, $popup = null, $active = false, $attributes = [])
 	{
 		return "{
-			let key = ".$this->CreateKeyScript($type, $location).";
+			let key = " . $this->CreateKeyScript($type, $location, $id) . ";
 			let layer = {$this->Name}_Items.get(key);
 			if(layer) {
 				{$this->Name}.removeLayer(layer);
 				{$this->Name}_Items.delete(key);
-			} else layer = L.$type(".(is_null($location) ? "{$this->Name}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
+			} else layer = L.$type(" . (is_null($location) ? "{$this->Name}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
 			let la = layer.addTo({$this->Name});
-			let popup = ".Script::Convert(__($popup)).";
+			let popup = " . Script::Convert(__($popup)) . ";
 			if(popup) {
 				let pp = la.bindPopup(popup);
-				let activePopup = ".Script::Convert($active).";
+				let activePopup = " . Script::Convert($active) . ";
 				if(activePopup) pp.openPopup();
 			}
 			{$this->Name}_Items.set(key, layer);
@@ -760,9 +805,9 @@ class Map extends Module
 	 * @param bool|string|null $active
 	 * @param array|string $attributes
 	 */
-	public function AddItem($type = "marker", $location = null, $popup = null, $active = false, $attributes = [])
+	public function AddItem($type = "marker", $location = null, $id = null, $popup = null, $active = false, $attributes = [])
 	{
-		return $this->Items[] = ["Type"=>$type??"marker", "Location"=>$location, "Popup"=>$popup, "Active"=>$active, "Attributes"=>$attributes];
+		return $this->Items[] = ["Type" => $type ?? "marker", "Location" => $location, "Id" => $id, "Popup" => $popup, "Active" => $active, "Attributes" => $attributes];
 	}
 	/**
 	 * To get a suitable script to pin something to the map
@@ -773,21 +818,21 @@ class Map extends Module
 	 * @param array|string $attributes
 	 * @return string
 	 */
-	public function AddItemScript($type = "marker", $location = null, $popup = null, $active = false, $attributes = [])
+	public function AddItemScript($type = "marker", $location = null, $id = null, $popup = null, $active = false, $attributes = [])
 	{
 		return "{
-			let key = ".$this->CreateKeyScript($type, $location).";
+			let key = " . $this->CreateKeyScript($type, $location, $id) . ";
 			let layer = {$this->Name}_Items.get(key);
 			if(layer) {
 				{$this->Name}.removeLayer(layer);
 				{$this->Name}_Items.delete(key);
 			}
-			layer = L.$type(".(is_null($location) ? "{$this->Name}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
+			layer = L.$type(" . (is_null($location) ? "{$this->Name}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
 			let la = layer.addTo({$this->Name});
-			let popup = ".Script::Convert(__($popup)).";
+			let popup = " . Script::Convert(__($popup)) . ";
 			if(popup) {
 				let pp = la.bindPopup(popup);
-				let activePopup = ".Script::Convert($active).";
+				let activePopup = " . Script::Convert($active) . ";
 				if(activePopup) pp.openPopup();
 			}
 			{$this->Name}_Items.set(key, layer);
@@ -799,13 +844,16 @@ class Map extends Module
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
-	public function RemoveItem($type = "marker", $location = null)
+	public function RemoveItem($type = "marker", $location = null, $id = null)
 	{
-		$key = $this->CreateKey($type, $location);
-		filter($this->Items, function($v) use($key){ return $key === $this->CreateKey($v["Type"]??"marker", $v["Location"]);});
+		$key = $this->CreateKey($type, $location, $id);
+		filter($this->Items, function ($v) use ($key) {
+			return $key === $this->CreateKey($v["Type"] ?? "marker", $v["Location"], get($v, "Id"));
+		});
 		return $this->OtherScripts[] = $this->RemoveItemScript(
-			type: $type,
-			location: $location
+			$type,
+			$location,
+			$id
 		);
 	}
 	/**
@@ -814,10 +862,10 @@ class Map extends Module
 	 * @param array|string|null $location The source latitude and longitude of the thing [latitude, longitude]
 	 * @return string
 	 */
-	public function RemoveItemScript($type = "marker", $location = null)
+	public function RemoveItemScript($type = "marker", $location = null, $id = null)
 	{
 		return "{
-			let key = ".$this->CreateKeyScript($type, $location).";
+			let key = " . $this->CreateKeyScript($type, $location, $id) . ";
 			let layer = {$this->Name}_Items.get(key);
 			if(layer) {
 				{$this->Name}.removeLayer(layer);

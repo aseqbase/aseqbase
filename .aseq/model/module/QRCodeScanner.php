@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 use MiMFa\Library\Style;
@@ -10,11 +11,14 @@ use MiMFa\Library\Style;
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
-class QRCodeScanner extends Module{
+class QRCodeScanner extends Module
+{
 	public $CameraIndex = 1;
 	public $AllowMirrorCamera = false;
 	public $AlternativeCameraIndex = 0;
 	public $AllowMirrorAlternativeCamera = true;
+	public $Local = true;
+	public $ScriptSource = "https://rawgit.com/schmich/instascan-builds/master/instascan.min.js";
 
 	public $ActiveButtonLabel = "<i class='fa fa-power-off'></i>";
 	public $SwitchButtonLabel = "<i class='fa fa-camera-rotate'></i>";
@@ -35,14 +39,17 @@ class QRCodeScanner extends Module{
 	public $DescriptionClass = "fa-fade";
 	public $CamerasNotFoundError = "No cameras found.";
 	public $BrowserNotSupportError = "Your browser does not support the video tag.";
-    public $Printable = false;
+	public $Printable = false;
 
-	
-	public function __construct(){
+
+	public function __construct()
+	{
 		parent::__construct();
+
 	}
-	public function GetStyle(){
-		return parent::GetStyle().Struct::Style("
+	public function GetStyle()
+	{
+		return parent::GetStyle() . Struct::Style("
 			.{$this->Name}{
 			    position: relative;
 				background-color: black;
@@ -117,35 +124,39 @@ class QRCodeScanner extends Module{
 		");
 	}
 
-	public function Get(){
-		//RenderScript(null, \_::$Address->ScriptRoot . "Instascan.js");
-		return Struct::Script(null,"https://rawgit.com/schmich/instascan-builds/master/instascan.min.js").
-		Struct::OpenTag("video", $this->GetDefaultAttributes()).
-		$this->BrowserNotSupportError.
-		Struct::CloseTag("video").
-		($this->AllowMask?Struct::Division($this->GetContent(), ["class"=>"mask"]):"").
-		Struct::Division(
-			($this->SwitchButtonLabel?Struct::Button($this->SwitchButtonLabel, $this->SwitchScript(), ["class"=>"switchcamera be hide"]):"").
-				($this->ActiveButtonLabel?Struct::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class"=>"activation be"]):"")
-		, ["class"=>"controls"]).
-		Struct::Division($this->GetTitle(["class"=>$this->TitleClass]).$this->GetDescription(["class"=>$this->DescriptionClass]), ["class"=>"message"]);
+	public function Get()
+	{
+		if ($this->Local) $this->ScriptSource = asset(\_::$Address->PackageDirectory, "Scanner/Script.js");
+		return Struct::Script(null, $this->ScriptSource) .
+			Struct::OpenTag("video", $this->GetDefaultAttributes()) .
+			$this->BrowserNotSupportError .
+			Struct::CloseTag("video") .
+			($this->AllowMask ? Struct::Division($this->GetContent(), ["class" => "mask"]) : "") .
+			Struct::Division(
+				($this->SwitchButtonLabel ? Struct::Button($this->SwitchButtonLabel, $this->SwitchScript(), ["class" => "switchcamera be hide"]) : "") .
+				($this->ActiveButtonLabel ? Struct::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class" => "activation be"]) : "")
+				,
+				["class" => "controls"]
+			) .
+			Struct::Division($this->GetTitle(["class" => $this->TitleClass]) . $this->GetDescription(["class" => $this->DescriptionClass]), ["class" => "message"]);
 	}
-	public function GetScript(){
+	public function GetScript()
+	{
 		return Struct::Script("
 		try{
-			if(!Instascan.Scanner) Struct.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');
-			} catch{Struct.script.load(null, '" . asset(\_::$Address->ScriptDirectory, "Instascan.js", optimize: true) . "');}
+			if(!Instascan.Scanner) Struct.script.load(null, '" . asset(\_::$Address->PackageDirectory, "Scanner/Script.js", optimize: true) . "');
+			} catch{Struct.script.load(null, '" . asset(\_::$Address->PackageDirectory, "Scanner/Script.js", optimize: true) . "');}
 			{$this->Name} = new Instascan.Scanner({video: document.querySelector('.{$this->Name} video')});
 			{$this->Name}.addListener('scan', function (content) {
-				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);":"")."
-				".($this->TargetScriptFunction?"({$this->TargetScriptFunction})(content);":"")."
-				".($this->TargetId?"document.getElementById(".Script::Convert($this->TargetId).").value = content;":"")."
-				".($this->TargetSelector?"document.querySelector(".Script::Convert($this->TargetSelector).").value = content;":"")."
-				".($this->ActiveAtEnding?"":$this->DeactiveScript())."
-				".($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.add('success');":"")."
+				" . ($this->AllowMask ? "document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);" : "") . "
+				" . ($this->TargetScriptFunction ? "({$this->TargetScriptFunction})(content);" : "") . "
+				" . ($this->TargetId ? "document.getElementById(" . Script::Convert($this->TargetId) . ").value = content;" : "") . "
+				" . ($this->TargetSelector ? "document.querySelector(" . Script::Convert($this->TargetSelector) . ").value = content;" : "") . "
+				" . ($this->ActiveAtEnding ? "" : $this->DeactiveScript()) . "
+				" . ($this->AllowMask ? "document.querySelector('.{$this->Name} .mask').classList.add('success');" : "") . "
 			});
 			{$this->Name}_selectedCamera = -1;
-			function {$this->Name}_useCamera(cameras, index = 0, mirror = false) {
+			function {$this->Name}_useCamera(cameras, index = null, mirror = false) {
 				if(cameras.length > 1) {
 					document.querySelector('.{$this->Name} .switchcamera')?.classList.remove('hide');
 					document.querySelector('.{$this->Name} .activation')?.classList.add('hide');
@@ -155,75 +166,104 @@ class QRCodeScanner extends Module{
 					document.querySelector('.{$this->Name} .activation')?.classList.remove('hide');
 				}
 
-				if (cameras.length > index && {$this->Name}_selectedCamera !== index) {
+				if(index===null || index < 0){
+					for(i=cameras.length-1;i>=0;i--)
+						if(
+							{$this->Name}_selectedCamera !== {$this->CameraIndex} &&
+							{$this->Name}_selectedCamera !== {$this->AlternativeCameraIndex} &&
+							{$this->Name}_useCamera(cameras, i, mirror)
+						) return true;
+				} else if (cameras.length > index && {$this->Name}_selectedCamera !== index) {
 					if({$this->Name} && {$this->Name}?._camera?._stream) {$this->Name}.stop();
 					{$this->Name}.start(cameras[index]);
 					{$this->Name}.mirror = mirror;
 					{$this->Name}_selectedCamera = index;
+					document.querySelector('.{$this->Name} .message').classList.remove('hide');
 					return true;
 				}
 				return false;
-			};".
-			($this->ActiveAtBegining?$this->ActiveScript():$this->DeactiveScript())
+			};" .
+			($this->ActiveAtBegining ? $this->ActiveScript() : $this->DeactiveScript())
 		);
 	}
-	public function Toggle(){
+	public function Toggle()
+	{
 		\_::$Front->Append("body", $this->ToggleScript());
 	}
-	public function ToggleScript(){
+	public function ToggleScript()
+	{
 		return "if({$this->Name} && {$this->Name}?._camera?._stream) {
-			".$this->DeactiveScript()."
+			" . $this->DeactiveScript() . "
 		}
 		else {
-			".$this->ActiveScript()."
+			" . $this->ActiveScript() . "
 		}";
 	}
 
-	public function Switch(){
+	public function Switch()
+	{
 		\_::$Front->Append("body", $this->SwitchScript());
 	}
-	public function SwitchScript(){
-		return $this->DeactiveScript()."
-		if({$this->Name}_selectedCamera === $this->AlternativeCameraIndex)
-			Instascan.Camera.getCameras().then((cameras) => {$this->Name}_useCamera(cameras, {$this->CameraIndex},".($this->AllowMirrorCamera?'true':'false').")).catch((e)=>console.log(e));
-		else Instascan.Camera.getCameras().then((cameras) => {$this->Name}_useCamera(cameras, {$this->AlternativeCameraIndex},".($this->AllowMirrorAlternativeCamera?'true':'false').")).catch((e)=>console.log(e));";
+	public function SwitchScript()
+	{
+		return $this->DeactiveScript() . "
+		if({$this->Name}_selectedCamera === $this->CameraIndex)
+			Instascan.Camera.getCameras().then((cameras) => {$this->Name}_useCamera(cameras, " . ($this->AlternativeCameraIndex ?? "null") . "," . ($this->AllowMirrorAlternativeCamera ? 'true' : 'false') . ")).catch((e)=>console.log(e));
+		else Instascan.Camera.getCameras().then((cameras) => {$this->Name}_useCamera(cameras, {$this->CameraIndex}," . ($this->AllowMirrorCamera ? 'true' : 'false') . ")).catch((e)=>console.log(e));";
 	}
 
-	public function Active(){
+	public function Active()
+	{
 		$this->ActiveAtBegining = true;
 		\_::$Front->Append("body", $this->ActiveScript());
 		return $this;
 	}
-	public function ActiveScript(){
+	public function ActiveScript()
+	{
 		return "
-		if({$this->Name} && {$this->Name}?._camera && !{$this->Name}?._camera?._stream) {$this->Name}.start();
+		if({$this->Name} && {$this->Name}?._camera && !{$this->Name}?._camera?._stream) {
+			{$this->Name}.start();
+			document.querySelector('.{$this->Name} .message').classList.remove('hide');
+		}
 		else Instascan.Camera.getCameras().then(function (cameras) {
-			if(!{$this->Name}_useCamera(cameras, {$this->CameraIndex},".($this->AllowMirrorCamera?'true':'false')."))
-				if(!{$this->Name}_useCamera(cameras, {$this->AlternativeCameraIndex},".($this->AllowMirrorAlternativeCamera?'true':'false')."))
+			if(!{$this->Name}_useCamera(cameras, {$this->CameraIndex}," . ($this->AllowMirrorCamera ? 'true' : 'false') . "))
+				if(!{$this->Name}_useCamera(cameras, {$this->AlternativeCameraIndex}," . ($this->AllowMirrorAlternativeCamera ? 'true' : 'false') . "))
 					if(!{$this->Name}_useCamera(cameras))
-						console.error(".Script::Convert($this->CamerasNotFoundError).");
+						return console.error(" . Script::Convert($this->CamerasNotFoundError) . ");
+			document.querySelector('.{$this->Name} .message').classList.remove('hide');
 		}).catch((e)=>console.error(e));";
 	}
-	
-	public function Deactive(){
+
+	public function Deactive()
+	{
 		$this->ActiveAtBegining = false;
 		\_::$Front->Append("body", $this->DeactiveScript());
 		return $this;
 	}
-	public function DeactiveScript(){
-		return "if({$this->Name} && {$this->Name}?._camera?._stream) {$this->Name}.stop();";
+	public function DeactiveScript()
+	{
+		return "if({$this->Name} && {$this->Name}?._camera?._stream) {
+			{$this->Name}.stop();
+			document.querySelector('.{$this->Name} .message').classList.add('hide');
+		}";
 	}
 
-	public function MessageScript($message = null){
-		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.remove('success');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(".Script::Convert(__($message)).");";
+	public function MessageScript($message = null)
+	{
+		return ($this->AllowMask ? "document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.remove('success');" : "") .
+			"document.querySelector('.{$this->Name} .message').classList.remove('hide');
+			document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(" . Script::Convert(__($message)) . ");";
 	}
-	public function SuccessScript($message = null){
-		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.add('success');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(".Script::Convert(__($message)).", {CLASS:'be fore green'});";
+	public function SuccessScript($message = null)
+	{
+		return ($this->AllowMask ? "document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').classList.add('success');" : "") .
+			"document.querySelector('.{$this->Name} .message').classList.remove('hide');
+			document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(" . Script::Convert(__($message)) . ", {CLASS:'be fore green'});";
 	}
-	public function ErrorScript($message = null){
-		return ($this->AllowMask?"document.querySelector('.{$this->Name} .mask').classList.remove('success');document.querySelector('.{$this->Name} .mask').classList.add('error');":"").
-		"document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(".Script::Convert(__($message)).", {CLASS:'be fore red'});";
+	public function ErrorScript($message = null)
+	{
+		return ($this->AllowMask ? "document.querySelector('.{$this->Name} .mask').classList.remove('success');document.querySelector('.{$this->Name} .mask').classList.add('error');" : "") .
+			"document.querySelector('.{$this->Name} .message').classList.remove('hide');
+			document.querySelector('.{$this->Name} .message').innerHTML = Struct.division(" . Script::Convert(__($message)) . ", {CLASS:'be fore red'});";
 	}
 }

@@ -15,7 +15,7 @@ class Contact extends ArrayObject
 	public $Method = "POST";
 	public $Secure = false;
 	public $Timeout = 60;
-	public array|null $Header = ["Content-type: application/x-www-form-urlencoded"];
+	public array|null $Headers = ["Content-Type: application/json"];
 
 	public $Identifier = null;
 	public $UserName = null;
@@ -56,18 +56,19 @@ class Contact extends ArrayObject
 				$res[] = $this->Send($value, $message, $attributes);
 			return $res;
 		}
-
+		$message = json_encode(array_merge($this->ToArray(), [
+			...($this->UserNameKey?[$this->UserNameKey => $this->UserName]:[]),
+			...($this->PasswordKey?[$this->PasswordKey => $this->Password]:[]),
+			...($this->ToKey?[$this->ToKey => $to]:[]),
+			...($this->FromKey?[$this->FromKey => $this->Identifier]:[]),
+			...($this->TextKey?[$this->TextKey => $message]:[])
+		], $attributes));
+		$this->Headers[] = "Content-Length: " . strlen($message);
 		return send(
 			$this->Method,
 			$this->MakeApi($path),
-			array_merge($this->ToArray(), [
-				$this->UserNameKey => $this->UserName,
-				$this->PasswordKey => $this->Password,
-				$this->ToKey => $to,
-				$this->FromKey => $this->Identifier,
-				$this->TextKey => $message
-			], $attributes),
-			headers: $this->Header,
+			$message,
+			headers: $this->Headers,
 			secure: $this->Secure,
 			timeout: $this->Timeout
 		);
@@ -89,13 +90,13 @@ class Contact extends ArrayObject
 		return send(
 			$this->Method,
 			$this->MakeApi($path),
-			array_merge($this->ToArray(), [
+			json_encode(array_merge($this->ToArray(), [
 				$this->UserNameKey => $this->UserName,
 				$this->PasswordKey => $this->Password,
 				$this->FromKey => $from,
 				$this->ToKey => $this->Identifier
-			], $attributes),
-			headers: $this->Header,
+			], $attributes)),
+			headers: $this->Headers,
 			secure: $this->Secure,
 			timeout: $this->Timeout
 		);
@@ -114,7 +115,7 @@ class Contact extends ArrayObject
 				$this->PasswordKey => $this->Password,
 				$this->CountKey => $count
 			], $attributes),
-			headers: $this->Header,
+			headers: $this->Headers,
 			secure: $this->Secure,
 			timeout: $this->Timeout
 		);

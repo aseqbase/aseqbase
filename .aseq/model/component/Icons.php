@@ -2,7 +2,7 @@
 use MiMFa\Library\Struct;
 class Icons
 {
-	public static $Local = false;
+	public static $Local = true;
 	public static $Initialized = false;
 	public static $DefaultRoot = "body";
 
@@ -15,7 +15,8 @@ class Icons
 	{
 		self::$Initialized = true;
 		if(self::$Local)
-			return Struct::Style(null, asset(\_::$Address->StyleDirectory, "Icons.css", optimize: false), ["async"]).Struct::Script(null, asset(\_::$Address->ScriptDirectory, "Icons.js", optimize: false), ["async"]);
+			return Struct::Style(null, asset(\_::$Address->PackageDirectory, "Icons/style/Style.css", optimize: false), ["async"]).
+		Struct::Script(null, asset(\_::$Address->PackageDirectory, "Icons/script/Script.js", optimize: false), ["async"]);
 		else return Struct::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
 			Struct::Script(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js", ["async"]);
 	}

@@ -1,5 +1,7 @@
 <?php
 namespace MiMFa\Module;
+
+use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
 class Translator extends Module{
 	/**
@@ -50,7 +52,12 @@ class Translator extends Module{
             if($lng != $cur)
                 $langs[] = Struct::Element(
 					($this->AllowCode?strtoupper($lng):"").
-					($this->AllowImage?Struct::Image($lng, getBetween($value,"Image","Icon"), ["onerror"=>"this.src='".asset("/asset/overlay/glass.png")."';"]):"").
+					($this->AllowImage?Struct::Image(
+						$lng,
+						getBetween($value,"Image","Icon")
+						, ["onerror"=>"this.src=\"".Convert::ToDataUri(Convert::ToImage(strtoupper($lng)), "image/png")."\";"]
+						):""
+					).
 					($this->AllowLabel?getBetween($value,"Title","Name" ):""),
 					"button",
 					["class"=>"button", "onclick"=>"load(\"?".(getBetween($value,"Query" )??"lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding"))."\");"]);
@@ -59,4 +66,3 @@ class Translator extends Module{
 			$this->GetContent();
     }
 }
-?>

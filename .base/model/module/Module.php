@@ -188,9 +188,10 @@ class Module extends \Base
      {
           $st = null;
           if ($this->Style) $st = is_string($this->Style) ? $this->Style : $this->Style->Get();
-          if ($tag = $tag ?? $this->Tag)
-               return join("", ["<$tag ", Struct::Attributes($this->GetDefaultAttributes(), $this->Attachments), $st ? " style=\"{$st}\">" : ">"]);
-          elseif ($st) return "<style>.{$this->Name}{ $st }</style>";
+          if ($tag = $tag ?? $this->Tag) {
+               $attr = Struct::Attributes($this->GetDefaultAttributes(), $this->Attachments, $inners, $outers);
+               return join("", [$outers, "<$tag ", $attr, $st ? " style=\"{$st}\">" : ">", $inners]);
+          } elseif ($st) return "<style>.{$this->Name}{ $st }</style>";
           return null;
      }
      /**
@@ -246,48 +247,48 @@ class Module extends \Base
      public function GetTitle($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Struct::Attributes([["class"=> $this->TitleClass], $attrs], $atcm);
+               $attrs = Struct::Attributes([["class"=> $this->TitleClass], $attrs], $atcm, $inners, $outers);
                if (isValid($this->Title)) {
-                    yield (isValid($this->TitleTag) ? "<" . $this->TitleTag . " $attrs>" : "");
+                    yield (isValid($this->TitleTag) ? join("",[$outers,"<", $this->TitleTag , " $attrs>",$inners]) : ($inners.$outers));
                     if (is_string($this->Title))
                          yield __($this->Title);
                     elseif (is_callable($this->Title))
                          yield ($this->Title)($attrs);
                     else
                          yield $this->Title;
-                    yield (isValid($this->TitleTag) ? "</" . $this->TitleTag . ">" : "");
+                    yield (isValid($this->TitleTag) ? join("", ["</" , $this->TitleTag . ">"]) : "");
                }
           });
      }
      public function GetDescription($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Struct::Attributes([["class"=> $this->DescriptionClass], $attrs], $atcm);
+               $attrs = Struct::Attributes([["class"=> $this->DescriptionClass], $attrs], $atcm, $inners, $outers);
                if (isValid($this->Description)) {
-                    yield (isValid($this->DescriptionTag) ? "<" . $this->DescriptionTag . " $attrs>" : "");
+                    yield (isValid($this->DescriptionTag) ? join("", [$outers, "<" , $this->DescriptionTag, " $attrs>", $inners]) : ($inners.$outers));
                     if (is_string($this->Description))
                          yield __($this->Description);
                     elseif (is_callable($this->Description))
                          yield ($this->Description)($attrs);
                     else
                          yield $this->Description;
-                    yield (isValid($this->DescriptionTag) ? "</" . $this->DescriptionTag . ">" : "");
+                    yield (isValid($this->DescriptionTag) ? join("", ["</" . $this->DescriptionTag . ">"]) : "");
                }
           });
      }
      public function GetContent($attrs = [])
      {
           return Convert::ToString(function () use ($attrs) {
-               $attrs = Struct::Attributes([["class"=> $this->ContentClass], $attrs], $atcm);
+               $attrs = Struct::Attributes([["class"=> $this->ContentClass], $attrs], $atcm, $inners, $outers);
                if (isValid($this->Content)) {
-                    yield (isValid($this->ContentTag) ? "<" . $this->ContentTag . " $attrs>" : "");
+                    yield (isValid($this->ContentTag) ? join("", [$outers, "<" , $this->ContentTag , " $attrs>", $inners]) : ($inners.$outers));
                     if (is_string($this->Content))
                          yield __(Struct::Convert($this->Content));
                     elseif (is_callable($this->Content))
                          yield ($this->Content)($attrs);
                     else
                          yield $this->Content;
-                    yield (isValid($this->ContentTag) ? "</" . $this->ContentTag . ">" : "");
+                    yield (isValid($this->ContentTag) ? join("", ["</", $this->ContentTag, ">"]) : "");
                }
                yield Convert::ToString($this->Children);
           });

@@ -1,0 +1,19 @@
+.be .fade.in{
+    animation: fade-in var(--animation-speed);
+}
+.be .fade.out{
+    animation: fade-out var(--animation-speed);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

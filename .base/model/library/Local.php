@@ -81,6 +81,17 @@ class Local
 	}
 
 	/**
+	 * To convert a file to its Data URI
+	 * @param mixed $path Probable file internal path
+	 */
+	public static function GetDataUri($path, $mime = null){
+		$path = self::GetFile($path);
+		if(!$path) return null;
+        $mime = $mime??mime_content_type($path);
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+    }
+
+	/**
 	 * To normalize the internal path
 	 * @param mixed $path Probable file internal path
 	 */
@@ -442,7 +453,7 @@ class Local
 		if (!get($content, "name"))
 			return null;//throw new \SilentException("There is not any file!");
 		// Check if image file is an actual image or fake image
-		if (getimagesize($content["tmp_name"]) === false)
+		if ((($content["tmp_name"]??null)?getimagesize($content["tmp_name"]):true) === false)
 			throw new \SilentException("The image file is not an actual image!");
 		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableImageFormats);
 	}

@@ -20,6 +20,7 @@ class General extends Template
 		component("Icons");
         component("ShortcutKey");
 		component("JQuery");
+		component("DataTable");
 		//component("Bootstrap");
 		component("AOS");
 	}

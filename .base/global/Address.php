@@ -90,6 +90,7 @@ class Address extends ArrayObject
     public string $StructDirectory;
     public string $ScriptDirectory;
     public string $StyleDirectory;
+    public string $PackageDirectory;
 
     /**
      * The root path
@@ -165,6 +166,7 @@ class Address extends ArrayObject
         $this->StructDirectory = $this->AssetDirectory . "struct" . DIRECTORY_SEPARATOR;
         $this->ScriptDirectory = $this->AssetDirectory . "script" . DIRECTORY_SEPARATOR;
         $this->StyleDirectory = $this->AssetDirectory . "style" . DIRECTORY_SEPARATOR;
+        $this->PackageDirectory = $this->AssetDirectory . "package" . DIRECTORY_SEPARATOR;
 
         $this->Root = str_replace(["\\", "/"], ["/", "/"], $root ?? "/");
         $this->AssetRoot = $this->Root . "asset/";
