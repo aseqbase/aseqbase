@@ -319,8 +319,9 @@ class Field extends Module{
 				$this->Attributes
 			];
 			$startTag = "";
-            $id = pop($attributes, "id")??Convert::ToID($this->Key);
-            if(isValid($this->Title)) $startTag .= Struct::Label($this->Title, $id, ["class"=>"title" ]);
+            $id = Struct::PopAttribute($attributes, "id")??Convert::ToId($this->Key);
+            $iid = $id."_input";
+			if(isValid($this->Title)) $startTag .= Struct::Label($this->Title, $id, ["class"=>"title" ]);
 			$endTag = "";
             if(isValid($this->Description)) $endTag .= Struct::Label($this->Description, $id, ["class"=>"description" ]);
 			yield $this->GetContent();
@@ -347,16 +348,16 @@ class Field extends Module{
                         $p->MaxWidth = $this->MaxWidth??"100%";
                         $p->MaxHeight = $this->MaxHeight??"25vmin";
                         $p->Id = "Player".getId();
-                        if(!$this->Lock) $p->PrependControls = "
-											<div class=\"icon fa fa-trash button\" onclick=\"
-												document.getElementById('$id').setAttribute('disabled','disabled');
-												document.getElementById('{$p->Id}').style.opacity='0.5';
-												document.getElementById('{$p->Id}').style.borderColor='#f33';\"></div>
-											<div class=\"icon fa fa-edit button\" onclick=\"
-												document.getElementById('$id').removeAttribute('disabled');
-												document.getElementById('{$p->Id}').style.opacity='1';
-												document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
-												document.getElementById('$id').click();\"></div>";
+                        if(!$this->Lock) $p->PrependControls = 
+							Struct::Icon("trash", "
+								document.getElementById('$iid').setAttribute('disabled','disabled');
+								document.getElementById('{$p->Id}').style.opacity='0.5';
+								document.getElementById('{$p->Id}').style.borderColor='#f33';", ["class"=>"button"]).
+							Struct::Icon("edit", "
+								document.getElementById('$iid').removeAttribute('disabled');
+								document.getElementById('{$p->Id}').style.opacity='1';
+								document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
+								document.getElementById('$iid').click();", ["class"=>"button"]);
                         yield $p->ToString();
 						$attributes["style"] = ($attributes["style"]??"")." display:none;";
                     }
@@ -369,26 +370,26 @@ class Field extends Module{
                             case 'doc':
                             case 'document':
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableDocumentFormats)."'";
-                                $others = is_null($p)?"": Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"": Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "image":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableImageFormats)."'";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "audio":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableAudioFormats)."'";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             case "video":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableVideoFormats)."'";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             default:
                                 $accept = "";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-					yield Struct::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput"], $accept, $attributes)
+					yield Struct::Input($this->Key, null, "file", ["Id" =>$iid, "Name" =>$this->Key, "class" => "fileinput"], $accept, $attributes)
 						.$others;
 					yield $endTag;
                     break;
@@ -414,16 +415,16 @@ class Field extends Module{
                         $p->MaxWidth = $this->MaxWidth??"100%";
                         $p->MaxHeight = $this->MaxHeight??"25vmin";
                         $p->Id = "Player".getId();
-                        if(!$this->Lock) $p->PrependControls = "
-											<div class=\"icon fa fa-trash button\" onclick=\"
-												document.getElementById('$id').setAttribute('disabled','disabled');
-												document.getElementById('{$p->Id}').style.opacity='0.5';
-												document.getElementById('{$p->Id}').style.borderColor='#f33';\"></div>
-											<div class=\"icon fa fa-edit button\" onclick=\"
-												document.getElementById('$id').removeAttribute('disabled');
-												document.getElementById('{$p->Id}').style.opacity='1';
-												document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
-												document.getElementById('$id').click();\"></div>";
+                        if(!$this->Lock) $p->PrependControls = 
+							Struct::Icon("trash", "
+								document.getElementById('$iid').setAttribute('disabled','disabled');
+								document.getElementById('{$p->Id}').style.opacity='0.5';
+								document.getElementById('{$p->Id}').style.borderColor='#f33';", ["class"=>"button"]).
+							Struct::Icon("edit", "
+								document.getElementById('$iid').removeAttribute('disabled');
+								document.getElementById('{$p->Id}').style.opacity='1';
+								document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
+								document.getElementById('$iid').click();", ["class"=>"button"]);
                         yield $p->ToString();
 						$attributes["style"] = ($attributes["style"]??"")." display:none;";
                     }
@@ -436,26 +437,26 @@ class Field extends Module{
                             case 'docs':
                             case 'documents':
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableDocumentFormats)."'";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "images":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableImageFormats)."'";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "audios":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableAudioFormats)."*'";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             case "videos":
                                 $accept = " accept='".join(", ",\_::$Config->AcceptableVideoFormats)."'";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             default:
                                 $accept = "";
-                                $others = is_null($p)?"":Struct::Script("document.getElementById('$id').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+                                $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                         }
-					yield Struct::Input($this->Key, $this->Value, "file", ["Id" =>$id, "Name" =>$this->Key, "class" => "fileinput", "multiple" => null], $accept, $attributes)
+					yield Struct::Input($this->Key, null, "file", ["Id" =>$iid, "Name" =>$this->Key, "class" => "fileinput", "multiple" => null], $accept, $attributes)
 					.$others;
 					yield $endTag;
                     break;

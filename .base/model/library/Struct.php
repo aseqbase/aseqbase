@@ -2258,6 +2258,9 @@ class Struct
             case 'font':
             case 'mixed':
 
+            case 'input':
+                $content = $dataOptions($options, $attributes) . self::Input($key, $value, null, $attributes);
+                break;
             case 'line':
             case 'value':
             case 'string':
@@ -2397,7 +2400,7 @@ class Struct
                 $content = $dataOptions($options, $attributes) . self::MapInput($key, $value, $attributes);
                 break;
             case 'path':
-                $content = $dataOptions($options, $attributes) . self::TextInput($key, $value, $attributes);
+                $content = $dataOptions($options, $attributes) . self::PathInput($key, $value, $attributes);
                 break;
             case 'calendar':
             case 'calendarinput':
@@ -2431,17 +2434,35 @@ class Struct
                 break;
             case 'doc':
             case 'document':
+                $content = $dataOptions($options, $attributes) . self::DocumentInput($key, $value, $attributes);
+                break;
+            case 'img':
             case 'image':
+                $content = $dataOptions($options, $attributes) . self::ImageInput($key, $value, $attributes);
+                break;
             case 'audio':
+                $content = $dataOptions($options, $attributes) . self::AudioInput($key, $value, $attributes);
+                break;
             case 'video':
+                $content = $dataOptions($options, $attributes) . self::VideoInput($key, $value, $attributes);
+                break;
             case 'file':
                 $content = $dataOptions($options, $attributes) . self::FileInput($key, $value, $attributes);
                 break;
             case 'docs':
             case 'documents':
+                $content = $dataOptions($options, $attributes) . self::DocumentInput($key, $value, "multiple", $attributes);
+                break;
+            case 'imgs':
             case 'images':
+                $content = $dataOptions($options, $attributes) . self::ImageInput($key, $value, "multiple", $attributes);
+                break;
             case 'audios':
+                $content = $dataOptions($options, $attributes) . self::AudioInput($key, $value, "multiple", $attributes);
+                break;
             case 'videos':
+                $content = $dataOptions($options, $attributes) . self::VideoInput($key, $value, "multiple", $attributes);
+                break;
             case 'files':
                 $content = $dataOptions($options, $attributes) . self::FilesInput($key, $value, $attributes);
                 break;
@@ -2539,9 +2560,17 @@ class Struct
     {
         if (is_array($type)) {
             $attributes = Convert::ToIteration($type, ...$attributes);
-            $type = "text";
+            $type = self::PopAttribute($attributes, "Type") ?? "text";
         }
-        return self::Element("input", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => self::PopAttribute($attributes, "name") ?? Convert::ToKey($key), ...($key?["autocomplete" => self::PopAttribute($attributes, "AutoComplete")??$key]:[]), "placeholder" => self::PopAttribute($attributes, "placeholder") ?? Convert::ToTitle($key), "type" => $type, "value" => $value, "class" => "input"], $attributes);
+        return self::Element("input", [
+            "id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key),
+            "name" => self::PopAttribute($attributes, "name") ?? ($key ? Convert::ToKey($key) : null),
+            ...($key ? ["autocomplete" => self::PopAttribute($attributes, "AutoComplete") ?? $key] : []),
+            "placeholder" => self::PopAttribute($attributes, "placeholder") ?? Convert::ToTitle($key),
+            "type" => $type,
+            "value" => $value,
+            "class" => "input"
+        ], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -2552,7 +2581,7 @@ class Struct
      */
     public static function TextInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "text", ["class" => "valueinput"], $attributes);
+        return self::Input($key, $value, "text", ["class" => "textinput"], $attributes);
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -2563,7 +2592,7 @@ class Struct
      */
     public static function TextsInput($key, $value = null, ...$attributes)
     {
-        return self::Element($value ?? "", "textarea", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => Convert::ToTitle($key), "class" => "input textinput"], $attributes);
+        return self::Element($value ?? "", "textarea", ["id" => self::PopAttribute($attributes, "Id") ?? Convert::ToId($key), "name" => Convert::ToKey($key), "placeholder" => Convert::ToTitle($key), "class" => "input textsinput"], $attributes);
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -2869,7 +2898,7 @@ class Struct
                 $value,
                 [
                     "id" => $id,
-                    "Name"=>$name
+                    "Name" => $name
                 ]
             ) .
             self::Element(
@@ -3031,7 +3060,46 @@ class Struct
      */
     public static function PathInput($key, $value = null, ...$attributes)
     {
-        return self::MaskInput($key, $value, '[^\<\>\^\`\{\|\}\r\n\t\f\v]*', ["class" => "pathinput"], $attributes);
+        $name = Convert::ToKey($key);
+        $id1 = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
+        $id2 = Convert::ToId($key);
+        $key = Convert::ToKey($key);
+        return self::Input($name, null, "file", $attributes, [
+            "class" => "pathinput",
+            "id" => $id1,
+            "accept" => self::PopAttribute($attributes, "Accept") ?? join(", ", \_::$Config->GetAcceptableFormats()),
+            "style" => $value ? "display:none;" : "",
+            ...($value ? ["name" => ""] : ["name" => "$name"]),
+            "oninput" => "
+                elem = document.getElementById('$id2');
+                if(this.files.length>0){
+                    this.setAttribute('name', '$name');
+                    elem.removeAttribute('name');
+                    elem.setAttribute('disabled', 'disabled');
+                } else {
+                    this.removeAttribute('name');
+                    elem.setAttribute('name', '$name');
+                    elem.removeAttribute('disabled');
+                }"
+        ]) .
+            self::MaskInput($name, $value, '[^\<\>\^\`\{\|\}\r\n\t\f\v]*', $attributes, [
+                "class" => "pathinput",
+                "id" => $id2,
+                ...($value ? ["name" => "$name"] : ["name" => ""]),
+                "oninput" => "
+                elem = document.getElementById('$id1');
+                if(!isEmpty(this.value)){
+                    this.setAttribute('name', '$name');
+                    elem.removeAttribute('name');
+                    elem.setAttribute('disabled', 'disabled');
+                    elem.style.display='none';
+                } else {
+                    this.removeAttribute('name');
+                    elem.setAttribute('name', '$name');
+                    elem.removeAttribute('disabled');
+                    elem.style.display='inherit';
+                }"
+            ]);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3064,57 +3132,20 @@ class Struct
      */
     public static function FileInput($key, $value = null, ...$attributes)
     {
-        //     $id1 = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
-        //     $id2 = Convert::ToId($key);
-        //     $key = Convert::ToKey($key);
-        //     return self::Input($key, null, "file", $attributes, [
-        //         "class" => "fileinput",
-        //         "id" => $id1,
-        //         "style" => $value ? "display:none;" : "",
-        //         ...($value ? ["name" => ""] : ["name" => "$key"]),
-        //         "oninput" => "
-        //         elem = document.getElementById('$id2');
-        //         if(this.files.length>0){
-        //             this.setAttribute('name', '$key');
-        //             elem.removeAttribute('name');
-        //             elem.setAttribute('disabled', 'disabled');
-        //         } else {
-        //             this.removeAttribute('name');
-        //             elem.setAttribute('name', '$key');
-        //             elem.removeAttribute('disabled');
-        //         }"
-        //     ]) .
-        //         self::Input($key, $value, "text", $attributes, [
-        //             "class" => "fileinput",
-        //             "id" => $id2,
-        //             ...($value ? ["name" => "$key"] : ["name" => ""]),
-        //             "oninput" => "
-        //         elem = document.getElementById('$id1');
-        //         if(!isEmpty(this.value)){
-        //             this.setAttribute('name', '$key');
-        //             elem.removeAttribute('name');
-        //             elem.setAttribute('disabled', 'disabled');
-        //             elem.style.display='none';
-        //         } else {
-        //             this.removeAttribute('name');
-        //             elem.setAttribute('name', '$key');
-        //             elem.removeAttribute('disabled');
-        //             elem.style.display='inherit';
-        //         }"
-        //         ]);
         $name = Convert::ToKey($key);
         $id = self::PopAttribute($attributes, "Id") ?? ("fi_" . getId());
-        $m = self::HasAttribute($attributes, "Multiple");
         $d = self::HasAttribute($attributes, "WebkitDirectory");
         $ph = self::PopAttribute($attributes, "PlaceHolder");
         $class = self::PopAttribute($attributes, "Class");
         $style = self::PopAttribute($attributes, "Style");
+        $accept = self::PopAttribute($attributes, "Accept") ?? join(", ", \_::$Config->GetAcceptableFormats());
         return self::Style("
         #$id {
             display: flex;
             align-items: center;
             align-content: center;
             justify-content: space-between;
+            gap: var(--size-0);
         }
         #$id>*>:is(.browse,.close) {
             aspect-ratio: 1;
@@ -3122,6 +3153,21 @@ class Struct
         }
         #$id.dragover {
             background-color: #01b64622;
+        }
+        #$id>input[type='text'] {
+            background-color: transparent;
+            color: inherit;
+            text-align:left;
+            direction:ltr;
+            width:100%;
+            border:none;
+            outline:none;
+            margin:0;
+            padding:0;
+        }
+        #$id>input[type='text']:hover {
+            border:none;
+            outline:none;
         }
         #$id>.collection>div{
             display: flex;
@@ -3140,12 +3186,16 @@ class Struct
             font-size: var(--size-0);
         }
         ") . self::Division([
-                        self::Input($value ? null : $name, $value, "file", [
+                        self::Input($value ? null : $name, null, "file", [
                             "style" => "display:none;",
+                            "accept" => $accept,
                             "oninput" => "{$id}_Update(true);"
                         ], $attributes),
-                        self::Input($value ? $name : null, $value, "text", [
-                            "placeholder" => $ph ?? $key ?? "📁 'Drag & drop files here' or 'click to select'",
+                        self::Element(null, "input", [
+                            "name" => $value ? $name : null,
+                            "type" => "text",
+                            "value" => $value,
+                            "placeholder" => $ph ?? "'Drag & drop files here' or 'click to select'",
                             "oninput" => "{$id}_Update(false);",
                             "ondblclick" => "document.querySelector('#$id>input[type=\"file\"]').click();"
                         ]),
@@ -3199,12 +3249,13 @@ class Struct
                 felem.innerHTML = '';
             }
         }
+
         function {$id}_DisplayFiles(files) {
             {$id}fileList.innerHTML = '';
             Array.from(files).forEach(file => {
-            const item = document.createElement('div');
-            item.innerHTML = " . Script::Convert(self::Icon($d ? "folder" : "file")) . "+`<span>\${file.name}<br><small>(\${(file.size / 1024).toFixed(1)} KB)</small></span>`;
-            {$id}fileList.appendChild(item);
+                const item = document.createElement('div');
+                item.innerHTML = " . Script::Convert(self::Icon($d ? "folder" : "file")) . "+'<span>'+file.name+'<br><small>('+(file.size / 1024).toFixed(1)+' KB)</small></span>';
+                {$id}fileList.appendChild(item);
             });
         }");
     }
@@ -3229,6 +3280,50 @@ class Struct
     public static function DirectoryInput($key, $value = null, ...$attributes)
     {
         return self::FileInput($key, $value, "webkitdirectory multiple", ["class" => "directoryinput"], $attributes);
+    }
+    /**
+     * The \<INPUT\> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function DocumentInput($key, $value = null, ...$attributes)
+    {
+        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Config->AcceptableDocumentFormats)], $attributes);
+    }
+    /**
+     * The \<INPUT\> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function ImageInput($key, $value = null, ...$attributes)
+    {
+        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Config->AcceptableImageFormats)], $attributes);
+    }
+    /**
+     * The \<INPUT\> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function AudioInput($key, $value = null, ...$attributes)
+    {
+        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Config->AcceptableAudioFormats)], $attributes);
+    }
+    /**
+     * The \<INPUT\> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function VideoInput($key, $value = null, ...$attributes)
+    {
+        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Config->AcceptableVideoFormats)], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3978,15 +4073,10 @@ class Struct
 
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
 
-        style(null,asset(\_::$Address->PackageDirectory, "Map/Style.css"));
-        style(null,asset(\_::$Address->PackageDirectory, "Map/Locate.css"));
-        script(null,asset(\_::$Address->PackageDirectory, "Map/Script.js"));
-        script(null,asset(\_::$Address->PackageDirectory, "Map/Locate.js"));
-
-        //style(null, "https://unpkg.com/leaflet/dist/leaflet.css");
-        //style(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css");
-        //script(null, "https://unpkg.com/leaflet/dist/leaflet.js");
-        //script(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js");
+        style(null, "https://unpkg.com/leaflet/dist/leaflet.css");
+        style(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css");
+        script(null, "https://unpkg.com/leaflet/dist/leaflet.js");
+        script(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js");
 
         // Normalize content
         $markersJS = "";

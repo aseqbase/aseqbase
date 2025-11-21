@@ -21,7 +21,7 @@ if (isValid($user)) {
     $form->AddChild(function () use ($user, $form) {
         $id = Convert::ToId("Image");
         $img = new \MiMFa\Module\Field("image" , "Image" , $user["Image" ], "Click to change the image!", attributes:["id"=>$id]);
-        $img->Scripts .= "document.getElementById('$id').onchange = function(){
+        $img->Scripts .= "document.querySelector('#$id input[type=\"file\"]').onchange = function(){
                     let data = new FormData();
                     data.append('Signature' , `" . \_::$User->TemporarySignature . "`);
                     data.append('Image' , this.files[0]);

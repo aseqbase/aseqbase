@@ -391,19 +391,17 @@ class Local
 		$sourceFile = $content["tmp_name"];
 		if (!$allow) {
 			if ($deleteSource)
-				unlink($sourceFile);
+				self::DeleteFile($sourceFile);
 			throw new \SilentException("The file format is not acceptable!");
 		}
 		// Check file size
 		$minSize = $minSize ?? \_::$Config->MinimumFileSize;
 		$maxSize = $maxSize ?? \_::$Config->MaximumFileSize;
 		if ($content["size"] < $minSize) {
-			if ($deleteSource)
-				unlink($sourceFile);
+			if ($deleteSource) self::DeleteFile($sourceFile);
 			throw new \SilentException("The file size is very small!");
 		} elseif ($content["size"] > $maxSize) {
-			if ($deleteSource)
-				unlink($sourceFile);
+			if ($deleteSource) self::DeleteFile($sourceFile);
 			throw new \SilentException("The file size is very big!");
 		}
 		if (!$dir) {
@@ -419,7 +417,7 @@ class Local
 			return $destFile;
 			return $destFile;
 		if ($deleteSource)
-			unlink($sourceFile);
+			self::DeleteFile($sourceFile);
 		throw new \SilentException("Sorry, there was an error uploading your file.");
 	}
 	/**
