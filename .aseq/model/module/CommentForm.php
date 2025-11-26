@@ -32,7 +32,7 @@ class CommentForm extends Form
 	public $IncompleteWarning = "Please fill all fields correctly!";
 	public $SuccessHandler = 'Thank you very much, Your message received successfully!';
 	public $ErrorHandler = 'Something went wrong in processing your message!';
-	public $SigningLabel = "Log in or create an account to leave your message";
+	public $SigningLabel = "'Sign in' or 'create an account' to 'leave a message'";
 	public $BlockTimeout = 60000;
 	public $ResponseView = null;
 	public $RootId = null;

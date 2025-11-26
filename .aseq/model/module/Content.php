@@ -114,7 +114,7 @@ class Content extends Module
       * @example ["News"=>"Find More: ", "Article"=>"Keywords: ", "Document: "=>"Keywords: ", "Post"=>"", "Default"=>"Tags: "]
       * @category Parts
       */
-     public $TagsLabel = ["News" => "<h6>Find More: </h6>", "Article" => "<h6>Keywords: </h6>", "Document: " => "<h6>Keywords: </h6>", "Post" => "", "Default" => "<h6>Tags: </h6>"];
+     public $TagsLabel = ["News" => "'Find More': ", "Article" => "'Keywords': ", "Document" => "'Keywords': ", "Post" => "", "Default" => "'Tags': "];
      /**
       * Order of Tags to show
       * @var array|int
@@ -141,7 +141,7 @@ class Content extends Module
       * @example ["News"=>"Read Also: ", "Default"=>"Relateds: "]
       * @category Parts
       */
-     public $RelatedsLabel = ["News" => "<h5>Read Also: </h5>", "Default" => "<h5>Relateds: </h5>"];
+     public $RelatedsLabel = ["News" => "'Read Also': ", "Default" => "'Relateds': "];
      /**
       * Order of Related posts to show
       * @var array|int
@@ -220,7 +220,7 @@ class Content extends Module
       * @example ["News"=>"Read Also: ", "Default"=>"Relateds: "]
       * @category Parts
       */
-     public $AttachesLabel = ["Default" => "<h5>Attaches:</h5>"];
+     public $AttachesLabel = ["Default" => "'Attaches':"];
      /**
       * @var bool
       * @category Parts
@@ -413,11 +413,11 @@ class Content extends Module
      }
      public function GetTitle($attributes = null)
      {
-          $p_id = get( $this->Item, 'Id');
-          $p_name = getValid( $this->Item, 'Name') ?? $p_id ?? $this->Title;
+          $p_id = get($this->Item, 'Id');
+          $p_name = getValid($this->Item, 'Name') ?? $p_id ?? $this->Title;
           $nameOrId = $p_id ?? $p_name;
           if (!$this->CompressPath) {
-               $catDir = \_::$Back->Query->GetContentCategoryRoute( $this->Item);
+               $catDir = \_::$Back->Query->GetContentCategoryRoute($this->Item);
                if (isValid($catDir))
                     $nameOrId = trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
           }
@@ -427,7 +427,8 @@ class Content extends Module
                     $this->GetDetails($this->CollectionRoot . $nameOrId)
                ) .
                $this->GetButtons(),
-               ["class" => "title"], $attributes
+               ["class" => "title"],
+               $attributes
           );
      }
      public function GetDescription($attributes = null)
@@ -435,7 +436,9 @@ class Content extends Module
           return Struct::Rack(
                ($this->AllowDescription ? $this->GetExcerpt() : "") . $this->GetImage(),
                ["class" => "description"]
-          , $attributes);
+               ,
+               $attributes
+          );
      }
      public function GetContent($attributes = null)
      {
@@ -571,7 +574,10 @@ class Content extends Module
                return null;
           $p_attaches = Convert::FromJson(get($this->Item, 'Attach'));
           if (!isEmpty($p_attaches))
-               return Struct::Division(__(Convert::FromSwitch($this->AttachesLabel, get($this->Item, 'Type'))) . Struct::Convert($p_attaches));
+               return Struct::Division(
+                    Struct::Heading5(Convert::FromSwitch($this->AttachesLabel, get($this->Item, 'Type'))) .
+                    Struct::Convert($p_attaches)
+               );
      }
      public function GetTags()
      {
@@ -580,12 +586,13 @@ class Content extends Module
           $p_tags = Convert::FromJson(get($this->Item, 'TagIds'));
           if (!isEmpty($p_tags)) {
                $p_type = get($this->Item, 'Type');
-               $p_tagstext = __(Convert::FromSwitch($this->TagsLabel, $p_type));
                $p_tagscount = Convert::FromSwitch($this->TagsCount, $p_type);
                $p_tagsorder = Convert::FromSwitch($this->TagsOrder, $p_type);
                $tags = table("Tag")->SelectPairs("Name", "Title", "`Id` IN (" . join(",", $p_tags) . ") " . (isEmpty($p_tagsorder) ? "" : "ORDER BY $p_tagsorder") . " LIMIT $p_tagscount");
                if (count($tags) > 0)
-                    return Struct::$BreakLine . Struct::Division($p_tagstext . join(PHP_EOL, loop(
+                    return Struct::$BreakLine . Struct::Division(
+               Struct::Heading6(Convert::FromSwitch($this->TagsLabel, $p_type)) . 
+               join(PHP_EOL, loop(
                          $tags,
                          function ($v, $k) {
                               return Struct::Link(
@@ -611,7 +618,7 @@ class Content extends Module
           $p_relatedstext = __(Convert::FromSwitch($this->RelatedsLabel, $p_type));
           $p_relatedscount = Convert::FromSwitch($this->RelatedsCount, $p_type) ?? 5;
           $p_relatedsorder = Convert::FromSwitch($this->RelatedsOrder, $p_type);
-          $rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'". (\_::$Back->Translate->Language?" AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"".\_::$Back->Translate->Language."\"', '$.lang'))":"") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
+          $rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Back->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Back->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
           if (count($rels) > 0)
                return Struct::$BreakLine . Struct::Division($p_relatedstext . join(PHP_EOL, loop(
                     $rels,
@@ -630,13 +637,13 @@ class Content extends Module
                     "Relation=:rid AND " . \_::$Back->GetAccessCondition(checkStatus: false) . " " . $this->CommentsLimitation,
                     [":rid" => get($this->Item, 'Id')]
                );
-               if (!$this->LeaveComment){
-                    $cc->ReplyButtonLabel = 
-                    $cc->DeleteButtonLabel = null;
+               if (!$this->LeaveComment) {
+                    $cc->ReplyButtonLabel =
+                         $cc->DeleteButtonLabel = null;
                }
-               if (!$this->ModifyComment){
-                    $cc->EditButtonLabel = 
-                    $cc->DeleteButtonLabel = null;
+               if (!$this->ModifyComment) {
+                    $cc->EditButtonLabel =
+                         $cc->DeleteButtonLabel = null;
                }
                if (count($cc->Items) > 0)
                     return Struct::$BreakLine . $cc->ToString();
