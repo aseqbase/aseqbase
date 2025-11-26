@@ -244,8 +244,9 @@ class QRCodeScanner extends Module
 	{
 		return "if({$this->Name} && {$this->Name}?._camera?._stream) {
 			{$this->Name}.stop();
-			document.querySelector('.{$this->Name} .message').classList.add('hide');
-		}";
+		}
+		document.querySelector('.{$this->Name} .message').classList.add('hide');
+		";
 	}
 
 	public function MessageScript($message = null)

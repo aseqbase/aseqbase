@@ -386,7 +386,7 @@ class MainMenu extends Module
 					module("SearchForm");
 					module("TemplateButton");
 					module("UserMenu");
-					$defaultButtons[] = new searchForm();
+					$defaultButtons[] = new SearchForm();
 					$defaultButtons[] = new TemplateButton();
 					if (\_::$User->AllowSigning) {
 						$usermenu = new UserMenu();

@@ -314,7 +314,6 @@ class Convert
         imagettftext($image, $fontSize, $angle, intval($multipleX * $width), intval($multipleY * $height), $textColor, $fontPath, self::ToString($value ?? ""));
         ob_start();
         imagepng($image);
-        imagedestroy($image);
         return ob_get_clean();
     }
     /**
@@ -546,23 +545,23 @@ class Convert
      */
     public static function ToShownDateTime($dateTime = null, \DateTimeZone|null $dateTimeZone = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + $tolerance ?? \_::$Config->TimeStampOffset);
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Config->TimeStampOffset));
     }
     public static function FromShownDateTime($dateTime = null, \DateTimeZone|null $dateTimeZone = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - $tolerance ?? \_::$Config->TimeStampOffset);
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Config->TimeStampOffset));
     }
     /**
      * Get the DateTime as a String type suitable to show on website
      */
     public static function ToShownDateTimeString($dateTime = null, \DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + $tolerance ?? \_::$Config->TimeStampOffset)
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Config->TimeStampOffset))
             ->format($dateTimeFormat ?? \_::$Config->DateTimeFormat);
     }
     public static function FromShownDateTimeString($dateTime = null, \DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - $tolerance ?? \_::$Config->TimeStampOffset)
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Config->TimeStampOffset))
             ->format($dateTimeFormat ?? \_::$Config->DateTimeFormat);
     }
 

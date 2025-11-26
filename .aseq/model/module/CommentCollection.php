@@ -457,9 +457,9 @@ class CommentCollection extends Collection
                 yield Struct::OpenTag("div", ["class" => "author-details"]);
                 if ($this->AllowAuthor) {
                     $au = getValid($author, "Name", $p_name);
-                    if (isEmpty($author))
-                        yield Struct::Span($au, null, ["class" => "author-name"]);
-                    else
+                    if (isEmpty($author)){
+                        if($au) yield Struct::Span($au, null, ["class" => "author-name"]);
+                    }else
                         yield Struct::Link($au, \_::$Address->UserRoot . get($author, "Signature"), ["class" => "author-name"]);
                 }
                 if ($p_showmeta && isValid($p_meta))

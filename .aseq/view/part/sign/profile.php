@@ -3,7 +3,7 @@
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 $user = \_::$User->Get();
-if (isValid($user)) {
+if ($user) {
     module("Form");
     module("Field");
     $form = new \MiMFa\Module\Form();
@@ -50,4 +50,4 @@ if (isValid($user)) {
         width: 50%;
     }");
 }
-?>
+else part(\_::$User->InHandlerPath);

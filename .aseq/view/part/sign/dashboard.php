@@ -2,8 +2,9 @@
 
 use MiMFa\Library\Struct;
 $user = \_::$User->Get();
-if (isValid($user))
-    echo Struct::Style("
+if ($user)
+	render(
+		Struct::Style("
 			.page header.header.introduction {
 				text-align: center;
 				margin: var(--size-1);
@@ -25,21 +26,25 @@ if (isValid($user))
 			.page .container {
 				gap: var(--size-2);
 			}
-	").
-	Struct::Center(
-		Struct::Header(
-			Struct::Media(\_::$User->Image).
-			Struct::Heading1(\_::$User->Name).
-			Struct::Paragraph(\_::$User->GetValue("Bio" )).
-            Struct::$BreakLine
-		,["class"=>"introduction"]).
-        Struct::Container([
-            [
-                Struct::Button("Show Profile", \_::$User->ProfileHandlerPath),
-                Struct::Button("Edit Profile", \_::$User->EditHandlerPath),
-                Struct::Button("Reset Password", \_::$User->RecoverHandlerPath),
-                Struct::Button("Sign Out", \_::$User->OutHandlerPath)
-            ]
-        ]),["class"=>"page"]
-    );
-?>
+	") .
+		Struct::Center(
+			Struct::Header(
+				Struct::Media(\_::$User->Image) .
+				Struct::Heading1(\_::$User->Name) .
+				Struct::Paragraph(\_::$User->GetValue("Bio")) .
+				Struct::$BreakLine
+				,
+				["class" => "introduction"]
+			) .
+			Struct::Container([
+				[
+					Struct::Button("Show Profile", \_::$User->ProfileHandlerPath),
+					Struct::Button("Edit Profile", \_::$User->EditHandlerPath),
+					Struct::Button("Reset Password", \_::$User->RecoverHandlerPath),
+					Struct::Button("Sign Out", \_::$User->OutHandlerPath)
+				]
+			]),
+			["class" => "page"]
+		)
+	);
+else part(\_::$User->InHandlerPath);

@@ -1,5 +1,7 @@
 <?php
 namespace MiMFa\Module;
+
+use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
 class PrePage extends Module
 {
@@ -42,7 +44,7 @@ class PrePage extends Module
 		if (isValid($this->Description))
 			return $this->GetTitle() . Struct::Rack(
 				$this->GetDescription(["class" => 'description col-md']) .
-				($this->Image ? Struct::Image($this->Title, $this->Image, ["class" => "col-md-4"]) : "")
+				($this->Image ? Struct::Image(preg_replace("/\<([\w:]+)[^<>]*\>[\w\W]*\<\/\1\>/i"," ", $this->Title??""), $this->Image, ["class" => "col-md-4"]) : "")
 			) . $this->GetContent(["class"=>"content"]);
 		else
 			return Struct::Rack(
@@ -50,4 +52,3 @@ class PrePage extends Module
 			) . $this->GetTitle() . $this->GetContent(["class"=>"content"]);
 	}
 }
-?>

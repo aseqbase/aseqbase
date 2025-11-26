@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Comment` (
   `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
   `Name` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Contact` varchar(256) NOT NULL,
+  `Contact` varchar(256) DEFAULT NULL,
   `Subject` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Attach` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,

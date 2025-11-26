@@ -1,10 +1,8 @@
 <?php
-
 use MiMFa\Library\Convert;
 
-
 $user = \_::$User->Get();
-if (isValid($user)) {
+if ($user) {
     echo "<div class='page'>";
     module("Form");
     module("Field");
@@ -45,4 +43,4 @@ if (isValid($user)) {
     $form->Render();
     echo "</div>";
 }
-?>
+else part(\_::$User->InHandlerPath);

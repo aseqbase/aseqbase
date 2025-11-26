@@ -265,7 +265,8 @@ class SideMenu extends Module
 			}
 			" : "") . ($this->AllowSignButton ? "
 				.{$this->Name}-sign-button-menu{
-					font-size:  var(--size-3);
+					font-size:  var(--size-5);
+					line-height:  var(--size-max);
 					cursor: pointer;
 					margin: auto;
 					" . ($sdir) . ": 2px;
@@ -273,7 +274,7 @@ class SideMenu extends Module
 					padding: 0px 5px;
 					position: fixed;
 					z-index: 9999;
-					color:  var(--fore-color-special);
+					color:  var(--fore-color-special-output);
 					" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
 				}
 				.{$this->Name}-sign-button-menu:hover{
@@ -419,8 +420,8 @@ class SideMenu extends Module
 				if ($this->AllowDefaultButtons) {
 					module("SearchForm");
 					module("TemplateButton"); 
-					$defaultButtons[] = new searchForm();
-					if (\_::$User->AllowSigning) $defaultButtons[] = Struct::Icon("user", \_::$User->InHandlerPath);
+					$defaultButtons[] = new SearchForm();
+					if (\_::$User->AllowSigning) $defaultButtons[] = Struct::Button(Struct::Icon("user"), \_::$User->InHandlerPath);
 					$defaultButtons[] = new TemplateButton();
 				}
 				yield Struct::Division([
@@ -532,4 +533,3 @@ class SideMenu extends Module
 		");
 	}
 }
-?>

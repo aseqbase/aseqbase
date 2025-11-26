@@ -872,7 +872,7 @@ class Struct
      */
     public static function Page($content, ...$attributes)
     {
-        return self::Element($content, "div", ["class" => "page"], $attributes);
+        return self::Element(is_countable($content) ? loop($content, fn($v) => self::Part($v)) : $content, "div", ["class" => "page"], $attributes);
     }
     /**
      * The \<DIV\> HTML Tag
@@ -882,7 +882,7 @@ class Struct
      */
     public static function Part($content, ...$attributes)
     {
-        return self::Element($content, "div", ["class" => "part"], $attributes);
+        return self::Element(is_countable($content) ? loop($content, fn($v) => self::Part($v)) : $content, "div", ["class" => "part"], $attributes);
     }
     /**
      * The \<DIV\> HTML Tag
@@ -1606,15 +1606,15 @@ class Struct
      * The \<Data\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param mixed $attributes Other custom attributes of the Tag,
-     * "Splitter"=>".",
-     * "ThousandSplitter"=>",",
+     * "DecimalSeparator"=>".",
+     * "Separator"=>","
      * @return string
      */
     public static function Number($content, ...$attributes)
     {
         $content = $content + 0;
-        $decimalPoint = self::PopAttribute($attributes, "Splitter") ?? ".";
-        $thousandSep = self::PopAttribute($attributes, "ThousandSplitter") ?? ",";
+        $decimalPoint = self::PopAttribute($attributes, "DecimalSeparator") ?? ".";
+        $thousandSep = self::PopAttribute($attributes, "Separator") ?? ",";
         $decimals = is_float($content) ? strlen(substr(strrchr($content, "."), 1)) : 0;
         return self::Element(number_format($content, $decimals, $decimalPoint, $thousandSep), "data", ["class" => "number", "value" => $content], $attributes);
     }
@@ -1922,7 +1922,7 @@ class Struct
      */
     public static function Form($content, $action = null, ...$attributes)
     {
-        $Interaction = self::PopAttribute($attributes, "Interaction");
+        $Interaction = self::PopAttribute($attributes, "Interaction") ?? self::PopAttribute($attributes, "Interactive");
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         if (!isValid($content))
             $content = self::SubmitButton();
@@ -1950,7 +1950,7 @@ class Struct
                 }));
             };
         return self::Element($content, "form", $action ? ((isScript($action) && !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "Id" => $id, "class" => "form"], $attributes)
-            . ($Interaction ? Struct::Script("handleForm('form#$id');") : "");
+            . (empty($Interaction) ? "" : Struct::Script($Interaction === true ? "handleForm('form#$id');" : $Interaction));
     }
     /**
      * Detect the type of inputed value
@@ -2241,6 +2241,7 @@ class Struct
             case 'description':
                 $content = self::Label($value ?? $titleOrKey, $id, $attributes);
                 break;
+            case 'json':
             case 'object':
                 $content = $dataOptions($options, $attributes) . self::ObjectInput($key, Convert::ToString($value), $attributes);
                 break;
@@ -2323,6 +2324,9 @@ class Struct
             case '0':
             case 'bool':
             case 'boolean':
+            case 'switch':
+                $content = $dataOptions($options, $attributes) . self::SwitchInput($key, $value, $attributes);
+                break;
             case 'check':
             case 'checkbox':
             case 'checkbutton':
@@ -2330,6 +2334,10 @@ class Struct
                 break;
             case 'bools':
             case 'booleans':
+            case 'switchs':
+            case 'switches':
+                $content = self::SwitchesInput($key, $value, $options, $attributes);
+                break;
             case 'checks':
             case 'checkboxes':
             case 'checkbuttons':
@@ -2372,6 +2380,10 @@ class Struct
                     $max = max($options);
                 }
                 $content = self::RangeInput($key, $value, $min, $max, $attributes);
+                break;
+            case 'symbolic':
+            case 'symbolicrange':
+                $content = self::SymbolicRangeInput($key, $value, $options, $attributes);
                 break;
             case 'float':
             case 'double':
@@ -2486,7 +2498,6 @@ class Struct
             case 'code':
                 $content = self::CodeInput($key, $value, $options, $attributes);
                 break;
-            case 'json':
             case 'javascript':
             case 'js':
             case 'html':
@@ -2655,7 +2666,8 @@ class Struct
      */
     public static function ObjectInput($key, $value = null, ...$attributes)
     {
-        return self::TextsInput($key, $value, ["class" => "objectinput", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"], ...$attributes);
+        $value = Convert::ToStatic($value);
+        return self::TextsInput($key, isJson($value)?json_encode(json_decode($value), JSON_PRETTY_PRINT):$value, ["class" => "objectinput", "rows" => "10", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;"], ...$attributes);
     }
     /**
      * A \<DIV\> HTML Tag contains an array of Inputs
@@ -2736,9 +2748,8 @@ class Struct
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
-    public static function CheckInput($key, $value = null, ...$attributes)
+    public static function SwitchInput($key, $value = null, ...$attributes)
     {
-        //return self::Input($key, $value ? "1" : "0", "checkbox", ["class" => "checkinput", ...($value ? ["checked" => "checked"] : []), "onchange" => "this.value = this.checked?1:0;"], $attributes);
         $class = "_" . getId();
         return self::Action(
             Struct::Icon($value ? "turn-on" : "toggle-off", null, ["class" => $class]),
@@ -2753,7 +2764,11 @@ class Struct
                         icon_$class.classList.add('fa-toggle-on');
                         cb_$class.click();
                     }",
-            ["class" => "checkinput"]
+            ["class" => "checkinput"],
+            [
+                "Class" => self::PopAttribute($attributes, "Class"),
+                "Style" => self::PopAttribute($attributes, "Style")
+            ]
         ) .
             self::Input($key, $value ? "1" : "0", "checkbox", [
                 "class" => "checkinput $class hide",
@@ -2769,6 +2784,44 @@ class Struct
                         this.value = 0;
                     }"
             ], $attributes);
+    }
+    /**
+     * The \<INPUT\> HTML Tag Collection
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value Default value
+     * @param array $options Available options
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function SwitchesInput($key, $value = null, $options = [], ...$attributes)
+    {
+        $ops = [];
+        if (is_array($value))
+            foreach ($options as $k => $v)
+                if (is_int($k))
+                    $ops[$v] = in_array($v, $value);
+                else
+                    $ops[$k] = in_array($k, $value);
+        else
+            foreach ($options as $k => $v)
+                if (is_int($k))
+                    $ops[$v] = $value;
+                else
+                    $ops[$k] = $v ?? $value;
+        return join(PHP_EOL, loop($ops, function ($v, $k) use ($key, $attributes) {
+            return self::Label($k, self::SwitchInput("{$key}[]", $v, ...$attributes), ["class" => "checksinput"]);
+        }));
+    }
+    /**
+     * The \<INPUT\> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function CheckInput($key, $value = null, ...$attributes)
+    {
+        return self::Input($key, $value ? "1" : "0", "checkbox", ["class" => "checkinput", ...($value ? ["checked" => "checked"] : []), "onchange" => "this.value = this.checked?1:0;"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag Collection
@@ -3390,6 +3443,50 @@ class Struct
             ",
                 "name" => $name
             ]);
+    }
+    /**
+     * The \<INPUT\> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param array $symbols An array of symbols from The minimum key to The maximum key (for example [0=>Struct::Icon('star')])
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function SymbolicRangeInput($key, $value = null, $symbols = [], ...$attributes)
+    {
+        $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
+        $class = self::PopAttribute($attributes, "Class");
+        $style = self::PopAttribute($attributes, "Style");
+        $disabled = self::PopAttribute($attributes, "Disabled");
+        return self::Style("
+            #{$id}>.action {
+                opacity: 1;
+                " . ($disabled ? "" : "cursor: pointer;") . "
+                transition: var(--transition-1);
+            }
+            #{$id}>.action.selected~.action {
+                opacity: 0.5;
+            }
+        ") .
+            self::Division(
+                [
+                    self::HiddenInput($key, $value, ...$attributes),
+                    loop($symbols, fn($v, $k) => self::Action($v, null, [
+                        "class" => (($value == $k) ? "selected" : ""),
+                        ...($disabled ? [] : [
+                            "onclick" => "document.querySelector('#{$id}>.hiddeninput').value = '$k';
+                        let buttons = document.querySelectorAll('#{$id}>.action');
+                        buttons.forEach(btn => { btn.classList.remove('selected'); });
+                        this.classList.add('selected');"
+                        ])
+                    ]))
+                ],
+                ["class" => "rangeinput symbolicrangeinput", "id" => $id],
+                [
+                    "class" => $class,
+                    "style" => $style
+                ]
+            );
     }
     /**
      * The \<INPUT\> HTML Tag

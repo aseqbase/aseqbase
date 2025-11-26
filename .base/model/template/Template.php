@@ -168,9 +168,6 @@ class Template extends \Base{
         .result.warning{
             color: var(--color-yellow);
         }
-        :not(h1, h2, h3, h4, h5, h6, p, .content) {
-            line-height: 1.5em;
-        }
         h1{
             font-size: var(--size-5);
             text-align: center;
