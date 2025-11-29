@@ -14,18 +14,18 @@ class PrePage extends Module
 	{
 		return parent::GetStyle() . Struct::Style("
 			.{$this->Name}{
-				padding: 3vmax;
+				padding: var(--size-max) var(--size-3) var(--size-1);
 			}
 			.{$this->Name}>.rack{
 				align-items: center;
 			}
-			.{$this->Name}:is(.title,.rack>.title){
-				margin-top: var(--size-max);
+			.{$this->Name}>:is(.title,.rack>.title){
+				margin: var(--size-0);
 			}
 			.{$this->Name}>.rack>.description{
 				font-size: var(--size-1);
 				text-align: justify;
-				padding: 3vmax 3vmax;
+				padding: 0px var(--size-max);
 			}
 			.{$this->Name}>:not(.content)>.image{
 				background-size: cover;

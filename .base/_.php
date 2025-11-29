@@ -15,7 +15,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 6.04999;
+	public static float $Version = 6.05111;
 	/**
 	 * The default files extensions
 	 * @example: ".php"

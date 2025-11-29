@@ -132,14 +132,14 @@ class SignUpForm extends Form
 
 	public function Get()
 	{
-		if (\_::$User->GetAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
+		if (\_::$User->HasAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
 			return $this->GetHeader().Convert::ToString($this->Welcome);
 		else
 			return parent::Get();
 	}
 	public function GetHeader()
 	{
-        if(\_::$User->GetAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))
+        if(\_::$User->HasAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))
 			return __(Convert::FromDynamicString($this->WelcomeFormat));
 		return parent::GetHeader();
 	}
@@ -149,12 +149,12 @@ class SignUpForm extends Form
 			yield Struct::Rack(
 				(isValid($this->FirstNameLabel) ? Struct::LargeSlot(
 					Struct::Label($this->FirstNameLabel, "FirstName", ["class"=> "prepend"]) .
-					Struct::TextInput("FirstName", ["placeholder" => $this->FirstNamePlaceHolder]),
+					Struct::TextInput("FirstName", null, ["placeholder" => $this->FirstNamePlaceHolder]),
 					["class"=> "field"]
 				) : "") .
 				(isValid($this->LastNameLabel) ? Struct::LargeSlot(
 					Struct::Label($this->LastNameLabel, "LastName", ["class"=> "prepend"]) .
-					Struct::TextInput("LastName", ["placeholder" => $this->LastNamePlaceHolder]),
+					Struct::TextInput("LastName", null, ["placeholder" => $this->LastNamePlaceHolder]),
 					["class"=> "field"]
 				) : "")
 			);
@@ -162,7 +162,7 @@ class SignUpForm extends Form
 				yield Struct::Rack(
 					Struct::LargeSlot(
 						Struct::Label($this->EmailLabel, "Email", ["class"=> "prepend"]) .
-						Struct::EmailInput("Email", ["placeholder" => $this->EmailPlaceHolder]),
+						Struct::EmailInput("Email", null, ["placeholder" => $this->EmailPlaceHolder]),
 						["class"=> "field"]
 					)
 				);
@@ -178,7 +178,7 @@ class SignUpForm extends Form
 									yield "<option value='+$i'" . ($this->ContactCountryCode == $i ? " selected" : "") . ">+$i</option>"; }
 						)
 							: "") .
-						Struct::TelInput("Phone", ["placeholder" => $this->ContactPlaceHolder]),
+						Struct::MaskInput("Phone", null,"^\d{10}$", ["placeholder" => $this->ContactPlaceHolder]),
 						["class"=> "field"]
 					)
 				);
@@ -257,7 +257,6 @@ class SignUpForm extends Form
 						e.preventDefault();
 						return false;
 					}
-					" . ($this->Interaction ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
 					return true;
                 });
 			});
@@ -266,7 +265,7 @@ class SignUpForm extends Form
 
 	public function Post()
 	{
-		if (!\_::$User->GetAccess(\_::$User->UserAccess))
+		if (!\_::$User->HasAccess(\_::$User->UserAccess))
 			try {
 				$received = receivePost();
 				if (isValid($received, "Email") || isValid($received, "Password" )) {
@@ -288,7 +287,7 @@ class SignUpForm extends Form
 							name: null,
 							firstName: get($received, "FirstName"),
 							lastName: get($received, "LastName"),
-							contact: (get($received, "CountryCode")??"0") . " " . get($received, "Phone"),
+							contact: (get($received, "CountryCode")??"0") . get($received, "Phone"),
 							groupId: $group,
 							status: $this->InitialStatus,
 							metadata: $route?["Route"=>$route]:null

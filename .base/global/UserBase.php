@@ -153,6 +153,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 	public function __construct()
 	{
+		$this->Access = $this->GuestAccess;
 		$this->Authorize = fn()=>load($this->InHandlerPath);
 		$this->DataTable = table("User");
 		$this->GroupDataTable = table("UserGroup");
@@ -204,15 +205,15 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 
 	/**
-	 * Check if the user has access to the page or not
+	 * To check if the user has access to the page or not
 	 * @param int|array|null $acceptableAccess The minimum accessibility for the user, pass null to give the user access
-	 * @return bool|int|null The user accessibility group
+	 * @return bool|null Returns true if the user has access, false if not, and null if undetermined
 	 */
-	public function GetAccess($acceptableAccess = null)
+	public function HasAccess($acceptableAccess = null)
 	{
-		$access = $this->Access ?? $this->GuestAccess;
 		if (is_null($acceptableAccess))
-			return $access;
+			 $acceptableAccess =  $this->UserAccess;
+		$access = $this->Access ?? $this->GuestAccess;
 		//if($acceptableAccess === true || $acceptableAccess === false) return $acceptableAccess;
 		if (is_int($acceptableAccess))
 			return $access >= $acceptableAccess;
@@ -225,6 +226,14 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			else
 				return in_array($access, $acceptableAccess);
 		return null;
+	}
+	/**
+	 * To get the current user access level
+	 * @return int Returns the current user access level
+	 */
+	public function GetAccess()
+	{
+		return $this->Access ?? $this->GuestAccess;
 	}
 	public function GetAccessCondition($tablePrefix = "")
 	{
@@ -434,7 +443,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			$this->Load();
 		} else
 			\_::$Back->Session->PopData($signature . "_" . getClientCode());
-		return !$this->GetAccess($this->UserAccess);
+		return !$this->GetAccess();
 	}
 
 	public function ResetPassword($signature = null, $password = null)
@@ -545,7 +554,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$dic['$SIGNATURE'] = $this->TemporarySignature;
 		$subject = Convert::FromDynamicString($subject ?? "", $dic, true);
 		$content = Convert::FromDynamicString($content ?? "", $dic, false);
-		return Contact::SendHtmlEmail($from, $this->TemporaryEmail, __($subject), __($content));
+		return Contact::SendHtmlEmail($from, $this->TemporaryEmail, __($subject), __($content))?true:false;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 <?php
-$isuser = \_::$User->GetAccess(\_::$User->UserAccess);
+$isuser = \_::$User->HasAccess();
 $data = $data??[];
 (new Router())
     ->On("sign/in")->Get(function() use($data) { return view("part", ["Name" => "sign/in",...receiveGet(),...$data]);})

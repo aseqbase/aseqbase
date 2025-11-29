@@ -1,5 +1,4 @@
 <?php
-
 module("SignUpForm");
 $module = new \MiMFa\Module\SignUpForm();
 pod($module, $data);
@@ -12,4 +11,3 @@ if($module->Result)
         load(\_::$User->InHandlerPath);
     }
 return $module->Result;
-?>

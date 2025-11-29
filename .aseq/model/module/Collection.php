@@ -146,7 +146,7 @@ class Collection extends Module
 					yield "<div class='row'>";
 				if (is_string($item))
 					yield $item;
-				else if (\_::$User->GetAccess(getValid($item, 'Access', \_::$User->VisitAccess))) {
+				else if (\_::$User->HasAccess(getValid($item, 'Access', \_::$User->VisitAccess))) {
 					$p_meta = getValid($item, 'MetaData', null);
 					if ($p_meta !== null) {
 						$p_meta = Convert::FromJson($p_meta);

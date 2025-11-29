@@ -45,7 +45,7 @@ class SignInForm extends Form{
 	}
 
 	public function GetStyle(){
-		if($this->AllowDecoration) return ((\_::$User->GetAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Struct::Style("
+		if($this->AllowDecoration) return ((\_::$User->HasAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Struct::Style("
 			.{$this->Name} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}
@@ -80,12 +80,12 @@ class SignInForm extends Form{
 	}
 
 	public function Get(){
-		if(\_::$User->GetAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
+		if(\_::$User->HasAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
 			return $this->GetHeader().Convert::ToString($this->Welcome);
         else return parent::Get();
 	}
 	public function GetHeader(){
-        if(\_::$User->GetAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))
+        if(\_::$User->HasAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))
 			return __(Convert::FromDynamicString($this->WelcomeFormat));
     }
 	public function GetFields(){
@@ -115,7 +115,7 @@ class SignInForm extends Form{
     }
 
 	public function Post(){
-		if(!\_::$User->GetAccess(\_::$User->UserAccess) || $this->MultipleSignIn) try {
+		if(!\_::$User->HasAccess(\_::$User->UserAccess) || $this->MultipleSignIn) try {
 			$received = receivePost();
 			$signature = get($received,"Signature" );
 			$password = get($received,"Password" );
@@ -139,7 +139,7 @@ class SignInForm extends Form{
     }
 	
 	public function Delete(){
-		if(\_::$User->GetAccess(\_::$User->UserAccess)) try {
+		if(\_::$User->HasAccess(\_::$User->UserAccess)) try {
 			$user = \_::$User->Get();
 			if (!isValid($user)) return $this->GetSuccess("You are no longer signed in!");
 			elseif(\_::$User->SignOut()) return $this->GetSuccess("You signed out successfully!");
@@ -149,4 +149,3 @@ class SignInForm extends Form{
 		return $this->GetMessage("You are not signed in!");
     }
 }
-?>

@@ -51,7 +51,7 @@ class Form extends Module
 	public $AllowFooter = true;
 	public $Class = "container";
 	public $ContentClass = "col-lg-6";
-	public $Interaction = true;
+	public $Interactive = true;
 
 	/**
 	 * A function to check received values before accepting
@@ -95,13 +95,13 @@ class Form extends Module
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);
 		// });
-		if (\_::$User->GetAccess(\_::$User->AdminAccess))
+		if (\_::$User->HasAccess(\_::$User->AdminAccess))
 			$this->BlockTimeout = 500;
 	}
 
 	public function CheckAccess($access = 0, $blocking = true, $reaction = false, &$message = null)
 	{
-		if (!\_::$User->GetAccess($access)) {
+		if (!\_::$User->HasAccess($access)) {
 			$message = $this->GetError("You have not enough access!");
 			if ($reaction)
 				deliver($this->GetSigning());
@@ -635,7 +635,7 @@ class Form extends Module
 
 	public function Get()
 	{
-		if (!\_::$User->GetAccess($this->Access))
+		if (!\_::$User->HasAccess($this->Access))
 			return null;
 		if (($res = $this->CheckTimeBlock()) !== false)
 			return $res;
@@ -711,7 +711,7 @@ class Form extends Module
 								Struct::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
 								,
 								$src,
-								["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
+								["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method, "interactive" => $this->Interactive]
 							) .
 							($this->AllowFooter ? $this->GetFooter() : "")
 							,
@@ -735,7 +735,7 @@ class Form extends Module
 						Convert::ToString($this->GetFields()) .
 						Struct::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"]),
 						$src,
-						["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method]
+						["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method, "interactive" => $this->Interactive]
 						,
 						...($this->AllowAnimate ? ["data-aos" => "fade-left"] : [])
 					) .
@@ -772,7 +772,6 @@ class Form extends Module
 	{
 		return parent::GetScript() . Struct::Script("
 			$(document).ready(function () {
-				" . ($this->Interaction ? "handleForm('.{$this->Name} form', null, null, null, null, {$this->Timeout});" : "") . "
 				$('.{$this->Name} :is(input, select, textarea)').on('focus', function () {
 					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-output)');
 				});

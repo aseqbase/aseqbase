@@ -291,7 +291,7 @@ class ConfigBase extends ArrayObject
                case "files":
                     return $this->AcceptableFileFormats;
                default:
-                    return [...$this->AcceptableImageFormats, ...$this->AcceptableAudioFormats, ...$this->AcceptableVideoFormats, ...$this->AcceptableDocumentFormats, ...$this->AcceptableFileFormats];
+                    return array_merge($this->AcceptableImageFormats, $this->AcceptableAudioFormats, $this->AcceptableVideoFormats, $this->AcceptableDocumentFormats, $this->AcceptableFileFormats);
           }
      }
 }

@@ -314,7 +314,7 @@ class CommentCollection extends Collection
             $i = 0;
             yield $this->GetTitle();
             yield $this->GetDescription();
-            $adminaccess = \_::$User->GetAccess(\_::$User->AdminAccess);
+            $adminaccess = \_::$User->HasAccess(\_::$User->AdminAccess);
             foreach (Convert::ToItems($items ?? $this->Items) as $k => $item) {
                 $p_userid = get($item, "UserId");
                 $p_groupid = get($item, "GroupId");
@@ -331,7 +331,7 @@ class CommentCollection extends Collection
                 )
                     continue;
                 $p_access = getValid($item, 'Access', \_::$User->VisitAccess);
-                if (!\_::$User->GetAccess($p_access))
+                if (!\_::$User->HasAccess($p_access))
                     continue;
                 if (isValid($this->Relation) && $this->Relation != get($item, 'Relation'))
                     continue;

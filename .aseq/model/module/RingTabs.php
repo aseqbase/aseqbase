@@ -176,7 +176,7 @@ class RingTabs extends Module{
 				$btns = [];
 				$tags = [];
 				loop($this->Items, function($v,$k,$i) use(&$btns, &$tags){
-					if(\_::$User->GetAccess(getValid($v,"Access" ,\_::$User->VisitAccess))) {
+					if(\_::$User->HasAccess(getValid($v,"Access" ,\_::$User->VisitAccess))) {
 						$desc = get($v, 'Description' );
 						$more = getBetween($v, "Button","More");
 						$pa = getBetween($v, 'Path');

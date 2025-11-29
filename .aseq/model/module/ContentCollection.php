@@ -187,7 +187,7 @@ class ContentCollection extends Collection{
         parent::__construct($items);
         $this->Root = $this->Root??\_::$Address->ContentRoot;
         $this->CollectionRoot = $this->CollectionRoot??\_::$Address->CategoryRoot;
-        $this->CheckAccess = fn($item)=>\_::$User->GetAccess(getValid($item, 'Access' , 0));
+        $this->CheckAccess = fn($item)=>\_::$User->HasAccess(getValid($item, 'Access' , 0));
     }
 
 	public function GetStyle(){

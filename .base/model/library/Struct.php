@@ -136,6 +136,15 @@ class Struct
                         );
                     } while ($lc);
 
+                    // Links
+                    $object = preg_replace_callback("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)/i", fn($m) => self::Link($m[1], $m[1]), $object);
+                    $object = preg_replace_callback("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)/i", fn($m) => self::Link($m[1], "mailto:{$m[1]}"), $object);
+                    $object = preg_replace_callback("/\B\#([\w]+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/iu", fn($m) => self::Link("#".$m[1], \_::$Address->SearchRoot.urlencode("#".$m[1]), ["id" => $m[2] ?? null], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
+                   
+                    $object = preg_replace_callback("/\s?(^[^\W].*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/mi", fn($m) => self::Element($m[1], "p", ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
+                    
+                    $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
+
                     // Texts
                     $object = preg_replace_callback("/\*\*(\S[^\*\r\n\v]+)\*\*(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Strong($m[1], null, ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
                     $object = preg_replace_callback("/\*([^\*\r\n\v]+)\*(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Bold($m[1], null, ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
@@ -147,12 +156,6 @@ class Struct
                     $object = preg_replace_callback("/(?<!\[)~([^\s\-+*\/\/\\\()\[\]{}$#@!~\"'`%^&=+]+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Sub($m[1], null, ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object); // Subscript
 
                     $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
-
-                    // Links
-                    $object = preg_replace_callback("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)\b/i", fn($m) => self::Link($m[1], $m[1]), $object);
-                    $object = preg_replace_callback("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)\b/i", fn($m) => self::Link($m[1], "mailto:{$m[1]}"), $object);
-
-                    $object = preg_replace_callback("/\s?(^[^\W].*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/mi", fn($m) => self::Element($m[1], "p", ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
 
                     // Signs
                     $object = preg_replace("/\s?^\-{3,6}(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?(?=<|$)/mi", Struct::Element(null, "hr", ["id" => "$1", "class" => "$2"], "$3"), $object);
@@ -2381,9 +2384,10 @@ class Struct
                 }
                 $content = self::RangeInput($key, $value, $min, $max, $attributes);
                 break;
+            case 'symbols':
             case 'symbolic':
             case 'symbolicrange':
-                $content = self::SymbolicRangeInput($key, $value, $options, $attributes);
+                $content = self::SymbolicInput($key, $value, $options, $attributes);
                 break;
             case 'float':
             case 'double':
@@ -2667,7 +2671,7 @@ class Struct
     public static function ObjectInput($key, $value = null, ...$attributes)
     {
         $value = Convert::ToStatic($value);
-        return self::TextsInput($key, isJson($value)?json_encode(json_decode($value), JSON_PRETTY_PRINT):$value, ["class" => "objectinput", "rows" => "10", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;"], ...$attributes);
+        return self::TextsInput($key, isJson($value) ? json_encode(json_decode($value), JSON_PRETTY_PRINT) : $value, ["class" => "objectinput", "rows" => "10", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;"], ...$attributes);
     }
     /**
      * A \<DIV\> HTML Tag contains an array of Inputs
@@ -2689,13 +2693,14 @@ class Struct
         return self::Division(function () use ($key, $value, $options, $attributes) {
             $sample = null;
             $attributes = [...($options ?? []), ...($attributes ?? [])];
-            $add = popValid($attributes, "Add", true);
-            //$edit = popValid($attributes, "edit", true);
-            $rem = popValid($attributes, "Remove", true);
+            $attrs = popValid($attributes, "Attributes", []);
+            $disabled = self::HasAttribute($attributes, "Disabled") || self::HasAttribute($attrs, "Disabled");
+            $add = $disabled ? false : popValid($attributes, "Add", true);
+            //$edit = $disabled?false:popValid($attributes, "edit", true);
+            $rem = $disabled ? false : popValid($attributes, "Remove", true);
             $sep = popValid($attributes, "Separator", null);
             $type = self::InputDetector(popValid($attributes, "Type"), popValid($attributes, "Value"));
             $key = popValid($attributes, "Key", $key);
-            $attrs = popValid($attributes, "Attributes", []);
             $options = popValid($attributes, "Options", null);
             if (isEmpty($value))
                 $value = [];
@@ -3089,7 +3094,7 @@ class Struct
     {
         return self::Input($key, $value, "text", [
             "class" => "maskinput",
-            ...(isPattern(text: $mask ?? "") ? ["onblur" => "this.value = ((this.value.match($mask)??[''])[0]??'')"] : ["pattern" => $mask, "title" => "Please complete field by correct format..."])
+            ...(isPattern($mask ?? "") ? ["onblur" => "this.value = ((this.value.match($mask)??[''])[0]??'')"] : ["pattern" => $mask, "title" => "Please complete field by correct format..."])
         ], ...$attributes);
     }
     /**
@@ -3452,7 +3457,7 @@ class Struct
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
-    public static function SymbolicRangeInput($key, $value = null, $symbols = [], ...$attributes)
+    public static function SymbolicInput($key, $value = null, $symbols = [], ...$attributes)
     {
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         $class = self::PopAttribute($attributes, "Class");
@@ -3481,7 +3486,7 @@ class Struct
                         ])
                     ]))
                 ],
-                ["class" => "rangeinput symbolicrangeinput", "id" => $id],
+                ["class" => "symbolicinput", "id" => $id],
                 [
                     "class" => $class,
                     "style" => $style

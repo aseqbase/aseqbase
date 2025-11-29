@@ -114,6 +114,7 @@ class General extends Template
 				.page{
 				    flex-grow: 1;
 				}
+
 				:is(h1,h2,h3,h4,h5,h6) strong{
 					font-weight: normal;
 				}
@@ -318,39 +319,31 @@ class General extends Template
 				}
 
 				.page{
-					line-height: 1.5;
-					padding: var(--size-3);
+					padding: 0px var(--size-1);
 				}
-				content>.page{
+				article{
 					margin-top: 5vmax;
 				}
-				content>.page:is(.external-page, .embed-page)>.frame{
-					min-Height: calc(100vh - 70px);
-				}
-				content>.page h1 {
+				:is(article, content) h1 {
 					font-weight: bold;
 				}
-				content>.page h1 sub {
+				:is(article, content) h1 sub {
 					font-weight: normal;
 				}
-				content>.page p {
+				:is(article, content) p {
 					margin: var(--size-1) 0;
 				}
-				content>.page :is(ul, ol) {
+				:is(article, content) :is(ul, ol, dl) {
 					margin: var(--size-2) 0;
-					margin-inline-start: var(--size-5);
 				}
-				content>.page li {
+				:is(article, content) :is(ul, ol) {
+					unicode-bidi: unset;
+					padding-inline-start: 0;
+					margin-inline-start: 1.5em;
+				}
+				:is(article, content) :is(li, dd) {
 					margin: var(--size-0) 0;
-				}
-				content>.page>.frame>.page{
-					color: var(--fore-color-input);
-					background-color: var(--back-color-input);
-					border: var(--border-1) var(--back-color-input);
-					box-shadow: var(--shadow-2);
-					border-radius: var(--radius-1);
-					padding: var(--size-0) var(--size-3) var(--size-4) var(--size-3);
-					margin: var(--size-2) var(--size-3) var(--size-1) var(--size-3);
+					margin-inline-start: 2em;
 				}
 
 				footer{

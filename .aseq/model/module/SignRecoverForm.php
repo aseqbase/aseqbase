@@ -74,20 +74,20 @@ class SignRecoverForm extends Form{
 						error = Struct.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
 					else if ($('.{$this->Name} form [name=PasswordConfirmation]')?.val() != $('.{$this->Name} form [name=Password]')?.val()) 
 						error = Struct.error('New password and confirm password does not match!');
+					e.preventDefault();
 					if(error) {
 						$('.{$this->Name} form .result').remove();
 						$('.{$this->Name} form').append(error);
-						e.preventDefault();
 						return false;
 					}
-					" . ($this->Interaction ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
+					" . ($this->Interactive ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "
 					return true;
                 });
 			});
 		");
 	}
 	public function GetFooter(){
-		if(\_::$User->GetAccess(\_::$User->UserAccess)) return parent::GetFooter();
+		if(\_::$User->HasAccess(\_::$User->UserAccess)) return parent::GetFooter();
         else return parent::GetFooter()
 			.Struct::LargeSlot(
 				Struct::Link($this->SignInLabel, $this->SignInPath??\_::$User->InHandlerPath)
@@ -121,4 +121,3 @@ class SignRecoverForm extends Form{
 		} catch(\Exception $ex) { return $this->GetError($ex); }
     }
 }
-?>

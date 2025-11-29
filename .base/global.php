@@ -1048,7 +1048,7 @@ function auth($minaccess = 0, bool|string $assign = true, bool|string|int|null $
 			return false;
 		}
 	}
-	$b = \_::$User->GetAccess($minaccess);
+	$b = \_::$User->HasAccess($minaccess);
 	if ($b)
 		return $b;
 	if ($assign) {

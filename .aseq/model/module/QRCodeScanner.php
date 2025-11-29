@@ -37,6 +37,7 @@ class QRCodeScanner extends Module
 	public $TitleClass = "fa-fade";
 	public $Description = "Scan Now...";
 	public $DescriptionClass = "fa-fade";
+	public $DeactiveDescription = "'Turn on' the 'Scanner'";
 	public $CamerasNotFoundError = "No cameras found.";
 	public $BrowserNotSupportError = "Your browser does not support the video tag.";
 	public $Printable = false;
@@ -126,7 +127,8 @@ class QRCodeScanner extends Module
 
 	public function Get()
 	{
-		if ($this->Local) $this->ScriptSource = asset(\_::$Address->PackageDirectory, "Scanner/Script.js");
+		if ($this->Local)
+			$this->ScriptSource = asset(\_::$Address->PackageDirectory, "Scanner/Script.js");
 		return Struct::Script(null, $this->ScriptSource) .
 			Struct::OpenTag("video", $this->GetDefaultAttributes()) .
 			$this->BrowserNotSupportError .
@@ -148,7 +150,10 @@ class QRCodeScanner extends Module
 			} catch{Struct.script.load(null, '" . asset(\_::$Address->PackageDirectory, "Scanner/Script.js", optimize: true) . "');}
 			{$this->Name} = new Instascan.Scanner({video: document.querySelector('.{$this->Name} video')});
 			{$this->Name}.addListener('scan', function (content) {
-				" . ($this->AllowMask ? "document.querySelector('.{$this->Name} .mask').classList.remove('error');document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);" : "") . "
+				" . ($this->AllowMask ? "
+					document.querySelector('.{$this->Name} .mask').classList.remove('error');
+					document.querySelector('.{$this->Name} .mask').innerHTML = '';wait(3000);
+				" : "") . "
 				" . ($this->TargetScriptFunction ? "({$this->TargetScriptFunction})(content);" : "") . "
 				" . ($this->TargetId ? "document.getElementById(" . Script::Convert($this->TargetId) . ").value = content;" : "") . "
 				" . ($this->TargetSelector ? "document.querySelector(" . Script::Convert($this->TargetSelector) . ").value = content;" : "") . "
@@ -165,21 +170,23 @@ class QRCodeScanner extends Module
 					document.querySelector('.{$this->Name} .switchcamera')?.classList.add('hide');
 					document.querySelector('.{$this->Name} .activation')?.classList.remove('hide');
 				}
-
-				if(index===null || index < 0){
+				if(index===null || index < 0) {
 					for(i=cameras.length-1;i>=0;i--)
 						if(
-							{$this->Name}_selectedCamera !== {$this->CameraIndex} &&
-							{$this->Name}_selectedCamera !== {$this->AlternativeCameraIndex} &&
+							i !== {$this->CameraIndex} &&
+							i !== {$this->AlternativeCameraIndex} &&
 							{$this->Name}_useCamera(cameras, i, mirror)
 						) return true;
 				} else if (cameras.length > index && {$this->Name}_selectedCamera !== index) {
-					if({$this->Name} && {$this->Name}?._camera?._stream) {$this->Name}.stop();
-					{$this->Name}.start(cameras[index]);
-					{$this->Name}.mirror = mirror;
-					{$this->Name}_selectedCamera = index;
-					document.querySelector('.{$this->Name} .message').classList.remove('hide');
-					return true;
+					if({$this->Name}) {
+						if({$this->Name}?._camera?._stream) {$this->Name}.stop();
+						{$this->Name}.start(cameras[index]);
+						{$this->Name}.mirror = mirror;
+						{$this->Name}_selectedCamera = index;
+						document.querySelector('.{$this->Name} .message').innerHTML = " . Script::Convert(__($this->Description)) . ";
+						document.querySelector('.{$this->Name} .message').classList.remove('hide');
+						return true;
+					}
 				}
 				return false;
 			};" .
@@ -223,6 +230,7 @@ class QRCodeScanner extends Module
 		return "
 		if({$this->Name} && {$this->Name}?._camera && !{$this->Name}?._camera?._stream) {
 			{$this->Name}.start();
+			document.querySelector('.{$this->Name} .message').innerHTML = " . Script::Convert(__($this->Description)) . ";
 			document.querySelector('.{$this->Name} .message').classList.remove('hide');
 		}
 		else Instascan.Camera.getCameras().then(function (cameras) {
@@ -230,6 +238,7 @@ class QRCodeScanner extends Module
 				if(!{$this->Name}_useCamera(cameras, {$this->AlternativeCameraIndex}," . ($this->AllowMirrorAlternativeCamera ? 'true' : 'false') . "))
 					if(!{$this->Name}_useCamera(cameras))
 						return console.error(" . Script::Convert($this->CamerasNotFoundError) . ");
+			document.querySelector('.{$this->Name} .message').innerHTML = " . Script::Convert(__($this->Description)) . ";
 			document.querySelector('.{$this->Name} .message').classList.remove('hide');
 		}).catch((e)=>console.error(e));";
 	}
@@ -245,8 +254,9 @@ class QRCodeScanner extends Module
 		return "if({$this->Name} && {$this->Name}?._camera?._stream) {
 			{$this->Name}.stop();
 		}
-		document.querySelector('.{$this->Name} .message').classList.add('hide');
-		";
+		" . ($this->DeactiveDescription ?
+			"document.querySelector('.{$this->Name} .message').innerHTML = " . Script::Convert(__($this->DeactiveDescription)) . ";" :
+			"document.querySelector('.{$this->Name} .message').classList.add('hide');");
 	}
 
 	public function MessageScript($message = null)

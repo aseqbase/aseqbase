@@ -4,7 +4,7 @@ namespace MiMFa\Module;
 use MiMFa\Library\Contact;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
-
+use MiMFa\Library\Local;
 
 module("Form");
 class MessageForm extends Form
@@ -138,6 +138,20 @@ class MessageForm extends Form
 				$received = receivePost();
 				$content = get($received, "Content");
 				$att = get($received, "Attach");
+				if (!$att) {
+						$att = receiveFile("Attach");
+						if ($att) {
+							if (Local::IsFileObject($att))
+								$att = Local::GetUrl(Local::Store($att));
+							elseif (is_array($att)) {
+								$att = [];
+								foreach ($att as $file) {
+									if (Local::IsFileObject($file))
+										$att[] = Local::GetUrl(Local::Store($file));
+								}
+							}
+						}
+					}
 				if ($content || $att) {
 					$res = null;
 					$rid = get($received, "Root");
@@ -150,7 +164,7 @@ class MessageForm extends Form
 							"To" => get($received, "To"),
 							"Name" => \_::$User->Name,
 							"Content" => Convert::ToText($content),
-							"Attach" => Convert::ToText(isStatic($att) ? $att ?? "" : Convert::ToJson($att)),
+							"Attach" => isStatic($att) ? $att ?? "" : Convert::ToJson($att),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
 						]);
@@ -182,7 +196,7 @@ class MessageForm extends Form
 					$res = null;
 					$cid = get($received, "Id");
 					if (isValid($cid))
-						$res = table("Message")->Update("`Id`=:Id AND (" . (\_::$User->GetAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId)", [
+						$res = table("Message")->Update("`Id`=:Id AND (" . (\_::$User->HasAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId)", [
 							":Id" => $cid,
 							":UserId" => \_::$User->Id,
 							"Name" => \_::$User->Name,
@@ -221,7 +235,7 @@ class MessageForm extends Form
 				$this->RootId = $rootId;
 				$this->Router->Initial()->Get()->Switch();
 				return $this->Handle();
-			} elseif (isValid($received, "Status") && \_::$User->GetAccess(\_::$User->AdminAccess)) {
+			} elseif (isValid($received, "Status") && \_::$User->HasAccess(\_::$User->AdminAccess)) {
 				$res = null;
 				$cid = get($received, "Id");
 				if (isValid($cid))
@@ -241,14 +255,14 @@ class MessageForm extends Form
 
 	public function Delete()
 	{
-		if (\_::$User->GetAccess(\_::$User->UserAccess))
+		if (\_::$User->HasAccess(\_::$User->UserAccess))
 			try {
 				$received = receiveDelete();
 				$cid = get($received, "Id");
 				if (isValid($cid))
 					if (
 						isValid($cid) && \_::$User->Id &&
-						table("Message")->Delete("`Id`=:Id AND (" . (\_::$User->GetAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId)", [":Id" => $cid, ":UId" => \_::$User->Id])
+						table("Message")->Delete("`Id`=:Id AND (" . (\_::$User->HasAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId)", [":Id" => $cid, ":UId" => \_::$User->Id])
 					) {
 						$this->Status = 200;
 						return $this->GetWarning("This comment removed successfuly!");

@@ -4,7 +4,7 @@ namespace MiMFa\Module;
 use MiMFa\Library\Contact;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
-
+use MiMFa\Library\Local;
 
 module("Form");
 class CommentForm extends Form
@@ -39,14 +39,14 @@ class CommentForm extends Form
 	public $Relation = null;
 	public $DefaultAccess = 0;
 	public $DefaultStatus = 1;
-    public $Printable = false;
+	public $Printable = false;
 
-	public function __construct($relation=null, $access = null)
+	public function __construct($relation = null, $access = null)
 	{
 		parent::__construct();
 		$this->Relation = $relation;
 		$this->Access = $access ?? \_::$Config->WriteCommentAccess;
-		$this->DefaultStatus = \_::$User->GetAccess(\_::$User->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
+		$this->DefaultStatus = \_::$User->HasAccess(\_::$User->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
 		$this->Template = "b";
 	}
 
@@ -81,7 +81,8 @@ class CommentForm extends Form
 	}
 	public function GetFields()
 	{
-		if($this->Relation) yield Struct::HiddenInput("Relation", $this->Relation);
+		if ($this->Relation)
+			yield Struct::HiddenInput("Relation", $this->Relation);
 		if (!\_::$User->Email) {
 			if (isValid($this->NameLabel))
 				yield Struct::Field(
@@ -147,6 +148,20 @@ class CommentForm extends Form
 					$res = null;
 					$rid = get($received, "Root");
 					$att = get($received, "Attach");
+					if (!$att) {
+						$att = receiveFile("Attach");
+						if ($att) {
+							if (Local::IsFileObject($att))
+								$att = Local::GetUrl(Local::Store($att));
+							elseif (is_array($att)) {
+								$att = [];
+								foreach ($att as $file) {
+									if (Local::IsFileObject($file))
+										$att[] = Local::GetUrl(Local::Store($file));
+								}
+							}
+						}
+					}
 					if ((\_::$User && \_::$User->Email) || isValid($received, "Contact"))
 						$res = table("Comment")->Insert([
 							"RootId" => $rid,
@@ -156,7 +171,7 @@ class CommentForm extends Form
 							"Contact" => getValid($received, "Contact", \_::$User ? \_::$User->Email : null),
 							"Subject" => Convert::ToText(get($received, "Subject")),
 							"Content" => Convert::ToText(get($received, "Content")),
-							"Attach" => Convert::ToText(isStatic($att) ? $att : Convert::ToJson($att)),
+							"Attach" => isStatic($att) ? $att : Convert::ToJson($att),
 							"Access" => $this->DefaultAccess,
 							"Status" => $this->DefaultStatus
 						]);
@@ -187,7 +202,7 @@ class CommentForm extends Form
 					$cid = get($received, "Id");
 					$att = get($received, "Attach");
 					if (isValid($cid))
-						$res = table("Comment")->Update("`Id`=:Id AND (" . (\_::$User->GetAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
+						$res = table("Comment")->Update("`Id`=:Id AND (" . (\_::$User->HasAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UserId OR `Contact`=:Contact)", [
 							":Id" => $cid,
 							":UserId" => \_::$User->Id,
 							":Contact" => \_::$User->Email,
@@ -214,7 +229,7 @@ class CommentForm extends Form
 	public function Patch()
 	{
 		$received = receivePatch();
-		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false, reaction: true)){
+		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false, reaction: true)) {
 			$rootId = get($received, "Root");
 			if (isValid($rootId)) {
 				popTimer();
@@ -227,7 +242,7 @@ class CommentForm extends Form
 				$this->RootId = $rootId;
 				$this->Router->Initial()->Get()->Switch();
 				return $this->Handle();
-			} elseif (isValid($received, "Status") && \_::$User->GetAccess(\_::$User->AdminAccess)) {
+			} elseif (isValid($received, "Status") && \_::$User->HasAccess(\_::$User->AdminAccess)) {
 				$res = null;
 				$cid = get($received, "Id");
 				if (isValid($cid))
@@ -247,14 +262,14 @@ class CommentForm extends Form
 
 	public function Delete()
 	{
-		if (\_::$User->GetAccess(\_::$User->UserAccess))
+		if (\_::$User->HasAccess(\_::$User->UserAccess))
 			try {
 				$received = receiveDelete();
 				$cid = get($received, "Id");
 				if (isValid($cid))
 					if (
 						isValid($cid) && \_::$User->Id &&
-						table("Comment")->Delete("`Id`=:Id AND (" . (\_::$User->GetAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$User->Id, ":UE" => \_::$User->Email])
+						table("Comment")->Delete("`Id`=:Id AND (" . (\_::$User->HasAccess(\_::$User->AdminAccess) ? "TRUE OR " : "") . "`UserId`=:UId OR `Contact`=:UE)", [":Id" => $cid, ":UId" => \_::$User->Id, ":UE" => \_::$User->Email])
 					) {
 						$this->Status = 200;
 						return $this->GetWarning("This comment removed successfuly!");

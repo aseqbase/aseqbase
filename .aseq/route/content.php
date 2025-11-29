@@ -32,9 +32,10 @@ function findContent($router, &$data)
         $doc = findContent($router, $data);
         $viewData = get($data, "View")??[];
         if(!is_array($viewData)) return Convert::By($viewData, $doc);
-        if (isEmpty($doc)){
+        if (!$doc){
             $c = get($viewData, "ErrorHandler");
             if($c) return Convert::By($c, $router);
+            elseif((!\_::$User->HasAccess()) && \_::$User->AllowSigning) view("part", ["Name"=>\_::$User->InHandlerPath]);
             else route("contents", $data);
         } else view(
                 pop($viewData, "ViewName") ?? "content",

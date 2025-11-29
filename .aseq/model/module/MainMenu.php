@@ -406,7 +406,7 @@ class MainMenu extends Module
 
 	protected function CreateItem($item, $ind = 1)
 	{
-		if (!\_::$User->GetAccess(getValid($item, "Access", \_::$User->VisitAccess)))
+		if (!\_::$User->HasAccess(getValid($item, "Access", \_::$User->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path");
 		$act = endsWith(\_::$Address->Path, $path) ? 'active' : "";

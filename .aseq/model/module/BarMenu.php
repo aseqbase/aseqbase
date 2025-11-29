@@ -145,14 +145,14 @@ class BarMenu extends Module{
             yield parent::Get();
             $count = 0;
             foreach ($this->Items as $item)
-                if(\_::$User->GetAccess(getValid($item,"Access" ,\_::$User->VisitAccess)))
+                if(\_::$User->HasAccess(getValid($item,"Access" ,\_::$User->VisitAccess)))
 					$count++;
             if($count > 0){
                 $size = 100 / $count;
                 $msize = 100 - $size * ($count-1);
 				$i = 1;
                 foreach ($this->Items as $item)
-					if(\_::$User->GetAccess(getValid($item,"Access" ,\_::$User->VisitAccess))) {
+					if(\_::$User->HasAccess(getValid($item,"Access" ,\_::$User->VisitAccess))) {
                         $m = $count/floatval(2.0);
                         $cls = "";
                         $ism = false;

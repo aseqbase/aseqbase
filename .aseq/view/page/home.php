@@ -18,7 +18,7 @@ response(
 	") .
 	Struct::Page(
 		$module->Handle() .
-		(!\_::$User->AllowSigning || \_::$User->GetAccess(\_::$User->UserAccess) ? "" :
+		(!\_::$User->AllowSigning || \_::$User->HasAccess(\_::$User->UserAccess) ? "" :
 			Struct::Center(
 				Struct::SmallSlot(
 					Struct::Button("Sign In", \_::$User->InHandlerPath, ["class"=>"main"]) .

@@ -218,7 +218,7 @@ class MessageCollection extends Collection
             $i = 0;
             yield $this->GetTitle();
             yield $this->GetDescription();
-            $adminaccess = \_::$User->GetAccess(\_::$User->AdminAccess);
+            $adminaccess = \_::$User->HasAccess(\_::$User->AdminAccess);
             $current_user_id = \_::$User->Id;
             $items = Convert::ToItems($items ?? $this->Items);
 
@@ -227,7 +227,7 @@ class MessageCollection extends Collection
                 $p_status = get($item, "Status");
                 $is_sender = $p_userid && $p_userid == $current_user_id;
 
-                if (!\_::$User->GetAccess(getValid($item, 'Access', \_::$User->VisitAccess)))
+                if (!\_::$User->HasAccess(getValid($item, 'Access', \_::$User->VisitAccess)))
                     continue;
                 if (isValid($this->Relation) && $this->Relation != get($item, 'Relation'))
                     continue;
@@ -306,7 +306,7 @@ class MessageCollection extends Collection
 
                 // Attached Content
                 if ($p_showattach && isValid($p_attach))
-                    yield "<div class='attach'>" . Struct::Convert($p_attach) . "</div>";
+                    yield "<div class='attach'>" . (is_array($p_attach) && array_key_first($p_attach)===0?loop($p_attach, fn($v)=>Struct::Media($v)):Struct::Convert($p_attach)) . "</div>";
 
                 yield "</div>";
 

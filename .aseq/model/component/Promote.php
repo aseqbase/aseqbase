@@ -2,7 +2,7 @@
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 
-class JsonLD{
+class Promote{
 	public static function Create($data){
 		if(!isEmpty($data)) 
         return Struct::Script(is_iterable($data)?
@@ -58,5 +58,5 @@ class JsonLD{
 	}
 }
 
-JsonLD::Create($data??null);
-\_::$Front->Libraries[] = \MiMFa\Component\JsonLD::Website();
+Promote::Create($data??null);
+\_::$Front->Libraries[] = Promote::Website();

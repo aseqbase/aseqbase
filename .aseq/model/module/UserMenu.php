@@ -81,7 +81,7 @@ class UserMenu extends Module
 	public function Get()
 	{
 		if ($this->Items == null) {
-			if (!\_::$User->GetAccess(\_::$User->UserAccess))
+			if (!\_::$User->HasAccess(\_::$User->UserAccess))
 				$this->Items = array(
 					array("Name" => "Sign In", "Image" => "sign-in", "Path" => \_::$User->InHandlerPath),
 					array("Name" => "Sign Up", "Image" => "user-plus", "Path" => \_::$User->UpHandlerPath)

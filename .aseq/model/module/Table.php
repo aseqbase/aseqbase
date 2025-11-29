@@ -399,7 +399,7 @@ class Table extends Module
     public function Get()
     {
         $isc = $this->Controlable;
-        $isu = $isc && $this->Updatable && \_::$User->GetAccess($this->UpdateAccess);
+        $isu = $isc && $this->Updatable && \_::$User->HasAccess($this->UpdateAccess);
         if ($isc)
             $this->CreateModal();
         if (isValid($this->DataTable) && isValid($this->KeyColumn)) {
@@ -452,17 +452,17 @@ class Table extends Module
         $rowCount = 0;
         $colCount = $ick ? count($icks) : 0;
         if ($isc) {
-            $uck = Struct::Division(\_::$User->GetAccess($this->AddAccess) ? Struct::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip"=>"Add another Item"]) : Struct::Image(null, "tasks"));
+            $uck = Struct::Division(\_::$User->HasAccess($this->AddAccess) ? Struct::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip"=>"Add another Item"]) : Struct::Image(null, "tasks"));
             if ($ick)
                 array_unshift($icks, $uck);
         }
         $strow = "<tr>";
         $etrow = "</tr>";
-        $vaccess = \_::$User->GetAccess($this->ViewAccess);
-        $aaccess = $isu && !is_null($this->AddAccess) && \_::$User->GetAccess($this->AddAccess);
-        $daccess = $isu && !is_null($this->DuplicateAccess) && \_::$User->GetAccess($this->DuplicateAccess);
-        $maccess = $isu && !is_null($this->ModifyAccess) && \_::$User->GetAccess($this->ModifyAccess);
-        $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->GetAccess($this->RemoveAccess);
+        $vaccess = \_::$User->HasAccess($this->ViewAccess);
+        $aaccess = $isu && !is_null($this->AddAccess) && \_::$User->HasAccess($this->AddAccess);
+        $daccess = $isu && !is_null($this->DuplicateAccess) && \_::$User->HasAccess($this->DuplicateAccess);
+        $maccess = $isu && !is_null($this->ModifyAccess) && \_::$User->HasAccess($this->ModifyAccess);
+        $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->HasAccess($this->RemoveAccess);
         $addbutton = fn($text="Add your first item") => Struct::Center(Struct::Button(__($text) . Struct::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
         if (is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
@@ -672,7 +672,7 @@ class Table extends Module
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
-				}" . ($this->Updatable ? (\_::$User->GetAccess($this->AddAccess) ? "
+				}" . ($this->Updatable ? (\_::$User->HasAccess($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(defaultValues){
 					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
@@ -683,21 +683,21 @@ class Table extends Module
                 			}catch{}
 						}
 					);
-				}" : "") . (\_::$User->GetAccess($this->ModifyAccess) ? "
+				}" : "") . (\_::$User->HasAccess($this->ModifyAccess) ? "
 				function {$this->Modal->Name}_Modify(key){
 					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
-				}" : "") . (\_::$User->GetAccess($this->DuplicateAccess) ? "
+				}" : "") . (\_::$User->HasAccess($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
 					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
-				}" : "") . (\_::$User->GetAccess($this->RemoveAccess) ? "
+				}" : "") . (\_::$User->HasAccess($this->RemoveAccess) ? "
 				function {$this->Modal->Name}_Delete(key){
 					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?") . "`))" : "") . "
 						send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
@@ -771,12 +771,19 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if (!\_::$User->GetAccess($this->ViewAccess))
+        if (!\_::$User->HasAccess($this->ViewAccess))
             return Struct::Error("You have not access to see datails!");
         if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
-        $record = $this->DataTable->SelectRow($this->FormFilter ? array_keys($this->CellsTypes) : "*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
-        if (isEmpty($record))
+        $row = $this->DataTable->SelectRow("*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
+        if (isEmpty($row))
             return Struct::Error("You can not 'see' this item!");
+        $record = [];
+        foreach ($this->CellsTypes as $key => $val)
+            $record[$key] = null;
+        if(!$this->FormFilter)
+            foreach ($row as $key => $val)
+                $record[$key] = $val;
+        unset($row);
         $form = $this->GetForm();
         $form->Set(
             title: getBetween($record, "Title", "Name"),
@@ -834,12 +841,11 @@ class Table extends Module
     public function GetAddForm($value){
         if (is_null($value))
             return null;
-        if (!\_::$User->GetAccess($this->AddAccess))
+        if (!\_::$User->HasAccess($this->AddAccess))
             return Struct::Error("You have not access to add!");
         $record = [];
-        if ($this->FormFilter)
-            foreach ($this->CellsTypes as $key => $val)
-                $record[$key] = null;
+        foreach ($this->CellsTypes as $key => $val)
+            $record[$key] = null;
         $form = $this->GetForm();
         $form->Set(
             title: "Add {$this->Title}",
@@ -851,10 +857,11 @@ class Table extends Module
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'"
                 );
-                if (count($record) == 0)
+                if (!$this->FormFilter)
                     foreach ($schemas as $schema)
                         $record[$schema["COLUMN_NAME"]] = null;
-                foreach ($record as $key => $val) foreach ($schemas as $schema)
+                foreach ($record as $key => $val)
+                    foreach ($schemas as $schema)
                         if ($schema["COLUMN_NAME"] == $key)
                         {
                             $val = $key == $this->KeyColumn ? $value : null;
@@ -872,12 +879,20 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if (!\_::$User->GetAccess($this->AddAccess))
+        if (!\_::$User->HasAccess($this->AddAccess))
             return Struct::Error("You have not access to add!");
         if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
-        $record = $this->DataTable->SelectRow($this->FormFilter ? array_keys($this->CellsTypes) : "*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
-        if (isEmpty($record))
+        $row = $this->DataTable->SelectRow("*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
+        if (isEmpty($row))
             return Struct::Error("You can not 'add' this item!");
+        $record = [];
+        foreach ($this->CellsTypes as $key => $val)
+            $record[$key] = null;
+        if(!$this->FormFilter)
+            foreach ($row as $key => $val)
+                $record[$key] = $val;
+        unset($row);
+        unset($record[$this->KeyColumnName]);
         $form = $this->GetForm();
         $form->Set(
             title: "Add {$this->Title}",
@@ -889,10 +904,11 @@ class Table extends Module
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'"
                 );
-                foreach ($record as $key => $val) foreach ($schemas as $schema)
+                yield Struct::HiddenInput($this->KeyColumnName, $this->AddSecret);
+                foreach ($record as $key => $val)
+                    foreach ($schemas as $schema)
                         if ($schema["COLUMN_NAME"] == $key)
                         {
-                            $val = $key == $this->KeyColumn ? $this->AddSecret : $val;
                             $res = $this->PrepareDataToShow($val, $key, $record, $schema);
                             if (!isEmpty($res))
                                 yield $res;
@@ -908,11 +924,19 @@ class Table extends Module
         if (is_null($value))
             return null;
         if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
-        if (!\_::$User->GetAccess($this->ModifyAccess))
+        if (!\_::$User->HasAccess($this->ModifyAccess))
             return Struct::Error("You have not access to modify!");
-        $record = $this->DataTable->SelectRow($this->FormFilter ? array_keys($this->CellsTypes) : "*", [$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
-        if (isEmpty($record))
+        $row = $this->DataTable->SelectRow("*", [$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
+        if (isEmpty($row))
             return Struct::Error("You can not 'modify' this item!");
+        $record = [];
+        foreach ($this->CellsTypes as $key => $val)
+            $record[$key] = null;
+        if(!$this->FormFilter)
+            foreach ($row as $key => $val)
+                $record[$key] = $val;
+        unset($row);
+        unset($record[$this->KeyColumnName]);
         $form = $this->GetForm();
         $form->Set(
             title: getBetween($record, "Title", "Name"),
@@ -924,17 +948,15 @@ class Table extends Module
                     FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE TABLE_NAME='{$this->DataTable->Name}'"
                 );
-                $f = false;
+                yield Struct::HiddenInput($this->KeyColumnName, $value);
                 foreach ($record as $key => $val) foreach ($schemas as $schema)
                         if ($schema["COLUMN_NAME"] == $key)
                         {
-                            $f = $this->KeyColumnName == $key;
                             $res = $this->PrepareDataToShow($val, $key, $record, $schema);
                             if (!isEmpty($res))
                                 yield $res;
                             break;
                         }
-                if(!$f) yield Struct::HiddenInput($this->KeyColumnName, $value);
                 yield Struct::HiddenInput($this->SecretKey, $this->ModifySecret);
             })()
         );
@@ -944,7 +966,7 @@ class Table extends Module
 
     public function AddRow($values)
     {
-        if (!\_::$User->GetAccess($this->AddAccess))
+        if (!\_::$User->HasAccess($this->AddAccess))
             return Struct::Error("You have not access to modify!");
         unset($values[$this->KeyColumn]);
         $values = $this->NormalizeFormValues($values);
@@ -959,7 +981,7 @@ class Table extends Module
     }
     public function ModifyRow($values)
     {
-        if (!\_::$User->GetAccess($this->ModifyAccess))
+        if (!\_::$User->HasAccess($this->ModifyAccess))
             return Struct::Error("You have not access to modify!");
         if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
         if (isValid($values, $this->KeyColumn)) {
@@ -976,7 +998,7 @@ class Table extends Module
         if (is_null($value))
             return null;
         if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
-        if (!\_::$User->GetAccess($this->RemoveAccess))
+        if (!\_::$User->HasAccess($this->RemoveAccess))
             return Struct::Error("You have not access to delete!");
         if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]))
             return deliverBreaker(Struct::Success("The 'items' removed successfully!"));

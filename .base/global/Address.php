@@ -135,6 +135,12 @@ class Address extends ArrayObject
      */
     public string $TagRoot;
     /**
+     * The Search root Route
+     * @example: "/search/"
+     * @var string
+     */
+    public string $SearchRoot;
+    /**
      * The User root Route
      * @example: "/user/"
      * @var string
@@ -175,6 +181,7 @@ class Address extends ArrayObject
         $this->ContentRoot = $this->Root . "post/";
         $this->CategoryRoot = $this->Root . "category/";
         $this->TagRoot = $this->Root . "tag/";
+        $this->SearchRoot = $this->Root . "search/";
         $this->UserRoot = $this->Root . "user/";
     }
 

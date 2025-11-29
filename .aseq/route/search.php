@@ -3,7 +3,7 @@ $computeData = pop($data, "Compute")??[];
 $filter = pop($computeData, "Filter")??[];
 $viewData = pop($data, "View")??[];
 $received = receive();
-$query = getBetween($received, "q", "Query");
+$query = getBetween($received, "q", "Query")??urldecode(\_::$Router->Page);
 $cat = getBetween($received, "Cat", "Category");
 return route("contents", [
     "Compute"=>[

@@ -274,7 +274,7 @@ class Content extends Module
           $this->CommentForm->SubjectLabel =
                $this->CommentForm->AttachLabel =
                null;
-          $this->CheckAccess = fn($item) => \_::$User->GetAccess(getValid($item, 'Access', 0));
+          $this->CheckAccess = fn($item) => \_::$User->HasAccess(getValid($item, 'Access', 0));
      }
 
      public function BeforeHandle()
@@ -308,7 +308,7 @@ class Content extends Module
 				color: var(--fore-color-special);
                     margin-top: var(--size-3);
                     margin-bottom: var(--size-3);
-                    padding: var(--size-4) var(--size-3);
+                    padding: var(--size-4) max(2vw,var(--size-3));
 				font-size:  var(--size-0);
 				box-shadow:  var(--shadow-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
@@ -391,8 +391,7 @@ class Content extends Module
      {
           return Convert::ToString(function () {
                $this->Set();
-               if (!$this->GetAccess())
-                    return;
+               if (!$this->GetAccess()) return part(\_::$User->InHandlerPath, print:false);
 
                yield $this->GetTitle();
                yield $this->GetDescription();
@@ -434,7 +433,7 @@ class Content extends Module
      public function GetDescription($attributes = null)
      {
           return Struct::Rack(
-               ($this->AllowDescription ? $this->GetExcerpt() : "") . $this->GetImage(),
+               ($this->AllowDescription=($this->AllowDescription ? $this->GetExcerpt() : null)) . $this->GetImage(),
                ["class" => "description"]
                ,
                $attributes
@@ -481,28 +480,29 @@ class Content extends Module
      }
      public function GetExcerpt()
      {
-          return Struct::MediumSlot(
-               __(
-                    Struct::Convert(getValid($this->Item, 'Description') ?? (
+          $excerpt = Struct::Convert(getValid($this->Item, 'Description') ?? (
                          $this->AutoExcerpt ? Convert::ToExcerpt(
                               Convert::ToText(getValid($this->Item, 'Content', $this->Content)),
                               0,
                               $this->ExcerptLength,
                               $this->ExcerptSign
-                         ) : $this->Description)),
+                         ) : $this->Description));
+          return $excerpt?Struct::MediumSlot(
+               __(
+                    $excerpt,
                     styling: true,
                     referring: $this->AutoReferring
                )
                ,
                ["class" => "excerpt"]
-          );
+          ):null;
      }
      public function GetImage()
      {
           if (!$this->AllowImage)
                return null;
           $p_image = getValid($this->Item, 'Image', $this->Image);
-          return isValid($p_image) ? Struct::Division(Struct::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg-5", "style" => "text-align: center;"]) : "";
+          return isValid($p_image) ? Struct::Division(Struct::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg".($this->AllowDescription?"-4":null), "style" => "text-align: center;"]) : "";
      }
      public function GetDetails($path = null)
      {
@@ -544,8 +544,7 @@ class Content extends Module
                          'Status'
                     );
           }
-          component("JsonLD");
-          return \MiMFa\Component\JsonLD::Article(
+          return \MiMFa\Component\Promote::Article(
                title: __(getValid($this->Item, 'Title', $this->Title)),
                excerpt: __(getValid($this->Item, 'Description', $this->Description)),
                image: getValid($this->Item, 'Image', $this->Image),
@@ -629,7 +628,7 @@ class Content extends Module
      }
      public function GetCommentsCollection()
      {
-          if ($this->AllowComments && \_::$User->GetAccess($this->AllowCommentsAccess)) {
+          if ($this->AllowComments && \_::$User->HasAccess($this->AllowCommentsAccess)) {
                module("CommentCollection");
                $cc = new CommentCollection();
                $cc->Items = table("Comment")->Select(

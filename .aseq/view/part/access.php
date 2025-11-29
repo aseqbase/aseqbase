@@ -1,8 +1,8 @@
 <?php
 
 use MiMFa\Library\Struct;
-if(\_::$User->GetAccess(\_::$User->GuestAccess)){
-    if(\_::$User->GetAccess(\_::$User->UserAccess))
+if(\_::$User->HasAccess(\_::$User->GuestAccess)){
+    if(\_::$User->HasAccess(\_::$User->UserAccess))
         echo Struct::Center([
                 Struct::Button("Dashboard", \_::$User->DashboardHandlerPath, ["data-aos"=>"zoom-up", "data-aos-duration"=>"100" ]),
                 Struct::Button("View Profile", \_::$User->ProfileHandlerPath, ["data-aos"=>"zoom-up", "data-aos-duration"=>"200" ]),
