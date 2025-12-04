@@ -236,7 +236,7 @@ class Bootstrap
         }
         $prefix = "aseq_";
         self::GetInput("Database Username", $force, self::$Configurations["DataBase"]["Username"] ?? "root", $username, "username");
-        self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "root", $password, "password");
+        self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "", $password, "password");
         self::GetInput("Tables prefix", $force, self::$Configurations["DataBase"]["Prefix"] ?? "aseq_", $prefix, "prefix");
 
         self::$Configurations["DataBase"]["Host"] = $host;
@@ -334,7 +334,7 @@ class Bootstrap
             return self::ConstructDataBase($force);
         }
         self::GetInput("Database Username", $force, self::$Configurations["DataBase"]["Username"] ?? "root", $username, "username");
-        self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "root", $password, "password");
+        self::GetInput("Database Password", $force, self::$Configurations["DataBase"]["Password"] ?? "", $password, "password");
 
         self::$Configurations["DataBase"]["Host"] = $host;
         self::$Configurations["DataBase"]["Name"] = $name;
@@ -498,14 +498,14 @@ class Info extends AseqInfo") . " {
             $port = self::$Arguments["port"] ?? ($port ?: "null");
             $name = self::$Arguments["name"] ?? (isset(self::$Configurations["DataBase"]["Name"]) ? self::$Configurations["DataBase"]["Name"] : "localhost");
             $username = self::$Arguments["username"] ?? (isset(self::$Configurations["DataBase"]["Username"]) ? self::$Configurations["DataBase"]["Username"] : "root");
-            $password = self::$Arguments["password"] ?? (isset(self::$Configurations["DataBase"]["Password"]) ? self::$Configurations["DataBase"]["Password"] : "root");
+            $password = self::$Arguments["password"] ?? (isset(self::$Configurations["DataBase"]["Password"]) ? self::$Configurations["DataBase"]["Password"] : "");
             $prefix = self::$Arguments["prefix"] ?? (isset(self::$Configurations["DataBase"]["Prefix"]) ? self::$Configurations["DataBase"]["Prefix"] : "");
             if (
                 $host === "localhost" &&
                 $port === "null" &&
                 $name === "localhost" &&
                 $username === "root" &&
-                $password === "root" &&
+                $password === "" &&
                 $prefix === "aseq_"
             ) {
                 self::SetSuccess("Backs are default!");
