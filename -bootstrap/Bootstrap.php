@@ -97,11 +97,15 @@ class Bootstrap
     public static function Install()
     {
         self::LoadConfig();
-        if (self::ConstructSource(false) !== false)
+        $s = self::$Arguments["s"] ?? self::$Arguments["source"] ?? null;
+        $d = self::$Arguments["d"] ?? self::$Arguments["database"] ?? null;
+        $c = self::$Arguments["c"] ?? self::$Arguments["setting"] ?? null;
+        $selective = $s || $d || $c;
+        if ((!$selective || $s) && self::ConstructSource(false) !== false)
             self::SetSuccess("Source installation is completed successfully.");
-        if (self::ConstructDataBase(false) !== false)
+        if ((!$selective || $d) && self::ConstructDataBase(false) !== false)
             self::SetSuccess("DataBase installation is completed successfully.");
-        if (self::ConstructSetting(false) !== false)
+        if ((!$selective || $c) && self::ConstructSetting(false) !== false)
             self::SetSuccess("Setting installation is completed successfully.");
         self::StoreConfig();
         self::SetSubject("FINISHED");
@@ -109,11 +113,15 @@ class Bootstrap
     public static function Update()
     {
         self::LoadConfig();
-        if (self::ConstructSource(true) !== false)
+        $s = self::$Arguments["s"] ?? self::$Arguments["source"] ?? null;
+        $d = self::$Arguments["d"] ?? self::$Arguments["database"] ?? null;
+        $c = self::$Arguments["c"] ?? self::$Arguments["setting"] ?? null;
+        $selective = $s || $d || $c;
+        if ((!$selective || $s) && self::ConstructSource(true) !== false)
             self::SetSuccess("Source update is completed successfully.");
-        if (self::ConstructDataBase(true) !== false)
+        if ((!$selective || $d) && self::ConstructDataBase(true) !== false)
             self::SetSuccess("DataBase update is completed successfully.");
-        if (self::ConstructSetting(true) !== false)
+        if ((!$selective || $c) && self::ConstructSetting(true) !== false)
             self::SetSuccess("Setting update is completed successfully.");
         self::StoreConfig();
         self::SetSubject("FINISHED");
@@ -160,6 +168,7 @@ class Bootstrap
                     if (!is_dir($targetPath)) {
                         mkdir($targetPath, $dirPermission, true);
                     }
+                    self::SetReport(($force ? "Repairing" : "Copying") . ": '$targetPath'");
                 } elseif (!preg_match($sourceExcludePattern, $targetPath) && $item !== $targetPath) {
                     $shouldCopy = !$force || !file_exists($targetPath) || filemtime($item) > filemtime($targetPath);
                     if ($shouldCopy) {
@@ -171,7 +180,6 @@ class Bootstrap
 
                         copy($item, $targetPath);
                         $i++;
-                        self::SetReport("Copied: '$relPath'");
                     }
                 }
             }
@@ -276,20 +284,23 @@ class Bootstrap
 
     public static function Uninstall()
     {
+        self::LoadConfig();
         $force = self::$Arguments["f"] ?? self::$Arguments["force"] ?? false;
+        $s = self::$Arguments["s"] ?? self::$Arguments["source"] ?? null;
+        $d = self::$Arguments["d"] ?? self::$Arguments["database"] ?? null;
+        $selective = $s || $d;
         if (strtolower(self::GetInput("Are you sure about starting uninstallation process (y/N)?", false, "n")) === "\"y\"") {
-            self::LoadConfig();
-            if ($force || strtolower(self::GetInput("Are you sure about removing all files and folders permanently (y/N)?", $force, "n")) === "\"y\"") {
+            if ((!$selective || $s) && ($force || strtolower(self::GetInput("Are you sure about removing all files and folders permanently (y/N)?", $force, "n")) === "\"y\"")) {
                 if (self::DestructSource($force) !== false)
                     self::SetSuccess("Source uninstallation is completed successfully.");
             }
-            if ($force || strtolower(self::GetInput("Are you sure about removing all tables permanently (y/N)?", $force, "n")) === "\"y\"") {
+            if ((!$selective || $d) && ($force || strtolower(self::GetInput("Are you sure about removing the database and all tables permanently (y/N)?", $force, "n")) === "\"y\"")) {
                 if (self::DestructDataBase($force) !== false)
                     self::SetSuccess("DataBase uninstallation is completed successfully.");
             }
-            self::StoreConfig();
-            self::SetSubject("FINISHED");
         }
+        self::StoreConfig();
+        self::SetSubject("FINISHED");
     }
     public static function DestructSource($force = false)
     {
@@ -299,32 +310,10 @@ class Bootstrap
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
         self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
 
-        $sourceExcludePattern = self::$Configurations["Source"]["ExcludePattern"] ?? "/^vendor$/i";
-
+        $sourceExcludePattern = self::$Configurations["Source"]["ExcludePattern"] ?? "/^((~[^\/\\\]*)|(\.git)|(vendor))$/i";
         $source = dirname(__DIR__) . DIRECTORY_SEPARATOR;// Source folder (your framework package root)
         try {
-            $i = 0;
-            $rl = strlen($source);
-            foreach (glob($source . '*') as $item) {
-                $relPath = substr($item, $rl);
-                if (
-                    str_starts_with($relPath, "~") ||
-                    str_starts_with($relPath, ".git" . DIRECTORY_SEPARATOR) ||
-                    str_starts_with($relPath, "vendor" . DIRECTORY_SEPARATOR)
-                )
-                    continue;
-                $targetPath = self::$DestinationDirectory . $relPath;
-
-                if (is_dir($targetPath))
-                    $i += self::DeleteDirectory($targetPath, $sourceExcludePattern);
-                elseif (!preg_match($sourceExcludePattern, $targetPath)) {
-                    if (unlink($targetPath)) {
-                        $i++;
-                        self::SetReport("Deleted: '$targetPath'");
-                    } else
-                        self::SetWarning("Failed to delete file: $targetPath");
-                }
-            }
+            $i = self::DeleteDestinations($source, self::$DestinationDirectory, $sourceExcludePattern);
             self::SetSuccess("$i source files are deleted.");
             self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
         } catch (\Exception $e) {
@@ -365,7 +354,34 @@ class Bootstrap
             return self::DestructDataBase($force);
         }
     }
-
+    public static function DeleteDestinations($sourceDirectory = null, $destDirectory = null, $excludePattern = null)
+    {
+        $i = 0;
+        $sourceDirectory = rtrim($sourceDirectory, "/\\");
+        $destDirectory = rtrim($destDirectory, "/\\");
+        foreach (scandir($sourceDirectory) as $item)
+            try {
+                if ($item === '.' || $item === '..')
+                    continue;
+                $path = $destDirectory . DIRECTORY_SEPARATOR . $item;
+                if ($excludePattern && preg_match($excludePattern, $item)) {
+                    self::SetWarning("Excluded: '$path'");
+                    continue;
+                } elseif (is_dir($path)) {
+                    $i += self::DeleteDestinations($sourceDirectory . DIRECTORY_SEPARATOR . $item, $path, $excludePattern);
+                    rmdir($path); // Remove the root directory itself
+                    self::SetReport("Deleted: '$path'");
+                } elseif (file_exists($path))
+                    if (unlink($path))
+                        $i++;
+                    else
+                        self::SetWarning("Delete failed: '$path'");
+            } catch (\Exception $e) {
+                self::SetError("Delete failed: " . $e->getMessage());
+                return false;
+            }
+        return $i; // Number of files deleted
+    }
 
     public static function Create()
     {
@@ -585,18 +601,21 @@ class Front extends AseqFront") . " {
         try {
             self::$Arguments = self::GetArguments();
             $configFile = getcwd() . DIRECTORY_SEPARATOR . self::$ConfigurationsFile;
+            self::$DestinationDirectory = preg_replace("/vendor[\/\\\]aseqbase([\/\\\][\w\s\-\.~]+)+[\/\\\]?$/i", "", getcwd() ?: __DIR__);
             if (file_exists($configFile)) {
                 self::$Configurations = json_decode(file_get_contents($configFile), flags: JSON_OBJECT_AS_ARRAY) ?: [];
                 if (!isset(self::$Configurations["Source"]))
                     self::$Configurations["Source"] = [];
                 if (!isset(self::$Configurations["Destination"]))
                     self::$Configurations["Destination"] = [];
-                self::$DestinationDirectory = (isset(self::$Configurations["Destination"]["Path"]) ? self::$Configurations["Destination"]["Path"] : null) ?: preg_replace("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", "", getcwd() . DIRECTORY_SEPARATOR);
+                self::$DestinationDirectory = (isset(self::$Configurations["Destination"]["Path"]) ? self::$Configurations["Destination"]["Path"] : null) ?: self::$DestinationDirectory;
                 if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
                     self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
                 //self::SetSuccess("Configurations loaded successfully!");
                 return self::$Configurations;
             }
+            if (!str_ends_with(self::$DestinationDirectory, DIRECTORY_SEPARATOR))
+                self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
         } catch (\PDOException $e) {
             self::SetWarning("Could not loaded configurations: " . $e->getMessage());
         }
@@ -635,45 +654,24 @@ class Front extends AseqFront") . " {
         return self::$Arguments;
     }
 
-    public static function DeleteDirectory($directory = null, $excludePattern = null)
-    {
-        $i = 0;
-        $directory = rtrim($directory, "/\\");
-        if ($directory && is_dir($directory)) {
-            foreach (glob($directory . DIRECTORY_SEPARATOR . '*') as $file) {
-                if (!$excludePattern || preg_match($excludePattern, basename($file)))
-                    continue;
-                elseif (is_file($file)) {
-                    if (unlink($file)) {
-                        $i++;
-                        self::SetReport("Deleted: '$file'");
-                    } else
-                        self::SetWarning("Failed to delete file: $file");
-                } elseif (is_dir($file))
-                    $i += self::DeleteDirectory($file, $excludePattern);
-            }
-            if (count(scandir($directory)) === 2)
-                rmdir($directory); // Remove the root directory itself
-        }
-        return $i; // Number of files deleted
-    }
-
     public static function GetInput($message, $force = false, $default = null, &$input = null, $argument = "arg")
     {
         $ask = self::$Arguments["a"] ?? false;
         $default = self::$Arguments[str_replace("-", "", $argument)] ?? ($input ?: $default);
         $input = ($force && !$ask && !is_null($default)) ?
             (is_callable($default) ? $default() : $default) :
-            (readline($message .
+            (readline(
+                $message .
                 ($argument === "arg" ? "" : " (--$argument)") .
                 ($default ? (
-                        is_callable($default) ? " [...]" :
-                        " [" . (preg_match(self::$ScriptsPattern, $default) ? $default : "\"$default\"") .
-                        "]"
-                    ) : ""
+                    is_callable($default) ? " [...]" :
+                    " [" . (preg_match(self::$ScriptsPattern, $default) ? $default : "\"$default\"") .
+                    "]"
+                ) : ""
                 ) . ": "
             ) ?: (is_callable($default) ? $default() : $default));
-        if(is_null($input)) return $input;
+        if (is_null($input))
+            return $input;
         if (preg_match("/^\"[\w\W]*[^\\\]\"$/", trim($input), $matches))
             return $matches[0];
         return preg_match(self::$ScriptsPattern, $input) ? $input : "\"$input\"";
