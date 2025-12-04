@@ -391,7 +391,8 @@ class Content extends Module
      {
           return Convert::ToString(function () {
                $this->Set();
-               if (!$this->GetAccess()) return part(\_::$User->InHandlerPath, print:false);
+               if (!$this->GetAccess())
+                    return part(\_::$User->InHandlerPath, print: false);
 
                yield $this->GetTitle();
                yield $this->GetDescription();
@@ -433,7 +434,7 @@ class Content extends Module
      public function GetDescription($attributes = null)
      {
           return Struct::Rack(
-               ($this->AllowDescription=($this->AllowDescription ? $this->GetExcerpt() : null)) . $this->GetImage(),
+               ($this->AllowDescription = ($this->AllowDescription ? $this->GetExcerpt() : null)) . $this->GetImage(),
                ["class" => "description"]
                ,
                $attributes
@@ -481,13 +482,13 @@ class Content extends Module
      public function GetExcerpt()
      {
           $excerpt = Struct::Convert(getValid($this->Item, 'Description') ?? (
-                         $this->AutoExcerpt ? Convert::ToExcerpt(
-                              Convert::ToText(getValid($this->Item, 'Content', $this->Content)),
-                              0,
-                              $this->ExcerptLength,
-                              $this->ExcerptSign
-                         ) : $this->Description));
-          return $excerpt?Struct::MediumSlot(
+               $this->AutoExcerpt ? Convert::ToExcerpt(
+                    Convert::ToText(getValid($this->Item, 'Content', $this->Content)),
+                    0,
+                    $this->ExcerptLength,
+                    $this->ExcerptSign
+               ) : $this->Description));
+          return $excerpt ? Struct::MediumSlot(
                __(
                     $excerpt,
                     styling: true,
@@ -495,14 +496,14 @@ class Content extends Module
                )
                ,
                ["class" => "excerpt"]
-          ):null;
+          ) : null;
      }
      public function GetImage()
      {
           if (!$this->AllowImage)
                return null;
           $p_image = getValid($this->Item, 'Image', $this->Image);
-          return isValid($p_image) ? Struct::Division(Struct::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg".($this->AllowDescription?"-4":null), "style" => "text-align: center;"]) : "";
+          return isValid($p_image) ? Struct::Division(Struct::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg" . ($this->AllowDescription ? "-4" : null), "style" => "text-align: center;"]) : "";
      }
      public function GetDetails($path = null)
      {
@@ -590,20 +591,22 @@ class Content extends Module
                $tags = table("Tag")->SelectPairs("Name", "Title", "`Id` IN (" . join(",", $p_tags) . ") " . (isEmpty($p_tagsorder) ? "" : "ORDER BY $p_tagsorder") . " LIMIT $p_tagscount");
                if (count($tags) > 0)
                     return Struct::$BreakLine . Struct::Division(
-               Struct::Heading6(Convert::FromSwitch($this->TagsLabel, $p_type)) . 
-               join(PHP_EOL, loop(
-                         $tags,
-                         function ($v, $k) {
-                              return Struct::Link(
-                                   isValid($v)
-                                   ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
-                                   : $k
-                                   ,
-                                   \_::$Address->TagRoot . $k,
-                                   ["class" => "btn"]
-                              );
-                         }
-                    )), ["class" => "tags"]);
+                         Struct::Heading6(Convert::FromSwitch($this->TagsLabel, $p_type)) .
+                         join(PHP_EOL, loop(
+                              $tags,
+                              function ($v, $k) {
+                                   return Struct::Link(
+                                        isValid($v)
+                                        ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
+                                        : $k
+                                        ,
+                                        \_::$Address->TagRoot . $k,
+                                        ["class" => "btn"]
+                                   );
+                              }
+                         )),
+                         ["class" => "tags"]
+                    );
           }
      }
      public function GetRelateds()
@@ -643,6 +646,17 @@ class Content extends Module
                if (!$this->ModifyComment) {
                     $cc->EditButtonLabel =
                          $cc->DeleteButtonLabel = null;
+               }
+               switch (strtolower(get($this->Item, 'Type') ?? "")) {
+                    case "merchandise":
+                    case "course":
+                    case "query":
+                    case "forum":
+                         $cc->ShowMedia = true;
+                         break;
+                    default:
+                         $cc->ShowMedia = false;
+                         break;
                }
                if (count($cc->Items) > 0)
                     return Struct::$BreakLine . $cc->ToString();

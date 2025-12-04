@@ -182,13 +182,18 @@ legend + * {
   outline-offset: -2px;
 }
 
-input:is([type=number],[type=range],[type=tel],[type=url],[type=email],[type=file],[type=date],[type=month],[type=week],[type=time],[type=datetime-local]),
+
+input:is([type=number],[type=range],[type=tel],[type=url],[type=email],[type=file],[type=date],[type=month],[type=week],[type=time],[type=datetime-local],[inputmode="numeric"],[inputmode="decimal"],[inputmode="tel"],[inputmode="email"],[inputmode="url"]),
 code,blockcode,xmp
 {
 	direction: ltr;
 	text-align: left;
 }
 
+:is(input,textarea,select)::placeholder {
+  color: #8888;
+  font-size: 80%;
+}
 
 ::-webkit-search-decoration {
   -webkit-appearance: none;

@@ -1,7 +1,6 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
 class PrePage extends Module
 {
@@ -20,7 +19,7 @@ class PrePage extends Module
 				align-items: center;
 			}
 			.{$this->Name}>:is(.title,.rack>.title){
-				margin: var(--size-0);
+				margin: var(--size-0) var(--size-0) 0px;
 			}
 			.{$this->Name}>.rack>.description{
 				font-size: var(--size-1);

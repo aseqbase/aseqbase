@@ -2,7 +2,7 @@
 \_::$Front->Finals[] = \MiMFa\Library\Struct::Script('
 document.addEventListener("keydown", function(event) {
     const elem = event.target;
-    if (elem.matches("input, textarea")) {
+    if (elem.matches(".input, input, textarea")) {
         let rtl = /^[\s\d\-*\/\\\\\+\.?=_\]\[{}()&\^%\$#@!~`\'"<>|]*[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]$/g.test(elem.value);
         if (rtl || ((event.ctrlKey || event.altKey) && event.shiftKey)) {
             if (event.code.endsWith("Left")) {

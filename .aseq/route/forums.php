@@ -10,6 +10,7 @@ route("contents", [
         "Description" => "Join to a Forum",
         "Image"=>"comments",
         "MaximumColumns"=> 1,
+        "ExcerptLength"=> 500,
         "Root" => "/forum/",
         "CollectionRoot" => "/forums/"
     ],

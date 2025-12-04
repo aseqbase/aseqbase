@@ -483,7 +483,18 @@ class DataTable
 	 */
 	public function PopMetaValue(array|int|string|null $id, $key, $defaultValue = false)
 	{
-		return self::SetMetaValue($id, $key, null, $defaultValue);
+		$metadata = self::GetMetaData($id, [])??[];
+		if (isStatic($id)) {
+			unset($metadata[$key]);
+			return $this->SetMetaData($id, $metadata, $defaultValue);
+		} else {
+			$params = [];
+			foreach ($metadata as $k => $md) {
+				unset($md[$key]);
+				$params[] = [":Id" => $k, "MetaData" => Convert::ToJson($md)];
+			}
+			return $this->Update("Id=:Id", $params, $defaultValue);
+		}
 	}
 	/**
 	 * To check if the metadata column has the specific $key or not
@@ -494,6 +505,77 @@ class DataTable
 	public function HasMetaValue(array|int|string|null $id, $key)
 	{
 		return self::GetMetaValue($id, $key) ? true : false;
+	}
+
+	
+	/**
+	 * To get the metadata Array value by the specific $key
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param mixed $key
+	 * @param mixed $defaultValue
+	 */
+	public function GetMetaItemValue(array|int|string|null $id, $key, $item, $defaultValue = null)
+	{
+		if (isStatic($id))
+			return getValid(get($this->GetMetaData($id), $key), $item, $defaultValue);
+		else
+			return loop($this->GetMetaValue($id, $key), function ($v, $k) use ($item) {
+				return [$k => $v[$item]]; }, pair: true) ?: $defaultValue;
+	}
+	/**
+	 * To set the metadata Array value by the specific $key
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param mixed $key
+	 * @param mixed $value
+	 * @param mixed $defaultValue
+	 */
+	public function SetMetaItemValue(array|int|string|null $id, $key, $item, $value, $defaultValue = false)
+	{
+		$metadata = self::GetMetaData($id, [])??[];
+		if (isStatic($id)) {
+			if(isset($metadata[$key])) $metadata[$key][$item] = $value;
+			else $metadata[$key] = [$item=>$value];
+			return $this->SetMetaData($id, $metadata, $defaultValue);
+		} else {
+			$params = [];
+			foreach ($metadata as $k => $md) {
+                if(isset($md[$key])) $md[$key][$item] = $value;
+                else $md[$key] = [$item=>$value];
+				$params[] = [":Id" => $k, "MetaData" => Convert::ToJson($md)];
+			}
+			return $this->Update("Id=:Id", $params, $defaultValue);
+		}
+	}
+	/**
+	 * To forget the metadata Array value by the specific $key
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param mixed $key
+	 * @param mixed $defaultValue
+	 */
+	public function PopMetaItemValue(array|int|string|null $id, $key, $item, $defaultValue = false)
+	{
+		$metadata = self::GetMetaData($id, [])??[];
+		if (isStatic($id)) {
+			unset($metadata[$key][$item]);
+			return $this->SetMetaData($id, $metadata, $defaultValue);
+		} else {
+			$params = [];
+			foreach ($metadata as $k => $md) {
+			    unset($md[$key][$item]);
+				$params[] = [":Id" => $k, "MetaData" => Convert::ToJson($md)];
+			}
+			return $this->Update("Id=:Id", $params, $defaultValue);
+		}
+	}
+	/**
+	 * To check if the metadata Array column has the specific $key or not
+	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function HasMetaItemValue(array|int|string|null $id, $key, $item)
+	{
+		return self::GetMetaItemValue($id, $key, $item) ? true : false;
 	}
 
 	public function GetColumnName($name)

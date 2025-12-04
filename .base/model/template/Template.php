@@ -261,6 +261,7 @@ class Template extends \Base{
             color: var(--color-white);
         }
         .input{
+            cursor: text;
             font-family: var(--font-input), var(--font-special-input), var(--font);
             background-color: var(--back-color-input);
             color: var(--fore-color-input);

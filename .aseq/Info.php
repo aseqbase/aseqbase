@@ -3,7 +3,7 @@ run("global/AseqInfo");
 class Info extends AseqInfo{
 	public $Path = "https://aseqbase.ir";
 	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
-	public $Payment = '{"Network":"TRC-20","Unit":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}';
+	public $Payment = '{"Network":"TRC-20","Currency":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}';
 
 	public $MainMenus = [
 		array("Name" => "HOME", "Path"=> "/home", "Image" => "home"),

@@ -59,9 +59,10 @@ class MainMenu extends Module
 				width: fit-content;
 				display: flex;
 				justify-content: flex-start;
+				line-height: 1.5;
 				align-items: center;
 				flex-direction: row;
-				padding: calc(var(--size-0) / 2) var(--size-0);
+				padding: calc(var(--size-0) / 2) var(--size-3);
 				gap: var(--size-0);
 			}
 			.{$this->Name} :is(.header, .header a, .header a:visited, .header a:hover){
@@ -73,7 +74,7 @@ class MainMenu extends Module
 				" . (isValid($this->Description) ? "line-height: var(--size-2);" : "") . "
 			}
 			.{$this->Name} .header .description{
-				font-size: var(--size-0);
+				font-size: 75%;
 			}
 			.{$this->Name} .header .image{
 				background-position: center;

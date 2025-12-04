@@ -139,11 +139,12 @@ class Struct
                     // Links
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)/i", fn($m) => self::Link($m[1], $m[1]), $object);
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)/i", fn($m) => self::Link($m[1], "mailto:{$m[1]}"), $object);
-                    $object = preg_replace_callback("/\B\#([\w]+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/iu", fn($m) => self::Link("#".$m[1], \_::$Address->SearchRoot.urlencode("#".$m[1]), ["id" => $m[2] ?? null], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
-                   
+                    $object = preg_replace_callback("/\B\#(\w+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/iu", fn($m) => self::Link("#" . $m[1], \_::$Address->SearchRoot . urlencode("#" . $m[1]), ["id" => $m[2] ?? null,"class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?: $object;
+                    $object = preg_replace_callback("/\B\@(\w+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/iu", fn($m) => self::Link("@" . $m[1], \_::$Address->UserRoot . urlencode($m[1]), ["id" => $m[2] ?? null,"class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?: $object;
+
                     $object = preg_replace_callback("/\s?(^[^\W].*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/mi", fn($m) => self::Element($m[1], "p", ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
-                    
-                    $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
+
+                    $object = encode($object, $dic, pattern: $patt);// To keep all previous tags unchanged
 
                     // Texts
                     $object = preg_replace_callback("/\*\*(\S[^\*\r\n\v]+)\*\*(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Strong($m[1], null, ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == \_::$Back->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
@@ -234,7 +235,7 @@ class Struct
         $attachments = "";
         $attrs = self::Attributes($attributes, $attachments, $inners, $outers, $allowMA);
         if ($isSingle)
-            return "$outers<$tagName$attrs data-single/>$inners$attachments";
+            return "$outers<$tagName$attrs/>$inners$attachments";
         else
             switch ($tagName) {
                 case "textarea":
@@ -620,7 +621,7 @@ class Struct
         return self::Division(
             self::Style("
             #$id.modal-overlay {
-                position: fixed;
+                position: absolute;
                 top: 0; bottom: 0; left: 0; right: 0;
                 width: 100%; height: 100%;
                 background: rgba(0,0,0, 0.6);
@@ -810,7 +811,7 @@ class Struct
             return self::Icon($source, null, ["class" => "media"], $attributes);
         if (isUrl($source))
             return self::Image($content, $source, ["class" => "media"], $attributes);
-        return self::Element(__($content ?? ""), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "');", "class" => "media"], ...$attributes);
+        return self::Element(self::Convert($content ?? ""), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "');", "class" => "media"], ...$attributes);
     }
     /**
      * The \<IFRAME\> or \<EMBED\> HTML Tag
@@ -1925,7 +1926,7 @@ class Struct
      */
     public static function Form($content, $action = null, ...$attributes)
     {
-        $Interaction = self::PopAttribute($attributes, "Interaction") ?? self::PopAttribute($attributes, "Interactive");
+        $Interaction = self::PopAttribute($attributes, "Interactive");
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         if (!isValid($content))
             $content = self::SubmitButton();
@@ -2038,19 +2039,6 @@ class Struct
         );
         if (is_null($content))
             return null;
-        // $isRequired = $isDisabled = false;
-        // if (!is_null($attributes))
-        //     if (is_string($attributes)) {
-        //         $isRequired = preg_match("/\brequired\b/i", ...$attributes);
-        //         $isDisabled = preg_match("/\bdisabled\b/i", ...$attributes);
-        //     } elseif (is_countable($attributes))
-        //         foreach ($attributes as $k => $v) {
-        //             $a = is_string($k) ? $k : (is_string($v) ? $v : "");
-        //             $isRequired = $isRequired || preg_match("/\brequired\b/i", $a);
-        //             $isDisabled = $isDisabled || preg_match("/\bdisabled\b/i", $a);
-        //             if ($isRequired && $isDisabled)
-        //                 break;
-        //         }
         $isRequired = self::HasAttribute($attributes, "required");
         // $isDisabled = self::HasAttribute($attributes, "disabled");
         // if ($isDisabled)
@@ -2354,7 +2342,7 @@ class Struct
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::NumberInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
+                $content = self::IntInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
                 break;
             case 'short':
                 $min = -255;
@@ -2363,7 +2351,7 @@ class Struct
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::NumberInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
+                $content = self::IntInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
                 break;
             case 'number':
             case 'long':
@@ -2771,7 +2759,7 @@ class Struct
                     }",
             ["class" => "checkinput"],
             [
-                "Class" => self::PopAttribute($attributes, "Class"),
+                "Class" => self::GetAttribute($attributes, "Class"),
                 "Style" => self::PopAttribute($attributes, "Style")
             ]
         ) .
@@ -3194,7 +3182,7 @@ class Struct
         $id = self::PopAttribute($attributes, "Id") ?? ("fi_" . getId());
         $d = self::HasAttribute($attributes, "WebkitDirectory");
         $ph = self::PopAttribute($attributes, "PlaceHolder");
-        $class = self::PopAttribute($attributes, "Class");
+        $class = self::GetAttribute($attributes, "Class");
         $style = self::PopAttribute($attributes, "Style");
         $accept = self::PopAttribute($attributes, "Accept") ?? join(", ", \_::$Config->GetAcceptableFormats());
         return self::Style("
@@ -3245,7 +3233,8 @@ class Struct
         }
         ") . self::Division([
                         self::Input($value ? null : $name, null, "file", [
-                            "style" => "display:none;",
+                            "class" => "input",
+                            "style" => "display:none!important;",
                             "accept" => $accept,
                             "oninput" => "{$id}_Update(true);"
                         ], $attributes),
@@ -3517,7 +3506,48 @@ class Struct
      */
     public static function NumberInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "number", ["class" => "numberinput", "inputmode" => "numeric"], $attributes);
+        $class = self::GetAttribute($attributes, "Class");
+        $style = self::PopAttribute($attributes, "Style");
+        $id = self::PopAttribute($attributes, "Id")??Convert::ToId($key);
+        return self::Element(null, "input", [
+            "name" => self::PopAttribute($attributes, "Name") ?? ($key ? Convert::ToKey($key) : null),
+            "type" => "number",
+            "value" => $value,
+            "class" => "input",
+            "style" => "display:none!important;"
+        ], $attributes) .
+            self::Element(
+                null,
+                "input",
+                [
+                    "id"=>$id,
+                    "type" => "text",
+                    "value" => number_format($value ?? 0, self::PopAttribute($attributes, "Decimals") ?: 0, '.', ','),
+                    ...($key ? ["autocomplete" => self::PopAttribute($attributes, "AutoComplete") ?? $key] : []),
+                    "placeholder" => self::PopAttribute($attributes, "placeholder") ?? Convert::ToTitle($key),
+                    "class" => "input numberinput",
+                    "inputmode" => "numeric",
+                    "oninput" => "
+                    let se = this.selectionEnd+1;
+                    this.value = Number(this.previousElementSibling.value = Number((this.value?this.value:'0').match(/[\d\.]+/gi).join(''))).toLocaleString('en-US');
+                    this.selectionEnd = se;",
+                ],
+                [
+                    "class" => $class,
+                    "style" => $style
+                ]
+            );
+    }
+    /**
+     * The \<INPUT\> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function IntInput($key, $value = null, ...$attributes)
+    {
+        return self::Input($key, $value, "number", ["class" => "intinput", "inputmode" => "numeric"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag

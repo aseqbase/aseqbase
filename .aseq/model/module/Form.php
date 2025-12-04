@@ -91,7 +91,7 @@ class Form extends Module
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
 		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
-		$this->Signing = fn() => part(\_::$User->InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
+		$this->Signing = fn() => \_::$User->HasAccess()?"":part(\_::$User->InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);
 		// });
@@ -104,7 +104,7 @@ class Form extends Module
 		if (!\_::$User->HasAccess($access)) {
 			$message = $this->GetError("You have not enough access!");
 			if ($reaction)
-				deliver($this->GetSigning());
+				response($this->GetSigning());
 			return false;
 		}
 		if (($message = $this->CheckTimeBlock()) === false) {
@@ -867,6 +867,7 @@ class Form extends Module
 	public function GetSigning()
 	{
 		if ($this->Signing === true) {
+			if(\_::$User->HasAccess()) return "";
 			module("Modal");
 			$module = new \MiMFa\Module\Modal();
 			$module->Style = new Style();

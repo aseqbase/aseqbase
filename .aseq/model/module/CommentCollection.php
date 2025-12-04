@@ -92,6 +92,11 @@ class CommentCollection extends Collection
      */
     public $AllowReplies = true;
     /**
+     * To show attaches ass media
+     * @var 
+     */
+    public $ShowMedia = false;
+    /**
      * Allow to analyze all text and linking categories and tags to their messages, to improve the website's SEO
      * @var mixed
      */
@@ -346,13 +351,11 @@ class CommentCollection extends Collection
                 $p_image = getValid($item, 'Image', $this->DefaultImage);
                 $p_subject = getValid($item, 'Subject', $this->DefaultTitle);
                 $p_message = getValid($item, 'Content', $this->DefaultDescription);
-                $p_attach = Convert::FromJson(getValid($item, 'Attach', $this->DefaultContent));
                 $p_email = get($item, 'Contact');
 
                 $p_showexcerpt = isValid($p_message) && $this->AutoExcerpt;
                 $p_showsubject = isValid($p_subject) && $this->AllowSubject;
                 $p_showmessage = $this->AllowMessage;
-                $p_showattach = $this->AllowAttach;
                 $p_showimage = isValid($p_image) && $this->AllowImage;
                 $p_showmeta = $this->AllowMetaData;
 
@@ -457,9 +460,10 @@ class CommentCollection extends Collection
                 yield Struct::OpenTag("div", ["class" => "author-details"]);
                 if ($this->AllowAuthor) {
                     $au = getValid($author, "Name", $p_name);
-                    if (isEmpty($author)){
-                        if($au) yield Struct::Span($au, null, ["class" => "author-name"]);
-                    }else
+                    if (isEmpty($author)) {
+                        if ($au)
+                            yield Struct::Span($au, null, ["class" => "author-name"]);
+                    } else
                         yield Struct::Link($au, \_::$Address->UserRoot . get($author, "Signature"), ["class" => "author-name"]);
                 }
                 if ($p_showmeta && isValid($p_meta))
@@ -472,8 +476,7 @@ class CommentCollection extends Collection
                     yield "<div class='full view parent-hover-show'>" . __(Struct::Convert($p_message), referring: $p_referring) . "</div>";
                 if ($p_showimage && isValid($p_image))
                     yield "<div class='col-lg-3'>" . $img->ToString() . "</div>";
-                if ($p_showattach && isValid($p_attach))
-                    yield "<div class='attach'>" . Struct::Convert($p_attach) . "</div>";
+                yield $this->GetAttaches($item);
                 yield "</div>";
                 if (!isEmpty($p_replyes))
                     yield Struct::Division(Struct::Division("", ["class" => "reply-box"]) . $this->Get($p_replyes), ["class" => "replies"]);
@@ -489,7 +492,7 @@ class CommentCollection extends Collection
     }
     public function GetScript()
     {
-        $action = $this->Action?Script::Convert($this->Action):"null";
+        $action = $this->Action ? Script::Convert($this->Action) : "null";
         return Struct::Script(
             "
             function {$this->Name}_Edit(btn, selector, forid) {
@@ -586,5 +589,14 @@ class CommentCollection extends Collection
                 }
             }"
         );
+    }
+    public function GetAttaches($item)
+    {
+        if ($this->AllowAttach) {
+            $p_attach = Convert::FromJson(get($item, 'Attach'));
+            if ($p_attach)
+                if($this->ShowMedia) return "<div class='attach'>" . (is_countable($p_attach) ? loop($p_attach, fn($v) => Struct::Media($v, $v)) : Struct::Convert($p_attach)) . "</div>";
+                else return "<div class='attach'>" . Struct::Convert($p_attach) . "</div>";
+        }
     }
 }
