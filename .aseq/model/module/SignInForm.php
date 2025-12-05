@@ -40,7 +40,7 @@ class SignInForm extends Form{
 	public function __construct(){
         parent::__construct();
 		$this->Action = \_::$User->InHandlerPath;
-		$this->SuccessPath = \_::$Address->Path;
+		$this->SuccessPath = \_::$User->Path;
 		$this->Welcome = function(){ return part(\_::$User->DashboardHandlerPath, print:false); };
 	}
 
@@ -128,7 +128,7 @@ class SignInForm extends Form{
 				elseif($res === false)
 					return $this->GetError($this->IncorrectWarning);
 				elseif(is_null($res))
-					return deliverBreaker($this->GetError("This account is not active yet!"), null, \_::$User->ActiveHandlerPath . "?signature=$signature".(\_::$Address->Query?"&".\_::$Address->Query:""));
+					return deliverBreaker($this->GetError("This account is not active yet!"), null, \_::$User->ActiveHandlerPath . "?signature=$signature".(\_::$User->Query?"&".\_::$User->Query:""));
 				else
 					return $this->GetError($res);
 			}

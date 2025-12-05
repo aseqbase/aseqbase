@@ -266,8 +266,8 @@ class Content extends Module
           $this->LeaveComment = \_::$Config->AllowWriteComment;
           $this->AllowComments = \_::$Config->AllowReadComment;
           $this->AllowCommentsAccess = \_::$Config->ReadCommentAccess;
-          $this->Root = $this->Root ?? \_::$Address->ContentRoot;
-          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Address->ContentRoot;
+          $this->Root = $this->Root ?? \_::$Router->ContentRoot;
+          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Router->ContentRoot;
           $this->CommentForm = new CommentForm();
           $this->CommentForm->MessageType = "texts";
           $this->CommentForm->Access = \_::$Config->WriteCommentAccess;
@@ -300,7 +300,7 @@ class Content extends Module
 
      public function GetStyle()
      {
-          $ralign = \_::$Back->Translate->Direction == "rtl" ? "left" : "right";
+          $ralign = \_::$Front->Translate->Direction == "rtl" ? "left" : "right";
           return Struct::Style("
 			.{$this->Name} {
 				height: fit-content;
@@ -524,7 +524,7 @@ class Content extends Module
                          function ($val) use (&$p_meta) {
                               $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
                               if (!isEmpty($authorName))
-                                   $p_meta .= " " . Struct::Link($authorName["Name"], \_::$Address->UserRoot . $authorName["Signature"], ["class" => "author"]);
+                                   $p_meta .= " " . Struct::Link($authorName["Name"], \_::$Router->UserRoot . $authorName["Signature"], ["class" => "author"]);
                          },
                          $this->Item,
                          'AuthorId'
@@ -600,7 +600,7 @@ class Content extends Module
                                         ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
                                         : $k
                                         ,
-                                        \_::$Address->TagRoot . $k,
+                                        \_::$Router->TagRoot . $k,
                                         ["class" => "btn"]
                                    );
                               }
@@ -620,7 +620,7 @@ class Content extends Module
           $p_relatedstext = __(Convert::FromSwitch($this->RelatedsLabel, $p_type));
           $p_relatedscount = Convert::FromSwitch($this->RelatedsCount, $p_type) ?? 5;
           $p_relatedsorder = Convert::FromSwitch($this->RelatedsOrder, $p_type);
-          $rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Back->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Back->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
+          $rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Front->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Front->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
           if (count($rels) > 0)
                return Struct::$BreakLine . Struct::Division($p_relatedstext . join(PHP_EOL, loop(
                     $rels,
@@ -636,7 +636,7 @@ class Content extends Module
                $cc = new CommentCollection();
                $cc->Items = table("Comment")->Select(
                     "*",
-                    "Relation=:rid AND " . \_::$Back->GetAccessCondition(checkStatus: false) . " " . $this->CommentsLimitation,
+                    "Relation=:rid AND " . authCondition(checkStatus: false) . " " . $this->CommentsLimitation,
                     [":rid" => get($this->Item, 'Id')]
                );
                if (!$this->LeaveComment) {

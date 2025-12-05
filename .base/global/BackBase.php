@@ -1,13 +1,9 @@
 <?php
-use MiMFa\Library\DataTable;
 library("Revise");
+library("HashCrypt");
 library("DataBase");
 library("DataTable");
 library("Query");
-library("Session");
-library("Translate");
-library("Contact");
-library("HashCrypt");
 
 /**
  *All the basic back-end libraries and services 
@@ -135,75 +131,10 @@ class BackBase
 	public $DataBaseAddNameToPrefix = false;
 
 	/**
-	 * A simple library to Session management
-	 * @internal
-	 */
-	public \MiMFa\Library\Session $Session;
-	/**
-	 * Allow to set sessions on the client side (false for default)
-	 * @var bool
-	 * @category Security
-	 */
-	public $AccessibleData = true;
-	/**
-	 * Encrypt all session keys (false for default)
-	 * @var bool
-	 * @category Security
-	 */
-	public $EncryptKey = false;
-	/**
-	 * Encrypt all session values (true for default)
-	 * @var bool
-	 * @category Security
-	 */
-	public $EncryptValue = true;
-	
-	/**
-	 * A simple library to Session management
+	 * A simple library to Query management
 	 * @internal
 	 */
 	public \MiMFa\Library\Query $Query;
-	/**
-	 * A simple library to Session management
-	 * @internal
-	 */
-	public \MiMFa\Library\Translate $Translate;
-	/**
-	 * Allow to translate all text by internal algorithms
-	 * @var bool
-	 * @category Language
-	 */
-	public $AllowTranslate = false;
-	/**
-	 * Allow to detect the client language automatically
-	 * @var bool
-	 * @category Language
-	 */
-	public $AutoDetectLanguage = false;
-	/**
-	 * Allow to update the language by translator automatically
-	 * @var bool
-	 * @category Language
-	 */
-	public $AutoUpdateLanguage = false;
-	/**
-	 * Allow to cache language for a fast rendering
-	 * @var bool
-	 * @category Language
-	 */
-	public $CacheLanguage = true;
-	/**
-	 * Default language to translate all text by internal algorithms
-	 * @var string
-	 * @category Language
-	 */
-	public $DefaultLanguage = null;
-	/**
-	 * The website default Direction
-	 * @var string
-	 * @category Language
-	 */
-	public $DefaultDirection = null;
 
 
 	public function __construct()
@@ -229,34 +160,7 @@ class BackBase
 		$this->DataBase->ReportLevel = $this->DataBaseError;
 		$this->DataBase->AllowNormalization = $this->DataBaseValueNormalization;
 		$this->Cryptograph = new \MiMFa\Library\HashCrypt();
-		$this->Session = new \MiMFa\Library\Session(new DataTable($this->DataBase, "Session", $this->DataBasePrefix), $this->Cryptograph);
-		$this->Session->AccessibleData = $this->AccessibleData;
-		$this->Session->EncryptKey = $this->EncryptKey;
-		$this->Session->EncryptValue = $this->EncryptValue;
 		$this->Query = new \MiMFa\Library\Query($this->DataBase);
-		$this->Translate = new \MiMFa\Library\Translate(new DataTable($this->DataBase, "Translate_Lexicon", null));
-
-		$this->Translate->AutoUpdate = $this->AutoUpdateLanguage;
-		$this->Translate->AutoDetect = $this->AutoDetectLanguage;
-		$this->Translate->Initialize(
-			$this->DefaultLanguage,
-			$this->DefaultDirection,
-			\_::$Config->Encoding,
-			$this->AllowTranslate && $this->CacheLanguage
-		);
-	}
-
-	public function GetAccessCondition($checkStatus = true, $checkAccess = true, $tableName = "")
-	{
-		$tableName = $tableName ? $tableName . "." : "";
-		$cond = [];
-		if ($checkStatus)
-			$cond[] = "{$tableName}Status IS NULL OR {$tableName}Status IN ('','1',1)";
-		if ($checkAccess)
-			$cond[] = \_::$User->GetAccessCondition($tableName);
-		if ($this->AllowTranslate)
-			$cond[] = $this->Translate->GetAccessCondition($tableName);
-		return " (" . join(") AND (", $cond) . ")";
 	}
 
 	public function HardKey($seed)

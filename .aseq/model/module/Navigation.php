@@ -261,7 +261,7 @@ class Navigation extends Module
 					border-radius: var(--radius-5);
 					border: var(--border-1) var(--fore-color-input);
 					background-color: var(--back-color-input);
-					box-shadow: " . (\_::$Back->Translate->Direction == "rtl" ? "" : "-") . "100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-input);
+					box-shadow: " . (\_::$Front->Translate->Direction == "rtl" ? "" : "-") . "100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-input);
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} input[type='range']:hover::-webkit-slider-thumb {
@@ -306,20 +306,20 @@ class Navigation extends Module
 	{
 		return Convert::ToString(function () {
 			yield parent::Get();
-			$url = \_::$Address->Path . "?";
+			$url = \_::$User->Path . "?";
 			$fromP = $this->GetFromPage();
 			$toP = $this->GetToPage();
 			$query = receiveGet() ?? array();
 			if (isset($query[$this->CountRequest]))
 				$query[$this->CountRequest] = $this->Count . "";
-			$right = \_::$Back->Translate->Direction == "rtl" ? "left" : "right";
-			$left = \_::$Back->Translate->Direction == "rtl" ? "right" : "left";
+			$right = \_::$Front->Translate->Direction == "rtl" ? "left" : "right";
+			$left = \_::$Front->Translate->Direction == "rtl" ? "right" : "left";
 
 			yield "<div class='contents'>";
 			$maxLimit = $this->AllowCount ? min($this->Count, $this->MaxLimit) : $this->MaxLimit;
 			if ($this->MinLimit < $maxLimit)
 				yield Struct::Division(
-					Struct::RangeInput(null, $this->Limit, $this->MinLimit, $maxLimit, ["onchange" => "load('/" . \_::$Address->Direction . "?" . preg_replace("/\&{$this->LimitRequest}\=\d+/", "", \_::$Address->Query ?? "") . "&{$this->LimitRequest}='+this.value);"]) .
+					Struct::RangeInput(null, $this->Limit, $this->MinLimit, $maxLimit, ["onchange" => "load('/" . \_::$User->Direction . "?" . preg_replace("/\&{$this->LimitRequest}\=\d+/", "", \_::$User->Query ?? "") . "&{$this->LimitRequest}='+this.value);"]) .
 					($this->AllowCount ? Struct::Span($this->Count) : 0)
 					,
 					["class" => "rangepanel"]

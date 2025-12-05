@@ -69,7 +69,7 @@ class Forum extends Content
                $cc = new CommentCollection();
                $cc->Items = table("Comment")->Select(
                     "*",
-                    "Relation=:rid AND " . \_::$Back->GetAccessCondition(checkStatus: false) . " " . $this->CommentsLimitation,
+                    "Relation=:rid AND " . authCondition(checkStatus: false) . " " . $this->CommentsLimitation,
                     [":rid" => get($this->Item, 'Id')]
                );
                if (count($cc->Items) > 0)

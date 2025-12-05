@@ -9,7 +9,7 @@ $tag = pop($filter, "Tag") ?? get($received, "Tag");
 $items = !is_array($computeData)?Convert::By($computeData):compute(pop($computeData, "ComputeName") ?? "content/all", [
     "Filter" => [
         "Query" => pop($filter, "Query") ?? get($received, "Query"),
-        "Category" => $cat??\_::$Address->Direction,
+        "Category" => $cat??\_::$User->Direction,
         "Type" => $type,
         "Tag" => $tag,
         ...$filter??[]
@@ -30,8 +30,8 @@ if (isEmpty($items)) {
 }
 
 view(pop($viewData, "ViewName") ?? "contents", [
-    "Title" => pop($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", \_::$Address->Page), $cat, pop($data, "DefaultTitle") ?? "Contents"),
-    "Root" => pop($viewData, "Root") ?? \_::$Address->ContentRoot,
+    "Title" => pop($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", \_::$User->Page), $cat, pop($data, "DefaultTitle") ?? "Contents"),
+    "Root" => pop($viewData, "Root") ?? \_::$Router->ContentRoot,
     "Description" => pop($viewData, "Description"),
     "Items" => $items,
     ...$viewData??[]

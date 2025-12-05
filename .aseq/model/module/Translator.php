@@ -46,7 +46,7 @@ class Translator extends Module{
 	}
 
 	public function Get(){
-		$cur = \_::$Back->Translate->Language;
+		$cur = \_::$Front->Translate->Language;
 		$langs = [];
 		foreach ($this->Items??[] as $lng=>$value)
             if($lng != $cur)

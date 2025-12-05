@@ -8,6 +8,7 @@ use MiMFa\Library\Revise;
 use MiMFa\Library\Script;
 
 library("Revise");
+library("Translate");
 /**
  *All the basic website front-end settings and functions
  *@copyright All rights are reserved for MiMFa Development Group
@@ -147,20 +148,76 @@ abstract class FrontBase
 	 */
 	public $PatternPalette = array("/asset/pattern/main.svg", "/asset/pattern/doddle.png", "/asset/pattern/doddle-fantasy.png", "/asset/pattern/triangle.png", "/asset/pattern/slicksline.png", "/asset/pattern/doddle-mess.png");
 
+	/**
+	 * A simple library to Session management
+	 * @internal
+	 */
+	public \MiMFa\Library\Translate $Translate;
+	/**
+	 * Allow to translate all text by internal algorithms
+	 * @var bool
+	 * @category Language
+	 */
+	public $AllowTranslate = false;
+	public $TranslateTableName = "Translate_Lexicon";
+	public $TranslateTableNamePrefix = null;
+	/**
+	 * Allow to detect the client language automatically
+	 * @var bool
+	 * @category Language
+	 */
+	public $AutoDetectLanguage = false;
+	/**
+	 * Allow to update the language by translator automatically
+	 * @var bool
+	 * @category Language
+	 */
+	public $AutoUpdateLanguage = false;
+	/**
+	 * Allow to cache language for a fast rendering
+	 * @var bool
+	 * @category Language
+	 */
+	public $CacheLanguage = true;
+	/**
+	 * Default language to translate all text by internal algorithms
+	 * @var string
+	 * @category Language
+	 */
+	public $DefaultLanguage = null;
+	/**
+	 * The website default Direction
+	 * @var string
+	 * @category Language
+	 */
+	public $DefaultDirection = null;
+	
 	public function __construct()
 	{
 		Revise::Load($this);
-		$this->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
+
+		$this->Translate = new \MiMFa\Library\Translate(new \MiMFa\Library\DataTable(\_::$Back->DataBase, $this->TranslateTableName, $this->TranslateTableNamePrefix));
+
+		$this->Translate->AutoUpdate = $this->AutoUpdateLanguage;
+		$this->Translate->AutoDetect = $this->AutoDetectLanguage;
+		$this->Translate->Initialize(
+			$this->DefaultLanguage,
+			$this->DefaultDirection,
+			\_::$Config->Encoding,
+			$this->AllowTranslate && $this->CacheLanguage
+		);
+
+		$this->Libraries[] = Struct::Script(null, asset(\_::$Router->ScriptDirectory, 'global.js', optimize: true));
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
 		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
 		if ($this->DetectMode && is_null($this->SwitchMode)) {
 			request(
 				"window.matchMedia('(prefers-color-scheme: dark)').matches ? -1 : 1",
 				function ($mode) {
-					$cmode = \_::$Front->GetMode();
+					$cmode = $this->GetMode();
 					if (($mode > 0 && $cmode < 0) || ($mode < 0 && $cmode > 0)) {
-						setMemo(\_::$Front->SwitchRequest, true);
-						\_::$Front->SwitchMode = true;
+						setMemo($this->SwitchRequest, true);
+						$this->SwitchMode = true;
 					}
 				}
 			);
@@ -171,6 +228,14 @@ abstract class FrontBase
 			$this->BackColorPalette = $middle;
 			$this->CurrentMode = $this->GetMode($this->BackColor(0));
 		}
+	}
+
+	public function GetAccessCondition($tableName = "")
+	{
+		$tableName = $tableName ? $tableName . "." : "";
+		if ($this->AllowTranslate)
+			return $this->Translate->GetAccessCondition($tableName);
+		return null;
 	}
 
 	public function CreateTemplate($name = null, $data = [])
@@ -360,7 +425,7 @@ abstract class FrontBase
 	public function Set($selector = null, $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Router->Directory,
 			"finalize",
 			fn() => response(Struct::Script($this->MakeSetScript($selector, $handler, $args, false)))
 		);
@@ -379,7 +444,9 @@ abstract class FrontBase
 			$args,
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err));l.remove();})"
 			//"(data,err)=>{elem = \$(" . Script::Convert($selector) . ");elem.before(data??err);elem.remove();}"
-			,direct: $direct, encrypt:false
+			,
+			direct: $direct,
+			encrypt: false
 		);
 	}
 	/**
@@ -389,7 +456,7 @@ abstract class FrontBase
 	public function Delete($selector = "body")
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Router->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeDeleteScript($selector, false)))
 		);
@@ -411,7 +478,7 @@ abstract class FrontBase
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Router->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeBeforeScript($selector, $handler, $args, false)))
 		);
@@ -429,7 +496,9 @@ abstract class FrontBase
 			$handler,
 			$args,
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
-			, direct: $direct, encrypt:false
+			,
+			direct: $direct,
+			encrypt: false
 		);
 	}
 	/**
@@ -441,7 +510,7 @@ abstract class FrontBase
 	public function After($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Router->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeAfterScript($selector, $handler, $args, false)))
 		);
@@ -460,7 +529,9 @@ abstract class FrontBase
 			$args,
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
 			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
-			, direct: $direct, encrypt:false
+			,
+			direct: $direct,
+			encrypt: false
 		);
 	}
 	/**
@@ -472,7 +543,7 @@ abstract class FrontBase
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Router->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeFillScript($selector, $handler, $args, false)))
 		);
@@ -491,7 +562,9 @@ abstract class FrontBase
 			$args,
 			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
-			, direct: $direct, encrypt:false
+			,
+			direct: $direct,
+			encrypt: false
 		);
 	}
 	/**
@@ -503,7 +576,7 @@ abstract class FrontBase
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Router->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakePrependScript($selector, $handler, $args, false)))
 		);
@@ -523,7 +596,9 @@ abstract class FrontBase
 			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
 			"(data,err)=>$(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").prepend(data??err)"
 			//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-			, direct: $direct, encrypt:false
+			,
+			direct: $direct,
+			encrypt: false
 		);
 	}
 	/**
@@ -535,7 +610,7 @@ abstract class FrontBase
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Router->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeAppendScript($selector, $handler, $args, false)))
 		);
@@ -556,7 +631,8 @@ abstract class FrontBase
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
 			//"(data,err)=>$(" . Script::Convert($selector) . ").append(data??err)"
 			,
-			direct: $direct, encrypt:false
+			direct: $direct,
+			encrypt: false
 		);
 	}
 }

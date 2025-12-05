@@ -56,7 +56,7 @@ class MessageForm extends Form
 					$row["To"],
 					$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Message"))),
 					$message ?? [
-						$notification => Struct::Link(getValid($row, "Subject", "Your Message"), \_::$Address->Path),
+						$notification => Struct::Link(getValid($row, "Subject", "Your Message"), \_::$User->Path),
 						"Name" => Convert::ToText(getValid($data, "Name", \_::$User->Name)),
 						"From" => getValid($data, "From", \_::$User->Email),
 						"Content" => Convert::ToText(get($data, "Content")),

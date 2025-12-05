@@ -26,7 +26,7 @@ class Local
 				return $root . $p;
 		$address = str_replace(DIRECTORY_SEPARATOR, "/", $address);
 		if (!startsWith($address, "/")) {
-			$dirs = explode("/", \_::$Address->Direction);
+			$dirs = explode("/", \_::$User->Direction);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
 			if (strlen($dirs) !== 0)
 				$address = "$dirs/$address";
@@ -43,9 +43,9 @@ class Local
 		if ((empty($url)) || isAbsoluteUrl($url))
 			return $url;
 		if (startsWith($url, "/"))
-			return \_::$Address->Host . $url;
+			return \_::$User->Host . $url;
 		else {
-			$dirs = explode("/", \_::$Address->Url);
+			$dirs = explode("/", \_::$User->Url);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
 			return "$dirs/$url";
 		}

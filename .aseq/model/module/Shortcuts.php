@@ -36,7 +36,7 @@ class Shortcuts extends Module{
 						($this->AllowIcon && ($v = get($item,'Icon'))?Struct::Icon($v):'').
 						($this->AllowTitle?(getBetween($item,'Title','Name' )??""):""),
 						$link = getBetween($item,'Path'),
-						["class"=>"item".(endsWith(\_::$Address->Url,$link)?' active':'')],
+						["class"=>"item".(endsWith(\_::$User->Url,$link)?' active':'')],
 						get($item,"Attributes")
 					);
 				}

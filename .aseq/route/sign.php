@@ -20,8 +20,8 @@ $data = $data??[];
                 else
                     load(\_::$User->InHandlerPath);
             })
-    ->else(!isEmpty(\_::$Address->Direction))
-        ->On()->Get(fn() => view("part", ["Name" => \_::$Address->Direction]))
+    ->else(!isEmpty(\_::$User->Direction))
+        ->On()->Get(fn() => view("part", ["Name" => \_::$User->Direction]))
     ->else(!$isuser && getReceived("Signature"))
         ->On("sign/up")->Rest(fn () => compute("sign/up"))
     ->else(!$isuser)
@@ -38,8 +38,8 @@ $data = $data??[];
             if (compute("sign/edit"))
                 reload();
         })
-    ->else(!isEmpty(\_::$Address->Direction))
-        ->On()->Default(fn() => response(compute(\_::$Address->Direction)))
+    ->else(!isEmpty(\_::$User->Direction))
+        ->On()->Default(fn() => response(compute(\_::$User->Direction)))
     ->else()
         ->On()->Default(fn() => view("part", ["Name" => "access"]))
     ->Handle();

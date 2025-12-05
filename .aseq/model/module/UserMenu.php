@@ -33,7 +33,7 @@ class UserMenu extends Module
 				display: none;
 				position: absolute;
 				top: auto;
-				".(\_::$Back->Translate->Direction=="rtl"?"left":"right").": 0;
+				".(\_::$Front->Translate->Direction=="rtl"?"left":"right").": 0;
 				background-color: var(--back-color-special);
 				color: var(--fore-color-special);
 				min-width: 300px;

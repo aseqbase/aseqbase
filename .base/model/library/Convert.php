@@ -591,13 +591,13 @@ class Convert
             if (!isset($additionalKeys['$HOSTEMAIL']))
                 $additionalKeys['$HOSTEMAIL'] = $email;
             if (!isset($additionalKeys['$HOSTLINK']))
-                $additionalKeys['$HOSTLINK'] = Struct::Link(\_::$Address->Site, \_::$Address->Host);
+                $additionalKeys['$HOSTLINK'] = Struct::Link(\_::$User->Site, \_::$User->Host);
             if (!isset($additionalKeys['$HOST']))
-                $additionalKeys['$HOST'] = \_::$Address->Host;
+                $additionalKeys['$HOST'] = \_::$User->Host;
             if (!isset($additionalKeys['$URLLINK']))
-                $additionalKeys['$URLLINK'] = Struct::Link(\_::$Address->Url, \_::$Address->Url);
+                $additionalKeys['$URLLINK'] = Struct::Link(\_::$User->Url, \_::$User->Url);
             if (!isset($additionalKeys['$URL']))
-                $additionalKeys['$URL'] = \_::$Address->Url;
+                $additionalKeys['$URL'] = \_::$User->Url;
             if (!isValid($additionalKeys, '$SIGNATURE'))
                 $additionalKeys['$SIGNATURE'] = \_::$User->TemporarySignature;
             if (!isValid($additionalKeys, '$NAME'))

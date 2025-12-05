@@ -309,12 +309,12 @@ class Module extends \Base
 
      public function Handle()
      {
-          $translate = \_::$Back->AllowTranslate;
+          $translate = \_::$Front->AllowTranslate;
           $analyze = \_::$Config->AllowTextAnalyzing;
-          \_::$Back->AllowTranslate = $translate && $this->AllowTranslate;
+          \_::$Front->AllowTranslate = $translate && $this->AllowTranslate;
           \_::$Config->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
           $output = $this->BeforeHandle() . parent::Handle() . $this->AfterHandle();
-          \_::$Back->AllowTranslate = $translate;
+          \_::$Front->AllowTranslate = $translate;
           \_::$Config->AllowTextAnalyzing = $analyze;
           return $output;
      }

@@ -640,7 +640,7 @@ class Form extends Module
 		if (($res = $this->CheckTimeBlock()) !== false)
 			return $res;
 		$name = $this->Name . "_Form";
-		$src = $this->Action ?? $this->Path ?? \_::$Address->Path;
+		$src = $this->Action ?? $this->Path ?? \_::$User->Path;
 		if (is_array($this->Children) && count($this->Children) > 0) {
 			module("Field");
 			$attr = $this->Method ? [] : ["disabled"];
@@ -696,7 +696,7 @@ class Form extends Module
 							$this->GetHeader() .
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
-							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$Address->Host, ["class" => "back-button"]) : "")
+							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : "")
 							,
 							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => "fade-left"] : [])]
 						) : "") .
@@ -726,7 +726,7 @@ class Form extends Module
 						$this->GetHeader() .
 						$this->GetTitle(["class" => "form-title"]) .
 						$this->GetDescription(["class" => "form-description"]) .
-						(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$Address->Host, ["class" => "back-button"]) : "")
+						(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : "")
 						: ""
 					) .
 					Struct::Form(
@@ -762,7 +762,7 @@ class Form extends Module
 			yield (isValid($this->SubmitLabel) ? Struct::SubmitButton($this->SubmitLabel, $this->SubmitValue, ["Name" => "submit", "class" => "main"]) : "");
 			yield (isValid(object: $this->ResetLabel) ? Struct::ResetButton($this->ResetLabel, null, ["Name" => "reset"]) : "");
 		}
-		yield (isValid($this->CancelLabel) ? Struct::Button($this->CancelLabel, $this->CancelPath ?? \_::$Address->Host, ["Name" => "cancel"]) : "");
+		yield (isValid($this->CancelLabel) ? Struct::Button($this->CancelLabel, $this->CancelPath ?? \_::$User->Host, ["Name" => "cancel"]) : "");
 	}
 	public function GetFooter()
 	{
@@ -851,7 +851,7 @@ class Form extends Module
 				\MiMFa\Library\Contact::SendHtmlEmail(
 					pop($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
 					pop($data, "ReceiverEmail") ?? $this->ReceiverEmail,
-					pop($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Address->Domain . ": A new form submitted"),
+					pop($data, "MailSubject") ?? $this->MailSubject ?? (\_::$User->Domain . ": A new form submitted"),
 					pop($data, "MailMessage") ?? $data,
 					exception: $ex
 				)

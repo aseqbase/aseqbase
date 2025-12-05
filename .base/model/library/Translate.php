@@ -310,7 +310,7 @@ class Translate
 			) ?? []) as $key => $value) {
 				$value = Convert::FromJson($value);
 				if ($key == "x")
-					$key = strtolower($defaultLang ?? \_::$Back->DefaultLanguage ?? $key);
+					$key = strtolower($defaultLang ?? \_::$Front->DefaultLanguage ?? $key);
 				$arr[$key] = array(
 					"Title" => getBetween($value, "Title", "Name") ?? strtoupper($key),
 					"Image" => getBetween($value, "Image", "Icon") ?? "https://unpkg.com/language-icons/icons/$key.svg",

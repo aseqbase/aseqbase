@@ -464,7 +464,7 @@ class CommentCollection extends Collection
                         if ($au)
                             yield Struct::Span($au, null, ["class" => "author-name"]);
                     } else
-                        yield Struct::Link($au, \_::$Address->UserRoot . get($author, "Signature"), ["class" => "author-name"]);
+                        yield Struct::Link($au, \_::$Router->UserRoot . get($author, "Signature"), ["class" => "author-name"]);
                 }
                 if ($p_showmeta && isValid($p_meta))
                     yield "<div class='metadata'>$p_meta</div>";

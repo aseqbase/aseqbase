@@ -5,9 +5,9 @@
     $module->Items = \_::$Info->Contacts;
     pod($module, $data);
     $module->Render();
-    if (\_::$Back->AllowTranslate) {
+    if (\_::$Front->AllowTranslate) {
         $module = new (module("Translator"))();
-        $module->Items = \_::$Back->Translate->GetLanguages();
+        $module->Items = \_::$Front->Translate->GetLanguages();
         $module->AllowLabel = true;
         $module->AllowImage = false;
         $module->Style = new Style();

@@ -1,7 +1,6 @@
 <?php
+library("Session");
 library("Contact");
-library("DataBase");
-library("DataTable");
 library("Cryptograph");
 library("SpecialCrypt");
 
@@ -14,6 +13,67 @@ use MiMFa\Library\Struct;
 
 class UserBase
 {
+    /**
+     * Full part of the current url
+     * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php?p=3&l=10#serp"
+     * @var string|null
+     */
+    public string|null $Url = null;
+    /**
+     * The path part of the current url
+     * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php"
+     * @var string|null
+     */
+    public string|null $Path = null;
+    /**
+     * The host part of the current url
+     * @example: "https://www.mimfa.net:5056"
+     * @var string|null
+     */
+    public string|null $Host = null;
+    /**
+     * The site name part of the current url
+     * @example: "www.mimfa.net"
+     * @var string|null
+     */
+    public string|null $Site = null;
+    /**
+     * The domain name part of the current url
+     * @example: "mimfa.net"
+     * @var string|null
+     */
+    public string|null $Domain = null;
+    /**
+     * The request part of the current url
+     * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
+     * @var string|null
+     */
+    public string|null $Request = null;
+    /**
+     * The direction part of the current url from the root
+     * @example: "Category/mimfa/service/web.php"
+     * @var string|null
+     */
+    public string|null $Direction = null;
+    /**
+     * The last part of the current direction url
+     * @example: "web.php"
+     * @var string|null
+     */
+    public string|null $Page = null;
+    /**
+     * The query part of the current url
+     * @example: "p=3&l=10"
+     * @var string|null
+     */
+    public string|null $Query = null;
+    /**
+     * The fragment or anchor part of the current url
+     * @example: "serp"
+     * @var string|null
+     */
+    public string|null $Fragment = null;
+
 	public $HandlerPath = "/sign";
 	public $SignHandlerPath = "/sign/sign";
 	public $UpHandlerPath = "/sign/up";
@@ -129,11 +189,6 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public $VisitAccess = 0;
 
 
-	public DataTable $DataTable;
-	public DataTable $GroupDataTable;
-	public Cryptograph $Cryptograph;
-
-
 	public $Id = null;
 	public $GroupId = null;
 	protected $Access = 0;
@@ -151,26 +206,73 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public $TemporaryName = null;
 	public $TemporaryEmail = null;
 
+
+	public DataTable $DataTable;
+	public DataTable $GroupDataTable;
+	public Cryptograph $Cryptograph;
+
+	/**
+	 * A simple library to Session management
+	 * @internal
+	 */
+	public \MiMFa\Library\Session $Session;
+	/**
+	 * Allow to set sessions on the client side (false for default)
+	 * @var bool
+	 * @category Security
+	 */
+	public $AccessibleData = true;
+	/**
+	 * Encrypt all session keys (false for default)
+	 * @var bool
+	 * @category Security
+	 */
+	public $EncryptKey = false;
+	/**
+	 * Encrypt all session values (true for default)
+	 * @var bool
+	 * @category Security
+	 */
+	public $EncryptValue = true;
+
+
 	public function __construct()
 	{
+		$this->Cryptograph = new SpecialCrypt();
+		$this->Session = new \MiMFa\Library\Session(new DataTable(\_::$Back->DataBase, "Session", \_::$Back->DataBasePrefix), $this->Cryptograph);
+		$this->Session->AccessibleData = $this->AccessibleData;
+		$this->Session->EncryptKey = $this->EncryptKey;
+		$this->Session->EncryptValue = $this->EncryptValue;
+
+        $this->Url = getUrl();
+        $this->Host = getHost();
+        $this->Site = getSite();
+        $this->Domain = getDomain();
+        $this->Path = getPath();
+        $this->Request = getRequest();
+        $this->Direction = getDirection();
+        $this->Page = getPage();
+        $this->Query = getQuery();
+        $this->Fragment = getFragment();
+
 		$this->Access = $this->GuestAccess;
-		$this->Authorize = fn()=>load($this->InHandlerPath);
+		$this->Authorize = fn() => load($this->InHandlerPath);
+
 		$this->DataTable = table("User");
 		$this->GroupDataTable = table("UserGroup");
-		$this->Cryptograph = new SpecialCrypt();
-		if ($this->Active)
-			$this->Refresh();
+
+		if ($this->Active) $this->Refresh();
 		\MiMFa\Library\Revise::Decode($this, takeValid($this->GetGroup(), "MetaData", "[]"));
 		\MiMFa\Library\Revise::Decode($this, takeValid($this->Get(), "MetaData", "[]"));
 	}
 
 	public function Refresh()
 	{
-		$this->TemporarySignature = \_::$Back->Session->GetSecure("Signature") ?? $this->TemporarySignature;
-		$this->TemporaryPassword = \_::$Back->Session->GetSecure("Password") ?? $this->TemporaryPassword;
+		$this->TemporarySignature = $this->Session->GetSecure("Signature") ?? $this->TemporarySignature;
+		$this->TemporaryPassword = $this->Session->GetSecure("Password") ?? $this->TemporaryPassword;
 		try {
 			if (
-				$this->TemporarySignature === \_::$Back->Session->GetData($this->TemporarySignature . "_" . getClientCode()) &&
+				$this->TemporarySignature === $this->Session->GetData($this->TemporarySignature . "_" . getClientCode()) &&
 				isValid($this->TemporarySignature) &&
 				isValid($this->TemporaryPassword)
 			)
@@ -184,23 +286,23 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 	public function Load($profile = null)
 	{
-		\_::$Back->Session->SetSecure("Signature", $this->Signature = $this->TemporarySignature = takeValid($profile, "Signature"));
-		\_::$Back->Session->SetSecure("Password", $this->TemporaryPassword = takeValid($profile, "Password"));
-		\_::$Back->Session->SetSecure("Id", $this->Id = takeValid($profile, "Id"));
-		\_::$Back->Session->SetSecure("GroupId", $this->GroupId = takeValid($profile, "GroupId"));
-		\_::$Back->Session->SetSecure("Image", $this->Image = $this->TemporaryImage = takeValid($profile, "Image"));
-		\_::$Back->Session->SetSecure("Name", $this->Name = $this->TemporaryName = takeValid($profile, "Name"));
-		\_::$Back->Session->SetSecure("Email", $this->Email = $this->TemporaryEmail = takeValid($profile, "Email"));
-		\_::$Back->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->SelectValue("`Access`", "Id=" . $this->GroupId));
+		$this->Session->SetSecure("Signature", $this->Signature = $this->TemporarySignature = takeValid($profile, "Signature"));
+		$this->Session->SetSecure("Password", $this->TemporaryPassword = takeValid($profile, "Password"));
+		$this->Session->SetSecure("Id", $this->Id = takeValid($profile, "Id"));
+		$this->Session->SetSecure("GroupId", $this->GroupId = takeValid($profile, "GroupId"));
+		$this->Session->SetSecure("Image", $this->Image = $this->TemporaryImage = takeValid($profile, "Image"));
+		$this->Session->SetSecure("Name", $this->Name = $this->TemporaryName = takeValid($profile, "Name"));
+		$this->Session->SetSecure("Email", $this->Email = $this->TemporaryEmail = takeValid($profile, "Email"));
+		$this->Session->SetSecure("Access", $this->Access = is_null($this->GroupId) ? null : $this->GroupDataTable->SelectValue("`Access`", "Id=" . $this->GroupId));
 		if (!$profile) {
-			\_::$Back->Session->PopSecure("Signature");
-			\_::$Back->Session->PopSecure("Password");
-			\_::$Back->Session->PopSecure("Id");
-			\_::$Back->Session->PopSecure("GroupId");
-			\_::$Back->Session->PopSecure("Image");
-			\_::$Back->Session->PopSecure("Name");
-			\_::$Back->Session->PopSecure("Email");
-			\_::$Back->Session->PopSecure("Access");
+			$this->Session->PopSecure("Signature");
+			$this->Session->PopSecure("Password");
+			$this->Session->PopSecure("Id");
+			$this->Session->PopSecure("GroupId");
+			$this->Session->PopSecure("Image");
+			$this->Session->PopSecure("Name");
+			$this->Session->PopSecure("Email");
+			$this->Session->PopSecure("Access");
 		}
 	}
 
@@ -212,7 +314,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function HasAccess($acceptableAccess = null)
 	{
 		if (is_null($acceptableAccess))
-			 $acceptableAccess =  $this->UserAccess;
+			$acceptableAccess = $this->UserAccess;
 		$access = $this->Access ?? $this->GuestAccess;
 		//if($acceptableAccess === true || $acceptableAccess === false) return $acceptableAccess;
 		if (is_int($acceptableAccess))
@@ -361,7 +463,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 	public function GenerateEmail($name = null, $fake = false)
 	{
-		return Convert::ToKey($name ?? $this->Signature ?? ("user_" . getId(true))) . ($fake ? uniqid("+") : "") . "@" . \_::$Address->Domain;
+		return Convert::ToKey($name ?? $this->Signature ?? ("user_" . getId(true))) . ($fake ? uniqid("+") : "") . "@" . $this->Domain;
 	}
 
 	/**
@@ -381,7 +483,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
 	{
 		$this->TemporaryImage = null;
-		$email = $email?:$this->GenerateEmail($signature);
+		$email = $email ?: $this->GenerateEmail($signature);
 		return $this->DataTable->Insert(
 			[
 				":Signature" => $this->TemporarySignature = $signature ?? $contact ?? $email,
@@ -418,7 +520,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if ($status === false || intval($status) < $this->ActiveStatus)
 			return null;
 		$this->Load($person);
-		return \_::$Back->Session->SetData($this->Signature . "_" . getClientCode(), $this->Signature) ? true : false;
+		return $this->Session->SetData($this->Signature . "_" . getClientCode(), $this->Signature) ? true : false;
 	}
 	/**
 	 * Summary of SignInOrSignUp
@@ -439,10 +541,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		if ($signature === null || $signature === $this->Signature) {
 			$signature = $signature ?? $this->Signature;
-			\_::$Back->Session->PopData($signature . "_" . getClientCode());
+			$this->Session->PopData($signature . "_" . getClientCode());
 			$this->Load();
 		} else
-			\_::$Back->Session->PopData($signature . "_" . getClientCode());
+			$this->Session->PopData($signature . "_" . getClientCode());
 		return !$this->GetAccess();
 	}
 
@@ -546,7 +648,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->TemporaryName = takeValid($person, "Name");
 		$this->TemporaryImage = takeValid($person, "Image");
 		$this->TemporaryPassword = takeValid($person, "Password");
-		$path = \_::$Address->Host . ($handlerPath ?? $this->HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
+		$path = $this->Host . ($handlerPath ?? $this->HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
 		$dic = array();
 		$dic['$HYPERLINK'] = Struct::Link($linkAnchor, $path);
 		$dic['$LINK'] = Struct::Link($path, $path);
@@ -554,7 +656,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$dic['$SIGNATURE'] = $this->TemporarySignature;
 		$subject = Convert::FromDynamicString($subject ?? "", $dic, true);
 		$content = Convert::FromDynamicString($content ?? "", $dic, false);
-		return Contact::SendHtmlEmail($from, $this->TemporaryEmail, __($subject), __($content))?true:false;
+		return Contact::SendHtmlEmail($from, $this->TemporaryEmail, __($subject), __($content)) ? true : false;
 	}
 
 	/**
@@ -565,7 +667,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 */
 	public function EncryptToken($key, $value)
 	{
-		\_::$Back->Session->SetData($value, $key);
+		$this->Session->SetData($value, $key);
 		return $this->Cryptograph->Encrypt($value . $this->TokenDelimiter . date($this->TokenDateTimeFormat), \_::$Back->SoftKey, true);
 	}
 	/**
@@ -580,11 +682,11 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		if (!$key || !$token)
 			return null;
 		list($sign, $date) = explode($this->TokenDelimiter, $this->Cryptograph->Decrypt($token, \_::$Back->SoftKey, true));
-		if (\_::$Back->Session->GetData($sign) != $key)
+		if ($this->Session->GetData($sign) != $key)
 			throw new \SilentException("Your request is invalid or used before!");
 		if ($date != date($this->TokenDateTimeFormat))
 			throw new \SilentException("Your request is expired!");
-		\_::$Back->Session->PopData($sign);
+		$this->Session->PopData($sign);
 		return get($this->Find($sign), "Signature");
 	}
 }

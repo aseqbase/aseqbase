@@ -1,6 +1,6 @@
 <?php
 \_::$Router->On("public|asset/.*\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm|webp)")
-    ->Default(fn()=>deliverFile(normalizePath(\_::$Address->Request)));
+    ->Default(fn()=>deliverFile(normalizePath(\_::$User->Request)));
 \_::$Router->On("contents")->Default("contents");
 \_::$Router->On("content")->Default("content");
 \_::$Router->On("posts")->Default("posts");

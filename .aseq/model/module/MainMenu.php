@@ -295,7 +295,7 @@ class MainMenu extends Module
 				flex-wrap: nowrap;
 				padding: calc(var(--size-0) / 6) var(--size-0);
 				gap: calc(var(--size-0) * 0.5);
-				" . ((\_::$Back->Translate->Direction ?? \_::$Back->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
+				" . ((\_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
 			}
 
 			.{$this->Name} .other form{
@@ -410,7 +410,7 @@ class MainMenu extends Module
 		if (!\_::$User->HasAccess(getValid($item, "Access", \_::$User->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path");
-		$act = endsWith(\_::$Address->Path, $path) ? 'active' : "";
+		$act = endsWith(\_::$User->Path, $path) ? 'active' : "";
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Struct::Item(

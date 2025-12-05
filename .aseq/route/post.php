@@ -2,7 +2,7 @@
 route("content", [
     "View"=>[
         "Root" => "/post/",
-        "CollectionRoot" => \_::$Address->CategoryRoot
+        "CollectionRoot" => \_::$Router->CategoryRoot
     ],
     "ErrorHandler" => "Could not find related post"
 ]);

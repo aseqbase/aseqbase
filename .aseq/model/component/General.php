@@ -3,8 +3,8 @@ use MiMFa\Library\Struct;
 class GeneralStyle{
 	public static function Variables($rootSelector = ":root") { return "
 		$rootSelector{
-			--dir: ".(\_::$Back->Translate->Direction??\_::$Back->DefaultDirection).";
-			--lang: ".(\_::$Back->Translate->Language??\_::$Back->DefaultLanguage).";
+			--dir: ".(\_::$Front->Translate->Direction??\_::$Front->DefaultDirection).";
+			--lang: ".(\_::$Front->Translate->Language??\_::$Front->DefaultLanguage).";
 			--color-black: " . \_::$Front->Color(0) . ";
 			--color-red: " . \_::$Front->Color(1) . ";
 			--color-green: " . \_::$Front->Color(2) . ";
@@ -174,5 +174,5 @@ class GeneralStyle{
 	}
 }
 \_::$Front->Libraries[] = Struct::Style(GeneralStyle::Variables());
-\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
-\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));
+\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Router->StyleDirectory,'general.css', optimize: true));
+\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Router->ScriptDirectory, 'general.js', optimize: true));

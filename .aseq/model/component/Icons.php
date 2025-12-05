@@ -15,8 +15,8 @@ class Icons
 	{
 		self::$Initialized = true;
 		if(self::$Local)
-			return Struct::Style(null, asset(\_::$Address->PackageDirectory, "Icons/style/Style.css", optimize: false), ["async"]).
-		Struct::Script(null, asset(\_::$Address->PackageDirectory, "Icons/script/Script.js", optimize: false), ["async"]);
+			return Struct::Style(null, asset(\_::$Router->PackageDirectory, "Icons/style/Style.css", optimize: false), ["async"]).
+		Struct::Script(null, asset(\_::$Router->PackageDirectory, "Icons/script/Script.js", optimize: false), ["async"]);
 		else return Struct::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
 			Struct::Script(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js", ["async"]);
 	}

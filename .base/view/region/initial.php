@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<?php echo \_::$Back->Translate->Language; ?>" dir="<?php echo \_::$Back->Translate->Direction; ?>">
+<html lang="<?php echo \_::$Front->Translate->Language; ?>" dir="<?php echo \_::$Front->Translate->Direction; ?>">
 	<head>
 		<meta charset="<?php echo \_::$Config->Encoding; ?>">
 		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo \_::$Config->Encoding; ?>" />

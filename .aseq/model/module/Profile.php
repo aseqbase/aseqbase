@@ -342,7 +342,7 @@ class Profile extends Table{
                         }
             })());
         $form->Image = getValid($record,"Image" ,$this->Image??"plus");
-        $form->SuccessPath = \_::$Address->Url;
+        $form->SuccessPath = \_::$User->Url;
         return $form->Handle();
     }
 	public function DoAddHandle($value){

@@ -244,21 +244,21 @@ class Map extends Module
 	public function BeforeHandle()
 	{
 		if ($this->Local) {
-			$this->StyleSource = asset(\_::$Address->PackageDirectory, "Map/Style.css");
-			$this->ScriptSource = asset(\_::$Address->PackageDirectory, "Map/Script.js");
+			$this->StyleSource = asset(\_::$Router->PackageDirectory, "Map/Style.css");
+			$this->ScriptSource = asset(\_::$Router->PackageDirectory, "Map/Script.js");
 		}
 		$this->Location = $this->Location ?? get($this->Item = $this->Item ?? first($this->Items), "Location") ?? [0, 0];
 		if ($this->Local) {
-			$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Button.css");
-			$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Button.js");
+			$this->PluginsStyleSources[] = asset(\_::$Router->PackageDirectory, "Map/Button.css");
+			$this->PluginsScriptSources[] = asset(\_::$Router->PackageDirectory, "Map/Button.js");
 		} else {
 			$this->PluginsStyleSources[] = "https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css";
 			$this->PluginsScriptSources[] = "https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js";
 		}
 		if ($this->DrawPosition) {
 			if ($this->Local) {
-				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Draw.css");
-				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Draw.js");
+				$this->PluginsStyleSources[] = asset(\_::$Router->PackageDirectory, "Map/Draw.css");
+				$this->PluginsScriptSources[] = asset(\_::$Router->PackageDirectory, "Map/Draw.js");
 			} else {
 				$this->PluginsStyleSources[] = "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css";
 				$this->PluginsScriptSources[] = "https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js";
@@ -266,8 +266,8 @@ class Map extends Module
 		}
 		if ($this->LocatePosition) {
 			if ($this->Local) {
-				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Locate.css");
-				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Locate.js");
+				$this->PluginsStyleSources[] = asset(\_::$Router->PackageDirectory, "Map/Locate.css");
+				$this->PluginsScriptSources[] = asset(\_::$Router->PackageDirectory, "Map/Locate.js");
 			} else {
 				$this->PluginsStyleSources[] = "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js";
@@ -275,8 +275,8 @@ class Map extends Module
 		}
 		if ($this->FullScreenPosition) {
 			if ($this->Local) {
-				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/FullScreen.css");
-				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/FullScreen.js");
+				$this->PluginsStyleSources[] = asset(\_::$Router->PackageDirectory, "Map/FullScreen.css");
+				$this->PluginsScriptSources[] = asset(\_::$Router->PackageDirectory, "Map/FullScreen.js");
 			} else {
 				$this->PluginsStyleSources[] = "https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css";
 				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet.fullscreen/Control.FullScreen.js";
@@ -284,14 +284,14 @@ class Map extends Module
 		}
 		if ($this->PrintPosition) {
 			if ($this->Local)
-				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Print.js");
+				$this->PluginsScriptSources[] = asset(\_::$Router->PackageDirectory, "Map/Print.js");
 			else
 				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet.browser.print/dist/leaflet.browser.print.min.js";
 		}
 		if ($this->CompassPosition) {
 			if ($this->Local) {
-				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Compass.css");
-				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Compass.js");
+				$this->PluginsStyleSources[] = asset(\_::$Router->PackageDirectory, "Map/Compass.css");
+				$this->PluginsScriptSources[] = asset(\_::$Router->PackageDirectory, "Map/Compass.js");
 			} else {
 				$this->PluginsStyleSources[] = "https://unpkg.com/leaflet-compass/dist/leaflet-compass.min.css";
 				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet-compass/dist/leaflet-compass.min.js";
@@ -299,8 +299,8 @@ class Map extends Module
 		}
 		if ($this->MeasurePosition) {
 			if ($this->Local) {
-				$this->PluginsStyleSources[] = asset(\_::$Address->PackageDirectory, "Map/Measure.css");
-				$this->PluginsScriptSources[] = asset(\_::$Address->PackageDirectory, "Map/Measure.js");
+				$this->PluginsStyleSources[] = asset(\_::$Router->PackageDirectory, "Map/Measure.css");
+				$this->PluginsScriptSources[] = asset(\_::$Router->PackageDirectory, "Map/Measure.js");
 			} else {
 				$this->PluginsStyleSources[] = "https://unpkg.com/leaflet-measure/dist/leaflet-measure.css";
 				$this->PluginsScriptSources[] = "https://unpkg.com/leaflet-measure/dist/leaflet-measure.js";
@@ -485,7 +485,7 @@ class Map extends Module
 				else marker = L.marker(e.latlng).addTo({$this->Name});
 				" . ($this->SelectedLocationPopup ? "marker.bindPopup(" . Script::Convert(__($this->SelectedLocationPopup)) . ").openPopup();" : "") . "
 				" . ($this->SelectedLocationScriptFunction ? "($this->SelectedLocationScriptFunction)({$this->Name}, e, err);" : "") . "
-				" . ($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction ? "fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}" . (\_::$Back->AllowTranslate ? "&accept-language=" . \_::$Back->Translate->Language : "") . "`)
+				" . ($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction ? "fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}" . (\_::$Front->AllowTranslate ? "&accept-language=" . \_::$Front->Translate->Language : "") . "`)
 				.then(response => response.json())
 				.then(data => {
 					err = null;

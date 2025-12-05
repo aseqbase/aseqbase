@@ -54,9 +54,9 @@ class Query
         $table = $table instanceof DataTable?$table:table($table ?? "Content", source: $this->DataBase);
         $condit = "";
         if (!isEmpty($condition))
-            $condit = $this->DataBase->ConditionNormalization([$condition, \_::$Back->GetAccessCondition(tableName:$table->Name)]);
+            $condit = $this->DataBase->ConditionNormalization([$condition, authCondition(tableName:$table->Name)]);
         else
-            $condit = $this->DataBase->ConditionNormalization(\_::$Back->GetAccessCondition(tableName:$table->Name));
+            $condit = $this->DataBase->ConditionNormalization(authCondition(tableName:$table->Name));
         $cids = $this->FindCategoryIds($direction, nest: $nest);
         if (count($cids) > 0) {
             $condit .= " AND $table->Name.CategoryIds REGEXP '\\\\D(" . join("|", $cids) . ")\\\\D'";
@@ -86,9 +86,9 @@ class Query
         $table = $table instanceof DataTable?$table:table($table ?? "Content", source: $this->DataBase);
         $condit = "";
         if (!isEmpty($condition))
-            $condit = $this->DataBase->ConditionNormalization([$condition, \_::$Back->GetAccessCondition(tableName:$table->Name)]);
+            $condit = $this->DataBase->ConditionNormalization([$condition, authCondition(tableName:$table->Name)]);
         else
-            $condit = $this->DataBase->ConditionNormalization(\_::$Back->GetAccessCondition(tableName:$table->Name));
+            $condit = $this->DataBase->ConditionNormalization(authCondition(tableName:$table->Name));
         if (isValid($name)) {
             $params[":Name"] = $name;
             $params[":Id"] = $name;
@@ -118,7 +118,7 @@ class Query
         $id = $this->FindCategoryId($direction, null, table:$table);
         if (isEmpty($id))
             return $default;
-        $condit = \_::$Back->GetAccessCondition(tableName:$table->Name);
+        $condit = authCondition(tableName:$table->Name);
         $parentIds = $id?[$id]:[];
         $newparentIds = $id?[$id]:[];
         while (
@@ -139,7 +139,7 @@ class Query
         if (isEmpty($direction))
             return $default;
         $table = $table instanceof DataTable?$table:table($table ?? "Category", source: $this->DataBase);
-        $condit = \_::$Back->GetAccessCondition(tableName:$table->Name);
+        $condit = authCondition(tableName:$table->Name);
         $paths = is_array($direction) ? $direction : explode("/", trim($direction ?? "", "/\\"));
         $parentId = null;
         $id = null;
@@ -162,7 +162,7 @@ class Query
         $ids = $this->FindCategoryIds($direction, [], $nest, $table);
         if (!$ids)
             return $default;
-        return $table->Select("*", "$table->Name.Id IN (".join(",", $ids).") AND " . \_::$Back->GetAccessCondition(tableName:$table->Name));
+        return $table->Select("*", "$table->Name.Id IN (".join(",", $ids).") AND " . authCondition(tableName:$table->Name));
     }
     public function FindCategory(string|array|null $direction, array|null $default = null, DataTable|string|null $table = null)
     {
@@ -170,7 +170,7 @@ class Query
         $id = $this->FindCategoryId($direction, null, table:$table);
         if (!$id)
             return $default;
-        return $table->SelectRow("*", "$table->Name.Id=:Id AND " . \_::$Back->GetAccessCondition(tableName:$table->Name), [":Id" => $id]);
+        return $table->SelectRow("*", "$table->Name.Id=:Id AND " . authCondition(tableName:$table->Name), [":Id" => $id]);
     }
 
     public function FindTagId(string|null $tag, int|null $default = null, DataTable|string|null $table = null)
@@ -216,7 +216,7 @@ class Query
         if (isEmpty($id))
             return $default;
         $table = table("Category", source: $this->DataBase);
-        return $table->SelectRow("*", "$table->Name.Id=:Id AND " . \_::$Back->GetAccessCondition(tableName:$table->Name), [":Id" => $id]);
+        return $table->SelectRow("*", "$table->Name.Id=:Id AND " . authCondition(tableName:$table->Name), [":Id" => $id]);
     }
 
     public function GetContentTagIds(array|string $content, array|null $default = [], DataTable|string|null $table = null)
@@ -247,7 +247,7 @@ class Query
         if (isset($this->Cache_CategoryRoutes[$category]))
             return $this->Cache_CategoryRoutes[$category];
         $table = $table instanceof DataTable?$table:table($table ?? "Category", source: $this->DataBase);
-        $cat = is_array(value: $category) ? $category : $table->SelectRow("*", "($table->Name.Name=:Name OR $table->Name.Id=:Id) AND " . \_::$Back->GetAccessCondition(tableName:$table->Name), [":Name" => $category, ":Id" => $category]);
+        $cat = is_array(value: $category) ? $category : $table->SelectRow("*", "($table->Name.Name=:Name OR $table->Name.Id=:Id) AND " . authCondition(tableName:$table->Name), [":Name" => $category, ":Id" => $category]);
         if (isEmpty($cat))
             return $default;
         return $this->Cache_CategoryRoutes[$category] = $this->GetCategoryRoute(takeValid($cat, "ParentId"), null, table:$table) . "/" . takeBetween($cat, "Name", "Id");

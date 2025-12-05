@@ -35,40 +35,35 @@ class _
 	public static array $Sequence;
 
 	/**
-	 * To access all addresses to the base of the website,
-	 */
-	public static Address $Address;
-
-	/**
 	 * To access all the website configurations
 	 */
-	public static Config $Config;
+	public static ConfigBase $Config;
 
 	/**
 	 * To access all back-end tools
 	 */
-	public static Back $Back;
+	public static BackBase $Back;
 
 	/**
 	 * To access all addresses to a sequence of the website
 	 * and an array of all method=>patterns=>handler view names to handle all type request virtual pathes
 	 */
-	public static Router $Router;
+	public static RouterBase $Router;
 
 	/**
 	 * To access all front-end tools
 	 */
-	public static Front $Front;
+	public static FrontBase $Front;
 
 	/**
 	 * To access the user service
 	 */
-	public static User $User;
+	public static UserBase $User;
 
 	/**
 	 * To access all the website information
 	 */
-	public static Info $Info;
+	public static InfoBase $Info;
 
 	
 	/**

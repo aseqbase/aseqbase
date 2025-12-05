@@ -40,7 +40,7 @@ class SideMenu extends Module
 	public function __construct()
 	{
 		parent::__construct();
-		$this->Direction = \_::$Back->Translate->Direction ?? \_::$Back->DefaultDirection;
+		$this->Direction = \_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection;
 	}
 
 	public function GetStyle()
@@ -463,7 +463,7 @@ class SideMenu extends Module
 		if (!\_::$User->HasAccess(getValid($item, "Access", \_::$User->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path");
-		$act = endsWith(\_::$Address->Path, $path) ? 'active' : '';
+		$act = endsWith(\_::$User->Path, $path) ? 'active' : '';
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Struct::Item(

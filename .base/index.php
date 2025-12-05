@@ -4,7 +4,7 @@ runSequence("route");
 runSequence("initialize");
 if (auth(\_::$User->VisitAccess, assign: true)) {
     run("customize");
-    if (isValid(\_::$Router->Request))
+    if (isValid(\_::$User->Request))
         \_::$Router->Handle();
     else
         route(\_::$Router->DefaultRouteName);

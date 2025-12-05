@@ -6,7 +6,7 @@ class Manifest
 {
 	public static function Store($data)
 	{
-		$path = \_::$Address->ScriptDirectory . "manifest.json";
+		$path = \_::$Router->ScriptDirectory . "manifest.json";
 		if (!isEmpty($data)) Local::WriteText($path, Convert::ToJson($data), true);
 		return $path;
 	}

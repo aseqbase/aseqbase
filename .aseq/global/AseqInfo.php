@@ -127,8 +127,8 @@ class AseqInfo extends InfoBase
 		if(is_null($this->Shortcuts)) $this->Shortcuts = $menu;
 		if(is_null($this->Services)) $this->Services = $menu;
 	
-		$this->LogoPath = asset("logo/logo-".\_::$Back->Translate->Language.".svg")??$this->LogoPath;
-		$this->BrandLogoPath = asset("logo/brand-logo-".\_::$Back->Translate->Language.".svg")??$this->BrandLogoPath;
-		$this->FullLogoPath = asset("logo/full-logo-".\_::$Back->Translate->Language.".svg")??$this->FullLogoPath;
+		$this->LogoPath = asset("logo/logo-".\_::$Front->Translate->Language.".svg")??$this->LogoPath;
+		$this->BrandLogoPath = asset("logo/brand-logo-".\_::$Front->Translate->Language.".svg")??$this->BrandLogoPath;
+		$this->FullLogoPath = asset("logo/full-logo-".\_::$Front->Translate->Language.".svg")??$this->FullLogoPath;
 	}
 }

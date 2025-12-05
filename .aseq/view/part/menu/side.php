@@ -8,9 +8,9 @@ $module->Description = \_::$Info->Owner;
 $module->Items = \_::$Info->SideMenus;
 $module->Image = \_::$Info->LogoPath;
 $module->Shortcuts = \_::$Info->Contacts;
-if (\_::$Back->AllowTranslate) {
+if (\_::$Front->AllowTranslate) {
     $moduleTranslator = new (module("Translator"))();
-    $moduleTranslator->Items = \_::$Back->Translate->GetLanguages();
+    $moduleTranslator->Items = \_::$Front->Translate->GetLanguages();
     $moduleTranslator->AllowLabel = true;
     $moduleTranslator->AllowImage = false;
     $moduleTranslator->Style = new MiMFa\Library\Style();
