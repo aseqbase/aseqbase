@@ -7,9 +7,33 @@
 	<br><sub><a href="http://aseqbase.ir" target="_blank">a seq</a>uence-<a href="http://aseqbase.ir" target="_blank">base</a>d web development framework</sub>
 </h1>
 
-<p><a href="http://aseqbase.ir" target="_blank">MiMFa aseqbase</a> is a unique framework for web development called "aseqbase" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>
+<p><a href="http://aseqbase.ir" target="_blank">MiMFa aseqbase</a> is a sequence-based web development framework designed by MiMFa to simplify the creation of modular, scalable, fast, safe, and accessible websites. Whether you're building  hierarchical platforms, subdomains, single-page applications, and so on. aseqbase provides the structure and tools to do it efficiently.
 
-<h3>Demonstrations</h3>
+aseqbase is built around the concept of **sequential web architecture** where each component, page, or subdomain follows a logical, layered sequence for deployment and accessibility. This makes it ideal for:
+	- Multi-subdomain websites
+	- Single-page applications
+	- Custom CMS setups
+	- Educational or media-rich platforms
+	- ...
+
+Explore the ecosystem:
+	- [Main site](http://aseqbase.ir)
+	- [Developer portal](https://dev.aseqbase.ir)
+	- [Media hub](https://media.aseqbase.ir)
+	- [CV builder](https://cv.aseqbase.ir)
+	- [Image tools](https://i.aseqbase.ir)
+
+## Repositories
+
+| Repo         | Description                                                                 |
+|--------------|-----------------------------------------------------------------------------|
+| `aseqbase`   | Core framework for sequence-based web development                           |
+| `sequence`   | Tools to create new subdomains with full accessibility and equipment        |
+| `single`     | Setup for single-page websites or subdomains                                |
+| `administrator` | Default CMS tailored for aseqbase websites                              |
+| ...          |                                                                            |
+
+<h2>Demonstrations</h2>
 	<p>There is a list of multiple websites, developed by this framework:</p>
 	<table>
 		<tr><th>NAME</th><th>DESCRIPTION</th><th>VISIT</th></tr>
@@ -21,7 +45,7 @@
 		<tr><td>PubkyFace</td><td>10,000 unique collectible NFT Characters with proof of ownership stored on the Polygon blockchain</td><td><a href="http://pf.mimfa.net" target="_blank">&#128279</a></td></tr>
 	</table>
 
-<h3>Requirements</h3>
+<h2>Requirements</h2>
 	<p>This version is available for:</p>
 	<h4>Operating System Options:</h4>
 		<table>
@@ -49,7 +73,7 @@
 			<tr><td>PostgreSQL</td><td>8.3.18 +</td></tr>
 		</table>
 
-<h3>Managements</h3>
+<h2>Managements</h2>
 <h4>Installing</h4>
 
   1. Install all requirements mentioned above
@@ -133,13 +157,46 @@
   2. Follow the steps to finish creating the file.
   3. Enjoy...
 
-<h3>Contributions</h3>
+<h2>Contributions</h2>
 	<p>Contributions can take the form of new components or features, changes to existing features, tests, documentation (such as developer guides, user guides, examples, or specifications), bug fixes, optimizations, or just good suggestions.</p>
 
-<h3>License</h3>
+
+We welcome contributions! To get involved:
+	1. Fork the repository
+	2. Create a feature branch
+	3. Submit a pull request with clear documentation
+
+
+Detailed guides and examples are available at [dev.aseqbase.ir](https://dev.aseqbase.ir). You’ll find:
+	- Setup walkthroughs
+	- CMS customization
+	- Subdomain management
+	- Accessibility best practices
+
+
+To start contributing to aseqbase:
+
+* **Technologies Used**:
+	- PHP (Core language)
+	- Modular architecture
+	- Hierarchy automation
+
+* **Clone the core framework**:
+   ```bash
+   git clone https://github.com/aseqbase/aseqbase.git
+   ```
+
+* **Choose your deployment type**:
+   - For multi-subdomain: contributing to the `sequence` repo
+   - For single-page: contributing to the `single` repo
+   - For CMS: contributing to the `administrator` repo
+   - ...
+
+
+<h2>License</h2>
 	<p>aseqbase Core is released under the terms of the GNU General Public License.</p>
 
-<h3>Links</h3>
+<h2>Links</h2>
 	<ul>
 		<li>To download the latest release, click <a href="http://aseqbase.mimfa.net/download" target="_blank">here &#128279</a>.</li>
 		<li>To watch demonstration and tutorial videos, click <a href="http://media.mimfa.net" target="_blank">here &#128279</a>.</li>
