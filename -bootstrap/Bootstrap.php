@@ -464,7 +464,7 @@ class Info extends AseqInfo") . " {
         if (!isset(self::$Configurations["Global"]))
             self::$Configurations["Global"] = [];
         return self::CreateFile(self::$DestinationDirectory . "global.php", fn() => "<?php
-\$ASEQ = " . self::GetInput("Current directory name", $force, self::$Configurations["Global"]["Aseq"] ?? "null", self::$Configurations["Global"]["Aseq"], argument: "aseq") . "; 	// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
+// \$ASEQ = " . self::GetInput("Current directory name", $force, self::$Configurations["Global"]["Aseq"] ?? "null", self::$Configurations["Global"]["Aseq"], argument: "aseq") . "; 	// (Optional) The current subdomain sequence, or leave null if this file is in the root directory
 \$BASE = " . self::GetInput("Parent directory name", $force, self::$Configurations["Global"]["Base"] ?? $parent, self::$Configurations["Global"]["Base"], argument: "base") . "; 	// (Optional) The parent directory you want to inherit all properties except what you changed
 // \$SEQUENCES_PATCH = []; 		            // (Optional) An array to apply your custom changes in \\_::\$Sequences
                                             // newdirectory, newaseq; // Add new directory to the \\_::\$Sequences
