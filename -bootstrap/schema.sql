@@ -234,9 +234,10 @@ REPLACE INTO `%%PREFIX%%UserGroup` (`Id` , `Name` , `Image` , `Title` , `Descrip
 --
 
 CREATE TABLE IF NOT EXISTS `Translate_Lexicon` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
   `KeyCode` varchar(256) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `ValueOptions` longtext DEFAULT NULL,
-  PRIMARY KEY (`KeyCode` ),
+  PRIMARY KEY (`Id` ),
   UNIQUE KEY `KeyCode` (`KeyCode` )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 

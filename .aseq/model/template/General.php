@@ -12,17 +12,17 @@ class General extends Template
         component("Manifest");
 		component("Reset");
 		component("General");
-        component("JsonLD");
         component("View");
         component("Be");
 		//component("Evaluate");
-		component("FontFace");
+        component("Promote");
+		component("Animate");
+		component("Fonts");
 		component("Icons");
-        component("ShortcutKey");
+        component("Shortcuts");
 		component("JQuery");
 		component("DataTable");
 		//component("Bootstrap");
-		component("AOS");
 	}
 
 	public function RenderInitial()
