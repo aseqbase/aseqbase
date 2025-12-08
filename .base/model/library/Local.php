@@ -127,7 +127,7 @@ class Local
 		foreach (\_::$Sequence as $directory => $root)
 			if (startsWith($path, $directory))
 				return $path;
-		return \_::$Router->Directory . ltrim(self::GetAddress($path), DIRECTORY_SEPARATOR);
+		return \_::$Address->Directory . ltrim(self::GetAddress($path), DIRECTORY_SEPARATOR);
 	}
 	/**
 	 * To get the relative address from a path
@@ -154,7 +154,7 @@ class Local
 	 */
 	public static function CreateAddress(string $fileName = "new", string $format = "", ?string $directory = null, bool $random = true): string
 	{
-		$directory = $directory ?? \_::$Router->TempDirectory;
+		$directory = $directory ?? \_::$Address->TempAddress;
 		do
 			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . "-" . getId($random) . $format;
 		while (file_exists(filename: $path));
@@ -167,7 +167,7 @@ class Local
 	 */
 	public static function GenerateOrganizedDirectory(?string $rootDirectory = null): string
 	{
-		$rootDirectory = ($rootDirectory ?? \_::$Router->PublicDirectory) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR;
+		$rootDirectory = ($rootDirectory ?? \_::$Address->PublicAddress) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR;
 		return self::CreateDirectory($rootDirectory);
 	}
 
@@ -183,8 +183,8 @@ class Local
 			return null;
 		if (is_dir($path))
 			return $path;
-		if (startsWith($path, \_::$Router->Directory))
-			$path = substr($path, strlen(\_::$Router->Directory));
+		if (startsWith($path, \_::$Address->Directory))
+			$path = substr($path, strlen(\_::$Address->Directory));
 		foreach (\_::$Sequence as $directory => $p)
 			if (is_dir($directory . $path))
 				return $directory . $path;
@@ -197,8 +197,8 @@ class Local
 	public static function CreateDirectory($directory)
 	{
 		$dir = "";
-		if (startsWith($directory, \_::$Router->Directory))
-			$directory = substr($directory, strlen($dir = \_::$Router->Directory));
+		if (startsWith($directory, \_::$Address->Directory))
+			$directory = substr($directory, strlen($dir = \_::$Address->Directory));
 		$dirs = explode(DIRECTORY_SEPARATOR, trim($directory, DIRECTORY_SEPARATOR));
 		foreach ($dirs as $d)
 			if (!file_exists($dir .= $d)) {
@@ -270,8 +270,8 @@ class Local
 			return null;
 		if (file_exists($path))
 			return $path;
-		if (startsWith($path, \_::$Router->Directory))
-			$path = substr($path, strlen(\_::$Router->Directory));
+		if (startsWith($path, \_::$Address->Directory))
+			$path = substr($path, strlen(\_::$Address->Directory));
 		foreach (\_::$Sequence as $directory => $p)
 			if (file_exists($directory . $path))
 				return $directory . $path;
@@ -375,7 +375,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) something to the local storage
 	 * @param mixed $content A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Router->PublicDirectory as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -389,7 +389,7 @@ class Local
 			return null;
 		if (!get($content, "name"))
 			return null;//throw new \SilentException("There is not any file!");
-		$directory = self::GenerateOrganizedDirectory($directory ?? \_::$Router->PublicDirectory);
+		$directory = self::GenerateOrganizedDirectory($directory ?? \_::$Address->PublicAddress);
 
 		$fileType = strtolower(pathinfo($content["name"], PATHINFO_EXTENSION));
 		$dir = self::CreateDirectory($directory);
@@ -420,7 +420,7 @@ class Local
 			throw new \SilentException("The 'file size' is 'very big'!");
 		}
 		if (!$dir) {
-			$dir = \_::$Router->TempDirectory;
+			$dir = \_::$Address->TempAddress;
 			$t = preg_find("/^[\w-]+\b/", $content["type"] ?? "");
 			if ($t)
 				$dir .= $t . DIRECTORY_SEPARATOR;
@@ -438,7 +438,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) file to the local storage
 	 * @param mixed $content A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Router->PublicDirectory as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -451,7 +451,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) image to the local storage
 	 * @param mixed $content An image object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Router->PublicDirectory as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum image size in byte
 	 * @param mixed $maxSize Maximum image size in byte
 	 * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
@@ -473,7 +473,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) audio to the local storage
 	 * @param mixed $content A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Router->PublicDirectory as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -486,7 +486,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) video to the local storage
 	 * @param mixed $content A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Router->PublicDirectory as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -499,7 +499,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) document to the local storage
 	 * @param mixed $content A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Router->PublicDirectory as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]

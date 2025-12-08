@@ -30,7 +30,7 @@ else {
             } elseif(is_array($items)) array_shift($items);
             else $items = [];
             view(pop($viewData, "ViewName") ?? "category", [
-                "Root" => pop($viewData, "Root") ?? \_::$Router->CategoryRoot,
+                "Root" => pop($viewData, "Root") ?? \_::$Address->CategoryRoot,
                 "Items" => $items,
                 ...$viewData??[], 
                 ...$parent??[]

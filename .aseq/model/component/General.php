@@ -174,5 +174,5 @@ class GeneralStyle{
 	}
 }
 \_::$Front->Libraries[] = Struct::Style(GeneralStyle::Variables());
-\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Router->StyleDirectory,'general.css', optimize: true));
-\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Router->ScriptDirectory, 'general.js', optimize: true));
+\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
+\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));

@@ -45,7 +45,12 @@ class Script
         }
     }
 
-    
+    /**
+     * To convert a point to scripts
+     * @param mixed $row The point content
+     * @param int $index The index of the point
+     * @return string The script part
+     */
     public static function Point($row, $index = 0)
     {
         $cc = is_array($row) ? count($row) : 0;
@@ -88,15 +93,30 @@ class Script
             ]);
         }
     }
+    /**
+     * To convert multiple points to scripts
+     * @param mixed $content The points content
+     * @return string The script part
+     */
     public static function Points($content)
     {
         return join(",", loop($content, function ($row, $i) {
             return self::Point($row, $i); }));
     }
+    /**
+     * To convert parameters to scripts
+     * @param mixed $items The items to convert
+     * @return string The script part
+     */
     public static function Parameters($items)
     {
         return isEmpty($items) ? "" : self::Convert($items);
     }
+    /**
+     * To convert numbers or array of numbers to scripts
+     * @param mixed $items A number or an array of numbers
+     * @return string The script part
+     */
     public static function Numbers($items)
     {
         $isarr = is_iterable($items);
@@ -116,7 +136,14 @@ class Script
             )) : $items;
         return isEmpty($val) ? "0" : ($isarr ? "[" + $val + "]" : $val);
     }
-
+    /**
+     * To import a file from the client device
+     * @param mixed $formats The acceptable formats like ".jpg,.png" or "image/*"
+     * @param bool $multiple Allow to select multiple files
+     * @param bool $binary To read the file as binary data
+     * @param int $timeout The timeout for uploading the file in milliseconds
+     * @return string The script part
+     */
     public static function ImportFile($formats = null, $multiple = false, $binary = false, $timeout = 60000){
         return "            var input = document.createElement('input');
             input.setAttribute('Type' , 'file');
@@ -145,19 +172,40 @@ class Script
             return false;
         ";
     }
-
+    /**
+     * Show an alert dialog
+     * @param mixed $message
+     * @return string
+     */
     public static function Alert($message = "")
     {
         return "alert(" . self::Convert(__($message)) . ")";
     }
+    /**
+     * Show a confirmation dialog
+     * @param mixed $message
+     * @return string
+     */
     public static function Confirm($message = "")
     {
         return "confirm(" . self::Convert(__($message)) . ")";
     }
+    /**
+     * To prompt a message and get user input
+     * @param mixed $message The message
+     * @param mixed $default The default value
+     * @return string The script part
+     */
     public static function Prompt($message = "", $default = null)
     {
         return "prompt(" . self::Convert(__($message)) . ", " . self::Convert(__($default)) . ")";
     }
+    /**
+     * Show message on the client side console
+     * @param mixed $message The data that is ready to print
+     * @param mixed $type The type of the message: log, info, warn, error
+     * @return string The script part
+     */
     public static function Log($message = "", $type = null)
     {
         switch($type = strtolower($type??"")){

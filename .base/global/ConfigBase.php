@@ -82,6 +82,13 @@ class ConfigBase extends ArrayObject
      public $CachePeriod = "v";
 
      /**
+      * The level of reporting: 0: Not report; 1: Report Errors; 2: Report Warnings; 3: Report Infos
+      * @var bool
+      * @category Optimization
+      */
+     public $ReportLevel = 2;
+
+     /**
       * Allow to reduce size of documents for increasing site speed
       * @var bool
       * @category Optimization

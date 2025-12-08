@@ -147,7 +147,7 @@ class BackBase
 			$this->SecretKey = $this->SoftKey;
 
 		if ($this->DataBaseAddNameToPrefix)
-			$this->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Router->Name ?? "qb") . "_";
+			$this->DataBasePrefix .= preg_replace("/\W/i", "_", \_::$Address->Name ?? "qb") . "_";
 		$this->DataBase = new \MiMFa\Library\DataBase(
 			$this->DataBaseType,
 			$this->DataBaseHost,

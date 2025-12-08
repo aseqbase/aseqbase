@@ -23,7 +23,8 @@ class SilentException extends Exception
 if (!error_reporting())
 	set_exception_handler(function ($exception) {
 		if ($exception instanceof SilentException) {
-			// Do nothing (prevent logging)
+			report($exception->getMessage(), "log", true);
+			report($exception->getTraceAsString(), "error", true);
 		} else {
 			error_log($exception->getMessage()); // Log other exceptions
 		}

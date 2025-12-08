@@ -9,7 +9,7 @@ $module->Title = !isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strl
 $module->Description = get($data, 'Description');
 $module->Image = get($data, 'Image');
 
-$Root = pop($data, 'Root') ?? \_::$Router->CategoryRoot;
+$Root = pop($data, 'Root') ?? \_::$Address->CategoryRoot;
 $items = pop($data, "Items");
 $name = $module->Name;// To do not change the name of module
 pod($module, $data);

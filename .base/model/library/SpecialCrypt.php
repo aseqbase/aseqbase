@@ -11,11 +11,10 @@ class SpecialCrypt extends HashCrypt
 
     /**
      * Encrypts then MACs a message
-     *
-     * @param string $message - plaintext message
+     * @param string $message - plain text message
      * @param string $key - encryption key (raw binary expected)
      * @param boolean $encode - set to TRUE to return a base64-encoded string
-     * @return string (raw binary)
+     * @return string The encrypted message
      */
     public function Encrypt($message, $key, $encode = false)
     {
@@ -36,11 +35,10 @@ class SpecialCrypt extends HashCrypt
 
     /**
      * Decrypts a message (after verifying integrity)
-     *
-     * @param string $message - ciphertext message
+     * @param string $message - cipher text message
      * @param string $key - encryption key (raw binary expected)
      * @param boolean $encoded - are we expecting an encoded string?
-     * @return string (raw binary)
+     * @return string The decrypted plain text message
      */
     public function Decrypt($message, $key, $decode = false)
     {

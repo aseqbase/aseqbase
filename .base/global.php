@@ -28,16 +28,8 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . "_.php");
 	=> str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
 ];
 
-require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "RouterBase.php");
-\_::$Router = new RouterBase();
-run("Router");
-\_::$Router = new Router($GLOBALS["ASEQBASE"],
-	//$GLOBALS["DIR"],
-	//root: getHost() . "/"//??$GLOBALS["ROOT"]
-);
-
-run("global/Base");
-run("global/Types");
+require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "Address.php");
+\_::$Address = new Address($GLOBALS["ASEQBASE"], $GLOBALS["DIR"]);
 
 library("Local");
 library("Convert");
@@ -45,6 +37,12 @@ library("Struct");
 library("Style");
 library("Script");
 library("Internal");
+
+run("global/RouterBase");
+run("Router");
+\_::$Router = new Router();
+run("global/Base");
+run("global/Types");
 
 run("global/ConfigBase");
 run("Config");
@@ -66,8 +64,8 @@ run("global/InfoBase");
 run("Info");
 \_::$Info = new Info();
 
-Local::CreateDirectory(\_::$Router->LogDirectory);
-Local::CreateDirectory(\_::$Router->TempDirectory);
+Local::CreateDirectory(\_::$Address->LogAddress);
+Local::CreateDirectory(\_::$Address->TempAddress);
 register_shutdown_function('cleanupTemp', false);
 
 component("Component");
@@ -508,7 +506,7 @@ function popReceived($key = null, $default = null, array|string|null $method = n
  */
 function request($intent = null, $callback = null)
 {
-	return beforeUsing(\_::$Router->Directory, "finalize", function () use ($intent, $callback) {
+	return beforeUsing(\_::$Address->Directory, "finalize", function () use ($intent, $callback) {
 		$callbackScript = "(data,err)=>document.querySelector('body').after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))";
 		$progressScript = "null";
 		$timeout = 60000;
@@ -592,8 +590,8 @@ function script($content, $source = null, ...$attributes)
 	// if (getMethodIndex() != 1)
 	// 	\_::$Front->Append("head", Struct::Script($content, $source, ...$attributes));
 	// else {
-		echo $content = Struct::Script($content, $source, ...$attributes);
-		return $content;
+	echo $content = Struct::Script($content, $source, ...$attributes);
+	return $content;
 	//}
 }
 /**
@@ -664,17 +662,53 @@ function error($message = null)
 	echo $message = Struct::Error($message);
 	return $message;
 }
+
 /**
- * Show message on the console
- * @param mixed $message
+ * Show message on the client side console or log it in the server side
+ * @param mixed $message The data that is ready to print
+ * @param string $type The type of the message: log, info, warn, error
+ * @param mixed $secret If set to false it will not log in the server side
  */
-function report($message = null, $type = "log")
+function report($message = null, $type = "log", $secret = null)
 {
-	return script(Script::Log($message, $type));
+	$log = false;
+	if ($secret !== false)
+		switch (strtolower($type)) {
+			case "error":
+			case "errors":
+				$type = "error";
+				$log = \_::$Config->ReportLevel>0?$type: false;
+				break;
+			case "warn":
+			case "warns":
+				$type = "warn";
+				$log = \_::$Config->ReportLevel>1?$type: false;
+				break;
+			case "info":
+			case "information":
+				$type = "info";
+				$log = \_::$Config->ReportLevel>2?$type: false;
+				break;
+			default:
+				$type = "log";
+				$log = \_::$Config->ReportLevel>2?$type: false;
+				break;
+		}
+	if($log) file_put_contents(address(\_::$Address->LogAddress . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
+	if (!$secret) return script(Script::Log($message, $type));
 }
 
 /**
  * Convert markdown supported data and echo them on the client side
+ * Also can render custom markups using the replacements dictionary
+ * Supports all MarkDown markups, and custom markups such as:
+ * - Inline code with backticks (`code`)
+ * - Code blocks with greater-than sign (>)
+ * - All type of multimedia embedding with ![alt](url)
+ * - Add custom attributes to any tag with @{} after the markup
+ * - Footnotes with [^note sign] and [note sign]: url or note
+ * - Auto-detect text direction
+ * - And more...
  * @param mixed $content The data that is ready to print
  * @param array|null $replacements A key=>value array of all parts to their replacement matchs
  * @param mixed $status The header status
@@ -1072,7 +1106,7 @@ function authCondition($checkStatus = true, $checkAccess = true, $tableName = ""
 		$cond[] = "{$tableName}Status IS NULL OR {$tableName}Status IN ('','1',1)";
 	if ($checkAccess)
 		$cond[] = \_::$User->GetAccessCondition($tableName);
-	if($a = \_::$Front->GetAccessCondition($tableName))
+	if ($a = \_::$Front->GetAccessCondition($tableName))
 		$cond[] = $a;
 	return " (" . join(") AND (", $cond) . ")";
 }
@@ -1404,7 +1438,7 @@ function runSequence($name, mixed $data = [], bool $print = true, string|int $or
 	$depth = min($depth, count(\_::$Sequence)) - 1;
 	$res = [];
 	for (; $origin <= $depth; $depth--)
-		$res[] = using(\_::$Router->Directory, $name, $data, $print, $depth, 1, $alternative, $default, require: $require, once: $once);
+		$res[] = using(\_::$Address->Directory, $name, $data, $print, $depth, 1, $alternative, $default, require: $require, once: $once);
 	return $res;
 }
 /**
@@ -1416,7 +1450,7 @@ function runSequence($name, mixed $data = [], bool $print = true, string|int $or
  */
 function run($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = true, bool $once = true)
 {
-	return using(\_::$Router->Directory, $name, $data, $print, $origin, $depth, $alternative, $default, require: $require, once: $once);
+	return using(\_::$Address->Directory, $name, $data, $print, $origin, $depth, $alternative, $default, require: $require, once: $once);
 }
 
 /**
@@ -1428,7 +1462,7 @@ function run($name, mixed $data = [], bool $print = true, string|int $origin = 0
  */
 function model($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->ModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true);
+	return using(\_::$Address->ModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true);
 }
 /**
  * To interprete, the specified LibraryName
@@ -1439,7 +1473,7 @@ function model($name, mixed $data = [], bool $print = true, string|int $origin =
  */
 function library($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
+	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
 /**
  * To interprete, the specified ComponentName
@@ -1450,7 +1484,7 @@ function library($name, mixed $data = [], bool $print = true, string|int $origin
  */
 function component($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Component\\$used" : null;
+	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Component\\$used" : null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -1461,7 +1495,7 @@ function component($name, mixed $data = [], bool $print = true, string|int $orig
  */
 function module($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Module\\$used" : null;
+	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Module\\$used" : null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -1472,7 +1506,7 @@ function module($name, mixed $data = [], bool $print = true, string|int $origin 
  */
 function template($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
+	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
 
 /**
@@ -1484,7 +1518,7 @@ function template($name, mixed $data = [], bool $print = true, string|int $origi
  */
 function view($name = null, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->ViewDirectory, $name ?? \_::$Front->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default, once: true);
+	return using(\_::$Address->ViewDirectory, $name ?? \_::$Front->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default, once: true);
 }
 
 /**
@@ -1496,7 +1530,7 @@ function view($name = null, mixed $data = [], bool $print = true, string|int $or
  */
 function region($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified pagename
@@ -1507,7 +1541,7 @@ function region($name, mixed $data = [], bool $print = true, string|int $origin 
  */
 function page($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified partname
@@ -1518,7 +1552,7 @@ function page($name, mixed $data = [], bool $print = true, string|int $origin = 
  */
 function part($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified computionname
@@ -1529,7 +1563,7 @@ function part($name, mixed $data = [], bool $print = true, string|int $origin = 
  */
 function compute($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->ComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->ComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
@@ -1541,7 +1575,7 @@ function compute($name, mixed $data = [], bool $print = true, string|int $origin
  */
 function route($name = null, mixed $data = null, bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Router->RouteDirectory, $name ?? \_::$Router->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->RouteDirectory, $name ?? \_::$Router->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
@@ -1553,7 +1587,7 @@ function route($name = null, mixed $data = null, bool $print = true, string|int 
  */
 function asset($directory, string|null $name = null, string|array|null $extensions = null, $optimize = false, string|int $origin = 0, int $depth = 999999, $default = null)
 {
-	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Router->AssetRoot, $directory ?? "");
+	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Address->AssetRoot, $directory ?? "");
 	$i = 0;
 	if (!is_array($extensions))
 		$extensions = [$extensions ?? ""];
@@ -2445,10 +2479,9 @@ function createEmail($name = "do-not-reply", string|null $path = null): string|n
 function cleanupTemp($full = true)
 {
 	$i = 0;
-	if ($full) {
-		$i += cleanup(\_::$Router->TempDirectory);
-		$i += cleanup(\_::$Router->TempDirectory);
-	} else
+	if ($full)
+		$i += cleanup(\_::$Address->TempAddress);
+	else
 		foreach ($_FILES as $file)
 			if (isset($file["tmp_name"]) && is_file($file["tmp_name"]) && ++$i)
 				unlink($file["tmp_name"]);
@@ -2470,10 +2503,8 @@ function cleanup($directory = null)
 				rmdir($file);
 			}
 	} else {
-		$i += cleanup(\_::$Router->TempDirectory);
-		$i += cleanup(\_::$Router->TempDirectory);
-		$i += cleanup(\_::$Router->LogDirectory);
-		$i += cleanup(\_::$Router->LogDirectory);
+		$i += cleanup(\_::$Address->TempAddress);
+		$i += cleanup(\_::$Address->LogAddress);
 		clearSecrets();
 		\_::$User->Session->Clear();
 	}
@@ -2687,14 +2718,14 @@ function isBase(string|null $directory): bool
 }
 function isInAseq(string|null $filePath): bool
 {
-	$filePath = preg_replace("/^\\\\/", \_::$Router->Directory, str_replace(\_::$Router->Directory, "", trim($filePath ?? getUrl())));
+	$filePath = preg_replace("/^\\\\/", \_::$Address->Directory, str_replace(\_::$Address->Directory, "", trim($filePath ?? getUrl())));
 	if (isFormat($filePath, \_::$Extension))
 		return file_exists($filePath);
 	return is_dir($filePath) || file_exists($filePath . \_::$Extension);
 }
 function isInBase(string|null $filePath): bool
 {
-	$filePath = __DIR__ . DIRECTORY_SEPARATOR . preg_replace("/^\\\\/", "", str_replace(\_::$Router->Directory, "", trim($filePath ?? getUrl())));
+	$filePath = __DIR__ . DIRECTORY_SEPARATOR . preg_replace("/^\\\\/", "", str_replace(\_::$Address->Directory, "", trim($filePath ?? getUrl())));
 	if (isFormat($filePath, \_::$Extension))
 		return file_exists($filePath);
 	return is_dir($filePath) || file_exists($filePath . \_::$Extension);
@@ -2950,7 +2981,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Router->ContentRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->ContentRoot . strtolower($k));
 				},
 				keyWords: table("Content")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2960,7 +2991,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Router->CategoryRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->CategoryRoot . strtolower($k));
 				},
 				keyWords: table("Category")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2970,7 +3001,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Router->TagRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->TagRoot . strtolower($k));
 				},
 				keyWords: table("Tag")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -2980,7 +3011,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Router->UserRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->UserRoot . strtolower($k));
 				},
 				keyWords: table("User")->SelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
 				both: false,
@@ -3109,19 +3140,19 @@ function array_find_keys($array, callable $searching)
 //  */
 // function test_address($directory = null, string $name = "Configuration")
 // {
-// 	echo addressing($directory ?? \_::$Router->Directory, $name);
-// 	echo "<br>ASEQ: " . \_::$Router->Name;
+// 	echo addressing($directory ?? \_::$Address->Directory, $name);
+// 	echo "<br>ASEQ: " . \_::$Address->Name;
 // 	echo "<br>ASEQ->Path: " . \_::$User->Path;
-// 	echo "<br>ASEQ->Dir: " . \_::$Router->Directory;
+// 	echo "<br>ASEQ->Dir: " . \_::$Address->Directory;
 // 	echo "<br>OTHER ASEQ: <br>";
-// 	var_dump(\_::$Router);
-// 	echo "<br>BASE: " . \_::$Router->Name;
+// 	var_dump(\_::$Address);
+// 	echo "<br>BASE: " . \_::$Address->Name;
 // 	echo "<br>BASE->Path: " . \_::$User->Path;
-// 	echo "<br>BASE->Dir: " . \_::$Router->Directory;
+// 	echo "<br>BASE->Dir: " . \_::$Address->Directory;
 // 	echo "<br>OTHER BASE: <br>";
 // 	var_dump(\_::$Address);
 // 	echo "<br><br>ADDRESSES: <br>";
-// 	var_dump(\_::$Router);
+// 	var_dump(\_::$Address);
 // }
 // function test_url()
 // {

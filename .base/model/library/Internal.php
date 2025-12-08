@@ -208,6 +208,6 @@ class Internal
     }
 }
 
-Internal::$Directory = \_::$Router->PrivateDirectory . "internal" . DIRECTORY_SEPARATOR;
-Local::CreateDirectory(\_::$Router->PrivateDirectory);
+Internal::$Directory = \_::$Address->PrivateAddress . "internal" . DIRECTORY_SEPARATOR;
+Local::CreateDirectory(\_::$Address->PrivateAddress);
 Local::CreateDirectory(Internal::$Directory);

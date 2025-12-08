@@ -207,17 +207,17 @@ abstract class FrontBase
 			$this->AllowTranslate && $this->CacheLanguage
 		);
 
-		$this->Libraries[] = Struct::Script(null, asset(\_::$Router->ScriptDirectory, 'global.js', optimize: true));
+		$this->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
 		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
 		if ($this->DetectMode && is_null($this->SwitchMode)) {
 			request(
 				"window.matchMedia('(prefers-color-scheme: dark)').matches ? -1 : 1",
 				function ($mode) {
-					$cmode = $this->GetMode();
+					$cmode = \_::$Front->GetMode();
 					if (($mode > 0 && $cmode < 0) || ($mode < 0 && $cmode > 0)) {
-						setMemo($this->SwitchRequest, true);
-						$this->SwitchMode = true;
+						setMemo(\_::$Front->SwitchRequest, true);
+						\_::$Front->SwitchMode = true;
 					}
 				}
 			);
@@ -425,7 +425,7 @@ abstract class FrontBase
 	public function Set($selector = null, $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Router->Directory,
+			\_::$Address->Directory,
 			"finalize",
 			fn() => response(Struct::Script($this->MakeSetScript($selector, $handler, $args, false)))
 		);
@@ -456,7 +456,7 @@ abstract class FrontBase
 	public function Delete($selector = "body")
 	{
 		return beforeUsing(
-			\_::$Router->Directory,
+			\_::$Address->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeDeleteScript($selector, false)))
 		);
@@ -478,7 +478,7 @@ abstract class FrontBase
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Router->Directory,
+			\_::$Address->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeBeforeScript($selector, $handler, $args, false)))
 		);
@@ -510,7 +510,7 @@ abstract class FrontBase
 	public function After($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Router->Directory,
+			\_::$Address->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeAfterScript($selector, $handler, $args, false)))
 		);
@@ -543,7 +543,7 @@ abstract class FrontBase
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Router->Directory,
+			\_::$Address->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeFillScript($selector, $handler, $args, false)))
 		);
@@ -576,7 +576,7 @@ abstract class FrontBase
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Router->Directory,
+			\_::$Address->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakePrependScript($selector, $handler, $args, false)))
 		);
@@ -610,7 +610,7 @@ abstract class FrontBase
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Router->Directory,
+			\_::$Address->Directory,
 			"finalize",
 			fn() => self::Append("body", Struct::Script($this->MakeAppendScript($selector, $handler, $args, false)))
 		);

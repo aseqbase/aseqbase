@@ -33,6 +33,7 @@ class _
 	 *]
 	 */
 	public static array $Sequence;
+	public static Address $Address;
 
 	/**
 	 * To access all the website configurations
@@ -46,7 +47,7 @@ class _
 
 	/**
 	 * To access all addresses to a sequence of the website
-	 * and an array of all method=>patterns=>handler view names to handle all type request virtual pathes
+	 * and an array of all method=>patterns=>handler view names to handle all type request virtual paths
 	 */
 	public static RouterBase $Router;
 

@@ -94,7 +94,7 @@ class Session
 	{
 		$this->StartSecure();
 		if (is_null($this->GetId())) {
-			$this->SetId(getClientCode(\_::$Router->Name));
+			$this->SetId(getClientCode(\_::$Address->Name));
 			$this->Set("Ip", getClientIp());
 			return true;
 		}

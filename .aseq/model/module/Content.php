@@ -266,8 +266,8 @@ class Content extends Module
           $this->LeaveComment = \_::$Config->AllowWriteComment;
           $this->AllowComments = \_::$Config->AllowReadComment;
           $this->AllowCommentsAccess = \_::$Config->ReadCommentAccess;
-          $this->Root = $this->Root ?? \_::$Router->ContentRoot;
-          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Router->ContentRoot;
+          $this->Root = $this->Root ?? \_::$Address->ContentRoot;
+          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Address->ContentRoot;
           $this->CommentForm = new CommentForm();
           $this->CommentForm->MessageType = "texts";
           $this->CommentForm->Access = \_::$Config->WriteCommentAccess;
@@ -524,7 +524,7 @@ class Content extends Module
                          function ($val) use (&$p_meta) {
                               $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
                               if (!isEmpty($authorName))
-                                   $p_meta .= " " . Struct::Link($authorName["Name"], \_::$Router->UserRoot . $authorName["Signature"], ["class" => "author"]);
+                                   $p_meta .= " " . Struct::Link($authorName["Name"], \_::$Address->UserRoot . $authorName["Signature"], ["class" => "author"]);
                          },
                          $this->Item,
                          'AuthorId'
@@ -600,7 +600,7 @@ class Content extends Module
                                         ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
                                         : $k
                                         ,
-                                        \_::$Router->TagRoot . $k,
+                                        \_::$Address->TagRoot . $k,
                                         ["class" => "btn"]
                                    );
                               }

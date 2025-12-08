@@ -32,8 +32,9 @@ class Style extends \ArrayObject
 
 	/**
 	 * To convert everything to a simple css styles
-	 * @param mixed $object
-	 * @return string
+	 * @param mixed $object The style object
+	 * @param mixed $args The additional arguments
+	 * @return string The styles string
 	 */
 	public static function Convert($object, ...$args)
 	{
@@ -51,6 +52,12 @@ class Style extends \ArrayObject
 		return join(" ", $styles);
 	}
 
+	/**
+	 * To create a universal property with all vendor prefixes
+	 * @param string $prop The property name
+	 * @param string $val The property value
+	 * @return string The universal property
+	 */
 	public static function UniversalProperty($prop, $val)
 	{
 		return
@@ -60,6 +67,12 @@ class Style extends \ArrayObject
 		-o-$prop: $val;
 		$prop: $val;";
 	}
+	/**
+	 * To create a universal value with all vendor prefixes
+	 * @param string $prop The property name
+	 * @param mixed ...$args The property values
+	 * @return string The universal value
+	 */
 	public static function UniversalValue()
 	{
 		$prop = func_get_arg(0);
@@ -102,6 +115,14 @@ class Style extends \ArrayObject
 		return $res . ";";
 	}
 
+	/**
+	 * To create a css property
+	 * @param string $prop The property name
+	 * @param mixed $val The property value
+	 * @param bool $isUniversalProperty To create a universal property with all vendor prefixes
+	 * @param bool $isUniversalValue To create a universal value with all vendor prefixes
+	 * @return string|null The css property or null if the value is null
+	 */
 	public static function DoProperty($prop, $val, $isUniversalProperty = false, $isUniversalValue = false)
 	{
 		return is_null($val) ? null :
@@ -113,7 +134,12 @@ class Style extends \ArrayObject
 				)
 			);
 	}
-
+	/**
+	 * To apply style processing on a text content
+	 * @param string|null $text
+	 * @param array<string>|null $keyWords
+	 * @return string|null
+	 */
 	public static function DoStyle($text, $keyWords = null)
 	{
 		return self::DoStrong(Struct::Convert($text), $keyWords);
@@ -186,7 +212,11 @@ class Style extends \ArrayObject
 			}
 		return Decode($text, $dic);
 	}
-
+	/**
+	 * To create a drop color effect
+	 * @param string $color The color to drop
+	 * @return string The drop color style
+	 */
 	public static function DropColor($color)
 	{
 		return self::UniversalProperty("filter", "brightness(1000%) grayscale(100%) opacity(0.1)
@@ -197,15 +227,27 @@ class Style extends \ArrayObject
 													drop-shadow(0 0 0 $color)
 		");
 	}
-
+	/**
+	 * To toggle between dark and light filters
+	 * @param int|null $mode The mode value
+	 * @return string
+	 */
 	public static function ToggleFilter(int|null $mode = null)
 	{
 		return ($mode ?? \_::$Front->GetMode() ?? 0) < 0 ? self::LightFilter() : self::DarkFilter();
 	}
+	/**
+	 * To create a dark filter style
+	 * @return string
+	 */
 	public static function DarkFilter()
 	{
 		return self::UniversalProperty("filter", "brightness(-1000%) opacity(1) grayscale(100%)");
 	}
+	/**
+	 * To create a light filter style
+	 * @return string
+	 */
 	public static function LightFilter()
 	{
 		return self::UniversalProperty("filter", "brightness(1000%) opacity(1) grayscale(100%)");

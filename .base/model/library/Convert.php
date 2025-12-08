@@ -413,7 +413,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'temp_name' => Local::CreateAddress($filename, ".tmp", \_::$Router->TempDirectory),
+                                'temp_name' => Local::CreateAddress($filename, ".tmp", \_::$Address->TempAddress),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );
