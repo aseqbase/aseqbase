@@ -230,11 +230,10 @@ abstract class FrontBase
 		}
 	}
 
-	public function GetAccessCondition($tableName = "")
+	public function GetAccessCondition($tablePrefix = "")
 	{
-		$tableName = $tableName ? $tableName . "." : "";
 		if ($this->AllowTranslate)
-			return $this->Translate->GetAccessCondition($tableName);
+			return $this->Translate->GetAccessCondition($tablePrefix);
 		return null;
 	}
 
