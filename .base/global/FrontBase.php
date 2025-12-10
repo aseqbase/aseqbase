@@ -383,7 +383,7 @@ abstract class FrontBase
 	 */
 	function Bring($intents = null, $callback = null)
 	{
-		$callbackScript = "(data,err)=>{el=document.createElement('qb');el.innerHTML=data??err;item.before(...el.childNodes);item.remove();}";
+		$callbackScript = "(data,err)=>{_(item).before(data,err).remove();}";
 		$progressScript = "null";
 		$timeout = 60000;
 		$start = Internal::MakeStartScript(true);
@@ -441,9 +441,7 @@ abstract class FrontBase
 		return Internal::MakeScript(
 			$handler,
 			$args,
-			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err));l.remove();})"
-			//"(data,err)=>{elem = _(" . Script::Convert($selector) . ");elem.before(data??err);elem.remove();}"
-			,
+			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").before(data??err).remove()",
 			direct: $direct,
 			encrypt: false
 		);
@@ -494,7 +492,7 @@ abstract class FrontBase
 		return Internal::MakeScript(
 			$handler,
 			$args,
-			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").before(data??err)"
 			,
 			direct: $direct,
 			encrypt: false
@@ -526,7 +524,7 @@ abstract class FrontBase
 		return Internal::MakeScript(
 			$handler,
 			$args,
-			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
+			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").after(data??err)"
 			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.after(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err)))"
 			,
 			direct: $direct,
@@ -560,7 +558,7 @@ abstract class FrontBase
 			$handler,
 			$args,
 			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
-			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
+			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").html(data??err)"
 			,
 			direct: $direct,
 			encrypt: false
@@ -592,10 +590,7 @@ abstract class FrontBase
 		return Internal::MakeScript(
 			$handler,
 			$args,
-			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
-			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").prepend(data??err)"
-			//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-			,
+			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").prepend(data??err)",
 			direct: $direct,
 			encrypt: false
 		);
@@ -626,10 +621,7 @@ abstract class FrontBase
 		return Internal::MakeScript(
 			$handler,
 			$args,
-			//"(data,err)=>document.querySelector(".Script::Convert($selector ?? $this->DefaultDestinationSelector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
-			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
-			//"(data,err)=>_(" . Script::Convert($selector) . ").append(data??err)"
-			,
+			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").append(data??err)",
 			direct: $direct,
 			encrypt: false
 		);

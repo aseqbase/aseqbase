@@ -349,6 +349,62 @@ class Live extends Array {
             return this.replace(Array.from(tempDiv.children));
         }
     }
+    after(element) {
+        if (element instanceof Live) return this.each(tag => {
+            if (tag instanceof Element) {
+                const l = new Live(element);
+                tag.after(...element);
+                l.rebuild();
+            }
+        });
+        else if (element instanceof Element) return this.each(tag => {
+            if (tag instanceof Element) {
+                const l = new Live(element);
+                tag.after(element);
+                l.rebuild();
+            }
+        });
+        else if (Array.isArray(element)) return this.each(tag => {
+            if (tag instanceof Element) {
+                const l = new Live(element);
+                tag.after(...element);
+                l.rebuild();
+            }
+        });
+        else {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = String(element);
+            return this.after(Array.from(tempDiv.children));
+        }
+    }
+    before(element) {
+        if (element instanceof Live) return this.each(tag => {
+            if (tag instanceof Element) {
+                const l = new Live(element);
+                tag.before(...element);
+                l.rebuild();
+            }
+        });
+        else if (element instanceof Element) return this.each(tag => {
+            if (tag instanceof Element) {
+                const l = new Live(element);
+                tag.before(element);
+                l.rebuild();
+            }
+        });
+        else if (Array.isArray(element)) return this.each(tag => {
+            if (tag instanceof Element) {
+                const l = new Live(element);
+                tag.before(...element);
+                l.rebuild();
+            }
+        });
+        else {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = String(element);
+            return this.before(Array.from(tempDiv.children));
+        }
+    }
     remove() {
         return this.each(tag => {
             if (tag instanceof Element)

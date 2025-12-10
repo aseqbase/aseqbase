@@ -70,7 +70,7 @@ class Internal
      */
     public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000, $direct = false, $encrypt = true)
     {
-        $callbackScript = $callbackScript ?? "(data,err)=>document.querySelector(" . (self::$Selector) . ")." . (self::$Target) . "(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err))";
+        $callbackScript = $callbackScript ?? "(data,err)=>_(" . (self::$Selector) . ")." . (self::$Target) . "append(data??err)";
         $progressScript = $progressScript ?? "null";
         $start = self::MakeStartScript(direct: $direct);
         $end = self::MakeEndScript(direct: $direct);
@@ -86,7 +86,7 @@ class Internal
     public static function MakeStartScript($multilines = false, $direct = false)
     {
         if (\_::$Router->DefaultMethodName === "GET" && !headers_sent() && !$direct) {
-            return "document.addEventListener('DOMContentLoaded',()=>" . ($multilines ? "{" : "");
+            return "_(()=>" . ($multilines ? "{" : "");
         }
         return "";
     }
