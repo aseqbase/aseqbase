@@ -374,7 +374,7 @@ class MessageCollection extends Collection
                     if(attbox) data.Attach = attbox.innerText;
                     sendPut($action, data, selector, function (data, err) {
                         try{document.querySelector(selector .result).remove();}catch{}
-                        $(selector).prepend(data);
+                        _(selector).prepend(data);
                         if(!err){
                             for(attr in divinp) msgbox.removeAttribute(attr);
                             if(sbjbox) for(attr in divinp) sbjbox.removeAttribute(attr);
@@ -400,7 +400,7 @@ class MessageCollection extends Collection
                         {Id:forid},
                         selector,
                         (data, err)=>{
-                            if(!err) $(selector).html(data);
+                            if(!err) _(selector).html(data);
                         }
                     );
             }" .
@@ -433,11 +433,11 @@ class MessageCollection extends Collection
                         {Root:forid},
                         selector,
                         (data, err)=>{
-                            $(rbox).html(data);
+                            _(rbox).html(data);
                             if(rbox.querySelector('form')) btn.innerHTML = `$this->CancelButtonLabel`;
                         },
                         (data, err)=>{
-                            $(rbox).html(data);
+                            _(rbox).html(data);
                             if(rbox.querySelector('form')) btn.innerHTML = `$this->CancelButtonLabel`;
                         }
                     );

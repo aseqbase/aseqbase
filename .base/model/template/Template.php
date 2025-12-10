@@ -77,6 +77,7 @@ class Template extends \Base{
     public function __construct($setDefaults = true, $setRevises = true){
         parent::__construct($setDefaults, $setRevises);
         component("Global");
+		component("Live");
     }
 	public function Handler($received = null){
         ob_start();

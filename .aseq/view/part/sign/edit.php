@@ -24,7 +24,7 @@ if ($user) {
                     data.append('Signature' , `" . \_::$User->TemporarySignature . "`);
                     data.append('Image' , this.files[0]);
                     data.append('submit', 'upload');
-                    sendPost(location.href, data, '.{$form->Name}', (data, err)=>$('.{$form->Name}').append(data+''));
+                    sendPost(location.href, data, '.{$form->Name}', (data, err)=>_('.{$form->Name}').append(data+''));
                 };";
         return $img;
     });

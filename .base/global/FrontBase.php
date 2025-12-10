@@ -442,7 +442,7 @@ abstract class FrontBase
 			$handler,
 			$args,
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.before(...((html)=>{el=document.createElement('qb');el.innerHTML=html;el.querySelectorAll('script').forEach(script => eval(script.textContent));return el.childNodes;})(data??err));l.remove();})"
-			//"(data,err)=>{elem = \$(" . Script::Convert($selector) . ");elem.before(data??err);elem.remove();}"
+			//"(data,err)=>{elem = _(" . Script::Convert($selector) . ");elem.before(data??err);elem.remove();}"
 			,
 			direct: $direct,
 			encrypt: false
@@ -593,7 +593,7 @@ abstract class FrontBase
 			$handler,
 			$args,
 			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
-			"(data,err)=>$(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").prepend(data??err)"
+			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").prepend(data??err)"
 			//"(data,err)=>document.querySelector(".Script::Convert($selector).").prepend(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 			,
 			direct: $direct,
@@ -628,7 +628,7 @@ abstract class FrontBase
 			$args,
 			//"(data,err)=>document.querySelector(".Script::Convert($selector ?? $this->DefaultDestinationSelector).").append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err))"
 			"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>{l.append(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err));l.querySelectorAll('script').forEach(script => eval(script.textContent));})"
-			//"(data,err)=>$(" . Script::Convert($selector) . ").append(data??err)"
+			//"(data,err)=>_(" . Script::Convert($selector) . ").append(data??err)"
 			,
 			direct: $direct,
 			encrypt: false

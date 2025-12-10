@@ -214,8 +214,8 @@ class RingTabs extends Module{
 
 	public function GetScript(){
 		return parent::GetScript().(count($this->Items) > 0? Struct::Script("
-			$(document).ready(function(){
-				".(isValid($this->Path)?"$('.{$this->Name} .menu>.center:before').click(function () { load('{$this->Path}'); });":"")."
+			_(document).ready(function(){
+				".(isValid($this->Path)?"_('.{$this->Name} .menu>.center:before').click(function () { load('{$this->Path}'); });":"")."
 				const bselector = '.{$this->Name} .menu>.center>a';
 
 				const buttons = Array.from(document.querySelectorAll(bselector));
@@ -249,19 +249,19 @@ class RingTabs extends Module{
 					button.addEventListener('click', move);
 				});
 
-				$(bselector).click(function(evt){
-					const xn = $(this).attr('href');
-					const tar = $(this).attr('data-target');
+				_(bselector).click(function(evt){
+					const xn = _(this).attr('href');
+					const tar = _(this).attr('data-target');
 					const x = xn.replace('#', '');
-					$(tar).each(function(){
-						const y = $(this).attr('Id' );
-						if (x == y) $(this).addClass('active view show');
-						else $(this).removeClass('active view show');
+					_(tar).each(function(){
+						const y = _(this).attr('Id' );
+						if (x == y) _(this).addClass('active view show');
+						else _(this).removeClass('active view show');
 					});
-					$(bselector).each(function(){
-						const y = $(this).attr('href');
-						if (xn == y) $(this).addClass('active');
-						else $(this).removeClass('active');
+					_(bselector).each(function(){
+						const y = _(this).attr('href');
+						if (xn == y) _(this).addClass('active');
+						else _(this).removeClass('active');
 					});
 					if(".($this->AllowTab?"true":"false").") evt.preventDefault();
 				});

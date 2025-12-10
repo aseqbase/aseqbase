@@ -145,8 +145,6 @@ class MainMenu extends Module
 				display: inline-block;
 			}
 			.{$this->Name} ul:not(.sub-items)>li.active{
-				background-color: var(--back-color);
-				color: var(--fore-color);
 				font-weight: bold;
 				box-shadow: var(--shadow-2);
 			}

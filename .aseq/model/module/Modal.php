@@ -111,13 +111,13 @@ class Modal extends Player{
 					title = null;
 				}
 				{$this->Name}_Set(content, source);
-				if(isEmpty(title)) $('.{$this->Name}>.body>.detail>.title').hide();
-				else $('.{$this->Name}>.body>.detail>.title').show().text(title);
-				if(isEmpty(description)) $('.{$this->Name}>.body>.detail>.description').hide();
-				else $('.{$this->Name}>.body>.detail>.description').show().text(description);
-				if(buttonsContent !== null) $('.{$this->Name}>.buttons').html({$this->ButtonsScript('${buttonsContent}')});
-				$('.{$this->Name},.{$this->Name}-background-mask').removeClass('hide');
-				$('.{$this->Name},.{$this->Name}-background-mask').fadeIn(".\_::$Front->AnimationSpeed.");
+				if(isEmpty(title)) _('.{$this->Name}>.body>.detail>.title').hide();
+				else _('.{$this->Name}>.body>.detail>.title').show().text(title);
+				if(isEmpty(description)) _('.{$this->Name}>.body>.detail>.description').hide();
+				else _('.{$this->Name}>.body>.detail>.description').show().text(description);
+				if(buttonsContent !== null) _('.{$this->Name}>.buttons').html({$this->ButtonsScript('${buttonsContent}')});
+				_('.{$this->Name},.{$this->Name}-background-mask').removeClass('hide');
+				_('.{$this->Name},.{$this->Name}-background-mask').fadeIn(".\_::$Front->AnimationSpeed.");
 				scrollThere('.{$this->Name}');
 			}
 			function {$this->Name}_Show(){
@@ -125,17 +125,17 @@ class Modal extends Player{
 			}
 			function {$this->Name}_Hide(){
 				{$this->ClearScript()};
-				$('.{$this->Name},.{$this->Name}-background-mask').fadeOut(".\_::$Front->AnimationSpeed.");
-				$('.{$this->Name}>.body>.detail>.title').text('');
-				$('.{$this->Name}>.body>.detail>.description').text('');
-				$('.{$this->Name}>.buttons').html('');
+				_('.{$this->Name},.{$this->Name}-background-mask').fadeOut(".\_::$Front->AnimationSpeed.");
+				_('.{$this->Name}>.body>.detail>.title').text('');
+				_('.{$this->Name}>.body>.detail>.description').text('');
+				_('.{$this->Name}>.buttons').html('');
 			}
 			function {$this->Name}_ModalFocus(){
-				$('.{$this->Name}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
+				_('.{$this->Name}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
 				{$this->FocusScript()};
 			}
 			function {$this->Name}_ModalInfo(){
-				$('.{$this->Name}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
+				_('.{$this->Name}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
 			}
 		");
 	}

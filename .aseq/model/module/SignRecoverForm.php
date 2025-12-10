@@ -61,23 +61,23 @@ class SignRecoverForm extends Form{
 	public function GetScript()
 	{
 		return Struct::Script("
-			$(function () {
-				$(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
+			_(document).ready(function () {
+				_(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
+					_(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
-				$(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					$(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
+				_(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
+					_(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
-                $('.{$this->Name} form').submit(function(e) {
+                _('.{$this->Name} form').submit(function(e) {
 					let error = null;
-					if (!$('.{$this->Name} form [name=Password]')?.val().match({$this->PasswordPattern})) 
+					if (!_('.{$this->Name} form [name=Password]')?.val().match({$this->PasswordPattern})) 
 						error = Struct.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
-					else if ($('.{$this->Name} form [name=PasswordConfirmation]')?.val() != $('.{$this->Name} form [name=Password]')?.val()) 
+					else if (_('.{$this->Name} form [name=PasswordConfirmation]')?.val() != _('.{$this->Name} form [name=Password]')?.val()) 
 						error = Struct.error('New password and confirm password does not match!');
 					e.preventDefault();
 					if(error) {
-						$('.{$this->Name} form .result').remove();
-						$('.{$this->Name} form').append(error);
+						_('.{$this->Name} form .result').remove();
+						_('.{$this->Name} form').append(error);
 						return false;
 					}
 					" . ($this->Interactive ? "submitForm('.{$this->Name} form', null, null, null, null, ".($this->Timeout*1000).");" : "") . "

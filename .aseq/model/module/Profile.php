@@ -226,7 +226,7 @@ class Profile extends Table{
 	}
 
 	public function GetScript(){
-		return Struct::Script("$(document).ready(()=>{".
+		return Struct::Script("_(document).ready(()=>{".
         ($this->Controlable?("
 				function {$this->Name}_View(key){
 					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);

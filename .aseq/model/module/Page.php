@@ -151,10 +151,10 @@ class Page extends Module
 					</style>`,`<div class='error'>`,data,`</div>`].join(`\r\n`)
 			};
 			function {$this->Name}_ShowFrame(selector = `.{$this->Name}`){
-				$(`.{$this->Name}>.page`).removeClass(`active`);
-				$(`.{$this->Name}>.page`).hide();
-				$(`.{$this->Name} `+selector).addClass(`active`);
-				$(`.{$this->Name} `+selector).show();
+				_(`.{$this->Name}>.page`).removeClass(`active`);
+				_(`.{$this->Name}>.page`).hide();
+				_(`.{$this->Name} `+selector).addClass(`active`);
+				_(`.{$this->Name} `+selector).show();
 			}
 			function {$this->Name}_ViewInternal(link,anim=null,cls=null, selector = `#internal`){
 				{$this->Name}_InjectInternal(link,anim,cls, selector);
@@ -171,11 +171,11 @@ class Page extends Module
 
 			function {$this->Name}_InjectInternal(link, anim=null, cls=null, selector = `#internal`){
 				selector += `>.frame`;
-				const frame = $(selector)[0];
+				const frame = _(selector)[0];
 				frame.innerHTML = ReadyHtml.load();
 				if(!isEmpty(cls)) frame.addClass(cls);
 				if(!isEmpty(anim)) frame.setAttribute(`data-aos`,(isEmpty(anim)?``:anim));
-				$(selector).load(`/private.php?".(isEmpty(\_::$User->Query)?"":(\_::$User->Query))."`".", {name:link,animation:anim,class:cls},
+				_(selector).load(`/private.php?".(isEmpty(\_::$User->Query)?"":(\_::$User->Query))."`".", null, {name:link,animation:anim,class:cls},
 					function(data){
 						if(!data) frame.innerHTML = ReadyHtml.connectionError(`Please check your connection...`);
 					},
@@ -186,13 +186,13 @@ class Page extends Module
 			}
 
 			function {$this->Name}_InjectExternal(link,anim=null, cls=null, selector = `#external`){
-				const frame = $(selector)[0];
+				const frame = _(selector)[0];
 				frame.innerHTML = ReadyHtml.load();
 				frame.innerHTML = `<iframe is='x-frame' data-loading-page=\``+ReadyHtml.load()+`\` data-aos='`+anim+`' class='frame `+cls+`' src='`+link+`'></iframe>`;
 			}
 
 			function {$this->Name}_EmbedExternal(link,anim=null, cls=null, selector = `#embed`){
-				const frame = $(selector+` .frame`)[0];
+				const frame = _(selector+` .frame`)[0];
 				frame.src = link;
 			}
 

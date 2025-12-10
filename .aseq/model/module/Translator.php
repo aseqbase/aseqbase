@@ -55,7 +55,7 @@ class Translator extends Module{
 					($this->AllowImage?Struct::Image(
 						$lng,
 						getBetween($value,"Image","Icon")
-						, ["onerror"=>"this.src=\"".Convert::ToDataUri(Convert::ToImage(strtoupper($lng)), "image/png")."\";"]
+						, ["onerror"=>"this.src = \"".Convert::ToDataUri(Convert::ToImage(strtoupper($lng)), "image/png")."\";"]
 						):""
 					).
 					($this->AllowLabel?getBetween($value,"Title","Name" ):""),

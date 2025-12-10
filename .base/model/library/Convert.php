@@ -301,10 +301,11 @@ class Convert
      * @param array $foreColor An array of one byte (0-255) values for [Red, Green, Blue, Alpha (A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent)]  
      * @param int $fontSize Font size in points
      * @param string|null $fontPath A TrueType font (Leave null for default)
-     * @return bool|string The image/png data ready to convert to Data URI
+     * @return - The image/png data ready to convert to Data URI
      */
     public static function ToImage($value, $width = 100, $height = 100, $backColor = [0, 0, 0, 127], $foreColor = [255, 255, 255, 0], $fontSize = 50, $fontPath = null, $angle = 0, $multipleX = 0.1, $multipleY = 0.75)
     {
+        if (!function_exists('imagecreatetruecolor')) return null;
         $image = imagecreatetruecolor($width, $height);
         imagesavealpha($image, true);
         $background = imagecolorallocatealpha($image, $backColor[0]??0, $backColor[1]??0, $backColor[2]??0, $backColor[3]??127);
@@ -320,11 +321,10 @@ class Convert
      * To convert a value to its useable Data URI
      * @param mixed $value
      * @param mixed $mime
-     * @return string
      */
     public static function ToDataUri($value, $mime)
     {
-        return 'data:' . $mime . ';base64,' . base64_encode(self::ToString($value));
+        return $value?'data:' . $mime . ';base64,' . base64_encode(self::ToString($value)):null;
     }
 
     public static function ToJson($obj): string

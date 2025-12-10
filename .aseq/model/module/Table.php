@@ -612,7 +612,7 @@ class Table extends Module
     {
         $localPaging = is_null($this->NavigationBar);
         return Struct::Script(
-            "$(document).ready(()=>{" .
+            "_(document).ready(()=>{" .
             (!$this->AllowDecoration ? "" :
                 "$('.{$this->Name} table').DataTable({" .
                 join(", ", [

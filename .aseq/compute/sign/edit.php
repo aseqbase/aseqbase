@@ -54,8 +54,8 @@ try {
                 reload();
             else
                 script("
-                    $(\"form .content img\").attr('src','" . \_::$User->TemporaryImage . "');
-                    $('input[type=file]').val(null);
+                    _(\"form .content img\").attr('src','" . \_::$User->TemporaryImage . "');
+                    _('input[type=file]').val(null);
                 ");
             return true;
         } else

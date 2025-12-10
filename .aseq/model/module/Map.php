@@ -244,8 +244,8 @@ class Map extends Module
 	public function BeforeHandle()
 	{
 		if ($this->Local) {
-			$this->StyleSource = asset(\_::$Address->PackageDirectory, "Map/Style.css");
-			$this->ScriptSource = asset(\_::$Address->PackageDirectory, "Map/Script.js");
+			$this->StyleSource = asset(\_::$Address->PackageDirectory, "Map/Map.css");
+			$this->ScriptSource = asset(\_::$Address->PackageDirectory, "Map/Map.js");
 		}
 		$this->Location = $this->Location ?? get($this->Item = $this->Item ?? first($this->Items), "Location") ?? [0, 0];
 		if ($this->Local) {

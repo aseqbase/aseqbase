@@ -25,8 +25,9 @@ class Translate
 	 * The language default direction (ltr|rtl)
 	 * @var string
 	 */
-	public $CodeLimit = 160;
 	public $Direction = "ltr";
+	public $ImagePathPattern = "https://unpkg.com/language-icons/icons/{0}.svg";
+	public $CodeLimit = 160;
 	public $WrapStart = "<";
 	public $WrapEnd = ">";
 	public $WrapPattern = "/(^<[\w\W]*>$)|(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(<\S+[\w\W]*>)|(\d*\.?\d+)/U";
@@ -313,7 +314,7 @@ class Translate
 					$key = strtolower($defaultLang ?? \_::$Front->DefaultLanguage ?? $key);
 				$arr[$key] = array(
 					"Title" => getBetween($value, "Title", "Name") ?? strtoupper($key),
-					"Image" => getBetween($value, "Image", "Icon") ?? "https://unpkg.com/language-icons/icons/$key.svg",
+					"Image" => getBetween($value, "Image", "Icon") ?? str_replace("{0}", $key, $this->ImagePathPattern?:"https://unpkg.com/language-icons/icons/{0}.svg"),
 					"Direction" => $dir = get($value, "Direction") ?? preg_match("/(ar|fa|ur|he|ps|sd|ug|dv|ku|yi|nqo|syr|ckb|ks|bal|brh|bgn|haz|khw|lrc|mzn|pnb|prs|uz_AF|tt|ota)/i", $key ?? "") ? "rtl" : "ltr",
 					"Encoding" => $enc = get($value, "Encoding") ?? "utf-8",
 					"Query" => "lang=$key&direction=$dir&encoding=$enc"

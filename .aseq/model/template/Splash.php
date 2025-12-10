@@ -17,7 +17,7 @@ class Splash extends Template{
 	<title><?php echo $this->WindowTitle??\_::$Info->FullName; ?></title>
 	<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??$this->Logo??\_::$Info->LogoPath); ?>">
 	<script type="text/javascript">
-		$(document).ready(function(){
+		_(document).ready(function(){
 			setTimeout(finishScreen,5000+(<?php echo count($this->Phrases)*1000; ?>));
 		});
 		function finishScreen(){

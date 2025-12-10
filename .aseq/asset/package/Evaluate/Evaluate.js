@@ -1,6 +1,6 @@
 class Evaluate{
     static SignPattern = /^\@/;
-    static CodeFormat = "$(`{0}`).{1}()";
+    static CodeFormat = "_(`{0}`).{1}()";
 
     static Url = function () {
         var urlParams = new URLSearchParams(window.location.search);

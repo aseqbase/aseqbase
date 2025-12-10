@@ -3,6 +3,14 @@
  Reset Styles
  */
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%; /* Prevent font scaling in Safari/iOS */
+}
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -228,4 +236,29 @@ summary {
 
 progress {
   vertical-align: baseline;
+}
+
+img, svg, video, canvas, audio, iframe {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button, input, select, textarea {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+textarea {
+  resize: vertical; /* already included, keep */
+}
+
+a {
+  background-color: transparent;
+  text-decoration: none;
+  color: inherit;
+}
+
+[hidden] {
+  display: none !important;
 }

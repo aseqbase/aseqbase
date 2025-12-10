@@ -434,8 +434,8 @@ let send = function (
 				result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'Form submitted successfully!';
 				if (!isEmpty(result)) {
 					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Struct.result(result);
-					if (isForm) $(selector).append(result);
-					else $(selector).prepend(result);
+					if (isForm) _(selector).append(result);
+					else _(selector).prepend(result);
 				}
 			}
 		}
@@ -448,8 +448,8 @@ let send = function (
 			if (!isEmpty(result)) {
 				result += "";
 				if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Struct.result(result);
-				if (isForm) $(selector).append(result);
-				else $(selector).prepend(result);
+				if (isForm) _(selector).append(result);
+				else _(selector).prepend(result);
 			}
 		}
 	};
@@ -466,8 +466,8 @@ let send = function (
 				try { document.querySelector(selector + ' .result').remove(); } catch { }
 				{
 					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Struct.result(result);
-					if (isForm) $(selector).append(result);
-					else $(selector).prepend(result);
+					if (isForm) _(selector).append(result);
+					else _(selector).prepend(result);
 				}
 			}
 		}
@@ -563,7 +563,7 @@ let sendFile = function (url = null, data = null, selector = 'body+:nth-child(1)
 				reader.readAsDataURL(file);
 			}
 		}
-		$(input).trigger('click');
+		_(input).trigger('click');
 		return res;
 	}
 };
@@ -619,7 +619,7 @@ let sendFileRequest = function (url = null, data = null, selector = 'body+:nth-c
 				reader.readAsDataURL(file);
 			}
 		}
-		$(input).trigger('click');
+		_(input).trigger('click');
 		return res;
 	}
 };

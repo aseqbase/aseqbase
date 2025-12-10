@@ -25,7 +25,7 @@ class ImageModal extends Modal
 		return parent::GetScript() . Struct::Script("
 			function {$this->Name}_Set(content, source = null){
 				{$this->Name}_Source = source??{$this->Name}_Source??content;
-				if(content !== null) $('.{$this->Name}>.content').html(
+				if(content !== null) _('.{$this->Name}>.content').html(
 		" . (
 			$this->AllowOrigin ? "content.endsWith(\".svg\")?
 				(`<iframe class=\"image\" style=\"height: 100%; width: auto;\" src=\"`+content+`\"></iframe>`):

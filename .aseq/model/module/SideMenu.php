@@ -452,7 +452,7 @@ class SideMenu extends Module
 				$module->Items = $this->Shortcuts;
 				yield $module->ToString();
 				if (!$this->AllowHide)
-					yield Struct::Icon("map-pin", "$('.{$this->Name}').toggleClass('active')", ["class" => "btn pin-button"]);
+					yield Struct::Icon("map-pin", "_('.{$this->Name}').toggleClass('active')", ["class" => "btn pin-button"]);
 				yield "</div>";
 			}
 		});

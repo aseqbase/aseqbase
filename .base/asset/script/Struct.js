@@ -527,12 +527,12 @@ Struct.parameters = (arr) => {
 
 Struct.handle = (data, selector = "body :nth-child(1)", reload = false) => {
     if (data.includes('result')) {
-        $(selector + ` .result`).remove();
-        $(selector).prepend(data);
+        _(selector + ` .result`).remove();
+        _(selector).prepend(data);
         if (reload) load();
     }
     else {
-        $(selector).append(data);
+        _(selector).append(data);
     }
 }
 

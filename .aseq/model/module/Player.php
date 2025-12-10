@@ -196,7 +196,7 @@ class Player extends Module
 				{$this->Name}slider.style.cursor = 'grab';
 				{$this->Name}mouseDown = false;
 			};
-			$(document).ready(
+			_(document).ready(
 				function(){
 					{$this->Name}slider = document.querySelector('.{$this->Name}>.content');
 
@@ -225,13 +225,13 @@ class Player extends Module
 
 			function {$this->Name}_Set(content, source = null){
 				{$this->Name}_Source = source??{$this->Name}_Source??content;
-				if(content !== null) $('.{$this->Name}>.content').html(content);
+				if(content !== null) _('.{$this->Name}>.content').html(content);
 			}
 			function {$this->Name}_Clear(){
-				$('.{$this->Name}>.content').html('');
+				_('.{$this->Name}>.content').html('');
 			}
 			function {$this->Name}_Focus(){
-				$('.{$this->Name}>.controls').toggle(" . \_::$Front->AnimationSpeed . ");
+				_('.{$this->Name}>.controls').toggle(" . \_::$Front->AnimationSpeed . ");
 			}
 			function {$this->Name}_Reset(){
 				let box = document.querySelector('.{$this->Name}>.content>*');

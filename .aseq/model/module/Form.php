@@ -771,12 +771,12 @@ class Form extends Module
 	public function GetScript()
 	{
 		return parent::GetScript() . Struct::Script("
-			$(document).ready(function () {
-				$('.{$this->Name} :is(input, select, textarea)').on('focus', function () {
-					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-output)');
+			_(document).ready(function () {
+				_('.{$this->Name} :is(input, select, textarea)').on('focus', function () {
+					_(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-output)');
 				});
-				$('.{$this->Name} :is(input, select, textarea)').on('blur', function () {
-					$(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-output)');
+				_('.{$this->Name} :is(input, select, textarea)').on('blur', function () {
+					_(this).parent().find('.{$this->Name} .input-group .text').css('outline-color', 'var(--fore-color-output)');
 				});
 			});
 		");

@@ -1,6 +1,6 @@
 let scrollThere = function (selector = "head", time = 1000) {
-	$('html, body').animate({
-		scrollTop: parseInt($(selector).offset().top)
+	_('html, body').animate({
+		scrollTop: parseInt(_(selector).offset().top)
 	}, time);
 };
 

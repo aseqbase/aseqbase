@@ -502,7 +502,7 @@ function popReceived($key = null, $default = null, array|string|null $method = n
  * Request something from parts of the client side
  * @param mixed $intent The front JS codes to collect requested thing from the client side 
  * @param mixed $callback The call back handler
- * @example: request('$("body").html', function(selectedHtml)=>{ //do somework })
+ * @example: request('_("body").html', function(selectedHtml)=>{ //do somework })
  */
 function request($intent = null, $callback = null)
 {
@@ -532,7 +532,7 @@ function request($intent = null, $callback = null)
  * Have a dialog with the client side
  * @param mixed $intent The front JS codes
  * @param mixed $callback The call back handler
- * @example: interact('$("body").html', function(selectedHtml)=>{ //do somework })
+ * @example: interact('_("body").html', function(selectedHtml)=>{ //do somework })
  * @return string|null The result of the client side
  */
 function interact($intent = null, $callback = null)

@@ -634,7 +634,7 @@ class Struct
         return self::Division(
             self::Style("
             #$id.modal-overlay {
-                position: absolute;
+                position: fixed;
                 top: 0; bottom: 0; left: 0; right: 0;
                 width: 100%; height: 100%;
                 background: rgba(0,0,0, 0.6);
@@ -649,11 +649,9 @@ class Struct
                 padding: var(--size-3);
                 border-radius: var(--radius-3);
                 max-width: 90%;
-                max-haight: 90%;
+                max-height: 90%;
                 box-shadow: var(--shadow-max);
-                position: sticky;
-                top: var(--size-max);
-                left: var(--size-max);
+                position: fixed;
             }
             #$id.modal-overlay>.modal>.modal-close {
                 position: absolute;
@@ -689,7 +687,7 @@ class Struct
                 "onmouseenter" => "this.classList.remove('$id');",
             ],
             $attributes
-        ) . self::Script("setTimeout(() => document.querySelector('#$id.$id')?.remove(), $wait);");
+        ) . self::Script("setTimeout(function(){ return document.querySelector('#$id.$id')?.remove();}, $wait);");
     }
     public static function Success($content, ...$attributes)
     {
@@ -2641,7 +2639,7 @@ class Struct
                             return \MiMFa\Library\Struct::Convert($nArgs);
                         },
                         ["\${document.getElementById('$eid').value}"],
-                        "(data,err)=>document.getElementById('$sid').innerHTML=data??err",
+                        "function(data,err){ return document.getElementById('$sid').innerHTML=data??err;}",
                         encrypt: false
                     )
                 ) =>
@@ -3269,17 +3267,17 @@ class Struct
         const {$id}fileInput = document.querySelector('#$id>input[type=\"file\"]');
         const {$id}fileList = document.querySelector('#$id>.collection');
 
-        {$id}fileInput.addEventListener('change', () => {
+        {$id}fileInput.addEventListener('change', function(){
             {$id}_DisplayFiles({$id}fileInput.files);
         });
-        {$id}dropzone.addEventListener('dragover', (e) => {
+        {$id}dropzone.addEventListener('dragover', function(e){
             e.preventDefault();
             {$id}dropzone.classList.add('dragover');
         });
-        {$id}dropzone.addEventListener('dragleave', () => {
+        {$id}dropzone.addEventListener('dragleave', function(){
             {$id}dropzone.classList.remove('dragover');
         });
-        {$id}dropzone.addEventListener('drop', (e) => {
+        {$id}dropzone.addEventListener('drop', function(e){
             e.preventDefault();
             {$id}dropzone.classList.remove('dragover');
             const files = e.dataTransfer.files;
@@ -3439,7 +3437,7 @@ class Struct
             self::HiddenInput($key, Convert::ToString($value, ","), [
                 "id" => $id,
                 "class" => "mapinput",
-                "onchange" => "setTimeout(()=>{
+                "onchange" => "setTimeout(function(){
                     ll = this.value.split(/[,;]/);
                     latlng = {lat:ll[0]??0,lng:ll[1]??0};
                     if(map_marker_input$id) map_marker_input$id.setLatLng(latlng).addTo(map_input$id);
@@ -3623,7 +3621,7 @@ class Struct
         $interval = $id . "_i";
         return Struct::Element(Struct::Span($from) . Struct::Script(
             "var $counter = " . ($countDown ? $from : $to) . ";" .
-            "var $interval = setInterval(() => {
+            "var $interval = setInterval(function(){
 			    if($counter " . ($countDown ? "<" : ">") . "= {$to}) {" . (
                 $action ? (
                     (isScript($action) || !isUrl($action)) ?
@@ -3648,7 +3646,7 @@ class Struct
      */
     public static function Timer($from, $to = 0, $action = null, $step = 1, $period = 1000, ...$attributes)
     {
-        return self::Counter($from, $to, $action, $step, $period, "((sec)=>(new Date(sec * 1000)).toISOString().substring(11, 19))", ["class" => "timer"], $attributes);
+        return self::Counter($from, $to, $action, $step, $period, "(function(sec){ return (new Date(sec * 1000)).toISOString().substring(11, 19);})", ["class" => "timer"], $attributes);
     }
     /**
      * The Calendar HTML Tag
@@ -4131,7 +4129,7 @@ class Struct
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading3($title) .
-                script(null, asset(\_::$Address->PackageDirectory, "Chart/Script.js")) .
+                script(null, asset(\_::$Address->PackageDirectory, "Chart/Chart.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {
@@ -4213,7 +4211,7 @@ class Struct
         if (!isEmpty($action) && !isScript($action) && isUrl($action))
             $action = "load(" . Script::Convert($action) . ")";
         if ($action)
-            $action = ".on('click', (e)=>{$action})";
+            $action = ".on('click', (e)=>{{$action}})";
 
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
 

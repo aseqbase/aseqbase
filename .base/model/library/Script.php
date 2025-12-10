@@ -168,7 +168,7 @@ class Script
                     reader.readAsText(file);")."
                 }
             }
-            $(input).trigger('click');
+            _(input).trigger('click');
             return false;
         ";
     }
