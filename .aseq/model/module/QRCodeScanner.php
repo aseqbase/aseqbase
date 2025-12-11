@@ -46,8 +46,8 @@ class QRCodeScanner extends Module
 	public function __construct()
 	{
 		parent::__construct();
-
 	}
+	
 	public function GetStyle()
 	{
 		return parent::GetStyle() . Struct::Style("
@@ -100,7 +100,7 @@ class QRCodeScanner extends Module
 			}
 			.{$this->Name} .controls .button{
 				background-color: #00000033;
-				color: #ffffff88;
+				color: #ffffffaa;
 				padding:1vmin;
 				margin:1vmin;
 			}
@@ -113,8 +113,13 @@ class QRCodeScanner extends Module
 				border: 1px solid white;
 				z-index: 1;
 				width: $this->MaskSize;
+				cursor: pointer;
 				aspect-ratio: 1;
 				box-shadow: 0px 0px 100vmax black;
+			}
+			.{$this->Name} .mask:hover{
+				background-color: #8884;
+				".Style::UniversalProperty("transition", "var(--transition-1)")."
 			}
 			.{$this->Name} .mask.error{
 				border-color: red;
@@ -133,15 +138,15 @@ class QRCodeScanner extends Module
 			Struct::OpenTag("video", $this->GetDefaultAttributes()) .
 			$this->BrowserNotSupportError .
 			Struct::CloseTag("video") .
-			($this->AllowMask ? Struct::Division($this->GetContent(), ["class" => "mask"]) : "") .
+			($this->AllowMask ? Struct::Division($this->GetContent(), ["class" => "mask", "onclick"=>$this->ToggleScript()]) : "") .
 			Struct::Division(
 				($this->SwitchButtonLabel ? Struct::Button($this->SwitchButtonLabel, $this->SwitchScript(), ["class" => "switchcamera be hide"]) : "") .
-				($this->ActiveButtonLabel ? Struct::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class" => "activation be"]) : "")
-				,
+				($this->ActiveButtonLabel ? Struct::Button($this->ActiveButtonLabel, $this->ToggleScript(), ["class" => "activation be"]) : ""),
 				["class" => "controls"]
 			) .
 			Struct::Division($this->GetTitle(["class" => $this->TitleClass]) . $this->GetDescription(["class" => $this->DescriptionClass]), ["class" => "message"]);
 	}
+
 	public function GetScript()
 	{
 		return Struct::Script("

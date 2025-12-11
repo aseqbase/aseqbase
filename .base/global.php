@@ -44,21 +44,21 @@ run("Router");
 run("global/Base");
 run("global/Types");
 
-run("global/ConfigBase");
-run("Config");
-\_::$Config = new Config();
-
 run("global/BackBase");
 run("Back");
 \_::$Back = new Back();
 
-run("global/FrontBase");
-run("Front");
-\_::$Front = new Front();
+run("global/ConfigBase");
+run("Config");
+\_::$Config = new Config();
 
 run("global/UserBase");
 run("User");
 \_::$User = new User();
+
+run("global/FrontBase");
+run("Front");
+\_::$Front = new Front();
 
 run("global/InfoBase");
 run("Info");

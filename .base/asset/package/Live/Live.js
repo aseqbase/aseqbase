@@ -243,7 +243,7 @@ class Live extends Array {
                 }
                 else {
                     const scripts = elem.querySelectorAll('script');
-                    scripts.forEach((oldScript) => {
+                    for (const oldScript of scripts) {
                         const newScript = document.createElement('script');
                         Array.from(oldScript.attributes).forEach(attr => {
                             newScript.setAttribute(attr.name, attr.value);
@@ -251,7 +251,7 @@ class Live extends Array {
                         if (oldScript.src) newScript.src = oldScript.src;
                         newScript.textContent = oldScript.textContent;
                         oldScript.parentNode.replaceChild(newScript, oldScript);
-                    });
+                    }
                 }
             }
         });
