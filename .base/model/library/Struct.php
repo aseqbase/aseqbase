@@ -98,7 +98,7 @@ class Struct
 
                     // Media
                     $object = preg_replace_callback("/!\{([^\}]+)\}(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Division($m[1], ["id" => $m[2] ?? null], ["class" => $m[3] ?? null], $m[4] ?? []), $object);
-                    $object = preg_replace_callback("/!(\w*)\[([^\]]+)\]\(\s*([^\s]+)(?:\s*\"([^\"]*)\")?\s*\)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => ("\\MiMFa\\Library\\Struct::" . ($m[1] ?: "Media"))($m[2] ?? null, $m[3] ?? null, ($m[4] ?? null)?["tooltip" => $m[4]]:[], ["id" => $m[5] ?? null], ["class" => $m[6] ?? null], $m[7] ?? []), $object);
+                    $object = preg_replace_callback("/!(\w*)\[([^\]]+)\]\(\s*([^\s]+)(?:\s*\"([^\"]*)\")?\s*\)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => ("\\MiMFa\\Library\\Struct::" . ($m[1] ?: "Media"))($m[2] ?? null, $m[3] ?? null, ($m[4] ?? null) ? ["tooltip" => $m[4]] : [], ["id" => $m[5] ?? null], ["class" => $m[6] ?? null], $m[7] ?? []), $object);
                     $object = preg_replace_callback("/\[([^\]]+)\]\(\s*([^\s]+)\s*\)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/i", fn($m) => self::Link($m[1], $m[2], ["id" => $m[3] ?? null], ($dir = Translate::DetectDirection($m[1])) == \_::$Front->Translate->Direction ? ["class" => ($m[4] ?? null)] : ["class" => "be $dir " . ($m[4] ?? null)], $m[5] ?? []), $object);
 
                     // Refer
@@ -146,12 +146,12 @@ class Struct
                     } while ($lc);
 
                     $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
-                    
+
                     // Links
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)/i", fn($m) => self::Link($m[1], $m[1]), $object);
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)/i", fn($m) => self::Link($m[1], "mailto:{$m[1]}"), $object);
-                    $object = preg_replace_callback("/\B\#(\w+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/iu", fn($m) => self::Link("#" . $m[1], \_::$Address->SearchRoot . urlencode("#" . $m[1]), ["id" => $m[2] ?? null,"class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?: $object;
-                    $object = preg_replace_callback("/\B\@(\w+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/iu", fn($m) => self::Link("@" . $m[1], \_::$Address->UserRoot . urlencode($m[1]), ["id" => $m[2] ?? null,"class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?: $object;
+                    $object = preg_replace_callback("/\B\#(\w+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/iu", fn($m) => self::Link("#" . $m[1], \_::$Address->SearchRoot . urlencode("#" . $m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?: $object;
+                    $object = preg_replace_callback("/\B\@(\w+)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?/iu", fn($m) => self::Link("@" . $m[1], \_::$Address->UserRoot . urlencode($m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?: $object;
 
                     $object = preg_replace_callback("/\s?(^[^\W].*)(?:\s*@\{(?:#([\w\-]+))?([\w\- \t]*(?=[\r\n}]))?([^\}]*)?\})?$/mi", fn($m) => self::Element($m[1], "p", ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == \_::$Front->Translate->Direction ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object);
 
@@ -635,7 +635,7 @@ class Struct
             self::Style("
             #$id.modal-overlay {
                 position: fixed;
-                top: 0; bottom: 0; left: 0; right: 0;
+                inset: 0;
                 width: 100%; height: 100%;
                 background: rgba(0,0,0, 0.6);
                 display: flex;
@@ -646,12 +646,13 @@ class Struct
             #$id.modal-overlay>.modal {
                 background-color: var(--back-color-special);
                 color: var(--fore-color-special);
+                position: fixed;
                 padding: var(--size-3);
                 border-radius: var(--radius-3);
                 max-width: 90%;
                 max-height: 90%;
+                overflow: auto;
                 box-shadow: var(--shadow-max);
-                position: fixed;
             }
             #$id.modal-overlay>.modal>.modal-close {
                 position: absolute;
@@ -672,7 +673,7 @@ class Struct
                 "class" => 'modal-overlay',
                 "onclick" => "if(event.target.classList.contains('modal-overlay')) event.target.remove();event.preventDefault();"
             ]
-        ) . self::Script("scrollThere('#$id');");
+        ) . self::Script("_('#$id').appendTo(_('body'));");
     }
     public static function Result($content, $icon = "bell", $wait = 10000, ...$attributes)
     {
@@ -3518,7 +3519,7 @@ class Struct
     {
         $class = self::GetAttribute($attributes, "Class");
         $style = self::PopAttribute($attributes, "Style");
-        $id = self::PopAttribute($attributes, "Id")??Convert::ToId($key);
+        $id = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
         return self::Element(null, "input", [
             "name" => self::PopAttribute($attributes, "Name") ?? ($key ? Convert::ToKey($key) : null),
             "type" => "number",
@@ -3530,7 +3531,7 @@ class Struct
                 null,
                 "input",
                 [
-                    "id"=>$id,
+                    "id" => $id,
                     "type" => "text",
                     "value" => number_format($value ?? 0, self::PopAttribute($attributes, "Decimals") ?: 0, '.', ','),
                     ...($key ? ["autocomplete" => self::PopAttribute($attributes, "AutoComplete") ?? $key] : []),

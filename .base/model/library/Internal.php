@@ -70,7 +70,7 @@ class Internal
      */
     public static function MakeScript($handler, $args = null, $callbackScript = null, $progressScript = null, $timeout = 60000, $direct = false, $encrypt = true)
     {
-        $callbackScript = $callbackScript ?? "(data,err)=>_(" . (self::$Selector) . ")." . (self::$Target) . "append(data??err)";
+        $callbackScript = $callbackScript ?? "(data,err)=>_(" . (self::$Selector) . ")." . (self::$Target) . "(data??err)";
         $progressScript = $progressScript ?? "null";
         $start = self::MakeStartScript(direct: $direct);
         $end = self::MakeEndScript(direct: $direct);

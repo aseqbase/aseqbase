@@ -238,7 +238,11 @@ progress {
   vertical-align: baseline;
 }
 
-img, svg, video, canvas, audio, iframe {
+svg, iframe {
+  display: block;
+  height: auto;
+}
+img, video, canvas, audio {
   display: block;
   max-width: 100%;
   height: auto;

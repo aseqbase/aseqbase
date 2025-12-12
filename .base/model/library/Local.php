@@ -19,12 +19,12 @@ class Local
 		if ((empty($address)) || isAbsoluteUrl($address))
 			return $address;
 		$address = self::GetRelativeAddress(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $address));
-		$p = ltrim(str_replace(DIRECTORY_SEPARATOR, "/", $address), "/");
+		$p = ltrim(normalizeUrl($address), "/");
 		$d = ltrim(preg_replace("/[\?#@].*$/", "", $address), DIRECTORY_SEPARATOR);
 		foreach (\_::$Sequence as $dir => $root)
 			if (file_exists($dir . $d))
 				return $root . $p;
-		$address = str_replace(DIRECTORY_SEPARATOR, "/", $address);
+		$address = normalizeUrl($address);
 		if (!startsWith($address, "/")) {
 			$dirs = explode("/", \_::$User->Direction);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");

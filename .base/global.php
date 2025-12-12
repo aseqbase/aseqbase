@@ -677,25 +677,27 @@ function report($message = null, $type = "log", $secret = null)
 			case "error":
 			case "errors":
 				$type = "error";
-				$log = \_::$Config->ReportLevel>0?$type: false;
+				$log = \_::$Config->ReportLevel > 0 ? $type : false;
 				break;
 			case "warn":
 			case "warns":
 				$type = "warn";
-				$log = \_::$Config->ReportLevel>1?$type: false;
+				$log = \_::$Config->ReportLevel > 1 ? $type : false;
 				break;
 			case "info":
 			case "information":
 				$type = "info";
-				$log = \_::$Config->ReportLevel>2?$type: false;
+				$log = \_::$Config->ReportLevel > 2 ? $type : false;
 				break;
 			default:
 				$type = "log";
-				$log = \_::$Config->ReportLevel>2?$type: false;
+				$log = \_::$Config->ReportLevel > 2 ? $type : false;
 				break;
 		}
-	if($log) file_put_contents(address(\_::$Address->LogAddress . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
-	if (!$secret) return script(Script::Log($message, $type));
+	if ($log)
+		file_put_contents(address(\_::$Address->LogAddress . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
+	if (!$secret)
+		return script(Script::Log($message, $type));
 }
 
 /**
@@ -2864,7 +2866,7 @@ function isStatic($value): bool
  */
 function normalizeUrl(string $path): string|null
 {
-	return str_replace("\\", "/", preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
+	return str_replace(["\\", " "], ["/", "%20"], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
 }
 /**
  * Remove all changeable command signs from a path (such as ../ or /./.)
@@ -2874,7 +2876,7 @@ function normalizeUrl(string $path): string|null
  */
 function normalizePath(string $path): string|null
 {
-	return str_replace(["\\", "/"], DIRECTORY_SEPARATOR, preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
+	return str_replace(["/", "\\", "%20"], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, " "], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
 }
 
 /**

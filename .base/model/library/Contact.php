@@ -159,7 +159,7 @@ class Contact extends ArrayObject
 			$tos = is_array($to) ? $to : preg_split("/[,; ><\[\](){}&#\|!~\'\"`\*=^%\$\s]+/", Convert::ToString($to));
 			$i = 0;
 			foreach ($tos as $t)
-				if (mail($t, $subject, $message . PHP_EOL . Convert::ToString($attaches), $header))
+				if (isEmail($t) && mail($t, $subject, $message . PHP_EOL . Convert::ToString($attaches), $header))
 					$i++;
 			return $i;
 		} catch (\Exception $ex) {
@@ -193,7 +193,7 @@ class Contact extends ArrayObject
 			$tos = is_array($to) ? $to : preg_split("/[,; ><\[\](){}&#\|!~\'\"`\*=^%\$\s]+/", Convert::ToString($to));
 			$i = 0;
 			foreach ($tos as $t)
-				if (mail($t, $subject, $message . Struct::$Break . Convert::ToString($attaches), $header))
+				if (isEmail($t) && mail($t, $subject, $message . Struct::$Break . Convert::ToString($attaches), $header))
 					$i++;
 			return $i;
 		} catch (\Exception $ex) {

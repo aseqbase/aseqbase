@@ -1,6 +1,14 @@
 class Live extends Array {
     static _animations = new WeakMap();
 
+    static generate(element = null) {
+        if (element instanceof Live) return element;
+        else if (element instanceof Element) return new Live(element);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = String(element);
+        return new Live(tempDiv.children);
+    }
+
     constructor(query = null, mode = null, source = null) {
         super();
         this.clear();
@@ -8,6 +16,7 @@ class Live extends Array {
     }
 
     toObject() {
+        if (this.length === 0) return null;
         const IS_PROXY = Symbol("isProxy");
         if (this[IS_PROXY]) return this;
         const proxy = new Proxy(this, {
@@ -44,7 +53,7 @@ class Live extends Array {
             else return this.clear().merge(query);
         }
 
-        const sources = source ? (new Live(source, mode)).toObject() : [document];
+        const sources = source ? Array.isArray(source) ? source : [source] : [document];
         for (const src of sources) {
             switch ((mode ?? (query.match(/^\s*\//) ? "xpath" : isArrQuery ? "location" : "query")).toLowerCase()) {
                 case "id":
@@ -77,7 +86,7 @@ class Live extends Array {
     }
 
     select(query = null, mode = null) {
-        return (new Live(query, mode, this)).toObject();
+        return new Live(query, mode, this);
     }
 
     merge(...args) {
@@ -85,7 +94,7 @@ class Live extends Array {
             if (arg !== undefined) {
                 if (Array.isArray(arg)) {
                     this.merge(...arg);
-                } else if (arg !== null && typeof arg[Symbol.iterator] === 'function' && !(arg instanceof Node)) {
+                } else if (arg !== null && ('function' === typeof arg[Symbol.iterator]) && !(arg instanceof Node)) {
                     if (arg instanceof XPathResult) {
                         this.merge(...Array.from((function* () {
                             let current;
@@ -114,43 +123,52 @@ class Live extends Array {
     }
 
     *whereIteration(condition, ...args) {
-        let i = 0;
-        for (const elem of this) {
-            if (condition(elem, i++, ...args)) yield elem;
-        }
+        for (const elem of this)
+            if (condition(elem, ...args)) yield elem;
     }
 
     each(action, ...args) {
-        return (new Live(this.eachIteration(action, ...args))).toObject();
+        return new Live(this.eachIteration(action, ...args));
     }
 
     *eachIteration(action, ...args) {
-        let i = 0;
-        for (const elem of this) {
-            yield action(elem, i++, ...args);
-        }
+        for (const elem of this)
+            yield action(elem, ...args);
     }
 
-    trigger(eventName, detail = {}) {
-        return this.each((elem) => {
-            const evt = new CustomEvent(eventName, { bubbles: true, detail });
-            elem.dispatchEvent(evt);
+    trigger(eventName, data = {}, options = {}) {
+        return this.each((el) => {
+            if (!(el instanceof Element)) return;
+            const opts = Object.assign({
+                bubbles: true,
+                cancelable: true,
+                composed: true
+            }, options);
+
+            let evt;
+            if (/^(click|dblclick|mousedown|mouseup|mouseover|mouseout|mouseenter|mouseleave)$/.test(eventName))
+                evt = new MouseEvent(eventName, opts);
+            else if (/^(keydown|keyup|keypress)$/.test(eventName))
+                evt = new KeyboardEvent(eventName, opts);
+            else evt = new CustomEvent(eventName, { ...opts, detail: data });
+            el.dispatchEvent(evt);
         });
-
     }
+
+
     on(eventName, action, ...args) {
         return this.each((elem) => {
             if (!action) return;
             else if (elem.addEventListener)
                 elem.addEventListener(eventName, (e) => {
-                    action(elem, e, ...args);
+                    action(e, elem, ...args);
                 });
             else if (elem.attachEvent)
                 elem.attachEvent('on' + eventName, (e) => {
-                    action(elem, e, ...args);
+                    action(e, elem, ...args);
                 });
             else elem['on' + eventName] = (e) => {
-                action(elem, e, ...args);
+                action(e, elem, ...args);
             };
         }, ...args);
     }
@@ -162,8 +180,8 @@ class Live extends Array {
 
     ready(action, ...args) {
         if (document.readyState !== 'loading') action(document, ...args);
-        else document.addEventListener('DOMContentLoaded', () => {
-            action(document, ...args);
+        else document.addEventListener('DOMContentLoaded', (e) => {
+            action(e, document, ...args);
         });
         return this;
     }
@@ -187,25 +205,25 @@ class Live extends Array {
     }
 
     parent() {
-        return (new Live(this.each((elem) => elem.parentNode).flat())).toObject();
+        return (new Live(this.each((elem) => elem.parentNode).flat()));
     }
     children() {
-        return (new Live(this.each((elem) => Array.from(elem.children)).flat())).toObject();
+        return (new Live(this.each((elem) => Array.from(elem.children)).flat()));
     }
     siblings() {
-        return (new Live(this.each((elem) => (elem.parentNode ? Array.from(elem.parentNode.children) : []).filter(child => child !== elem)).flat())).toObject();
+        return (new Live(this.each((elem) => (elem.parentNode ? Array.from(elem.parentNode.children) : []).filter(child => child !== elem)).flat()));
     }
     first() {
-        if (this.length === 0) return (new Live()).toObject();
-        return (new Live([this[0]])).toObject();
+        if (this.length === 0) return (new Live());
+        return (new Live([this[0]]));
     }
     last() {
-        if (this.length === 0) return (new Live()).toObject();
-        return (new Live([this[this.length - 1]])).toObject();
+        if (this.length === 0) return (new Live());
+        return (new Live([this[this.length - 1]]));
     }
 
     find(query = null, mode = null) {
-        return this.each((elem) => (new Live(query, mode, elem)).toObject()).flat();
+        return new Live(this.each((elem) => new Live(query, mode, elem)).flat());
     }
 
     /**
@@ -237,7 +255,6 @@ class Live extends Array {
                     Array.from(elem.attributes).forEach(attr => {
                         newScript.setAttribute(attr.name, attr.value);
                     });
-                    if (elem.src) newScript.src = elem.src;
                     newScript.textContent = elem.textContent;
                     elem.parentNode.replaceChild(newScript, elem);
                 }
@@ -248,9 +265,8 @@ class Live extends Array {
                         Array.from(oldScript.attributes).forEach(attr => {
                             newScript.setAttribute(attr.name, attr.value);
                         });
-                        if (oldScript.src) newScript.src = oldScript.src;
                         newScript.textContent = oldScript.textContent;
-                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                        oldScript.parentNode?.replaceChild(newScript, oldScript);
                     }
                 }
             }
@@ -261,149 +277,114 @@ class Live extends Array {
      * @param {Live | HTMLElement | Array<HTMLElement> | any} element To be appended to selected elements
      */
     append(element) {
-        if (element instanceof Live) return this.each(tag => {
+        if (Array.isArray(element)) return this.each(tag => {
+            if (tag instanceof Element)
+                return tag.append(...element);
+        });
+        else if (element instanceof Element) return this.each(tag => {
+            if (tag instanceof Element)
+                return tag.append(element);
+        });
+        else {
+            element = Live.generate(element);
+            this.append(element);
+            element.rebuild();
+        }
+        return this;
+    }
+    appendTo(element) {
+        if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.append(...element);
-                l.rebuild();
+                element.append(tag);
             }
         });
         else if (element instanceof Element) return this.each(tag => {
             if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.append(element);
-                l.rebuild();
+                (new Live(element)).append(tag);
             }
         });
-        else if (Array.isArray(element)) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.append(...element);
-                l.rebuild();
-            }
-        });
-        else {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = String(element);
-            return this.append(Array.from(tempDiv.children));
-        }
+        else return this.appendTo(new Live(element));
     }
     /**
      * The provided element(s) will be prepended to the selected elements.
      * @param {Live | HTMLElement | Array<HTMLElement> | any} element To be prepended to selected elements
      */
     prepend(element) {
-        if (element instanceof Live) return this.each(tag => {
+        if (Array.isArray(element)) return this.each(tag => {
+            if (tag instanceof Element)
+                return tag.prepend(...element);
+        });
+        else if (element instanceof Element) return this.each(tag => {
+            if (tag instanceof Element)
+                return tag.prepend(element);
+        });
+        else {
+            element = Live.generate(element);
+            this.prepend(element);
+            element.rebuild();
+        }
+        return this;
+    }
+    prependTo(element) {
+        if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.prepend(...element);
-                l.rebuild();
+                element.prepend(tag);
             }
         });
         else if (element instanceof Element) return this.each(tag => {
             if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.prepend(element);
-                l.rebuild();
+                (new Live(element)).prepend(tag);
             }
         });
-        else if (Array.isArray(element)) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.prepend(...element);
-                l.rebuild();
-            }
-        });
-        else {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = String(element);
-            return this.prepend(Array.from(tempDiv.children));
-
-        }
+        else return this.prependTo(new Live(element));
     }
     replace(element) {
-        if (element instanceof Live) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.replaceWith(...element);
-                l.rebuild();
-            }
+        if (Array.isArray(element)) return this.each(tag => {
+            if (tag instanceof Element)
+                return tag.replaceWith(...element);
         });
         else if (element instanceof Element) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.replaceWith(element);
-                l.rebuild();
-            }
-        });
-        else if (Array.isArray(element)) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.replaceWith(...element);
-                l.rebuild();
-            }
+            if (tag instanceof Element)
+                return tag.replaceWith(element);
         });
         else {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = String(element);
-            return this.replace(Array.from(tempDiv.children));
+            element = Live.generate(element);
+            this.replace(element);
+            element.rebuild();
         }
+        return this;
     }
     after(element) {
-        if (element instanceof Live) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.after(...element);
-                l.rebuild();
-            }
+        if (Array.isArray(element)) return this.each(tag => {
+            if (tag instanceof Element)
+                return tag.after(...element);
         });
         else if (element instanceof Element) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.after(element);
-                l.rebuild();
-            }
-        });
-        else if (Array.isArray(element)) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.after(...element);
-                l.rebuild();
-            }
+            if (tag instanceof Element)
+                return tag.after(element);
         });
         else {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = String(element);
-            return this.after(Array.from(tempDiv.children));
+            element = Live.generate(element);
+            this.after(element);
+            element.rebuild();
         }
+        return this;
     }
     before(element) {
-        if (element instanceof Live) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.before(...element);
-                l.rebuild();
-            }
+        if (Array.isArray(element)) return this.each(tag => {
+            if (tag instanceof Element)
+                return tag.before(...element);
         });
         else if (element instanceof Element) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.before(element);
-                l.rebuild();
-            }
-        });
-        else if (Array.isArray(element)) return this.each(tag => {
-            if (tag instanceof Element) {
-                const l = new Live(element);
-                tag.before(...element);
-                l.rebuild();
-            }
+            if (tag instanceof Element)
+                return tag.before(element);
         });
         else {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = String(element);
-            return this.before(Array.from(tempDiv.children));
+            element = Live.generate(element);
+            this.before(element);
+            element.rebuild();
         }
+        return this;
     }
     remove() {
         return this.each(tag => {
@@ -419,9 +400,10 @@ class Live extends Array {
         }).toString();
         html = String(html);
         return this.each(tag => {
-            if (tag instanceof Element)
+            if (tag instanceof Element) {
                 tag.innerHTML = html;
-            (new Live(tag)).rebuild();
+                (new Live(tag)).rebuild();
+            }
         });
     }
     text(text = null) {
@@ -793,7 +775,7 @@ class Live extends Array {
      * @param {int} maxHeight The maximum height to set
      */
     setHeight(maxHeight = 10) {
-        return this.each((tag, i, maxHeight) => {
+        return this.each((tag, maxHeight) => {
             if (!Number.isInteger(maxHeight)) {
                 tag.style.maxHeight = maxHeight;
                 maxHeight = 999999999;
@@ -813,7 +795,7 @@ class Live extends Array {
      * @param {int} maxWidth The maximum width to set
      */
     setWidth(maxWidth = 10) {
-        return this.each((tag, i, maxWidth) => {
+        return this.each((tag, maxWidth) => {
             if (!Number.isInteger(maxWidth)) {
                 tag.style.maxWidth = maxWidth;
                 maxWidth = 999999999;

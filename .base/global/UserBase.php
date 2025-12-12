@@ -74,6 +74,7 @@ class UserBase
      */
     public string|null $Fragment = null;
 
+	public $DefaultImagePath = "user";
 	public $HandlerPath = "/sign";
 	public $SignHandlerPath = "/sign/sign";
 	public $UpHandlerPath = "/sign/up";
@@ -83,26 +84,7 @@ class UserBase
 	public $EditHandlerPath = "/sign/edit";
 	public $DashboardHandlerPath = "/sign/dashboard";
 	public $RecoverHandlerPath = "/sign/recover";
-
-	public $DefaultImagePath = "user";
-	public $RecoverEmailSubject = 'Account Recovery Request';
-	public $RecoverEmailContent = 'Hello dear $NAME,<br><br>
-We received an account recovery request on $HOSTLINK for $EMAILLINK.<br>
-This email address is associated with an account but no password is associated with it yet, so it can�t be used to log in.<br>
-Please $HYPERLINK or the below link if you want to reset your password... else ignore this message.<br>$LINK<br><br>
-With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
-	public $RecoverLinkAnchor = "CLICK ON THIS LINK";
 	public $ActiveHandlerPath = "/sign/active";
-	public $ActiveEmailSubject = "Account Activation Request";
-	public $ActiveEmailContent = 'Hello dear $NAME,<br><br>
-We received an account activation request on $HOSTLINK for $EMAILLINK.<br>
-Thank you for registration, This email address is associated with an account but is not activated yet, so it can�t be used to log in.<br>
-Please $HYPERLINK or the below link to active your account!<br>$LINK<br><br>
-With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
-	public $ActiveLinkAnchor = "CLICK ON THIS LINK";
-
-	public $RecoveryTokenKey = "rt";
-	public $ActivationTokenKey = "at";
 
 	public $PasswordSecure = true;
 
@@ -483,7 +465,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
 	{
 		$this->TemporaryImage = null;
-		$email = $email ?: $this->GenerateEmail($signature);
+		$email = $email ?: $this->GenerateEmail($signature, true);
 		return $this->DataTable->Insert(
 			[
 				":Signature" => $this->TemporarySignature = $signature ?? $contact ?? $email,
@@ -567,97 +549,6 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 			return $password;
 	}
 
-	/**
-	 * Send an Activation Email
-	 * @param string $emailFrom Sender
-	 * @param string $emailTo Receiver
-	 * @param string The email text or html contents, contains:
-	 * $HYPERLINK: for the Activation hyperlink tag
-	 * $LINK: for the Activation link
-	 * $PATH: for the Activation link address
-	 * $NAME: for the user name
-	 * $SIGNATURE: for the user Signature
-	 * $IMAGE: for the user image path
-	 */
-	public function SendActivationEmail($receiverEmail = null, $subject = null, $content = null, $linkAnchor = null)
-	{
-		return $this->SendTokenEmail(\_::$Info->SenderEmail, $receiverEmail ?? $this->TemporaryEmail, $subject ?? $this->ActiveEmailSubject, $content ?? $this->ActiveEmailContent, $linkAnchor ?? $this->ActiveLinkAnchor, $this->ActiveHandlerPath, $this->ActivationTokenKey);
-	}
-	/**
-	 * Receive the Activation Email
-	 * @return bool|null return true if user activated, null if request is not received or false otherwise
-	 */
-	public function ReceiveActivationEmail()
-	{
-		$sign = $this->DecryptToken($this->ActivationTokenKey, getReceived($this->ActivationTokenKey));
-		if (empty($sign))
-			return null;
-		return $this->DataTable->Update(
-			"`Signature`=:Signature",
-			[
-				":Signature" => $sign,
-				":Status" => $this->ActiveStatus
-			]
-		) ? true : false;
-	}
-
-	/**
-	 * Send a Recovery Email
-	 * @param string $emailFrom Sender
-	 * @param string $emailTo Receiver
-	 * @param string The email text or html contents, contains:
-	 * $HYPERLINK: for the reset password hyperlink tag
-	 * $LINK: for the reset password link
-	 * $PATH: for the reset password link address
-	 * $NAME: for the user name
-	 * $SIGNATURE: for the user Signature
-	 * $IMAGE: for the user image path
-	 * @return bool
-	 */
-	public function SendRecoveryEmail($receiverEmail = null, $subject = null, $content = null, $linkAnchor = null)
-	{
-		return $this->SendTokenEmail(\_::$Info->SenderEmail, $receiverEmail ?? $this->TemporaryEmail, $subject ?? $this->RecoverEmailSubject, $content ?? $this->RecoverEmailContent, $linkAnchor ?? $this->RecoverLinkAnchor, $this->RecoverHandlerPath, $this->RecoveryTokenKey);
-	}
-	/**
-	 * Receive the Recovery Email
-	 * @return bool|null return true if user activated, null if request is not received or false otherwise
-	 */
-	public function ReceiveRecoveryEmail()
-	{
-		$newPass = getReceived("Password");
-		if (isValid($newPass)) {
-			$this->EncryptPassword($newPass);
-			$sign = $this->DecryptToken($this->RecoveryTokenKey, getReceived($this->RecoveryTokenKey));
-			if (empty($sign))
-				return null;
-			return $this->ResetPassword($sign, $newPass) ? true : false;
-		}
-		return null;
-	}
-
-
-	public function SendTokenEmail($from, $to, $subject, $content, $linkAnchor = "Click Here", $handlerPath = null, $tokenKey = "sign")
-	{
-		if (!$to)
-			throw new \SilentException("Please indicate your email address!");
-		$person = $this->DataTable->SelectRow("*", "`Email`=:Email", [":Email" => $to]);
-		if (isEmpty($person))
-			throw new \SilentException("Unfortunately the email address is incorrect!");
-		$this->TemporaryEmail = takeValid($person, "Email");
-		$this->TemporarySignature = takeValid($person, "Signature");
-		$this->TemporaryName = takeValid($person, "Name");
-		$this->TemporaryImage = takeValid($person, "Image");
-		$this->TemporaryPassword = takeValid($person, "Password");
-		$path = $this->Host . ($handlerPath ?? $this->HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
-		$dic = array();
-		$dic['$HYPERLINK'] = Struct::Link($linkAnchor, $path);
-		$dic['$LINK'] = Struct::Link($path, $path);
-		$dic['$PATH'] = $path;
-		$dic['$SIGNATURE'] = $this->TemporarySignature;
-		$subject = Convert::FromDynamicString($subject ?? "", $dic, true);
-		$content = Convert::FromDynamicString($content ?? "", $dic, false);
-		return Contact::SendHtmlEmail($from, $this->TemporaryEmail, __($subject), __($content)) ? true : false;
-	}
 
 	/**
 	 * To create and store a new token from the value
@@ -689,4 +580,28 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->Session->PopData($sign);
 		return get($this->Find($sign), "Signature");
 	}
+
+	public function SendTokenEmail($from, $to, $subject, $content, $linkAnchor = "Click Here", $handlerPath = null, $tokenKey = "sign")
+	{
+		if (!$to)
+			throw new \SilentException("Please input your 'email address'!");
+		$person = $this->DataTable->SelectRow("*", "`Email`=:Email", [":Email" => $to]);
+		if (isEmpty($person))
+			throw new \SilentException("Unfortunately the email address is incorrect!");
+		$this->TemporaryEmail = takeValid($person, "Email");
+		$this->TemporarySignature = takeValid($person, "Signature");
+		$this->TemporaryName = takeValid($person, "Name");
+		$this->TemporaryImage = takeValid($person, "Image");
+		$this->TemporaryPassword = takeValid($person, "Password");
+		$path = $this->Host . ($handlerPath ?? $this->HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
+		$dic = array();
+		$dic['$HYPERLINK'] = Struct::Link($linkAnchor, $path);
+		$dic['$LINK'] = Struct::Link($path, $path);
+		$dic['$PATH'] = $path;
+		$dic['$SIGNATURE'] = $this->TemporarySignature;
+		$subject = Convert::FromDynamicString($subject ?? "", $dic, true);
+		$content = Convert::FromDynamicString($content ?? "", $dic, false);
+		return Contact::SendHtmlEmail($from, $this->TemporaryEmail, __($subject), __($content)) ? true : false;
+	}
+
 }
