@@ -19,7 +19,6 @@ class SideMenu extends Module
 	public $AllowSubItemsDescription = true;
 	public $AllowItemsImage = true;
 	public $AllowSubItemsImage = true;
-	public $AllowChangeColor = true;
 	public $AllowHide = true;
 	public $AllowHoverable = true;
 	/**
@@ -27,6 +26,9 @@ class SideMenu extends Module
 	 * @var 
 	 */
 	public $Buttons = null;
+	public $AllowSearch = true;
+	public $AllowTemplate = true;
+	public $AllowProfile = true;
 	public $AllowDefaultButtons = true;
 	public $ButtonsScreenSize = "md";
 	public $AllowSignButton = true;
@@ -34,7 +36,7 @@ class SideMenu extends Module
 	public $SignButtonScreenSize = "md";
 	public $LogoWidth = "calc(1.25 * var(--size-5))";
 	public $LogoHeight = "calc(1.25 * var(--size-5))";
-    public $Printable = false;
+	public $Printable = false;
 
 
 	public function __construct()
@@ -419,14 +421,18 @@ class SideMenu extends Module
 				$defaultButtons = [];
 				if ($this->AllowDefaultButtons) {
 					module("SearchForm");
-					module("TemplateButton"); 
-					$defaultButtons[] = new SearchForm();
-					if (\_::$User->AllowSigning) $defaultButtons[] = Struct::Button(Struct::Icon("user"), \_::$User->InHandlerPath);
-					$defaultButtons[] = new TemplateButton();
+					module("TemplateButton");
+					if ($this->AllowSearch)
+						$defaultButtons[] = new SearchForm();
+					if ($this->AllowProfile && \_::$User->AllowSigning)
+						$defaultButtons[] = Struct::Button(Struct::Icon("user"), \_::$User->InHandlerPath);
+					if ($this->AllowTemplate)
+						$defaultButtons[] = new TemplateButton();
 				}
-				yield Struct::Division([
-						...($defaultButtons? $defaultButtons : []),
-						...($this->Buttons? (is_array($this->Buttons)?$this->Buttons:[$this->Buttons]) : [])
+				yield Struct::Division(
+					[
+						...($defaultButtons ? $defaultButtons : []),
+						...($this->Buttons ? (is_array($this->Buttons) ? $this->Buttons : [$this->Buttons]) : [])
 					],
 					["class" => "other view {$this->ButtonsScreenSize}-show"]
 				);
@@ -435,13 +441,13 @@ class SideMenu extends Module
 				if (count($this->Items) > 0)
 					yield Struct::Items(
 						function () {
-							foreach ($this->Items as $item)
-								{
-									if($item["Items"]??null)$item["Path"] = null;
-									yield $this->CreateItem($item, 1);
-								}
+							foreach ($this->Items as $item) {
+								if ($item["Items"] ?? null)
+									$item["Path"] = null;
+								yield $this->CreateItem($item, 1);
+							}
 						},
-						["onclick"=>"{$this->Name}_ViewSideMenu(false);"],
+						["onclick" => "{$this->Name}_ViewSideMenu(false);"],
 						["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : '') . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : '')]
 					);
 			yield $this->GetContent();
@@ -467,17 +473,17 @@ class SideMenu extends Module
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Struct::Item(
-			($ind <=2? Struct::Button(
-				($this->AllowItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
-				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name")):"").
-				($this->AllowItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
+			($ind <= 2 ? Struct::Button(
+				($this->AllowItemsImage ? Struct::Image(null, getBetween($item, "Image", "Icon")) : "") .
+				($this->AllowItemsLabel ? __(getBetween($item, "Title", "Name")) : "") .
+				($this->AllowItemsDescription ? Struct::Division(__(get($item, "Description")), ["class" => "description"]) : ""),
 				$path,
 				get($item, "Attributes")
-				) :
+			) :
 				Struct::Button(
-					($this->AllowSubItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
-					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name")):"").
-					($this->AllowSubItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
+					($this->AllowSubItemsImage ? Struct::Image(null, getBetween($item, "Image", "Icon")) : "") .
+					($this->AllowSubItemsLabel ? __(getBetween($item, "Title", "Name")) : "") .
+					($this->AllowSubItemsDescription ? Struct::Division(__(get($item, "Description")), ["class" => "description"]) : ""),
 					$path,
 					get($item, "Attributes")
 				)

@@ -383,7 +383,7 @@ abstract class FrontBase
 	 */
 	function Bring($intents = null, $callback = null)
 	{
-		$callbackScript = "(data,err)=>{_(item).before(data,err).remove();}";
+		$callbackScript = "(data,err)=>{_(item).before(data,err); _(item).remove();}";
 		$progressScript = "null";
 		$timeout = 60000;
 		$start = Internal::MakeStartScript(true);
@@ -392,12 +392,12 @@ abstract class FrontBase
 		$intents = Convert::ToString($intents, ",", "{1}", "[{0}]", "[]");
 		if (isStatic($callback))
 			response(Struct::Script("$start for(item of $intents)(" . $callbackScript . ")(" .
-				Script::Convert($callback) . ",item);document.getElementById('$id').remove();$end", null, ["id" => $id]));
+				Script::Convert($callback) . ",item);_('#$id').remove();$end", null, ["id" => $id]));
 		else
 			response(Struct::Script(
 				$callback ? "$start" .
 				"for(item of $intents)sendInternal(null,{\"" . Internal::Set($callback) . '":item.outerHTML},' .
-				"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
+				"getQuery(item),$callbackScript,$callbackScript,null,$progressScript,$timeout);_('#$id').remove();$end"
 				: $intents
 				,
 				null,

@@ -16,6 +16,11 @@ class Collection extends Module
 	/**.
 	 * An array of items, which contains a Key-Value based array of features
 	 * @var null|array<array<enum-string,mixed>>
+	 * @example
+	 * $Collection = new MiMFa\Module\Collection([
+	 *    ["Title"=>"Item 1", "Description"=>"This is the first item", "Image"=>"path/to/image1.jpg"],
+	 *    ["Title"=>"Item 2", "Description"=>"This is the second item", "Image"=>"path/to/image2.jpg"],
+	 * ]);
 	 */
 	public $Items = null;
 	public $Root = null;
@@ -156,7 +161,7 @@ class Collection extends Module
 					$p_image = getValid($item, 'Image', $this->DefaultImage);
 					$p_name = __(getBetween($item, 'Title', 'Name') ?? $this->DefaultTitle, true, false);
 					$p_description = getValid($item, 'Description', $this->DefaultDescription);
-					$p_description = is_null($p_description) ? null : __($p_description, styling:true, referring:true);
+					$p_description = is_null($p_description) ? null : __($p_description, styling: true, referring: true);
 					$p_link = ($l = get($item, 'Path')) ? $l : ($this->Root ? $this->Root . getBetween($item, 'Id', 'Name') : $this->DefaultPath);
 					$p_buttons = getValid($item, 'Buttons', $this->DefaultButtons);
 					$img->Source = $p_image;
@@ -203,4 +208,3 @@ class Collection extends Module
 		})()));
 	}
 }
-?>

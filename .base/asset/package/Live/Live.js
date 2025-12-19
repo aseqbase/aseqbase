@@ -260,14 +260,14 @@ class Live extends Array {
                 }
                 else {
                     const scripts = elem.querySelectorAll('script');
-                    for (const oldScript of scripts) {
+                    for (const oldScript of scripts) try{
                         const newScript = document.createElement('script');
                         Array.from(oldScript.attributes).forEach(attr => {
                             newScript.setAttribute(attr.name, attr.value);
                         });
                         newScript.textContent = oldScript.textContent;
                         oldScript.parentNode?.replaceChild(newScript, oldScript);
-                    }
+                    }catch(e){}
                 }
             }
         });

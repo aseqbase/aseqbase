@@ -31,6 +31,7 @@ class General extends Template
 		style("
 				body {
 				  	display: flex;
+					inset:0px;
 					flex-direction: column;
     				justify-content: space-between;
 					margin: 0;

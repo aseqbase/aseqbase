@@ -509,7 +509,7 @@ class CommentCollection extends Collection
                     if(sbjbox) data.Subject = sbjbox.innerText;
                     if(attbox) data.Attach = attbox.innerText;
                     sendPut($action, data, selector, function (data, err) {
-                        try{document.querySelector(selector .result).remove();}catch{}
+                        try{document.querySelector(selector+' .result').remove();}catch{}
                         _(selector).prepend(data);
                         if(!err){
                             for(attr in divinp) msgbox.removeAttribute(attr);

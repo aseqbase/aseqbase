@@ -3,7 +3,6 @@ use MiMFa\Library\Convert;
 
 $user = \_::$User->Get();
 if ($user) {
-    echo "<div class='page'>";
     module("Form");
     module("Field");
     $form = new \MiMFa\Module\Form();
@@ -11,7 +10,7 @@ if ($user) {
     $form->Image = "edit";
     $form->Id = "EditProfile";
     $form->Method = "POST";
-    $form->Template = "both";
+    $form->Template = "v";
     $form->BlockTimeout = 30000;
     $form->Timeout = 60000;
     $form->SubmitLabel = "Update";
@@ -41,6 +40,5 @@ if ($user) {
     $form->AddChild(new \MiMFa\Module\Field("text", "Address" , $user["Address" ], "Full postal address"));
     $form->AddChild(new \MiMFa\Module\Field("text", "Organization", $user["Organization"], "Your organization, institute, company, etc."));
     $form->Render();
-    echo "</div>";
 }
 else part(\_::$User->InHandlerPath);

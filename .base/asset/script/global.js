@@ -400,7 +400,7 @@ let send = function (
 	progress = null,
 	timeout = null,
 	async = true) {
-		
+
 	noEffects = false;
 	if (noEffects = !document.querySelector(selector)) selector = 'body';
 
@@ -408,22 +408,44 @@ let send = function (
 	const elems = noEffects ? [] : document.querySelectorAll(selector);
 	const opacity = noEffects ? 1 : document.querySelector(selector).style.opacity;
 	url = url ? url : location.href;
-	timeout = timeout || 30000;
+	timeout = timeout || 60000;
 	method = (method || "POST").toUpperCase();
 	let isForm = false;
-	let contentType = 'application/x-www-form-urlencoded; charset=utf-8';
 
-	if (data)
-		if (isForm = data instanceof FormData) {
-			contentType = false;
-		} else if (method === "GET") {
+	let contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+	switch (method) {
+		case "GET":
+		case "POST":
+		case "PATCH":
+		case "PUT":
+		case "DELETE":
+		case "OPTIONS":
+			break;
+		default:
+			if (data) {
+				if (isForm = data instanceof FormData)
+					data.append("__METHOD", method);
+				else if (contentType && (typeof data === 'object') || Array.isArray(data))
+					data.__METHOD = method;
+			}
+			else data = { __METHOD: method };
+			method = "POST";
+			break;
+	}
+
+	if (data) {
+		if (method === "GET") {
 			url += (url.includes('?') ? '&' : '?') + new URLSearchParams(data).toString();
 			contentType = false;
 			data = null;
-		} else if (typeof data === 'object' || Array.isArray(data)) {
+		}
+		else if (isForm = data instanceof FormData)
+			contentType = false;
+		else if (contentType && (typeof data === 'object') || Array.isArray(data)) {
 			data = JSON.stringify(data);
 			contentType = 'application/json; charset=utf-8';
 		}
+	}
 
 	success = success ?? function (result = null, err = null) {
 		if (err) error(result, err);
@@ -474,23 +496,11 @@ let send = function (
 	};
 
 	const xhr = new XMLHttpRequest();
-	switch (method) {
-		case "GET":
-		case "POST":
-		case "PATCH":
-		case "PUT":
-		case "DELETE":
-			xhr.open(method, url, async);
-			break;
-		default:
-			xhr.open("POST", url, async);
-			xhr.setRequestHeader("X-Custom-Method", method);
-			break;
-	}
+	xhr.open(method, url, async);
 
 	if (contentType) xhr.setRequestHeader('Content-Type', contentType);
 
-	if(async) xhr.timeout = timeout;
+	if (async) xhr.timeout = timeout;
 
 	xhr.upload.addEventListener('progress', progress);
 
@@ -530,8 +540,64 @@ let send = function (
 	};
 
 	xhr.send(data || null);
-	
+
 	return xhr;
+};
+// Retry wrapper for transient network errors (ERR_NETWORK_CHANGED, Network Error, timeouts)
+let sendWithRetry = function (
+	method = 'POST',
+	url = null,
+	data = null,
+	selector = 'body+:nth-child(1)',
+	success = null,
+	error = null,
+	ready = null,
+	progress = null,
+	timeout = null,
+	retryOptions = null,
+	async = true) {
+	const opts = Object.assign({ retries: 3, backoff: 300 }, retryOptions || {});
+	let attempt = 0;
+
+	function isTransientError(resp, status) {
+		const txt = (typeof resp === 'string') ? resp : (resp && resp.statusText ? resp.statusText : '');
+		return status === 0 || status === 'timeout' || /network|ERR_NETWORK_CHANGED/i.test(txt) || /Network Error/i.test(txt);
+	}
+
+	function tryOnce(resolve, reject) {
+		attempt++;
+		const onSuccess = function (res, st) {
+			if (success) try { success(res, st); } catch (e) { /* ignore callback errors */ }
+			resolve(res);
+		};
+		const onError = function (res, st) {
+			if (isTransientError(res, st) && attempt <= opts.retries) {
+				const delay = opts.backoff * Math.pow(2, attempt - 1);
+				setTimeout(() => tryOnce(resolve, reject), delay);
+			} else {
+				if (error) try { error(res, st); } catch (e) { /* ignore callback errors */ }
+				reject({ response: res, status: st });
+			}
+		};
+
+		// call underlying send (keeps original behavior)
+		try {
+			send(method, url, data, selector, onSuccess, onError, ready, progress, timeout, async);
+		} catch (e) {
+			// if send itself throws, treat as transient and retry if possible
+			if (attempt <= opts.retries) setTimeout(() => tryOnce(resolve, reject), opts.backoff * Math.pow(2, attempt - 1));
+			else reject(e);
+		}
+	}
+
+	// If caller provided callbacks (success/error) we behave callback-style and return undefined
+	if (isDefined(success) && success !== null) {
+		tryOnce(() => { }, () => { });
+		return;
+	}
+
+	// Promise-style
+	return new Promise((resolve, reject) => tryOnce(resolve, reject));
 };
 let sendGet = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('GET', url, data, selector, success, error, ready, progress, timeout);
@@ -587,7 +653,21 @@ let sendRequest = function (
 	ready = null,
 	progress = null,
 	timeout = null) {
-		return send(method, url, data, selector, success, error, ready, progress, timeout, false);
+	return send(method, url, data, selector, success, error, ready, progress, timeout, false);
+};
+let trySendRequest = function (
+	method = 'POST',
+	url = null,
+	data = null,
+	selector = 'body+:nth-child(1)',
+	success = null,
+	error = null,
+	ready = null,
+	progress = null,
+	timeout = null,
+	retryOptions = null) {
+	// keep parity with sendRequest which sets async to false by default
+	return trySend(method, url, data, selector, success, error, ready, progress, timeout, retryOptions, false);
 };
 let sendGetRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('GET', url, data, selector, success, error, ready, progress, timeout);

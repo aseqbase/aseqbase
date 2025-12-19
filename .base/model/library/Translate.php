@@ -33,8 +33,8 @@ class Translate
 	public $WrapPattern = "/(^<[\w\W]*>$)|(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(<\S+[\w\W]*>)|(\d*\.?\d+)/U";
 	public $ValidPattern = "/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-z]/m";
 	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
-	public $CorrectorPattern = "/(?:^'([\w\W]+)'$)|([\w\W]+)/";
-	public $CorrectorReplacement = "$1$2";
+	public $CorrectorPattern = "/(?:^(['\"\`])([\w\W]+)\\1$)|([\w\W]+)/";
+	public $CorrectorReplacement = "$2$3";
 	/**
 	 * To have a deep translate
 	 * @test
@@ -109,7 +109,7 @@ class Translate
 			return $data;
 		return self::DetectCaseStatus($data, $data);
 	}
-	public function Get($text, $lang = null, $depth = 1)
+	public function Get($text, $lang = null, $depth = 3)
 	{
 		if (!$this->IsRootLanguage($text))
 			return $text;

@@ -3428,26 +3428,31 @@ class Struct
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         $name = self::PopAttribute($attributes, "Name");
         $onChange = self::PopAttribute($attributes, "OnChange");
-        return self::Map($value, null, [
+        return self::Script("
+        {$id}=null;
+        function {$id}_update(){
+            const inp = document.getElementById('$id');
+            if(inp.value === {$id}) return;
+            ll = inp.value?inp.value.split(/[\,;]/g):[0,0];
+            latlng = {lat:ll[0]??0,lng:ll[1]??0};
+            if(map_marker_input$id) map_marker_input$id.setLatLng(latlng).addTo(map_input$id);
+            else map_marker_input$id = L.marker(latlng, {draggable: true}).addTo(map_input$id);
+            map_input$id.flyTo(latlng);
+            {$id} = inp.value;
+        }
+        ").self::Map($value, null, [
             "id" => "_input$id",
             "class" => "input",
-            "onchange" => "document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
+            "onchange" => "{$id}=document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
                 Convert::ToString($onChange, ";
             ")
         ], $attributes) .
             self::HiddenInput($key, Convert::ToString($value, ","), [
                 "id" => $id,
                 "class" => "mapinput",
-                "onchange" => "setTimeout(function(){
-                    ll = this.value.split(/[,;]/);
-                    latlng = {lat:ll[0]??0,lng:ll[1]??0};
-                    if(map_marker_input$id) map_marker_input$id.setLatLng(latlng).addTo(map_input$id);
-                    else map_marker_input$id = L.marker(latlng, {draggable: true}).addTo(map_input$id);
-                    map_input$id.flyTo(latlng);
-                }, 2000)
-            ",
+                "onchange" => "setTimeout(function(){{$id}_update();}, 2000)",
                 "name" => $name
-            ]);
+            ]).self::Script("setInterval(function(){{$id}_update();}, 2000)");
     }
     /**
      * The \<INPUT\> HTML Tag

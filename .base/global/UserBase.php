@@ -462,15 +462,15 @@ class UserBase
 	 * @param mixed $metadata
 	 * @return bool|null It will return 'true' if signed up 'null' if the account is not active yet, and 'false' otherwise
 	 */
-	public function SignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
+	public function SignUp($signature, $password = null, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
 	{
 		$this->TemporaryImage = null;
 		$email = $email ?: $this->GenerateEmail($signature, true);
 		return $this->DataTable->Insert(
 			[
-				":Signature" => $this->TemporarySignature = $signature ?? $contact ?? $email,
+				":Signature" => $this->TemporarySignature = $signature ?: ($email ?: $contact),
 				":Email" => $this->TemporaryEmail = strtolower($email),
-				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password),
+				":Password" => $this->TemporaryPassword = $this->EncryptPassword($password??randomString(16)),
 				":Name" => $this->TemporaryName = $name ?? trim($firstName . " " . $lastName),
 				":FirstName" => $firstName,
 				":LastName" => $lastName,
@@ -511,11 +511,11 @@ class UserBase
 	 * @param mixed $email
 	 * @return bool|null It will return 'true' if logged in 'null' if the account is not active yet, and 'false' otherwise
 	 */
-	public function SignInOrSignUp($signature, $password, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
+	public function SignInOrSignUp($signature, $password = null, $email = null, $name = null, $firstName = null, $lastName = null, $contact = null, $groupId = null, $status = null, $metadata = null)
 	{
-		return ($res = $this->SignIn($signature ?? $email, $password)) !== false ? $res :
+		return ($res = $this->SignIn($signature ?: ($email ?: $contact), $password)) !== false ? $res :
 			(
-				($res = $this->SignUp($signature ?? $email, $password, $email, $name, $firstName, $lastName, $contact, $groupId, $status, $metadata)) === true ?
+				($res = $this->SignUp($signature, $password, $email, $name, $firstName, $lastName, $contact, $groupId, $status, $metadata)) === true ?
 				$this->SignIn($signature ?? $email, $password) : $res
 			);
 	}

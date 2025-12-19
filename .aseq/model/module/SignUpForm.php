@@ -3,6 +3,8 @@ namespace MiMFa\Module;
 use MiMFa\Library\Struct;
 
 use MiMFa\Library\Convert;
+use MiMFa\Library\Script;
+
 module("Form");
 class SignUpForm extends Form
 {
@@ -83,7 +85,8 @@ class SignUpForm extends Form
 		parent::__construct();
 		$this->Action = \_::$User->UpHandlerPath;
 		$this->InitialStatus = \_::$User->InitialStatus;
-		$this->Welcome = function(){ return part(\_::$User->DashboardHandlerPath, print:false); };
+		$this->Welcome = $this->InitialStatus?function(){ return part(\_::$User->DashboardHandlerPath, print:false); }:
+			function(){ return part(\_::$User->ActiveHandlerPath, print:false); };
 	}
 
 	public function GetStyle()
@@ -178,7 +181,7 @@ class SignUpForm extends Form
 									yield "<option value='+$i'" . ($this->ContactCountryCode == $i ? " selected" : "") . ">+$i</option>"; }
 						)
 							: "") .
-						Struct::MaskInput("Phone", null,"^\d{10}$", ["placeholder" => $this->ContactPlaceHolder]),
+						Struct::MaskInput("Phone", null,"^\d{10}$", ["placeholder" => $this->ContactPlaceHolder, "inputmode" => "numeric"]),
 						["class"=> "field"]
 					)
 				);
@@ -245,16 +248,16 @@ class SignUpForm extends Form
 				});
                 _('.{$this->Name} form').submit(function(e) {
 					let error = null;
-					if (!_('.{$this->Name} form [name=Password]')?.val().match({$this->PasswordPattern})) 
-						error = Struct.error(".\MiMFa\Library\Script::Convert($this->PasswordTip).");
-					else if (!_('.{$this->Name} form [name=Signature]')?.val().match({$this->SignaturePattern})) 
-						error = Struct.error(".\MiMFa\Library\Script::Convert($this->SignatureTip).");
-					else if (_('.{$this->Name} form [name=PasswordConfirmation]')?.val() != _('.{$this->Name} form [name=Password]')?.val()) 
-						error = Struct.error('New password and confirm password does not match!');
+					if (!_('.{$this->Name} form [name=\"Password\"]')?.val().match({$this->PasswordPattern})) 
+						error = Struct.error(".Script::Convert(__($this->PasswordTip)).");
+					else if (!_('.{$this->Name} form [name=\"Signature\"]')?.val().match({$this->SignaturePattern})) 
+						error = Struct.error(".Script::Convert(__($this->SignatureTip)).");
+					else if (_('.{$this->Name} form [name=\"PasswordConfirmation\"]')?.val() != _('.{$this->Name} form [name=Password]')?.val()) 
+						error = Struct.error(".Script::Convert(__('New password and confirm password does not match!')).");
 					if(error) {
-						_('.{$this->Name} form .result').remove();
-						_('.{$this->Name} form').append(error);
 						e.preventDefault();
+						_('.{$this->Name} form .result')?.remove();
+						_('.{$this->Name} form').append(error);
 						return false;
 					}
 					return true;

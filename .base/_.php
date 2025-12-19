@@ -15,7 +15,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 6.99311;
+	public static float $Version = 7.01991;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -78,6 +78,14 @@ class _
 	 */
 	public static array $AfterActions = array();
 	
+	/**
+	 * To check if the results are rendered on the client side or not
+	 * @return bool
+	 */
+	public static function IsRendered(){
+		return headers_sent();
+	} 
+
 	/**
 	 * The storage of all cached data
 	 * @var array

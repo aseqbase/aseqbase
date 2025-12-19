@@ -223,7 +223,7 @@ class Form extends Module
 				
 				.{$this->Name} .button {
 					width: fit-content;
-					max-width: 85%;
+					max-width: 100%;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 

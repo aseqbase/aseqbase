@@ -17,6 +17,7 @@ class PrePage extends Module
 			}
 			.{$this->Name}>.rack{
 				align-items: center;
+				gap: var(--size-max);
 			}
 			.{$this->Name}>:is(.title,.rack>.title){
 				margin: var(--size-0) var(--size-0) 0px;
@@ -24,7 +25,6 @@ class PrePage extends Module
 			.{$this->Name}>.rack>.description{
 				font-size: var(--size-1);
 				text-align: justify;
-				padding: 0px var(--size-max);
 			}
 			.{$this->Name}>:not(.content)>.image{
 				background-size: cover;

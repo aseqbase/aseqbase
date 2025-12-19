@@ -319,39 +319,29 @@ function receive(array|string|null $method = null)
 			case "put":
 			case "patch":
 			case "delete":
-				if ($method === "post" && $_POST) {
-					$method = $_POST;
-					break;
-				}
-				$res = file_get_contents('php://input');
-				if (!isEmpty($res)) {
-					if (isJson($res))
-						$method = Convert::FromJson($res) ?? $method;
-					else if (strpos($_SERVER['CONTENT_TYPE'] ?? "", 'multipart/form-data') !== false)
-						$method = Convert::FromFormData($res, $_FILES) ?? $method;
-					else
-						parse_str($res, $method);
-				} else
-					parse_str($res, $method);
-
-				$_REQUEST = $method = is_array($method) ? $method : [$method];
-				break;
+			case "options":
 			default:
 				if (strtoupper($method) == getMethodName()) {
-					if ($method = $_POST)
-						break;
-					$res = file_get_contents('php://input');
-					if (!isEmpty($res)) {
-						if (isJson($res))
-							$method = Convert::FromJson($res) ?? $method;
-						else if (strpos($_SERVER['CONTENT_TYPE'] ?? "", 'multipart/form-data') !== false)
-							$method = Convert::FromFormData($res, $_FILES) ?? $method;
-						else
+					if ($_POST) {
+						$method = $_POST;
+						if (isset($method["__METHOD"])) {
+							unset($method["__METHOD"]);
+							$_REQUEST = $method;
+						}
+					} else {
+						$res = file_get_contents('php://input');
+						if (!isEmpty($res)) {
+							if (isJson($res))
+								$method = Convert::FromJson($res) ?? $method;
+							else if (strpos($_SERVER['CONTENT_TYPE'] ?? "", 'multipart/form-data') !== false)
+								$method = Convert::FromFormData($res, $_FILES) ?? $method;
+							else
+								parse_str($res, $method);
+						} else
 							parse_str($res, $method);
-					} else
-						parse_str($res, $method);
 
-					$_REQUEST = $method = is_array($method) ? $method : [$method];
+						$_REQUEST = $method = is_array($method) ? $method : [$method];
+					}
 				}
 				break;
 		}
@@ -516,11 +506,11 @@ function request($intent = null, $callback = null)
 		$intent = is_string($intent) ? $intent : Script::Convert($intent);
 		if (isStatic($callback))
 			response(Struct::Script("$start(" . $callbackScript . ")(" .
-				Script::Convert($callback) . ",$intent);document.getElementById('$id').remove();$end", null, ["id" => $id]));
+				Script::Convert($callback) . ",$intent);try{document.getElementById('$id').remove();}catch{}$end", null, ["id" => $id]));
 		else
 			response(Struct::Script(
 				$callback ? $start .
-				'sendInternal(null,{"' . Internal::Set($callback) . '":JSON.stringify(' . $intent . ")}, null,$callbackScript,$callbackScript, null,$progressScript,$timeout);document.getElementById('$id').remove();$end"
+				'sendInternal(null,{"' . Internal::Set($callback) . '":JSON.stringify(' . $intent . ")}, null,$callbackScript,$callbackScript, null,$progressScript,$timeout);try{document.getElementById('$id').remove();}catch{}$end"
 				: $intent,
 				null,
 				["id" => $id]
@@ -759,6 +749,12 @@ function responseStatus($status = null)
 {
 	if ($status && !headers_sent()) {
 		header("HTTP/1.1 " . abs($status));
+		// --- CORS / Preflight & Method-Override helper (drop in early in request pipeline) ---
+		header("Access-Control-Allow-Origin: " . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
+		header("Access-Control-Allow-Credentials: true");
+		header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
+		header("Access-Control-Allow-Headers: X-Custom-Method, X-Custom-Method-Override, X-HTTP-Method-Override, Content-Type, X-Requested-With, Authorization");
+
 		return true;
 	}
 	return false;
@@ -2382,7 +2378,7 @@ function getMethodName(string|int|null $method = null)
 		case "EXTERNAL":
 			return "EXTERNAL";
 		default:
-			return strtoupper($method ?? $_SERVER['HTTP_X_CUSTOM_METHOD'] ?? $_SERVER['REQUEST_METHOD'] ?? "OTHER");
+			return strtoupper($method ?: (($_POST["__METHOD"] ?? null) ?: ((((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? null)) ?: "OTHER")));
 	}
 }
 /**
@@ -2403,7 +2399,7 @@ function getMethodName(string|int|null $method = null)
  */
 function getMethodIndex(string|int|null $method = null)
 {
-	switch (strtoupper($method ?? $_SERVER['HTTP_X_CUSTOM_METHOD'] ?? $_SERVER['REQUEST_METHOD'] ?? "")) {
+	switch (strtoupper($method ?: (($_POST["__METHOD"] ?? null) ?: ((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? "")))) {
 		case 1:
 		case "PUBLIC":
 		case "GET":
