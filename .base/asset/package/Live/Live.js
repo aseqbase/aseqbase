@@ -6,7 +6,7 @@ class Live extends Array {
         else if (element instanceof Element) return new Live(element);
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = String(element);
-        return new Live(tempDiv.children);
+        return new Live(tempDiv.children?tempDiv.children:tempDiv);
     }
 
     constructor(query = null, mode = null, source = null) {
@@ -277,7 +277,8 @@ class Live extends Array {
      * @param {Live | HTMLElement | Array<HTMLElement> | any} element To be appended to selected elements
      */
     append(element) {
-        if (Array.isArray(element)) return this.each(tag => {
+        if(isEmpty(element)) return this;
+        else if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element)
                 return tag.append(...element);
         });
@@ -310,7 +311,8 @@ class Live extends Array {
      * @param {Live | HTMLElement | Array<HTMLElement> | any} element To be prepended to selected elements
      */
     prepend(element) {
-        if (Array.isArray(element)) return this.each(tag => {
+        if(isEmpty(element)) return this;
+        else if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element)
                 return tag.prepend(...element);
         });
@@ -355,7 +357,8 @@ class Live extends Array {
         return this;
     }
     after(element) {
-        if (Array.isArray(element)) return this.each(tag => {
+        if(isEmpty(element)) return this;
+        else if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element)
                 return tag.after(...element);
         });
@@ -371,7 +374,8 @@ class Live extends Array {
         return this;
     }
     before(element) {
-        if (Array.isArray(element)) return this.each(tag => {
+        if(isEmpty(element)) return this;
+        else if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element)
                 return tag.before(...element);
         });

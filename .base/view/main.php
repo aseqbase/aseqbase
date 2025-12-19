@@ -4,7 +4,7 @@ $name = pop($data, "Name") ?? \_::$User->Direction;
 $templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??between($name, \_::$Info->Name);
 $alternative = pop($data, "Alternative") ?? "404";
 $content = pop($data, "Content");
-$templ->Content = isValid($content)?
+$templ->Content = $content?
         \MiMFa\Library\Struct::Page($content):
         function() use($name, $data, $alternative) { return page($name, data: $data, print:false, alternative: $alternative); };
 $templ->Render();

@@ -31,7 +31,8 @@ use MiMFa\Library\Struct;
  *@link https://github.com/aseqbase/aseqbase/wiki/Template See the Documentation
  *@example Main.php
  */
-class Template extends \Base{
+class Template extends \Base
+{
     /**
      * The window title
      * @var string|null
@@ -43,68 +44,84 @@ class Template extends \Base{
      */
     public $WindowLogo = null;
 
-	/**
-     * Leave null for default action or replace an action to change
-	 * @var callable|null
-	 */
-	public $Initial = null;
-	/**
+    /**
      * Leave null for default action or replace an action to change
      * @var callable|null
      */
-	public $Main = null;
-	/**
+    public $Initial = null;
+    /**
      * Leave null for default action or replace an action to change
      * @var callable|null
      */
-	public $Final = null;
-	/**
+    public $Main = null;
+    /**
      * Leave null for default action or replace an action to change
      * @var callable|null
      */
-	public $Header = null;
-	/**
+    public $Final = null;
+    /**
      * Leave null for default action or replace an action to change
      * @var callable|null
      */
-	public $Content = null;
-	/**
+    public $Header = null;
+    /**
      * Leave null for default action or replace an action to change
      * @var callable|null
      */
-	public $Footer = null;
+    public $Content = null;
+    /**
+     * Leave null for default action or replace an action to change
+     * @var callable|null
+     */
+    public $Footer = null;
 
-    public function __construct($setDefaults = true, $setRevises = true){
+    public function __construct($setDefaults = true, $setRevises = true)
+    {
         parent::__construct($setDefaults, $setRevises);
         component("Global");
-		component("Live");
+        component("Live");
     }
-	public function Handler($received = null){
+    public function Handler($received = null)
+    {
         ob_start();
-		$this->Render();
+        $this->Render();
         return ob_get_clean();
     }
 
-	public function Render(){
-		if(isValid($this->Initial)) response($this->Initial);
-		else $this->RenderInitial();
-		if(isValid($this->Main)) response($this->Main);
-		else $this->RenderMain();
-        if(isValid($this->Header)) response($this->Header);
-        else $this->RenderHeader();
-        if(isValid($this->Content)) response($this->Content);
-        else $this->RenderContent();
-        if(isValid($this->Footer)) response($this->Footer);
-        else $this->RenderFooter();
-		if(isValid($this->Final)) response($this->Final);
-		else $this->RenderFinal();
-	}
+    public function Render()
+    {
+        if ($this->Initial)
+            response($this->Initial);
+        else
+            $this->RenderInitial();
+        if ($this->Main)
+            response($this->Main);
+        else
+            $this->RenderMain();
+        if ($this->Header)
+            response($this->Header);
+        else
+            $this->RenderHeader();
+        if ($this->Content)
+            response($this->Content);
+        else
+            $this->RenderContent();
+        if ($this->Footer)
+            response($this->Footer);
+        else
+            $this->RenderFooter();
+        if ($this->Final)
+            response($this->Final);
+        else
+            $this->RenderFinal();
+    }
 
-	public function RenderInitial(){
+    public function RenderInitial()
+    {
         region("initial");
-        $title = $this->WindowTitle??[preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/","",\_::$User->Direction)];
-        response(Struct::Title(Convert::ToTitle(is_array($title)?[...$title,...[ \_::$Info->Name]]:$title)));
-		response(Struct::Logo(getFullUrl($this->WindowLogo??\_::$Info->LogoPath)));
+        $title = $this->WindowTitle ?? [preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/", "", \_::$User->Direction)];
+        response(Struct::Title(Convert::ToTitle(is_array($title) ? [...$title, ...[\_::$Info->Name]] : $title)));
+        response(Struct::Logo(getFullUrl($this->WindowLogo ?? \_::$Info->LogoPath)));
         response(Struct::Style("
         head, style, script, link, meta, title{
             display: none !important;
@@ -239,11 +256,11 @@ class Template extends \Base{
             justify-content: center;
             align-items: center;
             gap: var(--size-0);
-            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
+            " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
         }
         :is(button, .button):hover{
             font-weight: bold;
-            ".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
+            " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
         }
         :is(button, .button, .icon).success{
             background-color: var(--color-green);
@@ -282,23 +299,32 @@ class Template extends \Base{
             " . \MiMFa\Library\Style::UniversalProperty("filter", "grayscale(100)") . "
         }
         "));
-        foreach ($this as $key=>$value)
-        	if(is_string($key)) response(Struct::Meta($key, Convert::ToString($value)));
-            else response($value);
+        foreach ($this as $key => $value)
+            if (is_string($key))
+                response(Struct::Meta($key, Convert::ToString($value)));
+            else
+                response($value);
     }
-	public function RenderMain(){
+    public function RenderMain()
+    {
         region("main");
     }
-	public function RenderHeader(){
+    public function RenderHeader()
+    {
     }
-	public function RenderContent(){
-        foreach ($this->Children??[] as $key=>$value)
-        	if(is_string($key)) response(Struct::Section($value, ["Id" =>$key]));
-            else response($value);
+    public function RenderContent()
+    {
+        foreach ($this->Children ?? [] as $key => $value)
+            if (is_string($key))
+                response(Struct::Section($value, ["Id" => $key]));
+            else
+                response($value);
     }
-	public function RenderFooter(){
+    public function RenderFooter()
+    {
     }
-	public function RenderFinal(){
+    public function RenderFinal()
+    {
         region("final");
     }
 }

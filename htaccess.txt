@@ -1,141 +1,117 @@
 ##
 # @package    MiMFa aseqbase
-# @copyright  Copyright (C) 2005 - 2023 Open Source Matters. All rights reserved.
-# @license    GNU General Public License version 3 or later; see LICENSE.txt
+# @copyright  Copyright (C) 2005 - 2023 Open Source Matters
+# @license    GNU General Public License version 3 or later ; see LICENSE.txt
 ##
+
+# Default charset
 AddDefaultCharset UTF-8
-AddCharset utf-8 .html .css .js .xml .json .rss
-AddType application/x-font-woff .woff
+# Do NOT force charset on .js files
+AddCharset utf-8 .html .css .xml .json .rss
+
+# Correct MIME types for fonts
+AddType font/woff .woff
+AddType font/woff2 .woff2
+AddType application/vnd.ms-fontobject .eot
+AddType font/ttf .ttf
+AddType font/otf .otf
+AddType image/svg+xml .svg
+
 ##
-#
-# Remove the ETag (entity tag) response header field
+# Remove ETag
 Header unset ETag
 FileETag none
-#
+
 <IfModule mod_expires.c>
-ExpiresActive on
-ExpiresByType image/jpg  "access 1 year"
-ExpiresByType image/gif  "access 1 year"
-ExpiresByType image/jpeg  "access 1 year"
-ExpiresByType image/png  "access 1 year"
-ExpiresByType video/webm  "access 1 year"
-ExpiresByType application/x-shockwave-flash "access 1 year"
-ExpiresByType application/x-javascript  "access 1 year"
-ExpiresByType application/javascript  "access 1 year"
-ExpiresByType application/pdf "access 1 month"
-ExpiresByType application/woff "access 1 year"
-ExpiresByType application/eot "access 1 year"
-ExpiresByType text/javascript  "access 1 year"
-ExpiresByType text/css "access 1 year"
-ExpiresDefault  "access plus 7 days"
+  ExpiresActive on
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png  "access plus 1 year"
+  ExpiresByType image/gif  "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType video/webm "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/ttf "access plus 1 year"
+  ExpiresByType font/otf "access plus 1 year"
+  ExpiresByType application/pdf "access plus 1 month"
+  ExpiresDefault "access plus 7 days"
 </IfModule>
-#
+<IfModule mod_rewrite.c>
+  RewriteCond %{REQUEST_METHOD} OPTIONS
+  RewriteRule ^(.*)$ $1 [R=200,L]
+</IfModule>
 <IfModule mod_headers.c>
-<FilesMatch "\.(js|css|flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|gif|jpg|jpeg|png|swf|webm|webp)$">
-Header append Cache-Control "public"
-</FilesMatch>
-<FilesMatch "\.(txt|html)$">
-Header append Cache-Control "proxy-revalidate"
-</FilesMatch>
-<FilesMatch "\.(php|cgi|pl|htm|xml)$">
-Header set Cache-Control "private, no-cache, no-store, proxy-revalidate, no-transform"
-Header set Pragma "no-cache"
-</FilesMatch>
+  <FilesMatch "\.(js|css|ico|pdf|gif|jpg|jpeg|png|webp|svg|woff|woff2|ttf|otf)$">
+    Header append Cache-Control "public"
+  </FilesMatch>
+  <FilesMatch "\.(txt|html)$">
+    Header append Cache-Control "proxy-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(php|cgi|pl|htm|xml)$">
+    Header set Cache-Control "private, no-cache, no-store, proxy-revalidate, no-transform"
+    Header set Pragma "no-cache"
+  </FilesMatch>
+  # Allow AJAX / XHR
+  Header always set Access-Control-Allow-Origin "*"
+  Header always set Access-Control-Allow-Headers "X-Custom-Method, Content-Type, X-Requested-With"
+  Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 </IfModule>
-#
+
 <IfModule mod_deflate.c>
-AddOutputFilterByType DEFLATE text/plain
-AddOutputFilterByType DEFLATE text/html
-AddOutputFilterByType DEFLATE text/xml
-AddOutputFilterByType DEFLATE text/css
-AddOutputFilterByType DEFLATE application/xml
-AddOutputFilterByType DEFLATE application/xhtml+xml
-AddOutputFilterByType DEFLATE application/rss+xml
-AddOutputFilterByType DEFLATE application/javascript
-AddOutputFilterByType DEFLATE application/x-javascript
-AddOutputFilterByType DEFLATE application/x-httpd-php
-AddOutputFilterByType DEFLATE application/x-httpd-fastphp
-AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
-AddOutputFilterByType DEFLATE application/x-font
-AddOutputFilterByType DEFLATE application/x-font-opentype
-AddOutputFilterByType DEFLATE application/x-font-otf
-AddOutputFilterByType DEFLATE application/x-font-truetype
-AddOutputFilterByType DEFLATE application/x-font-ttf
-AddOutputFilterByType DEFLATE font/opentype
-AddOutputFilterByType DEFLATE font/otf
-AddOutputFilterByType DEFLATE font/ttf
-AddOutputFilterByType DEFLATE image/svg+xml
-AddOutputFilterByType DEFLATE image/x-icon
-AddOutputFilterByType DEFLATE text/javascript
-BrowserMatch ^Mozilla/4 gzip-only-text/html
-BrowserMatch ^Mozilla/4\.0[678] no-gzip
-BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
-Header append Vary User-Agent env=!dont-vary
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/xml
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE application/xhtml+xml
+  AddOutputFilterByType DEFLATE application/rss+xml
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE image/x-icon
+  BrowserMatch ^Mozilla/4 gzip-only-text/html
+  BrowserMatch ^Mozilla/4\.0[678] no-gzip
+  BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+  Header append Vary User-Agent
 </IfModule>
-#
-# Block/Forbid Referer Spammers/Referer Phishing
+
+# Block referer spammers
 RewriteCond %{HTTP_REFERER} ^.*(ranksonic\.|semalt\.|kambasoft\.|buttons-for-website\.|buttons-for-your-website\.com|4webmasters\.org|social-buttons\.com|best-seo-offer\.com|best-seo-solution\.com).*$ [NC]
 RewriteRule ^(.*)$ - [F]
-#
+
+# Protect sensitive files
 <files wp-config.php>
-order allow,deny
-deny from all
+  order allow,deny
+  deny from all
 </files>
 <files "xmlrpc.php">
-order allow,deny
-deny from all
+  order allow,deny
+  deny from all
 </files>
 <files .htaccess>
-order allow,deny
-deny from all
+  order allow,deny
+  deny from all
 </files>
-#
+
 RewriteEngine on
 RewriteCond %{HTTP_USER_AGENT} ^msnbot
 RewriteRule ^.* - [F,L]
-#
-#Alternate default index pages
+
+# Default index pages
 DirectoryIndex index.php index.htm index.html static.php
-# No directory listings
-IndexIgnore *
-# Can be commented out if it causes errors, see notes above.
 Options +FollowSymlinks
 Options -Indexes
-# Mod_rewrite in use.
-RewriteEngine on
-#RewriteBase /
-#
-## Begin - Rewrite rules to block out some common exploits.
-# If you experience problems on your site then comment out the operations listed 
-# below by adding a # to the beginning of the line.
-# This attempts to block the most common type of exploit `attempts` on MiMFa!
-#
-# Block any script trying to base64_encode data within the URL.
-RewriteCond %{QUERY_STRING} base64_encode[^(]*\([^)]*\) [OR]
-# Block any script that includes a <script> tag in URL.
-RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
-# Block any script trying to set a PHP GLOBALS variable via URL.
-RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
-# Block any script trying to modify a _REQUEST variable via URL.
-RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
-# Return 403 Forbidden header and show the content of the root home page
-RewriteRule .* /index.php [F]
-## End - Rewrite rules to block out some common exploits.
-#
-## Begin - MiMFa! core SEF Section.
-#RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-# If the requested path and file are not /index.php and the request
-# has not already been internally rewritten to the index.php script
-RewriteCond %{REQUEST_URI} !^/index\.php
-# and the requested path and file don't directly match a physical file
-RewriteCond %{REQUEST_FILENAME} !-f
-# and the requested path and file don't directly match a physical folder
-RewriteCond %{REQUEST_FILENAME} !-d
-# Redirect all virtual paths to the main index.php
-RewriteRule ^ /index.php [L]
-## End - MiMFa! core SEF Section.
 
-# php -- BEGIN cPanel-generated handler, do not edit
-# Set the �ea-php81� package as the default �PHP� programming language.
-AddHandler application/x-httpd-php81 .php
-# php -- END cPanel-generated handler, do not edit
+# Block common exploits
+RewriteCond %{QUERY_STRING} base64_encode[^(]*\([^)]*\) [OR]
+RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
+RewriteCond %{QUERY_STRING} GLOBALS( = |\[|\%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} _REQUEST( = |\[|\%[0-9A-Z]{0,2})
+RewriteRule .* /index.php [F]
+
+# MiMFa! core SEF Section
+RewriteCond %{REQUEST_URI} !^/index\.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ /index.php [L]

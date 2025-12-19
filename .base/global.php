@@ -80,6 +80,9 @@ function initialize(string|null|int $status = null, $data = [], bool $print = tr
 function finalize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
 {
 	runSequence("finalize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+	if (function_exists('fastcgi_finish_request')) 
+		fastcgi_finish_request();
+	else flush();
 	if (is_null($status))
 		exit;
 	else
@@ -343,6 +346,7 @@ function receive(array|string|null $method = null)
 						$_REQUEST = $method = is_array($method) ? $method : [$method];
 					}
 				}
+				else $method = [];
 				break;
 		}
 	if (count($method) == 1 && isset($method[0]))
@@ -749,12 +753,11 @@ function responseStatus($status = null)
 {
 	if ($status && !headers_sent()) {
 		header("HTTP/1.1 " . abs($status));
-		// --- CORS / Preflight & Method-Override helper (drop in early in request pipeline) ---
-		header("Access-Control-Allow-Origin: " . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
-		header("Access-Control-Allow-Credentials: true");
-		header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
-		header("Access-Control-Allow-Headers: X-Custom-Method, X-Custom-Method-Override, X-HTTP-Method-Override, Content-Type, X-Requested-With, Authorization");
-
+		foreach (\_::$Front->Headers as $name => $value)
+			if (is_int($name))
+				header($value);
+			else
+				header("$name: $value");
 		return true;
 	}
 	return false;

@@ -43,6 +43,12 @@ abstract class FrontBase
 	public $SwitchRequest = "SwitchMode";
 
 	/**
+	 * Default response headers
+	 * @internal
+	 * @var array
+	 */
+	public $Headers = [];
+	/**
 	 * Default page head Packages
 	 * @field html
 	 * @internal
@@ -210,18 +216,7 @@ abstract class FrontBase
 		$this->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
 		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
-		if ($this->DetectMode && is_null($this->SwitchMode)) {
-			request(
-				"window.matchMedia('(prefers-color-scheme: dark)').matches ? -1 : 1",
-				function ($mode) {
-					$cmode = \_::$Front->GetMode();
-					if (($mode > 0 && $cmode < 0) || ($mode < 0 && $cmode > 0)) {
-						setMemo(\_::$Front->SwitchRequest, true);
-						\_::$Front->SwitchMode = true;
-					}
-				}
-			);
-		}
+
 		if ($this->SwitchMode) {
 			$middle = $this->ForeColorPalette;
 			$this->ForeColorPalette = $this->BackColorPalette;
