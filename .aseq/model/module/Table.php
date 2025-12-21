@@ -175,7 +175,7 @@ class Table extends Module
     public $HoverableRows = true;
     public $HoverableCells = true;
 
-    public $ExclusiveMethod = "TABLE";
+    public $Method = "TABLE";
     public $SecretKey = "_secret";
     
     /**
@@ -255,7 +255,7 @@ class Table extends Module
         $this->AddSecret = sha1("$a-Add");
         $this->RemoveSecret = sha1("$a-Remove");
         $this->ModifySecret = sha1("$a-Modify");
-        $this->Router->Set($this->ExclusiveMethod)->Route(fn(&$router) => deliver($this->Exclusive()));
+        $this->Router->Set($this->Method)->Route(fn(&$router) => deliver($this->Exclusive()));
     }
     /**
      * Set the main properties of module
@@ -667,14 +667,14 @@ class Table extends Module
 			});") . ($this->Controlable ?
                 (is_null($this->Modal) ? "" : ("
 				function {$this->Modal->Name}_View(key){
-					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ViewSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ViewSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" . ($this->Updatable ? (\_::$User->HasAccess($this->AddAccess) ? "
 				function {$this->Modal->Name}_Create(defaultValues){
-					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
+					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
                             if(defaultValues)
@@ -685,14 +685,14 @@ class Table extends Module
 					);
 				}" : "") . (\_::$User->HasAccess($this->ModifyAccess) ? "
 				function {$this->Modal->Name}_Modify(key){
-					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (\_::$User->HasAccess($this->DuplicateAccess) ? "
 				function {$this->Modal->Name}_Duplicate(key){
-					send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
@@ -700,7 +700,7 @@ class Table extends Module
 				}" : "") . (\_::$User->HasAccess($this->RemoveAccess) ? "
 				function {$this->Modal->Name}_Delete(key){
 					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?") . "`))" : "") . "
-						send('{$this->ExclusiveMethod}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+						send('{$this->Method}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
 						(data, err)=>{
 							load();
 						});
@@ -719,7 +719,7 @@ class Table extends Module
 
     public function Exclusive()
     {
-        $values = receive($this->ExclusiveMethod) ?? [];
+        $values = receive($this->Method) ?? [];
         $value = get($values, $this->KeyColumn);
         $secret = pop($values, $this->SecretKey);
         $recievedData = count($values) > 1;
@@ -759,7 +759,7 @@ class Table extends Module
             //$form->AllowHeader = false;
         }
         $this->Form->Router->Get()->Switch();
-        $this->Form->Method = $this->ExclusiveMethod;
+        $this->Form->Method = $this->Method;
         if ($this->Modal) {
             $this->Form->CancelPath = $this->Modal->HideScript();
             $this->Form->CancelLabel = "Cancel";
@@ -1114,4 +1114,3 @@ class Table extends Module
         return $values;
     }
 }
-?>

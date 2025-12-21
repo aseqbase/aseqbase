@@ -80,9 +80,10 @@ function initialize(string|null|int $status = null, $data = [], bool $print = tr
 function finalize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
 {
 	runSequence("finalize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
-	if (function_exists('fastcgi_finish_request')) 
+	if (function_exists('fastcgi_finish_request'))
 		fastcgi_finish_request();
-	else flush();
+	else
+		flush();
 	if (is_null($status))
 		exit;
 	else
@@ -325,13 +326,9 @@ function receive(array|string|null $method = null)
 			case "options":
 			default:
 				if (strtoupper($method) == getMethodName()) {
-					if ($_POST) {
+					if ($_POST)
 						$method = $_POST;
-						if (isset($method["__METHOD"])) {
-							unset($method["__METHOD"]);
-							$_REQUEST = $method;
-						}
-					} else {
+					else {
 						$res = file_get_contents('php://input');
 						if (!isEmpty($res)) {
 							if (isJson($res))
@@ -345,8 +342,10 @@ function receive(array|string|null $method = null)
 
 						$_REQUEST = $method = is_array($method) ? $method : [$method];
 					}
-				}
-				else $method = [];
+					if (isset($method["__METHOD"]))
+						unset($method["__METHOD"]);
+				} else
+					$method = [];
 				break;
 		}
 	if (count($method) == 1 && isset($method[0]))
@@ -2381,7 +2380,7 @@ function getMethodName(string|int|null $method = null)
 		case "EXTERNAL":
 			return "EXTERNAL";
 		default:
-			return strtoupper($method ?: (($_POST["__METHOD"] ?? null) ?: ((((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? null)) ?: "OTHER")));
+			return strtoupper($method ?: (($_REQUEST["__METHOD"] ?? null) ?: ((((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? null)) ?: "OTHER")));
 	}
 }
 /**
@@ -2402,7 +2401,7 @@ function getMethodName(string|int|null $method = null)
  */
 function getMethodIndex(string|int|null $method = null)
 {
-	switch (strtoupper($method ?: (($_POST["__METHOD"] ?? null) ?: ((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? "")))) {
+	switch (strtoupper($method ?: (($_REQUEST["__METHOD"] ?? null) ?: ((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? "")))) {
 		case 1:
 		case "PUBLIC":
 		case "GET":

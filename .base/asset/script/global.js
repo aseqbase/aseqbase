@@ -411,8 +411,8 @@ let send = function (
 	timeout = timeout || 60000;
 	method = (method || "POST").toUpperCase();
 	let isForm = false;
-
 	let contentType = 'application/x-www-form-urlencoded; charset=utf-8';
+	
 	switch (method) {
 		case "GET":
 		case "POST":
@@ -423,10 +423,12 @@ let send = function (
 			break;
 		default:
 			if (data) {
-				if (isForm = data instanceof FormData)
+				if (isForm = (data instanceof FormData))
 					data.append("__METHOD", method);
-				else if (contentType && (typeof data === 'object') || Array.isArray(data))
+				else if (Array.isArray(data) || (typeof data === 'object'))
 					data.__METHOD = method;
+				else if (isString(data))
+					data += "&__METHOD=" + method;
 			}
 			else data = { __METHOD: method };
 			method = "POST";
@@ -441,7 +443,7 @@ let send = function (
 		}
 		else if (isForm = data instanceof FormData)
 			contentType = false;
-		else if (contentType && (typeof data === 'object') || Array.isArray(data)) {
+		else if (Array.isArray(data) || (typeof data === 'object')) {
 			data = JSON.stringify(data);
 			contentType = 'application/json; charset=utf-8';
 		}
@@ -454,6 +456,16 @@ let send = function (
 			if (!isEmpty(result)) {
 				result += "";
 				result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'Form submitted successfully!';
+
+				// If server returned a full HTML document, replace the whole page instead of appending it.
+				// This prevents browsers (notably Firefox) from appending full pages into containers
+				// and causing "chained pages" behavior.
+				if (typeof result === 'string' && /<!doctype\s+html|<\s*html|<\s*body/i.test(result)) {
+					document.open();
+					document.write(result);
+					document.close();
+					return;
+				}
 				if (!isEmpty(result)) {
 					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Struct.result(result);
 					if (isForm) _(selector).append(result);

@@ -157,9 +157,9 @@ class Live extends Array {
 
 
     on(eventName, action, ...args) {
-        return this.each((elem) => {
-            if (!action) return;
-            else if (elem.addEventListener)
+        if (!action) return this.trigger(eventName);
+        else return this.each((elem) => {
+            if (elem.addEventListener)
                 elem.addEventListener(eventName, (e) => {
                     action(e, elem, ...args);
                 });
@@ -185,22 +185,23 @@ class Live extends Array {
         });
         return this;
     }
-    submit(action, ...args) {
+
+    submit(action = null, ...args) {
         return this.on('submit', action, ...args);
     }
-    click(action, ...args) {
+    click(action = null, ...args) {
         return this.on('click', action, ...args);
     }
-    dblclick(action, ...args) {
+    dblclick(action = null, ...args) {
         return this.on('dblclick', action, ...args);
     }
-    hover(actionIn, actionOut, ...args) {
+    hover(actionIn = null, actionOut, ...args) {
         return this.on('mouseenter', actionIn, ...args).on('mouseleave', actionOut, ...args);
     }
-    focus(action, ...args) {
+    focus(action = null, ...args) {
         return this.on('focus', action, ...args);
     }
-    blur(action, ...args) {
+    blur(action = null, ...args) {
         return this.on('blur', action, ...args);
     }
 
