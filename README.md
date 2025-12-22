@@ -78,15 +78,15 @@ Explore the ecosystem:
 
   1. Install all requirements mentioned above
   2. Follow one of these options:
-		* Open a terminal in the destination directory (for example, `D:\MyWebsite\`) of the website, then install the framework by:
-			``` bash
-			> composer create-project aseqbase/aseqbase ./
-			```
 		* Prompts below to create a manageable framework (update, uninstall, etc.):
 			``` bash
 			> composer require aseqbase/aseqbase
 			> cd vendor/aseqbase/aseqbase
 			vendor/aseqbase/aseqbase> composer dev:install
+			```
+		* Open a terminal in the destination directory (for example, `D:\MyWebsite\`) of the website, then install the framework by:
+			``` bash
+			> composer create-project aseqbase/aseqbase ./
 			```
   3. Put the destination directory of your website on the appeared step (for example, `D:\MyWebsite\`)
 		``` bash
