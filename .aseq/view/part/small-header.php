@@ -1,4 +1,8 @@
-<style>
+<?php
+
+use MiMFa\Library\Struct;
+
+style("
 	.small-header{
 		padding: 10px 10px;
 		margin-bottom: 10px;
@@ -19,12 +23,26 @@
 		display: table-cell;
 		vertical-align: middle;
 	}
-</style>
-<div class="small-header">
-	<a href="<?php echo \_::$Info->HomePath; ?>">
-		<div class="brand-bar">
-			<div class="image" style="background-image: var(--logo-path-url);"></div>
-			<div class="title"><?php echo \_::$Info->FullName; ?></div>
-		</div>
-	</a>
-</div>
+");
+response(
+	Struct::Division(
+		Struct::Link(
+			Struct::Division(
+				[
+					Struct::Division(
+						"",
+						["style" => "background-image: var(--logo-path-url);"]
+					),
+					Struct::Division(
+						\_::$Info->FullName,
+						["class" => "title"]
+					)
+				],
+				["class" => "brand-bar"]
+			)
+			,
+			\_::$Info->HomePath
+		),
+		["class" => "small-header"]
+	)
+);

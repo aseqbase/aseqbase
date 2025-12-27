@@ -38,7 +38,7 @@ class Gallery extends Collection{
      * The Width of thumbnail preshow
      * @var string
      */
-	public $ThumbnailWidth = "100%";
+	public $ThumbnailWidth = "93%";
 	/**
      * The Height of thumbnail preshow
      * @var string
@@ -48,7 +48,7 @@ class Gallery extends Collection{
      * The Minimum Width of thumbnail preshow
      * @var string
      */
-	public $ThumbnailMinWidth = "100%";
+	public $ThumbnailMinWidth = "90%";
 	/**
      * The Minimum Height of thumbnail preshow
      * @var string
@@ -149,12 +149,6 @@ class Gallery extends Collection{
 
 	public function Get(){
 		return join(PHP_EOL, iterator_to_array((function(){
-            module("Image" );
-            $img = new Image();
-    		$img->AllowOrigin = false;
-            $img->Class = "image";
-            yield $img->GetStyle();
-
             module("ImageModal");
             $viewer = new ImageModal();
             $viewer->Name = $this->Name."_".$viewer->Name;
@@ -171,11 +165,9 @@ class Gallery extends Collection{
                 $p_link = getValid($item,'Link',$this->DefaultPath)??(isEmpty($this->MoreButtonLabel)?null:$p_download??$p_image);
                 $p_path = getValid($item,'Path' , $this->DefaultPath)??$p_link;
                 $p_buttons = getValid($item,'ButtonsContent', $this->DefaultButtons);
-                $img->Source = $p_image;
                 $clickact = $viewer->InitializeScript($p_title, $p_description, ($p_link??$p_path??$p_image),$p_buttons, getFullUrl($p_download??$p_path??$p_link??$p_image));
-                $img->Attributes = ["onclick"=>$clickact];
 			yield Struct::Division(
-				$img->ToString().
+				Struct::Media($p_title, $p_image, ["class"=>"image", "onclick"=>$clickact]).
 				Struct::Division(
 					Struct::Heading4($p_name).
 					Struct::Paragraph($p_description),

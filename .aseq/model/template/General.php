@@ -113,6 +113,11 @@ class General extends Template
 					color: var(--color-white);
 				}
 				.page{
+					padding: var(--size-1);
+					display: flex;
+    				align-items: stretch;
+					justify-content: center;
+    				flex-direction: column;
 				    flex-grow: 1;
 				}
 
@@ -136,20 +141,24 @@ class General extends Template
 					margin-top: var(--size-4);
 				}
 				.heading4, h4{
+					text-align: start;
 					margin-top: var(--size-2);
 				}
 				.heading5, h5{
+					text-align: start;
 					margin-top: var(--size-1);
 				}
 				.heading6, h6{
+					text-align: start;
 					margin-top: var(--size-1);
 					padding-inline-end: var(--size-1);
 				}
 				:is(.heading6, h6):before{
+					text-align: start;
 					display: block;
 				}
 
-				p{
+				p {
 					text-align: justify;
 				}
 
@@ -295,6 +304,9 @@ class General extends Template
 					border-color: var(--back-color-output);
 				}
 
+				.input{
+					padding: var(--size-0);
+				}
 				input[type='range'].rangeinput {
 					height: calc(var(--size-0) / 2);
 					outline: none;
@@ -319,9 +331,6 @@ class General extends Template
 					background-size: contain;
 				}
 
-				.page{
-					padding: 0px var(--size-1);
-				}
 				article{
 					margin-top: 5vmax;
 				}

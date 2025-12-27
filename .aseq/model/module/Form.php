@@ -298,8 +298,6 @@ class Form extends Module
 					width: 100%;
 					max-width: 85vw;
 					max-width: -webkit-fill-available;
-					padding-top: calc(var(--size-0) / 2.5);
-					padding-bottom: calc(var(--size-0) / 2.5);
 					border: none;
 					border-bottom: var(--border-1);
 					border-color: transparent;
@@ -441,7 +439,6 @@ class Form extends Module
 				border-radius: 0px 3px 3px 0px;
 				outline: none;
 				border: none;
-				padding: 3px;
 				border-bottom: var(--border-1);
 				border-color: transparent;
 				border-radius: var(--radius-0);
@@ -517,7 +514,6 @@ class Form extends Module
 				border-radius: 0px 3px 3px 3px;
 				border: var(--border-1);
 				border-color: transparent;
-				padding: 2px var(--size-0);
 				border-radius: var(--radius-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}

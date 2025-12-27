@@ -330,6 +330,7 @@ class Content extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .details .route{
+                    opacity: 0.9;
 				padding-$ralign: var(--size-0);
 			}
 			.{$this->Name} .buttons{
@@ -337,15 +338,15 @@ class Content extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .buttons>.button{
-            	opacity: 0;
+            	     opacity: 0;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name}:hover .buttons>.button{
-            	opacity: 1;
+            	     opacity: 1;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .tags a{
-                line-height: 100%;
+                    line-height: 100%;
 				background-Color: inherit;
 				color: inherit;
             		padding: calc(var(--size-0) / 5) calc(var(--size-0) / 4);
@@ -372,15 +373,16 @@ class Content extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .description{
-            	font-size: var(--size-2);
-               gap: var(--size-2);
-            	text-align: justify;
+            	     font-size: var(--size-2);
+                    gap: var(--size-2);
+                    text-align: justify;
 				position: relative;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .content{
-               font-size: var(--size-1);
-               text-align: justify;
+                    line-height: 2em;
+                    font-size: var(--size-1);
+                    text-align: justify;
 				padding-top: var(--size-3);
 				padding-bottom: var(--size-3);
 			}

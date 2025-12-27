@@ -34,15 +34,18 @@ class SideMenu extends Module
 	public $AllowSignButton = true;
 	public $SignButtonText = "&#9776;";
 	public $SignButtonScreenSize = "md";
+	public $ToggleLabel;
 	public $LogoWidth = "calc(1.25 * var(--size-5))";
 	public $LogoHeight = "calc(1.25 * var(--size-5))";
 	public $Printable = false;
 
 
-	public function __construct()
+	public function __construct($items = null)
 	{
 		parent::__construct();
+		$this->Items = $items ?? $this->Items;
 		$this->Direction = \_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection;
+		$this->ToggleLabel = Struct::Icon("angle-down");
 	}
 
 	public function GetStyle()
@@ -476,6 +479,7 @@ class SideMenu extends Module
 			($ind <= 2 ? Struct::Button(
 				($this->AllowItemsImage ? Struct::Image(null, getBetween($item, "Image", "Icon")) : "") .
 				($this->AllowItemsLabel ? __(getBetween($item, "Title", "Name")) : "") .
+				($count > 0 ? $this->ToggleLabel : "") .
 				($this->AllowItemsDescription ? Struct::Division(__(get($item, "Description")), ["class" => "description"]) : ""),
 				$path,
 				get($item, "Attributes")
@@ -483,6 +487,7 @@ class SideMenu extends Module
 				Struct::Button(
 					($this->AllowSubItemsImage ? Struct::Image(null, getBetween($item, "Image", "Icon")) : "") .
 					($this->AllowSubItemsLabel ? __(getBetween($item, "Title", "Name")) : "") .
+					($count > 0 ? $this->ToggleLabel : "") .
 					($this->AllowSubItemsDescription ? Struct::Division(__(get($item, "Description")), ["class" => "description"]) : ""),
 					$path,
 					get($item, "Attributes")

@@ -28,8 +28,16 @@ class MainMenu extends Module
 	public $LogoWidth = "auto";
 	public $LogoHeight = "calc(var(--size-5) - var(--size-0) / 2)";
 	public $FixedMargin = "calc(var(--size-1) * 3)";
+	public $ToggleLabel;
     public $Printable = false;
     public $ZIndex = "9999";
+
+	public function __construct($items = null)
+	{
+		parent::__construct();
+		$this->Items = $items ?? $this->Items;
+		$this->ToggleLabel = Struct::Icon("angle-down");
+	}
 
 	public function GetStyle()
 	{
@@ -52,7 +60,10 @@ class MainMenu extends Module
 			}
 			" : "
 			}") . "
-
+			.{$this->Name} .inside{
+				display: flex;
+				flex-wrap: wrap;
+			}
 			.{$this->Name} .header{
 				color: var(--back-color-5);
 				margin: 0;
@@ -361,6 +372,7 @@ class MainMenu extends Module
 	public function Get()
 	{
 		return Convert::ToString(function () {
+			yield Struct::OpenTag("div", ["class"=>"inside"]);
 			if ($this->AllowBranding)
 				yield Struct::Division(
 					(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Info->Path) : "") .
@@ -400,6 +412,7 @@ class MainMenu extends Module
 					["class" => "other view {$this->ShowOthersScreenSize}-show {$this->HideOthersScreenSize}-hide"]
 				);
 			}
+			yield Struct::CloseTag("div");
 		});
 	}
 
@@ -415,6 +428,7 @@ class MainMenu extends Module
 			($ind <=2? Struct::Button(
 				($this->AllowItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
 				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name")):"").
+				($count > 0?$this->ToggleLabel:"").
 				($this->AllowItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 				$path,
 				get($item, "Attributes")
@@ -422,6 +436,7 @@ class MainMenu extends Module
 				Struct::Button(
 					($this->AllowSubItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
 					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name")):"").
+					($count > 0?$this->ToggleLabel:"").
 					($this->AllowSubItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
 					$path,
 					get($item, "Attributes")

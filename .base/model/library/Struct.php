@@ -725,9 +725,10 @@ class Struct
         if (!isValid($source))
             return null;
         $srcs = [];
+        $type = self::PopAttribute($attributes, "Type");
         if (is_array($source))
             foreach ($source as $key => $value)
-                if (is_int($key))
+                if (is_int($key) && !($key = $type))
                     $srcs[] = self::Element("Source", ["src" => $value]);
                 else
                     $srcs[] = self::Element("Source", ["src" => $value, "type" => $key]);
@@ -751,9 +752,10 @@ class Struct
         if (!isValid($source))
             return null;
         $srcs = [];
+        $type = self::PopAttribute($attributes, "Type");
         if (is_array($source))
             foreach ($source as $key => $value)
-                if (is_int($key))
+                if (is_int($key) && !($key = $type))
                     $srcs[] = self::Element("Source", ["src" => $value]);
                 else
                     $srcs[] = self::Element("Source", ["src" => $value, "type" => $key]);
@@ -801,7 +803,7 @@ class Struct
         //return self::Element("img", ["src" => $source, "alt" => __($content ?? ""), "class" => "image"], $attributes);
     }
     /**
-     * The \<IMAGE\> or \<I\> HTML Tag
+     * The \<VIDEO\> or \<AUDIO\> or \<IMAGE\> or \<I\> HTML Tag
      * @param mixed $content The alternative content of the Tag
      * @param string|null|array $source The source path to show, Or other custom attributes of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
@@ -817,13 +819,74 @@ class Struct
             $source = $content;
             $content = null;
         }
-        if (!isValid($source))
+        if (!$source)
             return null;
         if (isIdentifier($source))
             return self::Icon($source, null, ["class" => "media"], $attributes);
         if (isUrl($source))
-            return self::Image($content, $source, ["class" => "media"], $attributes);
+            switch (strtolower(preg_find("/\.\w+$/", $source))) {
+                case ".ogg":
+                case ".mp3":
+                case ".wav":
+                case ".flac":
+                    return self::Audio($content, $source, ["class" => "media"], $attributes);
+                case ".3gp":
+                case ".avi":
+                case ".mp4":
+                case ".mov":
+                case ".mkv":
+                case ".webm":
+                    return self::Video($content, $source, ["class" => "media"], $attributes);
+                default:
+                    return self::Image($content, $source, ["class" => "media"], $attributes);
+            }
         return self::Element(self::Convert($content ?? ""), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "');", "class" => "media"], ...$attributes);
+    }
+    /**
+     * A \<DIV\> HTML Tag with a media as the background
+     * @param mixed $content The content of the Cover
+     * @param string|null|array $source The source path to show at the background
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Cover($content, $source = null, ...$attributes)
+    {
+        $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
+        return self::Style("
+            #$id{
+                position:relative;
+            }
+            #$id>.media{
+                position:absolute;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+                object-fit:cover;
+                z-index:0;
+                overflow:hidden;
+            }
+            #$id>.media>*{
+                width:100%;
+                height:100%;
+                object-fit:cover;
+            }
+            #$id>.division{
+                position:relative;
+                z-index:1;
+            }
+        ") .
+            self::Element(
+                self::Media(null, $source, [
+                    "autoplay" => null,
+                    "loop" => null,
+                    "muted" => null,
+                ]) .
+                self::Division($content),
+                "div",
+                ["id" => $id, "class" => "cover"],
+                ...$attributes
+            );
     }
     /**
      * The \<IFRAME\> or \<EMBED\> HTML Tag
@@ -1906,10 +1969,10 @@ class Struct
      */
     public static function Icon($content, $action = null, ...$attributes)
     {
-        if (!isValid($content))
+        if (!$content)
             return null;
-        if (isEmpty($action))
-            return self::Element("", "i", ["class" => "icon fa fa-" . strtolower($content)], $attributes);
+        if (!$action)
+            return self::Element("", "i", ["class" => "icon fa " . (preg_match("/\bfa-/", $content) ? "" : "fa-") . strtolower($content)], $attributes);
         return self::Action(self::Icon($content, null), $action, ["class" => "icon"], $attributes);
     }
     /**
@@ -2639,8 +2702,9 @@ class Struct
                         function ($nArgs) {
                             return \MiMFa\Library\Struct::Convert($nArgs);
                         },
-                        ["\${document.getElementById('$eid').value}"],
-                        "function(data,err){ return document.getElementById('$sid').innerHTML=data??err;}",
+                        ["\${_('#$eid').val()}"],
+                        "function(data,err){ return _('#$sid').html(data??err);}",
+                        direct: true,
                         encrypt: false
                     )
                 ) =>
@@ -3440,19 +3504,19 @@ class Struct
             map_input$id.flyTo(latlng);
             {$id} = inp.value;
         }
-        ").self::Map($value, null, [
-            "id" => "_input$id",
-            "class" => "input",
-            "onchange" => "{$id}=document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
-                Convert::ToString($onChange, ";
+        ") . self::Map($value, null, [
+                        "id" => "_input$id",
+                        "class" => "input",
+                        "onchange" => "{$id}=document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
+                            Convert::ToString($onChange, ";
             ")
-        ], $attributes) .
+                    ], $attributes) .
             self::HiddenInput($key, Convert::ToString($value, ","), [
                 "id" => $id,
                 "class" => "mapinput",
                 "onchange" => "setTimeout(function(){{$id}_update();}, 2000)",
                 "name" => $name
-            ]).self::Script("setInterval(function(){{$id}_update();}, 2000)");
+            ]) . self::Script("setInterval(function(){{$id}_update();}, 2000)");
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3997,7 +4061,7 @@ class Struct
                     $content,
                     function ($v, $k, $i) use ($active, $id) {
                         if ($v)
-                            return self::Element($v, "div", ["class" => "tab-content" . ($k === $active || $i === $active ? " show" : " hide"), "id" => "$id-tab-$i"]);
+                            return self::Element($v, "div", ["class" => "tab-content" . ($k === $active || $i === $active ? " active show" : " hide"), "id" => "$id-tab-$i"]);
                     }
                 )),
                 ["class" => "tab-contents"]
@@ -4006,10 +4070,12 @@ class Struct
             $attributes
         ) .
             script("function {$id}_openTab(tab, tabId){
-            document.querySelectorAll('#$id>.tab-contents>.tab-content').forEach(content => content.classList.remove('show') & content.classList.add('hide'));
+            document.querySelectorAll('#$id>.tab-contents>.tab-content').forEach(content => content.classList.remove('active') & content.classList.remove('show') & content.classList.add('hide'));
             document.querySelectorAll('#$id>.tab-titles>.tab-title').forEach(title => title.classList.remove('active'));
-            document.getElementById(tabId).classList.remove('hide');
-            document.getElementById(tabId).classList.add('show');
+            content = document.getElementById(tabId);
+            content.classList.remove('hide');
+            content.classList.add('show');
+            content.classList.add('active');
             tab.classList.add('active');
         }");
     }

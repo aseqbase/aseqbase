@@ -340,8 +340,9 @@ function receive(array|string|null $method = null)
 						} else
 							parse_str($res, $method);
 
-						$_REQUEST = $method = is_array($method) ? $method : [$method];
+						$method = is_array($method) ? $method : [$method];
 					}
+					$_REQUEST = $method;
 					if (isset($method["__METHOD"]))
 						unset($method["__METHOD"]);
 				} else
@@ -2345,7 +2346,7 @@ function getFragment(string|null $path = null): string|null
  */
 function getMethodName(string|int|null $method = null)
 {
-	switch (strtoupper($method ?? "")) {
+	switch (strtoupper(string: $method ?? "")) {
 		case 1:
 		case "PUBLIC":
 		case "GET":

@@ -137,6 +137,7 @@ class Template extends \Base
         h1, h2, h3, h4, h5, h6 {
             font-family: var(--font-special), var(--font);
             direction: var(--dir);
+            line-height: 1.2em;
         }
         .tooltip {
             position: absolute;
@@ -212,7 +213,7 @@ class Template extends \Base
         }
             
         p, .content {
-            line-height: 2em;
+            line-height: 150%;
             direction: var(--dir);
         }
         big {
@@ -295,8 +296,8 @@ class Template extends \Base
             opacity: 0.7;
             cursor: not-allowed;
         }
-        body>*:deactive {
-            " . \MiMFa\Library\Style::UniversalProperty("filter", "grayscale(100)") . "
+        body *:is(:deactive,:disabled) {
+            " . \MiMFa\Library\Style::UniversalProperty("filter", "opacity(50%) grayscale(100) !important") . "
         }
         "));
         foreach ($this as $key => $value)

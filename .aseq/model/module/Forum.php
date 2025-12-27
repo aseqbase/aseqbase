@@ -23,6 +23,12 @@ class Forum extends Content
      public DateTime|null $ShowCommentEndTime = null;
      public DateTime|null $LeaveCommentStartTime = null;
      public DateTime|null $LeaveCommentEndTime = null;
+     /**
+      * @var string|null
+      * @category Management
+      */
+     public $CommentsLimitation = "ORDER BY `CreateTime` DESC, `UpdateTime` DESC";
+
 
      function __construct()
      {
@@ -84,4 +90,3 @@ class Forum extends Content
      }
 
 }
-?>

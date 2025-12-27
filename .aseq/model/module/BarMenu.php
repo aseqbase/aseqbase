@@ -2,6 +2,7 @@
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 class BarMenu extends Module{
+	public $Tag = "nav";
 	public $Items = null;
 	public $AllowLabels = false;
 	public $AllowAnimate = true;
@@ -52,11 +53,6 @@ class BarMenu extends Module{
 			}
 			
 			.{$this->Name} .button {
-				background-color: var(--back-color-output);
-				background-image: var(--overlay-url-0);
-				background-position: center;
-				background-repeat: no-repeat;
-				color: var(--fore-color-output);
 				border: none;
 				display: flex;
 				border-radius: var(--radius-0);
@@ -167,7 +163,7 @@ class BarMenu extends Module{
 								getBetween($item, "Image" , 'Icon')
 							)
 							, get($item, 'Path')??""
-						, ['class'=>$cls], get($item,"Attributes")??[]);
+						, ['class'=>"item $cls"], get($item,"Attributes")??[]);
 						$i++;
                     }
             }

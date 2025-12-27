@@ -49,7 +49,7 @@ class Translator extends Module{
 		$cur = \_::$Front->Translate->Language;
 		$langs = [];
 		foreach ($this->Items??[] as $lng=>$value)
-            if($lng != $cur)
+            if($lng != $cur && $lng != "x")
                 $langs[] = Struct::Element(
 					($this->AllowCode?strtoupper($lng):"").
 					($this->AllowImage?Struct::Image(
@@ -59,8 +59,8 @@ class Translator extends Module{
 						):""
 					).
 					($this->AllowLabel?getBetween($value,"Title","Name" ):""),
-					"button",
-					["class"=>"button", "onclick"=>"load(\"?".(getBetween($value,"Query" )??"lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding"))."\");"]);
+					"a",
+					["class"=>"button", "href"=>"?".(getBetween($value,"Query" )??"lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding"))]);
 		return $this->GetTitle().$this->GetDescription().
 			join(PHP_EOL, $langs).
 			$this->GetContent();

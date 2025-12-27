@@ -31,7 +31,7 @@ class Internal
         foreach ($received as $k => $v) {
             $args = null;
             if (is_string($v)) {
-                if (preg_match("/^\{[\w\W]*\}$/", $v))
+                if (preg_match("/^[\{\[][\w\W]*[\]\}]$/", $v))
                     $args = $v;
                 else
                     try {

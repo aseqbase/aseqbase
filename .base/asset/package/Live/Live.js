@@ -6,7 +6,7 @@ class Live extends Array {
         else if (element instanceof Element) return new Live(element);
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = String(element);
-        return new Live(tempDiv.children?tempDiv.children:tempDiv);
+        return new Live(tempDiv.children ? tempDiv.children : tempDiv);
     }
 
     constructor(query = null, mode = null, source = null) {
@@ -16,7 +16,7 @@ class Live extends Array {
     }
 
     toObject() {
-        if (this.length === 0) return null;
+        if (this.length === 0) return this;
         const IS_PROXY = Symbol("isProxy");
         if (this[IS_PROXY]) return this;
         const proxy = new Proxy(this, {
@@ -78,7 +78,20 @@ class Live extends Array {
                 case "query":
                 case "pure":
                 default:
-                    this.merge(typeof query === 'string' ? src.querySelectorAll(query) : query);
+                    if (typeof query === 'string') {
+                        const pseudoElementPattern = /:+(before|after|first-line|first-letter|marker|backdrop|placeholder)/i;
+                        const pseudoElementMatch = query.match(pseudoElementPattern);
+                        if (pseudoElementMatch) {
+                            const baseSelector = query.replace(pseudoElementPattern, '');
+                            const elements = document.querySelectorAll(baseSelector);
+                            this.merge(Array.from(elements).map(el => ({
+                                element: el,
+                                pseudo: pseudoElementMatch[0],
+                                style: window.getComputedStyle(el, pseudoElementMatch[0])
+                            })));
+                        }
+                        else this.merge(document.querySelectorAll(query));
+                    } else this.merge(query);
                     break;
             }
         }
@@ -261,14 +274,14 @@ class Live extends Array {
                 }
                 else {
                     const scripts = elem.querySelectorAll('script');
-                    for (const oldScript of scripts) try{
+                    for (const oldScript of scripts) try {
                         const newScript = document.createElement('script');
                         Array.from(oldScript.attributes).forEach(attr => {
                             newScript.setAttribute(attr.name, attr.value);
                         });
                         newScript.textContent = oldScript.textContent;
                         oldScript.parentNode?.replaceChild(newScript, oldScript);
-                    }catch(e){}
+                    } catch (e) { }
                 }
             }
         });
@@ -278,7 +291,7 @@ class Live extends Array {
      * @param {Live | HTMLElement | Array<HTMLElement> | any} element To be appended to selected elements
      */
     append(element) {
-        if(isEmpty(element)) return this;
+        if (isEmpty(element)) return this;
         else if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element)
                 return tag.append(...element);
@@ -312,7 +325,7 @@ class Live extends Array {
      * @param {Live | HTMLElement | Array<HTMLElement> | any} element To be prepended to selected elements
      */
     prepend(element) {
-        if(isEmpty(element)) return this;
+        if (isEmpty(element)) return this;
         else if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element)
                 return tag.prepend(...element);
@@ -358,7 +371,7 @@ class Live extends Array {
         return this;
     }
     after(element) {
-        if(isEmpty(element)) return this;
+        if (isEmpty(element)) return this;
         else if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element)
                 return tag.after(...element);
@@ -375,7 +388,7 @@ class Live extends Array {
         return this;
     }
     before(element) {
-        if(isEmpty(element)) return this;
+        if (isEmpty(element)) return this;
         else if (Array.isArray(element)) return this.each(tag => {
             if (tag instanceof Element)
                 return tag.before(...element);
@@ -423,9 +436,9 @@ class Live extends Array {
     }
     val(value = null) {
         if (value === null) {
-            if (this.length === 0) return null;
+            if (this.length === 0) return undefined;
             const el = this[0];
-            return el && "value" in el ? el.value : null;
+            return el ? ("value" in el ? el.value : "innerText" in el ? el.innerText : "textContent" in el ? el.textContent : null) : undefined;
         }
         value = String(value);
         return this.each(tag => {
@@ -435,20 +448,32 @@ class Live extends Array {
 
     attr(name, value = null) {
         if (value === null) {
-            if (this.length === 0) return null;
+            if (this.length === 0) return undefined;
             const el = this[0];
-            return el instanceof Element ? el.getAttribute(name) : null;
+            return el instanceof Element ? el.getAttribute(name) : undefined;
         }
         value = String(value);
         return this.each(tag => {
             if (tag instanceof Element) tag.setAttribute(name, value);
         });
     }
+    addAttr(name, value = null) {
+        value = value ? String(value) : null;
+        return this.each(tag => {
+            if (tag instanceof Element) tag.addAttribute(name, value);
+        });
+    }
+    removeAttr(name) {
+        return this.each(tag => {
+            if (tag instanceof Element) tag.removeAttribute(name);
+        });
+    }
+
     css(property, value = null) {
         if (value === null) {
-            if (this.length === 0) return null;
+            if (this.length === 0) return undefined;
             const el = this[0];
-            return el instanceof Element ? window.getComputedStyle(el)[property] : null;
+            return el instanceof Element ? window.getComputedStyle(el)[property] : undefined;
         }
         value = String(value);
         return this.each(tag => {
@@ -477,30 +502,32 @@ class Live extends Array {
     }
 
     offset() {
-        if (this.length === 0) return null;
+        if (this.length === 0) return undefined;
         const el = this[0];
-        if (!(el instanceof Element)) return null;
+        if (!(el instanceof Element)) return undefined;
         const rect = el.getBoundingClientRect();
         return {
-            top: rect.top + window.pageYOffset,
-            left: rect.left + window.pageXOffset,
+            top: rect.top,
+            left: rect.left,
+            bottom: rect.top + window.pageYOffset,
+            right: rect.left + window.pageXOffset,
             width: rect.width,
             height: rect.height
         };
     }
     position() {
-        if (this.length === 0) return null;
+        if (this.length === 0) return undefined;
         const el = this[0];
-        if (!(el instanceof Element)) return null;
+        if (!(el instanceof Element)) return undefined;
         return {
             top: el.offsetTop,
             left: el.offsetLeft
         };
     }
     size() {
-        if (this.length === 0) return null;
+        if (this.length === 0) return undefined;
         const el = this[0];
-        if (!(el instanceof Element)) return null;
+        if (!(el instanceof Element)) return undefined;
         return {
             width: el.offsetWidth,
             height: el.offsetHeight
@@ -508,11 +535,11 @@ class Live extends Array {
     }
     scrollTop(value = null) {
         if (value === null) {
-            if (this.length === 0) return null;
+            if (this.length === 0) return undefined;
             const el = this[0];
             if (el === window || el === document)
                 return window.pageYOffset || document.documentElement.scrollTop || 0;
-            return el instanceof Element ? el.scrollTop : null;
+            return el instanceof Element ? el.scrollTop : undefined;
         }
         const v = Number(value) || 0;
         return this.each(tag => {
@@ -525,11 +552,11 @@ class Live extends Array {
     }
     scrollLeft(value = null) {
         if (value === null) {
-            if (this.length === 0) return null;
+            if (this.length === 0) return undefined;
             const el = this[0];
             if (el === window || el === document)
                 return window.pageXOffset || document.documentElement.scrollLeft || 0;
-            return el instanceof Element ? el.scrollLeft : null;
+            return el instanceof Element ? el.scrollLeft : undefined;
         }
         const v = Number(value) || 0;
         return this.each(tag => {

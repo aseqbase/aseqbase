@@ -136,7 +136,6 @@ class BackBase
 	 */
 	public \MiMFa\Library\Query $Query;
 
-
 	public function __construct()
 	{
 		\MiMFa\Library\Revise::Load($this);

@@ -29,7 +29,7 @@ class UserMenu extends Module
 				width: 100%;
 				aspect-ratio: 1;
 			}
-			.{$this->Name} .submenu{
+			.{$this->Name} .sub-items{
 				display: none;
 				position: absolute;
 				top: auto;
@@ -49,12 +49,12 @@ class UserMenu extends Module
 				z-index: 9;
             	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-2)") . "
 			}
-			.{$this->Name} .submenu .name{
+			.{$this->Name} .sub-items .name{
 				background-color: var(--fore-color-output);
 				color: var(--back-color-output);
 				" . \MiMFa\Library\Style::UniversalProperty("word-wrap", "break-word") . "
 			}
-			.{$this->Name} .submenu .bio>:not(html,head,body,style,script,link,meta,title){
+			.{$this->Name} .sub-items .bio>:not(html,head,body,style,script,link,meta,title){
             	font-size: 80%;
 				opacity: 0.8;
 				background-color: var(--back-color-input);
@@ -64,7 +64,7 @@ class UserMenu extends Module
 				padding: var(--size-0) var(--size-1);
 				" . \MiMFa\Library\Style::UniversalProperty("word-wrap", "break-word") . "
 			}
-			.{$this->Name} .submenu :is(.link, .button):not(.name){
+			.{$this->Name} .sub-items :is(.link, .button):not(.name){
             	width: 100%;
             	text-align: initial;
             	padding: calc(var(--size-0) / 2) var(--size-1);
@@ -72,7 +72,7 @@ class UserMenu extends Module
 				align-content: center;
 				justify-content: space-between;
 			}
-			.{$this->Name}:hover .submenu{
+			.{$this->Name}:hover .sub-items{
             	display: grid;
             	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-2)") . "
 			}
@@ -115,7 +115,7 @@ class UserMenu extends Module
 								);
 						else
 							yield $item;
-				}, ["class" => "submenu"]) . $this->GetContent();
+				}, ["class" => "sub-items"]) . $this->GetContent();
 		}
 		return parent::Get();
 	}
