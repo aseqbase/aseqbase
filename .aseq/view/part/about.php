@@ -15,9 +15,9 @@ $module->Style->Color =
 $separator->Style->BorderRadius = "0px 0px 100% 100%";
 $separator->MergeTop = true;
 $separator->MergeBottom = true;
-$module->Image = \_::$Info->FullLogoPath ?? \_::$Info->LogoPath;
-$module->Title = \_::$Info->FullName;
-$module->Description = \_::$Info->FullSlogan;
+$module->Image = \_::$Front->FullLogoPath ?? \_::$Front->LogoPath;
+$module->Title = \_::$Front->FullName;
+$module->Description = \_::$Front->FullSlogan;
 $module->Render();
 $separator->Render();
 
@@ -28,7 +28,7 @@ $module->Style->BackgroundColor =
 $separator->MergeBottom = false;
 $module->Title = "Who We Are?";
 $module->Image = null;
-$module->Description = \_::$Info->FullDescription;
+$module->Description = \_::$Front->FullDescription;
 $module->Render();
 pod($module, $data);
 $separator->Render();

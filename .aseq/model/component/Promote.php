@@ -19,7 +19,7 @@ class Promote{
 			"{
 			  '@context': 'https://schema.org/',
 			  '@type': 'WebSite',
-			  'name': `".Convert::ToText($name??\_::$Info->FullName)."`,
+			  'name': `".Convert::ToText($name??\_::$Front->FullName)."`,
 			  'url': `".($url??\_::$User->Host)."`,
 			  'potentialAction': {
 				'@type': 'SearchAction',
@@ -34,9 +34,9 @@ class Promote{
 			"{
 			  '@context': 'https://schema.org',
 			  '@type': `$type`,
-			  'headline': `".Convert::ToExcerpt(Convert::ToText($title??\_::$Info->FullName),0,110)."`,
-			  'description': `".Convert::ToText($excerpt??\_::$Info->Description)."`,
-			  'image': `".($image??\_::$Info->FullLogoPath)."`,
+			  'headline': `".Convert::ToExcerpt(Convert::ToText($title??\_::$Front->FullName),0,110)."`,
+			  'description': `".Convert::ToText($excerpt??\_::$Front->Description)."`,
+			  'image': `".($image??\_::$Front->FullLogoPath)."`,
 			  'author': {
 				'@type': 'Person',
 				'name': `".get($author,'Name' )."`,
@@ -48,7 +48,7 @@ class Promote{
 				'url': `".getValid($publisher,'Url',(\_::$User->Host.(isValid($publisher,'Name' )?"":'/'.get($publisher,'Name' ))))."`
 				'logo': {
 				  '@type': 'ImageObject',
-				  'url': `".getValid($publisher,'Url',\_::$Info->LogoPath)."`
+				  'url': `".getValid($publisher,'Url',\_::$Front->LogoPath)."`
 				}
 			  },
 			  'datePublished': `$datePublished`,

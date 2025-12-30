@@ -23,7 +23,7 @@ class DataTable
 		$this->DataBase = $dataBase;
 		$this->MainName = $name;
 		$name = $prefix ? ($prefix . $name) : $name;
-		foreach (\_::$Config->DataTableNameConvertors as $key => $value)
+		foreach (\_::$Back->DataTableNameConvertors as $key => $value)
 			$name = preg_replace($key, $value, $name);
 		$this->Name = $name;
 	}

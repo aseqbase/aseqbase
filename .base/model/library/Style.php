@@ -180,7 +180,7 @@ class Style extends \ArrayObject
 		if ($text === null)
 			return $text;
 		if ($keyWords === null)
-			$keyWords = \_::$Info->KeyWords;
+			$keyWords = \_::$Front->KeyWords;
 		$dic = array();
 		$text = encode(
 			$text,

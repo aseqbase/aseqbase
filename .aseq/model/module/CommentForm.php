@@ -45,8 +45,8 @@ class CommentForm extends Form
 	{
 		parent::__construct();
 		$this->Relation = $relation;
-		$this->Access = $access ?? \_::$Config->WriteCommentAccess;
-		$this->DefaultStatus = \_::$User->HasAccess(\_::$User->AdminAccess) ? 1 : \_::$Config->DefaultCommentStatus;
+		$this->Access = $access ?? \_::$Back->WriteCommentAccess;
+		$this->DefaultStatus = \_::$User->HasAccess(\_::$User->AdminAccess) ? 1 : \_::$Back->DefaultCommentStatus;
 		$this->Template = "b";
 	}
 
@@ -55,7 +55,7 @@ class CommentForm extends Form
 		try {
 			$row = table("Comment")->SelectRow("Contact, Subject", "Id=:Id", [":Id" => $commentId]);
 			Contact::SendHtmlEmail(
-				\_::$Info->SenderEmail,
+				\_::$Front->SenderEmail,
 				$row["Contact"],
 				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),
 				$message ?? [

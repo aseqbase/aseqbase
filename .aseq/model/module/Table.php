@@ -1082,9 +1082,9 @@ class Table extends Module
                         unset($values[$k]);
                         $type = getValid($this->CellsTypes, $k, "");
                         if (is_string($type))
-                            $type = \_::$Config->GetAcceptableFormats($type);
+                            $type = \_::$Back->GetAcceptableFormats($type);
                         else
-                            $type = \_::$Config->GetAcceptableFormats();
+                            $type = \_::$Back->GetAcceptableFormats();
                         $values[$k] = Local::GetUrl(Local::StoreFile($v, extensions: $type));
                     } elseif (isEmpty($v))
                         unset($values[$k]);

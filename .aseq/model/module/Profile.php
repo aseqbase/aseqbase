@@ -468,8 +468,8 @@ class Profile extends Table{
             foreach (receiveFile()??[] as $k=>$v)
                 if(Local::IsFileObject($v)){
                     $type = getValid($this->CellsTypes, $k, "");
-                    if(is_string($type)) $type = \_::$Config->GetAcceptableFormats($type);
-                    else $type = \_::$Config->GetAcceptableFormats();
+                    if(is_string($type)) $type = \_::$Back->GetAcceptableFormats($type);
+                    else $type = \_::$Back->GetAcceptableFormats();
                     $values[$k] = Local::GetUrl(Local::StoreFile($v, extensions:$type));
                 }
                 else unset($values[$k]);

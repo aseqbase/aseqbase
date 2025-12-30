@@ -2076,6 +2076,66 @@ class Struct
     /**
      * The \<LABEL\> and related input HTML Tag
      * @param object|string|array|callable|\Closure|\stdClass|null $type Can be a datatype or an input type
+     *     'Span' => "Inline text display (<span>), non-editable label.",
+     *     'Division' => "Block container (<div>) for arbitrary content.",
+     *     'Link' => "Anchor (<a>) that navigates to value or url.",
+     *     'Action' => "Clickable element that triggers JS action or load.",
+     *     'Paragraph' => "Paragraph (<p>) block of text.",
+     *     'Label' => "Form label tied to an input (for attribute).",
+     *     'Disabled' => "Read-only / disabled input presentation.",
+     *     'Input' => "Generic single-line input (text by default).",
+     *     'Collection' => "Collection of items (dl/list) or repeated inputs.",
+     *     'Text' => "Single-line text input.",
+     *     'Texts' => "Multi-line textarea input.",
+     *     'Content' => "Rich content editor (textarea + live preview).",
+     *     'Script' => "Code/script editor textarea (JS/HTML/CSS).",
+     *     'Object' => "JSON/object editor (formatted textarea).",
+     *     'Search' => "Search input (type=search).",
+     *     'Find' => "Find/combo input with visible text + hidden value (datalist).",
+     *     'Color' => "Color picker input (type=color).",
+     *     'Dropdown' => "Single-select dropdown (<select>).",
+     *     'Dropdowns' => "Multi-select dropdown (<select multiple>).",
+     *     'Radio' => "Single radio input.",
+     *     'Radios' => "Group of radio buttons (multiple choices).",
+     *     'Switch' => "Boolean toggle (visual switch).",
+     *     'Switches' => "Multiple boolean toggles.",
+     *     'Check' => "Single checkbox input.",
+     *     'Checks' => "Multiple checkboxes collection.",
+     *     'Integer' => "Integer number input (min/max supported).",
+     *     'Short' => "Small-range integer input (bounded short int).",
+     *     'Long' => "Numeric input for larger integer values.",
+     *     'Range' => "Slider input with min/max (range).",
+     *     'Code' => "Numeric code input (digits, optional fixed length).",
+     *     'Symbolic' => "Symbolic selector (visual symbols as choices).",
+     *     'Float' => "Floating-point number input with precision/step.",
+     *     'Tel' => "Telephone input (type=tel).",
+     *     'Mask' => "Text input validated by regex pattern / mask.",
+     *     'Url' => "URL input (validated, accepts absolute or root paths).",
+     *     'Map' => "Map picker (interactive Leaflet map) producing lat,lng.",
+     *     'Path' => "File-or-path input (text fallback + file chooser).",
+     *     'Address' => "Multi-line address textarea.",
+     *     'Calendar' => "Calendar widget with date/time selection + hidden value.",
+     *     'Datetime' => "Datetime-local input control.",
+     *     'Date' => "Date-only input control.",
+     *     'Time' => "Time-only input control.",
+     *     'Week' => "Week input control.",
+     *     'Month' => "Month input control.",
+     *     'Hidden' => "Hidden input field (type=hidden).",
+     *     'Secret' => "Password input (type=password).",
+     *     'Document' => "Single document file uploader (document formats).",
+     *     'Documents' => "Multiple document uploader.",
+     *     'Image' => "Single image file uploader (image formats).",
+     *     'Images' => "Multiple image uploader.",
+     *     'Audio' => "Single audio file uploader.",
+     *     'Audios' => "Multiple audio uploader.",
+     *     'Video' => "Single video file uploader.",
+     *     'Videos' => "Multiple video uploader.",
+     *     'File' => "Generic single file uploader.",
+     *     'Files' => "Multiple file uploader.",
+     *     'Directory' => "Directory selector (webkitdirectory / multiple).",
+     *     'Email' => "Email input (type=email), validated format.",
+     *     'Submit' => "Form submit button.",
+     *     'Reset' => "Form reset button."
      * @param mixed $key The default key and the name of the field
      * @param mixed $value The default value of the field
      * @param mixed $description The more detaled text about the field
@@ -2086,10 +2146,6 @@ class Struct
      */
     public static function Field($type = null, $key = null, $value = null, $description = null, $title = null, $wrapper = true, $options = null, ...$attributes)
     {
-        if (is_array($description)) {
-            $attributes = Convert::ToIteration($description, ...$attributes);
-            $description = null;
-        }
         if ($type === false)
             return null;
         if (!is_null($type)) {
@@ -2129,6 +2185,17 @@ class Struct
             case false:
             case 'false':
                 return null;
+            case 'icon':
+            case 'button':
+            case 'submitbutton':
+            case 'submit':
+            case 'resetbutton':
+            case 'reset':
+            case 'imagesubmit':
+            case 'imgsubmit':
+                $titleTag = null;
+                $wrapper = false;
+                break;
             case 'hidden':
             case 'hide':
                 $titleTag = $descriptionTag = null;
@@ -2278,6 +2345,14 @@ class Struct
             case 'true':
                 $content = $dataOptions($options, $attributes) . self::Input($key, $value, null, $attributes);
                 break;
+            case 'br':
+            case 'break':
+                $content = self::Element(null, "br", $attributes);
+                break;
+            case 'hr':
+            case 'breakline':
+                $content = self::Element(null, "hr", $attributes);
+                break;
             case 'span':
                 $content = self::Span($value ?? $titleOrKey, null, $attributes);
                 break;
@@ -2292,6 +2367,12 @@ class Struct
                 break;
             case 'action':
                 $content = self::Action($titleOrKey, $value, $attributes);
+                break;
+            case 'button':
+                $content = self::Button($titleOrKey, $value, $attributes);
+                break;
+            case 'icon':
+                $content = self::Icon($titleOrKey, $value, $attributes);
                 break;
             case 'p':
             case 'paragraph':
@@ -2366,6 +2447,7 @@ class Struct
             case 'types':
             case 'multiple':
             case 'enums':
+            case 'dropdowns':
             case 'selects':
                 $content = self::SelectsInput($key, $value, $options, ["multiple" => null], $attributes);
                 break;
@@ -2566,6 +2648,8 @@ class Struct
                 $content = self::CodeInput($key, $value, $options, $attributes);
                 break;
             case 'javascript':
+            case 'script':
+            case 'scripts':
             case 'js':
             case 'html':
             case 'css':
@@ -2820,17 +2904,17 @@ class Struct
     {
         $class = "_" . getId();
         return self::Action(
-            Struct::Icon($value ? "turn-on" : "toggle-off", null, ["class" => $class]),
+            Struct::Icon($value ? "toggle-on" : "toggle-off", null, ["class" => "fa-2x $class"]),
             "icon_$class = document.querySelector('.icon.$class');
             cb_$class = document.querySelector('.checkinput.$class');
-                    if(cb_$class.checked){
+                    if(cb_$class.checked || cb_$class.value){
                         icon_$class.classList.remove('fa-toggle-on');
                         icon_$class.classList.add('fa-toggle-off');
-                        cb_$class.click();
+                        cb_$class.value = 0;
                     } else {
                         icon_$class.classList.remove('fa-toggle-off');
                         icon_$class.classList.add('fa-toggle-on');
-                        cb_$class.click();
+                        cb_$class.value = 1;
                     }",
             ["class" => "checkinput"],
             [
@@ -2838,9 +2922,8 @@ class Struct
                 "Style" => self::PopAttribute($attributes, "Style")
             ]
         ) .
-            self::Input($key, $value ? "1" : "0", "checkbox", [
-                "class" => "checkinput $class hide",
-                ...($value ? ["checked" => "checked"] : []),
+            self::Input($key, $value ? 1 : 0, "hidden", [
+                "class" => "checkinput $class",
                 "onchange" => "icon_$class = document.querySelector('.icon.$class');
                     if(this.checked){
                         icon_$class.classList.remove('fa-toggle-off');
@@ -3188,7 +3271,7 @@ class Struct
         return self::Input($name, null, "file", $attributes, [
             "class" => "pathinput",
             "id" => $id1,
-            "accept" => self::PopAttribute($attributes, "Accept") ?? join(", ", \_::$Config->GetAcceptableFormats()),
+            "accept" => self::PopAttribute($attributes, "Accept") ?? join(", ", \_::$Back->GetAcceptableFormats()),
             "style" => $value ? "display:none;" : "",
             ...($value ? ["name" => ""] : ["name" => "$name"]),
             "oninput" => "
@@ -3259,7 +3342,7 @@ class Struct
         $ph = self::PopAttribute($attributes, "PlaceHolder");
         $class = self::GetAttribute($attributes, "Class");
         $style = self::PopAttribute($attributes, "Style");
-        $accept = self::PopAttribute($attributes, "Accept") ?? join(", ", \_::$Config->GetAcceptableFormats());
+        $accept = self::PopAttribute($attributes, "Accept") ?? join(", ", \_::$Back->GetAcceptableFormats());
         return self::Style("
         #$id {
             display: flex;
@@ -3412,7 +3495,7 @@ class Struct
      */
     public static function DocumentInput($key, $value = null, ...$attributes)
     {
-        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Config->AcceptableDocumentFormats)], $attributes);
+        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Back->AcceptableDocumentFormats)], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3423,7 +3506,7 @@ class Struct
      */
     public static function ImageInput($key, $value = null, ...$attributes)
     {
-        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Config->AcceptableImageFormats)], $attributes);
+        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Back->AcceptableImageFormats)], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3434,7 +3517,7 @@ class Struct
      */
     public static function AudioInput($key, $value = null, ...$attributes)
     {
-        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Config->AcceptableAudioFormats)], $attributes);
+        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Back->AcceptableAudioFormats)], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3445,7 +3528,7 @@ class Struct
      */
     public static function VideoInput($key, $value = null, ...$attributes)
     {
-        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Config->AcceptableVideoFormats)], $attributes);
+        return self::FileInput($key, $value, ["accept" => join(", ", \_::$Back->AcceptableVideoFormats)], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3818,7 +3901,7 @@ class Struct
             ") .
             self::Script("
             function {$uniq}_Click(day = null){
-                const tso = " . (\_::$Config->TimeStampOffset * 1000) . ";
+                const tso = " . (\_::$Back->TimeStampOffset * 1000) . ";
                 dt = new Date(
                     document.querySelector('.$uniq .Y$uniq').innerText+'-'+
                     document.querySelector('.$uniq .M$uniq').innerText+'-'+
@@ -3834,7 +3917,7 @@ class Struct
                     sd = 1;
                     ed = new Date(gdt.getFullYear(), gdt.getMonth()+1, 0).getDate();
                     sw = (new Date(dt.getFullYear(), dt.getMonth(), sd).getDay()+1)%7;
-                    if(" . (\_::$Config->DateTimeZone == "UTC" ? "false" : "true") . ")
+                    if(" . (\_::$Back->DateTimeZone == "UTC" ? "false" : "true") . ")
                         switch(dt.getMonth() + 1){
                             case 1:
                             case 2:

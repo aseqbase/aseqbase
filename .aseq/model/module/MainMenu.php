@@ -45,15 +45,12 @@ class MainMenu extends Module
 			"
 			.{$this->Name} {
 				" . ($this->AllowFixed ? "
-				background-color: var(--back-color-special);
-				color: var(--fore-color-special);
 				opacity: 0.95;
 				position: fixed;
 				top:0;
 				left:0;
 				right:0;
 				z-index: 999;
-				box-shadow: var(--shadow-2);
 			}
 			.{$this->Name}-margin{
 				min-height: {$this->FixedMargin};
@@ -65,7 +62,6 @@ class MainMenu extends Module
 				flex-wrap: wrap;
 			}
 			.{$this->Name} .header{
-				color: var(--back-color-5);
 				margin: 0;
 				width: fit-content;
 				display: flex;
@@ -76,16 +72,8 @@ class MainMenu extends Module
 				padding: calc(var(--size-0) / 2) var(--size-3);
 				gap: var(--size-0);
 			}
-			.{$this->Name} :is(.header, .header a, .header a:visited, .header a:hover){
-				text-decoration: none;
-				font-weight: normal !important;
-			}
 			.{$this->Name} .header .title{
-				font-size: var(--size-2);
 				" . (isValid($this->Description) ? "line-height: var(--size-2);" : "") . "
-			}
-			.{$this->Name} .header .description{
-				font-size: 75%;
 			}
 			.{$this->Name} .header .image{
 				background-position: center;
@@ -98,44 +86,13 @@ class MainMenu extends Module
 				height: {$this->LogoHeight};
 				font-size: var(--size-0);
 			}
-
-			.{$this->Name} ul li .image{
-				margin-inline-end: var(--size-0);
+			" . ($this->AllowDefaultButtons? "
+			.{$this->Name} ul:not(.sub-items) {
+				min-width: fit-content;
+				max-width: 70%;
+				margin-inline-end: 100px;
 			}
-			.{$this->Name} ul li .description{
-				font-size: var(--size-0);
-				color: #888b;
-				font-weight: normal;
-			}
-			.{$this->Name} ul li:hover .description{
-				font-size: var(--size-0);
-				color: unset;
-			}
-
-			.{$this->Name} ul li .icon{
-				font-size: var(--size-1);
-			}
-
-			.{$this->Name} ul li.dropdown{
-				position: initial;
-			}
-			.{$this->Name} ul li.dropdown ul{
-				text-align: start;
-			}
-
-			.{$this->Name} :is(button, .button, .icon[onclick]){
-				border: var(--border-0);
-				border-radius: var(--radius-0);
-				box-shadow: var(--shadow-0);
-			}
-			.{$this->Name} :is(button, .button, .icon[onclick]):hover{
-				box-shadow: var(--shadow-2);
-			}
-				
-			.{$this->Name}>ul>li:not(.sub-items)>button{
-				text-transform: uppercase;
-			}
-				
+			" : "") ."
 			.{$this->Name} ul:not(.sub-items) {
 				list-style: none;
 				list-style-type: none;
@@ -144,73 +101,24 @@ class MainMenu extends Module
 				overflow: hidden;
 				display: flex;
 				align-items: center;
-				" . ($this->AllowDefaultButtons? "
-				min-width: fit-content;
-				max-width: 70%;
-				margin-inline-end: 100px;
-				" : "") . "
-			}
-			.{$this->Name} ul:not(.sub-items)>li {
-				background-color: transparent;
-				color: inherit;
-				display: inline-block;
-			}
-			.{$this->Name} ul:not(.sub-items)>li.active{
-				font-weight: bold;
-				box-shadow: var(--shadow-2);
-			}
-			.{$this->Name} ul:not(.sub-items)>li>:is(.button, .button:visited){
-				background-color: transparent;
-				color: var(--fore-color-special);
-				border: none;
-				font-size: inherit;
-				border-radius: unset;
-				text-decoration: none;
-				padding: var(--size-0) var(--size-1);
-				display: block;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
-				font-weight: bold;
-				background-color: var(--back-color-output);
-				color: var(--fore-color-output);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} ul:not(.sub-items)>li.active>:is(.button, .button:visited){
-				color: var(--fore-color);
-			}
-			.{$this->Name} ul:not(.sub-items)>li.active:hover>:is(.button, .button:visited){
-				color: var(--fore-color);
-			}
-			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
-				color: var(--fore-color-output);
-				background-color: var(--back-color-output);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
-				display: block;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			.{$this->Name} ul.sub-items {
 				display: none;
 				position: fixed;
-				color: var(--fore-color-special);
-				background-color: var(--back-color-special);
 				min-width: 160px;
 				max-width: 90vw;
 				max-height: 70vh;
 				padding: 0px;
-				box-shadow: 0px 16px 16px 0px rgba(0,0,0,0.2);
 				overflow-x: hidden;
 				overflow-y: auto;
 				z-index: $this->ZIndex;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
+				
 			.{$this->Name} ul.sub-items .sub-items {
 				display: flex;
 				position: relative;
-				background-color: #8881;
 				font-size: 90%;
 				min-width: calc(5 * var(--size-5));
 				max-width: 500px;
@@ -219,7 +127,6 @@ class MainMenu extends Module
 				padding: 0px;
 				padding-inline-start: var(--size-5);
 				padding-bottom: calc(var(--size-0) / 2);
-				box-shadow: var(--shadow-1);
 				overflow-x: hidden;
 				overflow-y: auto;
 				flex-wrap: wrap;
@@ -229,70 +136,18 @@ class MainMenu extends Module
 				align-items: stretch;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} ul.sub-items .sub-items li :is(.button, .button:visited) {
-				padding: calc(var(--size-0) / 2) var(--size-1);
-				background: transparent;
-				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} ul.sub-items>li {
-				display: block;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
+
 			.{$this->Name} ul.sub-items>li>:is(.button, .button:visited){
-    			width: 100%;
-				color: var(--fore-color-input);
+				width: 100%;
 				text-decoration: none;
 				padding: calc(var(--size-1) / 2) var(--size-1);
 				display: block;
 				text-align: start;
 				border: none;
 			}
-			.{$this->Name} ul.sub-items>li.dropdown{
-				display: block;
-				border-bottom: var(--border-1) transparent;
-			}
-			.{$this->Name} ul.sub-items>li.dropdown.active{
-				box-shadow: var(--shadow-2);
-				border: none;
-			}
-			.{$this->Name} ul.sub-items>li.dropdown.active>:is(.button, .button:visited){
-				font-weight: bold;
-				border: none;
-			}
-			.{$this->Name} ul.sub-items>li.dropdown:hover{
-				border-bottom-color: var(--back-color-output);
-				box-shadow: var(--shadow-1);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
-				font-weight: bold;
-				background-color: var(--back-color-output);
-				color: var(--fore-color-output);
-				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
-				font-weight: bold;
-				background-color: var(--back-color-output);
-				color: var(--fore-color-output);
-				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->Name} ul.sub-items>li:not(.dropdown).active>:is(.button, .button:visited){
-				font-weight: bold;
-				box-shadow: var(--shadow-2);
-				border: none;
-			}
-			.{$this->Name} ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
-				font-weight: bold;
-				background-color: var(--back-color-output);
-				color: var(--fore-color-output);
-				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
 
-		" . ($this->AllowOthers ? "
+			" .
+			($this->AllowOthers ? "
 			.{$this->Name} .other{
 				text-align: end;
 				width: fit-content;
@@ -375,10 +230,10 @@ class MainMenu extends Module
 			yield Struct::OpenTag("div", ["class"=>"inside"]);
 			if ($this->AllowBranding)
 				yield Struct::Division(
-					(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Info->Path) : "") .
+					(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Front->Path) : "") .
 					Struct::Division(
 						(isValid($this->Description) ? Struct::Division(__($this->Description), ['class' => 'description']) : "") .
-						(isValid($this->Title) ? Struct::Link(Struct::Division(__($this->Title), ['class' => 'title']), \_::$Info->Path) : ""),
+						(isValid($this->Title) ? Struct::Link(Struct::Division(__($this->Title), ['class' => 'title']), \_::$Front->Path) : ""),
 					["class" => "brand"]),
 				["class" => "header"]);
 			if ($this->AllowItems)

@@ -36,24 +36,24 @@ use MiMFa\Library\Struct;
         }
     </style>
     <div class="center-lead container">
-        <?php if (isValid(\_::$Info, "IntroductionVideoPath")) {
+        <?php if (isValid(\_::$Front, "IntroductionVideoPath")) {
             module("EmbededYoutube");
             $ytm = new MiMFa\Module\EmbededYoutube();
-            $ytm->Source = takeValid(\_::$Info, "IntroductionVideoPath");
+            $ytm->Source = takeValid(\_::$Front, "IntroductionVideoPath");
             $ytm->Render();
         } ?>
         <div class="description content">
-            <?php echo \_::$Info->Description; ?>
+            <?php echo \_::$Front->Description; ?>
         </div>
         <div class="ownerdescription content">
-            <?php echo \_::$Info->OwnerDescription; ?>
+            <?php echo \_::$Front->OwnerDescription; ?>
         </div>
         <div class="fulldescription content">
-            <?php echo \_::$Info->FullDescription; ?>
+            <?php echo \_::$Front->FullDescription; ?>
         </div>
         <div class="services content row">
             <?php
-            foreach (\_::$Info->Services as $value) {
+            foreach (\_::$Front->Services as $value) {
                 $p = get($value, "Path");
                 $isp = isValid($p);
                 ?>

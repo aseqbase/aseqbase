@@ -41,16 +41,13 @@ library("Internal");
 run("global/RouterBase");
 run("Router");
 \_::$Router = new Router();
+
 run("global/Base");
 run("global/Types");
 
 run("global/BackBase");
 run("Back");
 \_::$Back = new Back();
-
-run("global/ConfigBase");
-run("Config");
-\_::$Config = new Config();
 
 run("global/UserBase");
 run("User");
@@ -59,10 +56,6 @@ run("User");
 run("global/FrontBase");
 run("Front");
 \_::$Front = new Front();
-
-run("global/InfoBase");
-run("Info");
-\_::$Info = new Info();
 
 Local::CreateDirectory(\_::$Address->LogAddress);
 Local::CreateDirectory(\_::$Address->TempAddress);
@@ -76,9 +69,17 @@ function initialize(string|null|int $status = null, $data = [], bool $print = tr
 {
 	responseStatus($status);
 	runSequence("initialize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+	runSequence("initialize".DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+}
+function customize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
+{
+	responseStatus($status);
+	run("customize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+	run("customize".DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
 }
 function finalize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
 {
+	runSequence("finalize".DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
 	runSequence("finalize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
 	if (function_exists('fastcgi_finish_request'))
 		fastcgi_finish_request();
@@ -671,21 +672,21 @@ function report($message = null, $type = "log", $secret = null)
 			case "error":
 			case "errors":
 				$type = "error";
-				$log = \_::$Config->ReportLevel > 0 ? $type : false;
+				$log = \_::$Back->ReportLevel > 0 ? $type : false;
 				break;
 			case "warn":
 			case "warns":
 				$type = "warn";
-				$log = \_::$Config->ReportLevel > 1 ? $type : false;
+				$log = \_::$Back->ReportLevel > 1 ? $type : false;
 				break;
 			case "info":
 			case "information":
 				$type = "info";
-				$log = \_::$Config->ReportLevel > 2 ? $type : false;
+				$log = \_::$Back->ReportLevel > 2 ? $type : false;
 				break;
 			default:
 				$type = "log";
-				$log = \_::$Config->ReportLevel > 2 ? $type : false;
+				$log = \_::$Back->ReportLevel > 2 ? $type : false;
 				break;
 		}
 	if ($log)
@@ -1061,13 +1062,13 @@ function auth($minaccess = 0, bool|string $assign = true, bool|string|int|null $
 		if ($exit !== false)
 			finalize($exit);
 		return false;
-	} elseif (isValid(\_::$Config->AccessMode)) {
+	} elseif (isValid(\_::$Back->AccessMode)) {
 		$ip = getClientIp();
 		$cip = false;
-		foreach (\_::$Config->AccessPatterns as $pat)
+		foreach (\_::$Back->AccessPatterns as $pat)
 			if ($cip = preg_match($pat, $ip))
 				break;
-		if ((\_::$Config->AccessMode > 0 && !$cip) || (\_::$Config->AccessMode < 0 && $cip)) {
+		if ((\_::$Back->AccessMode > 0 && !$cip) || (\_::$Back->AccessMode < 0 && $cip)) {
 			if ($assign) {
 				if (is_string($assign))
 					load($assign);
@@ -2701,19 +2702,12 @@ function isValid($object, string|null $item = null): bool
 }
 function isAseq(string|null $directory): bool
 {
-	return !Local::FileExists($directory . "global/ConfigBase.php")
-		&& Local::FileExists($directory . "global.php")
-		&& Local::FileExists($directory . "Info.php")
-		&& Local::FileExists($directory . "initialize.php");
+	return !isBase($directory);
 }
 function isBase(string|null $directory): bool
 {
-	return Local::FileExists($directory . "Config.php")
-		&& Local::FileExists($directory . "global/ConfigBase.php")
-		&& Local::FileExists($directory . "Info.php")
-		&& Local::FileExists($directory . "global/InfoBase.php")
+	return Local::FileExists($directory . "global/BackBase.php")
 		&& Local::FileExists($directory . "Front.php")
-		&& Local::FileExists($directory . "global/FrontBase.php")
 		&& Local::FileExists($directory . "global.php")
 		&& Local::FileExists($directory . "initialize.php");
 }
@@ -2759,7 +2753,7 @@ function isFormat(string|null $path, string|array ...$formats)
 function isFile(string|null $url, string ...$formats): bool
 {
 	if (count($formats) == 0)
-		array_push($formats, \_::$Config->AcceptableFileFormats, \_::$Config->AcceptableDocumentFormats, \_::$Config->AcceptableImageFormats, \_::$Config->AcceptableAudioFormats, \_::$Config->AcceptableVideoFormats);
+		array_push($formats, \_::$Back->AcceptableFileFormats, \_::$Back->AcceptableDocumentFormats, \_::$Back->AcceptableImageFormats, \_::$Back->AcceptableAudioFormats, \_::$Back->AcceptableVideoFormats);
 	return isUrl($url) && isFormat(getPath($url), $formats);
 }
 /**
@@ -2975,10 +2969,10 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 	if ($styling)
 		$value = MiMFa\Library\Style::DoStyle(
 			$value,
-			\_::$Info->KeyWords
+			\_::$Front->KeyWords
 		);
 	if ($referring ?? $styling) {
-		if (\_::$Config->AllowContentReferring)
+		if (\_::$Back->AllowContentReferring)
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
@@ -2988,7 +2982,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 				both: true,
 				caseSensitive: true
 			);
-		if (\_::$Config->AllowCategoryReferring)
+		if (\_::$Back->AllowCategoryReferring)
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
@@ -2998,7 +2992,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 				both: true,
 				caseSensitive: true
 			);
-		if (\_::$Config->AllowTagReferring)
+		if (\_::$Back->AllowTagReferring)
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
@@ -3008,7 +3002,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 				both: true,
 				caseSensitive: true
 			);
-		if (\_::$Config->AllowUserReferring)
+		if (\_::$Back->AllowUserReferring)
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {

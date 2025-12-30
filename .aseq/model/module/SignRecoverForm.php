@@ -167,7 +167,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	public function SendRecoveryEmail($subject = null, $content = null, $linkAnchor = null)
 	{
 		return \_::$User->SendTokenEmail(
-			$this->SenderEmail ?? \_::$Info->SenderEmail,
+			$this->SenderEmail ?? \_::$Front->SenderEmail,
 			$receiverEmail ?? \_::$User->TemporaryEmail,
 			$subject ?? $this->EmailSubject,
 			$content ?? $this->EmailContent,

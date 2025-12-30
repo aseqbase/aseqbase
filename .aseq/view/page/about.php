@@ -6,13 +6,13 @@ use MiMFa\Library\Style;
 
 module("PrePage");
 $module = new MiMFa\Module\PrePage();
-$module->Image = \_::$Info->FullLogoPath;
-//$module->Title = \_::$Info->FullName??"About Us";
+$module->Image = \_::$Front->FullLogoPath;
+//$module->Title = \_::$Front->FullName??"About Us";
 $module->ContentTag = "h4";
-$module->Content = __(\_::$Info->Slogan);
+$module->Content = __(\_::$Front->Slogan);
 pod($module, $data);
-$ops = \_::$Info->OwnerDescription?Convert::ToParagraphs(__(\_::$Info->OwnerDescription)):[];
-$dps = \_::$Info->FullDescription?Convert::ToParagraphs(__(\_::$Info->FullDescription)):[];
+$ops = \_::$Front->OwnerDescription?Convert::ToParagraphs(__(\_::$Front->OwnerDescription)):[];
+$dps = \_::$Front->FullDescription?Convert::ToParagraphs(__(\_::$Front->FullDescription)):[];
 $opsc = count($ops);
 $dpsc = count($dps);
 response(
@@ -37,12 +37,12 @@ response(
 		Struct::Container(
 			[
 				[$module->ToString()],
-				[Struct::Paragraph(\_::$Info->Description)],
+				[Struct::Paragraph(\_::$Front->Description)],
 				loop($opsc, function($v,$k,$i) use($ops,$opsc) {return ($i+2)%2==0? array_slice($ops, $i, min(2, $opsc-$i)):null;}, false),
 				loop($dpsc, function($v,$k,$i) use($dps,$dpsc) {return ($i+2)%2==0? array_slice($dps, $i, min(2, $dpsc-$i)):null;}, false),
-				(\_::$Info->FullOwnerDescription?Convert::ToParagraphs(__(\_::$Info->FullOwnerDescription)):[]),
+				(\_::$Front->FullOwnerDescription?Convert::ToParagraphs(__(\_::$Front->FullOwnerDescription)):[]),
 				[Struct::$BreakLine],
-				[Struct::Paragraph(__(\_::$Info->FullSlogan), null,["class"=>"be center"])]
+				[Struct::Paragraph(__(\_::$Front->FullSlogan), null,["class"=>"be center"])]
 			]
 		)
 	)

@@ -90,7 +90,7 @@ class Form extends Module
 	{
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
-		$this->ReCaptchaSiteKey = \_::$Config->ReCaptchaSiteKey;
+		$this->ReCaptchaSiteKey = \_::$Back->ReCaptchaSiteKey;
 		$this->Signing = fn() => \_::$User->HasAccess()?"":part(\_::$User->InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);
@@ -168,6 +168,7 @@ class Form extends Module
 				}
 				.{$this->Name} form {
     				position: relative;
+					padding: 0px var(--size-0);
 				}
 				.{$this->Name} form .fields {
 					display: table;
@@ -218,18 +219,16 @@ class Form extends Module
 				}
 				
 				.{$this->Name} .group.buttons {
+					margin: 0px;
 					gap: calc(var(--size-0) / 2) var(--size-0);
+					justify-content: end;
 				}
-				
 				.{$this->Name} .button {
 					width: fit-content;
 					max-width: 100%;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 
-				.{$this->Name} .group {
-					padding: var(--size-0);
-				}
 			");
 			switch (strtolower($this->Template ?? "")) {
 				case 'v':
@@ -263,8 +262,8 @@ class Form extends Module
 					" . Style::DoProperty("width", $this->FieldsWidth) . "
 					" . Style::DoProperty("height", $this->FieldsHeight) . "
 					display: flex;
-					padding: 0px var(--size-0) var(--size-0);
-					padding: 3px 0px;
+					padding: 0px var(--size-0) var(--size-1);
+					padding: calc(var(--size-0) / 2) 0px;
 				}
 
 				.{$this->Name} .field .title{
@@ -325,16 +324,12 @@ class Form extends Module
 					opacity: 0.5;
 					text-align: initial;
 					display: block;
-					padding-top: 5px;
+					padding: calc(var(--size-0) / 2);
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} .field:hover label.description{
 					opacity: 0.75;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-				}
-					
-				.{$this->Name} .group.buttons {
-					text-align: center;
 				}
 			");
 	}
@@ -348,6 +343,7 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
+				padding-bottom: var(--size-1);
 				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
@@ -358,8 +354,8 @@ class Form extends Module
 				position: relative;
 				text-align: initial;
 				vertical-align: top;
-				margin: 5px;
-				padding: 5px var(--size-0);
+				margin: calc(var(--size-0) / 2);
+				padding: calc(var(--size-0) / 2) var(--size-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
@@ -374,7 +370,7 @@ class Form extends Module
 				border-bottom: var(--border-1);
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
 				border-radius: var(--radius-0);
-				margin: 5px;
+				margin: calc(var(--size-0) / 2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
@@ -387,7 +383,7 @@ class Form extends Module
 				display: block;
 				font-size: 75%;
 				line-height: 100%;
-				padding: 5px 2px;
+				padding: calc(var(--size-0) / 2) var(--size-0);
 				opacity: 0.5;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -398,6 +394,9 @@ class Form extends Module
 			.{$this->Name} .field:hover label.description{
 				opacity: 0.75;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}	
+			.{$this->Name} .group.buttons {
+				justify-content: end;
 			}
 		");
 	}
@@ -414,7 +413,8 @@ class Form extends Module
 				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
-				padding: 3px 0px;
+				padding: calc(var(--size-0) / 2) 0px;
+				padding-bottom: var(--size-1);
 			}
 			.{$this->Name} .field label.title{
 				width: fit-content;
@@ -423,8 +423,8 @@ class Form extends Module
 				text-align: initial;
 				vertical-align: top;
 				margin-right: -1px;
-				padding: 3px var(--size-1);
-				border-radius: 3px 0px 0px 3px;
+				padding: calc(var(--size-0) / 2) var(--size-1);
+				border-radius: calc(var(--size-0) / 2) 0px 0px calc(var(--size-0) / 2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
@@ -436,7 +436,7 @@ class Form extends Module
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
 				height: 100%;
-				border-radius: 0px 3px 3px 0px;
+				border-radius: 0px calc(var(--size-0) / 2) calc(var(--size-0) / 2) 0px;
 				outline: none;
 				border: none;
 				border-bottom: var(--border-1);
@@ -455,7 +455,7 @@ class Form extends Module
 				display: table-cell;
 				font-size: 75%;
 				line-height: 100%;
-				padding: 3px;
+				padding: calc(var(--size-0) / 2);
 				opacity: 0;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -471,6 +471,9 @@ class Form extends Module
 				opacity: 0.75;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
+			.{$this->Name} .group.buttons {
+				justify-content: center;
+			}
 		");
 	}
 	public function GetFieldsVerticalStyle()
@@ -483,6 +486,7 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
+				padding-bottom: var(--size-1);
 				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
@@ -497,7 +501,7 @@ class Form extends Module
 				text-align: initial;
 				margin-bottom: -1px;
 				padding: 2px var(--size-0);
-				border-radius: 3px 3px 0px 0px;
+				border-radius: calc(var(--size-0) / 2) calc(var(--size-0) / 2) 0px 0px;
 				border: var(--border-1);
 				border-color: transparent;
 				border-bottom: 0px solid;
@@ -511,7 +515,7 @@ class Form extends Module
 				width: 100%;
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
-				border-radius: 0px 3px 3px 3px;
+				border-radius: 0px calc(var(--size-0) / 2) calc(var(--size-0) / 2) calc(var(--size-0) / 2);
 				border: var(--border-1);
 				border-color: transparent;
 				border-radius: var(--radius-0);
@@ -544,9 +548,14 @@ class Form extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover label.description{
+				padding-top: calc(var(--size-1) / 2);
+				padding-bottom: var(--size-1);
 				font-size: 75%;
 				opacity: 0.75;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->Name} .group.buttons {
+				justify-content: end;
 			}
 		");
 	}
@@ -560,6 +569,7 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
+				padding-bottom: var(--size-1);
 				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
@@ -571,8 +581,8 @@ class Form extends Module
 				text-align: initial;
 				vertical-align: top;
 				margin-right: -1px;
-				padding: 5px var(--size-0);
-			    margin: 5px;
+				padding: calc(var(--size-0) / 2) var(--size-0);
+			    margin: calc(var(--size-0) / 2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
@@ -583,7 +593,7 @@ class Form extends Module
 				width: 100%;
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
-			    margin: 5px;
+			    margin: calc(var(--size-0) / 2);
 				border: none;
 				border-color: transparent;
 				border-bottom: var(--border-1);
@@ -607,7 +617,8 @@ class Form extends Module
 				color: var(--fore-color-special);
 				background-color: var(--back-color-special);
 				position: absolute;
-				padding: calc(var(--size-0) / 2);
+				margin: 0px;
+				padding: calc(var(--size-0) / 2) var(--size-0);
 				z-index: 1;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -624,7 +635,7 @@ class Form extends Module
 			}
 					
 			.{$this->Name} .group.buttons {
-				text-align: center;
+				justify-content: end;
 			}
 		");
 	}
@@ -845,7 +856,7 @@ class Form extends Module
 		if (count($data) > 0 && get($data, "ReceiverEmail") ?? $this->ReceiverEmail)
 			if (
 				\MiMFa\Library\Contact::SendHtmlEmail(
-					pop($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Info->SenderEmail,
+					pop($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Front->SenderEmail,
 					pop($data, "ReceiverEmail") ?? $this->ReceiverEmail,
 					pop($data, "MailSubject") ?? $this->MailSubject ?? (\_::$User->Domain . ": A new form submitted"),
 					pop($data, "MailMessage") ?? $data,

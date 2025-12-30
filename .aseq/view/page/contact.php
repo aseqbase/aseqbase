@@ -5,8 +5,8 @@
 	$module->Render();
 	module("Contacts");
 	$module = new MiMFa\Module\Contacts();
-	$module->Items = \_::$Info->Contacts;
-	$module->Location = \_::$Info->Location;
+	$module->Items = \_::$Front->Contacts;
+	$module->Location = \_::$Front->Location;
     pod($module, $data);
 	$module->Render();
 	part("message", $data);

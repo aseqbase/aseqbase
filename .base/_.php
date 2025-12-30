@@ -15,7 +15,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 7.02010;
+	public static float $Version = 7.02100;
 	/**
 	 * The default files extensions
 	 * @example: ".php"
@@ -34,11 +34,6 @@ class _
 	 */
 	public static array $Sequence;
 	public static Address $Address;
-
-	/**
-	 * To access all the website configurations
-	 */
-	public static ConfigBase $Config;
 
 	/**
 	 * To access all back-end tools
@@ -60,12 +55,6 @@ class _
 	 * To access the user service
 	 */
 	public static UserBase $User;
-
-	/**
-	 * To access all the website information
-	 */
-	public static InfoBase $Info;
-
 	
 	/**
 	 * A Directory=>Name=>Fucntion array to apply the Function before using the Path

@@ -14,14 +14,14 @@ class Splash extends Template{
 
     public function RenderInitial(){
         parent::RenderInitial();?>
-	<title><?php echo $this->WindowTitle??\_::$Info->FullName; ?></title>
-	<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??$this->Logo??\_::$Info->LogoPath); ?>">
+	<title><?php echo $this->WindowTitle??\_::$Front->FullName; ?></title>
+	<link rel="icon" href="<?php echo getFullUrl($this->WindowLogo??$this->Logo??\_::$Front->LogoPath); ?>">
 	<script type="text/javascript">
 		_(document).ready(function(){
 			setTimeout(finishScreen,5000+(<?php echo count($this->Phrases)*1000; ?>));
 		});
 		function finishScreen(){
-			load("<?php echo $this->NextPath??\_::$Info->HomePath; ?>");
+			load("<?php echo $this->NextPath??\_::$Front->HomePath; ?>");
 		}
 	</script>
 	<style>

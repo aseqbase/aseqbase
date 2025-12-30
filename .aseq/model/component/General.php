@@ -133,27 +133,27 @@ class GeneralStyle{
 			--pattern-url-min: URL(\"" . first(\_::$Front->PatternPalette) . "\");
 			--pattern-url-max: URL(\"" . last(\_::$Front->PatternPalette) . "\");
 			
-			--owner: \"" . __(\_::$Info->Owner, true, false) . "\";
-			--name: \"" . __(\_::$Info->Name, true, false) . "\";
-			--slogan: \"" . __(\_::$Info->Slogan, true, false) . "\";
+			--owner: \"" . __(\_::$Front->Owner, true, false) . "\";
+			--name: \"" . __(\_::$Front->Name, true, false) . "\";
+			--slogan: \"" . __(\_::$Front->Slogan, true, false) . "\";
 
-			--path: \"" . \_::$Info->Path . "\";
-			--home-path: \"" . \_::$Info->HomePath . "\";
-			--logo-path: \"" . asset(\_::$Info->LogoPath) . "\";
-			--full-logo-path: \"" . asset(\_::$Info->FullLogoPath) . "\";
-			--banner-path: \"" . asset(\_::$Info->BannerPath) . "\";
-			--full-banner-path: \"" . asset(\_::$Info->FullBannerPath) . "\";
-			--wait-symbol-path: \"" . asset(\_::$Info->WaitSymbolPath) . "\";
-			--process-symbol-path: \"" . asset(\_::$Info->ProcessSymbolPath) . "\";
-			--error-symbol-path: \"" . asset(\_::$Info->ErrorSymbolPath) . "\";
+			--path: \"" . \_::$Front->Path . "\";
+			--home-path: \"" . \_::$Front->HomePath . "\";
+			--logo-path: \"" . asset(\_::$Front->LogoPath) . "\";
+			--full-logo-path: \"" . asset(\_::$Front->FullLogoPath) . "\";
+			--banner-path: \"" . asset(\_::$Front->BannerPath) . "\";
+			--full-banner-path: \"" . asset(\_::$Front->FullBannerPath) . "\";
+			--wait-symbol-path: \"" . asset(\_::$Front->WaitSymbolPath) . "\";
+			--process-symbol-path: \"" . asset(\_::$Front->ProcessSymbolPath) . "\";
+			--error-symbol-path: \"" . asset(\_::$Front->ErrorSymbolPath) . "\";
 
-			--logo-path-url: URL(\"" . asset(\_::$Info->LogoPath) . "\");
-			--full-logo-path-url: URL(\"" . asset(\_::$Info->FullLogoPath) . "\");
-			--banner-path-url: URL(\"" . asset(\_::$Info->BannerPath) . "\");
-			--full-banner-path-url: URL(\"" . asset(\_::$Info->FullBannerPath) . "\");
-			--wait-symbol-path-url: URL(\"" . asset(\_::$Info->WaitSymbolPath) . "\");
-			--process-symbol-path-url: URL(\"" . asset(\_::$Info->ProcessSymbolPath) . "\");
-			--error-symbol-path-url: URL(\"" . asset(\_::$Info->ErrorSymbolPath) . "\");
+			--logo-path-url: URL(\"" . asset(\_::$Front->LogoPath) . "\");
+			--full-logo-path-url: URL(\"" . asset(\_::$Front->FullLogoPath) . "\");
+			--banner-path-url: URL(\"" . asset(\_::$Front->BannerPath) . "\");
+			--full-banner-path-url: URL(\"" . asset(\_::$Front->FullBannerPath) . "\");
+			--wait-symbol-path-url: URL(\"" . asset(\_::$Front->WaitSymbolPath) . "\");
+			--process-symbol-path-url: URL(\"" . asset(\_::$Front->ProcessSymbolPath) . "\");
+			--error-symbol-path-url: URL(\"" . asset(\_::$Front->ErrorSymbolPath) . "\");
 		}";
 	}
 	public static function SwitchVariables($rootSelector = ":root") { return "

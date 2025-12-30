@@ -2,7 +2,7 @@
     use MiMFa\Library\Style;
     use MiMFa\Library\Struct;
     $module = new (module("Shortcuts"))();
-    $module->Items = \_::$Info->Contacts;
+    $module->Items = \_::$Front->Contacts;
     pod($module, $data);
     $module->Render();
     if (\_::$Front->AllowTranslate) {

@@ -5,6 +5,7 @@ $Name = pop($data, "Name");
 module("PrePage");
 $module = new MiMFa\Module\PrePage();
 $module->Title = pop($data, 'Title');
+$module->Path = pop($data, 'Path');
 $module->Description = pop($data, 'Description');
 $module->Content = pop($data, 'Content');
 $module->Image = pop($data, 'Image');

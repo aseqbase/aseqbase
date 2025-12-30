@@ -71,13 +71,13 @@ class Local
 	 */
 	public static function OptimizeUrl($url)
 	{
-		if (!\_::$Config->CachePeriod)
+		if (!\_::$Back->CachePeriod)
 			return $url;
 		if (strpos($url, "?") > 0)
 			$url .= "&";
 		else
 			$url .= "?";
-		return $url . "v=" . (\_::$Config->CachePeriod == "v" ? \_::$Version : date(\_::$Config->CachePeriod));
+		return $url . "v=" . (\_::$Back->CachePeriod == "v" ? \_::$Version : date(\_::$Back->CachePeriod));
 	}
 
 	/**
@@ -398,7 +398,7 @@ class Local
 		// Allow certain file formats
 		$allow = true;
 		$dfileType = ".".$fileType;
-		foreach (($extensions ?? \_::$Config->GetAcceptableFormats()) as $ext)
+		foreach (($extensions ?? \_::$Back->GetAcceptableFormats()) as $ext)
 			if ($allow = ($fileType === $ext || $dfileType === $ext))
 				break;
 		$sourceFile = $content["tmp_name"];
@@ -408,8 +408,8 @@ class Local
 			throw new \SilentException("The 'file format' is not 'acceptable'!");
 		}
 		// Check file size
-		$minSize = $minSize ?? \_::$Config->MinimumFileSize;
-		$maxSize = $maxSize ?? \_::$Config->MaximumFileSize;
+		$minSize = $minSize ?? \_::$Back->MinimumFileSize;
+		$maxSize = $maxSize ?? \_::$Back->MaximumFileSize;
 		if ($content["size"] < $minSize) {
 			if ($deleteSource)
 				self::DeleteFile($sourceFile);
@@ -446,7 +446,7 @@ class Local
 	 */
 	public static function StoreFile($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableFileFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableFileFormats);
 	}
 	/**
 	 * Save (Upload from the client side) image to the local storage
@@ -468,7 +468,7 @@ class Local
 		// Check if image file is an actual image or fake image
 		if ((($content["tmp_name"] ?? null) ? getimagesize($content["tmp_name"]) : true) === false)
 			throw new \SilentException("The image file is not an actual image!");
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableImageFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableImageFormats);
 	}
 	/**
 	 * Save (Upload from the client side) audio to the local storage
@@ -481,7 +481,7 @@ class Local
 	 */
 	public static function StoreAudio($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableAudioFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableAudioFormats);
 	}
 	/**
 	 * Save (Upload from the client side) video to the local storage
@@ -494,7 +494,7 @@ class Local
 	 */
 	public static function StoreVideo($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableVideoFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableVideoFormats);
 	}
 	/**
 	 * Save (Upload from the client side) document to the local storage
@@ -507,7 +507,7 @@ class Local
 	 */
 	public static function StoreDocument($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Config->AcceptableDocumentFormats);
+		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableDocumentFormats);
 	}
 	/**
 	 * Load (Download from the client side) something from the local storage,
@@ -524,15 +524,15 @@ class Local
 		if (ob_get_level())
 			ob_clean();
 
-		// ini_set('mbstring.internal_encoding', \_::$Config->Encoding);//deprecated
+		// ini_set('mbstring.internal_encoding', \_::$Back->Encoding);//deprecated
 		// ini_set('mbstring.http_input', 'auto');//deprecated
-		// ini_set('mbstring.http_output', \_::$Config->Encoding);//deprecated
+		// ini_set('mbstring.http_output', \_::$Back->Encoding);//deprecated
 		ini_set('mbstring.detect_order', 'auto');
-		ini_set('default_charset', \_::$Config->Encoding);
+		ini_set('default_charset', \_::$Back->Encoding);
 
 		header("Content-Disposition: attachment; filename=\"$name\"");
 		header("Content-Type: application/force-download");
-		header("Content-Type: $type; charset=" . \_::$Config->Encoding);
+		header("Content-Type: $type; charset=" . \_::$Back->Encoding);
 		header('Expires: 0');
 		header('Cache-Control: must-revalidate');
 		header('Pragma: public');

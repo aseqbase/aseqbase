@@ -263,14 +263,14 @@ class Content extends Module
      function __construct()
      {
           parent::__construct();
-          $this->LeaveComment = \_::$Config->AllowWriteComment;
-          $this->AllowComments = \_::$Config->AllowReadComment;
-          $this->AllowCommentsAccess = \_::$Config->ReadCommentAccess;
+          $this->LeaveComment = \_::$Back->AllowWriteComment;
+          $this->AllowComments = \_::$Back->AllowReadComment;
+          $this->AllowCommentsAccess = \_::$Back->ReadCommentAccess;
           $this->Root = $this->Root ?? \_::$Address->ContentRoot;
           $this->CollectionRoot = $this->CollectionRoot ?? \_::$Address->ContentRoot;
           $this->CommentForm = new CommentForm();
           $this->CommentForm->MessageType = "texts";
-          $this->CommentForm->Access = \_::$Config->WriteCommentAccess;
+          $this->CommentForm->Access = \_::$Back->WriteCommentAccess;
           $this->CommentForm->SubjectLabel =
                $this->CommentForm->AttachLabel =
                null;

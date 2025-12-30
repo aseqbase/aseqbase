@@ -1,7 +1,7 @@
 <?php
 $templ = \_::$Front->CreateTemplate("Main");
 $name = pop($data, "Name") ?? \_::$User->Direction;
-$templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??between($name, \_::$Info->Name);
+$templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??between($name, \_::$Front->Name);
 $alternative = pop($data, "Alternative") ?? "404";
 $content = pop($data, "Content");
 $templ->Content = $content?

@@ -273,12 +273,8 @@ class Bootstrap
             self::CreateBackFile(true);
         if (self::$Arguments["front"] ?? false)
             self::CreateFrontFile($force);
-        if (self::$Arguments["route"] ?? false)
-            self::CreateRouteFile($force);
-        if (self::$Arguments["config"] ?? false)
-            self::CreateConfigFile($force);
-        if (self::$Arguments["info"] ?? false)
-            self::CreateInfoFile($force);
+        if (self::$Arguments["initialize"] ?? self::$Arguments["route"] ?? false)
+            self::CreateInitializeFile($force);
     }
 
 
@@ -389,16 +385,11 @@ class Bootstrap
             self::LoadConfig();
             $force = self::$Arguments["f"] ?? self::$Arguments["force"] ?? false;
             switch (strtolower(self::$Arguments[0] ?? "")) {
-                case "info":
-                case "information":
-                    return self::CreateInfoFile($force);
-                case "config":
-                case "configuration":
-                    return self::CreateConfigFile($force);
                 case "global":
                     return self::CreateGlobalFile($force);
                 case "route":
-                    return self::CreateRouteFile($force);
+                case "initialize":
+                    return self::CreateInitializeFile($force);
                 case "front":
                     return self::CreateFrontFile($force);
                 case "back":
@@ -432,32 +423,6 @@ class Bootstrap
             self::SetError("Could not store '$path': " . $e->getMessage());
         }
     }
-    public static function CreateConfigFile($force = null)
-    {
-        return self::CreateFile(self::$DestinationDirectory . "Config.php", function () {
-            return "<?php
-" . ((self::$Arguments["b"] ?? null) ? "class Config extends ConfigBase" : "run(\"global/AseqConfig\");
-class Config extends AseqConfig") . " {
-}";
-        }, $force);
-    }
-    public static function CreateInfoFile($force = null)
-    {
-        if (!isset(self::$Configurations["Info"]))
-            self::$Configurations["Info"] = [];
-        return self::CreateFile(self::$DestinationDirectory . "Info.php", fn() => "<?php
-" . ((self::$Arguments["b"] ?? null) ? "class Info extends InfoBase" : "run(\"global/AseqInfo\");
-class Info extends AseqInfo") . " {
-    public \$Owner = " . self::GetInput("OwnerName", $force, "MiMFa", self::$Configurations["Info"]["Owner"], "owner") . ";
-	public \$FullOwner = " . self::GetInput("FullOwnerName", $force, "MiMFa", self::$Configurations["Info"]["FullOwner"], "full-owner") . ";
-	public \$Name = " . self::GetInput("Name", $force, "aseqbase", self::$Configurations["Info"]["Name"], "name") . ";
-	public \$FullName = " . self::GetInput("FullName", $force, "MiMFa aseqbase", self::$Configurations["Info"]["FullName"], "full-name") . ";
-	public \$Slogan = " . self::GetInput("Slogan", $force, "<u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["Slogan"], "slogan") . ";
-	public \$FullSlogan = " . self::GetInput("FullSlogan", $force, "Develop websites by <u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["FullSlogan"], "full-slogan") . ";
-	public \$Description = " . self::GetInput("Description", $force, "An original, safe, very flexible, and innovative framework for web developments!", self::$Configurations["Info"]["Description"], "description") . ";
-	public \$FullDescription = " . self::GetInput("FullDescription", $force, "A special framework for web development called 'aseqbase' (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.", self::$Configurations["Info"]["FullDescription"], "full-description") . ";
-}", $force);
-    }
     public static function CreateGlobalFile($force = null)
     {
         $parent = (self::$Arguments["b"] ?? null) ? ".base" : ".aseq";
@@ -471,22 +436,6 @@ class Info extends AseqInfo") . " {
                                             // directory, newaseq; // Update directory in the \\_::\$Sequences
                                             // directory, null; // Remove thw directory from the \\_::\$Sequences
 ", $force);
-    }
-    public static function CreateRouteFile($force = null)
-    {
-        return self::CreateFile(self::$DestinationDirectory . "route.php", fn() => "<?php
-// To unset the default router sat at the before sequences
-\_::\$Router->On()->Reset();
-
-/**
- * Use your routers by below formats
- * \_::\$Router->On(\"A Part Of Path?\")->Default(\"Route Name\");
- * Or use a suitable handler for example
- * \_::\$Router->On()->Default(fn(\$router)=>deliver(\MiMFa\Library\Struct::Heading1(\"Hello World!\")));
- */
-
-// To route other requests to the DefaultRouteName
-\_::\$Router->On()->Default(\_::\$Router->DefaultRouteName);", $force);
     }
     public static function CreateBackFile($force = null)
     {
@@ -563,7 +512,16 @@ class Back extends AseqBack") . " {
             return "<?php
 " . ((self::$Arguments["b"] ?? null) ? "class Front extends FrontBase" : "run(\"global/AseqFront\");
 class Front extends AseqFront") . " {
-	/**
+    public \$Owner = " . self::GetInput("OwnerName", $force, "MiMFa", self::$Configurations["Info"]["Owner"], "owner") . ";
+	public \$FullOwner = " . self::GetInput("FullOwnerName", $force, "MiMFa", self::$Configurations["Info"]["FullOwner"], "full-owner") . ";
+	public \$Name = " . self::GetInput("Name", $force, "aseqbase", self::$Configurations["Info"]["Name"], "name") . ";
+	public \$FullName = " . self::GetInput("FullName", $force, "MiMFa aseqbase", self::$Configurations["Info"]["FullName"], "full-name") . ";
+	public \$Slogan = " . self::GetInput("Slogan", $force, "<u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["Slogan"], "slogan") . ";
+	public \$FullSlogan = " . self::GetInput("FullSlogan", $force, "Develop websites by <u>a seq</u>uence-<u>base</u>d framework", self::$Configurations["Info"]["FullSlogan"], "full-slogan") . ";
+	public \$Description = " . self::GetInput("Description", $force, "An original, safe, very flexible, and innovative framework for web developments!", self::$Configurations["Info"]["Description"], "description") . ";
+	public \$FullDescription = " . self::GetInput("FullDescription", $force, "A special framework for web development called 'aseqbase' (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.", self::$Configurations["Info"]["FullDescription"], "full-description") . ";
+	
+    /**
 	 * The website default template class
 	 * @var string
 	 * @default \"Main\"
@@ -594,6 +552,22 @@ class Front extends AseqFront") . " {
                 ");
 }";
         }, $force);
+    }
+    public static function CreateInitializeFile($force = null)
+    {
+        return self::CreateFile(self::$DestinationDirectory . "initialize.php", fn() => "<?php
+// To unset the default router sat at the before sequences
+\_::\$Router->On()->Reset();
+
+/**
+ * Use your routers by below formats
+ * \_::\$Router->On(\"A Part Of Path?\")->Default(\"Route Name\");
+ * Or use a suitable handler for example
+ * \_::\$Router->On()->Default(fn(\$router)=>deliver(\MiMFa\Library\Struct::Heading1(\"Hello World!\")));
+ */
+
+// To route other requests to the DefaultRouteName
+\_::\$Router->On()->Default(\_::\$Router->DefaultRouteName);", $force);
     }
 
     public static function LoadConfig()

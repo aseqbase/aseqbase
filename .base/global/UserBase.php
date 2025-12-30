@@ -434,13 +434,13 @@ class UserBase
 	public function GenerateSign($slogan = "Kind Regards")
 	{
 		return trim(join(PHP_EOL, [
-			$this->Access >= $this->AdminAccess ? \_::$Info->Slogan : "",
+			$this->Access >= $this->AdminAccess ? \_::$Front->Slogan : "",
 			$slogan ? "*$slogan*" : "",
 			"------",
 			"*" . $this->Name . "*",
-			get($this->GetGroup(), "Title") . " at " . \_::$Info->Name,
-			$this->Access >= $this->AdminAccess ? \_::$Info->ReceiverEmail ?? $this->Email : $this->Email,
-			"[" . \_::$Info->FullName . "](" . \_::$Info->Path . ")"
+			get($this->GetGroup(), "Title") . " at " . \_::$Front->Name,
+			$this->Access >= $this->AdminAccess ? \_::$Front->ReceiverEmail ?? $this->Email : $this->Email,
+			"[" . \_::$Front->FullName . "](" . \_::$Front->Path . ")"
 		]));
 	}
 	public function GenerateEmail($name = null, $fake = false)

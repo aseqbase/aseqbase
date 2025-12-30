@@ -1,7 +1,7 @@
 <?php
 view("message", data: [
-    "WindowTitle" => \_::$Info->FullName,
-    "WindowLogo" => MiMFa\Library\Local::GetUrl(\_::$Info->LogoPath),
+    "WindowTitle" => \_::$Front->FullName,
+    "WindowLogo" => MiMFa\Library\Local::GetUrl(\_::$Front->LogoPath),
     "Title" => "Bad Request 400",
     "Description" => "There was an error in your request."
 ]);

@@ -8,7 +8,7 @@ if (!get($received, "Message"))
 	response($form->GetError("Your message could not be empty!"));
 else {
 	$form->MailSubject = \_::$User->Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$User, "Name")) . "'";
-	$form->ReceiverEmail = \_::$Info->ReceiverEmail;
+	$form->ReceiverEmail = \_::$Front->ReceiverEmail;
 	$form->SenderEmail = get($received, "Email") ?? get(\_::$User, "Email");
 	table("Message")->Insert([
 		"UserId" => \_::$User ? \_::$User->Id : null,

@@ -85,7 +85,7 @@ class Base extends \ArrayObject
 
 	public function Set_Defaults()
 	{
-		$this->Name = \_::$Config->EncryptNames ? (substr($this->Get_Namespace(), 0, 1) . RandomString(10)) : ($this->Name ?? $this->get_className()) . "_" . $this->Get_Namespace();
+		$this->Name = \_::$Back->EncryptNames ? (substr($this->Get_Namespace(), 0, 1) . RandomString(10)) : ($this->Name ?? $this->get_className()) . "_" . $this->Get_Namespace();
 		return $this;
 	}
 

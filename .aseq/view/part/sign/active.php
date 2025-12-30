@@ -10,7 +10,7 @@ try {
     $sign = \_::$User->DecryptToken($activationTokenKey, getReceived($activationTokenKey));
     if (
         $email && \_::$User->SendTokenEmail(
-            \_::$Info->SenderEmail,
+            \_::$Front->SenderEmail,
             $email ?? \_::$User->TemporaryEmail,
             "Account Activation Request",
             'Hello dear $NAME,<br><br>

@@ -528,7 +528,7 @@ class Convert
      */
     public static function ToDateTime(\DateTime|string|null $dateTime = null, \DateTimeZone|null $dateTimeZone = null)
     {
-        return (is_string($dateTime) || is_null($dateTime)) ? new \DateTime($dateTime ?? \_::$Config->CurrentDateTime, $dateTimeZone ?? new \DateTimeZone(\_::$Config->DateTimeZone)) : $dateTime;
+        return (is_string($dateTime) || is_null($dateTime)) ? new \DateTime($dateTime ?? \_::$Back->CurrentDateTime, $dateTimeZone ?? new \DateTimeZone(\_::$Back->DateTimeZone)) : $dateTime;
     }
     /**
      * Get the DateTime as a String type suitable to save or send to the databases
@@ -545,24 +545,24 @@ class Convert
      */
     public static function ToShownDateTime($dateTime = null, \DateTimeZone|null $dateTimeZone = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Config->TimeStampOffset));
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Back->TimeStampOffset));
     }
     public static function FromShownDateTime($dateTime = null, \DateTimeZone|null $dateTimeZone = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Config->TimeStampOffset));
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Back->TimeStampOffset));
     }
     /**
      * Get the DateTime as a String type suitable to show on website
      */
     public static function ToShownDateTimeString($dateTime = null, \DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Config->TimeStampOffset))
-            ->format($dateTimeFormat ?? \_::$Config->DateTimeFormat);
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Back->TimeStampOffset))
+            ->format($dateTimeFormat ?? \_::$Back->DateTimeFormat);
     }
     public static function FromShownDateTimeString($dateTime = null, \DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Config->TimeStampOffset))
-            ->format($dateTimeFormat ?? \_::$Config->DateTimeFormat);
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Back->TimeStampOffset))
+            ->format($dateTimeFormat ?? \_::$Back->DateTimeFormat);
     }
 
     public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
@@ -585,7 +585,7 @@ class Convert
     public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true)
     {
         if ($addDefaultKeys) {
-            $email = \_::$Info->ReceiverEmail;
+            $email = \_::$Front->ReceiverEmail;
             if (!isset($additionalKeys['$HOSTEMAILLINK']))
                 $additionalKeys['$HOSTEMAILLINK'] = Struct::Link($email, "mailto:$email");
             if (!isset($additionalKeys['$HOSTEMAIL']))

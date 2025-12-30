@@ -34,14 +34,14 @@ response(
 						["style" => "background-image: var(--logo-path-url);"]
 					),
 					Struct::Division(
-						\_::$Info->FullName,
+						\_::$Front->FullName,
 						["class" => "title"]
 					)
 				],
 				["class" => "brand-bar"]
 			)
 			,
-			\_::$Info->HomePath
+			\_::$Front->HomePath
 		),
 		["class" => "small-header"]
 	)

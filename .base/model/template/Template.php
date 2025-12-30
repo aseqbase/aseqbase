@@ -120,8 +120,8 @@ class Template extends \Base
     {
         region("initial");
         $title = $this->WindowTitle ?? [preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/", "", \_::$User->Direction)];
-        response(Struct::Title(Convert::ToTitle(is_array($title) ? [...$title, ...[\_::$Info->Name]] : $title)));
-        response(Struct::Logo(getFullUrl($this->WindowLogo ?? \_::$Info->LogoPath)));
+        response(Struct::Title(Convert::ToTitle(is_array($title) ? [...$title, ...[\_::$Front->Name]] : $title)));
+        response(Struct::Logo(getFullUrl($this->WindowLogo ?? \_::$Front->LogoPath)));
         response(Struct::Style("
         head, style, script, link, meta, title{
             display: none !important;

@@ -41,7 +41,7 @@ class MessageForm extends Form
 	{
 		parent::__construct();
 		$this->Relation = $relation;
-		$this->Access = $access ?? \_::$Config->WriteCommentAccess;
+		$this->Access = $access ?? \_::$Back->WriteCommentAccess;
 		$this->DefaultStatus = 1;
 		$this->Template = null;
 	}
@@ -52,7 +52,7 @@ class MessageForm extends Form
 			$row = table("Message")->SelectRow("`To`, Subject", "Id=:Id", [":Id" => $messageId]);
 			if (isEmail($row["To"]))
 				Contact::SendHtmlEmail(
-					\_::$Info->SenderEmail,
+					\_::$Front->SenderEmail,
 					$row["To"],
 					$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Message"))),
 					$message ?? [

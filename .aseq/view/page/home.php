@@ -4,8 +4,8 @@ use \MiMFa\Library\Struct;
 
 module("RingTabs");
 $module = new \MiMFa\Module\RingTabs();
-$module->Image = \_::$User->Image??\_::$Info->LogoPath;
-$module->Items = \_::$Info->Services;
+$module->Image = \_::$User->Image??\_::$Front->LogoPath;
+$module->Items = \_::$Front->Services;
 //pod($module, $data);
 response(
 	Struct::Style("

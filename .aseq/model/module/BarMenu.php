@@ -16,7 +16,6 @@ class BarMenu extends Module{
 	public function GetStyle(){
 		return parent::GetStyle().Struct::Style("
 			.{$this->Name}{
-				color: var(--fore-color-output);
 				text-transform: uppercase;
 				text-align: center;
 				width:100vw;
@@ -81,8 +80,7 @@ class BarMenu extends Module{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 60%;
-				color: var(--back-color-output);".
-				(($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter():"")."
+				". (($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter():"")."
 			}
 			.{$this->Name} .button:hover>.media{
 				background-size: auto 70%;".

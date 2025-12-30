@@ -30,11 +30,13 @@ class Translate
 	public $CodeLimit = 160;
 	public $WrapStart = "<";
 	public $WrapEnd = ">";
-	public $WrapPattern = "/(^<[\w\W]*>$)|(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(<\S+[\w\W]*>)|(\d*\.?\d+)/U";
+	public $WrapPattern = "/(^<[\w\W]*>$)|(\\$\{[\w\W]+\})|(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(<\S+[\w\W]*>)|(\d*\.?\d+)/U";
 	public $ValidPattern = "/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-z]/m";
-	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\`\'\r\n\t\f]*)|(\:\d))+))$/';
+	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
 	public $CorrectorPattern = "/(?:^(['\"\`])([\w\W]+)\\1$)|([\w\W]+)/";
 	public $CorrectorReplacement = "$2$3";
+	public $TrimmerPattern = "/(?:\\$\{([\w\W]+)\})|([\w\W]+)/";
+	public $TrimmerReplacement = "$1$2";
 	/**
 	 * To have a deep translate
 	 * @test
@@ -106,8 +108,8 @@ class Translate
 		}
 		$data = decode($data, $replacements);
 		if ($this->CaseSensitive)
-			return $data;
-		return self::DetectCaseStatus($data, $data);
+			return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $data);
+		return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, self::DetectCaseStatus($data, $data));
 	}
 	public function Get($text, $lang = null, $depth = 3)
 	{
@@ -124,16 +126,16 @@ class Translate
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
 			$data = decode($data[$lang ?? $this->Language] ?? $data["x"], $dic);
 			if ($this->CaseSensitive)
-				return $this->Deep ? $this->DeepReplace($data, $lang) : $data;
-			return self::DetectCaseStatus($this->Deep ? $this->DeepReplace($data, $lang) : $data, $text);
+				return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $this->Deep ? $this->DeepReplace($data, $lang) : $data);
+			return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, self::DetectCaseStatus($this->Deep ? $this->DeepReplace($data, $lang) : $data, $text));
 		} elseif ($this->AutoUpdate)
 			$this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $ntext))]);
 		if ($dic && $depth)
 			if ($this->CaseSensitive)
-				return decode($this->Deep ? $this->DeepReplace($ntext, $lang) : $ntext, $dic);
+				return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, decode($this->Deep ? $this->DeepReplace($ntext, $lang) : $ntext, $dic));
 			else
-				return self::DetectCaseStatus($this->Deep ? $this->DeepReplace(decode($ntext, $dic), $lang) : decode($ntext, $dic), $text);
-		return $this->Deep ? $this->DeepReplace($text, $lang) : $text;
+				return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, self::DetectCaseStatus($this->Deep ? $this->DeepReplace(decode($ntext, $dic), $lang) : decode($ntext, $dic), $text));
+		return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $this->Deep ? $this->DeepReplace($text, $lang) : $text);
 	}
 	public function DeepReplace($text, $lang = null)
 	{
@@ -217,7 +219,8 @@ class Translate
 			foreach ($this->DataTable->Select("*", $condition, $params) as $value)
 				$this->Cache[strtolower($value["KeyCode"])] = $value["ValueOptions"];
 		unset($this->Cache[""]);
-		if($this->Deep) sort($this->Cache, SORT_DESC);
+		if ($this->Deep)
+			sort($this->Cache, SORT_DESC);
 	}
 
 	public function ClearAll($condition = null, $params = [])
@@ -249,10 +252,9 @@ class Translate
 	 */
 	public function IsRootLanguage($text)
 	{
-		if (isEmpty($text))
-			return true;
-		return preg_match($this->ValidPattern, $text) &&
-			!preg_match($this->InvalidPattern, $text);
+		return !$text ||
+			(preg_match($this->ValidPattern, $text) &&
+				!preg_match($this->InvalidPattern, $text));
 	}
 
 	/**
@@ -314,7 +316,7 @@ class Translate
 					$key = strtolower($defaultLang ?? \_::$Front->DefaultLanguage ?? $key);
 				$arr[$key] = array(
 					"Title" => getBetween($value, "Title", "Name") ?? strtoupper($key),
-					"Image" => getBetween($value, "Image", "Icon") ?? str_replace("{0}", $key, $this->ImagePathPattern?:"https://unpkg.com/language-icons/icons/{0}.svg"),
+					"Image" => getBetween($value, "Image", "Icon") ?? str_replace("{0}", $key, $this->ImagePathPattern ?: "https://unpkg.com/language-icons/icons/{0}.svg"),
 					"Direction" => $dir = get($value, "Direction") ?? preg_match("/(ar|fa|ur|he|ps|sd|ug|dv|ku|yi|nqo|syr|ckb|ks|bal|brh|bgn|haz|khw|lrc|mzn|pnb|prs|uz_AF|tt|ota)/i", $key ?? "") ? "rtl" : "ltr",
 					"Encoding" => $enc = get($value, "Encoding") ?? "utf-8",
 					"Query" => "lang=$key&direction=$dir&encoding=$enc"

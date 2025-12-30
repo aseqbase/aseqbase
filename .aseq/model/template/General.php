@@ -1,5 +1,7 @@
 <?php namespace MiMFa\Template;
 use MiMFa\Library\Struct;
+use MiMFa\Library\Style;
+
 class General extends Template
 {
 	public $WindowTitle = null;
@@ -22,7 +24,6 @@ class General extends Template
         component("Shortcuts");
 		component("JQuery");
 		component("DataTable");
-		//component("Bootstrap");
 	}
 
 	public function RenderInitial()
@@ -112,6 +113,170 @@ class General extends Template
 					background-color: var(--color-yellow);
 					color: var(--color-white);
 				}
+
+				body>nav {
+					background-color: var(--back-color-special);
+					color: var(--fore-color-special);
+					box-shadow: var(--shadow-2);
+				}
+				body>nav .header{
+					color: var(--fore-color-special);
+				}
+				body>nav :is(.header, .header a, .header a:visited, .header a:hover){
+					text-decoration: none;
+					font-weight: normal !important;
+				}
+				body>nav .header .title{
+					font-size: var(--size-2);
+				}
+				body>nav .header .description{
+					font-size: 75%;
+				}
+				body>nav ul li .image{
+					margin-inline-end: var(--size-0);
+				}
+				body>nav ul li .description{
+					font-size: var(--size-0);
+					color: #888b;
+					font-weight: normal;
+				}
+				body>nav ul li:hover .description{
+					font-size: var(--size-0);
+					color: unset;
+				}
+
+				body>nav ul li .icon{
+					font-size: var(--size-1);
+				}
+
+				body>nav ul li.dropdown{
+					position: initial;
+				}
+				body>nav ul li.dropdown ul{
+					text-align: start;
+				}
+
+				body>nav :is(button, .button, .icon[onclick]){
+					border: var(--border-0);
+					border-radius: var(--radius-0);
+					box-shadow: var(--shadow-0);
+				}
+				body>nav :is(button, .button, .icon[onclick]):hover{
+					box-shadow: var(--shadow-2);
+				}
+					
+				body>nav>ul>li:not(.sub-items)>button{
+					text-transform: uppercase;
+				}
+					
+				body>nav ul:not(.sub-items)>li {
+					background-color: transparent;
+					color: inherit;
+					display: inline-block;
+				}
+				body>nav ul:not(.sub-items)>li.active{
+					font-weight: bold;
+					box-shadow: var(--shadow-2);
+				}
+				body>nav ul:not(.sub-items)>li>:is(.button, .button:visited){
+					background-color: transparent;
+					color: var(--fore-color-special);
+					border: none;
+					font-size: inherit;
+					border-radius: unset;
+					text-decoration: none;
+					padding: var(--size-0) var(--size-1);
+					display: block;
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
+					font-weight: bold;
+					background-color: var(--back-color-output);
+					color: var(--fore-color-output);
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul:not(.sub-items)>li.active>:is(.button, .button:visited){
+					color: var(--fore-color);
+				}
+				body>nav ul:not(.sub-items)>li.active:hover>:is(.button, .button:visited){
+					color: var(--fore-color);
+				}
+				body>nav ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
+					color: var(--fore-color-output);
+					background-color: var(--back-color-output);
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
+					display: block;
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+
+				body>nav ul.sub-items {
+					color: var(--fore-color-special);
+					background-color: var(--back-color-special);
+					box-shadow: 0px 16px 16px 0px rgba(0,0,0,0.2);
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul.sub-items .sub-items {
+					background-color: #8881;
+					box-shadow: var(--shadow-1);
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul.sub-items .sub-items li :is(.button, .button:visited) {
+					padding: calc(var(--size-0) / 2) var(--size-1);
+					background: transparent;
+					border: none;
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul.sub-items>li {
+					display: block;
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul.sub-items>li>:is(.button, .button:visited){
+					color: var(--fore-color-input);
+				}
+				body>nav ul.sub-items>li.dropdown{
+					display: block;
+					border-bottom: var(--border-1) transparent;
+				}
+				body>nav ul.sub-items>li.dropdown.active{
+					box-shadow: var(--shadow-2);
+					border: none;
+				}
+				body>nav ul.sub-items>li.dropdown.active>:is(.button, .button:visited){
+					font-weight: bold;
+					border: none;
+				}
+				body>nav ul.sub-items>li.dropdown:hover{
+					border-bottom-color: var(--back-color-output);
+					box-shadow: var(--shadow-1);
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
+					font-weight: bold;
+					border: none;
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
+					font-weight: bold;
+					background-color: var(--back-color-output);
+					color: var(--fore-color-output);
+					border: none;
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				body>nav ul.sub-items>li:not(.dropdown).active>:is(.button, .button:visited){
+					font-weight: bold;
+					box-shadow: var(--shadow-2);
+					border: none;
+				}
+				body>nav ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
+					font-weight: bold;
+					background-color: var(--back-color-output);
+					color: var(--fore-color-output);
+					border: none;
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+
 				.page{
 					padding: var(--size-1);
 					display: flex;
@@ -305,7 +470,7 @@ class General extends Template
 				}
 
 				.input{
-					padding: var(--size-0);
+					padding: calc(var(--size-0) / 2) var(--size-0);
 				}
 				input[type='range'].rangeinput {
 					height: calc(var(--size-0) / 2);

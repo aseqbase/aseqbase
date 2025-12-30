@@ -369,19 +369,19 @@ class Field extends Module{
                         {
                             case 'doc':
                             case 'document':
-                                $accept = " accept='".join(", ",\_::$Config->AcceptableDocumentFormats)."'";
+                                $accept = " accept='".join(", ",\_::$Back->AcceptableDocumentFormats)."'";
                                 $others = is_null($p)?"": Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "image":
-                                $accept = " accept='".join(", ",\_::$Config->AcceptableImageFormats)."'";
+                                $accept = " accept='".join(", ",\_::$Back->AcceptableImageFormats)."'";
                                 $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "audio":
-                                $accept = " accept='".join(", ",\_::$Config->AcceptableAudioFormats)."'";
+                                $accept = " accept='".join(", ",\_::$Back->AcceptableAudioFormats)."'";
                                 $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             case "video":
-                                $accept = " accept='".join(", ",\_::$Config->AcceptableVideoFormats)."'";
+                                $accept = " accept='".join(", ",\_::$Back->AcceptableVideoFormats)."'";
                                 $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             default:
@@ -436,19 +436,19 @@ class Field extends Module{
                         {
                             case 'docs':
                             case 'documents':
-                                $accept = " accept='".join(", ",\_::$Config->AcceptableDocumentFormats)."'";
+                                $accept = " accept='".join(", ",\_::$Back->AcceptableDocumentFormats)."'";
                                 $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "images":
-                                $accept = " accept='".join(", ",\_::$Config->AcceptableImageFormats)."'";
+                                $accept = " accept='".join(", ",\_::$Back->AcceptableImageFormats)."'";
                                 $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
                                 break;
                             case "audios":
-                                $accept = " accept='".join(", ",\_::$Config->AcceptableAudioFormats)."*'";
+                                $accept = " accept='".join(", ",\_::$Back->AcceptableAudioFormats)."*'";
                                 $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             case "videos":
-                                $accept = " accept='".join(", ",\_::$Config->AcceptableVideoFormats)."'";
+                                $accept = " accept='".join(", ",\_::$Back->AcceptableVideoFormats)."'";
                                 $others = is_null($p)?"":Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
                                 break;
                             default:
