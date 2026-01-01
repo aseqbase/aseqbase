@@ -221,7 +221,7 @@ class UserBase
 	public function __construct()
 	{
 		$this->Cryptograph = new SpecialCrypt();
-		$this->Session = new \MiMFa\Library\Session(new DataTable(\_::$Back->DataBase, "Session", \_::$Back->DataBasePrefix), $this->Cryptograph);
+		$this->Session = new \MiMFa\Library\Session(new DataTable(\_::$Back->DataBase, "Session", \_::$Back->DataBasePrefix, \_::$Back->DataTableNameConvertors), $this->Cryptograph, \_::$Address->Name);
 		$this->Session->AccessibleData = $this->AccessibleData;
 		$this->Session->EncryptKey = $this->EncryptKey;
 		$this->Session->EncryptValue = $this->EncryptValue;

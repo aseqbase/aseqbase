@@ -14,7 +14,7 @@ class Message extends Template{
 		<!DOCTYPE html>
 		<html>
 			<head>
-				<meta charset="<?php echo \_::$Back->Encoding; ?>">
+				<meta charset="<?php echo \_::$Front->Encoding; ?>">
 				<!--[if lt IE 9]>
 				<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
 				<![endif]-->

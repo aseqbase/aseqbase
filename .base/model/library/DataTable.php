@@ -18,12 +18,12 @@ class DataTable
 	public $MidQuery = null;
 	public $PostQuery = null;
 
-	public function __construct(\MiMFa\Library\DataBase $dataBase, $name, $prefix = null)
+	public function __construct(\MiMFa\Library\DataBase $dataBase, $name, $prefix = null, $nameConvertors = [])
 	{
 		$this->DataBase = $dataBase;
 		$this->MainName = $name;
 		$name = $prefix ? ($prefix . $name) : $name;
-		foreach (\_::$Back->DataTableNameConvertors as $key => $value)
+		foreach ($nameConvertors as $key => $value)
 			$name = preg_replace($key, $value, $name);
 		$this->Name = $name;
 	}

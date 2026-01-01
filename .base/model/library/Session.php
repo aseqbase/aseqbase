@@ -31,12 +31,12 @@ class Session
 	 */
 	public $EncryptValue = true;
 
-	public function __construct(DataTable $dataTable, Cryptograph $cryptograph)
+	public function __construct(DataTable $dataTable, Cryptograph $cryptograph, $name = null)
 	{
 		$this->DataTable = $dataTable;
 		$this->Cryptograph = $cryptograph;
 		if (!$this->isAlive())
-			$this->Start();
+			$this->Start($name);
 	}
 	/**
 	 * Stores datas in the session.
@@ -90,20 +90,20 @@ class Session
 		return session_id() != "";
 	}
 
-	public function Start()
+	public function Start($name = null)
 	{
 		$this->StartSecure();
 		if (is_null($this->GetId())) {
-			$this->SetId(getClientCode(\_::$Address->Name));
+			$this->SetId(getClientCode($name));
 			$this->Set("Ip", getClientIp());
 			return true;
 		}
 		return false;
 	}
-	public function Restart()
+	public function Restart($name = null)
 	{
 		$this->Stop();
-		return $this->Start();
+		return $this->Start($name);
 	}
 	public function Stop()
 	{

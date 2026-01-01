@@ -4,6 +4,25 @@ require_once "HashCrypt.php";
 class SpecialCrypt extends HashCrypt
 {
     public Cryptograph $Cryptograph;
+	/**
+	 * Salt and pepper for more strong encryptions, Shake them!
+	 * @var string
+	 * @category Security
+	 */
+	public $SampleChars = "4wCpq01Ikl2NVmSDKFPJ7fXYijTzAUbE5WxgRuvGQZ3yBo6ncdeLMrst_HhO89a";
+	/**
+	 * Salt and pepper picker
+	 * @var int
+	 * @category Security
+	 */
+	public $Sampler = 3;
+	/**
+	 * Insert indexer for salt and pepper
+	 * @var int
+	 * @category Security
+	 */
+	public $Indexer = 7;
+
 
     function __construct(){
         $this->Cryptograph = new Cryptograph();
@@ -73,20 +92,20 @@ class SpecialCrypt extends HashCrypt
 
     protected function AddSampleChars($text)
     {
-        $sampler = \_::$Back->EncryptSampler;
-        $samplechars = \_::$Back->EncryptSampleChars;
+        $sampler = $this->Sampler;
+        $samplechars = $this->SampleChars;
         $samplelen = strlen($samplechars);
-        $indexer = \_::$Back->EncryptIndexer;
-        for (; $indexer < strlen($text); $indexer+=\_::$Back->EncryptIndexer){
+        $indexer = $this->Indexer;
+        for (; $indexer < strlen($text); $indexer+=$this->Indexer){
             $text = putToString($text, substr($samplechars, $sampler%$samplelen,1), $indexer);
-            $sampler+=\_::$Back->EncryptSampler;
+            $sampler+=$this->Sampler;
         }
         return $text;
     }
     protected function RemoveSampleChars($text)
     {
-        $indexer = strlen($text) - strlen($text)%\_::$Back->EncryptIndexer;
-        for (; $indexer > 0 ; $indexer-=\_::$Back->EncryptIndexer)
+        $indexer = strlen($text) - strlen($text)%$this->Indexer;
+        for (; $indexer > 0 ; $indexer-=$this->Indexer)
             $text = popFromString($text, $indexer, 1);
         return $text;
     }

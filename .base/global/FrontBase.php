@@ -26,62 +26,62 @@ abstract class FrontBase
 	 */
 	public $Owner = null;
 	/**
-     * The website owner full name
-     * @var mixed
+	 * The website owner full name
+	 * @var mixed
 	 */
 	public $FullOwner = null;
 	/**
-     * Descriptions about the website owner
-     * @field strings
-     * @var mixed
+	 * Descriptions about the website owner
+	 * @field strings
+	 * @var mixed
 	 */
 	public $OwnerDescription = null;
 	/**
-     * A full version of descriptions about the website owner
-     * @field strings
-     * @var mixed
+	 * A full version of descriptions about the website owner
+	 * @field strings
+	 * @var mixed
 	 */
 	public $FullOwnerDescription = null;
 	/**
-     * The website owner and name
+	 * The website owner and name
 	 * @var mixed
 	 */
 	public $Name = null;
 	/**
-     * The website full owner and full name
+	 * The website full owner and full name
 	 * @var mixed
 	 */
 	public $FullName = null;
 	/**
-     * The short slogan of the website
+	 * The short slogan of the website
 	 * @var mixed
 	 */
 	public $Slogan = null;
 	/**
-     * The more detailed slogan of the website
-     * @field strings
-     * @var mixed
+	 * The more detailed slogan of the website
+	 * @field strings
+	 * @var mixed
 	 */
 	public $FullSlogan = null;
 	/**
-     * The short description of the website
-     * @var mixed
+	 * The short description of the website
+	 * @var mixed
 	 */
 	public $Description = null;
 	/**
-     * The more detailed description of the website
-     * @field strings
-     * @var mixed
+	 * The more detailed description of the website
+	 * @field strings
+	 * @var mixed
 	 */
 	public $FullDescription = null;
 
 	/**
 	 * Default mail sender
-	* @example: "do-not-reply@mimfa.net"
-	* @field array
-	* @var string|null|array<string>
-	* @category Security
-	*/
+	 * @example: "do-not-reply@mimfa.net"
+	 * @field array
+	 * @var string|null|array<string>
+	 * @category Security
+	 */
 	public $SenderEmail = null;
 	/**
 	 * Default mail reciever
@@ -93,36 +93,42 @@ abstract class FrontBase
 	public $ReceiverEmail = null;
 	/**
 	 * The main path
-     * @field path
+	 * @field path
 	 * @var mixed
 	 */
 	public $Path = null;
 	/**
-     * The website main logo path
-     * @field path
-     * @var mixed
+	 * The website main logo path
+	 * @field path
+	 * @var mixed
 	 */
 	public $LogoPath = "asset/logo/logo.png";
 	/**
-     * The website brand logo path
-     * @field path
+	 * The website brand logo path
+	 * @field path
 	 * @var mixed
 	 */
 	public $BrandLogoPath = "asset/logo/brand-logo.png";
 	/**
-     * The website full logo path
-     * @field path
+	 * The website full logo path
+	 * @field path
 	 * @var mixed
 	 */
 	public $FullLogoPath = "asset/logo/full-logo.png";
-	
+
 	/**
 	 * The main KeyWords of the website, these will effect on SEO and views
-     * @field array
-     * @var array
+	 * @field array
+	 * @var array
 	 */
 	public $KeyWords = [];
 
+	/**
+	 * The website Encoding
+	 * @var string
+	 * @category Language
+	 */
+	public $Encoding = "utf-8";
 	public $AnimationSpeed = 0;
 	public $DetectMode = false;
 	public $SwitchMode = null;
@@ -302,22 +308,22 @@ abstract class FrontBase
 	 * @category Language
 	 */
 	public $DefaultDirection = null;
-	
+
 	public function __construct()
 	{
 		Revise::Load($this);
 
-		$this->Translate = new \MiMFa\Library\Translate(new \MiMFa\Library\DataTable(\_::$Back->DataBase, $this->TranslateTableName, $this->TranslateTableNamePrefix));
-
-		$this->Translate->AutoUpdate = $this->AutoUpdateLanguage;
-		$this->Translate->AutoDetect = $this->AutoDetectLanguage;
-		$this->Translate->Initialize(
-			$this->DefaultLanguage,
-			$this->DefaultDirection,
-			\_::$Back->Encoding,
-			$this->AllowTranslate && $this->CacheLanguage
-		);
-
+		$this->Translate = new \MiMFa\Library\Translate(new \MiMFa\Library\DataTable(\_::$Back->DataBase, $this->TranslateTableName, $this->TranslateTableNamePrefix, \_::$Back->DataTableNameConvertors));
+		if ($this->AllowTranslate || $this->AutoUpdateLanguage) {
+			$this->Translate->AutoUpdate = $this->AutoUpdateLanguage;
+			$this->Translate->AutoDetect = $this->AutoDetectLanguage;
+			$this->Translate->Initialize(
+				$this->DefaultLanguage,
+				$this->DefaultDirection,
+				$this->Encoding,
+				$this->AllowTranslate && $this->CacheLanguage
+			);
+		}
 		$this->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
 		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
@@ -329,10 +335,10 @@ abstract class FrontBase
 			$this->CurrentMode = $this->GetMode($this->BackColor(0));
 		}
 
-		$this->SenderEmail = $this->SenderEmail?:createEmail("do-not-reply");
-		$this->ReceiverEmail = $this->ReceiverEmail?:createEmail("info");
+		$this->SenderEmail = $this->SenderEmail ?: createEmail("do-not-reply");
+		$this->ReceiverEmail = $this->ReceiverEmail ?: createEmail("info");
 	}
-	
+
 	public function __get($name)
 	{
 		return $this->Items[$this->PropertyName($name)] ?? null;
@@ -345,7 +351,7 @@ abstract class FrontBase
 	{
 		return preg_replace("/\W+/", "", strToProper($name));
 	}
-	
+
 	public function GetAccessCondition($tablePrefix = "")
 	{
 		if ($this->AllowTranslate)
@@ -571,7 +577,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => \_::$Front->Append("body", Struct::Script(\_::$Front->MakeDeleteScript($selector, false)))
+			fn() => $this->Append("body", Struct::Script($this->MakeDeleteScript($selector, false)))
 		);
 	}
 	/**
@@ -593,7 +599,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => \_::$Front->Append("body", Struct::Script(\_::$Front->MakeBeforeScript($selector, $handler, $args, false)))
+			fn() => $this->Append("body", Struct::Script($this->MakeBeforeScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -625,7 +631,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => \_::$Front->Append("body", Struct::Script(\_::$Front->MakeAfterScript($selector, $handler, $args, false)))
+			fn() => $this->Append("body", Struct::Script($this->MakeAfterScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -656,7 +662,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => \_::$Front->Append("body", Struct::Script(\_::$Front->MakeFillScript($selector, $handler, $args, false)))
+			fn() => $this->Append("body", Struct::Script($this->MakeFillScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -688,7 +694,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => \_::$Front->Append("body", Struct::Script(\_::$Front->MakePrependScript($selector, $handler, $args, false)))
+			fn() => $this->Append("body", Struct::Script($this->MakePrependScript($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -719,7 +725,7 @@ abstract class FrontBase
 		return beforeUsing(
 			\_::$Address->Directory,
 			"finalize",
-			fn() => \_::$Front->Append("body", Struct::Script(\_::$Front->MakeAppendScript($selector, $handler, $args, false)))
+			fn() => $this->Append("body", Struct::Script($this->MakeAppendScript($selector, $handler, $args, false)))
 		);
 	}
 	/**

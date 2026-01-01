@@ -20,6 +20,7 @@ class Translate
 	 */
 	public $AutoDetect = false;
 	public $Language = "en";
+	public $DefaultLanguage = "en";
 	public $Encoding = "utf-8";
 	/**
 	 * The language default direction (ltr|rtl)
@@ -58,7 +59,7 @@ class Translate
 	 */
 	public function Initialize(?string $defaultLang = null, ?string $defaultDirection = null, ?string $defaultEncoding = null, bool $caching = true)
 	{
-		$langs = $this->GetLanguages(defaultLang: $defaultLang);
+		$langs = $this->GetLanguages(defaultLang: $this->DefaultLanguage = $defaultLang);
 		setMemo("Lang", $this->Language = $this->GetLanguage($langs, $defaultLang));
 		setMemo("Direction", $this->Direction = $this->GetDirection($langs, $defaultDirection));
 		setMemo("Encoding", $this->Encoding = $this->GetEncoding($langs, $defaultEncoding));
@@ -313,7 +314,7 @@ class Translate
 			) ?? []) as $key => $value) {
 				$value = Convert::FromJson($value);
 				if ($key == "x")
-					$key = strtolower($defaultLang ?? \_::$Front->DefaultLanguage ?? $key);
+					$key = strtolower($defaultLang ?? $this->DefaultLanguage ?? $key);
 				$arr[$key] = array(
 					"Title" => getBetween($value, "Title", "Name") ?? strtoupper($key),
 					"Image" => getBetween($value, "Image", "Icon") ?? str_replace("{0}", $key, $this->ImagePathPattern ?: "https://unpkg.com/language-icons/icons/{0}.svg"),

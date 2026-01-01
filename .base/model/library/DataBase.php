@@ -371,7 +371,8 @@ class DataBase {
 	public function FetchValueExecute($query, $params = [])
 	{
 		$stmt = $this->Execute($query, $params);
-		return $stmt->fetchColumn();
+		$v = $stmt->fetchColumn();
+		return $v === false? null:$v;
 	}
 	public function TryFetchValue($query, $params = [], $defaultValue = null)
 	{
@@ -610,10 +611,12 @@ COMMIT;";
 				echo Struct::Error($ex->getMessage());
 				break;
 			case 2:
-				echo $query . Struct::Error($ex);
+				error($ex);
+				echo $query;
 				break;
 			case 3:
-				echo $query, Struct::Error($ex), "PARAMS{" . ($params ? count($params) : 0) . "}: ", Convert::ToString($params, arrayFormat: "{{0}}");
+				error($ex);
+				echo $query, "PARAMS{" . ($params ? count($params) : 0) . "}: ", Convert::ToString($params, arrayFormat: "{{0}}");
 				break;
 			default:
 				throw $ex;

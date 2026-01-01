@@ -152,7 +152,7 @@ class Local
 	 * @param int $random Pass 0 or false to get the name sequential from the number 1 to infinity
 	 * @return string
 	 */
-	public static function CreateAddress(string $fileName = "new", string $format = "", ?string $directory = null, bool $random = true): string
+	public static function CreateAddress(string $fileName = "new", string $format = "", string|null $directory = null, bool $random = true): string
 	{
 		$directory = $directory ?? \_::$Address->TempAddress;
 		do
@@ -162,13 +162,12 @@ class Local
 	}
 	/**
 	 * Generate a new Organized Directory
-	 * @param ?string $rootDirectory Root directory, leave null for a public directory
+	 * @param string|null $rootDirectory Root directory, leave null for a public directory
 	 * @return string
 	 */
-	public static function GenerateOrganizedDirectory(?string $rootDirectory = null): string
+	public static function GenerateOrganizedDirectory(string|null $rootDirectory = null): string
 	{
-		$rootDirectory = ($rootDirectory ?? \_::$Address->PublicAddress) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR;
-		return self::CreateDirectory($rootDirectory);
+		return self::CreateDirectory(($rootDirectory ?? \_::$Address->PublicAddress) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR);
 	}
 
 	/**
@@ -194,15 +193,23 @@ class Local
 	{
 		return is_dir($path);
 	}
-	public static function CreateDirectory($directory)
+	/**
+	 * To Create all Directories recursively
+	 * @param mixed $directory
+	 * @param int $permissions The permissions are 0777 by default, which means the widest possible access.
+	 * For more information on permissions, read the details on the chmod() page
+	 * @return string|null The last created directory
+	 */
+	public static function CreateDirectory($directory, $permissions = 0777)
 	{
 		$dir = "";
+		$directory = self::GetAddress($directory);
 		if (startsWith($directory, \_::$Address->Directory))
 			$directory = substr($directory, strlen($dir = \_::$Address->Directory));
 		$dirs = explode(DIRECTORY_SEPARATOR, trim($directory, DIRECTORY_SEPARATOR));
 		foreach ($dirs as $d)
-			if (!file_exists($dir .= $d)) {
-				mkdir($dir, 0777, true);
+			if (!is_dir($dir .= $d)) {
+				mkdir($dir, $permissions, true);
 				self::CreateFile(($dir .= DIRECTORY_SEPARATOR) . "index.html", "<!--Silence is the Best-->");
 			} else
 				$dir .= DIRECTORY_SEPARATOR;
@@ -239,10 +246,9 @@ class Local
 		if ($recursive)
 			foreach ($sourcePaths as $source) {
 				$bn = basename($source);
-				if (is_dir($source)) {
-					self::CreateDirectory($destDirectory . $bn);
-					$b = self::CopyDirectory($source, $destDirectory . $bn) && $b;
-				} else
+				if (is_dir($source))
+					$b = self::CopyDirectory($source, self::CreateDirectory($destDirectory . $bn)) && $b;
+				else
 					$b = self::CopyFile($source, $destDirectory . $bn) && $b;
 			}
 		return $b;
@@ -283,6 +289,7 @@ class Local
 	}
 	public static function CreateFile($path, $content = null)
 	{
+		//return file_put_contents($path, $content??"");
 		$res = fopen($path, "w");
 		if ($content)
 			fwrite($res, $content);
@@ -524,15 +531,15 @@ class Local
 		if (ob_get_level())
 			ob_clean();
 
-		// ini_set('mbstring.internal_encoding', \_::$Back->Encoding);//deprecated
+		// ini_set('mbstring.internal_encoding', \_::$Front->Encoding);//deprecated
 		// ini_set('mbstring.http_input', 'auto');//deprecated
-		// ini_set('mbstring.http_output', \_::$Back->Encoding);//deprecated
+		// ini_set('mbstring.http_output', \_::$Front->Encoding);//deprecated
 		ini_set('mbstring.detect_order', 'auto');
-		ini_set('default_charset', \_::$Back->Encoding);
+		ini_set('default_charset', \_::$Front->Encoding);
 
 		header("Content-Disposition: attachment; filename=\"$name\"");
 		header("Content-Type: application/force-download");
-		header("Content-Type: $type; charset=" . \_::$Back->Encoding);
+		header("Content-Type: $type; charset=" . \_::$Front->Encoding);
 		header('Expires: 0');
 		header('Cache-Control: must-revalidate');
 		header('Pragma: public');

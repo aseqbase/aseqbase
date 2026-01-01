@@ -18,6 +18,8 @@ class Contacts extends Module
 				margin:0px !important;
 			}
 			.{$this->Name} a.badge, a.badge:visited {
+				padding: calc(var(--size-0) / 5) var(--size-0);
+				border-radius: var(--radius-3);
 				background-color: var(--back-color-input);
 				color: var(--fore-color-input);
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
@@ -30,7 +32,7 @@ class Contacts extends Module
 			.{$this->Name} .map{
 				border: 10px solid var(--back-color-input);
 				box-shadow: var(--shadow-2);
-				border-radius: 5px;
+				border-radius: var(--radius-2);
 			}
 			.{$this->Name} .map>iframe{
 				display: inline-block;
@@ -52,12 +54,12 @@ class Contacts extends Module
 				yield '<ul class="contacts col-lg">';
 				for ($i = 0; $i < $count; $i++) {
 					$item = $this->Items[$i];
-					yield '<li class="d-flex justify-content-between align-items-center">';
+					yield '<li class="be flex justify align center middle">';
 					yield Struct::Image(" " . getBetween($item, 'Name', 'Title'), getBetween($item, 'Icon', 'Image'));
 					yield Struct::Link(
 						getBetween($item, 'Value', 'Title', 'Path', 'Name'),
 						get($item, 'Path'),
-						["target"=>"_blank", "class"=>"badge badge-pill"]);
+						["target"=>"_blank", "class"=>"badge"]);
 					yield '</li>';
 				}
 				yield '</ul>';

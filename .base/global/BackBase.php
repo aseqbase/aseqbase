@@ -17,12 +17,6 @@ class BackBase
 	public $Items = [];
 
 	/**
-	 * The website Encoding
-	 * @var string
-	 * @category Language
-	 */
-	public $Encoding = "utf-8";
-	/**
 	 * The Date Time Zone
 	 * @var string
 	 * @category Time
@@ -272,25 +266,6 @@ class BackBase
 	 * @category Security
 	 */
 	public $SoftKey = null;
-	/**
-	 * Salt and pepper for more strong encryptions, Shake them!
-	 * @var string
-	 * @category Security
-	 */
-	public $EncryptSampleChars = "4wCpq01Ikl2NVmSDKFPJ7fXYijTzAUbE5WxgRuvGQZ3yBo6ncdeLMrst_HhO89a";
-	/**
-	 * Salt and pepper picker
-	 * @var int
-	 * @category Security
-	 */
-	public $EncryptSampler = 3;
-	/**
-	 * Insert indexer for salt and pepper
-	 * @var int
-	 * @category Security
-	 */
-	public $EncryptIndexer = 7;
-
 
 	/**
 	 * A simple library to Session management

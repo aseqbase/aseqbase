@@ -61,22 +61,22 @@ Explore the ecosystem:
 	<h4>Web Server Options:</h4>
 		<table>
 			<tr><th>SERVER</th><th>VER</th></tr>
-			<tr><td>Apache</td><td>2.x</td></tr>
-			<tr><td>Nginx</td><td>1.x</td></tr>
-			<tr><td>Microsoft IIS</td><td>7</td></tr>
+			<tr><td>*Apache*</td><td>2.x</td></tr>
+			<tr><td>Nginx</td><td>1.x (Config needed)</td></tr>
+			<tr><td>Microsoft IIS (Config needed)</td><td>7</td></tr>
 		</table>
 	<h4>DataBase Options:</h4>
 		<table>
 			<tr><th>DATABASE</th><th>VER</th></tr>
-			<tr><td>MySQL</td><td>5.1 + (5.7 + preferred)</td></tr>
-			<tr><td>SQL Server</td><td>10.50.1600.1 +</td></tr>
-			<tr><td>PostgreSQL</td><td>8.3.18 +</td></tr>
+			<tr><td>*MySQL*</td><td>5.1 + (5.7 + preferred)</td></tr>
+			<tr><td>SQL Server</td><td>10.50.1600.1 + (Config needed)</td></tr>
+			<tr><td>PostgreSQL</td><td>8.3.18 + (Config needed)</td></tr>
 		</table>
 
 <h2>Managements</h2>
 <h4>Installing</h4>
 
-  1. Install all requirements mentioned above
+  1. Install all requirements mentioned above, and *composer*, to follow the steps
   2. Open a terminal in the destination directory (for example, `D:\MyWebsite\`) of the website, then follow one of these options:
 		* Prompts below to create a manageable framework (update, uninstall, etc.):
 			``` bash
@@ -84,7 +84,7 @@ Explore the ecosystem:
 			> cd vendor/aseqbase/aseqbase
 			vendor/aseqbase/aseqbase> composer dev:install
 			```
-		* Install the framework by:
+		* Or install the framework by:
 			``` bash
 			> composer create-project aseqbase/aseqbase ./
 			```

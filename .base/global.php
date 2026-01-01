@@ -42,20 +42,20 @@ run("global/RouterBase");
 run("Router");
 \_::$Router = new Router();
 
-run("global/Base");
-run("global/Types");
-
 run("global/BackBase");
 run("Back");
 \_::$Back = new Back();
+
+run("global/FrontBase");
+run("Front");
+\_::$Front = new Front();
 
 run("global/UserBase");
 run("User");
 \_::$User = new User();
 
-run("global/FrontBase");
-run("Front");
-\_::$Front = new Front();
+run("global/Base");
+run("global/Types");
 
 Local::CreateDirectory(\_::$Address->LogAddress);
 Local::CreateDirectory(\_::$Address->TempAddress);
@@ -754,11 +754,12 @@ function responseStatus($status = null)
 {
 	if ($status && !headers_sent()) {
 		header("HTTP/1.1 " . abs($status));
-		foreach (\_::$Front->Headers as $name => $value)
-			if (is_int($name))
-				header($value);
-			else
-				header("$name: $value");
+		if(!empty(\_::$Front->Headers))
+			foreach (\_::$Front->Headers as $name => $value)
+				if (is_int($name))
+					header($value);
+				else
+					header("$name: $value");
 		return true;
 	}
 	return false;
@@ -1617,7 +1618,8 @@ function table(string $name, bool $prefix = true, string|int $origin = 0, int $d
 	return new DataTable(
 		$source ?? \_::$Back->DataBase,
 		$name,
-		$prefix ? \_::$Back->DataBasePrefix : null
+		$prefix ? \_::$Back->DataBasePrefix : null,
+		\_::$Back->DataTableNameConvertors
 	);
 }
 

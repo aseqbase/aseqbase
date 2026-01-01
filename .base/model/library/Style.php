@@ -180,7 +180,7 @@ class Style extends \ArrayObject
 		if ($text === null)
 			return $text;
 		if ($keyWords === null)
-			$keyWords = \_::$Front->KeyWords;
+			$keyWords = [];
 		$dic = array();
 		$text = encode(
 			$text,
@@ -229,12 +229,12 @@ class Style extends \ArrayObject
 	}
 	/**
 	 * To toggle between dark and light filters
-	 * @param int|null $mode The mode value
+	 * @param int $mode The mode value for example \_::$Front->GetMode()
 	 * @return string
 	 */
-	public static function ToggleFilter(int|null $mode = null)
+	public static function ToggleFilter(int $mode)
 	{
-		return ($mode ?? \_::$Front->GetMode() ?? 0) < 0 ? self::LightFilter() : self::DarkFilter();
+		return ($mode ?? 0) < 0 ? self::LightFilter() : self::DarkFilter();
 	}
 	/**
 	 * To create a dark filter style

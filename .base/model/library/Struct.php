@@ -204,7 +204,7 @@ class Struct
                     );
                 } else {
                     foreach ($object as $key => $val)
-                        $texts[] = self::Item(self::Span($key . ": ") . self::Convert($val, ...$args));
+                        $texts[] = self::Item(self::Bold($key) . ": " . (is_string($val) ? (isUrl($val)?self::Span(strlen($val)<50?$val:Convert::ToExcerpt($val, 0,20).Convert::ToExcerpt($val, 0,20,"", true), $val):self::Span($val)) : self::Convert($val, ...$args)));
                     return self::Items(join(PHP_EOL, $texts));
                 }
             }
@@ -2389,6 +2389,8 @@ class Struct
                 $content = self::Label($value ?? $titleOrKey, $id, $attributes);
                 break;
             case 'json':
+                $content = $dataOptions($options, $attributes) . self::JsonInput($key, Convert::ToString($value), $attributes);
+                break;
             case 'object':
                 $content = $dataOptions($options, $attributes) . self::ObjectInput($key, Convert::ToString($value), $attributes);
                 break;
@@ -2765,6 +2767,9 @@ class Struct
      */
     public static function ContentInput($key, $value = null, ...$attributes)
     {
+        $si = self::PopAttribute($attributes, "SelectedIndex") ?? 0;
+        $style = self::PopAttribute($attributes, "Style");
+        $class = self::PopAttribute($attributes, "Class");
         $eid = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
         $sid = "_" . getId();
         return self::Tabs(
@@ -2774,11 +2779,11 @@ class Struct
                         "id" => $eid,
                         "name" => Convert::ToKey($key),
                         "placeholder" => Convert::ToTitle($key),
-                        "class" => "input contentinput",
+                        "class" => "contentinput",
                         "rows" => "20",
                         // "role"=>"textbox", "contenteditable"=>"true",
                         // "aria-label"=>"comment-box", "aria-multiline"=>"true", "aria-readonly"=>"false",
-                        "style" => "font-size: 75%; overflow:scroll; word-wrap: unset;"
+                        "style" => "width: 100%; font-size: 75%; overflow:scroll; word-wrap: unset; margin:0px;"
                     ], ...$attributes),
                 self::Action(
                     self::Icon("eye"),
@@ -2794,7 +2799,7 @@ class Struct
                 ) =>
                     self::Division(self::Center(self::Icon("spinner fa-spin")), ["id" => $sid])
             ],
-            ["class" => "contentinput"]
+            ["class" => "input contentinput $class", "style" => $style, "SelectedIndex" => $si]
         );
     }
     /**
@@ -2815,10 +2820,52 @@ class Struct
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
+    public static function JsonInput($key, $value = null, ...$attributes)
+    {
+        $jvalue = Convert::ToStatic($value);
+        $si = self::PopAttribute($attributes, "SelectedIndex") ?? 0;
+        $style = self::PopAttribute($attributes, "Style");
+        $class = self::PopAttribute($attributes, "Class");
+        $eid = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
+        $sid = "_" . getId();
+        return self::Tabs(
+            [
+                self::Action(self::Icon("edit")) =>
+                    self::Element(isJson($jvalue) ? json_encode(json_decode($jvalue), JSON_PRETTY_PRINT) : $jvalue, "textarea", [
+                        "id" => $eid,
+                        "name" => Convert::ToKey($key),
+                        "placeholder" => Convert::ToTitle($key),
+                        "class" => "jsoninput",
+                        "rows" => "10",
+                        "style" => "width: 100%; font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr; margin:0px;"
+                    ], ...$attributes),
+                self::Action(
+                    self::Icon("eye"),
+                    Internal::MakeScript(
+                        function ($nArgs) {
+                            return \MiMFa\Library\Struct::Convert(Convert::FromJson($nArgs));
+                        },
+                        ["\${_('#$eid').val()}"],
+                        "function(data,err){ return _('#$sid').html(data??err);}",
+                        direct: true,
+                        encrypt: false
+                    )
+                ) =>
+                    self::Division(self::Convert(isJson($value) ? Convert::FromJson($value) : $value), ["id" => $sid,"style"=>"padding-bottom:var(--size-2);"])
+            ],
+            ["class" => "input jsoninput $class", "style" => $style, "SelectedIndex" => $si]
+        );
+    }
+    /**
+     * The \<TEXTAREA\> HTML Tag
+     * @param mixed $key The tag name, id, or placeholder
+     * @param mixed $value The tag default value
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
     public static function ObjectInput($key, $value = null, ...$attributes)
     {
-        $value = Convert::ToStatic($value);
-        return self::TextsInput($key, isJson($value) ? json_encode(json_decode($value), JSON_PRETTY_PRINT) : $value, ["class" => "objectinput", "rows" => "10", "style" => "font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr;"], ...$attributes);
+        return self::JsonInput($key, $value, ["class" => "objectinput", "SelectedIndex" => $value ? 1 : 0], $attributes);
     }
     /**
      * A \<DIV\> HTML Tag contains an array of Inputs
@@ -3161,7 +3208,14 @@ class Struct
             }
         }
         return self::Calendar($value, [
-            "class" => "calendarinput",
+            "class" => "input calendarinput",
+            "style" => "
+                font-size: 80%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                align-content: center;
+                flex-wrap: wrap;",
             "for" => $id,
             "onchange" => "
                 dt = new Date(parseInt(this.getAttribute('value' )));
@@ -4127,7 +4181,7 @@ class Struct
     public static function Tabs($content = [], ...$attributes)
     {
         $content = Convert::ToSequence($content);
-        $active = pop($attributes, "SelectedIndex") ?? 0;
+        $active = self::PopAttribute($attributes, "SelectedIndex") ?? 0;
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         return self::Division(
             self::Division(

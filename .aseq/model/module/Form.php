@@ -173,6 +173,7 @@ class Form extends Module
 				.{$this->Name} form .fields {
 					display: table;
 					min-width: 100%;
+					gap: var(--size-0);
 				}
 				.{$this->Name} .header {
 					position: sticky;
@@ -220,15 +221,16 @@ class Form extends Module
 				
 				.{$this->Name} .group.buttons {
 					margin: 0px;
+					padding: var(--size-0) 0px;
 					gap: calc(var(--size-0) / 2) var(--size-0);
 					justify-content: end;
+					flex-direction: row-reverse;
 				}
 				.{$this->Name} .button {
 					width: fit-content;
 					max-width: 100%;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-
 			");
 			switch (strtolower($this->Template ?? "")) {
 				case 'v':
@@ -370,7 +372,7 @@ class Form extends Module
 				border-bottom: var(--border-1);
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
 				border-radius: var(--radius-0);
-				margin: calc(var(--size-0) / 2);
+				margin: calc(var(--size-0) / 2) 0px;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
@@ -547,6 +549,9 @@ class Form extends Module
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
+			.{$this->Name} .field .input::placeholder {
+				text-align:center;
+			}
 			.{$this->Name} .field:hover label.description{
 				padding-top: calc(var(--size-1) / 2);
 				padding-bottom: var(--size-1);
@@ -569,10 +574,12 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
-				padding-bottom: var(--size-1);
 				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
+			}
+			.{$this->Name} .field>*{
+				margin-bottom: var(--size-0);
 			}
 			.{$this->Name} .field label.title{
 				width: fit-content;
@@ -593,7 +600,6 @@ class Form extends Module
 				width: 100%;
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
-			    margin: calc(var(--size-0) / 2);
 				border: none;
 				border-color: transparent;
 				border-bottom: var(--border-1);
@@ -623,8 +629,7 @@ class Form extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover .input{
-				outline: none;
-				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
+				" . Style::DoProperty("outline-color", $this->FieldsBorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field:hover label.description{

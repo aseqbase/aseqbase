@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="<?php echo \_::$Front->Translate->Language; ?>" dir="<?php echo \_::$Front->Translate->Direction; ?>">
 	<head>
-		<meta charset="<?php echo \_::$Back->Encoding; ?>">
-		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo \_::$Back->Encoding; ?>" />
+		<meta charset="<?php echo \_::$Front->Encoding; ?>">
+		<meta http-equiv="Content-Type" content="text/html; charset=<?php echo \_::$Front->Encoding; ?>" />
 		<!--[if lt IE 9]>
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
 		<![endif]-->
