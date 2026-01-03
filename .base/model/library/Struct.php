@@ -3292,9 +3292,11 @@ class Struct
      */
     public static function MaskInput($key, $value = null, $mask = "\\w+", ...$attributes)
     {
+        $m = preg_replace("/(^\/)|((\/[iugmpxs]*)$)/i", "", $mask??"");
+        if($mask && $m == $mask) $mask = "/$mask/i";
         return self::Input($key, $value, "text", [
             "class" => "maskinput",
-            ...(isPattern($mask ?? "") ? ["onblur" => "this.value = ((this.value.match($mask)??[''])[0]??'')"] : ["pattern" => $mask, "title" => "Please complete field by correct format..."])
+            ...(isPattern($mask ?? "") ? ["onblur" => "this.value = ((this.value.match($mask)??[''])[0]??'')"] : ["pattern" => $m, "title" => "Please complete field by correct format..."])
         ], ...$attributes);
     }
     /**

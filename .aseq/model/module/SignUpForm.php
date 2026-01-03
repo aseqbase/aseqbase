@@ -38,32 +38,33 @@ class SignUpForm extends Form
 	 * @var array|null
 	 */
 	public $GroupOptions = null;/*[
-		"2", "Guest",
-		"3", "Registered",
-		"4", "Student"
-	];*/
+"2", "Guest",
+"3", "Registered",
+"4", "Student"
+];*/
 	/**
 	 * All available route options
 	 * @var array|null
 	 */
 	public $RouteOptions = null;/*[
-		"None" => "How you meet us?",
-		"Metting" => "Metting",
-		"Card" => "Visit Card",
-		"Advertisement" => "Advertisement",
-		"Search" => "Search Engine",
-		"Social" => "Social Media",
-		"Other" => "Other"
-	];*/
+"None" => "How you meet us?",
+"Metting" => "Metting",
+"Card" => "Visit Card",
+"Advertisement" => "Advertisement",
+"Search" => "Search Engine",
+"Social" => "Social Media",
+"Other" => "Other"
+];*/
 	public $SignaturePattern = "/[^\"'`]{5,100}/";
 	public $SignatureTip = "Your username should be unique and between 5-100 characters!";
-	public $PasswordPattern = "/[^\"'`]{8,100}/";
-	public $PasswordTip = "Your password should be strong and between 8-100 characters!";
+	public $PasswordPattern = "/[^\"'`]{6,100}/";
+	public $PasswordTip = "Your password should be strong and between 6-100 characters!";
 	public $SignInLabel = "Do you have an account?";
 	public $SignInPath = null;
 	public $Welcome = null;
 	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
 	public $ContactCountryCode = null;
+	public $ContactPattern = "/^\d{4,10}$/";
 	public $AllowInternalMethod = true;
 	public $AllowExternalMethod = false;
 	public $MultipleSignIn = false;
@@ -85,8 +86,10 @@ class SignUpForm extends Form
 		parent::__construct();
 		$this->Action = \_::$User->UpHandlerPath;
 		$this->InitialStatus = \_::$User->InitialStatus;
-		$this->Welcome = $this->InitialStatus?function(){ return part(\_::$User->DashboardHandlerPath, print:false); }:
-			function(){ return part(\_::$User->ActiveHandlerPath, print:false); };
+		$this->Welcome = $this->InitialStatus ? function () {
+			return part(\_::$User->DashboardHandlerPath, print: false); } :
+			function () {
+				return part(\_::$User->ActiveHandlerPath, print: false); };
 	}
 
 	public function GetStyle()
@@ -136,13 +139,13 @@ class SignUpForm extends Form
 	public function Get()
 	{
 		if (\_::$User->HasAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
-			return $this->GetHeader().Convert::ToString($this->Welcome);
+			return $this->GetHeader() . Convert::ToString($this->Welcome);
 		else
 			return parent::Get();
 	}
 	public function GetHeader()
 	{
-        if(\_::$User->HasAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))
+		if (\_::$User->HasAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))
 			return __(Convert::FromDynamicString($this->WelcomeFormat));
 		return parent::GetHeader();
 	}
@@ -151,28 +154,28 @@ class SignUpForm extends Form
 		if ($this->AllowInternalMethod) {
 			yield Struct::Rack(
 				(isValid($this->FirstNameLabel) ? Struct::LargeSlot(
-					Struct::Label($this->FirstNameLabel, "FirstName", ["class"=> "prepend"]) .
+					Struct::Label($this->FirstNameLabel, "FirstName", ["class" => "prepend"]) .
 					Struct::TextInput("FirstName", null, ["placeholder" => $this->FirstNamePlaceHolder]),
-					["class"=> "field"]
+					["class" => "field"]
 				) : "") .
 				(isValid($this->LastNameLabel) ? Struct::LargeSlot(
-					Struct::Label($this->LastNameLabel, "LastName", ["class"=> "prepend"]) .
+					Struct::Label($this->LastNameLabel, "LastName", ["class" => "prepend"]) .
 					Struct::TextInput("LastName", null, ["placeholder" => $this->LastNamePlaceHolder]),
-					["class"=> "field"]
+					["class" => "field"]
 				) : "")
 			);
 			if (isValid($this->EmailLabel))
 				yield Struct::Rack(
 					Struct::LargeSlot(
-						Struct::Label($this->EmailLabel, "Email", ["class"=> "prepend"]) .
+						Struct::Label($this->EmailLabel, "Email", ["class" => "prepend"]) .
 						Struct::EmailInput("Email", null, ["placeholder" => $this->EmailPlaceHolder]),
-						["class"=> "field"]
+						["class" => "field"]
 					)
 				);
 			if (isValid($this->ContactLabel))
 				yield Struct::Rack(
 					Struct::LargeSlot(
-						Struct::Label($this->ContactLabel, "Phone", ["class"=> "prepend"]) .
+						Struct::Label($this->ContactLabel, "Phone", ["class" => "prepend"]) .
 						(isValid($this->ContactCountryCode) ? Struct::SelectInput(
 							"CountryCode",
 							"+1",
@@ -181,45 +184,45 @@ class SignUpForm extends Form
 									yield "<option value='+$i'" . ($this->ContactCountryCode == $i ? " selected" : "") . ">+$i</option>"; }
 						)
 							: "") .
-						Struct::MaskInput("Phone", null,"^\d{10}$", ["placeholder" => $this->ContactPlaceHolder, "inputmode" => "numeric"]),
-						["class"=> "field"]
+						Struct::MaskInput("Phone", null, $this->ContactPattern, ["placeholder" => $this->ContactPlaceHolder, "inputmode" => "numeric"]),
+						["class" => "field"]
 					)
 				);
 			if (isValid($this->GroupLabel) && !isEmpty($this->GroupOptions))
 				yield Struct::Rack(
 					Struct::LargeSlot(
-						Struct::Label($this->GroupLabel, "Group", ["class"=> "prepend"]) .
+						Struct::Label($this->GroupLabel, "Group", ["class" => "prepend"]) .
 						Struct::SelectInput("Group", $this->GroupValue, $this->GroupPlaceHolder, $this->GroupOptions),
-						["class"=> "field"]
+						["class" => "field"]
 					)
 				);
 			if (isValid($this->RouteLabel) && !isEmpty($this->RouteOptions))
 				yield Struct::Rack(
 					Struct::LargeSlot(
-						Struct::Label($this->RouteLabel, "Route", ["class"=> "prepend"]) .
+						Struct::Label($this->RouteLabel, "Route", ["class" => "prepend"]) .
 						Struct::SelectInput("Route", $this->RoutePlaceHolder, $this->RouteOptions),
-						["class"=> "field"]
+						["class" => "field"]
 					)
 				);
 			if (isValid($this->SignatureLabel))
 				yield Struct::Rack(
 					Struct::LargeSlot(
-						Struct::Label($this->SignatureLabel, "Signature", ["class"=> "prepend"]) .
+						Struct::Label($this->SignatureLabel, "Signature", ["class" => "prepend"]) .
 						Struct::TextInput("Signature", $this->SignatureValue, ["placeholder" => $this->SignaturePlaceHolder, "autocomplete" => "UserName"]),
-						["class"=> "field"]
+						["class" => "field"]
 					)
 				);
 			if (isValid($this->PasswordLabel))
 				yield Struct::Rack(
 					Struct::LargeSlot(
-						Struct::Label($this->PasswordLabel, "Password" , ["class"=> "prepend"]) .
+						Struct::Label($this->PasswordLabel, "Password", ["class" => "prepend"]) .
 						Struct::SecretInput("Password", $this->PasswordValue, ["placeholder" => $this->PasswordPlaceHolder, "autocomplete" => "Password"]),
-						["class"=> "field"]
+						["class" => "field"]
 					) .
 					Struct::LargeSlot(
-						Struct::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class"=> "prepend"]) .
+						Struct::Label($this->PasswordConfirmationLabel, "PasswordConfirmation", ["class" => "prepend"]) .
 						Struct::SecretInput("PasswordConfirmation", $this->PasswordValue, ["placeholder" => $this->PasswordConfirmationPlaceHolder, "autocomplete" => "Password"]),
-						["class"=> "field"]
+						["class" => "field"]
 					)
 				);
 		}
@@ -230,9 +233,9 @@ class SignUpForm extends Form
 	public function GetFooter()
 	{
 		return parent::GetFooter() . Struct::LargeSlot(
-			Struct::Link($this->SignInLabel, $this->SignInPath??\_::$User->InHandlerPath)
+			Struct::Link($this->SignInLabel, $this->SignInPath ?? \_::$User->InHandlerPath)
 			,
-			["class"=> "col"]
+			["class" => "col"]
 		);
 	}
 
@@ -249,11 +252,11 @@ class SignUpForm extends Form
                 _('.{$this->Name} form').submit(function(e) {
 					let error = null;
 					if (!_('.{$this->Name} form [name=\"Password\"]')?.val().match({$this->PasswordPattern})) 
-						error = Struct.error(".Script::Convert(__($this->PasswordTip)).");
+						error = Struct.error(" . Script::Convert(__($this->PasswordTip)) . ");
 					else if (!_('.{$this->Name} form [name=\"Signature\"]')?.val().match({$this->SignaturePattern})) 
-						error = Struct.error(".Script::Convert(__($this->SignatureTip)).");
+						error = Struct.error(" . Script::Convert(__($this->SignatureTip)) . ");
 					else if (_('.{$this->Name} form [name=\"PasswordConfirmation\"]')?.val() != _('.{$this->Name} form [name=Password]')?.val()) 
-						error = Struct.error(".Script::Convert(__('New password and confirm password does not match!')).");
+						error = Struct.error(" . Script::Convert(__('New password and confirm password does not match!')) . ");
 					if(error) {
 						e.preventDefault();
 						_('.{$this->Name} form .result')?.remove();
@@ -271,17 +274,18 @@ class SignUpForm extends Form
 		if (!\_::$User->HasAccess(\_::$User->UserAccess))
 			try {
 				$received = receivePost();
-				if (isValid($received, "Email") || isValid($received, "Password" )) {
+				if (isValid($received, "Email") || isValid($received, "Password")) {
 					$signature = get($received, "Signature");
-					if (!preg_match($this->SignaturePattern,$signature))
+					if (!preg_match($this->SignaturePattern, $signature))
 						return $this->GetError($this->SignatureTip);
-					$password = get($received, "Password" );
-					if (!preg_match($this->PasswordPattern, $password)) 
+					$password = get($received, "Password");
+					if (!preg_match($this->PasswordPattern, $password))
 						return $this->GetError($this->PasswordTip);
 					$route = get($received, "Route");
 					$group = get($received, "Group");
-					if(!isset($this->GroupOptions[$group])) $group = $this->DefaultGroupId;
-				
+					if (!isset($this->GroupOptions[$group]))
+						$group = $this->DefaultGroupId;
+
 					if (
 						\_::$User->SignUp(
 							signature: $signature,
@@ -290,10 +294,10 @@ class SignUpForm extends Form
 							name: null,
 							firstName: get($received, "FirstName"),
 							lastName: get($received, "LastName"),
-							contact: (get($received, "CountryCode")??"0") . get($received, "Phone"),
+							contact: (get($received, "CountryCode") ?? "0") . get($received, "Phone"),
 							groupId: $group,
 							status: $this->InitialStatus,
-							metadata: $route?["Route"=>$route]:null
+							metadata: $route ? ["Route" => $route] : null
 						) !== false
 					) {
 						$this->Result = true;
