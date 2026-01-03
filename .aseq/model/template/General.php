@@ -139,6 +139,7 @@ class General extends Template
 					font-size: var(--size-0);
 					color: #888b;
 					font-weight: normal;
+					padding: calc(var(--size-0) / 2) 0px;
 				}
 				body>nav ul li:hover .description{
 					font-size: var(--size-0);

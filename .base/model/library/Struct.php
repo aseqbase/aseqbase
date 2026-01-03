@@ -2843,7 +2843,7 @@ class Struct
                     self::Icon("eye"),
                     Internal::MakeScript(
                         function ($nArgs) {
-                            return \MiMFa\Library\Struct::Convert(Convert::FromJson($nArgs));
+                            return \MiMFa\Library\Struct::Convert(\MiMFa\Library\Convert::FromJson($nArgs));
                         },
                         ["\${_('#$eid').val()}"],
                         "function(data,err){ return _('#$sid').html(data??err);}",
@@ -2954,14 +2954,14 @@ class Struct
             Struct::Icon($value ? "toggle-on" : "toggle-off", null, ["class" => "fa-2x $class"]),
             "icon_$class = document.querySelector('.icon.$class');
             cb_$class = document.querySelector('.checkinput.$class');
-                    if(cb_$class.checked || cb_$class.value){
-                        icon_$class.classList.remove('fa-toggle-on');
-                        icon_$class.classList.add('fa-toggle-off');
-                        cb_$class.value = 0;
-                    } else {
+                    if(cb_$class.value == '0'){
                         icon_$class.classList.remove('fa-toggle-off');
                         icon_$class.classList.add('fa-toggle-on');
                         cb_$class.value = 1;
+                    } else {
+                        icon_$class.classList.remove('fa-toggle-on');
+                        icon_$class.classList.add('fa-toggle-off');
+                        cb_$class.value = 0;
                     }",
             ["class" => "checkinput"],
             [

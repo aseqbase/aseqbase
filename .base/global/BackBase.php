@@ -353,6 +353,10 @@ class BackBase
 	{
 		\MiMFa\Library\Revise::Load($this);
 
+		ini_set('display_errors', $this->DisplayError);
+		ini_set('display_startup_errors', $this->DisplayStartupError);
+		error_reporting($this->ReportError);
+		
 		if (!$this->SoftKey)
 			$this->SoftKey = $this->SecretKey;
 		elseif (!$this->SecretKey)
@@ -373,10 +377,6 @@ class BackBase
 		$this->DataBase->AllowNormalization = $this->DataBaseValueNormalization;
 		$this->Cryptograph = new \MiMFa\Library\HashCrypt();
 		$this->Query = new \MiMFa\Library\Query($this->DataBase);
-
-		ini_set('display_errors', $this->DisplayError);
-		ini_set('display_startup_errors', $this->DisplayStartupError);
-		error_reporting($this->ReportError);
 	}
 
 	public function __get($name)

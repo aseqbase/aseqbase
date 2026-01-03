@@ -6,4 +6,3 @@ if(
 
 require_once(__DIR__.DIRECTORY_SEPARATOR."initialize.php");
 if(auth(\_::$User->AdminAccess)) run(normalizePath(\_::$User->Direction));
-?>

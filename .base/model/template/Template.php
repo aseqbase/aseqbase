@@ -279,15 +279,17 @@ class Template extends \Base
             background-color: var(--color-yellow);
             color: var(--color-white);
         }
-        .input{
-            cursor: text;
+        .input, .input *{
             font-family: var(--font-input), var(--font-special-input), var(--font);
+        }
+        :is(input,.input):is([type='radiobutton'], [type='checkbox']){
+            width: fit-content;
+        }
+        .input:not([type='radiobutton'], [type='checkbox']){
+            cursor: text;
             background-color: var(--back-color-input);
             color: var(--fore-color-input);
             border: var(--border-1) var(--fore-color-input);
-        }
-        .input *{
-            font-family: var(--font-input), var(--font-special-input), var(--font);
         }
         .input[type=file]:not(:disabled,[readonly]) {
             cursor: pointer;

@@ -143,4 +143,3 @@ class AseqFront extends FrontBase
 		$this->FullLogoPath = asset("logo/full-logo-".$this->Translate->Language.".svg")??$this->FullLogoPath;
 	}
 }
-?>

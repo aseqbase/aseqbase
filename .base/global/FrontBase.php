@@ -327,7 +327,7 @@ abstract class FrontBase
 		$this->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
 		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
-
+		
 		if ($this->SwitchMode) {
 			$middle = $this->ForeColorPalette;
 			$this->ForeColorPalette = $this->BackColorPalette;

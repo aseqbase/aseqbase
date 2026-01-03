@@ -2,4 +2,3 @@
 class AseqRouter extends RouterBase
 {
 }
-?>

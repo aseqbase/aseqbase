@@ -38,6 +38,8 @@ library("Style");
 library("Script");
 library("Internal");
 
+getReceived();//To set the __METHOD and cache received data
+
 run("global/RouterBase");
 run("Router");
 \_::$Router = new Router();
@@ -1278,7 +1280,10 @@ function open(string|null $path = null, $extension = false, string|int $origin =
 function save($data, string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $flags = 0, &$address = null)
 {
 	$address = address($path, $extension, $origin, $depth);
-	return file_put_contents($address = $address ?: ($path ? Local::GetAbsoluteAddress(DIRECTORY_SEPARATOR . $path) : Local::CreateAddress()), Convert::ToString($data), flags: $flags);
+	return file_put_contents($address = $address ?: ($path ? Local::GetAbsoluteAddress(
+		preg_match("/^[a-z]+\:/i", $path)?$path : 
+		(preg_match("/^[\/\\\]/i", $path)?array_key_first(\_::$Sequence) . ltrim($path, "\\\/") : __DIR__.DIRECTORY_SEPARATOR.$path)
+		) : Local::CreateAddress()), Convert::ToString($data), flags: $flags);
 }
 
 /**

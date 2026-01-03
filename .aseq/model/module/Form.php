@@ -175,6 +175,10 @@ class Form extends Module
 					min-width: 100%;
 					gap: var(--size-0);
 				}
+				.{$this->Name} :is(input,.input):is([type='radiobutton'], [type='checkbox']){
+					margin-inline-start: calc(var(--size-0) / 2);
+					margin-inline-end: var(--size-0);
+				}
 				.{$this->Name} .header {
 					position: sticky;
 					top: var(--size-max);
@@ -292,18 +296,20 @@ class Form extends Module
 					border-bottom: 1px solid var(--fore-color-special-input);
 				}
 				.{$this->Name} .field .input {
-					" . Style::DoProperty("color", $this->FieldsForeColor) . "
-					" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 					font-size: 125%;
 					display: inline-flex;
+					border: none;
+					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+				}
+				.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+					" . Style::DoProperty("color", $this->FieldsForeColor) . "
+					" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 					width: 100%;
 					max-width: 85vw;
 					max-width: -webkit-fill-available;
-					border: none;
 					border-bottom: var(--border-1);
 					border-color: transparent;
 					border-radius: var(--radius-0);
-					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} .field .input[type='color'] {
 					min-width: auto;
@@ -361,10 +367,13 @@ class Form extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
-				" . Style::DoProperty("color", $this->FieldsForeColor) . "
-				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				display: table-cell;
 				font-size: 125%;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+				" . Style::DoProperty("color", $this->FieldsForeColor) . "
+				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
@@ -373,7 +382,6 @@ class Form extends Module
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
 				border-radius: var(--radius-0);
 				margin: calc(var(--size-0) / 2) 0px;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -430,21 +438,23 @@ class Form extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
-				" . Style::DoProperty("color", $this->FieldsForeColor) . "
-				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				display: table-cell;
 				font-size: 125%;
+				height: 100%;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+				" . Style::DoProperty("color", $this->FieldsForeColor) . "
+				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
-				height: 100%;
 				border-radius: 0px calc(var(--size-0) / 2) calc(var(--size-0) / 2) 0px;
 				outline: none;
 				border: none;
 				border-bottom: var(--border-1);
 				border-color: transparent;
 				border-radius: var(--radius-0);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -511,9 +521,12 @@ class Form extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
+				font-size: 100%;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
-				font-size: 100%;
 				width: 100%;
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
@@ -521,7 +534,6 @@ class Form extends Module
 				border: var(--border-1);
 				border-color: transparent;
 				border-radius: var(--radius-0);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
@@ -593,10 +605,13 @@ class Form extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
-				" . Style::DoProperty("color", $this->FieldsForeColor) . "
-				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				display: table-cell;
 				font-size: 125%;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+				" . Style::DoProperty("color", $this->FieldsForeColor) . "
+				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
 				max-width: 85vw;
@@ -604,7 +619,6 @@ class Form extends Module
 				border-color: transparent;
 				border-bottom: var(--border-1);
 				border-radius: var(--radius-0);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;

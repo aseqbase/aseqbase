@@ -68,4 +68,3 @@ class AseqBack extends BackBase
 	public $EncryptSampler = 3;
 	public $EncryptIndexer = 7;
 }
-?>

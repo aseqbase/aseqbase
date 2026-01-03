@@ -97,7 +97,7 @@ class RouterBase extends ArrayObject
     public $Point = 0;
     public $Pattern = null;
     public $Taken = null;
-    
+
     /**
      * The current handled request part of the url
      * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
@@ -118,7 +118,8 @@ class RouterBase extends ArrayObject
         $handler = null,
         $method = null
     ) {
-        $this->Initial($pattern, $method)->Route($handler);
+        $this->Initial($pattern, $method);
+        if ($pattern || $handler) $this->Route($handler);
     }
 
     public function Handlers()
@@ -180,8 +181,7 @@ class RouterBase extends ArrayObject
 
         $this->DefaultMethodIndex = getMethodIndex();
         $this->DefaultMethodName = getMethodName();
-        $this->Set($method)->On($pattern);
-        return $this;
+        return $this->On($pattern)->Set($method);
     }
 
     /**

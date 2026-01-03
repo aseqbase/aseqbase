@@ -1,1 +1,1 @@
-﻿<?php echo \_::$Front->GetFinal(); ?></body></html>
+<?php echo \_::$Front->GetFinal(); ?></body></html>

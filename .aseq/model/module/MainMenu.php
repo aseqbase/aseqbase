@@ -14,8 +14,8 @@ class MainMenu extends Module
 	public $AllowItems = true;
 	public $AllowOthers = true;
 	public $AllowFixed = false;
-	public $AllowItemsLabel = true;
-	public $AllowSubItemsLabel = true;
+	public $AllowItemsTitle = true;
+	public $AllowSubItemsTitle = true;
 	public $AllowItemsDescription = false;
 	public $AllowSubItemsDescription = true;
 	public $AllowItemsImage = false;
@@ -281,18 +281,18 @@ class MainMenu extends Module
 		$count = count(getValid($item, "Items", []));
 		return Struct::Item(
 			($ind <=2? Struct::Button(
-				($this->AllowItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
-				($this->AllowItemsLabel?__(getBetween($item, "Title", "Name")):"").
+				($this->AllowItemsImage&& ($t = getBetween($item, "Icon", "Image"))?Struct::Image(null, $t):"").
+				($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name"))?__($t):"").
 				($count > 0?$this->ToggleLabel:"").
-				($this->AllowItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
+				($this->AllowItemsDescription && ($t = get($item, "Description"))?Struct::Division(__($t), ["class"=>"description"]):""),
 				$path,
 				get($item, "Attributes")
 				) :
 				Struct::Button(
-					($this->AllowSubItemsImage?Struct::Image(null, getBetween($item, "Image", "Icon")):"").
-					($this->AllowSubItemsLabel?__(getBetween($item, "Title", "Name")):"").
+					($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image"))?Struct::Image(null, $t):"").
+					($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name"))?__($t):"").
 					($count > 0?$this->ToggleLabel:"").
-					($this->AllowSubItemsDescription?Struct::Division(__(get($item, "Description")), ["class"=>"description"]):""),
+					($this->AllowSubItemsDescription && ($t = get($item, "Description"))?Struct::Division(__($t), ["class"=>"description"]):""),
 					$path,
 					get($item, "Attributes")
 				)
