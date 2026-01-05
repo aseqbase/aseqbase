@@ -59,8 +59,8 @@ run("User");
 run("global/Base");
 run("global/Types");
 
-Local::CreateDirectory(\_::$Address->LogAddress);
-Local::CreateDirectory(\_::$Address->TempAddress);
+Local::CreateDirectory(\_::$Address->LogDirectory);
+Local::CreateDirectory(\_::$Address->TempDirectory);
 register_shutdown_function('cleanupTemp', false);
 
 component("Component");
@@ -345,7 +345,7 @@ function receive(array|string|null $method = null)
 
 						$method = is_array($method) ? $method : [$method];
 					}
-					$_REQUEST = $method;
+					$_POST = $method;
 					if (isset($method["__METHOD"]))
 						unset($method["__METHOD"]);
 				} else
@@ -692,7 +692,7 @@ function report($message = null, $type = "log", $secret = null)
 				break;
 		}
 	if ($log)
-		file_put_contents(address(\_::$Address->LogAddress . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
+		file_put_contents(address(\_::$Address->LogDirectory . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
 	if (!$secret)
 		return script(Script::Log($message, $type));
 }
@@ -2389,7 +2389,7 @@ function getMethodName(string|int|null $method = null)
 		case "EXTERNAL":
 			return "EXTERNAL";
 		default:
-			return strtoupper($method ?: (($_REQUEST["__METHOD"] ?? null) ?: ((((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? null)) ?: "OTHER")));
+			return strtoupper($method ?: (($_POST["__METHOD"] ?? null) ?: ((((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? null)) ?: "OTHER")));
 	}
 }
 /**
@@ -2410,7 +2410,7 @@ function getMethodName(string|int|null $method = null)
  */
 function getMethodIndex(string|int|null $method = null)
 {
-	switch (strtoupper($method ?: (($_REQUEST["__METHOD"] ?? null) ?: ((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? "")))) {
+	switch (strtoupper($method ?: (($_POST["__METHOD"] ?? null) ?: ((($_SERVER['HTTP_X_CUSTOM_METHOD'] ?? null) ?: ($_SERVER['HTTP_X_CUSTOM_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? null)) ?: ($_SERVER['REQUEST_METHOD'] ?? "")))) {
 		case 1:
 		case "PUBLIC":
 		case "GET":
@@ -2489,7 +2489,7 @@ function cleanupTemp($full = true)
 {
 	$i = 0;
 	if ($full)
-		$i += cleanup(\_::$Address->TempAddress);
+		$i += cleanup(\_::$Address->TempDirectory);
 	else
 		foreach ($_FILES as $file)
 			if (isset($file["tmp_name"]) && is_file($file["tmp_name"]) && ++$i)
@@ -2512,8 +2512,8 @@ function cleanup($directory = null)
 				rmdir($file);
 			}
 	} else {
-		$i += cleanup(\_::$Address->TempAddress);
-		$i += cleanup(\_::$Address->LogAddress);
+		$i += cleanup(\_::$Address->TempDirectory);
+		$i += cleanup(\_::$Address->LogDirectory);
 		clearSecrets();
 		\_::$User->Session->Clear();
 	}

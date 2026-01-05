@@ -181,7 +181,6 @@ class Form extends Module
 				}
 				.{$this->Name} .header {
 					position: sticky;
-					top: var(--size-max);
 					bottom: var(--size-max);
 					padding: var(--size-1);
 					text-align: center;

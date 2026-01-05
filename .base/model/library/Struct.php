@@ -2951,7 +2951,7 @@ class Struct
     {
         $class = "_" . getId();
         return self::Action(
-            Struct::Icon($value ? "toggle-on" : "toggle-off", null, ["class" => "fa-2x $class"]),
+            Struct::Icon($value ? "toggle-on" : "toggle-off", null, ["class" => $class]),
             "icon_$class = document.querySelector('.icon.$class');
             cb_$class = document.querySelector('.checkinput.$class');
                     if(cb_$class.value == '0'){

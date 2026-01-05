@@ -157,7 +157,7 @@ class MainMenu extends Module
 				align-items: center;
 				justify-content: space-around;
 				flex-wrap: nowrap;
-				padding: calc(var(--size-0) / 6) var(--size-0);
+				padding: calc(var(--size-0) / 3) var(--size-0);
 				gap: calc(var(--size-0) * 0.5);
 				" . ((\_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
 			}

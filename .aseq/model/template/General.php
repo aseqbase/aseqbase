@@ -139,7 +139,7 @@ class General extends Template
 					font-size: var(--size-0);
 					color: #888b;
 					font-weight: normal;
-					padding: calc(var(--size-0) / 2) 0px;
+					line-height: 2em;
 				}
 				body>nav ul li:hover .description{
 					font-size: var(--size-0);
@@ -166,7 +166,7 @@ class General extends Template
 					box-shadow: var(--shadow-2);
 				}
 					
-				body>nav>ul>li:not(.sub-items)>button{
+				body>nav>.inside>ul>li:not(.sub-items)>.button{
 					text-transform: uppercase;
 				}
 					
@@ -277,6 +277,7 @@ class General extends Template
 					border: none;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
+				
 				body>.prepage {
 					padding-top: calc(1.5 * var(--size-max));
 				}

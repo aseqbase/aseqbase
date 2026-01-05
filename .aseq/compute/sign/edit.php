@@ -13,7 +13,7 @@ if ($imgObj = receiveFile("Image")) {
         if (isValid($img) && !Local::DeleteFile($img))
             error("Could not delete your previous picture!");
         else {
-            $img = Local::StoreImage($imgObj, \_::$Address->PublicAddress . "image".DIRECTORY_SEPARATOR."profile".DIRECTORY_SEPARATOR);
+            $img = Local::StoreImage($imgObj, \_::$Address->PublicDirectory . "image".DIRECTORY_SEPARATOR."profile".DIRECTORY_SEPARATOR);
             if (!is_null($img)) {
                 $received["Image"] = Local::GetUrl($img);
                 $imgchange = true;

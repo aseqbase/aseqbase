@@ -107,7 +107,7 @@ class Local
 					"/[\/\\\]+/",
 					DIRECTORY_SEPARATOR,
 					preg_replace(
-						"/(^\w+:?\/*[^\/\\\:]+\/?)|([\?#@].*$)/",
+						"/(^\w+:\/\/[^\/\\]+\/?)|([\?#@].*$)/",
 						"",
 						$path
 					)
@@ -154,10 +154,10 @@ class Local
 	 */
 	public static function CreateAddress(string $fileName = "new", string $format = "", string|null $directory = null, bool $random = true): string
 	{
-		$directory = $directory ?? \_::$Address->TempAddress;
+		$directory = $directory ?: \_::$Address->TempDirectory;
 		do
 			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . "-" . getId($random) . $format;
-		while (file_exists(filename: $path));
+		while (file_exists($path));
 		return $path;
 	}
 	/**
@@ -167,7 +167,7 @@ class Local
 	 */
 	public static function GenerateOrganizedDirectory(string|null $rootDirectory = null): string
 	{
-		return self::CreateDirectory(($rootDirectory ?? \_::$Address->PublicAddress) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR);
+		return self::CreateDirectory(($rootDirectory ?: \_::$Address->PublicDirectory) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR);
 	}
 
 	/**
@@ -396,15 +396,13 @@ class Local
 			return null;
 		if (!get($content, "name"))
 			return null;//throw new \SilentException("There is not any file!");
-		$directory = self::GenerateOrganizedDirectory($directory ?? \_::$Address->PublicAddress);
 
 		$fileType = strtolower(pathinfo($content["name"], PATHINFO_EXTENSION));
-		$dir = self::CreateDirectory($directory);
 		$fileName = strtolower(pathinfo($content["name"], PATHINFO_FILENAME)) . "_";
 
 		// Allow certain file formats
 		$allow = true;
-		$dfileType = ".".$fileType;
+		$dfileType = "." . $fileType;
 		foreach (($extensions ?? \_::$Back->GetAcceptableFormats()) as $ext)
 			if ($allow = ($fileType === $ext || $dfileType === $ext))
 				break;
@@ -426,13 +424,18 @@ class Local
 				self::DeleteFile($sourceFile);
 			throw new \SilentException("The 'file size' is 'very big'!");
 		}
-		if (!$dir) {
-			$dir = \_::$Address->TempAddress;
+
+		if ($directory === false) {
+			$directory = \_::$Address->TempDirectory;
 			$t = preg_find("/^[\w-]+\b/", $content["type"] ?? "");
 			if ($t)
-				$dir .= $t . DIRECTORY_SEPARATOR;
-		}
-		$destFile = self::CreateAddress($fileName, ".$fileType", $dir);
+				$directory .= $t . DIRECTORY_SEPARATOR;
+		} elseif (!$directory)
+			$directory = self::GenerateOrganizedDirectory();
+		else
+			$directory = self::CreateDirectory($directory);
+
+		$destFile = self::CreateAddress($fileName, ".$fileType", $directory);
 		if (is_uploaded_file($sourceFile) && move_uploaded_file($sourceFile, $destFile))
 			return $destFile;
 		if (rename($sourceFile, $destFile))
