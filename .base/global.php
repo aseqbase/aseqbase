@@ -30,6 +30,7 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . "_.php");
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "Address.php");
 \_::$Address = new Address($GLOBALS["ASEQBASE"], $GLOBALS["DIR"]);
+$GLOBALS["ROOT"] = preg_replace("/[\/\\\][^\/\\\]+$/", "",__DIR__). DIRECTORY_SEPARATOR;
 
 library("Local");
 library("Convert");
@@ -59,8 +60,8 @@ run("User");
 run("global/Base");
 run("global/Types");
 
-Local::CreateDirectory(\_::$Address->LogDirectory);
-Local::CreateDirectory(\_::$Address->TempDirectory);
+Local::CreateDirectory(\_::$Address->LogAddress);
+Local::CreateDirectory(\_::$Address->TempAddress);
 register_shutdown_function('cleanupTemp', false);
 
 component("Component");
@@ -692,7 +693,7 @@ function report($message = null, $type = "log", $secret = null)
 				break;
 		}
 	if ($log)
-		file_put_contents(address(\_::$Address->LogDirectory . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
+		file_put_contents(address(\_::$Address->LogAddress . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
 	if (!$secret)
 		return script(Script::Log($message, $type));
 }
@@ -1282,7 +1283,7 @@ function save($data, string|null $path = null, $extension = false, string|int $o
 	$address = address($path, $extension, $origin, $depth);
 	return file_put_contents($address = $address ?: ($path ? Local::GetAbsoluteAddress(
 		preg_match("/^[a-z]+\:/i", $path)?$path : 
-		(preg_match("/^[\/\\\]/i", $path)?array_key_first(\_::$Sequence) . ltrim($path, "\\\/") : __DIR__.DIRECTORY_SEPARATOR.$path)
+		(preg_match("/^[\/\\\]/i", $path)? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : __DIR__.DIRECTORY_SEPARATOR.$path)
 		) : Local::CreateAddress()), Convert::ToString($data), flags: $flags);
 }
 
@@ -2489,7 +2490,7 @@ function cleanupTemp($full = true)
 {
 	$i = 0;
 	if ($full)
-		$i += cleanup(\_::$Address->TempDirectory);
+		$i += cleanup(\_::$Address->TempAddress);
 	else
 		foreach ($_FILES as $file)
 			if (isset($file["tmp_name"]) && is_file($file["tmp_name"]) && ++$i)
@@ -2512,8 +2513,8 @@ function cleanup($directory = null)
 				rmdir($file);
 			}
 	} else {
-		$i += cleanup(\_::$Address->TempDirectory);
-		$i += cleanup(\_::$Address->LogDirectory);
+		$i += cleanup(\_::$Address->TempAddress);
+		$i += cleanup(\_::$Address->LogAddress);
 		clearSecrets();
 		\_::$User->Session->Clear();
 	}
@@ -2813,7 +2814,7 @@ function isJson($json)
 		return null;
 	if (!is_string($json))
 		return false;
-	return preg_match("/^\s*[\{|\[][\s\S]*[\}\]]\s*$/", $json) > 0;
+	return preg_match("/^\s*[\{\[][\s\S]*[\}\]]\s*$/", $json) > 0;
 }
 /**
  * Check if the string is a relative or absolute URL

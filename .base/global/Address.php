@@ -36,6 +36,29 @@ class Address extends ArrayObject
     public string $PrivateDirectory;
     public string $PublicDirectory;
 
+    public string $Address;
+    public string $ModelAddress;
+    public string $ViewAddress;
+    public string $ComputeAddress;
+    public string $RouteAddress;
+    public string $AssetAddress;
+    public string $StorageAddress;
+    public string $LibraryAddress;
+    public string $ComponentAddress;
+    public string $TemplateAddress;
+    public string $ModuleAddress;
+    public string $PageAddress;
+    public string $RegionAddress;
+    public string $PartAddress;
+    public string $StructAddress;
+    public string $ScriptAddress;
+    public string $StyleAddress;
+    public string $PackageAddress;
+    public string $TempAddress;
+    public string $LogAddress;
+    public string $PrivateAddress;
+    public string $PublicAddress;
+
     /**
      * The root path
      * @example: "/"
@@ -120,6 +143,31 @@ class Address extends ArrayObject
         $this->LogDirectory = $this->Directory . "log" . DIRECTORY_SEPARATOR;
         $this->PrivateDirectory = $this->Directory . "private" . DIRECTORY_SEPARATOR;
         $this->PublicDirectory = $this->Directory . "public" . DIRECTORY_SEPARATOR;
+
+        $directory = rtrim(str_replace(["\\", "/"], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR], $directory), DIRECTORY_SEPARATOR);
+
+        $this->Address = $directory . DIRECTORY_SEPARATOR;
+        $this->ModelAddress = $directory . $this->ModelDirectory;
+        $this->ViewAddress = $directory . $this->ViewDirectory;
+        $this->ComputeAddress = $directory . $this->ComputeDirectory;
+        $this->RouteAddress = $directory . $this->RouteDirectory;
+        $this->AssetAddress = $directory . $this->AssetDirectory;
+        $this->StorageAddress = $directory . $this->StorageDirectory;
+        $this->TempAddress = $directory . $this->TempDirectory;
+        $this->LibraryAddress = $directory . $this->LibraryDirectory;
+        $this->ComponentAddress = $directory . $this->ComponentDirectory;
+        $this->TemplateAddress = $directory . $this->TemplateDirectory;
+        $this->ModuleAddress = $directory . $this->ModuleDirectory;
+        $this->PageAddress = $directory . $this->PageDirectory;
+        $this->RegionAddress = $directory . $this->RegionDirectory;
+        $this->PartAddress = $directory . $this->PartDirectory;
+        $this->StructAddress = $directory . $this->StructDirectory;
+        $this->ScriptAddress = $directory . $this->ScriptDirectory;
+        $this->StyleAddress = $directory . $this->StyleDirectory;
+        $this->PackageAddress = $directory . $this->PackageDirectory;
+        $this->LogAddress = $directory . $this->LogDirectory;
+        $this->PrivateAddress = $directory . $this->PrivateDirectory;
+        $this->PublicAddress = $directory . $this->PublicDirectory;
 
         $this->Root = "/";
         $this->AssetRoot = $this->Root . "asset/";

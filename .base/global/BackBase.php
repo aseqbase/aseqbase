@@ -188,7 +188,7 @@ class BackBase
 	 * @var array<string>
 	 * @category Security
 	 */
-	public $AcceptableImageFormats = [".png", ".jpg", ".jpeg", ".jiff", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg"];
+	public $AcceptableImageFormats = [".png", ".jpg", ".jpeg", ".webp", ".jiff", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg"];
 	/**
 	 * Acceptable audio formats
 	 * @field array

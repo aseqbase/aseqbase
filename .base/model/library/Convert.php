@@ -331,18 +331,16 @@ class Convert
     {
         if (is_null($obj))
             return "null";
-        return json_encode($obj, flags: JSON_OBJECT_AS_ARRAY);
+        return json_encode($obj, flags: JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION);
     }
     public static function FromJson($json): null|array
     {
-        if (isEmpty($json) || !isStatic($json) || trim(strtolower($json)) === "null")
-            return null;
         if (!isStatic($json))
             return $json;
-        if (trim(strtolower($json)) === "null")
+        if (isEmpty($json) || (trim(strtolower($json)) === "null"))
             return null;
         if (isJson($json))
-            return json_decode($json, flags: JSON_OBJECT_AS_ARRAY);
+            return json_decode($json, flags: JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION);
         return [$json];
     }
 
@@ -413,7 +411,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'temp_name' => Local::CreateAddress($filename, ".tmp", \_::$Address->TempAddress),
+                                'temp_name' => Local::CreateAddress($filename, ".tmp", \_::$Address->TempDirectory),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );

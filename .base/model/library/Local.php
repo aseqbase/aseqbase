@@ -102,17 +102,14 @@ class Local
 		if (empty($path))
 			return null;
 		return
-			ltrim(
+			preg_replace(
+				"/[\/\\\]+/",
+				DIRECTORY_SEPARATOR,
 				preg_replace(
-					"/[\/\\\]+/",
-					DIRECTORY_SEPARATOR,
-					preg_replace(
-						"/(^\w+:\/\/[^\/\\]+\/?)|([\?#@].*$)/",
-						"",
-						$path
-					)
-				),
-				DIRECTORY_SEPARATOR
+					"/(^\w+:\/\/[^\/\\]+\/?)|([\?#@].*$)/",
+					"",
+					$path
+				)
 			);
 	}
 	/**
@@ -154,7 +151,7 @@ class Local
 	 */
 	public static function CreateAddress(string $fileName = "new", string $format = "", string|null $directory = null, bool $random = true): string
 	{
-		$directory = $directory ?: \_::$Address->TempDirectory;
+		$directory = $directory ?: \_::$Address->TempAddress;
 		do
 			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . "-" . getId($random) . $format;
 		while (file_exists($path));
@@ -167,7 +164,7 @@ class Local
 	 */
 	public static function GenerateOrganizedDirectory(string|null $rootDirectory = null): string
 	{
-		return self::CreateDirectory(($rootDirectory ?: \_::$Address->PublicDirectory) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR);
+		return self::CreateDirectory(($rootDirectory ?: \_::$Address->PublicAddress) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR);
 	}
 
 	/**
@@ -204,8 +201,10 @@ class Local
 	{
 		$dir = "";
 		$directory = self::GetAddress($directory);
-		if (startsWith($directory, \_::$Address->Directory))
-			$directory = substr($directory, strlen($dir = \_::$Address->Directory));
+		if (startsWith($directory, \_::$Address->Address))
+			$directory = substr($directory, strlen($dir = \_::$Address->Address));
+		elseif (startsWith($directory, DIRECTORY_SEPARATOR))
+			$dir = DIRECTORY_SEPARATOR;
 		$dirs = explode(DIRECTORY_SEPARATOR, trim($directory, DIRECTORY_SEPARATOR));
 		foreach ($dirs as $d)
 			if (!is_dir($dir .= $d)) {
@@ -426,7 +425,7 @@ class Local
 		}
 
 		if ($directory === false) {
-			$directory = \_::$Address->TempDirectory;
+			$directory = \_::$Address->TempAddress;
 			$t = preg_find("/^[\w-]+\b/", $content["type"] ?? "");
 			if ($t)
 				$directory .= $t . DIRECTORY_SEPARATOR;
