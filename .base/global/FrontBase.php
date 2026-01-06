@@ -324,7 +324,6 @@ abstract class FrontBase
 				$this->AllowTranslate && $this->CacheLanguage
 			);
 		}
-		$this->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
 		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
 		
