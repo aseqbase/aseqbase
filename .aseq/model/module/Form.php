@@ -902,7 +902,8 @@ class Form extends Module
 				$module->Height = "fit-content";
 			$module->Style->Position = "sticky";
 			$module->Style->Margin = "auto";
-			$module->Style->Top = "initial";
+			$module->Style->Top = "var(--size-max)";
+			$module->Style->Bottom = "var(--size-max)";
 			$module->Style->Left = "initial";
 			$module->Style->Right = "initial";
 			$module->AllowFocus =

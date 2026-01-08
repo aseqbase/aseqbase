@@ -36,7 +36,7 @@ class Translate
 	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
 	public $CorrectorPattern = "/(?:^(['\"\`])([\w\W]+)\\1$)|([\w\W]+)/";
 	public $CorrectorReplacement = "$2$3";
-	public $TrimmerPattern = "/(?:\\$\{([\w\W]+)\})|([\w\W]+)/";
+	public $TrimmerPattern = "/(?:\$\{([\w\W]+)\})|([\w\W]+)/";
 	public $TrimmerReplacement = "$1$2";
 	/**
 	 * To have a deep translate

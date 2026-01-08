@@ -4,10 +4,10 @@ use MiMFa\Library\Convert;
 
 try {
     $activationTokenKey = "at";
-    $email = getReceived("Email");
-    if (!$email && $email = getReceived("Signature"))
+    $email = received("Email");
+    if (!$email && $email = received("Signature"))
         $email = \_::$User->GetValue("Email", $email);
-    $sign = \_::$User->DecryptToken($activationTokenKey, getReceived($activationTokenKey));
+    $sign = \_::$User->DecryptToken($activationTokenKey, received($activationTokenKey));
     if (
         $email && \_::$User->SendTokenEmail(
             \_::$Front->SenderEmail,
@@ -29,7 +29,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK',
         error("Your account is not activate!");
         part("access");
     } elseif (
-        getReceived($activationTokenKey) && \_::$User->DataTable->Update(
+        received($activationTokenKey) && \_::$User->DataTable->Update(
             "`Signature`=:Signature",
             [
                 ":Signature" => $sign,

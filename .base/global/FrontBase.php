@@ -325,7 +325,7 @@ abstract class FrontBase
 			);
 		}
 		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
-		$this->SwitchMode = getReceived($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
+		$this->SwitchMode = received($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
 		
 		if ($this->SwitchMode) {
 			$middle = $this->ForeColorPalette;

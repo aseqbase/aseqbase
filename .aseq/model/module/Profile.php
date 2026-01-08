@@ -211,7 +211,7 @@ class Profile extends Table{
         $maccess = $isu && !is_null($this->ModifyAccess) && \_::$User->HasAccess($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->HasAccess($this->RemoveAccess);
 		$isc = $isc && ($vaccess || $aaccess || $maccess || $raccess);
-        $secret = getReceived("secret")??$this->ViewSecret;
+        $secret = received("secret")??$this->ViewSecret;
         $res = Struct::Division(
             ($maccess? Struct::Icon("edit","{$this->Name}_Modify(`$key`);", ["class"=>"table-item-modify"]) : "").
             ($raccess? Struct::Icon("trash","{$this->Name}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")

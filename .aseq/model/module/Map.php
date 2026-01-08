@@ -788,7 +788,7 @@ class Map extends Module
 				{$this->Name}_Items.delete(key);
 			} else layer = L.$type(" . (is_null($location) ? "{$this->Name}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
 			let la = layer.addTo({$this->Name});
-			let popup = " . Script::Convert(__($popup)) . ";
+			let popup = " . Script::Convert($popup) . ";
 			if(popup) {
 				let pp = la.bindPopup(popup);
 				let activePopup = " . Script::Convert($active) . ";
@@ -829,7 +829,7 @@ class Map extends Module
 			}
 			layer = L.$type(" . (is_null($location) ? "{$this->Name}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
 			let la = layer.addTo({$this->Name});
-			let popup = " . Script::Convert(__($popup)) . ";
+			let popup = " . Script::Convert($popup) . ";
 			if(popup) {
 				let pp = la.bindPopup(popup);
 				let activePopup = " . Script::Convert($active) . ";

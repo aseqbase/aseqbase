@@ -158,13 +158,13 @@ class CommentCollection extends Collection
      * @var array|string|null
      * @category Management
      */
-    public $WaitingLabel = "<i class='icon fa fa-check'><span class='tooltip'>The message is received but not showed</span></i>";
+    public $WaitingLabel = "<i class='icon fa fa-eye-slash'><span class='tooltip'>The message is received but not showed</span></i>";
     /**
      * The label text of approved message
      * @var array|string|null
      * @category Management
      */
-    public $PublishedLabel = "<i class='icon fa fa-eye'><span class='tooltip'>The message is shown</span></i>";
+    public $PublishedLabel = "<i class='icon fa fa-check'><span class='tooltip'>The message is shown</span></i>";
 
     public function GetStyle()
     {

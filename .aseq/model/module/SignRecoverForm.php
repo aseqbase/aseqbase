@@ -46,7 +46,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 	public function GetFields()
 	{
-		if (!is_null($rrk = getReceived($this->TokenKey))) {
+		if (!is_null($rrk = received($this->TokenKey))) {
 			yield Struct::HiddenInput($this->TokenKey, $rrk);
 			yield Struct::Rack(
 				Struct::LargeSlot(
@@ -128,7 +128,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		try {
 			$received = receivePost();
-			if (isValid($received, "Password") && getReceived($this->TokenKey)) {
+			if (isValid($received, "Password") && received($this->TokenKey)) {
 				$res = $this->ReceiveRecoveryEmail();
 				if ($res)
 					return $this->GetSuccess("Dear '" . \_::$User->TemporaryName . "', your password changed successfully!");
@@ -182,10 +182,10 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 */
 	public function ReceiveRecoveryEmail()
 	{
-		$newPass = getReceived("Password");
+		$newPass = received("Password");
 		if (isValid($newPass)) {
 			\_::$User->EncryptPassword($newPass);
-			$sign = \_::$User->DecryptToken($this->TokenKey, getReceived($this->TokenKey));
+			$sign = \_::$User->DecryptToken($this->TokenKey, received($this->TokenKey));
 			if (empty($sign))
 				return null;
 			return \_::$User->ResetPassword($sign, $newPass) ? true : false;

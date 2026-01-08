@@ -22,7 +22,7 @@ $data = $data??[];
             })
     ->else(!isEmpty(\_::$User->Direction))
         ->On()->Get(fn() => view("part", ["Name" => \_::$User->Direction]))
-    ->else(!$isuser && getReceived("Signature"))
+    ->else(!$isuser && received("Signature"))
         ->On("sign/up")->Rest(fn () => compute("sign/up"))
     ->else(!$isuser)
         ->On("sign/in")->Rest(function () {

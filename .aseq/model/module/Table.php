@@ -17,8 +17,6 @@ module("Navigation");
  */
 class Table extends Module
 {
-    //public $Tag = "table";
-
     public $Modal = null;
     public Navigation|null $NavigationBar = null;
     public $TopNavigation = false;
@@ -114,7 +112,7 @@ class Table extends Module
      * @var 
      */
     public $FormFilter = false;
-    
+
     /**
      * An array of all key=>type columns in data to use for each cell type
      * @var array Auto detection
@@ -177,7 +175,7 @@ class Table extends Module
 
     public $Method = "TABLE";
     public $SecretKey = "_secret";
-    
+
     /**
      * A millisecond timeout for count down to refresh
      * @var int|null
@@ -195,6 +193,10 @@ class Table extends Module
     public $ViewAccess = 0;
     public $ViewCondition = null;
     public $ViewSecret;
+    public $ImportAccess = 0;
+    public $ImportSecret;
+    public $ExportAccess = 0;
+    public $ExportSecret;
     public $AddAccess = 0;
     public $AddSecret;
     public $ModifyAccess = 0;
@@ -252,6 +254,8 @@ class Table extends Module
         $a = (new DateTime())->format("z");
         $this->ViewSecret = sha1("$a-View");
         $this->DuplicateSecret = sha1("$a-Duplicate");
+        $this->ImportSecret = sha1("$a-Import");
+        $this->ExportSecret = sha1("$a-Export");
         $this->AddSecret = sha1("$a-Add");
         $this->RemoveSecret = sha1("$a-Remove");
         $this->ModifySecret = sha1("$a-Modify");
@@ -263,7 +267,8 @@ class Table extends Module
      */
     public function Set($itemsOrDataTable = null)
     {
-        if(is_string($itemsOrDataTable)) $itemsOrDataTable = table($itemsOrDataTable);
+        if (is_string($itemsOrDataTable))
+            $itemsOrDataTable = table($itemsOrDataTable);
         if ($itemsOrDataTable instanceof DataTable) {
             $this->DataTable = $itemsOrDataTable;
             $this->AllowScrollX =
@@ -452,7 +457,10 @@ class Table extends Module
         $rowCount = 0;
         $colCount = $ick ? count($icks) : 0;
         if ($isc) {
-            $uck = Struct::Division(\_::$User->HasAccess($this->AddAccess) ? Struct::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip"=>"Add another Item"]) : Struct::Image(null, "tasks"));
+            $uck .= (\_::$User->HasAccess($this->AddAccess) ? Struct::Icon("plus", "{$this->Modal->Name}_Create();", ["class" => "table-item-create", "Tooltip" => "Add another Item"]) : Struct::Image(null, "tasks"));
+            $uck .= (\_::$User->HasAccess($this->ImportAccess) ? Struct::Icon("download", "{$this->Modal->Name}_Import();", ["class" => "table-items-import", "Tooltip" => "Import Items"]) : "");
+            $uck .= (\_::$User->HasAccess($this->ExportAccess) ? Struct::Icon("upload", "{$this->Modal->Name}_Export();", ["class" => "table-items-export", "Tooltip" => "Export Items"]) : "");
+            $uck = Struct::Division($uck, ["class" => "table-items-manage"]);
             if ($ick)
                 array_unshift($icks, $uck);
         }
@@ -460,10 +468,17 @@ class Table extends Module
         $etrow = "</tr>";
         $vaccess = \_::$User->HasAccess($this->ViewAccess);
         $aaccess = $isu && !is_null($this->AddAccess) && \_::$User->HasAccess($this->AddAccess);
+        $iaccess = $isu && !is_null($this->ImportAccess) && \_::$User->HasAccess($this->ImportAccess);
+        $eaccess = $isu && !is_null($this->ExportAccess) && \_::$User->HasAccess($this->ExportAccess);
         $daccess = $isu && !is_null($this->DuplicateAccess) && \_::$User->HasAccess($this->DuplicateAccess);
         $maccess = $isu && !is_null($this->ModifyAccess) && \_::$User->HasAccess($this->ModifyAccess);
         $raccess = $isu && !is_null($this->RemoveAccess) && \_::$User->HasAccess($this->RemoveAccess);
-        $addbutton = fn($text="Add your first item") => Struct::Center(Struct::Button(__($text) . Struct::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"]));
+        $addbutton = fn($add = "Add your first item", $import = false, $export = false) =>
+            Struct::Center(
+                ($add===false?"":Struct::Button(__($add) . Struct::Image(null, "plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"])).
+                ($import===false?"":Struct::Button(__($import) . Struct::Image(null, "download"), "{$this->Modal->Name}_Import();", ["class" => "table-items-import"])).
+                ($export===false?"":Struct::Button(__($export) . Struct::Image(null, "upload"), "{$this->Modal->Name}_Export();", ["class" => "table-items-export"]))
+            );
         if (is_countable($this->Items) && (($this->NavigationBar != null && $this->NavigationBar->Count > 0) || count($this->Items) > 0)) {
             $cells = [];
             foreach ($this->Items as $rkey => $row)
@@ -483,12 +498,12 @@ class Table extends Module
                                 [
                                     $uck => Struct::Division([
                                         ...[($hrn ? Struct::Span($rn++, null, ['class' => 'number']) : "")],
-                                        ...Convert::ToSequence(Convert::By($this->PrependControlsCreator, $rowid, $row)??[]),
-                                        ...($vaccess ? [Struct::Icon("eye", "{$this->Modal->Name}_View(`$rowid`);", ["class" => "table-item-view", "tooltip"=>"Show"])] : []),
-                                        ...($maccess ? [Struct::Icon("edit", "{$this->Modal->Name}_Modify(`$rowid`);", ["class" => "table-item-modify", "tooltip"=>"Modify"])] : []),
-                                        ...($daccess ? [Struct::Icon("copy", "{$this->Modal->Name}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate", "tooltip"=>"Duplicate Copy"])] : []),
-                                        ...($raccess ? [Struct::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete", "tooltip"=>"Remove"])] : []),
-                                        ...Convert::ToSequence(Convert::By($this->AppendControlsCreator,$rowid, $row)??[])
+                                        ...Convert::ToSequence(Convert::By($this->PrependControlsCreator, $rowid, $row) ?? []),
+                                        ...($vaccess ? [Struct::Icon("eye", "{$this->Modal->Name}_View(`$rowid`);", ["class" => "table-item-view", "tooltip" => "Show"])] : []),
+                                        ...($maccess ? [Struct::Icon("edit", "{$this->Modal->Name}_Modify(`$rowid`);", ["class" => "table-item-modify", "tooltip" => "Modify"])] : []),
+                                        ...($daccess ? [Struct::Icon("copy", "{$this->Modal->Name}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate", "tooltip" => "Duplicate Copy"])] : []),
+                                        ...($raccess ? [Struct::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete", "tooltip" => "Remove"])] : []),
+                                        ...Convert::ToSequence(Convert::By($this->AppendControlsCreator, $rowid, $row) ?? [])
                                     ]),
                                     ...$row
                                 ];
@@ -505,16 +520,16 @@ class Table extends Module
                                 if ($ick) {
                                     if ($hcn) {
                                         $cells[] = $strow;
-                                        foreach ($icks as $ci => $ckey){
-                                            $ci = (is_int($ci)?$ckey:$ci);
+                                        foreach ($icks as $ci => $ckey) {
+                                            $ci = (is_int($ci) ? $ckey : $ci);
                                             if (!$eck || !in_array($ci, $ecks))
                                                 $cells[] = $this->GetCell($cn++, $ci, $row, true);
                                         }
                                         $cells[] = $etrow;
                                     }
                                     $cells[] = $strow;
-                                    foreach ($icks as $ci => $ckey){
-                                            $ci = (is_int($ci)?$ckey:$ci);
+                                    foreach ($icks as $ci => $ckey) {
+                                        $ci = (is_int($ci) ? $ckey : $ci);
                                         if (!$eck || !in_array($ci, $ecks))
                                             $cells[] = $this->GetCell(is_int($ckey) ? ($hcn ? $ckey + $scn : "") : $ci, $ckey, $row, true);
                                     }
@@ -540,8 +555,8 @@ class Table extends Module
                         $cells[] = $strow;
                         if ($ick) {
                             $colCount = max($colCount, count($icks));
-                            foreach ($icks as  $ci => $ckey){
-                                $ckey = is_int($ci)?$ckey:$ci;
+                            foreach ($icks as $ci => $ckey) {
+                                $ckey = is_int($ci) ? $ckey : $ci;
                                 if (!$eck || !in_array($ckey, $ecks)) {
                                     $cel = isset($row[$ckey]) ? $row[$ckey] : null;
                                     if ($isrk)
@@ -573,16 +588,16 @@ class Table extends Module
                 if (is_bool($this->Footer)) {
                     $cells[] = "<tfoot><tr>";
                     if (0 < $colCount)
-                        $cells[] = Struct::Cell("", $isc || $hrn ? ["Type"=>"head", "class" => "view invisible"] : ["Type"=>"head"]);
+                        $cells[] = Struct::Cell("", $isc || $hrn ? ["Type" => "head", "class" => "view invisible"] : ["Type" => "head"]);
                     for ($i = 1; $i < $colCount; $i++)
-                        $cells[] = Struct::Cell("", ["Type"=>"head"]/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
+                        $cells[] = Struct::Cell("", ["Type" => "head"]/*$ick&&isset($icks[$ckey])?$cks[$icks[$ckey]]:false*/);
                     $cells[] = "</tr></tfoot>";
                 } else
                     $cells[] = Convert::ToString($this->Footer);
-            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag(). ($aaccess?$addbutton("Add another item"):"") . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) .Struct::Table(join(PHP_EOL, $cells)).parent::GetCloseTag();
-        } elseif ($aaccess)
-            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton("Add your first item").Struct::Table("").parent::GetCloseTag();
-        return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag().Struct::Table("").parent::GetCloseTag();
+            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . ($aaccess || $iaccess || $eaccess ? $addbutton($aaccess? "Add another item":false,$iaccess? "Import items":false,$eaccess? "Export items":false) : "") . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . Struct::Table(join(PHP_EOL, $cells)) . parent::GetCloseTag();
+        } elseif ($aaccess || $iaccess)
+            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton("Add your first item", $iaccess? "Import items":false) . Struct::Table("") . parent::GetCloseTag();
+        return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . Struct::Table("") . parent::GetCloseTag();
     }
 
     public function GetCell($value, $key, $record = [], bool $isHead = false)
@@ -591,9 +606,12 @@ class Table extends Module
             $value = Convert::ToString(Convert::By(get($this->CellsValues, $key), $value, $key, $record) ?? $value);
         if ($isHead) {
             $value = Convert::ToString($value);
-            if (isFile($value)) return "<th>" . Struct::Media($value) . "</th>";
-            else if (isAbsoluteUrl($value)) return "<th>" . Struct::Link(getPage($value), $value) . "</th>";
-            else return "<th>" . __($value, translating: $this->AllowLabelTranslation) . "</th>";
+            if (isFile($value))
+                return "<th>" . Struct::Media($value) . "</th>";
+            else if (isAbsoluteUrl($value))
+                return "<th>" . Struct::Link(getPage($value), $value) . "</th>";
+            else
+                return "<th>" . __($value, translating: $this->AllowLabelTranslation) . "</th>";
         }
         //if($this->Updatable && !$isHead && $key > 1){
         //    $value = new Field(key:$key, value: $value, lock: true, type:getValid($this->CellsTypes,$key, null));
@@ -601,8 +619,10 @@ class Table extends Module
         //    $value->MaxHeight = $this->MediaHeight;
         //    return "<td>".Convert::ToString($value)."</td>";
         //}
-        if (isFile($value)) return "<td>" . Struct::Media($value) . "</td>";
-        if (isAbsoluteUrl($value)) return "<td>" . Struct::Link(getPage($value), $value) . "</td>";
+        if (isFile($value))
+            return "<td>" . Struct::Media($value) . "</td>";
+        if (isAbsoluteUrl($value))
+            return "<td>" . Struct::Link(getPage($value), $value) . "</td>";
         $value = __($value, translating: $this->AllowDataTranslation);
         if (!$this->TextWrap && !startsWith($value, "<"))
             return "<td>" . Convert::ToExcerpt(Convert::ToText($value), 0, $this->TextLength, "..." . Struct::Tooltip($value)) . "</td>";
@@ -672,8 +692,30 @@ class Table extends Module
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
-				}" . ($this->Updatable ? (\_::$User->HasAccess($this->AddAccess) ? "
-				function {$this->Modal->Name}_Create(defaultValues){
+				}") . ($this->Updatable ? (\_::$User->HasAccess($this->ImportAccess) ? "
+				function {$this->Modal->Name}_Import(defaultValues = null){
+                        send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ImportSecret}','{$this->KeyColumn}':'{$this->ImportSecret}'}, `.{$this->Name}`,
+                            (data, err)=>{
+                                " . $this->Modal->InitializeScript(null, null, '${data}') . "
+                                if(defaultValues)
+                                    for(x in defaultValues)try{
+                                        document.querySelector('.{$this->Modal->Name} *[name=\"'+x+'\"]').value = defaultValues[x];
+                                    }catch{}
+                            }
+                        );
+				}" : "") . (\_::$User->HasAccess($this->ExportAccess) ? "
+				function {$this->Modal->Name}_Export(defaultValues = null){
+                        send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ExportSecret}','{$this->KeyColumn}':'{$this->ExportSecret}'}, `.{$this->Name}`,
+                            (data, err)=>{
+                                " . $this->Modal->InitializeScript(null, null, '${data}') . "
+                                if(defaultValues)
+                                    for(x in defaultValues)try{
+                                        document.querySelector('.{$this->Modal->Name} *[name=\"'+x+'\"]').value = defaultValues[x];
+                                    }catch{}
+                            }
+                        );
+				}" : "") . (\_::$User->HasAccess($this->AddAccess) ? "
+				function {$this->Modal->Name}_Create(defaultValues = null){
 					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
@@ -705,8 +747,8 @@ class Table extends Module
 							load();
 						});
 				}" : "") : "")
-                )) : "")
-        ).($this->RefreshTimeout?(new (module("Counter"))(max(1, $this->RefreshTimeout/1000),0,"load()"))->GetScript():"");
+                ) : "")
+        ) . ($this->RefreshTimeout ? (new (module("Counter"))(max(1, $this->RefreshTimeout / 1000), 0, "load()"))->GetScript() : "");
     }
 
     public function AfterHandle()
@@ -723,8 +765,10 @@ class Table extends Module
         $value = get($values, $this->KeyColumn);
         $secret = pop($values, $this->SecretKey);
         $recievedData = count($values) > 1;
-        if(!$this->ControlHandler) $this->ControlHandler = fn($v,$f)=>null;
-        if (!$secret) return Struct::Error("Your request is not valid!");
+        if (!$this->ControlHandler)
+            $this->ControlHandler = fn($v, $f) => null;
+        if (!$secret)
+            return Struct::Error("Your request is not valid!");
         elseif ($secret === $this->ViewSecret)
             return ($this->ControlHandler)($value, "GetViewForm") ?? $this->GetViewForm($value);
         elseif ($secret === $this->DuplicateSecret)
@@ -741,13 +785,24 @@ class Table extends Module
                 return ($this->ControlHandler)($value, "GetModifyForm") ?? $this->GetModifyForm($value);
         elseif ($secret === $this->RemoveSecret)
             return ($this->ControlHandler)($value, "RemoveRow") ?? $this->RemoveRow($value);
-        else return Struct::Error("There is not any response for your request!");
+        elseif ($secret === $this->ImportSecret)
+            if ($recievedData)
+                return ($this->ControlHandler)($values, "ImportRows") ?? $this->ImportRows(Convert::ToFields(received("__ROWS")), $values);
+            else
+                return ($this->ControlHandler)($value, "GetImportForm") ?? $this->GetImportForm();
+        elseif ($secret === $this->ExportSecret)
+            if ($recievedData)
+                return ($this->ControlHandler)($values, "ExportRows") ?? $this->ExportRows(Convert::ToFields(urldecode(pop($values, "__ROWS"))), $values);
+            else
+                return ($this->ControlHandler)($value, "GetExportForm") ?? $this->GetExportForm();
+        else
+            return Struct::Error("There is not any response for your request!");
     }
 
-    public function GetForm()
+    public function GetForm(): Form|null
     {
         module("Form");
-        if(!$this->Form) {
+        if (!$this->Form) {
             $this->Form = new Form();
             $this->Form->Template = "s";
             $this->Form->Class = "container";
@@ -773,14 +828,15 @@ class Table extends Module
             return null;
         if (!\_::$User->HasAccess($this->ViewAccess))
             return Struct::Error("You have not access to see datails!");
-        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
+        if (!$this->DataTable->AlternativeName && !$this->KeyColumnName)
+            $this->KeyColumnName = $this->KeyColumn;
         $row = $this->DataTable->SelectRow("*", [$this->ViewCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
         if (isEmpty($row))
             return Struct::Error("You can not 'see' this item!");
         $record = [];
         foreach ($this->CellsTypes as $key => $val)
             $record[$key] = null;
-        if(!$this->FormFilter)
+        if (!$this->FormFilter)
             foreach ($row as $key => $val)
                 $record[$key] = $val;
         unset($row);
@@ -838,7 +894,70 @@ class Table extends Module
             $form->CancelLabel = null;
         return $form->Handle();
     }
-    public function GetAddForm($value){
+    public function GetImportForm()
+    {
+        if (!\_::$User->HasAccess($this->ImportAccess))
+            return Struct::Error("You have not access to 'Import'!");
+        $record = [];
+        foreach ($this->CellsTypes as $key => $val)
+            $record[$key] = null;
+        $form = $this->GetForm();
+        $form->Image = "download";
+        $form->Set(
+            title: "Import {$this->Title}",
+            description: $this->Description,
+            method: null,
+            children: (function () use ($record) {
+                $schemas = $this->DataTable->DataBase->TryFetchRows(
+                    "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME='{$this->DataTable->Name}'"
+                );
+                if (!$this->FormFilter)
+                    foreach ($schemas as $schema)
+                        $record[$schema["COLUMN_NAME"]] = null;
+
+                yield Struct::Field("File", "__ROWS", null, title: "Table", attributes: ["Accept" => ".csv"]);
+                foreach ($record as $key => $val)
+                    yield Struct::Field("Text", $key, $key, title: "\${{$key}}", options: $record);
+                yield Struct::HiddenInput($this->SecretKey, $this->ImportSecret);
+            })()
+        );
+        return $form->Handle();
+    }
+    public function GetExportForm()
+    {
+        if (!\_::$User->HasAccess($this->ExportAccess))
+            return Struct::Error("You have not access to 'Export'!");
+        $record = [];
+        foreach ($this->CellsTypes as $key => $val)
+            $record[$key] = null;
+        $form = $this->GetForm();
+        $form->Image = "upload";
+        $form->Set(
+            title: "Export {$this->Title}",
+            description: $this->Description,
+            method: null,
+            children: (function () use ($record) {
+                $schemas = $this->DataTable->DataBase->TryFetchRows(
+                    "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME='{$this->DataTable->Name}'"
+                );
+                if (!$this->FormFilter)
+                    foreach ($schemas as $schema)
+                        $record[$schema["COLUMN_NAME"]] = null;
+
+                yield Struct::Field("Texts", "__ROWS", null, title: "Selected Rows", attributes: ["Accept" => ".csv"]);
+                foreach ($record as $key => $val)
+                    yield Struct::Field("Text", $key, $key, title: "\${{$key}}", options: $record);
+                yield Struct::HiddenInput($this->SecretKey, $this->ExportSecret);
+            })()
+        );
+        return $form->Handle();
+    }
+    public function GetAddForm($value)
+    {
         if (is_null($value))
             return null;
         if (!\_::$User->HasAccess($this->AddAccess))
@@ -881,14 +1000,15 @@ class Table extends Module
             return null;
         if (!\_::$User->HasAccess($this->AddAccess))
             return Struct::Error("You have not access to add!");
-        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
+        if (!$this->DataTable->AlternativeName && !$this->KeyColumnName)
+            $this->KeyColumnName = $this->KeyColumn;
         $row = $this->DataTable->SelectRow("*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
         if (isEmpty($row))
             return Struct::Error("You can not 'add' this item!");
         $record = [];
         foreach ($this->CellsTypes as $key => $val)
             $record[$key] = null;
-        if(!$this->FormFilter)
+        if (!$this->FormFilter)
             foreach ($row as $key => $val)
                 $record[$key] = $val;
         unset($row);
@@ -923,7 +1043,8 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
+        if (!$this->DataTable->AlternativeName && !$this->KeyColumnName)
+            $this->KeyColumnName = $this->KeyColumn;
         if (!\_::$User->HasAccess($this->ModifyAccess))
             return Struct::Error("You have not access to modify!");
         $row = $this->DataTable->SelectRow("*", [$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
@@ -932,7 +1053,7 @@ class Table extends Module
         $record = [];
         foreach ($this->CellsTypes as $key => $val)
             $record[$key] = null;
-        if(!$this->FormFilter)
+        if (!$this->FormFilter)
             foreach ($row as $key => $val)
                 $record[$key] = $val;
         unset($row);
@@ -949,7 +1070,8 @@ class Table extends Module
                     WHERE TABLE_NAME='{$this->DataTable->Name}'"
                 );
                 yield Struct::HiddenInput($this->KeyColumnName, $value);
-                foreach ($record as $key => $val) foreach ($schemas as $schema)
+                foreach ($record as $key => $val)
+                    foreach ($schemas as $schema)
                         if ($schema["COLUMN_NAME"] == $key)
                         {
                             $res = $this->PrepareDataToShow($val, $key, $record, $schema);
@@ -964,6 +1086,69 @@ class Table extends Module
         return $form->Handle();
     }
 
+    public function ImportRows($rows, $cols = [])
+    {
+        if (!$this->DataTable || !\_::$User->HasAccess($this->ImportAccess))
+            return Struct::Error("You have not access to 'import'!");
+        $s = 0;
+        $e = 0;
+        foreach ($cols ?: [] as $k => $v)
+            if (isEmpty($v))
+                unset($cols[$k]);
+        foreach ($rows as $values) {
+            $values = $this->NormalizeFormValues($values);
+            if (!is_array($values))
+                continue;
+            if ($cols) {
+                $cells = [];
+                foreach ($cols as $k => $v)
+                    if (isset($values[$v]) && !isEmpty($values[$v]))
+                        $cells[$k] = $values[$v];
+                if ($this->DataTable->Insert($cells))
+                    $s++;
+                else
+                    $e++;
+            } else {
+                foreach ($values as $k => $v)
+                    if (isEmpty($v))
+                        unset($values[$k]);
+                if ($this->DataTable->Insert($values))
+                    $s++;
+                else
+                    $e++;
+            }
+        }
+        if ($e == 0)
+            return deliverBreaker(Struct::Success("All $s items imported successfully!"));
+        elseif ($s == 0)
+            return Struct::Error("Could not import any items!");
+        else
+            return Struct::Warning("$s items imported and $e items failed!");
+    }
+    public function ExportRows($rows, $cols = [])
+    {
+        if (!\_::$User->HasAccess($this->ExportAccess))
+            return Struct::Error("You have not access to 'export'!");
+        foreach ($cols ?: [] as $k => $v)
+            if (isEmpty($v))
+                unset($cols[$k]);
+        $this->Items = [];
+        if ($this->DataTable)
+            if ($rows)
+                $this->Items = $this->DataTable->Select($cols, array_key_first($rows) . " IN (" . join(", ", filter($rows, fn($v) => $v, [])) . ")");
+            else
+                $this->Items = $this->DataTable->Select($cols);
+        else if ($this->Items)
+            if ($cols && count($cols) !== count(first($this->Items) ?? [])) {
+                $fields = Convert::CellsToFields($this->Items);
+                $rk = array_key_first($rows)??0;
+                $fields = $rows ?
+                    loop($fields, fn($r, $ri) => in_array($rk, $r) && in_array($r[$rk], $rows)?loop($r, fn($v, $k) => in_array($k, $cols) ? [$cols[$k], $v] : null, false, true) : null) :
+                    loop($fields, fn($r, $ri) => loop($r, fn($v, $k) => in_array($k, $cols) ? [$cols[$k], $v] : null, false, true));
+                $this->Items = Convert::FieldsToCells($fields);
+            }
+        Local::Load(Convert::FromCells($this->Items), ($this->Title ?: \_::$User->Page) . ".csv");
+    }
     public function AddRow($values)
     {
         if (!\_::$User->HasAccess($this->AddAccess))
@@ -983,7 +1168,8 @@ class Table extends Module
     {
         if (!\_::$User->HasAccess($this->ModifyAccess))
             return Struct::Error("You have not access to modify!");
-        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
+        if (!$this->DataTable->AlternativeName && !$this->KeyColumnName)
+            $this->KeyColumnName = $this->KeyColumn;
         if (isValid($values, $this->KeyColumn)) {
             $values = $this->NormalizeFormValues($values);
             if (!is_array($values))
@@ -997,7 +1183,8 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if(!$this->DataTable->AlternativeName && !$this->KeyColumnName) $this->KeyColumnName = $this->KeyColumn;
+        if (!$this->DataTable->AlternativeName && !$this->KeyColumnName)
+            $this->KeyColumnName = $this->KeyColumn;
         if (!\_::$User->HasAccess($this->RemoveAccess))
             return Struct::Error("You have not access to delete!");
         if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]))
@@ -1093,7 +1280,8 @@ class Table extends Module
             return Struct::Error($ex);
         }
         foreach ($values as $k => $v)
-            if($k == "submit") unset($values[$k]);
+            if ($k == "submit")
+                unset($values[$k]);
             elseif ($k !== $this->KeyColumn) {
                 if ($v === '')
                     $values[$k] = null;

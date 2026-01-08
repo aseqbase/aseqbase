@@ -146,7 +146,7 @@ class Live extends Array {
 
     *eachIteration(action, ...args) {
         for (const elem of this)
-            yield action(elem, ...args);
+            yield action(elem, ...args) ?? elem;
     }
 
     trigger(eventName, data = {}, options = {}) {
@@ -432,6 +432,52 @@ class Live extends Array {
         text = String(text);
         return this.each(tag => {
             if (tag instanceof Element) tag.textContent = text;
+        });
+    }
+    prependText(text = null) {
+        if (text === null) return this;
+        text = String(text);
+        return this.each(tag => {
+            const isInput = ((tag instanceof Element) && typeof tag.selectionStart === 'number');
+            if (isInput) {
+                const startPos = tag.selectionStart;
+                const endPos = tag.selectionEnd;
+                tag = new Live(tag);
+                tag.val(text + tag.val());
+                tag.selectionStart = startPos + text.length;
+                tag.selectionEnd = endPos + text.length;
+            } else if (tag instanceof Element) {
+                tag.textContent = text + tag.textContent;
+            }
+        });
+    }
+    appendText(text = null) {
+        if (text === null) return this;
+        text = String(text);
+        return this.each(tag => {
+            const isInput = ((tag instanceof Element) && typeof tag.selectionStart === 'number');
+            if (isInput) {
+                const startPos = tag.selectionStart;
+                const endPos = tag.selectionEnd;
+                tag = new Live(tag);
+                tag.val(tag.val() + text);
+                tag.selectionStart = startPos;
+                tag.selectionEnd = endPos;
+            } else if (tag instanceof Element) {
+                tag.textContent += text;
+            }
+        });
+    }
+    lines(lines = null) {
+        if (lines === null) {
+            if (this.length === 0) return undefined;
+            const el = this[0];
+            if (!(el instanceof Element)) return undefined;
+            return el.textContent.split('\n');
+        }
+        lines = String(lines);
+        return this.each(tag => {
+            if (tag instanceof Element) tag.textContent = lines;
         });
     }
     val(value = null) {
@@ -875,6 +921,211 @@ class Live extends Array {
             };
             resize();
         });
+    }
+
+    /**
+     * The text within the selected elements will be selected.
+     * @param {*} index The start index of the selection
+     * @param {*} length The length of the selection, if null selects to the end, if negative selects backwards
+     * @returns 
+     */
+    selectText(index = 0, length = null) {
+        return this.each(tag => {
+            if (!(tag instanceof Element)) return;
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            const range = document.createRange();
+            let start = Number(index) || 0;
+            let end;
+            if (length !== null)
+                end = start + length;
+            else
+                end = tag.textContent.length;
+            if (start < 0) start = 0;
+            if (end > tag.textContent.length) end = tag.textContent.length;
+            range.setStart(tag.firstChild || tag, start);
+            range.setEnd(tag.firstChild || tag, end);
+            sel.addRange(range);
+        });
+    }
+    selectLines(startLine = 0, endLine = null) {
+        return this.each(tag => {
+            if (!(tag instanceof Element)) return;
+            const lines = tag.textContent.split('\n');
+            let start = Number(startLine) || 0;
+            let end;
+            if (endLine !== null)
+                end = Number(endLine);
+            else
+                end = lines.length;
+            if (start < 0) start = 0;
+            if (end > lines.length) end = lines.length;
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            const range = document.createRange();
+            let charIndex = 0;
+            let startCharIndex = 0;
+            let endCharIndex = 0;
+            for (let i = 0; i < lines.length; i++) {
+                if (i === start) startCharIndex = charIndex;
+                charIndex += lines[i].length + 1;
+                if (i === end - 1) endCharIndex = charIndex;
+            }
+            range.setStart(tag.firstChild || tag, startCharIndex);
+            range.setEnd(tag.firstChild || tag, endCharIndex);
+            sel.addRange(range);
+        });
+    }
+    selectRange(range = null) {
+        return this.each(tag => {
+            if (!(tag instanceof Element)) return;
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            if (range) {
+                sel.addRange(range);
+            } else {
+                const range = document.createRange();
+                range.selectNodeContents(tag);
+                sel.addRange(range);
+            }
+        });
+    }
+
+    selectedText(text = null) {
+        let results = [];
+        const isGetter = (text === null);
+        if (this.length > 0) this.each(tag => {
+            const isInput = ((tag instanceof Element) && typeof tag.selectionStart === 'number');
+            if (isInput)
+                if (isGetter)
+                    return results.push(new Live(tag).val().substring(tag.selectionStart, tag.selectionEnd));
+                else {
+                    const start = tag.selectionStart;
+                    const end = tag.selectionEnd;
+                    const event = new InputEvent("input", {
+                        inputType: "insertReplacementText",
+                        data: text,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    tag.setRangeText(text, start, end, "select");
+                    tag.dispatchEvent(event);
+                    tag.selectionStart = start;
+                    tag.selectionEnd = start + text.length;
+                    tag.focus();
+                } else if (isGetter) return results.push(window.getSelection().toString());
+            else {
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) {
+                    const range = sel.getRangeAt(0);
+                    range.deleteContents();
+                    range.insertNode(document.createTextNode(text));
+                    sel.removeAllRanges();
+                    range.setStart(range.startContainer, range.startOffset + text.length);
+                    range.setEnd(range.startContainer, range.startOffset);
+                    sel.addRange(range);
+                    tag.focus();
+                }
+            }
+        });
+        return isGetter ? results.join("") : this;
+    }
+    selectedLines(lines = null) {
+        let results = [];
+        const isGetter = (lines === null);
+        this.each(tag => {
+            const isInput = ((tag instanceof Element) && typeof tag.selectionStart === 'number');
+            const text = isInput ? tag.value : tag.textContent;
+            const allLines = text.split('\n');
+            let startPos = 0;
+            let endPos = 0;
+            if (isInput) {
+                startPos = tag.selectionStart;
+                endPos = tag.selectionEnd;
+            } else {
+                const sel = window.getSelection();
+                if (sel.rangeCount > 0) {
+                    const range = sel.getRangeAt(0);
+                    const preSelectionRange = range.cloneRange();
+                    preSelectionRange.selectNodeContents(tag);
+                    preSelectionRange.setEnd(range.startContainer, range.startOffset);
+                    startPos = preSelectionRange.toString().length;
+                    endPos = startPos + range.toString().length;
+                }
+            }
+            let charIndex = 0;
+            let startLineIndex = -1;
+            let endLineIndex = -1;
+            const currentLineIndices = [];
+            for (let i = 0; i < allLines.length; i++) {
+                const line = allLines[i];
+                const lineStart = charIndex;
+                const lineEnd = charIndex + line.length;
+
+                if (endPos >= lineStart && startPos <= lineEnd) {
+                    currentLineIndices.push(i);
+                    if (startLineIndex === -1) startLineIndex = i;
+                    endLineIndex = i;
+                }
+                charIndex += line.length + 1;
+            }
+
+            if (isGetter) currentLineIndices.forEach(lineIndex => results.push(allLines[lineIndex]));
+            else {
+                if (startLineIndex !== -1 && endLineIndex !== -1) {
+                    const prefixLines = allLines.slice(0, startLineIndex);
+                    const suffixLines = allLines.slice(endLineIndex + 1);
+                    const newContent = [
+                        ...prefixLines,
+                        ...lines,
+                        ...suffixLines
+                    ].join('\n');
+                    if (isInput)
+                        tag.value = newContent;
+                    else
+                        tag.textContent = newContent;
+                    if (isInput) {
+                        let newStartPos = 0;
+                        for (let i = 0; i < startLineIndex; i++) {
+                            newStartPos += allLines[i].length + 1;
+                        }
+                        const linesLength = lines.reduce((acc, line) => acc + line.length + 1, 0);
+                        const newEndPos = newStartPos + linesLength - 1;
+                        tag.selectionStart = newStartPos;
+                        tag.selectionEnd = newEndPos;
+                    } else {
+                        const sel = window.getSelection();
+                        sel.removeAllRanges();
+                        const range = document.createRange();
+                        let newStartPos = 0;
+                        for (let i = 0; i < startLineIndex; i++) {
+                            newStartPos += allLines[i].length + 1;
+                        }
+                        const linesLength = lines.reduce((acc, line) => acc + line.length + 1, 0);
+                        const newEndPos = newStartPos + linesLength - 1;
+                        range.setStart(tag.firstChild || tag, newStartPos);
+                        range.setEnd(tag.firstChild || tag, newEndPos);
+                        sel.addRange(range);
+                    }
+                    tag.focus();
+                }
+            }
+        });
+
+        return isGetter ? results : this;
+    }
+    selectedRange(range = null) {
+        const sel = window.getSelection();
+        if (range !== null) {
+            sel.removeAllRanges();
+            sel.addRange(range);
+            return this;
+        } else {
+            if (sel.rangeCount > 0) {
+                return sel.getRangeAt(0);
+            }
+            return null;
+        }
     }
 }
 

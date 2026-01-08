@@ -341,7 +341,7 @@ class Convert
             return null;
         if (isJson($json))
             return json_decode($json, flags: JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION);
-        return [$json];
+        return preg_split('/\r?\n/', $json."");
     }
 
     public static function ToXml($data, \SimpleXMLElement|null $root = null)
@@ -435,11 +435,63 @@ class Convert
         return $res;
     }
 
+    public static function ToFields($svString, $delimiter = ',', $enclosure = '"', $eol = "\n"){
+        return self::CellsToFields(self::ToCells($svString, $delimiter, $enclosure, $eol));
+    }
+    public static function FromFields($fields, $delimiter = ',', $enclosure = '"', $eol = "\n"){
+        return self::FromCells(self::FieldsToCells($fields), $delimiter, $enclosure, $eol);
+    }
+    /**
+     * Convert Key Value parameters to a flat Table
+     * @param mixed $fields A key value pairs array
+     * @return array<array|string>
+     */
+    public static function FieldsToCells($fields){
+        if (!$fields) return [];
+        $cells = [""];
+        $dic = [];
+        foreach ($fields as $value) {
+            foreach ($value as $k => $v)
+                $dic[$k] = $v;
+            $cells[] = loop($dic, function ($v) {
+                return $v;
+            });
+            foreach ($dic as $k => $v)
+                $dic[$k] = null;
+        }
+        $cells[0] = loop($dic, function ($v, $k) {
+            return $k;
+        });
+        return $cells;
+    }
+    public static function CellsToFields($cells): array
+    {
+        if (!$cells) return [];
+        $c = 0;
+        $fields = [];
+        foreach ($cells as $row) {
+            if ($c === 0) {
+                $keys = $row;
+                // $length = count($row);
+                // for ($i = 0; $i < $length; $i++)
+                //     $keys[$i] = $row[$i];
+            } else {
+                $cols = [];
+                foreach ($row as $i => $value)
+                    if (isset($keys[$i]))
+                        $cols[$keys[$i]] = $value;
+                    //else $cols[$keys[$i] = $i] = $value;
+                $fields[] = $cols;
+            }
+            $c++;
+        }
+        return $fields;
+    }
     public static function ToCells($svString, $delimiter = ',', $enclosure = '"', $eol = "\n"): array
     {
         if (isEmpty($svString))
             return [];
-        $rows = [];
+        $cells = [];
         $length = strlen($svString);
         $index = 0;
         while ($index < $length) {
@@ -503,9 +555,9 @@ class Convert
                     break;
                 }
             } while ($index < $length);
-            $rows[] = $row;
+            $cells[] = $row;
         }
-        return $rows;
+        return $cells;
     }
     public static function FromCells($cells, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {

@@ -30,7 +30,7 @@ require_once(__DIR__ . DIRECTORY_SEPARATOR . "_.php");
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "Address.php");
 \_::$Address = new Address($GLOBALS["ASEQBASE"], $GLOBALS["DIR"]);
-$GLOBALS["ROOT"] = preg_replace("/[\/\\\][^\/\\\]+$/", "",__DIR__). DIRECTORY_SEPARATOR;
+$GLOBALS["ROOT"] = preg_replace("/[\/\\\][^\/\\\]+$/", "", __DIR__) . DIRECTORY_SEPARATOR;
 
 library("Local");
 library("Convert");
@@ -39,7 +39,7 @@ library("Style");
 library("Script");
 library("Internal");
 
-getReceived();//To set the __METHOD and cache received data
+received();//To set the __METHOD and cache received data
 
 run("global/RouterBase");
 run("Router");
@@ -72,17 +72,17 @@ function initialize(string|null|int $status = null, $data = [], bool $print = tr
 {
 	responseStatus($status);
 	runSequence("initialize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
-	runSequence("initialize".DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+	runSequence("initialize" . DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
 }
 function customize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
 {
 	responseStatus($status);
 	run("customize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
-	run("customize".DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+	run("customize" . DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
 }
 function finalize(string|null|int $status = null, $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = false, bool $once = true)
 {
-	runSequence("finalize".DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
+	runSequence("finalize" . DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR, $data, $print, $origin, $depth, $alternative, $default, $require, $once);
 	runSequence("finalize", $data, $print, $origin, $depth, $alternative, $default, $require, $once);
 	if (function_exists('fastcgi_finish_request'))
 		fastcgi_finish_request();
@@ -318,6 +318,7 @@ function receive(array|string|null $method = null)
 			case "file":
 			case "files":
 				$method = $_FILES;
+				break;
 			case "public":
 			case "get":
 				$method = $_GET;
@@ -364,7 +365,7 @@ function receive(array|string|null $method = null)
  */
 function receiveGet($key = null, $default = null)
 {
-	return getReceived($key, $default, "get");
+	return received($key, $default, "get");
 }
 /**
  * Received posted values from the client side
@@ -373,7 +374,7 @@ function receiveGet($key = null, $default = null)
  */
 function receivePost($key = null, $default = null)
 {
-	return getReceived($key, $default, "post");
+	return received($key, $default, "post");
 }
 /**
  * Received putted values from the client side
@@ -382,7 +383,7 @@ function receivePost($key = null, $default = null)
  */
 function receivePut($key = null, $default = null)
 {
-	return getReceived($key, $default, "put");
+	return received($key, $default, "put");
 }
 /**
  * Received patched values from the client side
@@ -391,7 +392,7 @@ function receivePut($key = null, $default = null)
  */
 function receivePatch($key = null, $default = null)
 {
-	return getReceived($key, $default, "patch");
+	return received($key, $default, "patch");
 }
 /**
  * Received file values from the client side
@@ -400,7 +401,7 @@ function receivePatch($key = null, $default = null)
  */
 function receiveFile($key = null, $default = null)
 {
-	return getReceived($key, $default, $_FILES);
+	return received($key, $default, "file");
 }
 /**
  * Received deleted values from the client side
@@ -409,7 +410,7 @@ function receiveFile($key = null, $default = null)
  */
 function receiveDelete($key = null, $default = null)
 {
-	return getReceived($key, $default, "delete");
+	return received($key, $default, "delete");
 }
 /**
  * Received stream values from the client side
@@ -418,7 +419,7 @@ function receiveDelete($key = null, $default = null)
  */
 function receiveStream($key = null, $default = null)
 {
-	return getReceived($key, $default, "stream");
+	return received($key, $default, "stream");
 }
 /**
  * Received internal values from the client side
@@ -427,7 +428,7 @@ function receiveStream($key = null, $default = null)
  */
 function receiveInternal($key = null, $default = null)
 {
-	return getReceived($key, $default, "internal");
+	return received($key, $default, "internal");
 }
 /**
  * Received external values from the client side
@@ -436,21 +437,26 @@ function receiveInternal($key = null, $default = null)
  */
 function receiveExternal($key = null, $default = null)
 {
-	return getReceived($key, $default, "external");
+	return received($key, $default, "external");
 }
 
 /**
- * Receive a parameter from the client side
+ * Receive a parameter from the client side,
+ * It will temp files and gives  their data too
  * @param mixed $key The key of the received value
- * @param array|string|null $method The the received data source $_GET/$POST/$_FILES/... (by default it is $_REQUEST)
+ * @param array|string|null $method The the received data source $_GET/$POST/$_FILES/...
+ * (by default it is null to give received data from all methods)
  * @return mixed The value
  */
-function getReceived($key = null, $default = null, array|string|null $method = null)
+function received($key = null, $default = null, array|string|null $method = null)
 {
 	if (is_null($key))
 		return \_::Cache($method, fn() => receive($method)) ?? $default;
 	else
-		return getValid(\_::Cache($method, fn() => receive($method)), $key, $default);
+		return get(\_::Cache($method, fn() => receive($method)), $key) ??
+			($method ? $default :
+			(($p = Local::Temp(received($key, null, "file")))?file_get_contents($p):$default)
+		);
 }
 /**
  * Receive a parameter from the client side then remove it
@@ -462,7 +468,7 @@ function popReceived($key = null, $default = null, array|string|null $method = n
 {
 	$val = null;
 	if (is_null($key)) {
-		$val = getReceived($key, $default, $method);
+		$val = received($key, $default, $method);
 		if (is_string($method))
 			switch (trim(strtolower($method))) {
 				case "public":
@@ -482,7 +488,7 @@ function popReceived($key = null, $default = null, array|string|null $method = n
 					break;
 			}
 	} else {
-		$val = getReceived($key, $default, $method);
+		$val = received($key, $default, $method);
 		unset($_POST[$key]);
 		unset($_GET[$key]);
 		unset($_REQUEST[$key]);
@@ -757,7 +763,7 @@ function responseStatus($status = null)
 {
 	if ($status && !headers_sent()) {
 		header("HTTP/1.1 " . abs($status));
-		if(!empty(\_::$Front->Headers))
+		if (!empty(\_::$Front->Headers))
 			foreach (\_::$Front->Headers as $name => $value)
 				if (is_int($name))
 					header($value);
@@ -1150,7 +1156,7 @@ function encode($plain, &$replacements = [], $wrapStart = "<", $wrapEnd = ">", $
 	if (!is_array($replacements))
 		$replacements = array();
 	$c = count($replacements);
-	return $correctorPattern ? preg_replace_callback($pattern, function ($a) use (&$replacements, &$c, $wrapStart, $wrapEnd, $correctorPattern, $correctorReplacement) {
+	return ($correctorPattern ? preg_replace_callback($pattern, function ($a) use (&$replacements, &$c, $wrapStart, $wrapEnd, $correctorPattern, $correctorReplacement) {
 		$val = preg_replace($correctorPattern, $correctorReplacement, $a[0]);
 		$key = array_search($val, $replacements);
 		if (!$key)
@@ -1163,7 +1169,7 @@ function encode($plain, &$replacements = [], $wrapStart = "<", $wrapEnd = ">", $
 			if (!$key)
 				$replacements[$key = $wrapStart . $c++ . $wrapEnd] = $val;
 			return $key;
-		}, $plain);
+		}, $plain)) ?? $plain;
 }
 function decode($cipher, ?array $replacements)
 {
@@ -1282,9 +1288,9 @@ function save($data, string|null $path = null, $extension = false, string|int $o
 {
 	$address = address($path, $extension, $origin, $depth);
 	return file_put_contents($address = $address ?: ($path ? Local::GetAbsoluteAddress(
-		preg_match("/^[a-z]+\:/i", $path)?$path : 
-		(preg_match("/^[\/\\\]/i", $path)? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : __DIR__.DIRECTORY_SEPARATOR.$path)
-		) : Local::CreateAddress()), Convert::ToString($data), flags: $flags);
+		preg_match("/^[a-z]+\:/i", $path) ? $path :
+		(preg_match("/^[\/\\\]/i", $path) ? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : __DIR__ . DIRECTORY_SEPARATOR . $path)
+	) : Local::CreateAddress()), Convert::ToString($data), flags: $flags);
 }
 
 /**
@@ -1978,12 +1984,11 @@ function search($object, callable $by, $default = null)
  * To filter and return all succeed results by a callable function on a countable element
  * @param mixed $object The source object
  * @param callable $by The filter $by($value, $key, $index)=> // return true if find and false when it is not find 
- * @return mixed
  */
 function filter(&$object, callable $by, $default = null)
 {
+	$results = [];
 	if (!is_null($object)) {
-		$results = [];
 		$index = 0;
 		if (!is_iterable($object)) {
 			if ($by($object, null, $index))

@@ -118,7 +118,7 @@ class Modal extends Player{
 				if(buttonsContent !== null) _('.{$this->Name}>.buttons').html({$this->ButtonsScript('${buttonsContent}')});
 				_('.{$this->Name},.{$this->Name}-background-mask').removeClass('hide');
 				_('.{$this->Name},.{$this->Name}-background-mask').fadeIn(".\_::$Front->AnimationSpeed.");
-				scrollThere('.{$this->Name}');
+				//scrollThere('.{$this->Name} .body');
 			}
 			function {$this->Name}_Show(){
 				{$this->InitializeScript()}

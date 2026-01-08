@@ -136,7 +136,6 @@ class Template extends \Base
         }
         h1, h2, h3, h4, h5, h6 {
             font-family: var(--font-special), var(--font);
-            direction: var(--dir);
             line-height: 1.2em;
         }
         .tooltip {
@@ -214,7 +213,6 @@ class Template extends \Base
             
         p, .content {
             line-height: 150%;
-            direction: var(--dir);
         }
         big {
             font-size: 1.33em;
@@ -281,6 +279,7 @@ class Template extends \Base
         }
         .input, .input *{
             font-family: var(--font-input), var(--font-special-input), var(--font);
+            line-height: 1.5em;
         }
         :is(input,.input):is([type='radiobutton'], [type='checkbox']){
             width: fit-content;

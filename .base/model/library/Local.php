@@ -374,10 +374,22 @@ class Local
 	public static function IsFileObject($content)
 	{
 		if (is_string($content))
-			$content = getReceived($content);
+			$content = received($content);
 		return get($content, "name") ? true : false;
 	}
 
+	/**
+	 * Save temporary (Upload from the client side) something to the local storage
+	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $minSize Minimum file size in byte
+	 * @param mixed $maxSize Maximum file size in byte
+	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
+	 * @return string Return the uploaded file path, else return null
+	 */
+	public static function Temp($content, $minSize = null, $maxSize = null, ?array $extensions = null, $deleteSource = true)
+	{
+		return self::Store($content, \_::$Address->TempAddress, $minSize, $maxSize, $extensions, $deleteSource);
+	}
 	/**
 	 * Save (Upload from the client side) something to the local storage
 	 * @param mixed $content A file object or posted file key name
