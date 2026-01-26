@@ -393,7 +393,7 @@ let send = function (
 	method = 'POST',
 	url = null,
 	data = null,
-	selector = 'body+:nth-child(1)',
+	selector = 'body',
 	success = null,
 	error = null,
 	ready = null,
@@ -560,7 +560,7 @@ let sendWithRetry = function (
 	method = 'POST',
 	url = null,
 	data = null,
-	selector = 'body+:nth-child(1)',
+	selector = 'body',
 	success = null,
 	error = null,
 	ready = null,
@@ -611,23 +611,23 @@ let sendWithRetry = function (
 	// Promise-style
 	return new Promise((resolve, reject) => tryOnce(resolve, reject));
 };
-let sendGet = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendGet = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('GET', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPost = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPost = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('POST', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPut = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPut = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('PUT', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPatch = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPatch = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('PATCH', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendDelete = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendDelete = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('DELETE', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendFile = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
-	if (data) return send('POST', url, data, selector, success, error, ready, progress, timeout);
+let sendFile = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
+	if (data) return send('FILE', url, data, selector, success, error, ready, progress, timeout);
 	else {
 		input.setAttribute('type', 'file');
 		res = null;
@@ -636,7 +636,7 @@ let sendFile = function (url = null, data = null, selector = 'body+:nth-child(1)
 			if (file) {
 				const reader = new FileReader();
 				reader.addEventListener('load', (event) => {
-					res = send('POST', url, encodeURIComponent(event.target.result), selector, success, error, ready, progress, timeout);
+					res = send('FILE', url, encodeURIComponent(event.target.result), selector, success, error, ready, progress, timeout);
 				});
 				reader.readAsDataURL(file);
 			}
@@ -645,13 +645,13 @@ let sendFile = function (url = null, data = null, selector = 'body+:nth-child(1)
 		return res;
 	}
 };
-let sendStream = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendStream = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('STREAM', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendInternal = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendInternal = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendExternal = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendExternal = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return send('EXTERNAL', url, data, selector, success, error, ready, progress, timeout);
 };
 
@@ -659,7 +659,7 @@ let sendRequest = function (
 	method = 'POST',
 	url = null,
 	data = null,
-	selector = 'body+:nth-child(1)',
+	selector = 'body',
 	success = null,
 	error = null,
 	ready = null,
@@ -671,7 +671,7 @@ let trySendRequest = function (
 	method = 'POST',
 	url = null,
 	data = null,
-	selector = 'body+:nth-child(1)',
+	selector = 'body',
 	success = null,
 	error = null,
 	ready = null,
@@ -681,23 +681,23 @@ let trySendRequest = function (
 	// keep parity with sendRequest which sets async to false by default
 	return trySend(method, url, data, selector, success, error, ready, progress, timeout, retryOptions, false);
 };
-let sendGetRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendGetRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('GET', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPostRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPostRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPutRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPutRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('PUT', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendPatchRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendPatchRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('PATCH', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendDeleteRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendDeleteRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('DELETE', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendFileRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
-	if (data) return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
+let sendFileRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
+	if (data) return sendRequest('FILE', url, data, selector, success, error, ready, progress, timeout);
 	else {
 		input.setAttribute('type', 'file');
 		res = null;
@@ -706,7 +706,7 @@ let sendFileRequest = function (url = null, data = null, selector = 'body+:nth-c
 			if (file) {
 				const reader = new FileReader();
 				reader.addEventListener('load', (event) => {
-					res = sendRequest('POST', url, encodeURIComponent(event.target.result), selector, success, error, ready, progress, timeout);
+					res = sendRequest('FILE', url, encodeURIComponent(event.target.result), selector, success, error, ready, progress, timeout);
 				});
 				reader.readAsDataURL(file);
 			}
@@ -715,12 +715,12 @@ let sendFileRequest = function (url = null, data = null, selector = 'body+:nth-c
 		return res;
 	}
 };
-let sendStreamRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendStreamRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('STREAM', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendInternalRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendInternalRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
 };
-let sendExternalRequest = function (url = null, data = null, selector = 'body+:nth-child(1)', success = null, error = null, ready = null, progress = null, timeout = null) {
+let sendExternalRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
 	return sendRequest('EXTERNAL', url, data, selector, success, error, ready, progress, timeout);
 };

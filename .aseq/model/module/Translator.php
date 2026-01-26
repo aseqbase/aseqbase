@@ -3,7 +3,8 @@ namespace MiMFa\Module;
 
 use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
-class Translator extends Module{
+class Translator extends Module
+{
 	/**
 	 * An array of language metadata
 	 * @example: array(
@@ -17,13 +18,15 @@ class Translator extends Module{
 	 * @var array
 	 */
 	public $Items = [];
-    public $AllowCode = false;
-    public $AllowLabel = false;
-    public $AllowImage = true;
-    public $Printable = false;
+	public $AllowDefault = false;
+	public $AllowCode = false;
+	public $AllowLabel = false;
+	public $AllowImage = true;
+	public $Printable = false;
 
-	public function GetStyle(){
-		return parent::GetStyle().Struct::Style("
+	public function GetStyle()
+	{
+		return parent::GetStyle() . Struct::Style("
             .{$this->Name} {
 				display: flex;
 				gap: var(--size-0);
@@ -34,7 +37,7 @@ class Translator extends Module{
             }
             .{$this->Name} .button {
 				cursor: pointer;
-				".($this->AllowLabel || $this->AllowCode?"padding: calc(var(--size-0) / 2);":"padding: 0px;")."
+				" . ($this->AllowLabel || $this->AllowCode ? "padding: calc(var(--size-0) / 2);" : "padding: 0px;") . "
 				gap: calc(var(--size-0) / 2);
 				color: inherit;
             }
@@ -45,24 +48,29 @@ class Translator extends Module{
 		");
 	}
 
-	public function Get(){
+	public function Get()
+	{
 		$cur = \_::$Front->Translate->Language;
 		$langs = [];
-		foreach ($this->Items??[] as $lng=>$value)
-            if($lng != $cur && $lng != "x")
-                $langs[] = Struct::Element(
-					($this->AllowCode?strtoupper($lng):"").
-					($this->AllowImage?Struct::Image(
-						$lng,
-						getBetween($value,"Image","Icon")
-						, ["onerror"=>"this.src = \"".Convert::ToDataUri(Convert::ToImage(strtoupper($lng)), "image/png")."\";"]
-						):""
-					).
-					($this->AllowLabel?getBetween($value,"Title","Name" ):""),
-					"a",
-					["class"=>"button", "href"=>"?".(getBetween($value,"Query" )??"lang=$lng&direction=".get($value,"Direction")."&encoding=".get($value,"Encoding"))]);
-		return $this->GetTitle().$this->GetDescription().
-			join(PHP_EOL, $langs).
+		foreach ($this->Items ?? [] as $lng => $value)
+			if ($lng != "x")
+				if (($nl = ($lng != $cur)) || $this->AllowDefault)
+					$langs[] = Struct::Element(
+						($this->AllowCode ? strtoupper($lng) : "") .
+						($this->AllowImage ? Struct::Image(
+							$lng,
+							getBetween($value, "Image", "Icon")
+							,
+							["onerror" => "this.src = \"" . Convert::ToDataUri(Convert::ToImage(strtoupper($lng)), "image/png") . "\";"]
+						) : ""
+						) .
+						($this->AllowLabel ? getBetween($value, "Title", "Name") : ""),
+						$nl? "a" : "bold",
+						["class" => $nl?"button":"be bold", "href" => "?" . (getBetween($value, "Query") ?? "lang=$lng&direction=" . get($value, "Direction") . "&encoding=" . get($value, "Encoding"))]
+					);
+
+		return $this->GetTitle() . $this->GetDescription() .
+			join(PHP_EOL, $langs) .
 			$this->GetContent();
-    }
+	}
 }

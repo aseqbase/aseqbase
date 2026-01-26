@@ -263,6 +263,6 @@ a {
   color: inherit;
 }
 
-[hidden] {
+hidden, .hidden, [hidden] {
   display: none !important;
 }

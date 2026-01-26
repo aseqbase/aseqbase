@@ -305,11 +305,12 @@ class Convert
      */
     public static function ToImage($value, $width = 100, $height = 100, $backColor = [0, 0, 0, 127], $foreColor = [255, 255, 255, 0], $fontSize = 50, $fontPath = null, $angle = 0, $multipleX = 0.1, $multipleY = 0.75)
     {
-        if (!function_exists('imagecreatetruecolor')) return null;
+        if (!function_exists('imagecreatetruecolor'))
+            return null;
         $image = imagecreatetruecolor($width, $height);
         imagesavealpha($image, true);
-        $background = imagecolorallocatealpha($image, $backColor[0]??0, $backColor[1]??0, $backColor[2]??0, $backColor[3]??127);
-        $textColor = imagecolorallocatealpha($image, $foreColor[0]??255, $foreColor[1]??255, $foreColor[2]??255, $foreColor[3]??0);
+        $background = imagecolorallocatealpha($image, $backColor[0] ?? 0, $backColor[1] ?? 0, $backColor[2] ?? 0, $backColor[3] ?? 127);
+        $textColor = imagecolorallocatealpha($image, $foreColor[0] ?? 255, $foreColor[1] ?? 255, $foreColor[2] ?? 255, $foreColor[3] ?? 0);
         imagefilledrectangle($image, 0, 0, $width, $height, $background);
         $fontPath = $fontPath ?? address("/asset/font/Default.ttf");
         imagettftext($image, $fontSize, $angle, intval($multipleX * $width), intval($multipleY * $height), $textColor, $fontPath, self::ToString($value ?? ""));
@@ -324,24 +325,24 @@ class Convert
      */
     public static function ToDataUri($value, $mime)
     {
-        return $value?'data:' . $mime . ';base64,' . base64_encode(self::ToString($value)):null;
+        return $value ? 'data:' . $mime . ';base64,' . base64_encode(self::ToString($value)) : null;
     }
 
-    public static function ToJson($obj): string
+    public static function ToJson($obj, $flags = null)
     {
         if (is_null($obj))
             return "null";
-        return json_encode($obj, flags: JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION);
+        return json_encode($obj, flags: $flags??(JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
     }
-    public static function FromJson($json): null|array
+    public static function FromJson($json, $flags = null): null|array
     {
         if (!isStatic($json))
             return $json;
         if (isEmpty($json) || (trim(strtolower($json)) === "null"))
             return null;
         if (isJson($json))
-            return json_decode($json, flags: JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION);
-        return preg_split('/\r?\n/', $json."");
+            return json_decode($json, flags: $flags??(JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
+        return preg_split('/\r?\n/', $json . "");
     }
 
     public static function ToXml($data, \SimpleXMLElement|null $root = null)
@@ -411,7 +412,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'temp_name' => Local::CreateAddress($filename, ".tmp", \_::$Address->TempDirectory),
+                                'temp_name' => Local::GenerateAddress($filename, ".tmp", \_::$Address->TempDirectory),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );
@@ -435,10 +436,12 @@ class Convert
         return $res;
     }
 
-    public static function ToFields($svString, $delimiter = ',', $enclosure = '"', $eol = "\n"){
+    public static function ToFields($svString, $delimiter = ',', $enclosure = '"', $eol = "\n")
+    {
         return self::CellsToFields(self::ToCells($svString, $delimiter, $enclosure, $eol));
     }
-    public static function FromFields($fields, $delimiter = ',', $enclosure = '"', $eol = "\n"){
+    public static function FromFields($fields, $delimiter = ',', $enclosure = '"', $eol = "\n")
+    {
         return self::FromCells(self::FieldsToCells($fields), $delimiter, $enclosure, $eol);
     }
     /**
@@ -446,8 +449,10 @@ class Convert
      * @param mixed $fields A key value pairs array
      * @return array<array|string>
      */
-    public static function FieldsToCells($fields){
-        if (!$fields) return [];
+    public static function FieldsToCells($fields)
+    {
+        if (!$fields)
+            return [];
         $cells = [""];
         $dic = [];
         foreach ($fields as $value) {
@@ -466,7 +471,8 @@ class Convert
     }
     public static function CellsToFields($cells): array
     {
-        if (!$cells) return [];
+        if (!$cells)
+            return [];
         $c = 0;
         $fields = [];
         foreach ($cells as $row) {
@@ -480,7 +486,7 @@ class Convert
                 foreach ($row as $i => $value)
                     if (isset($keys[$i]))
                         $cols[$keys[$i]] = $value;
-                    //else $cols[$keys[$i] = $i] = $value;
+                //else $cols[$keys[$i] = $i] = $value;
                 $fields[] = $cols;
             }
             $c++;
@@ -494,6 +500,16 @@ class Convert
         $cells = [];
         $length = strlen($svString);
         $index = 0;
+        $normalize = function ($v) {
+            if (($v . "") === "")
+                return null;
+            else if (preg_match("/^\d+$/", $v))
+                return intval($v);
+            else if (preg_match("/^\d*.?\d+$/", $v))
+                return floatval($v);
+            else
+                return $v;
+        };
         while ($index < $length) {
             $row = [];
             $column = '';
@@ -512,7 +528,7 @@ class Convert
                             }
                         } else {
                             $inEnclosure = false;
-                            $row[] = $column;
+                            $row[] = $normalize($column);
                             break;
                         }
                     } else {
@@ -528,11 +544,11 @@ class Convert
                             $column .= $char;
                         }
                     } else {
-                        $row[] = $column;
+                        $row[] = $normalize($column);
                         break;
                     }
                 } else if ($char == $delimiter) {
-                    $row[] = $column;
+                    $row[] = $normalize($column);
                     $column = '';
                 } else if ($char == "\r") {
                     if ($index < $length) {
@@ -541,17 +557,17 @@ class Convert
                             $index++;
                         }
                     }
-                    $row[] = $column;
+                    $row[] = $normalize($column);
                     break;
                 } else if ($char == $eol) {
-                    $row[] = $column;
+                    $row[] = $normalize($column);
                     break;
                 } else {
                     $column .= $char;
                 }
 
                 if ($index == $length) {
-                    $row[] = $column;
+                    $row[] = $normalize($column);
                     break;
                 }
             } while ($index < $length);
@@ -617,7 +633,7 @@ class Convert
 
     public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
-        $path = $path ?? Local::CreateAddress("table", ".csv", random: false);
+        $path = $path ?? Local::GenerateAddress("table", ".csv", random: false);
         $fstream = fopen($path, 'r+b');
         foreach ($cells as $fields)
             fputcsv($fstream, $fields, $delimiter, $enclosure, "\\", $eol);

@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Library;
+<?php
+namespace MiMFa\Library;
 /**
  * A simple library to create default and standard Script parts
  *@copyright All rights are reserved for MiMFa Development Group
@@ -19,12 +20,13 @@ class Script
             return "null";
         else {
             if (is_string($object)) {
-                if($res = preg_find('/(?<=^\\$\{)[\W\w]+(?=\}$)/', $object)) return $res;
+                if ($res = preg_find('/(?<=^\\$\{)[\W\w]+(?=\}$)/', $object))
+                    return $res;
                 $sp = "`";
                 $object = str_replace("\\", "\\\\", $object);
                 // if(preg_match("/\n|(\\$\\{[\w\W]*\\})/",$object))
                 //     $object = str_replace(["`", '$'], ["\\`", '\\$'], $object);
-                if(preg_match("/\n|(\\$\{[\w\W]*\})/",$object))
+                if (preg_match("/\n|(\\$\{[\w\W]*\})/", $object))
                     $object = str_replace("`", "\\`", $object);
                 else
                     $object = str_replace($sp = "\"", "\\\"", $object);
@@ -35,12 +37,24 @@ class Script
                 return $object;
             if (is_subclass_of($object, "\Base"))
                 return $object->ToString();
-            if (is_array($object) && count($object) > 0 && !is_int(array_key_first($object))) 
-                return join("", ["{", join(", ", loop($object, function ($v, $k) use($args){ return  Convert::ToStatic($k).":".self::Convert($v, ...$args);})), "}"]);
-            if (is_countable($object) || is_iterable($object)) 
-                return join("", ["[", join(", ", loop($object, function ($o) use($args){ return self::Convert($o, ...$args);})), "]"]);
+            if (is_array($object) && count($object) > 0 && !is_int(array_key_first($object)))
+                return join("", [
+                    "{",
+                    join(", ", loop($object, function ($v, $k) use ($args) {
+                        return Convert::ToStatic($k) . ":" . self::Convert($v, ...$args);
+                    })),
+                    "}"
+                ]);
+            if (is_countable($object) || is_iterable($object))
+                return join("", [
+                    "[",
+                    join(", ", loop($object, function ($o) use ($args) {
+                        return self::Convert($o, ...$args);
+                    })),
+                    "]"
+                ]);
             if (is_callable($object) || $object instanceof \Closure)
-                return Internal::MakeScript($object, $args, direct:true);
+                return Internal::MakeScript($object, $args, direct: true);
             return json_encode($object, flags: JSON_OBJECT_AS_ARRAY);
         }
     }
@@ -101,7 +115,8 @@ class Script
     public static function Points($content)
     {
         return join(",", loop($content, function ($row, $i) {
-            return self::Point($row, $i); }));
+            return self::Point($row, $i);
+        }));
     }
     /**
      * To convert parameters to scripts
@@ -137,40 +152,81 @@ class Script
         return isEmpty($val) ? "0" : ($isarr ? "[" + $val + "]" : $val);
     }
     /**
-     * To import a file from the client device
+     * To upload a file from the client device
      * @param mixed $formats The acceptable formats like ".jpg,.png" or "image/*"
      * @param bool $multiple Allow to select multiple files
      * @param bool $binary To read the file as binary data
      * @param int $timeout The timeout for uploading the file in milliseconds
      * @return string The script part
      */
-    public static function ImportFile($formats = null, $multiple = false, $binary = false, $timeout = 60000){
-        return "            var input = document.createElement('input');
+    public static function Upload($formats = null, $target = null, $successScript = null, $errorScript = null, $readyScript = null, $progressScript = null, $timeout = 60000, $multiple = false, $binary = false)
+    {
+        return "
+            var input = document.createElement('input');
             input.setAttribute('Type' , 'file');
-            input.setAttribute('accept', ".self::Convert($formats).");
+            input.setAttribute('accept', " . self::Convert($formats) . ");
             input.onchange = evt => {
-                ".($multiple?"const files = input.files;
-                for(const file of files)":"const [file] = input.files;")."
-                if (file) {
-                    ".($binary?"const reader = new FileReader();
-                    reader.addEventListener('load', (event) => {
-                        const binaryData = event.target.result;
-                        // send binary data as a base64 string
-                        const base64Data = btoa(String.fromCharCode(...new Uint8Array(binaryData)));
-                        sendFile(null, 'data=' + encodeURIComponent(base64Data), null, null, null, null, null, $timeout);
-                    });
-                    reader.readAsArrayBuffer(file);":
-                    "//URL.createObjectUrl(file);
+                " . ($multiple ? "const files = input.files;
+                for(const file of files)" : "const [file] = input.files;") . "
+                if (file) {" . ($binary ? "
                     const reader = new FileReader();
                     reader.addEventListener('load', (event) => {
-                        sendFile(null, 'data=' + encodeURIComponent(event.target.result), null, null, null, null, null, $timeout);
+                        const binaryData = event.target.result;
+                        const base64Data = btoa(String.fromCharCode(...new Uint8Array(binaryData)));
+                        sendFileRequest(" . self::Convert($target) . ", 'data=' + encodeURIComponent(base64Data), null, " . ($successScript ?? "null") . ", " . ($errorScript ?? "null") . ", " . ($readyScript ?? "null") . ", " . ($progressScript ?? "null") . ", $timeout);
                     });
-                    reader.readAsText(file);")."
+                    reader.readAsArrayBuffer(file);
+                    " : "
+                    //URL.createObjectUrl(file);
+                    const reader = new FileReader();
+                    reader.addEventListener('load', (event) => {
+                        sendFile(null, 'data=' + encodeURIComponent(event.target.result), null, " . ($successScript ?? "null") . ", " . ($errorScript ?? "null") . ", " . ($readyScript ?? "null") . ", " . ($progressScript ?? "null") . ", $timeout);
+                    });
+                    reader.readAsText(file);") . "
                 }
             }
             _(input).trigger('click');
             return false;
         ";
+    }
+
+    /**
+     * To download a file from the client device
+     * @param string|array|null $object The source file or files
+     * @param string|bool|null $destinationAddress Set true to store in public directory,
+     * false to store in temp,
+     * null to dont store,
+     * or an address otherwise
+     * @param bool $binary To write the data as a binary file
+     * @return string|null The file content, address (if sent null for $destinationAddress) or null otherwise
+     */
+    public static function Download($object = null, $destinationAddress = null, $binary = false)
+    {
+        if (is_null($object))
+            $object = receiveFile();
+        $objectName = get($object, "name") ?? "upload";
+        if (is_array($object))
+            $object = get($object, "data");
+        if (!$object)
+            return null;
+        $object = urldecode($object);
+        if ($binary && (($object = base64_decode($object)) === false))
+            return null;
+
+        if ($destinationAddress === true) {
+            if (Local::Write($destinationAddress = Local::GenerateAddress($objectName, "", \_::$Address->PublicAddress), $object))
+                return $destinationAddress;
+            else
+                return null;
+        } elseif ($destinationAddress === false) {
+            if (Local::Write($destinationAddress = Local::GenerateAddress($objectName, "", \_::$Address->TempAddress), $object))
+                return $destinationAddress;
+            else
+                return null;
+        } elseif ($destinationAddress)
+            if (!Local::Write($destinationAddress, $object))
+                return null;
+        return $object;
     }
     /**
      * Show an alert dialog
@@ -208,7 +264,7 @@ class Script
      */
     public static function Log($message = "", $type = null)
     {
-        switch($type = strtolower($type??"")){
+        switch ($type = strtolower($type ?? "")) {
             case "message":
                 $type = "info";
                 break;

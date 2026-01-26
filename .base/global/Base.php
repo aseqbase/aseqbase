@@ -11,7 +11,7 @@ library("Revise");
  *○ Use @param datatype $paramname [description]: to indicate comments of a function parameter
  *○ Use @small, @medium, @large: to indicate the size of input box
  *○ Use @category categoryname: to specify a category to organize the documented element's package into
- *○ Use @internal: to indicate the property should not be visible in the front-end
+ *○ Use @internal to indicate the property should not be visible in the front-end
  *○ Use @access {public, private, protected}: to indicate access control documentation for an element, for example @access private prevents documentation of the following element (if enabled)
  *○ Use @version versionstring [unspecified format]: to indicate the version of any element, including a page-level block
  *○ Use @example /path/to/example.php [description]: to include an external example file with syntax highlighting
@@ -30,11 +30,13 @@ class Base extends \ArrayObject
 {
 	/**
 	 * The main name of the object
+	 * @internal
 	 * @var string|null
 	 */
 	public $Name = null;
 	/**
 	 * The main router of the object
+	 * @internal
 	 * @var Router
 	 */
 	public $Router = null;
@@ -52,7 +54,13 @@ class Base extends \ArrayObject
 	 * @var bool|null
 	 */
 	public $Visual = true;
+	/**
+	 * @internal
+	 */
 	public $Rendered = 0;
+	/**
+	 * @internal
+	 */
 	public $Handled = 0;
 
 	function __construct($setDefaults = true, $setRevises = true)

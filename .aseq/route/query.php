@@ -14,6 +14,6 @@ return route("search", [
         "Title" => "Query Results",
         ...$viewData
     ],
-    ...$data
+    ...($data??[])
 ]);
 ?>

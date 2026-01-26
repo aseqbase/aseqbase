@@ -35,43 +35,59 @@ class Template extends \Base
 {
     /**
      * The window title
+     * @field value
+     * @category Document
      * @var string|null
      */
     public $WindowTitle = null;
     /**
      * The window icon
+     * @field image
+     * @category Document
      * @var string|null
      */
     public $WindowLogo = null;
 
     /**
      * Leave null for default action or replace an action to change
-     * @var callable|null
+     * @field content
+     * @category Document
+     * @var mixed
      */
     public $Initial = null;
     /**
      * Leave null for default action or replace an action to change
-     * @var callable|null
+     * @field content
+     * @category Document
+     * @var mixed
      */
     public $Main = null;
     /**
      * Leave null for default action or replace an action to change
-     * @var callable|null
+     * @field content
+     * @category Document
+     * @var mixed
      */
     public $Final = null;
     /**
      * Leave null for default action or replace an action to change
-     * @var callable|null
+     * @field content
+     * @category Part
+     * @var mixed
      */
     public $Header = null;
     /**
      * Leave null for default action or replace an action to change
-     * @var callable|null
+     * @field content
+     * @category Part
+     * @var mixed
      */
     public $Content = null;
     /**
      * Leave null for default action or replace an action to change
-     * @var callable|null
+     * @field content
+     * @category Part
+     * @var mixed
      */
     public $Footer = null;
 
@@ -80,6 +96,7 @@ class Template extends \Base
         parent::__construct($setDefaults, $setRevises);
         component("Global");
         component("Live");
+		\MiMFa\Library\Revise::Load($this);
     }
     public function Handler($received = null)
     {
@@ -91,27 +108,27 @@ class Template extends \Base
     public function Render()
     {
         if ($this->Initial)
-            response($this->Initial);
+            struct($this->Initial);
         else
             $this->RenderInitial();
         if ($this->Main)
-            response($this->Main);
+            struct($this->Main);
         else
             $this->RenderMain();
         if ($this->Header)
-            response($this->Header);
+            struct($this->Header);
         else
             $this->RenderHeader();
         if ($this->Content)
-            response($this->Content);
+            struct($this->Content);
         else
             $this->RenderContent();
         if ($this->Footer)
-            response($this->Footer);
+            struct($this->Footer);
         else
             $this->RenderFooter();
         if ($this->Final)
-            response($this->Final);
+            struct($this->Final);
         else
             $this->RenderFinal();
     }
@@ -134,9 +151,13 @@ class Template extends \Base
             text-align: unset;
             direction: var(--dir);
         }
-        h1, h2, h3, h4, h5, h6 {
+        h1, h2, h3, h4, h5, h6, .heading {
             font-family: var(--font-special), var(--font);
             line-height: 1.2em;
+            text-align: start;
+        }
+        hidden, [hidden] {
+            display: none !important;
         }
         .tooltip {
             position: absolute;
@@ -281,10 +302,10 @@ class Template extends \Base
             font-family: var(--font-input), var(--font-special-input), var(--font);
             line-height: 1.5em;
         }
-        :is(input,.input):is([type='radiobutton'], [type='checkbox']){
+        :is(input,.input):is(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
             width: fit-content;
         }
-        .input:not([type='radiobutton'], [type='checkbox']){
+        .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
             cursor: text;
             background-color: var(--back-color-input);
             color: var(--fore-color-input);

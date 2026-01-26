@@ -230,6 +230,7 @@ class Navigation extends Module
 				flex-wrap: wrap;
 			}
 			.{$this->Name} .rangepanel .rangeinput{
+				background-color: var(--back-color-input);
 				" . ($this->AllowCount ? "min-width: 70%;max-width: 95%;" : "width: 100%;") . "
 			}
 			.{$this->Name} .rangepanel span{
@@ -243,15 +244,15 @@ class Navigation extends Module
 					height: var(--size-1);
 					overflow: hidden;
 					-webkit-appearance: none;
-					border-color: var(--back-color);
-					background-color: var(--fore-color-input);
+					border-color: var(--fore-color-input);
+					background-color: var(--back-color-input);
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} input[type='range']::-webkit-slider-runnable-track {
 					height: 100%;
 					-webkit-appearance: none;
-					color: var(--back-color-output);
-					background-color: var(--back-color-input);
+					color: var(--fore-color-input);
+					background-color: var(--fore-color-input);
 				}
 				.{$this->Name} input[type='range']::-webkit-slider-thumb {
 					aspect-ratio: 1;
@@ -260,28 +261,29 @@ class Navigation extends Module
 					cursor: pointer;
 					border-radius: var(--radius-5);
 					border: var(--border-1) var(--fore-color-input);
-					background-color: var(--back-color-input);
+					color: var(--fore-color-input);
+					background-color: var(--fore-color-input);
 					box-shadow: " . (\_::$Front->Translate->Direction == "rtl" ? "" : "-") . "100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-input);
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
 				.{$this->Name} input[type='range']:hover::-webkit-slider-thumb {
-					border-color: var(--fore-color-output);
-					background-color: var(--back-color-output);
+					border-color: var(--fore-color-input);
+					background-color: var(--fore-color-input);
 				}
 			}
 			/*FF*/
 			.{$this->Name} input[type='range']::-moz-range-progress {
-				background-color: var(--back-color-input);
+				background-color: var(--fore-color-input);
 			}
 			.{$this->Name} input[type='range']::-moz-range-track {
-				background-color: var(--fore-color-input);
+				background-color: var(--back-color-input);
 			}
 			/*IE*/
 			.{$this->Name} input[type='range']::-ms-fill-lower {
-				background-color: var(--back-color-input);
+				background-color: var(--fore-color-input);
 			}
 			.{$this->Name} input[type='range']::-ms-fill-upper {
-				background-color: var(--fore-color-input);
+				background-color: var(--back-color-input);
 			}
 			" : "") .
 			"

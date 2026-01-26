@@ -57,7 +57,7 @@ class Struct
                     $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
 
                     // Codes
-                    $object = preg_replace("/{$pre}(`{2,4})(\w*)\s?([\s\S]+)\s?{$pre}\1{$attrPatt}/iu", self::CodeBlock("$3", ["id" => "$4", "class" => "$5", "title" => "$2"], "$6"), $object); // Code blocks
+                    $object = preg_replace("/{$pre}(`{2,4})(\w*)\s?([\s\S]+)\s?{$pre}\1{$attrPatt}/iu", self::CodeBlock("$3", ["id" => "$4", "class" => "$5", "title" => "$2"], "$6"), $object) ?? $object; // Code blocks
                     $object = encode($object, $dic, pattern: $patt);// To keep all previous tags unchanged
                     $object = preg_replace_callback("/{$pre}(?<!`)(`)([^`\r\n]+)\1(?!`){$attrPatt}/u", function ($m) {
                         return self::Code($m[2], ["id" => ($m[3] ?? null), "class" => ($m[4] ?? null)], $m[5] ?? []);
@@ -79,7 +79,7 @@ class Struct
                     $object = encode($object, $dic, pattern: $patt);// To keep all previous tags unchanged
 
                     // Quotes
-                    $object = preg_replace("/{$pre}(\"{2,4})([^\"\r\n]*)\s?([\s\S]+)\s?{$pre}\1{$attrPatt}/iu", self::QuoteBlock("$3", ["id" => "$4", "class" => "$5", "title" => "$2"], "$6"), $object); // Code blocks
+                    $object = preg_replace("/{$pre}(\"{2,4})([^\"\r\n]*)\s?([\s\S]+)\s?{$pre}\1{$attrPatt}/iu", self::QuoteBlock("$3", ["id" => "$4", "class" => "$5", "title" => "$2"], "$6"), $object) ?? $object; // Code blocks
                     $object = encode($object, $dic, pattern: $patt);// To keep all previous tags unchanged
                     $object = preg_replace_callback(
                         "/{$pre}(?<!\")\"(?=\S)(.+?)(?<=\S)\"(?!\"){$attrPatt}/us",
@@ -196,8 +196,8 @@ class Struct
                     $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
                     
                     // Lines
-                    $object = preg_replace("/\s?^(\-{3,})(.+)\1{$attrPatt}(?=<|$)/imu", Struct::BreakLine("\$2", null, ["id" => "\$3", "class" => "\$4"], "\$5"), $object);
-                    $object = preg_replace("/\s?^\-{3,}{$attrPatt}(?=<|$)/im", Struct::Element(null, "hr", ["id" => "\$1", "class" => "\$2"], "\$3"), $object);
+                    $object = preg_replace("/\s?^(\-{3,})(.+)\1{$attrPatt}(?=<|$)/imu", Struct::BreakLine("\$2", null, ["id" => "\$3", "class" => "\$4"], "\$5"), $object)??$object;
+                    $object = preg_replace("/\s?^\-{3,}{$attrPatt}(?=<|$)/im", Struct::Element(null, "hr", ["id" => "\$1", "class" => "\$2"], "\$3"), $object)??$object;
                     
                     // Texts
                     // Strong: **text**
@@ -255,7 +255,7 @@ class Struct
                     $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
 
                     // Signs
-                    $object = preg_replace("/(\r\n)|(\n\r)|((?<!>))\r?\n\r?/", self::$Break, $object);
+                    $object = preg_replace("/(\r\n)|(\n\r)|((?<!>))\r?\n\r?/", self::$Break, $object)??$object;
 
                     return $fdir == \_::$Front->Translate->Direction ? decode($object, $dic) : self::Division(decode($object, $dic), ["class" => "be $fdir"]);
                 }
@@ -688,11 +688,11 @@ class Struct
     {
         return self::Meta("keywords", is_array($content) ? join(", ", $content) : $content, $attributes);
     }
-    public static function Script($content, $source = null, ...$attributes)
+    public static function Script($content = null, $source = null, ...$attributes)
     {
         return self::Element(Convert::ToString($content), "script", is_null($source) ? ["type" => "text/javascript"] : ["src" => $source], $attributes);
     }
-    public static function Style($content, $source = null, ...$attributes)
+    public static function Style($content = null, $source = null, ...$attributes)
     {
         if (isValid($content))
             return self::Element(Convert::ToString($content), "style", $attributes);
@@ -770,7 +770,7 @@ class Struct
                 "onmouseenter" => "this.classList.remove('$id');",
             ],
             $attributes
-        ) . self::Script("setTimeout(function(){ return document.querySelector('#$id.$id')?.remove();}, $wait);");
+        ) . self::Script("setTimeout(function(){ return document.querySelector('#$id.$id')?.remove();}, $wait); scrollThere('body>#$id');");
     }
     public static function Success($content, ...$attributes)
     {
@@ -2008,6 +2008,28 @@ class Struct
         return self::Element(__($content), "div", ["class" => "tooltip"], $attributes);
     }
     /**
+     * The \<PROGRESS\> HTML Tag
+     * @param float|null $value A number between 0 to 1
+     * @param mixed $content Main content of the tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Progress($value, $content = null,...$attributes)
+    {
+        return self::Element($content??"", "progress", ["class" => "progress"],is_null($value)?[]:["value" => $value], $attributes);
+    }
+    /**
+     * The \<HIDDEN\> HTML Tag
+     * @param mixed $value A machine readable value
+     * @param mixed $content Main content of the hidden tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Hidden($value, $content = null,...$attributes)
+    {
+        return self::Element($content??"", "hidden", ["class" => "hidden", "value" => $value], $attributes);
+    }
+    /**
      * The \<DATA\> HTML Tag
      * @param mixed $content Main content of tag
      * @param mixed $value A machine readable value
@@ -2185,9 +2207,12 @@ class Struct
                     return "text";
             else
                 return strtolower(gettype($value));
-        elseif (is_string($type))
-            return strtolower($type);
-        elseif (is_callable($type) || ($type instanceof \Closure))
+        elseif (is_string($type)){
+            $type = preg_replace("/(\bnull\s*\|)|(\|\s*null\b)|\?/i", "", $type);
+            if(str_contains($type, "|")) return "object";
+            else return strtolower($type);
+            //return strtolower(first(preg_split("/\|/", $type)));
+        }elseif (is_callable($type) || ($type instanceof \Closure))
             return self::InputDetector($type($type, $value), $value);
         elseif (is_object($type) || ($type instanceof \stdClass))
             return self::InputDetector(getValid($type, "Type", null), $value);
@@ -2421,8 +2446,8 @@ class Struct
                 }
             }
             $mt = preg_find("/(?<=[\w\W]\<)[\w\W]+(?=\>$)/i", trim($type), null);
-            $pos = strpos($type, "<");
             if (!isEmpty($mt)) {
+                $pos = strpos($type, "<");
                 $options = ["Type" => $mt, ...($options ?? [])];
                 $type = $pos > 0 ? first(str_split($type, $pos)) : "";
                 return self::Interactor(
@@ -2518,6 +2543,7 @@ class Struct
             case 'json':
                 $content = $dataOptions($options, $attributes) . self::JsonInput($key, Convert::ToString($value), $attributes);
                 break;
+            case 'mixed':
             case 'object':
                 $content = $dataOptions($options, $attributes) . self::ObjectInput($key, Convert::ToString($value), $attributes);
                 break;
@@ -2533,14 +2559,11 @@ class Struct
                 break;
             case 'size':
             case 'font':
-            case 'mixed':
-
             case 'input':
                 $content = $dataOptions($options, $attributes) . self::Input($key, $value, null, $attributes);
                 break;
             case 'line':
             case 'value':
-            case 'string':
             case 'text':
             case 'singleline':
             case 'shorttext':
@@ -2555,6 +2578,7 @@ class Struct
             case 'lines':
             case 'texts':
             case 'mediumtext':
+            case 'string':
             case 'strings':
             case 'multiline':
             case 'textarea':
@@ -2622,13 +2646,13 @@ class Struct
                 break;
             case 'int':
             case 'integer':
-                $min = PHP_INT_MIN;
-                $max = PHP_INT_MAX;
+                $min = null;
+                $max = null;
                 if (is_array($options) && count($options)) {
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::IntInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
+                $content = self::IntInput($key, $value, [...(is_null($min)?[]:['min' => $min]), ...(is_null($max)?[]:['max' => $max])], $attributes);
                 break;
             case 'short':
                 $min = -255;
@@ -2647,7 +2671,7 @@ class Struct
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::NumberInput($key, $value, ['min' => $min, 'max' => $max], $attributes);
+                $content = self::NumberInput($key, $value, [...(is_null($min)?[]:['min' => $min]), ...(is_null($max)?[]:['max' => $max])], $attributes);
                 break;
             case 'range':
                 $min = 0;
@@ -2795,6 +2819,10 @@ class Struct
             case 'search':
                 $content = $dataOptions($options, $attributes) . self::SearchInput($key, $value, $attributes);
                 break;
+            case 'progress':
+            case 'progressbar':
+                $content = self::Progress($value, $key, $attributes);
+                break;
             default:
                 if (is_string($type))
                     if (preg_match("/[^a-z\d\-_:\/\\\]/i", $type))
@@ -2901,6 +2929,7 @@ class Struct
         $sid = "_" . getId();
         return self::Style("
             .contentinput:has(#$eid){
+                background-color: var(--back-color);
                 display: flex;
                 padding: 0px;
             }
@@ -3019,6 +3048,8 @@ class Struct
             .markdowninput:has(#$id)>.tools>.tile>*{
                 font-size: var(--size-0);
                 padding: calc(var(--size-0) / 4);
+                line-height: 1em;
+                border: none;
             }
             .markdowninput:has(#$id)>.tools>.tile>.button{
                 font-size: var(--size-2);
@@ -3041,6 +3072,16 @@ class Struct
             }
         ") . self::Division(
             self::Tiles($options ?: [
+                self::Icon("align-left", "{$id}_injectInLines('!{','} @{be align left}')", ["Tooltip" => "Align Left"]),
+                self::Icon("align-center", "{$id}_injectInLines('!{','} @{be align center}')", ["Tooltip" => "Align Center"]),
+                self::Icon("align-right", "{$id}_injectInLines('!{','} @{be align right}')", ["Tooltip" => "Align Right"]),
+                self::Icon("align-justify", "{$id}_injectInLines('!{','} @{be align justify}')", ["Tooltip" => "Align Justify"]),
+                self::Icon("chevron-left", "{$id}_injectInLines('!{','} @{be rtl}')", ["Tooltip" => "Right to Left Direction"]),
+                self::Icon("chevron-right", "{$id}_injectInLines('!{','} @{be ltr}')", ["Tooltip" => "Left to Right Direction"]),
+                self::Icon("list-ul", "{$id}_injectInLines('\\t- ')", ["Tooltip" => "Unordered List"]),
+                self::Icon("list-ol", "{$id}_injectInLines( '\\t+ ')", ["Tooltip" => "Ordered List"]),
+                self::Icon("indent", "{$id}_injectInLines('\\t')", ["Tooltip" => "Indention"]),
+                self::Icon("outdent", "{$id}_replaceInLines(/^\\t/, '')", ["Tooltip" => "Outdention"]),
                 self::Icon("bold", "{$id}_injectInText('*','*')", ["Tooltip" => "Bold"]),
                 self::Icon("italic", "{$id}_injectInText('+','+')", ["Tooltip" => "Italic"]),
                 self::Icon("underline", "{$id}_injectInText('_','_')", ["Tooltip" => "Underline"]),
@@ -3054,24 +3095,13 @@ class Struct
                 self::Button("H4", "{$id}_injectInLines('#### ')", ["Tooltip" => "Heading 4"]),
                 self::Button("H5", "{$id}_injectInLines('##### ')", ["Tooltip" => "Heading 5"]),
                 self::Button("H6", "{$id}_injectInLines('###### ')", ["Tooltip" => "Heading 6"]),
-                self::$Break,
-                self::Icon("align-left", "{$id}_injectInLines('!{','} @{be align left}')", ["Tooltip" => "Align Left"]),
-                self::Icon("align-center", "{$id}_injectInLines('!{','} @{be align center}')", ["Tooltip" => "Align Center"]),
-                self::Icon("align-right", "{$id}_injectInLines('!{','} @{be align right}')", ["Tooltip" => "Align Right"]),
-                self::Icon("align-justify", "{$id}_injectInLines('!{','} @{be align justify}')", ["Tooltip" => "Align Justify"]),
-                self::Icon("chevron-left", "{$id}_injectInLines('!{','} @{be ltr}')", ["Tooltip" => "Left to Right Direction"]),
-                self::Icon("chevron-right", "{$id}_injectInLines('!{','} @{be rtl}')", ["Tooltip" => "Right to Left Direction"]),
-                self::Icon("list-ul", "{$id}_injectInLines('\\t- ')", ["Tooltip" => "Unordered List"]),
-                self::Icon("list-ol", "{$id}_injectInLines( '\\t+ ')", ["Tooltip" => "Ordered List"]),
-                self::Icon("indent", "{$id}_injectInLines('\\t')", ["Tooltip" => "Indention"]),
-                self::Icon("outdent", "{$id}_replaceInLines(/^\\t/, '')", ["Tooltip" => "Outdention"]),
-                self::Icon("minus", "{$id}_injectOutText('\\n---','---\\n')", ["Tooltip" => "Horizontal Rule"]),
                 self::Icon("quote-right", "{$id}_injectOutLines('\"\"\"', '\"\"\"')", ["Tooltip" => "Block Quote"]),
                 self::Icon("file-code", "{$id}_injectOutLines('```', '```')", ["Tooltip" => "Code Block"]),
                 self::Icon("code", "{$id}_injectInLines(' > ')", ["Tooltip" => "Code Script"]),
                 self::Icon("link", "var url=prompt('Enter the URL:','https://'); if(url){ {$id}_injectInText('[',']('+url+')');}", ["Tooltip" => "Link"]),
                 self::Icon("square", "var act=prompt('Enter the JS Action or URL:','https://'); if(act){ _('#$id').selectedText( {$id}_injectInText('!Button[',']('+act+')');}", ["Tooltip" => "Button"]),
                 self::Icon("image", "var url=prompt('Enter the Media URL or Icon name:','https://'); if(url){ {$id}_injectInText('![',']('+url+')');}", ["Tooltip" => "Image, Video, Audio, Icon, ..."]),
+                self::Icon("minus", "{$id}_injectOutText('\\n---','---\\n')", ["Tooltip" => "Horizontal Rule"]),
             ], ["class"=>"tools"]) .
             self::Element($value ?? "", "textarea", [
                 "id" => $id,
@@ -3222,7 +3252,7 @@ class Struct
         return self::Action(
             Struct::Icon($value ? "toggle-on" : "toggle-off", null, ["class" => $class]),
             "icon_$class = document.querySelector('.icon.$class');
-            cb_$class = document.querySelector('.checkinput.$class');
+            cb_$class = document.querySelector('.switchinput.$class');
                     if(cb_$class.value == '0'){
                         icon_$class.classList.remove('fa-toggle-off');
                         icon_$class.classList.add('fa-toggle-on');
@@ -3232,14 +3262,14 @@ class Struct
                         icon_$class.classList.add('fa-toggle-off');
                         cb_$class.value = 0;
                     }",
-            ["class" => "checkinput"],
+            ["class" => "switchinput"],
             [
                 "Class" => self::GetAttribute($attributes, "Class"),
                 "Style" => self::PopAttribute($attributes, "Style")
             ]
         ) .
             self::Input($key, $value ? 1 : 0, "hidden", [
-                "class" => "checkinput $class",
+                "class" => "switchinput $class",
                 "onchange" => "icon_$class = document.querySelector('.icon.$class');
                     if(this.checked){
                         icon_$class.classList.remove('fa-toggle-off');
@@ -3276,7 +3306,7 @@ class Struct
                 else
                     $ops[$k] = $v ?? $value;
         return join(PHP_EOL, loop($ops, function ($v, $k) use ($key, $attributes) {
-            return self::Label($k, self::SwitchInput("{$key}[]", $v, ...$attributes), ["class" => "checksinput"]);
+            return self::Label($k, self::SwitchInput("{$key}[]", $v, ...$attributes), ["class" => "switchesinput"]);
         }));
     }
     /**
@@ -4621,7 +4651,7 @@ class Struct
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading3($title) .
-                script(null, asset(\_::$Address->PackageDirectory, "Chart/Chart.js")) .
+                script(null, asset(\_::$Address->StructDirectory, "Chart/Chart.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {

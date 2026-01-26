@@ -18,59 +18,75 @@ library("Translate");
  */
 abstract class FrontBase
 {
+	/**
+	 * Additional items to use in back-end
+	 * @var array
+	 */
 	public $Items = [];
 
 	/**
 	 * The website owner name
 	 * @var mixed
+	 * @category Information
 	 */
 	public $Owner = null;
 	/**
 	 * The website owner full name
 	 * @var mixed
+	 * @category Information
 	 */
 	public $FullOwner = null;
 	/**
 	 * Descriptions about the website owner
-	 * @field strings
+	 * @field texts
+	 * @category Information
 	 * @var mixed
 	 */
 	public $OwnerDescription = null;
 	/**
 	 * A full version of descriptions about the website owner
-	 * @field strings
+	 * @field content
+	 * @category Information
 	 * @var mixed
 	 */
 	public $FullOwnerDescription = null;
 	/**
 	 * The website owner and name
+	 * @category Information
 	 * @var mixed
 	 */
 	public $Name = null;
 	/**
 	 * The website full owner and full name
+	 * @category Information
 	 * @var mixed
 	 */
 	public $FullName = null;
 	/**
 	 * The short slogan of the website
+	 * @field string
+	 * @category Information
 	 * @var mixed
 	 */
 	public $Slogan = null;
 	/**
 	 * The more detailed slogan of the website
-	 * @field strings
+	 * @field texts
+	 * @category Information
 	 * @var mixed
 	 */
 	public $FullSlogan = null;
 	/**
 	 * The short description of the website
+	 * @field texts
+	 * @category Information
 	 * @var mixed
 	 */
 	public $Description = null;
 	/**
 	 * The more detailed description of the website
-	 * @field strings
+	 * @field content
+	 * @category Information
 	 * @var mixed
 	 */
 	public $FullDescription = null;
@@ -91,27 +107,62 @@ abstract class FrontBase
 	 * @category Security
 	 */
 	public $ReceiverEmail = null;
+
+	
+	/**
+	 * The website default template class
+	 * @default "Template"
+	 * @field value
+	 * @category Template
+	 * @var string
+	 */
+	public $DefaultTemplate = "Template";
+	/**
+	 * The website view name
+	 * @default "main"
+	 * @field value
+	 * @category Template
+	 * @var string
+	 */
+	public $DefaultViewName = "main";
+	/**
+	 * @field value
+	 * @category Template
+	 * @var string
+	 */
+	public $DefaultSourceSelector = "body";
+	/**
+	 * @field value
+	 * @category Template
+	 * @var string
+	 */
+	public $DefaultDestinationSelector = "body";
+
 	/**
 	 * The main path
 	 * @field path
+	 * @category Information
 	 * @var mixed
 	 */
 	public $Path = null;
 	/**
 	 * The website main logo path
-	 * @field path
+	 * @field image
+	 * @category Template
 	 * @var mixed
 	 */
 	public $LogoPath = "asset/logo/logo.png";
 	/**
 	 * The website brand logo path
-	 * @field path
+	 * @field image
+	 * @category Template
 	 * @var mixed
 	 */
 	public $BrandLogoPath = "asset/logo/brand-logo.png";
 	/**
 	 * The website full logo path
-	 * @field path
+	 * @field image
+	 * @category Template
 	 * @var mixed
 	 */
 	public $FullLogoPath = "asset/logo/full-logo.png";
@@ -119,6 +170,7 @@ abstract class FrontBase
 	/**
 	 * The main KeyWords of the website, these will effect on SEO and views
 	 * @field array
+	 * @category Information
 	 * @var array
 	 */
 	public $KeyWords = [];
@@ -129,58 +181,71 @@ abstract class FrontBase
 	 * @category Language
 	 */
 	public $Encoding = "utf-8";
+	/**
+	 * @category Template
+	 * @var int
+	 */
 	public $AnimationSpeed = 0;
+	/**
+	 * @category Template
+	 */
 	public $DetectMode = false;
+	/**
+	 * @category Template
+	 */
 	public $SwitchMode = null;
+	/**
+	 * @category Template
+	 * @field short
+	 */
 	public $DefaultMode = null;
-	public $CurrentMode = null;
 	/**
-	 * The website default template class
-	 * @var string
-	 * @default "Template"
-	 * @category General
+	 * @category Template
+	 * @field short
 	 */
-	public $DefaultTemplate = "Template";
-	/**
-	 * The website view name
-	 * @var string
-	 * @default "main"
-	 * @category General
-	 */
-	public $DefaultViewName = "main";
-	public $DefaultSourceSelector = "body";
-	public $DefaultDestinationSelector = "body";
 
+	public $CurrentMode = null;
+
+	/**
+	 * @field value
+	 * @category Template
+	 * @var string
+	 */
 	public $SwitchRequest = "SwitchMode";
 
 	/**
 	 * Default response headers
 	 * @internal
+	 * @category Render
 	 * @var array
 	 */
 	public $Headers = [];
 	/**
 	 * Default page head Packages
-	 * @field html
 	 * @internal
+	 * @field html
+	 * @category Render
 	 * @var array
 	 */
 	public $Libraries = [];
 	/**
 	 * The custom head packages
 	 * @field html
+	 * @category Render
 	 * @var array
 	 */
 	public $Initials = [];
 	/**
 	 * The custom top of body's tags
 	 * @field html
+	 * @category Render
 	 * @var array
 	 */
 	public $Mains = [];
 	/**
 	 * The custom top of body's tags
 	 * @field html
+	 * @category Render
 	 * @var array
 	 */
 	public $Finals = [];
@@ -189,6 +254,7 @@ abstract class FrontBase
 	 * Full Colors Palette
 	 * @field array<color>
 	 * @template array [Black, Red, Green, Blue, Yellow, Cyan, Violet, White]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $ColorPalette = array("#212529", "#dc3545", "#198754", "#0d6efd", "#ffc107", "#0dcaf0", "#6f42c1", "#f8f9fa");
@@ -196,6 +262,7 @@ abstract class FrontBase
 	 * Fore Colors Palette
 	 * @field array<color>
 	 * @template array [normal, inside, outside, special, special-input, special-output]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $ForeColorPalette = array("#151515", "#202020", "#101010", "#040506", "#3aa3e9", "#fdfeff");
@@ -203,6 +270,7 @@ abstract class FrontBase
 	 * Back Colors Palette
 	 * @field array<color>
 	 * @template array [normal, inside, outside, special, special-input, special-output]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $BackColorPalette = array("#fdfeff", "#fafbfc", "#fdfeff", "#fafcfd", "#fdfeff", "#3aa3e9");
@@ -210,6 +278,7 @@ abstract class FrontBase
 	 * Fonts Palette
 	 * @field array<font>
 	 * @template array [normal, inside, outside]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $FontPalette = array("'Dubai-Light', sans-serif", "'Dubai', sans-serif", "'Dubai', sans-serif");
@@ -217,6 +286,7 @@ abstract class FrontBase
 	 * Sizes Palette
 	 * @field array<size>
 	 * @template array [sm, n, lg, xl, xxl,...]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $SizePalette = array("2.3vh", "2.4vh", "2.6vh", "3vh", "3.6vh", "4.4vh", "5.4vh");
@@ -225,6 +295,7 @@ abstract class FrontBase
 	 * @field array<{'size' 'size' 'size' 'color'}>
 	 * @field array<text>
 	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $ShadowPalette = array("none", "4px 7px 20px #00000005", "4px 7px 20px #00000015", "4px 7px 20px #00000030", "5px 10px 25px #00000030", "5px 10px 25px #00000050", "5px 10px 50px #00000050");
@@ -233,6 +304,7 @@ abstract class FrontBase
 	 * @field array<{'size', ['solid','double','dotted','dashed']}>
 	 * @field array<text>
 	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $BorderPalette = array("0px", "1px solid", "2px solid", "5px solid", "10px solid", "25px solid");
@@ -240,6 +312,7 @@ abstract class FrontBase
 	 * Radiuses Palette
 	 * @field array<size>
 	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $RadiusPalette = array("unset", "3px", "5px", "25px", "50%", "100%");
@@ -247,6 +320,7 @@ abstract class FrontBase
 	 * Transitions Palette
 	 * @field array<text>
 	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $TransitionPalette = array("none", "all .25s linear", "all .5s linear", "all .75s linear", "all 1s linear", "all 1.5s linear");
@@ -254,6 +328,7 @@ abstract class FrontBase
 	 * Overlays Palette
 	 * @field array<path>
 	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $OverlayPalette = array("/asset/overlay/glass.png", "/asset/overlay/cotton.png", "/asset/overlay/cloud.png", "/asset/overlay/wings.svg", "/asset/overlay/sands.png", "/asset/overlay/dirty.png");
@@ -261,6 +336,7 @@ abstract class FrontBase
 	 * Patterns Palette
 	 * @field array<path>
 	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
 	 * @var mixed
 	 */
 	public $PatternPalette = array("/asset/pattern/main.svg", "/asset/pattern/doddle.png", "/asset/pattern/doddle-fantasy.png", "/asset/pattern/triangle.png", "/asset/pattern/slicksline.png", "/asset/pattern/doddle-mess.png");
@@ -268,6 +344,7 @@ abstract class FrontBase
 	/**
 	 * A simple library to Session management
 	 * @internal
+	 * @category Language
 	 */
 	public \MiMFa\Library\Translate $Translate;
 	/**
@@ -276,8 +353,18 @@ abstract class FrontBase
 	 * @category Language
 	 */
 	public $AllowTranslate = false;
+	/**
+	 * @category Language
+	 * @field value
+	 * @var string
+	 */
 	public $TranslateTableName = "Translate_Lexicon";
+	/**
+	 * @category Language
+	 * @field value
+	 */
 	public $TranslateTableNamePrefix = null;
+
 	/**
 	 * Allow to detect the client language automatically
 	 * @var bool

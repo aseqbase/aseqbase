@@ -18,6 +18,7 @@ class PrePage extends Module
 				padding: var(--size-0) var(--size-3);
 			}
 			.{$this->Name}>.rack{
+			    text-align: center;
 				align-items: center;
 				gap: var(--size-max);
 			}

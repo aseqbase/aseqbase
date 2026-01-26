@@ -92,15 +92,15 @@ class SignInForm extends Form{
         if($this->AllowInternalMethod){
 			yield $this->SignatureValue?
 				Struct::HiddenInput("Signature", $this->SignatureValue):
-				Struct::LargeSlot(
+				Struct::Division(
 					Struct::Label($this->SignatureLabel, "Signature" , ["class"=>"prepend"]).
 					Struct::TextInput("Signature", $this->SignatureValue, ["placeholder"=> $this->SignaturePlaceHolder, "autocomplete"=>"username"])
-				, ["class"=>"field col"]);
+				, ["class"=>"field"]);
 			yield $this->PasswordValue?
-				Struct::HiddenInput("Password", $this->PasswordValue):Struct::LargeSlot(
+				Struct::HiddenInput("Password", $this->PasswordValue):Struct::Division(
 					Struct::Label($this->PasswordLabel, "Password" , ["class"=>"prepend"]).
 					Struct::SecretInput("Password", $this->PasswordValue, ["placeholder"=> $this->PasswordPlaceHolder, "autocomplete"=>"password"])
-				, ["class"=>"field col"]);
+				, ["class"=>"field"]);
 		}
 		yield from parent::GetFields();
     }

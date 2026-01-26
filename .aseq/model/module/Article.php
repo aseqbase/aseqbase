@@ -11,27 +11,57 @@ module("Content");
  */
 class Article extends Content
 {
+     public $Class = null;
      public $Root = "/post/";
 
-     public function GetStyle(){
-          return parent::GetStyle().Struct::Style("
-          .{$this->Name} :is(.title, .description, .title a:not(.button), .description a:not(.button)) {
+     public function GetStyle()
+     {
+          return parent::GetStyle() . Struct::Style("
+          .{$this->Name}{
+               position: relative;
+               inset: 0;
+               display: contents;
+               height: fit-content;
+               width: 100%;
+               width: -webkit-fill-available;
+          }
+          .{$this->Name} .heading{
+               text-align: start;
+          }
+          .{$this->Name} .header.cover{
+               position: relative;
+               width: 100%;
+          }
+          .{$this->Name} .header.cover :is(.title, .description, .title a:not(.button), .description a:not(.button)) {
                color: var(--color-white);
           }
-          .{$this->Name} .title{
-               margin-top: 2vmax;
+          .{$this->Name} .header.cover>.division{
+               position: initial !important;
+          }
+          .{$this->Name} .header.cover>*>.container{
+               padding: max(calc(4 * var(--size-max)), 150px) var(--size-3) var(--size-0);
+          }
+          .{$this->Name} .header.cover>*>.container *{
+               text-align: start;
+          }
+          .{$this->Name} .header.cover .title{
                margin-bottom: 0px;
           }
-          .{$this->Name} .qb-article-header.cover{
-               position: relative;
-               top: calc(-1 * var(--size-4));
-               left: calc(-1 * max(2vw,var(--size-3)));
-               right: calc(-1 * max(2vw,var(--size-3)));
-               width: calc(100% + 2 * max(2vw, var(--size-3)));
-               padding: calc(4 * var(--size-4)) var(--size-2) var(--size-2);
+          .{$this->Name} .header.cover .description{
+               margin-top: var(--size-0);
+               font-size: var(--size-1);
+               font-weight: normal;
+               max-width: 500px;
+               text-align: start;
           }
-          .{$this->Name} .qb-article-header.cover>.division{
-               position: initial !important;
+          .{$this->Name} .header.cover .description *{
+               margin: 0px;
+               text-align: start;
+          }
+          .{$this->Name} .content{
+               padding: var(--size-max) var(--size-3);
+               background-color: var(--back-color-special);
+               box-shadow: var(--shadow-2);
           }
           ");
 
@@ -39,7 +69,8 @@ class Article extends Content
      public function GetTitle($attributes = null)
      {
           $p_image = getValid($this->Item, 'Image', $this->Image);
-          if (!($this->AllowImage = $this->AllowImage && $p_image)) return parent::GetTitle($attributes);
+          if (!($this->AllowImage = $this->AllowImage && $p_image))
+               return parent::GetTitle($attributes);
           $p_id = get($this->Item, 'Id');
           $p_name = getValid($this->Item, 'Name') ?? $p_id ?? $this->Title;
           $nameOrId = $p_id ?? $p_name;
@@ -50,30 +81,37 @@ class Article extends Content
           }
 
           return Struct::Cover(
-               Struct::Division("",["style"=>"position:absolute;inset:0;background-color:#0008;"]).
-               Struct::Rack(
+               Struct::Division("", ["style" => "position:absolute;inset:0;background-color:#0008;"]) .
+               Struct::Container(Struct::Rack(
                     Struct::MediumSlot(
                          ($this->AllowTitle ? Struct::Heading1(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
                          $this->GetDetails($this->CollectionRoot . $nameOrId),
-                         ["style"=>"z-index: 1;"]
+                         ["style" => "z-index: 1;"]
                     ) .
                     $this->GetButtons(),
                     ["class" => "title"],
                     $attributes
                ) . Struct::Rack(
-                         $this->AllowDescription = ($this->AllowDescription ? $this->GetExcerpt() : null),
-                         ["class" => "description"],
-                         $attributes
-                    ),
-               $p_image,[
-                    "class"=>"qb-article-header"
+                              $this->AllowDescription = ($this->AllowDescription ? $this->GetExcerpt() : null),
+                              ["class" => "description"],
+                              $attributes
+                         )),
+               $p_image,
+               [
+                    "class" => "header"
                ]
           );
      }
      public function GetDescription($attributes = null)
      {
           $p_image = getValid($this->Item, 'Image', $this->Image);
-          if (!($this->AllowImage = $this->AllowImage && $p_image)) return parent::GetDescription($attributes);
+          if (!($this->AllowImage = $this->AllowImage && $p_image))
+               return parent::GetDescription($attributes);
           return "";
+     }
+     public function GetScript(){
+          return parent::GetScript().Struct::Script("
+               _('.{$this->Name}>:not(.header, .container-fluid)').addClass('container');
+          ");
      }
 }

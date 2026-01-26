@@ -2,7 +2,7 @@
 use MiMFa\Library\Struct;
 class Icons
 {
-	public static $Local = true;
+	public static $CDN = false;
 	public static $Initialized = false;
 	public static $DefaultRoot = "body";
 
@@ -14,11 +14,11 @@ class Icons
 	public static function GetInitial()
 	{
 		self::$Initialized = true;
-		if(self::$Local)
-			return Struct::Style(null, asset(\_::$Address->PackageDirectory, "Icons/style/Style.css", optimize: false), ["async"]).
-		Struct::Script(null, asset(\_::$Address->PackageDirectory, "Icons/script/Script.js", optimize: false), ["async"]);
-		else return Struct::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
+		if(self::$CDN)
+			return Struct::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
 			Struct::Script(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js", ["async"]);
+		else return Struct::Style(null, asset(\_::$Address->StructDirectory, "Icons/style/Style.css", optimize: false), ["async"]).
+		Struct::Script(null, asset(\_::$Address->StructDirectory, "Icons/script/Script.js", optimize: false), ["async"]);
 	}
 	public static function GetStyle($root = null)
 	{

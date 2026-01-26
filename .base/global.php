@@ -21,16 +21,34 @@ use MiMFa\Library\Style;
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "_.php");
 
 \_::$Sequence = [
-	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
-	=> str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? ""),
+	$GLOBALS["DIR"] = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? "")
+	=> $GLOBALS["ROOT"] = str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? ""),
 	...($GLOBALS["SEQUENCES"] ?? []),
-	str_replace(["\\", "/"], DIRECTORY_SEPARATOR, __DIR__ . DIRECTORY_SEPARATOR ?? "")
-	=> str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
+	$GLOBALS["BASE_DIR"] = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, __DIR__ . DIRECTORY_SEPARATOR ?? "")
+	=> $GLOBALS["BASE_ROOT"] = str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
 ];
+$GLOBALS["ROOT_DIR"] = preg_replace("/[\/\\\][^\/\\\]+$/", "", __DIR__) . DIRECTORY_SEPARATOR;
+
+// $dl = preg_split("/[\\/\\\]/", str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $GLOBALS["DIR"] ?? ""));
+// $bdl = preg_split("/[\\/\\\]/", str_replace(["\\", "/"], DIRECTORY_SEPARATOR, __DIR__ . DIRECTORY_SEPARATOR ?? ""));
+// $l = min(count($dl), count($bdl));
+// $ROOT_DIR = "";
+// for ($i=0; $i < $l; $i++) 
+// 	if($dl[$i] === $bdl[$i])
+// 		$ROOT_DIR .= $dl[$i] . DIRECTORY_SEPARATOR;
+// 	else break;
+// $ROOT_PATTERN = "/^".preg_quote($ROOT_DIR)."/";
+
+// \_::$Sequence = [
+// 	$GLOBALS["DIR"] = preg_replace($ROOT_PATTERN, "", $GLOBALS["DIR"])
+// 	=> $GLOBALS["ROOT"] = str_replace(["\\", "/"], "/", $GLOBALS["ROOT"] ?? ""),
+// 	...loop($GLOBALS["SEQUENCES"] ?? [], fn($v,$k)=>[preg_replace($ROOT_PATTERN, "", $k)=>$v] , pair:true),
+// 	$GLOBALS["BASE_DIR"] = preg_replace($ROOT_PATTERN, "", $GLOBALS["BASE_DIR"])
+// 	=> $GLOBALS["BASE_ROOT"] = str_replace(["\\", "/"], "/", $GLOBALS["BASE_ROOT"] ?? "")
+// ];
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "Address.php");
 \_::$Address = new Address($GLOBALS["ASEQBASE"], $GLOBALS["DIR"]);
-$GLOBALS["ROOT"] = preg_replace("/[\/\\\][^\/\\\]+$/", "", __DIR__) . DIRECTORY_SEPARATOR;
 
 library("Local");
 library("Convert");
@@ -317,7 +335,7 @@ function receive(array|string|null $method = null)
 		switch ($method = trim(strtolower($method))) {
 			case "file":
 			case "files":
-				$method = $_FILES;
+				$method = $_FILES ?: (isset($_REQUEST["__METHOD"]) && startsWith(strtolower($_REQUEST["__METHOD"]), "file")? $_POST : []);
 				break;
 			case "public":
 			case "get":
@@ -348,12 +366,12 @@ function receive(array|string|null $method = null)
 						$method = is_array($method) ? $method : [$method];
 					}
 					$_POST = $method;
-					if (isset($method["__METHOD"]))
-						unset($method["__METHOD"]);
 				} else
 					$method = [];
 				break;
 		}
+	if (isset($method["__METHOD"]))
+		unset($method["__METHOD"]);
 	if (count($method) == 1 && isset($method[0]))
 		$method = decrypt($method[0]);
 	return $method;
@@ -446,16 +464,17 @@ function receiveExternal($key = null, $default = null)
  * @param mixed $key The key of the received value
  * @param array|string|null $method The the received data source $_GET/$POST/$_FILES/...
  * (by default it is null to give received data from all methods)
+ * @param mixed $directory The destination directory for received files, leave null to store it temporary
  * @return mixed The value
  */
-function received($key = null, $default = null, array|string|null $method = null)
+function received($key = null, $default = null, array|string|null $method = null, $directory = null)
 {
 	if (is_null($key))
 		return \_::Cache($method, fn() => receive($method)) ?? $default;
 	else
 		return get(\_::Cache($method, fn() => receive($method)), $key) ??
 			($method ? $default :
-			(($p = Local::Temp(received($key, null, "file")))?file_get_contents($p):$default)
+			(Local::Store(received($key, null, "file"), $directory?:\_::$Address->TempAddress)?:$default)
 		);
 }
 /**
@@ -586,26 +605,6 @@ function response($content = null, $status = null)
 	echo $content = Convert::ToString($content);
 	return $content;
 }
-/**
- * Echo scripts to the client side
- */
-function script($content, $source = null, ...$attributes)
-{
-	// if (getMethodIndex() != 1)
-	// 	\_::$Front->Append("head", Struct::Script($content, $source, ...$attributes));
-	// else {
-	echo $content = Struct::Script($content, $source, ...$attributes);
-	return $content;
-	//}
-}
-/**
- * Echo styles to the client side
- */
-function style($content, $source = null, ...$attributes)
-{
-	echo $content = Struct::Style($content, $source, ...$attributes);
-	return $content;
-}
 
 /**
  * Show a modal output in the client side
@@ -702,29 +701,6 @@ function report($message = null, $type = "log", $secret = null)
 		file_put_contents(address(\_::$Address->LogAddress . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
 	if (!$secret)
 		return script(Script::Log($message, $type));
-}
-
-/**
- * Convert markdown supported data and echo them on the client side
- * Also can render custom markups using the replacements dictionary
- * Supports all MarkDown markups, and custom markups such as:
- * - Inline code with backticks (`code`)
- * - Code blocks with greater-than sign (>)
- * - All type of multimedia embedding with ![alt](url)
- * - Add custom attributes to any tag with @{} after the markup
- * - Footnotes with [^note sign] and [note sign]: url or note
- * - Auto-detect text direction
- * - And more...
- * @param mixed $content The data that is ready to print
- * @param array|null $replacements A key=>value array of all parts to their replacement matchs
- * @param mixed $status The header status
- * @return mixed Printed data
- */
-function render($content = null, $replacements = null, $status = null)
-{
-	responseStatus($status);
-	echo $content = Struct::Convert($replacements ? decode($content, $replacements) : $content);
-	return $content;
 }
 
 /**
@@ -1226,7 +1202,7 @@ function address(string|null $path = null, $extension = false, string|int $origi
 	$path = preg_replace("/(?<!\\" . DIRECTORY_SEPARATOR . ")\\" . DIRECTORY_SEPARATOR . "$/", DIRECTORY_SEPARATOR . "index", $path);
 	if (!endsWith($path, $extension) && !endsWith($path, DIRECTORY_SEPARATOR))
 		$path .= $extension;
-	$address = null;
+	if (file_exists($path)) return $path;
 	//$toSeq = $depth < 0 ? (count(\_::$Sequence) + $depth) : ($origin + $depth);
 	if (is_string($origin)) {
 		$key = null;
@@ -1241,6 +1217,7 @@ function address(string|null $path = null, $extension = false, string|int $origi
 		if (is_null($key))
 			$origin = 0;
 	}
+	$address = null;
 	$scount = count(\_::$Sequence);
 	$origin = $origin < 0 ? ($scount + $origin) : min($scount, $origin);
 	$toSeq = $depth < 0 ? ($scount + $depth) : min($scount, $origin + $depth);
@@ -1287,10 +1264,7 @@ function open(string|null $path = null, $extension = false, string|int $origin =
 function save($data, string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $flags = 0, &$address = null)
 {
 	$address = address($path, $extension, $origin, $depth);
-	return file_put_contents($address = $address ?: ($path ? Local::GetAbsoluteAddress(
-		preg_match("/^[a-z]+\:/i", $path) ? $path :
-		(preg_match("/^[\/\\\]/i", $path) ? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : __DIR__ . DIRECTORY_SEPARATOR . $path)
-	) : Local::CreateAddress()), Convert::ToString($data), flags: $flags);
+	return file_put_contents($address = $address ?: ($path ? Local::GetAbsoluteAddress($path) : Local::GenerateAddress()), Convert::ToString($data), flags: $flags);
 }
 
 /**
@@ -1617,6 +1591,70 @@ function asset($directory, string|null $name = null, string|array|null $extensio
 	} finally {
 		usingAfters($directory, $name);
 	}
+}
+
+/**
+ * Convert markdown supported data and echo them on the client side
+ * Also can render custom markups using the replacements dictionary
+ * Supports all MarkDown markups, and custom markups such as:
+ * - Inline code with backticks (`code`)
+ * - Code blocks with greater-than sign (>)
+ * - All type of multimedia embedding with ![alt](url)
+ * - Add custom attributes to any tag with @{} after the markup
+ * - Footnotes with [^note sign] and [note sign]: url or note
+ * - Auto-detect text direction
+ * - And more...
+ * @param mixed $content The data that is ready to print or a file address
+ * @param array|null $replacements A key=>value array of all parts to their replacement matchs
+ * @return mixed Printed data
+ */
+function render($content = null, $replacements = [])
+{
+	if(is_file($content)) return struct(null, $content, $replacements);
+	else return struct($content, null, $replacements);
+}
+
+/**
+ * Convert markdown supported data and echo them on the client side
+ * Also can render custom markups using the replacements dictionary
+ * Supports all MarkDown markups, and custom markups such as:
+ * - Inline code with backticks (`code`)
+ * - Code blocks with greater-than sign (>)
+ * - All type of multimedia embedding with ![alt](url)
+ * - Add custom attributes to any tag with @{} after the markup
+ * - Footnotes with [^note sign] and [note sign]: url or note
+ * - Auto-detect text direction
+ * - And more...
+ * @param mixed $content The data that is ready to print
+ * @param string|null $source The source file address
+ * @param array|null $replacements A key=>value array of all parts to their replacement matchs
+ * @return mixed Printed data
+ */
+function struct($content = null, $source = null, ...$replacements)
+{
+	if($source) $content .= open($source);
+	echo $content = Struct::Convert($replacements ? decode($content, Convert::ToItems($replacements)) : $content);
+	return $content;
+}
+/**
+ * To echo scripts to the client side
+ */
+function script($content = null, $source = null, ...$attributes)
+{
+	// if (getMethodIndex() != 1)
+	// 	\_::$Front->Append("head", Struct::Script($content, $source, ...$attributes));
+	// else {
+	echo $content = Struct::Script($content, $source, ...$attributes);
+	return $content;
+	//}
+}
+/**
+ * To echo styles to the client side
+ */
+function style($content = null, $source = null, ...$attributes)
+{
+	echo $content = Struct::Style($content, $source, ...$attributes);
+	return $content;
 }
 
 /**
@@ -2360,7 +2398,7 @@ function getFragment(string|null $path = null): string|null
  */
 function getMethodName(string|int|null $method = null)
 {
-	switch (strtoupper(string: $method ?? "")) {
+	switch (strtoupper($method ?? "")) {
 		case 1:
 		case "PUBLIC":
 		case "GET":
@@ -2375,7 +2413,7 @@ function getMethodName(string|int|null $method = null)
 		case 4:
 		case "FILES":
 		case "FILE":
-			return "POST";
+			return "FILE";
 		case 5:
 		case "PATCH":
 			return "PATCH";
@@ -2972,13 +3010,13 @@ function async($action, $callback = null, ...$args)
  * @param bool $referring Referring tags and categories to their links
  * @return string|null
  */
-function __(mixed $value, bool $translating = true, bool $styling = false, bool|null $referring = null): string|null
+function __(mixed $value, bool $translating = true, bool $styling = false, bool|null $referring = null, $separator = "\n", $lang = null, $depth = null): string|null
 {
 	$value = MiMFa\Library\Convert::ToString(
-		is_array($value) ? join("\n", loop($value, fn($v) => __($v, $translating, $styling, $referring))) : $value
+		is_array($value) ? join($separator, loop($value, fn($v) => __($v, $translating, $styling, $referring))) : $value
 	);
 	if ($translating && \_::$Front->AllowTranslate)
-		$value = \_::$Front->Translate->Get($value);
+		$value = \_::$Front->Translate->Get($value, $lang, $depth);
 	if ($styling)
 		$value = MiMFa\Library\Style::DoStyle(
 			$value,
@@ -3080,7 +3118,6 @@ function strToCamel($string)
  * @param mixed $pattern
  * @param string|null $text
  * @param string|null $def
- * @return mixed
  */
 function preg_find($pattern, string|null $text, string|null $def = null): string|null
 {
@@ -3091,7 +3128,6 @@ function preg_find($pattern, string|null $text, string|null $def = null): string
  * Regular Expression Find all matches by pattern
  * @param mixed $pattern
  * @param string|null $text
- * @return array|null
  */
 function preg_find_all($pattern, string|null $text): array|null
 {

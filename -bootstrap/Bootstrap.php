@@ -439,7 +439,7 @@ class Bootstrap
     }
     public static function CreateBackFile($force = null)
     {
-        return self::CreateFile(self::$DestinationDirectory . "Back.php", function () {
+        return self::CreateFile(self::$DestinationDirectory . "Back.php", function () use($force) {
             if (!isset(self::$Configurations["DataBase"]))
                 self::$Configurations["DataBase"] = [];
             [$host, $port] = explode(":", isset(self::$Configurations["DataBase"]["Host"]) ? self::$Configurations["DataBase"]["Host"] . ":" : "localhost:");
@@ -449,13 +449,16 @@ class Bootstrap
             $username = self::$Arguments["username"] ?? (isset(self::$Configurations["DataBase"]["Username"]) ? self::$Configurations["DataBase"]["Username"] : "root");
             $password = self::$Arguments["password"] ?? (isset(self::$Configurations["DataBase"]["Password"]) ? self::$Configurations["DataBase"]["Password"] : "");
             $prefix = self::$Arguments["prefix"] ?? (isset(self::$Configurations["DataBase"]["Prefix"]) ? self::$Configurations["DataBase"]["Prefix"] : "");
+            $secret = self::$Arguments["secret"] ?? (isset(self::$Configurations["DataBase"]["Secret"]) ? self::$Configurations["DataBase"]["Secret"] :
+                self::GetInput("Secret Key", $force, self::$Configurations["DataBase"]["Secret"] ?? "a!s@e#q\$b%a^s&e*", self::$Configurations["DataBase"]["Secret"], "secret"));
             if (
                 $host === "localhost" &&
                 $port === "null" &&
                 $name === "localhost" &&
                 $username === "root" &&
                 $password === "" &&
-                $prefix === "aseq_"
+                $prefix === "aseq_" &&
+                $secret === "a!s@e#q\$b%a^s&e*"
             ) {
                 self::SetSuccess("Backs are default!");
                 return null;
@@ -463,6 +466,13 @@ class Bootstrap
             return "<?php
 " . ((self::$Arguments["b"] ?? null) ? "class Back extends BackBase" : "run(\"global/AseqBack\");
 class Back extends AseqBack") . " {
+	/**
+	 * A special key for the website, be sure to change this
+	 * @field password
+	 * @var string
+	 * @category Security
+	 */
+	public \$SecretKey = '$secret';
      /**
       * The database HostName or IP
       * @var string

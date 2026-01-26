@@ -3,7 +3,7 @@
 use MiMFa\Library\Struct;
 $user = \_::$User->Get();
 if ($user)
-	render(
+	response(
 		Struct::Style("
 			.page header.header.introduction {
 				text-align: center;

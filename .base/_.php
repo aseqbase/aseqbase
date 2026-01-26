@@ -15,22 +15,24 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 7.02996;
+	public static float $Version = 7.29996;
 	/**
 	 * The default files extensions
-	 * @example: ".php"
+	 * @example
+     * ".php"
 	 */
 	public static string|null $Extension = ".php";
 
 	/**
 	 * All sequence from aseq to base
-	 * @example: [
+	 * @example
+	 * [
 	 *	'home/domain/aseq/' => 'https://aseq.domain.tld/',
 	 *	'home/domain/1stseq/' => 'https://1stseq.domain.tld/',
 	 *	'home/domain/2ndseq/' => 'https://2ndseq.domain.tld/',
 	 *	'home/domain/3rdseq/' => 'https://3rdseq.domain.tld/',
 	 *	'home/domain/base/' => 'https://base.domain.tld/'
-	 *]
+	 * ]
 	 */
 	public static array $Sequence;
 	public static Address $Address;

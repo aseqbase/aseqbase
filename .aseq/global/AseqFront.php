@@ -1,60 +1,111 @@
 <?php
 class AseqFront extends FrontBase
 {
-	public $Owner = "MiMFa";
+	/**
+	 * The website owner name
+	 * @var mixed
+	 * @category Information
+	 */
+	public $Owner = "MiMFa";/**
+	 * The website owner full name
+	 * @var mixed
+	 * @category Information
+	 */
 	public $FullOwner = "Minimal Members Factory";
+	/**
+	 * The website owner and name
+	 * @category Information
+	 * @var mixed
+	 */
 	public $Name = "aseqbase";
+	/**
+	 * The website full owner and full name
+	 * @category Information
+	 * @var mixed
+	 */
 	public $FullName = "MiMFa aseqbase";
+	/**
+	 * The short slogan of the website
+	 * @field string
+	 * @category Information
+	 * @var mixed
+	 */
 	public $Slogan = "<u>a seq</u>uence-<u>base</u>d framework";
+	/**
+	 * The more detailed slogan of the website
+	 * @field texts
+	 * @category Information
+	 * @var mixed
+	 */
 	public $FullSlogan = "Develop websites by <u>a seq</u>uence-<u>base</u>d framework";
+	/**
+	 * The short description of the website
+	 * @field texts
+	 * @category Information
+	 * @var mixed
+	 */
 	public $Description = "An original, safe, very flexible, and innovative framework for web developments!";
+	/**
+	 * The more detailed description of the website
+	 * @field content
+	 * @category Information
+	 * @var mixed
+	 */
 	public $FullDescription = "A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.";
 	/**
      * The copyright of the website
-     * @field strings
+     * @field texts
+	 * @category Information
      * @var mixed
 	 */
 	public $CopyRight = null;
 
 	/**
      * The website main banner path
-     * @field path
+     * @field image
+	 * @category Front
 	 * @var mixed
 	 */
 	public $BannerPath = null;
 	/**
      * The website full logo path
-     * @field path
+     * @field image
+	 * @category Front
 	 * @var mixed
 	 */
 	public $FullBannerPath = null;
 	/**
      * The default homepage path
      * @field path
+	 * @category Information
 	 * @var mixed
 	 */
 	public $HomePath = "/home";
 	/**
      * The default download links path
      * @field path
+	 * @category Information
 	 * @var mixed
 	 */
 	public $DownloadPath = null;
 	/**
      * The main symbol path to show while system is waiting
-     * @field path
+     * @field image
+	 * @category Front
 	 * @var mixed
 	 */
 	public $WaitSymbolPath = "/asset/general/wait.gif";
 	/**
      * The main symbol path to show while system is processing
-     * @field path
+     * @field image
+	 * @category Front
 	 * @var mixed
 	 */
 	public $ProcessSymbolPath = "/asset/general/process.gif";
 	/**
      * The main symbol path to show on the errors
-     * @field path
+     * @field image
+	 * @category Front
 	 * @var mixed
 	 */
 	public $ErrorSymbolPath = "/asset/general/error.gif";
@@ -62,15 +113,23 @@ class AseqFront extends FrontBase
 	/**
      * The location link on the map
      * @field map
+	 * @category Information
 	 * @var mixed
 	 */
 	public $Location = null;
 
+	/**
+	 * The main KeyWords of the website, these will effect on SEO and views
+	 * @field array
+	 * @category Optimize
+	 * @var array
+	 */
 	public $KeyWords = array("MiMFa aseqbase Framework", "MiMFa", "aseqbase", "Web Development", "Development", "Web Framework", "Website", "Framework");
 
 	/**
      * The main menu to show on the most pages
-     * @field array
+     * @field array<array>
+	 * @category Render
      * @var array|null
 	 */
 	public $MainMenus = [
@@ -79,14 +138,16 @@ class AseqFront extends FrontBase
 
 	/**
      * The side menu to show on the most pages
-     * @field array
+     * @field array<array>
+	 * @category Render
      * @var array|null
 	 */
 	public $SideMenus = null;
 
 	/**
      * The main shortcut menu to show on the most pages
-     * @field array
+     * @field array<array>
+	 * @category Render
      * @var array|null
 	 */
 	public $Shortcuts = [
@@ -99,21 +160,24 @@ class AseqFront extends FrontBase
 
 	/**
      * The main menu items to show on the first page
-     * @field array
+     * @field array<array>
+	 * @category Render
      * @var array|null
 	 */
 	public $Services = null;
 
 	/**
      * The main members and personnel of the website
-     * @field array
+     * @field array<array>
+	 * @category Render
      * @var array|null
 	 */
 	public $Members = [];
 
 	/**
      * The main contacts details to show on the most pages and contact page
-     * @field array
+     * @field array<array>
+	 * @category Render
      * @var array|null
 	 */
 	public $Contacts = [];
@@ -122,11 +186,38 @@ class AseqFront extends FrontBase
 	 * The website default template class
 	 * @var string
 	 * @default "Main"
-	 * @category General
+	 * @field value
+	 * @category Template
 	 */
 	public $DefaultTemplate = "Main";
+	/**
+	 * @category Template
+	 */
 	public $DetectMode = true;
+	/**
+	 * @category Template
+	 */
 	public $AnimationSpeed = 500;
+
+	
+	/**
+	 * Allow to translate all text by internal algorithms
+	 * @var bool
+	 * @category Language
+	 */
+	public $AllowTranslate = false;
+	/**
+	 * Allow to detect the client language automatically
+	 * @var bool
+	 * @category Language
+	 */
+	public $AutoDetectLanguage = true;
+	/**
+	 * Allow to update the language by translator automatically
+	 * @var bool
+	 * @category Language
+	 */
+	public $AutoUpdateLanguage = false;
 
 	
 	public function __construct(){

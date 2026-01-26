@@ -1,12 +1,12 @@
 <?php namespace MiMFa\Template;
 template("General");
 class Main extends General{
-	public $AllowHeader = true;
-	public $AllowContent = true;
-	public $AllowFooter = true;
-	public $AllowTopMenu = true;
-	public $AllowSideMenu = true;
-	public $AllowBarMenu = true;
+	public bool $AllowHeader = true;
+	public bool $AllowContent = true;
+	public bool $AllowFooter = true;
+	public bool $AllowTopMenu = true;
+	public bool $AllowSideMenu = true;
+	public bool $AllowBarMenu = true;
 	
 	public function RenderHeader(){
 		parent::RenderHeader();

@@ -22,7 +22,7 @@ $GLOBALS["SEQUENCES_PATCH"] = array();
 /* Don't change the codes below: */
 $directory = __DIR__.DIRECTORY_SEPARATOR;
 if(realpath($directory."global.php")) include_once $directory."global.php";
-$GLOBALS["NEST"] = empty($GLOBALS["ASEQ"])?0:preg_match_all("/(?<=\S|\s)\.(?=\S|\s)/",$ASEQ)+1;
+$GLOBALS["NEST"] = empty($GLOBALS["ASEQ"])?0:preg_match_all("/(?<=\S|\s)\.(?=\S|\s)/",$GLOBALS["ASEQ"])+1;
 if(!isset($GLOBALS["HOST"])){
 	$GLOBALS["HOST"] = (isset($_SERVER['HTTPS'])?"https://":"http://");
 	$http_host = strtolower(trim($_SERVER["HTTP_HOST"]??""));

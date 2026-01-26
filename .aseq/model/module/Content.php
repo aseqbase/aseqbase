@@ -110,14 +110,14 @@ class Content extends Module
      public $AllowTags = true;
      /**
       * The label text of Tags
-      * @var string|null
+      * @var string|array|null
       * @example ["News"=>"Find More: ", "Article"=>"Keywords: ", "Document: "=>"Keywords: ", "Post"=>"", "Default"=>"Tags: "]
       * @category Parts
       */
      public $TagsLabel = ["News" => "'Find More': ", "Article" => "'Keywords': ", "Document" => "'Keywords': ", "Post" => "", "Default" => "'Tags': "];
      /**
       * Order of Tags to show
-      * @var array|int
+      * @var string|array|null
       * @example ["News"=>10, "Default"=>5]
       * @category Parts
       */
@@ -137,7 +137,7 @@ class Content extends Module
      public $AllowRelateds = true;
      /**
       * The label text of Related posts
-      * @var string|null
+      * @var string|array|null
       * @example ["News"=>"Read Also: ", "Default"=>"Relateds: "]
       * @category Parts
       */
@@ -203,7 +203,7 @@ class Content extends Module
      public $AllowButtons = true;
      /**
       * The label text of More button
-      * @var string|null
+      * @var string|array|null
       * @example ["News"=>"Source" ,"Post"=>"Refer","Text"=>"Refer","File"=>"Download","Document"=>"Download","Default"=>"Visit"]
       * @category Excerption
       */
@@ -216,7 +216,7 @@ class Content extends Module
      public $AllowAttaches = true;
      /**
       * The label text of Attaches part
-      * @var string|null
+      * @var string|array|null
       * @example ["News"=>"Read Also: ", "Default"=>"Relateds: "]
       * @category Parts
       */
@@ -320,10 +320,10 @@ class Content extends Module
 			}
 
 			.{$this->Name} .heading{
+                    text-align: start;
                     padding: 0px;
                     margin: 0px;
                     margin-bottom: calc(var(--size-0) / 2);
-				text-align: unset;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .details{

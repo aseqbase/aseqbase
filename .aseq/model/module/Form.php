@@ -171,13 +171,21 @@ class Form extends Module
 					padding: 0px var(--size-0);
 				}
 				.{$this->Name} form .fields {
-					display: table;
+					display: flex;
 					min-width: 100%;
 					gap: var(--size-0);
 				}
-				.{$this->Name} :is(input,.input):is([type='radiobutton'], [type='checkbox']){
+				.{$this->Name} :is(input,.input):is(.switchinput, [type='radiobutton'], [type='checkbox']){
+    				display: inline-block;
+					margin: 0px;
 					margin-inline-start: calc(var(--size-0) / 2);
 					margin-inline-end: var(--size-0);
+				}
+				.{$this->Name} .field .input[type='color'] {
+    				display: inline-block;
+					margin: var(--size-0);
+					padding: 0px;
+					aspect-ratio: 1;
 				}
 				.{$this->Name} .header {
 					position: sticky;
@@ -275,6 +283,8 @@ class Form extends Module
 					font-size: 90%;
 					opacity: 80%;
 					min-width: fit-content;
+					max-width: 40vw;
+					text-wrap: auto;
 					display: inline-flex;
 					vertical-align: middle;
 					align-items: center;
@@ -300,11 +310,11 @@ class Form extends Module
 					border: none;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+				.{$this->Name} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 					" . Style::DoProperty("color", $this->FieldsForeColor) . "
 					" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 					width: 100%;
-					max-width: 85vw;
+					max-width: 55vw;
 					max-width: -webkit-fill-available;
 					border-bottom: var(--border-1);
 					border-color: transparent;
@@ -312,7 +322,7 @@ class Form extends Module
 				}
 				.{$this->Name} .field .input[type='color'] {
 					min-width: auto;
-					width: initial;
+					width: revert;
 					aspect-ratio: 1;
 				}
 				.{$this->Name} .field .input::placeholder {
@@ -343,6 +353,9 @@ class Form extends Module
 	public function GetFieldsBothStyle()
 	{
 		return Struct::Style("
+			.{$this->Name} form .fields {
+				display: table;
+			}
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -357,25 +370,28 @@ class Form extends Module
 			}
 			.{$this->Name} .field label.title{
 				width: fit-content;
+				max-width: 30vw;
+				text-wrap: auto;
 				display: table-cell;
 				position: relative;
 				text-align: initial;
 				vertical-align: top;
-				margin: calc(var(--size-0) / 2);
-				padding: calc(var(--size-0) / 2) var(--size-0);
+				padding: calc(var(--size-0) + var(--size-0) / 4) var(--size-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
-				display: table-cell;
 				font-size: 125%;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+			.{$this->Name} .input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				padding: calc(var(--size-0) + var(--size-0) / 4) 0px;
+			}
+			.{$this->Name} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
-				min-width: min(300px, 40vw);
-				max-width: 85vw;
+				min-width: min(200px, 30vw);
+				max-width: 65vw;
 				border: none;
 				border-bottom: var(--border-1);
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
@@ -384,15 +400,15 @@ class Form extends Module
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
-				width: initial;
+				width: revert;
 				aspect-ratio: 1;
 			}
 			.{$this->Name} .field label.description{
 				text-align: initial;
-				display: block;
+				display: inline-block;
 				font-size: 75%;
 				line-height: 100%;
-				padding: calc(var(--size-0) / 2) var(--size-0);
+				padding: calc(var(--size-0) / 4) var(--size-0);
 				opacity: 0.5;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -412,6 +428,9 @@ class Form extends Module
 	public function GetFieldsHorizontalStyle()
 	{
 		return Struct::Style("
+			.{$this->Name} form .fields {
+				display: table;
+			}
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -427,12 +446,13 @@ class Form extends Module
 			}
 			.{$this->Name} .field label.title{
 				width: fit-content;
+				max-width: 30vw;
+				text-wrap: auto;
 				display: table-cell;
 				position: relative;
 				text-align: initial;
 				vertical-align: top;
-				margin-right: -1px;
-				padding: calc(var(--size-0) / 2) var(--size-1);
+				padding: var(--size-0) var(--size-0);
 				border-radius: calc(var(--size-0) / 2) 0px 0px calc(var(--size-0) / 2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -442,12 +462,15 @@ class Form extends Module
 				height: 100%;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+			.{$this->Name} .input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				padding: var(--size-0) 0px;
+			}
+			.{$this->Name} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
-				max-width: 85vw;
+				max-width: 65vw;
 				border-radius: 0px calc(var(--size-0) / 2) calc(var(--size-0) / 2) 0px;
 				outline: none;
 				border: none;
@@ -457,7 +480,7 @@ class Form extends Module
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
-				width: initial;
+				width: revert;
 				aspect-ratio: 1;
 			}
 			.{$this->Name} .field label.description{
@@ -497,7 +520,6 @@ class Form extends Module
 				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
 				" . Style::DoProperty("width", $this->FieldsWidth) . "
 				" . Style::DoProperty("height", $this->FieldsHeight) . "
-				padding-bottom: var(--size-1);
 				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
@@ -523,12 +545,12 @@ class Form extends Module
 				font-size: 100%;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+			.{$this->Name} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
-				max-width: 85vw;
+				max-width: 95vw;
 				border-radius: 0px calc(var(--size-0) / 2) calc(var(--size-0) / 2) calc(var(--size-0) / 2);
 				border: var(--border-1);
 				border-color: transparent;
@@ -536,7 +558,7 @@ class Form extends Module
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
-				width: initial;
+				width: revert;
 				aspect-ratio: 1;
 			}
 			.{$this->Name} .field label.description{
@@ -578,6 +600,9 @@ class Form extends Module
 	public function GetFieldsTableStyle()
 	{
 		return Struct::Style("
+			.{$this->Name} form .fields {
+				display: table;
+			}
 			.{$this->Name} .field{
 				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
 				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
@@ -588,32 +613,32 @@ class Form extends Module
 				font-size: var(--size-1);
 				text-align: start;
 				display: table-row;
-			}
-			.{$this->Name} .field>*{
-				margin-bottom: var(--size-0);
+				border-spacing: var(--size-0);
 			}
 			.{$this->Name} .field label.title{
 				width: fit-content;
+				max-width: 30vw;
+				text-wrap: auto;
 				display: table-cell;
 				position: relative;
 				text-align: initial;
-				vertical-align: top;
-				margin-right: -1px;
-				padding: calc(var(--size-0) / 2) var(--size-0);
-			    margin: calc(var(--size-0) / 2);
+    			vertical-align: top;
+				padding: var(--size-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->Name} .field .input{
-				display: table-cell;
 				font-size: 125%;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .input:not([type='radiobutton'], [type='checkbox']){
+			.{$this->Name} .input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				padding: var(--size-0) 0px;
+			}
+			.{$this->Name} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
-				max-width: 85vw;
+				max-width: 65vw;
 				border: none;
 				border-color: transparent;
 				border-bottom: var(--border-1);
@@ -621,7 +646,7 @@ class Form extends Module
 			}
 			.{$this->Name} .field .input[type='color'] {
 				min-width: auto;
-				width: initial;
+				width: revert;
 				aspect-ratio: 1;
 			}
 			.{$this->Name} .field label.description{
@@ -724,7 +749,7 @@ class Form extends Module
 							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : "")
 							,
 							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => "fade-left"] : [])]
-						) : "") .
+						) : Struct::LargeSlot("")) .
 						Struct::LargeSlot(
 							Struct::Form(
 								Struct::Rack(
@@ -741,7 +766,8 @@ class Form extends Module
 							($this->AllowFooter ? $this->GetFooter() : "")
 							,
 							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate ? ["data-aos" => "fade-right"] : [])]
-						)
+						).
+						($this->AllowHeader ? "":Struct::LargeSlot(""))
 					);
 			else
 				return

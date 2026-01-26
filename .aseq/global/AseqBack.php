@@ -1,10 +1,40 @@
 <?php
 class AseqBack extends BackBase
 {
+	/**
+	 * The Date Time Format
+	 * @var string
+	 * @example: "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
+	 * @field value
+	 * @category Time
+	 */
 	public $DateTimeFormat = 'H:i, d M y';
 
+	/**
+	 * 0: Not show Errors; 1: To show Errors
+	 * @field int
+	 * @var int|null
+	 * @category Debug
+	 */
 	public $DisplayError = null;
+	/**
+	 * 0: Not show startup Errors; 1: To show startup Errors
+	 * @field int
+	 * @var int|null
+	 * @category Debug
+	 */
 	public $DisplayStartupError = null;
+	/**
+	 * E_ error flags
+	 * @field int
+	 * @options
+	 * 0:"No Report"
+	 * 32767:"E_ALL"
+	 * 8:"E_NOTICE"
+	 * 1:"E_ERROR"
+	 * @var int|null
+	 * @category Debug
+	 */
 	public $ReportError = null;
 
 	public $AllowReduceSize = true;
@@ -49,22 +79,26 @@ class AseqBack extends BackBase
 	 */
 	public $DefaultCommentStatus = 0;
 
-	
+	/**
+	 * Database Errors
+	 * @field int
+	 * @var int|null
+	 * @category Debug
+	 */
 	public $DataBaseError = null;
-	
-	public $AllowTranslate = false;
-	public $AutoDetectLanguage = true;
-	public $AutoUpdateLanguage = false;
-	public $CacheLanguage = true;
-	public $DefaultLanguage = null;
-	public $DefaultDirection = null;
-
+		/**
+	 * A special key for the website, be sure to change this
+	 * @field password
+	 * @var string
+	 * @category Security
+	 */
 	public $SecretKey = '~a!s@e#q$b%a^s&e*';
+	/**
+	 * A special soft key for the default cryption, be sure to change this
+	 * A special key generator for the website, override this for more security
+	 * @field password
+	 * @var string
+	 * @category Security
+	 */
 	public $SoftKey = null;
-	public $AccessibleData = true;
-	public $EncryptKey = false;
-	public $EncryptValue = true;
-	public $EncryptSampleChars = "4wCpq01Ikl2NVmSDKFPJ7fXYijTzAUbE5WxgRuvGQZ3yBo6ncdeLMrst_HhO89a";
-	public $EncryptSampler = 3;
-	public $EncryptIndexer = 7;
 }

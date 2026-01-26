@@ -13,103 +13,270 @@ class Address extends ArrayObject
      */
     public string|null $Name;
 
+    /**
+     * @example
+     * "/"
+     */
     public string|null $Directory;
+    /**
+     * @example
+     * "/model/"
+     */
     public string $ModelDirectory;
+    /**
+     * @example
+     * "/view/"
+     */
     public string $ViewDirectory;
+    /**
+     * @example
+     * "/compute/"
+     */
+
     public string $ComputeDirectory;
+    /**
+     * @example
+     * "/route/"
+     */
     public string $RouteDirectory;
+    /**
+     * @example
+     * "/asset/"
+     */
     public string $AssetDirectory;
-    public string $StorageDirectory;
+    /**
+     * @example
+     * "/model/library/"
+     */
     public string $LibraryDirectory;
+    /**
+     * @example
+     * "/model/component/"
+     */
     public string $ComponentDirectory;
+    /**
+     * @example
+     * "/model/template/"
+     */
     public string $TemplateDirectory;
+    /**
+     * @example
+     * "/model/module/"
+     */
     public string $ModuleDirectory;
+    /**
+     * @example
+     * "/view/page/"
+     */
     public string $PageDirectory;
+    /**
+     * @example
+     * "/view/region/"
+     */
     public string $RegionDirectory;
+    /**
+     * @example
+     * "/view/part/"
+     */
     public string $PartDirectory;
+    /**
+     * @example
+     * "/asset/struct/"
+     */
     public string $StructDirectory;
+    /**
+     * @example
+     * "/asset/script/"
+     */
     public string $ScriptDirectory;
+    /**
+     * @example
+     * "/asset/style/"
+     */
     public string $StyleDirectory;
-    public string $PackageDirectory;
+    /**
+     * @example
+     * "/temp/"
+     */
     public string $TempDirectory;
+    /**
+     * @example
+     * "/log/"
+     */
     public string $LogDirectory;
+    /**
+     * @example
+     * "/private/"
+     */
     public string $PrivateDirectory;
+    /**
+     * @example
+     * "/public/"
+     */
     public string $PublicDirectory;
 
+    /**
+     * 
+     * @example
+     * "home/public_html/"
+     */
     public string $Address;
+    /**
+     * @example
+     * "home/public_html/model/"
+     */
     public string $ModelAddress;
+    /**
+     * @example
+     * "home/public_html/view/"
+     */
     public string $ViewAddress;
+    /**
+     * @example
+     * "home/public_html/compute/"
+     */
     public string $ComputeAddress;
+    /**
+     * @example
+     * "home/public_html/route/"
+     */
     public string $RouteAddress;
+    /**
+     * @example
+     * "home/public_html/asset/"
+     */
     public string $AssetAddress;
-    public string $StorageAddress;
+    /**
+     * @example
+     * "home/public_html/model/library/"
+     */
     public string $LibraryAddress;
+    /**
+     * @example
+     * "home/public_html/model/component/"
+     */
     public string $ComponentAddress;
+    /**
+     * @example
+     * "home/public_html/model/template/"
+     */
     public string $TemplateAddress;
+    /**
+     * @example
+     * "home/public_html/model/module/"
+     */
     public string $ModuleAddress;
+    /**
+     * @example
+     * "home/public_html/view/page/"
+     */
     public string $PageAddress;
+    /**
+     * @example
+     * "home/public_html/view/region/"
+     */
     public string $RegionAddress;
+    /**
+     * @example
+     * "home/public_html/view/part/"
+     */
     public string $PartAddress;
+    /**
+     * @example
+     * "home/public_html/asset/struct/"
+     */
     public string $StructAddress;
+    /**
+     * @example
+     * "home/public_html/asset/script/"
+     */
     public string $ScriptAddress;
+    /**
+     * @example
+     * "home/public_html/asset/style/"
+     */
     public string $StyleAddress;
-    public string $PackageAddress;
+    /**
+     * @example
+     * "home/public_html/temp/"
+     */
     public string $TempAddress;
+    /**
+     * @example
+     * "home/public_html/log/"
+     */
     public string $LogAddress;
+    /**
+     * @example
+     * "home/public_html/private/"
+     */
     public string $PrivateAddress;
+    /**
+     * @example
+     * "home/public_html/public/"
+     */
     public string $PublicAddress;
 
     /**
      * The root path
-     * @example: "/"
+     * @example
+     * "/"
      * @var string|null
      */
     public string|null $Root;
     /**
      * The Asset root Route
-     * @example: "/asset/"
+     * @example
+     * "/asset/"
      * @var string
      */
     public string $AssetRoot;
     /**
      * The Script root Route
-     * @example: "/script/"
+     * @example
+     * "/script/"
      * @var string
      */
     public string $ScriptRoot;
     /**
      * The Style root Route
-     * @example: "/style/"
+     * @example
+     * "/style/"
      * @var string
      */
     public string $StyleRoot;
     /**
      * The Content root Route
-     * @example: "/content/"
+     * @example
+     * "/content/"
      * @var string
      */
     public string $ContentRoot;
     /**
      * The Category root Route
-     * @example: "/category/"
+     * @example
+     * "/category/"
      * @var string
      */
     public string $CategoryRoot;
     /**
      * The Tag root Route
-     * @example: "/tag/"
+     * @example
+     * "/tag/"
      * @var string
      */
     public string $TagRoot;
     /**
      * The Search root Route
-     * @example: "/search/"
+     * @example
+     * "/search/"
      * @var string
      */
     public string $SearchRoot;
     /**
      * The User root Route
-     * @example: "/user/"
+     * @example
+     * "/user/"
      * @var string
      */
     public string $UserRoot;
@@ -127,7 +294,6 @@ class Address extends ArrayObject
         $this->ComputeDirectory = $this->Directory . "compute" . DIRECTORY_SEPARATOR;
         $this->RouteDirectory = $this->Directory . "route" . DIRECTORY_SEPARATOR;
         $this->AssetDirectory = $this->Directory . "asset" . DIRECTORY_SEPARATOR;
-        $this->StorageDirectory = $this->Directory . "storage" . DIRECTORY_SEPARATOR;
         $this->TempDirectory = $this->Directory . "temp" . DIRECTORY_SEPARATOR;
         $this->LibraryDirectory = $this->ModelDirectory . "library" . DIRECTORY_SEPARATOR;
         $this->ComponentDirectory = $this->ModelDirectory . "component" . DIRECTORY_SEPARATOR;
@@ -139,7 +305,6 @@ class Address extends ArrayObject
         $this->StructDirectory = $this->AssetDirectory . "struct" . DIRECTORY_SEPARATOR;
         $this->ScriptDirectory = $this->AssetDirectory . "script" . DIRECTORY_SEPARATOR;
         $this->StyleDirectory = $this->AssetDirectory . "style" . DIRECTORY_SEPARATOR;
-        $this->PackageDirectory = $this->AssetDirectory . "package" . DIRECTORY_SEPARATOR;
         $this->LogDirectory = $this->Directory . "log" . DIRECTORY_SEPARATOR;
         $this->PrivateDirectory = $this->Directory . "private" . DIRECTORY_SEPARATOR;
         $this->PublicDirectory = $this->Directory . "public" . DIRECTORY_SEPARATOR;
@@ -152,7 +317,6 @@ class Address extends ArrayObject
         $this->ComputeAddress = $directory . $this->ComputeDirectory;
         $this->RouteAddress = $directory . $this->RouteDirectory;
         $this->AssetAddress = $directory . $this->AssetDirectory;
-        $this->StorageAddress = $directory . $this->StorageDirectory;
         $this->TempAddress = $directory . $this->TempDirectory;
         $this->LibraryAddress = $directory . $this->LibraryDirectory;
         $this->ComponentAddress = $directory . $this->ComponentDirectory;
@@ -164,7 +328,6 @@ class Address extends ArrayObject
         $this->StructAddress = $directory . $this->StructDirectory;
         $this->ScriptAddress = $directory . $this->ScriptDirectory;
         $this->StyleAddress = $directory . $this->StyleDirectory;
-        $this->PackageAddress = $directory . $this->PackageDirectory;
         $this->LogAddress = $directory . $this->LogDirectory;
         $this->PrivateAddress = $directory . $this->PrivateDirectory;
         $this->PublicAddress = $directory . $this->PublicDirectory;

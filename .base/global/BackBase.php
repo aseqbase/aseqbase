@@ -14,17 +14,23 @@ library("Query");
  */
 class BackBase
 {
+	/**
+	 * Additional items to use in back-end
+	 * @var array
+	 */
 	public $Items = [];
 
 	/**
 	 * The Date Time Zone
 	 * @var string
+	 * @field value
 	 * @category Time
 	 */
 	public $DateTimeZone = "UTC";
 	/**
 	 * The Date Time Locale
 	 * @var string
+	 * @field value
 	 * @category Time
 	 */
 	public $DateTimeLocale = "en-US";
@@ -32,12 +38,14 @@ class BackBase
 	 * The Date Time Format
 	 * @var string
 	 * @example: "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
+	 * @field value
 	 * @category Time
 	 */
 	public $DateTimeFormat = "Y-m-d H:i:s";
 	/**
 	 * Current Date Time
 	 * @var string
+	 * @field value
 	 * @category Time
 	 */
 	public $CurrentDateTime = "now";
@@ -47,22 +55,6 @@ class BackBase
 	 * @category Time
 	 */
 	public $TimeStampOffset = 0;
-
-	/**
-	 * Source to get the version of latest aseqbase release
-	 * @field path
-	 * @var string
-	 * @category Update
-	 */
-	public $CheckVersionSourcePath = "http://aseqbase.ir/api/information/version.php";
-
-	/**
-	 * Source to get the latest version of aseqbase path
-	 * @field path
-	 * @var string
-	 * @category Update
-	 */
-	public $LatestVersionSourcePath = "http://aseqbase.ir/api/information/link.php?req=download&tag=latest";
 
 	/**
 	 * The period of caching, Type
@@ -78,13 +70,14 @@ class BackBase
 	 * @template "z"   To remove caches each 1 day of each year
 	 * @template "W"   To remove caches each 1 week of each year
 	 * @var string|null
+	 * @field value
 	 * @category Optimization
 	 */
 	public $CachePeriod = "v";
 
 	/**
 	 * The level of reporting: 0: Not report; 1: Report Errors; 2: Report Warnings; 3: Report Infos
-	 * @var bool
+	 * @var int|null
 	 * @category Optimization
 	 */
 	public $ReportLevel = 2;
@@ -219,12 +212,6 @@ class BackBase
 	public $AcceptableFileFormats = [".zip", ".rar"];
 
 	/**
-	 * An array of RegExPattern=>Replacement to convert all requested table names
-	 * @var array
-	 */
-	public $DataTableNameConvertors = [];
-
-	/**
 	 * 0: Not show Errors; 1: To show Errors
 	 * @field int
 	 * @var int|null
@@ -241,6 +228,11 @@ class BackBase
 	/**
 	 * E_ error flags
 	 * @field int
+	 * @options
+	 * 0:"No Report"
+	 * 32767:"E_ALL"
+	 * 8:"E_NOTICE"
+	 * 1:"E_ERROR"
 	 * @var int|null
 	 * @category Debug
 	 */
@@ -273,6 +265,12 @@ class BackBase
 	 */
 	public \MiMFa\Library\DataBase $DataBase;
 	/**
+	 * An array of RegExPattern=>Replacement to convert all requested table names
+	 * @var array
+	 * @category DataBase
+	 */
+	public $DataTableNameConvertors = [];
+	/**
 	 * Database Errors
 	 * @field int
 	 * @var int|null
@@ -283,12 +281,14 @@ class BackBase
 	/**
 	 * The database default Encoding
 	 * @var string
+	 * @field value
 	 * @category DataBase
 	 */
 	public $DataBaseEncoding = "utf8";
 	/**
 	 * The database Type
 	 * @var string
+	 * @field value
 	 * @category DataBase
 	 */
 	public $DataBaseType = 'mysql';
@@ -301,19 +301,20 @@ class BackBase
 	/**
 	 * The database HostName or IP
 	 * @var string
+	 * @field value
 	 * @category DataBase
 	 */
 	public $DataBaseHost = 'localhost';
 	/**
 	 * The database Port or null for default
-	 * @var string
+	 * @field int
 	 * @category DataBase
 	 */
 	public $DataBasePort = null;
 	/**
 	 * The database UserName
-	 * @field password
 	 * @var string
+	 * @field value
 	 * @category DataBase
 	 */
 	public $DataBaseUser = 'root';
@@ -327,18 +328,20 @@ class BackBase
 	/**
 	 * The database Name
 	 * @var string
+	 * @field value
 	 * @category DataBase
 	 */
 	public $DataBaseName = 'localhost';
 	/**
 	 * The database tables Prefix
 	 * @var string
+	 * @field value
 	 * @category DataBase
 	 */
 	public $DataBasePrefix = 'aseq_';
 	/**
 	 * Add the website name to the selected DataBasePrefix for strongest privacy
-	 * @var string
+	 * @field bool
 	 * @category DataBase
 	 */
 	public $DataBaseAddNameToPrefix = false;
@@ -348,6 +351,24 @@ class BackBase
 	 * @internal
 	 */
 	public \MiMFa\Library\Query $Query;
+
+	
+	/**
+	 * Source to get the version of latest aseqbase release
+	 * @field path
+	 * @var string
+	 * @category System
+	 */
+	public $CheckVersionSourcePath = "http://aseqbase.ir/api/information/version.php";
+
+	/**
+	 * Source to get the latest version of aseqbase path
+	 * @field path
+	 * @var string
+	 * @category System
+	 */
+	public $LatestVersionSourcePath = "http://aseqbase.ir/api/information/link.php?req=download&tag=latest";
+
 
 	public function __construct()
 	{

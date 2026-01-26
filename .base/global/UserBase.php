@@ -290,7 +290,7 @@ class UserBase
 
 	/**
 	 * To check if the user has access to the page or not
-	 * @param int|array|null $acceptableAccess The minimum accessibility for the user, pass null to give the user access
+	 * @param int|array|null|boolean $acceptableAccess The minimum accessibility for the user, pass null to give the user access
 	 * @return bool|null Returns true if the user has access, false if not, and null if undetermined
 	 */
 	public function HasAccess($acceptableAccess = null)
@@ -299,6 +299,8 @@ class UserBase
 			$acceptableAccess = $this->UserAccess;
 		$access = $this->Access ?? $this->GuestAccess;
 		//if($acceptableAccess === true || $acceptableAccess === false) return $acceptableAccess;
+		if (is_bool($acceptableAccess))
+			return $acceptableAccess && ($access >= $this->GuestAccess);
 		if (is_int($acceptableAccess))
 			return $access >= $acceptableAccess;
 		if (is_array($acceptableAccess) && count($acceptableAccess) > 0)

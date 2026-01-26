@@ -6,19 +6,31 @@ namespace MiMFa\Library;
  *@author Mohammad Fathi
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#reflect See the Library Documentation
-*/
-class Revise{
-    public static $Extension = ".revise";
-    public static $Flags = JSON_OBJECT_AS_ARRAY;
+ */
+class Revise
+{
+    public static $PutMethod = "REVISE_PUT";
+    public static $DelMethod = "REVISE_DEL";
+    public static $Extension = ".revise.json";
+    public static $Flags = JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION;
 
+    /**
+     * To get the Revise file Path of an object
+     * @param mixed $object
+     */
+    public static function Path($object)
+    {
+        return (new \ReflectionClass($object))->getFileName() . self::$Extension;
+    }
     /**
      * Load object with revised data
      * @param mixed $object
      */
-    public static function Load(&$object, &$path = null){
-        if($object === null) return $object;
-        $path = $path??(self::GetPath($object).self::$Extension);
-        if(file_exists($path)){
+    public static function Load(&$object, &$path = null)
+    {
+        if ($object === null)
+            return $object;
+        if (file_exists($path = $path ?? self::Path($object))) {
             self::Decode($object, file_get_contents($path));
             return $path;
         }
@@ -28,56 +40,168 @@ class Revise{
      * Store revised object data on a file
      * @param mixed $object
      */
-    public static function Store($object, &$path = null){
-        if($object === null) return $object;
-        $path = $path??(self::GetPath($object).self::$Extension);
-        return file_put_contents($path, self::Encode($object))?$path:false;
+    public static function Store($object, &$path = null)
+    {
+        if ($object === null)
+            return $object;
+        return file_put_contents($path = $path ?? self::Path($object), self::Encode($object)) ? $path : false;
     }
     /**
      * Restore object data to the main values
      * @param mixed $object
      */
-    public static function Restore($object, &$path = null){
-        if($object === null) return $object;
-        $path = $path??(self::GetPath($object).self::$Extension);
-        return !file_exists($path) || unlink($path);
+    public static function Delete($object, &$path = null)
+    {
+        if ($object === null)
+            return $object;
+        return (!file_exists($path = $path ?? self::Path($object))) || unlink($path);
     }
 
-    /**
-     * To get the Path of a Class
-     * @param mixed $object
-     */
-    public static function GetPath($object){
-        return (new \ReflectionClass($object))->getFileName();
-    }
     /**
      * To get Features of an object in a string
      * @param mixed $object
      */
-    public static function Encode($object){
-        if($object === null) return "null";
-        $res = json_encode($object, flags:self::$Flags);
-        if($res === false) return "{}";
+    public static function Encode($object)
+    {
+        if ($object === null)
+            return "null";
+        $res = [];
+        foreach (self::Properties($object) as $value)
+            $res[$value["Name"]] = $value["Value"];
+        $res = json_encode($res, flags: self::$Flags);
+        if ($res === false)
+            return "{}";
         return $res;
     }
     /**
      * To set Features of an object from a string
      * @param mixed $object
      */
-    public static function Decode(&$object, string $reviseData = "{}"){
-        $metadata = json_decode($reviseData, flags:self::$Flags)??[];
-        foreach ($metadata as $key=>$value)
-            if(isset($object->$key)) $object->$key = $value;
+    public static function Decode(&$object, string $reviseData = "{}")
+    {
+        $metadata = json_decode($reviseData, flags: self::$Flags) ?? [];
+        foreach (self::Properties($object) as $value) {
+            $key = $value["Name"];
+            if (isset($metadata[$key]) && isset($object->$key))
+                switch ($value["Type"]) {
+                    case "string":
+                        $object->$key = Convert::ToString($metadata[$key]);
+                        break;
+                    case "bool":
+                    case "boolean":
+                        $object->$key = boolval($metadata[$key]);
+                        break;
+                    case "int":
+                    case "integer":
+                    case "number":
+                        $object->$key = intval($metadata[$key]);
+                        break;
+                    case "float":
+                        $object->$key = floatval($metadata[$key]);
+                        break;
+                    case "double":
+                        $object->$key = doubleval($metadata[$key]);
+                        break;
+                    default:
+                        $object->$key = $metadata[$key];
+                        break;
+                }
+        }
         return $object;
     }
 
-    public static function GetCommentParameters(string|null $comment){
-        if(is_null($comment)) return [];
-        $matches = preg_find_all("/\@\w+\s*.*/", $comment);
-        $res = [];
-        $res["Abstract"] = ltrim(Convert::ToString(preg_find_all("/^\s*\*\s*[^@\/][\s\w].*/mi", $comment)), "* \t\r\n\f\v");
-        foreach ($matches as $value)
-            $res[strtolower(preg_find("/(?<=\@)\w+/", $value))] = trim(preg_replace("/^\@\w+\s*/", "", $value));
+    /**
+     * To get each of Features of a Class as an array
+     * @param mixed $object
+     */
+    public static function Properties($object, \ReflectionClass|null $reflection = null)
+    {
+        $reflection = $reflection ?? new \ReflectionClass($object);
+        foreach ($reflection->getProperties() as $value) {
+            $pars = self::Parameters($value->getDocComment());
+            $modifires = $value->getModifiers();
+            if (
+                $modifires != T_PRIVATE &&
+                $modifires != T_PROTECTED &&
+                !isValid($pars, "internal") &&
+                !isValid($pars, "private")
+            ) {
+                $dval = $value->getDefaultValue();
+                $type = popBetween($pars, "field", "type") ?: ((is_null($dval) ? null : gettype($dval)) ?: ($value->getSettableType() ?: pop($pars, "var")));
+                $desc = pop($pars, "description");
+                yield [
+                    "Type" => $type = strtolower((str_replace(["object", "<array", "<[", ","], "", $type ?? "") !== ($type ?? "")) ? "object" : ($type ?: "mixed")),
+                    "Name" => $value->getName(),
+                    "Value" => $value->getValue($object),
+                    "Title" => pop($pars, "title"),
+                    "Description" => $desc = __(pop($pars, "abstract") ?? $desc, separator: Struct::$Break),
+                    "Category" => pop($pars, "category"),
+                    "Required" => pop($pars, "required"),
+                    "Options" => pop($pars, "options"),
+                    "Attributes" => pop($pars, "attributes") ?? [],
+                    "Content" => [
+                        ...($desc ? [$desc] : []),
+                        ...loop($pars, fn($v, $k) => [__(strToProper($k)) . ": ", is_array($v) ? Struct::Convert($v) : $v])
+                    ]
+                ];
+            }
+        }
+    }
+    public static function Parameters(string|null $comment)
+    {
+        if (is_null($comment))
+            return [];
+        $key = null;
+        $res = ["description" => []];
+        foreach (preg_split("/\r?\n\r?\s*\*\s*/", preg_replace("/(\s*\/[\s\*]+)|([\s\*]+\/\s*)/", "", $comment)) as $value) {
+            if ($f = preg_find("/(?<=^\@)\w+\b/", $value))
+                $key = strtolower($f);
+            if ($key) {
+                switch ($key) {
+                    case "type":
+                    case "var":
+                        if (isset($res[$key]))
+                            $res[$key] .= "|";
+                        else
+                            $res[$key] = "";
+                        $res[$key] .= trim(preg_replace("/^\@\w+\W+/", "", $value));
+                        break;
+                    case "field":
+                    case "required":
+                        $res[$key] = trim(preg_replace("/^\@\w+\W+/", "", $value));
+                        break;
+                    case "abstract":
+                    case "example":
+                        if (!isset($res[$key]))
+                            $res[$key] = [];
+                        $res[$key][] = trim(preg_replace("/^\@\w+\W+/", "", $value));
+                        break;
+                    case "template":
+                    case "templates":
+                    case "option":
+                    case "options":
+                    case "attribute":
+                    case "attributes":
+                        if (!isset($res[$key]))
+                            $res[$key] = [];
+                        $val = trim(preg_replace("/^\@\w+\W+/", "", $value));
+                        $k = preg_find("/^\s*\w+\s*(?=:)/u", $val);
+                        if ($k)
+                            $res[$key][trim($k, " \n\r\t\v\x00\"'")] = preg_replace("/(^\s*\w+\s*:\s*([\"\']))|(\2$)/u", "", $val);
+                        else
+                            $res[$key][] = $val;
+                        break;
+                    default:
+                        if (isset($res[$key]))
+                            $res[$key] .= ", ";
+                        else
+                            $res[$key] = "";
+                        $res[$key] .= trim(preg_replace("/^\@\w+\W+/", "", $value));
+                        break;
+                }
+            } else
+                $res["description"][] = $value;
+        }
         return $res;
     }
 
@@ -85,63 +209,109 @@ class Revise{
      * To get all Features of a Class as a HTML Form
      * @param mixed $object
      */
-    public static function GetForm($object):\MiMFa\Module\Form{
+    public static function GetForm($object)
+    {
+        if (is_null($object))
+            return Struct::Warning("There is no object!");
         module("Form");
-        if(is_null($object)) return new \MiMFa\Module\Form();
+        module("Field");
         $reflection = new \ReflectionClass($object);
+
+        $tabs = [];
+        foreach (self::Properties($object, $reflection) as $prop) {
+            $t = strtoupper($prop["Category"] ?: "General");
+            if (!isset($tabs[$t]))
+                $tabs[$t] = "";
+            try {
+                $tabs[$t] .= (new \MiMFa\Module\Field(
+                    type: $prop["Type"],
+                    key: $prop["Name"],
+                    value: $prop["Type"] === "object" ? json_encode($prop["Value"], flags: self::$Flags) : $prop["Value"],
+                    title: $prop["Title"],
+                    description: __($prop["Content"], separator: Struct::$Break),
+                    required: $prop["Required"],
+                    options: $prop["Options"],
+                    attributes: $prop["Attributes"]
+                ))->ToString();
+            } catch (\Exception) {
+            }
+        }
+        $name = $reflection->getShortName();
+        $tid = "{$name}Tab";
         $form = new \MiMFa\Module\Form(
-            title: "Edit {$reflection->getName()}",
-            description: getBetween(self::GetCommentParameters($reflection->getDocComment()),"Abstract","Description" ),
-            method: "POST",
-            image:"edit",
-            children: self::GetFields($reflection, $object)
+            title: "Edit $name}",
+            description: getBetween(self::Parameters($reflection->getDocComment()), "Abstract", "Description"),
+            method: self::$PutMethod,
+            image: "edit",
+            children: Struct::Tabs($tabs, ["Id" => $tid])
         );
-        $form->Id = "{$reflection->getName()}EditForm";
-        $form->Template = "both";
+        $form->Id = "{$name}Form";
+        $form->ContentClass = "col-lg-12";
+        $form->Template = "b";
         $form->Timeout = 60;
         $form->SubmitLabel = "Update";
         $form->ResetLabel = "Reset";
         $form->AllowHeader = false;
-        return $form;
-    }
-    /**
-     * To get each of Features of a Class as a form HTML Field
-     * @param mixed $object
-     */
-    public static function GetFields(\ReflectionClass $reflection, $object){
-        module("Field");
-        foreach ($reflection->getProperties() as $value){
-            $pars = self::GetCommentParameters($value->getDocComment());
-            $module = $value->getModifiers();
-            if(
-                $module != T_PRIVATE &&
-                $module != T_PROTECTED &&
-                !isValid($pars,"internal") &&
-                !isValid($pars,"private")
-            )
-                yield new \MiMFa\Module\Field(
-                    type:getBetween($pars,"Field","Type" )??($value->getType()??get($pars,"Var")),
-                    key:$value->getName(),
-                    value:$value->getValue($object),
-                    title:getValid($pars,"Title" , null),
-                    description:getBetween($pars,"Abstract","Description" ),
-                    required:getValid($pars,"Required", null),
-                    options:getValid($pars,"Options", null),
-                    attributes:getValid($pars,"Attributes", null)
-            );
-        }
+        $form->Buttons = Struct::Button("Recover to Defaults", "send('" . self::$DelMethod . "', null, {Name:'{$form->Name}'})");
+        return Struct::Style("
+            #$tid>.tab-titles{
+                margin-bottom: var(--size-1);
+                border-bottom: var(--border-1);
+            }
+            #$tid>.tab-titles>.tab-title{
+                padding: calc(var(--size-1) / 2) var(--size-0);
+                border-radius: var(--radius-1);
+            }
+            #$tid>.tab-titles>.tab-title.active{
+                font-weight: bold;
+                border: var(--border-2);
+                border-bottom: none;
+                outline: var(--border-2) var(--back-color-special);
+            }
+        ") . $form->ToString();
     }
     /**
      * To handle all Features received of a Class HTML Form
      * @param mixed $object
      */
-    public static function HandleForm($object, array $newValues = null){
+    public static function HandleForm($object)
+    {
         try {
-            if(is_null($newValues)) $newValues = receivePost(null);
-            foreach ($newValues as $key=>$value)
-                if(isset($object->$key)) $object->$key = $value;
-            if(self::Store($object)) return Struct::Success("Data updated successfully!");
-            else return Struct::Error("Something went wrong!");
-        } catch(\Exception $ex) { return Struct::Error($ex); }
+            if (receive(self::$DelMethod))
+                return self::Delete($object)
+                    ? Struct::Success("Data Recoverred to default Successfully!" . Struct::Script("load()"))
+                    : Struct::Warning("Data were set to default!");
+            elseif ($newValues = receive(self::$PutMethod))
+                try {
+                    \_::$User->Active = false;
+                    $res = [];
+                    foreach (self::Properties($object) as $value)
+                        $res[$value["Name"]] = $value["Type"];
+                    foreach ($newValues as $key => $value)
+                        if (isset($object->$key))
+                            if ($res[$key] === "object" && $value)
+                                $object->$key = json_decode($value, flags: self::$Flags);
+                            elseif (startsWith($res[$key] ?? "", "bool"))
+                                $object->$key = boolval($value);
+                            else
+                                $object->$key = $value;
+                    if (self::Store($object))
+                        return Struct::Success("Data updated successfully!" . Struct::Script("load()"));
+                    else
+                        return Struct::Error("Something went wrong!");
+                } catch (\Exception $ex) {
+                    return Struct::Error($ex);
+                } finally {
+                    \_::$User->Active = true;
+                } else
+                return self::GetForm($object);
+        } catch (\Exception $ex) {
+            return Struct::Error($ex);
+        }
+    }
+
+    public static function Render($object)
+    {
+        return response(self::HandleForm($object));
     }
 }

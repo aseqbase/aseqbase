@@ -1,7 +1,7 @@
 <?php
 namespace MiMFa\Module;
 use MiMFa\Library\Struct;
-module("Content");
+module("Article");
 /**
  * To show data as posts
  *@copyright All rights are reserved for MiMFa Development Group
@@ -9,33 +9,10 @@ module("Content");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
-class Post extends Content
+class Post extends Article
 {
      public $Root = "/post/";
 
-     public function GetStyle(){
-          return parent::GetStyle().Struct::Style("
-          .{$this->Name} :is(.title, .description, .title a:not(.button), .description a:not(.button)) {
-               color: var(--color-white);
-          }
-          .{$this->Name} .title{
-               margin-top: 2vmax;
-               margin-bottom: 0px;
-          }
-          .{$this->Name} .qb-post-header.cover{
-               position: relative;
-               top: calc(-1 * var(--size-4));
-               left: calc(-1 * max(2vw,var(--size-3)));
-               right: calc(-1 * max(2vw,var(--size-3)));
-               width: calc(100% + 2 * max(2vw, var(--size-3)));
-               padding: calc(4 * var(--size-4)) var(--size-2) var(--size-2);
-          }
-          .{$this->Name} .qb-post-header.cover>.division{
-               position: initial !important;
-          }
-          ");
-
-     }
      public function GetTitle($attributes = null)
      {
           $p_image = getValid($this->Item, 'Image', $this->Image);

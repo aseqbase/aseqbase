@@ -29,23 +29,25 @@ class Translate
 	public $Direction = "ltr";
 	public $ImagePathPattern = "https://unpkg.com/language-icons/icons/{0}.svg";
 	public $CodeLimit = 160;
+	public $WrapPattern = "/(^<[\w\W]*>$)|(\\$\{[\w\W]+\})|(\B\`[^\`]+\`\B)|(\B'[^']+'\B)|(\"\B[^\"]+\")|(<\S+[\w\W]*>)|(\d*\.?\d+)/u";
 	public $WrapStart = "<";
 	public $WrapEnd = ">";
-	public $WrapPattern = "/(^<[\w\W]*>$)|(\\$\{[\w\W]+\})|(\"\S+[^\"]*\")|('\S+[^']*')|(`\S+[^`]*`)|(<\S+[\w\W]*>)|(\d*\.?\d+)/U";
-	public $ValidPattern = "/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-z]/m";
-	public $InvalidPattern = '/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
-	public $CorrectorPattern = "/(?:^(['\"\`])([\w\W]+)\\1$)|([\w\W]+)/";
-	public $CorrectorReplacement = "$2$3";
-	public $TrimmerPattern = "/(?:\$\{([\w\W]+)\})|([\w\W]+)/";
+	public $ValidPattern = "/[A-Z]/i";//"/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-Z]/mi";
+	public $InvalidPattern = "/[^A-Z0-9\W\$\{\}]/i";//'/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
+	public $CorrectorPattern = "/(?:^\`([\w\W]+)\`$)|(?:^'([\w\W]+)'$)|([\w\W]+)/u";
+	public $CorrectorReplacement = "$1$2$3";
+	public $TrimmerPattern = "/(?:\\$\{([^}]+)\})|((?<!\\$\{)[\w\W]+(?!\}))/u";
 	public $TrimmerReplacement = "$1$2";
 	/**
 	 * To have a deep translate
-	 * @test
 	 */
-	public $Deep = false;
+	public $Deep = true;
+	public $DeepPattern = "/([^\w\s()\[\]]?((\w[\w\-\s<>0-9]*\w)|\w)[^\w\s:,;\.\!()\[\]]?)|([^0-9<>\{\}\w])/u";
+	public $Depth = 3;
 	public $AllowCache = true;
 	public $CaseSensitive = false;
 	public $AutoUpdate = false;
+
 	public $GetValueQuery = null;
 
 	public function __construct(DataTable $dataTable)
@@ -91,6 +93,60 @@ class Translate
 		$this->Language = $lang;
 	}
 
+	public function Get($text, $lang = null, $depth = null)
+	{
+		if (!$this->IsRootLanguage($text))
+			return $text;
+		$dic = array();
+		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
+		$code = $this->CreateCode($ntext);
+		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
+		
+		$depth = $depth ?? $this->Depth;
+		if (($d = $depth - 1) >= 0)
+			foreach ($dic as $key => $value)
+				$dic[$key] = $this->Get(preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $value), $lang, $d);
+
+		if ($data) {
+			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
+			$data = decode($data[$lang ?? $this->Language] ?? $data["x"], $dic);
+		} else {
+			if ($this->AutoUpdate)
+				$this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $ntext))]);
+
+			if ($dic && $depth)
+				$data = decode($ntext, $dic);
+			else
+				$data = $text;
+
+			if ($this->Deep) $data = $this->GetDeep($data, $lang);
+		}
+
+		if (!$this->CaseSensitive)
+			$data = self::DetectCaseStatus($data, $text);
+		return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $data);
+	}
+	public function GetDeep($text, $lang = null)
+	{
+		if (!$this->IsRootLanguage($text))
+			return $text;
+		$d = $this->Deep;
+		$this->Deep = false;
+		foreach (preg_find_all($this->DeepPattern, $text) as $part)
+			$text = str_replace($part, $this->Get($part, $lang), $text);
+		$this->Deep = $d;
+		return $text;
+	}
+	public function GetReplace($text, $lang = null)
+	{
+		$lang = $lang ?? $this->Language;
+		foreach ($this->Cache as $code => $data) {
+			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
+			if (!$this->IsRootLanguage($text = str_replace($data["x"] ?? $code, $data[$lang] ?? $data["x"], $text)))
+				return $text;
+		}
+		return $text;
+	}
 	public function GetHybrid($text, $replacements = [], $lang = null)
 	{
 		if (!$this->IsRootLanguage($text))
@@ -111,44 +167,6 @@ class Translate
 		if ($this->CaseSensitive)
 			return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $data);
 		return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, self::DetectCaseStatus($data, $data));
-	}
-	public function Get($text, $lang = null, $depth = 3)
-	{
-		if (!$this->IsRootLanguage($text))
-			return $text;
-		$dic = array();
-		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
-		$code = $this->CreateCode($ntext);
-		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
-		if (($d = $depth - 1) >= 0)
-			foreach ($dic as $key => $value)
-				$dic[$key] = $this->Get($value, $lang, $d);
-		if ($data) {
-			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
-			$data = decode($data[$lang ?? $this->Language] ?? $data["x"], $dic);
-			if ($this->CaseSensitive)
-				return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $this->Deep ? $this->DeepReplace($data, $lang) : $data);
-			return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, self::DetectCaseStatus($this->Deep ? $this->DeepReplace($data, $lang) : $data, $text));
-		} elseif ($this->AutoUpdate)
-			$this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $ntext))]);
-		if ($dic && $depth)
-			if ($this->CaseSensitive)
-				return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, decode($this->Deep ? $this->DeepReplace($ntext, $lang) : $ntext, $dic));
-			else
-				return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, self::DetectCaseStatus($this->Deep ? $this->DeepReplace(decode($ntext, $dic), $lang) : decode($ntext, $dic), $text));
-		return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $this->Deep ? $this->DeepReplace($text, $lang) : $text);
-	}
-	public function DeepReplace($text, $lang = null)
-	{
-		if (!$this->Cache)
-			return $text;
-		$lang = $lang ?? $this->Language;
-		foreach ($this->Cache as $code => $data) {
-			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
-			if (!$this->IsRootLanguage($text = str_replace($code, $data[$lang] ?? $data["x"], $text)))
-				return $text;
-		}
-		return $text;
 	}
 
 	public function GetAll($condition = null, $params = [], $hasKey = false)
@@ -220,8 +238,6 @@ class Translate
 			foreach ($this->DataTable->Select("*", $condition, $params) as $value)
 				$this->Cache[strtolower($value["KeyCode"])] = $value["ValueOptions"];
 		unset($this->Cache[""]);
-		if ($this->Deep)
-			sort($this->Cache, SORT_DESC);
 	}
 
 	public function ClearAll($condition = null, $params = [])
@@ -237,12 +253,13 @@ class Translate
 	public function CreateCode($text)
 	{
 		if ($text === null)
-			return "Null";
-		$key = preg_replace("/\s+|((?<=[\w\W]{4})\.)/", " ", trim($text, " \n\r\t\v\x00~`!@#$%^&*()-+=?/,|\\'\":;]}[{"));
-		if (strlen($key) > $this->CodeLimit)
-			$key = md5($key);
+			return "";
+		$key = preg_replace("/\s+/", " ", trim($text, " \n\r\t\v\x00"));
+		//$key = preg_replace("/\s+|((?<=[\w\W]{4})\.)/", " ", trim($text, " \n\r\t\v\x00~`!@#$%^&*()-+=?/,|\\'\":;]}[{"));
 		if (!$this->CaseSensitive)
 			$key = strtolower($key);
+		if (strlen($key) > $this->CodeLimit)
+			$key = md5($key);
 		return $key;
 	}
 
@@ -253,9 +270,9 @@ class Translate
 	 */
 	public function IsRootLanguage($text)
 	{
-		return !$text ||
-			(preg_match($this->ValidPattern, $text) &&
-				!preg_match($this->InvalidPattern, $text));
+		return $text &&
+			preg_match($this->ValidPattern, $text) &&
+			!preg_match($this->InvalidPattern, $text);
 	}
 
 	/**
@@ -376,10 +393,12 @@ class Translate
 	{
 		if ($model === strtolower($model))
 			return strtolower($text);
-		if ($model === strToProper($model))
-			return strToProper($text);
 		if ($model === strtoupper($model))
 			return strtoupper($text);
+		if ($model === strToProper($model))
+			return strToProper($text);
+		if ($model === strToCamel($model))
+			return strToCamel($text);
 		return $text;
 	}
 }

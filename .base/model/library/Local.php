@@ -121,9 +121,14 @@ class Local
 	{
 		if (empty($path))
 			return null;
+		$path = preg_match("/^[a-z]+\:/i", $path) ? $path :
+		(preg_match("/^[\/\\\]/i", $path) ? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : (\_::$Address->Address . $path));
 		foreach (\_::$Sequence as $directory => $root)
 			if (startsWith($path, $directory))
 				return $path;
+			elseif (startsWith($path, $root))
+				return \_::$Address->Directory . ltrim(self::GetAddress(substr($path, strlen($root))), DIRECTORY_SEPARATOR);
+		if(preg_match("/^[a-z]+\:/i", $path)) return self::GetAddress($path);
 		return \_::$Address->Directory . ltrim(self::GetAddress($path), DIRECTORY_SEPARATOR);
 	}
 	/**
@@ -139,17 +144,19 @@ class Local
 		foreach (\_::$Sequence as $directory => $root)
 			if (startsWith($path, $directory))
 				return substr($path, strlen($directory));
+			elseif (startsWith($path, $root))
+				return self::GetAddress(substr($path, strlen($root)));
 		return $path;
 	}
 
 	/**
-	 * Create a new unique address
+	 * Generate a new unique address
 	 * @param string $directory Root directory, leave null for a temp directory
 	 * @param string $format The full format of extension (like .html)
 	 * @param int $random Pass 0 or false to get the name sequential from the number 1 to infinity
 	 * @return string
 	 */
-	public static function CreateAddress(string $fileName = "new", string $format = "", string|null $directory = null, bool $random = true): string
+	public static function GenerateAddress(string $fileName = "new", string $format = "", string|null $directory = null, bool $random = true): string
 	{
 		$directory = $directory ?: \_::$Address->TempAddress;
 		do
@@ -179,8 +186,8 @@ class Local
 			return null;
 		if (is_dir($path))
 			return $path;
-		if (startsWith($path, \_::$Address->Directory))
-			$path = substr($path, strlen(\_::$Address->Directory));
+		if (startsWith($path, \_::$Address->Address))
+			$path = substr($path, strlen(\_::$Address->Address));
 		foreach (\_::$Sequence as $directory => $p)
 			if (is_dir($directory . $path))
 				return $directory . $path;
@@ -275,8 +282,8 @@ class Local
 			return null;
 		if (file_exists($path))
 			return $path;
-		if (startsWith($path, \_::$Address->Directory))
-			$path = substr($path, strlen(\_::$Address->Directory));
+		if (startsWith($path, \_::$Address->Address))
+			$path = substr($path, strlen(\_::$Address->Address));
 		foreach (\_::$Sequence as $directory => $p)
 			if (file_exists($directory . $path))
 				return $directory . $path;
@@ -342,74 +349,87 @@ class Local
 		return $b;
 	}
 
-	public static function ReadText($path): null|string
-	{
-		$res = file_get_contents(self::GetFile($path));
-		if ($res === false)
-			return null;
-		return $res;
-	}
-	public static function WriteText($path, string|null $text, bool $ifNeeds = false)
-	{
-		if ($ifNeeds && (self::ReadText($path) === $text))
-			return null;
-		return file_put_contents(self::GetFile($path) ?? self::GetAddress($path), $text);
-	}
-
-
 	/**
-	 * Get the fileobject by file key name
-	 * @param mixed $inputName Posted file key name
-	 * @return mixed
+	 * To reads entire file into a string
+	 * This function is similar to file(),
+	 * except that this returns the file in a string,
+	 * starting at the specified offset up to length bytes. On failure, this will return false.
+	 * @param string|null $path The relative file or directory path
+	 * @param int $depth How much layers it should iterate to find the correct address
+	 * @param int $offset [optional] The offset where the reading starts.
+	 * @param int|null $length [optional] Maximum length of data read. The default is to read until end of file is reached.
+	 * @return string|false|null The function returns the read data or flse on failure or null if could not find the file.
 	 */
-	public static function GetFileObject($inputName)
+	public static function Read(string|null $path = null, int $offset = 0, int|null $length = null)
 	{
-		return receiveFile($inputName);
+		return $path ? file_get_contents(self::GetFile($path), offset: $offset, length: $length) : null;
 	}
+	/**
+	 * To write data into an exists file or the new file
+	 * @param string $path The relative file path
+	 * @param $data The data to write. Can be either a string, an array or a each other data types.
+	 * @return string|false|null The function returns the number of bytes that were written to the file, or false on failure.
+	 */
+	public static function Write(string $path, $data = null, int $flags = 0)
+	{
+		return file_put_contents(self::GetAbsoluteAddress($path), Convert::ToString($data), flags: $flags);
+	}
+
+
 	/**
 	 * Check if the fileobject is not null or empty
-	 * @param mixed $content Posted file key name or object
+	 * @param mixed $object Posted file key name or object
 	 * @return mixed
 	 */
-	public static function IsFileObject($content)
+	public static function IsFileObject(&$object)
 	{
-		if (is_string($content))
-			$content = received($content);
-		return get($content, "name") ? true : false;
+		if (!$object)
+			return false;
+		if (is_string($object))
+			$object = receiveFile($object);
+		return isset($object["tmp_name"]) && isset($object["name"]) && isset($object["size"]);
 	}
 
 	/**
 	 * Save temporary (Upload from the client side) something to the local storage
-	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $object A file object or posted file key name
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function Temp($content, $minSize = null, $maxSize = null, ?array $extensions = null, $deleteSource = true)
+	public static function Temp($object, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, \_::$Address->TempAddress, $minSize, $maxSize, $extensions, $deleteSource);
+		return self::Store($object, \_::$Address->TempAddress, $minSize, $maxSize, $extensions, true);
 	}
 	/**
 	 * Save (Upload from the client side) something to the local storage
-	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $object A file object or posted file key name
 	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function Store($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null, $deleteSource = true)
+	public static function Store($object, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null, $deleteSource = true)
 	{
-		if (is_string($content))
-			$content = self::GetFileObject($content);
-		if (!$content)
-			return null;
-		if (!get($content, "name"))
-			return null;//throw new \SilentException("There is not any file!");
+		$minSize = $minSize ?? \_::$Back->MinimumFileSize;
+		$maxSize = $maxSize ?? \_::$Back->MaximumFileSize;
 
-		$fileType = strtolower(pathinfo($content["name"], PATHINFO_EXTENSION));
-		$fileName = strtolower(pathinfo($content["name"], PATHINFO_FILENAME)) . "_";
+		if (!self::IsFileObject($object)) {
+			if(!$object) return null;//throw new \SilentException("There is not any file!");
+			// $objectsize = sizeof($object);
+			// if ($objectsize < $minSize)
+			// 	throw new \SilentException("The 'file size' is 'very small'!");
+			// elseif ($objectsize > $maxSize)
+			// 	throw new \SilentException("The 'file size' is 'very big'!");
+			if(self::Write($path = self::GenerateAddress(directory:$directory, format:first($extensions)??""), $object))
+				return $path;
+			return null;
+		}
+
+		$fileType = strtolower(pathinfo($object["name"], PATHINFO_EXTENSION));
+		$fileName = strtolower(pathinfo($object["name"], PATHINFO_FILENAME)) . "_";
 
 		// Allow certain file formats
 		$allow = true;
@@ -417,20 +437,18 @@ class Local
 		foreach (($extensions ?? \_::$Back->GetAcceptableFormats()) as $ext)
 			if ($allow = ($fileType === $ext || $dfileType === $ext))
 				break;
-		$sourceFile = $content["tmp_name"];
+		$sourceFile = $object["tmp_name"];
 		if (!$allow) {
 			if ($deleteSource)
 				self::DeleteFile($sourceFile);
 			throw new \SilentException("The 'file format' is not 'acceptable'!");
 		}
 		// Check file size
-		$minSize = $minSize ?? \_::$Back->MinimumFileSize;
-		$maxSize = $maxSize ?? \_::$Back->MaximumFileSize;
-		if ($content["size"] < $minSize) {
+		if ($object["size"] < $minSize) {
 			if ($deleteSource)
 				self::DeleteFile($sourceFile);
 			throw new \SilentException("The 'file size' is 'very small'!");
-		} elseif ($content["size"] > $maxSize) {
+		} elseif ($object["size"] > $maxSize) {
 			if ($deleteSource)
 				self::DeleteFile($sourceFile);
 			throw new \SilentException("The 'file size' is 'very big'!");
@@ -438,7 +456,7 @@ class Local
 
 		if ($directory === false) {
 			$directory = \_::$Address->TempAddress;
-			$t = preg_find("/^[\w-]+\b/", $content["type"] ?? "");
+			$t = preg_find("/^[\w-]+\b/", $object["type"] ?? "");
 			if ($t)
 				$directory .= $t . DIRECTORY_SEPARATOR;
 		} elseif (!$directory)
@@ -446,7 +464,7 @@ class Local
 		else
 			$directory = self::CreateDirectory($directory);
 
-		$destFile = self::CreateAddress($fileName, ".$fileType", $directory);
+		$destFile = self::GenerateAddress($fileName, ".$fileType", $directory);
 		if (is_uploaded_file($sourceFile) && move_uploaded_file($sourceFile, $destFile))
 			return $destFile;
 		if (rename($sourceFile, $destFile))
@@ -458,82 +476,78 @@ class Local
 	}
 	/**
 	 * Save (Upload from the client side) file to the local storage
-	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $object A file object or posted file key name
 	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function StoreFile($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
+	public static function StoreFile($object, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableFileFormats);
+		return self::Store($object, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableFileFormats);
 	}
 	/**
 	 * Save (Upload from the client side) image to the local storage
-	 * @param mixed $content An image object or posted file key name
+	 * @param mixed $object An image object or posted file key name
 	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum image size in byte
 	 * @param mixed $maxSize Maximum image size in byte
 	 * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
 	 * @return string Return the uploaded image path, else return null
 	 */
-	public static function StoreImage($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
+	public static function StoreImage($object, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		if (is_string($content))
-			$content = self::GetFileObject($content);
-		if (!$content)
-			return null;
-		if (!get($content, "name"))
-			return null;//throw new \SilentException("There is not any file!");
+		if (!self::IsFileObject($object))
+			return self::Store($object, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableImageFormats);
 		// Check if image file is an actual image or fake image
-		if ((($content["tmp_name"] ?? null) ? getimagesize($content["tmp_name"]) : true) === false)
+		if ((($object["tmp_name"] ?? null) ? getimagesize($object["tmp_name"]) : true) === false)
 			throw new \SilentException("The image file is not an actual image!");
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableImageFormats);
+		return self::Store($object, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableImageFormats);
 	}
 	/**
 	 * Save (Upload from the client side) audio to the local storage
-	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $object A file object or posted file key name
 	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function StoreAudio($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
+	public static function StoreAudio($object, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableAudioFormats);
+		return self::Store($object, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableAudioFormats);
 	}
 	/**
 	 * Save (Upload from the client side) video to the local storage
-	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $object A file object or posted file key name
 	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function StoreVideo($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
+	public static function StoreVideo($object, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableVideoFormats);
+		return self::Store($object, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableVideoFormats);
 	}
 	/**
 	 * Save (Upload from the client side) document to the local storage
-	 * @param mixed $content A file object or posted file key name
+	 * @param mixed $object A file object or posted file key name
 	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
 	 * @return string Return the uploaded file path, else return null
 	 */
-	public static function StoreDocument($content, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
+	public static function StoreDocument($object, $directory = null, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($content, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableDocumentFormats);
+		return self::Store($object, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableDocumentFormats);
 	}
 	/**
 	 * Load (Download from the client side) something from the local storage,
 	 * Send somthing to download
-	 * @param mixed $content
+	 * @param mixed $content The content of the loaded file
 	 * @param string $name Optional filename to force download with a specific name.
 	 * @param string $type The file content type (e.g., "application/pdf", "image/jpeg").
 	 */

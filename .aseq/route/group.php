@@ -30,7 +30,7 @@ else
                 return $std;
             },
             "Image" =>"Image" ,
-            "Description" =>"strings"
+            "Description" =>"texts"
         ];
         $module->SelectCondition = "`Id`=:Id";
         $module->SelectParameters = [":Id"=>$path];
