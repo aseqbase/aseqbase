@@ -8,8 +8,7 @@ module("PrePage");
 $module = new MiMFa\Module\PrePage();
 $module->Image = \_::$Front->FullLogoPath;
 //$module->Title = \_::$Front->FullName??"About Us";
-$module->ContentTag = "h4";
-$module->Content = __(\_::$Front->Slogan);
+$module->Content = Struct::Heading1(__(\_::$Front->Slogan));
 pod($module, $data);
 $ops = \_::$Front->OwnerDescription?Convert::ToParagraphs(__(\_::$Front->OwnerDescription)):[];
 $dps = \_::$Front->FullDescription?Convert::ToParagraphs(__(\_::$Front->FullDescription)):[];
@@ -17,7 +16,9 @@ $opsc = count($ops);
 $dpsc = count($dps);
 response(
 	Struct::Style("
-		.{$module->Name} .content{
+		.{$module->Name} .heading{
+			font-size: var(--size-3);
+			margin-top: var(--size-0);
 			text-align: center;
 		}
 		.{$module->Name} .image{
@@ -42,8 +43,9 @@ response(
 				loop($dpsc, function($v,$k,$i) use($dps,$dpsc) {return ($i+2)%2==0? array_slice($dps, $i, min(2, $dpsc-$i)):null;}, false),
 				(\_::$Front->FullOwnerDescription?Convert::ToParagraphs(__(\_::$Front->FullOwnerDescription)):[]),
 				[Struct::$BreakLine],
-				[Struct::Paragraph(__(\_::$Front->FullSlogan), null,["class"=>"be center"])]
-			]
+				[Struct::Center(__(\_::$Front->FullSlogan))]
+			],
+			["style"=>"text-align:justify;"]
 		)
 	)
 );

@@ -49,6 +49,10 @@ class Form extends Module
 	public $AllowHeader = true;
 	public $AllowContent = true;
 	public $AllowFooter = true;
+	public $AnimationOffset = 0;
+	public $HeaderAnimation = "fade-right";
+	public $ContentAnimation = "fade-left";
+	public $FooterAnimation = "fade-up";
 	public $Class = "container";
 	public $ContentClass = "col-lg-6";
 	public $Interactive = true;
@@ -91,7 +95,7 @@ class Form extends Module
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
 		$this->ReCaptchaSiteKey = \_::$Back->ReCaptchaSiteKey;
-		$this->Signing = fn() => \_::$User->HasAccess()?"":part(\_::$User->InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
+		$this->Signing = fn() => \_::$User->HasAccess() ? "" : part(\_::$User->InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);
 		// });
@@ -748,7 +752,7 @@ class Form extends Module
 							$this->GetDescription(["class" => "form-description"]) .
 							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : "")
 							,
-							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => "fade-left"] : [])]
+							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => $this->HeaderAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
 						) : Struct::LargeSlot("")) .
 						Struct::LargeSlot(
 							Struct::Form(
@@ -763,21 +767,27 @@ class Form extends Module
 								$src,
 								["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method, "interactive" => $this->Interactive]
 							) .
-							($this->AllowFooter ? $this->GetFooter() : "")
+							($this->AllowFooter ? Struct::Division(
+								$this->GetFooter(),
+								...($this->AllowAnimate ? ["data-aos" => $this->FooterAnimation, "data-aos-offset" => $this->AnimationOffset] : [])
+							) : "")
 							,
-							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate ? ["data-aos" => "fade-right"] : [])]
-						).
-						($this->AllowHeader ? "":Struct::LargeSlot(""))
+							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate ? ["data-aos" => $this->ContentAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
+						) .
+						($this->AllowHeader ? "" : Struct::LargeSlot(""))
 					);
 			else
 				return
 					(
 						$this->AllowHeader ?
-						Struct::Media(null, $this->Image, ["class" => "image"]) .
-						$this->GetHeader() .
-						$this->GetTitle(["class" => "form-title"]) .
-						$this->GetDescription(["class" => "form-description"]) .
-						(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : "")
+						Struct::Division(
+							Struct::Media(null, $this->Image, ["class" => "image"]) .
+							$this->GetHeader() .
+							$this->GetTitle(["class" => "form-title"]) .
+							$this->GetDescription(["class" => "form-description"]) .
+							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : ""),
+							$this->AllowAnimate ? ["data-aos" => $this->HeaderAnimation, "data-aos-offset" => $this->AnimationOffset] : []
+						)
 						: ""
 					) .
 					Struct::Form(
@@ -786,11 +796,19 @@ class Form extends Module
 						Convert::ToString($this->GetFields()) .
 						Struct::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"]),
 						$src,
-						["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method, "interactive" => $this->Interactive]
-						,
-						...($this->AllowAnimate ? ["data-aos" => "fade-left"] : [])
+						[
+							"Id" => $name,
+							"Name" => $name,
+							"enctype" => $this->EncType,
+							"method" => $this->Method,
+							"interactive" => $this->Interactive,
+							...($this->AllowAnimate ? ["data-aos" => $this->ContentAnimation, "data-aos-offset" => $this->AnimationOffset] : [])
+						]
 					) .
-					($this->AllowFooter ? $this->GetFooter() : "");
+					($this->AllowFooter ? Struct::Division(
+						$this->GetFooter(),
+						...($this->AllowAnimate ? ["data-aos" => $this->FooterAnimation, "data-aos-offset" => $this->AnimationOffset] : [])
+					) : "");
 		}
 		return null;
 	}
@@ -918,7 +936,8 @@ class Form extends Module
 	public function GetSigning()
 	{
 		if ($this->Signing === true) {
-			if(\_::$User->HasAccess()) return "";
+			if (\_::$User->HasAccess())
+				return "";
 			module("Modal");
 			$module = new \MiMFa\Module\Modal();
 			$module->Style = new Style();

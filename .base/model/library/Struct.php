@@ -3107,9 +3107,10 @@ class Struct
                 "id" => $id,
                 "name" => Convert::ToKey($key),
                 "placeholder" => Convert::ToTitle($key),
+                "class" => "input",
                 "rows" => "10"
             ], ...$attributes),
-            ["class" => "input markdowninput $class", "style" => $style]
+            ["class" => "markdowninput $class", "style" => $style]
         );
     }
     /**
@@ -3134,7 +3135,7 @@ class Struct
                         "id" => $eid,
                         "name" => Convert::ToKey($key),
                         "placeholder" => Convert::ToTitle($key),
-                        "class" => "jsoninput",
+                        "class" => "input",
                         "rows" => "10",
                         "style" => "width: 100%; font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr; margin:0px;"
                     ], ...$attributes),
@@ -3152,7 +3153,7 @@ class Struct
                 ) =>
                     self::Division(self::Convert(isJson($value) ? Convert::FromJson($value) : $value), ["id" => $sid, "style" => "padding-bottom:var(--size-2);"])
             ],
-            ["class" => "input jsoninput $class", "style" => $style, "SelectedIndex" => $si]
+            ["class" => "jsoninput $class", "style" => $style, "SelectedIndex" => $si]
         );
     }
     /**

@@ -387,7 +387,7 @@ class Local
 			return false;
 		if (is_string($object))
 			$object = receiveFile($object);
-		return isset($object["tmp_name"]) && isset($object["name"]) && isset($object["size"]);
+		return isset($object["tmp_name"]) && isset($object["name"]) && isset($object["size"]) && $object["size"];
 	}
 
 	/**

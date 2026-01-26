@@ -29,21 +29,21 @@ class Translate
 	public $Direction = "ltr";
 	public $ImagePathPattern = "https://unpkg.com/language-icons/icons/{0}.svg";
 	public $CodeLimit = 160;
-	public $WrapPattern = "/(^<[\w\W]*>$)|(\\$\{[\w\W]+\})|(\B\`[^\`]+\`\B)|(\B'[^']+'\B)|(\"\B[^\"]+\")|(<\S+[\w\W]*>)|(\d*\.?\d+)/u";
+	public $WrapPattern = "/(^\s*<[\w\W]*>\s*$)|(\$\{[\w\W]+\})|(\`.?[^\`]*.?\`)|('.?[^']*.?')|(\".?[^\"]*.?\")|(<\S[\w\W]*>)|(\d*[\.,:\-]?\d+)/u";
 	public $WrapStart = "<";
 	public $WrapEnd = ">";
 	public $ValidPattern = "/[A-Z]/i";//"/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-Z]/mi";
 	public $InvalidPattern = "/[^A-Z0-9\W\$\{\}]/i";//'/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
-	public $CorrectorPattern = "/(?:^\`([\w\W]+)\`$)|(?:^'([\w\W]+)'$)|([\w\W]+)/u";
-	public $CorrectorReplacement = "$1$2$3";
-	public $TrimmerPattern = "/(?:\\$\{([^}]+)\})|((?<!\\$\{)[\w\W]+(?!\}))/u";
+	public $CorrectorPattern = "/(?:^\`([\w\W]+)\`$)|(?:^'([\w\W]+)'$)|(?:^\"([\w\W]+)\"$)|([\w\W]+)/u";
+	public $CorrectorReplacement = "$1$2$3$4";
+	public $TrimmerPattern = "/(?:\\$\{([^\}]+)\})|((?<!\\$\{)[\w\W]+(?!\}))/u";
 	public $TrimmerReplacement = "$1$2";
 	/**
 	 * To have a deep translate
 	 */
 	public $Deep = true;
-	public $DeepPattern = "/([^\w\s()\[\]]?((\w[\w\-\s<>0-9]*\w)|\w)[^\w\s:,;\.\!()\[\]]?)|([^0-9<>\{\}\w])/u";
-	public $Depth = 3;
+	public $DeepPattern = "/([^\w\s()\[\]'\"\`]?((\w[\w\-\s<>0-9]*\w)|\w)[^\w\s:,;\.\!()\[\]'\"\`]?)|([^0-9<>\{\}\w'\"\`])/u";
+	public $Turn = 3;
 	public $AllowCache = true;
 	public $CaseSensitive = false;
 	public $AutoUpdate = false;
@@ -93,7 +93,7 @@ class Translate
 		$this->Language = $lang;
 	}
 
-	public function Get($text, $lang = null, $depth = null)
+	public function Get($text, $lang = null, $turn = null)
 	{
 		if (!$this->IsRootLanguage($text))
 			return $text;
@@ -101,39 +101,36 @@ class Translate
 		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($ntext);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
-		
-		$depth = $depth ?? $this->Depth;
-		if (($d = $depth - 1) >= 0)
+
+		$turn = $turn ?? $this->Turn;
+		if (($d = $turn - 1) >= 0)
 			foreach ($dic as $key => $value)
 				$dic[$key] = $this->Get(preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $value), $lang, $d);
 
 		if ($data) {
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
-			$data = decode($data[$lang ?? $this->Language] ?? $data["x"], $dic);
+			$data = $data[$lang ?? $this->Language] ?? $data["x"];
 		} else {
-			if ($this->AutoUpdate)
-				$this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $ntext))]);
+			$data = $dic? $ntext : $text;
 
-			if ($dic && $depth)
-				$data = decode($ntext, $dic);
-			else
-				$data = $text;
-
-			if ($this->Deep) $data = $this->GetDeep($data, $lang);
+			if ($this->Deep) $data = $this->GetDeep($data, $lang, $turn - 1);
+			elseif ($this->AutoUpdate) $this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $data))]);
 		}
+
+		if ($dic) $data = decode($data, $dic);
 
 		if (!$this->CaseSensitive)
 			$data = self::DetectCaseStatus($data, $text);
 		return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $data);
 	}
-	public function GetDeep($text, $lang = null)
+	public function GetDeep($text, $lang = null, $turn = null)
 	{
 		if (!$this->IsRootLanguage($text))
 			return $text;
 		$d = $this->Deep;
 		$this->Deep = false;
 		foreach (preg_find_all($this->DeepPattern, $text) as $part)
-			$text = str_replace($part, $this->Get($part, $lang), $text);
+			$text = str_replace($part, $this->Get($part, $lang, $turn), $text);
 		$this->Deep = $d;
 		return $text;
 	}

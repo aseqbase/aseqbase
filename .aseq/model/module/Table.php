@@ -467,13 +467,13 @@ class Table extends Module
 
         $addbutton = fn($add = "Add your first item", $import = false, $export = false) =>
             $aaccess || $iaccess || $eaccess ? Struct::Center(
-                ($add === false || !$aaccess? "" : Struct::Button(__($add) . Struct::Icon("plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"], $add?[]: ["style"=>"padding:calc(var(--size-0) / 2);border:none;","Tooltip" => "Add another Item"])) .
-                ($import === false  || !$iaccess? "" : Struct::Button(__($import) . Struct::Icon("download"), "{$this->Modal->Name}_Import();", ["class" => "table-items-import"], $import?[]: ["style"=>"padding:calc(var(--size-0) / 2);border:none;","Tooltip" => "Import Items"])) .
-                ($export === false  || !$eaccess? "" : Struct::Button(__($export) . Struct::Icon("upload"), "{$this->Modal->Name}_Export();", ["class" => "table-items-export"], $export?[]: ["style"=>"padding:calc(var(--size-0) / 2);border:none;","Tooltip" => "Export Items"]))
-            ):null;
+                ($add === false || !$aaccess ? "" : Struct::Button(__($add) . Struct::Icon("plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"], $add ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Add another Item"])) .
+                ($import === false || !$iaccess ? "" : Struct::Button(__($import) . Struct::Icon("download"), "{$this->Modal->Name}_Import();", ["class" => "table-items-import"], $import ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Import Items"])) .
+                ($export === false || !$eaccess ? "" : Struct::Button(__($export) . Struct::Icon("upload"), "{$this->Modal->Name}_Export();", ["class" => "table-items-export"], $export ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Export Items"]))
+            ) : null;
 
         if ($isc) {
-            $uck = Struct::Division(($addbutton)(null,null,null)??Struct::Image(null, "tasks"), ["class" => "table-items-manage"]);
+            $uck = Struct::Division(($addbutton)(null, null, null) ?? Struct::Image(null, "tasks"), ["class" => "table-items-manage"]);
             if ($ick)
                 array_unshift($icks, $uck);
         }
@@ -815,6 +815,7 @@ class Table extends Module
             $this->Form->SuccessPath = \_::$User->Url;
             $this->Form->BackPath = \_::$User->Url;
             $this->Form->BackLabel = null;
+            $this->form->AllowAnimate = false;
             //$form->AllowHeader = false;
         }
         $this->Form->Router->Get()->Switch();
@@ -974,7 +975,7 @@ class Table extends Module
             title: "Add {$this->Title}",
             description: $this->Description,
             method: null,
-            children: (function () use ($record, $value) {
+            children: (function () use (&$record, $value) {
                 $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
@@ -985,9 +986,9 @@ class Table extends Module
                         $record[$schema["COLUMN_NAME"]] = null;
                 foreach ($record as $key => $val)
                     foreach ($schemas as $schema)
-                        if ($schema["COLUMN_NAME"] == $key)
+                        if ($schema["COLUMN_NAME"] === $key)
                         {
-                            $val = $key == $this->KeyColumn ? $value : null;
+                            $val = ($key == $this->KeyColumn) ? $value : null;
                             $res = $this->PrepareDataToShow($val, $key, $record, $schema);
                             if (!isEmpty($res))
                                 yield $res;
@@ -1002,13 +1003,13 @@ class Table extends Module
     {
         if (is_null($value))
             return null;
-        if (!\_::$User->HasAccess($this->AddAccess))
-            return Struct::Error("You have not access to add!");
+        if (!\_::$User->HasAccess($this->DuplicateAccess))
+            return Struct::Error("You have not access to duplicate!");
         if (!$this->DataTable->AlternativeName && !$this->KeyColumnName)
             $this->KeyColumnName = $this->KeyColumn;
         $row = $this->DataTable->SelectRow("*", [$this->DuplicateCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]);
         if (isEmpty($row))
-            return Struct::Error("You can not 'add' this item!");
+            return Struct::Error("You can not 'duplicate' this item!");
         $record = [];
         foreach ($this->CellsTypes as $key => $val)
             $record[$key] = null;
@@ -1022,7 +1023,7 @@ class Table extends Module
             title: "Add {$this->Title}",
             description: $this->Description,
             method: null,
-            children: (function () use ($record, $value) {
+            children: (function () use (&$record, $value) {
                 $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
@@ -1031,7 +1032,7 @@ class Table extends Module
                 yield Struct::HiddenInput($this->KeyColumnName, $this->AddSecret);
                 foreach ($record as $key => $val)
                     foreach ($schemas as $schema)
-                        if ($schema["COLUMN_NAME"] == $key)
+                        if ($schema["COLUMN_NAME"] === $key)
                         {
                             $res = $this->PrepareDataToShow($val, $key, $record, $schema);
                             if (!isEmpty($res))
@@ -1040,7 +1041,7 @@ class Table extends Module
                 yield Struct::HiddenInput($this->SecretKey, $this->AddSecret);
             })()
         );
-        $form->Image = getValid($record, "Image", "plus");
+        $form->Image = getValid($record, "Image", "copy");
         return $form->Handle();
     }
     public function GetModifyForm($value)

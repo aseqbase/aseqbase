@@ -127,7 +127,7 @@ class Revise
                 !isValid($pars, "private")
             ) {
                 $dval = $value->getDefaultValue();
-                $type = popBetween($pars, "field", "type") ?: ((is_null($dval) ? null : gettype($dval)) ?: ($value->getSettableType() ?: pop($pars, "var")));
+                $type = popBetween($pars, "field", "type") ?: ((is_null($dval) ? null : gettype($dval)) ?: ((isset($value->getSettableType)?$value->getSettableType():$value->getType() )?: pop($pars, "var")));
                 $desc = pop($pars, "description");
                 yield [
                     "Type" => $type = strtolower((str_replace(["object", "<array", "<[", ","], "", $type ?? "") !== ($type ?? "")) ? "object" : ($type ?: "mixed")),

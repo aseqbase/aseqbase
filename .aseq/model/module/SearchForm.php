@@ -5,7 +5,7 @@ use MiMFa\Library\Struct;
 class SearchForm extends Module{
     public $Tag = null;
 	public $Path = "/search";
-	public $SubmitLabel = "<i class=\"icon fa fa-search\"></i>";
+	public $SubmitLabel = "<i class='icon fa fa-search'></i>";
 	public $PlaceHolder = "Search";
 	public $QueryKey = "q";
 	public $QueryValue = null;

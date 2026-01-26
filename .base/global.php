@@ -335,7 +335,7 @@ function receive(array|string|null $method = null)
 		switch ($method = trim(strtolower($method))) {
 			case "file":
 			case "files":
-				$method = $_FILES ?: (isset($_REQUEST["__METHOD"]) && startsWith(strtolower($_REQUEST["__METHOD"]), "file")? $_POST : []);
+				$method = $_FILES ?: ((isset($_REQUEST["__METHOD"]) && startsWith(strtolower($_REQUEST["__METHOD"]), "file"))? $_POST : []);
 				break;
 			case "public":
 			case "get":
