@@ -12,7 +12,6 @@ module("Content");
 class Article extends Content
 {
      public $Class = null;
-     public $Root = "/post/";
 
      public function GetStyle()
      {
@@ -51,7 +50,7 @@ class Article extends Content
                margin-top: var(--size-0);
                font-size: var(--size-1);
                font-weight: normal;
-               max-width: 500px;
+               max-width: max(50%, 500px);
                text-align: start;
           }
           .{$this->Name} .header.cover .description *{
@@ -60,8 +59,8 @@ class Article extends Content
           }
           .{$this->Name} .content{
                padding: var(--size-max) var(--size-3);
+               margin-bottom: var(--size-max);
                background-color: var(--back-color-special);
-               box-shadow: var(--shadow-2);
           }
           ");
 
@@ -69,8 +68,8 @@ class Article extends Content
      public function GetTitle($attributes = null)
      {
           $p_image = getValid($this->Item, 'Image', $this->Image);
-          if (!($this->AllowImage = $this->AllowImage && $p_image))
-               return parent::GetTitle($attributes);
+          // if (!($this->AllowImage = $this->AllowImage && $p_image))
+          //      return parent::GetTitle($attributes);
           $p_id = get($this->Item, 'Id');
           $p_name = getValid($this->Item, 'Name') ?? $p_id ?? $this->Title;
           $nameOrId = $p_id ?? $p_name;
@@ -104,9 +103,9 @@ class Article extends Content
      }
      public function GetDescription($attributes = null)
      {
-          $p_image = getValid($this->Item, 'Image', $this->Image);
-          if (!($this->AllowImage = $this->AllowImage && $p_image))
-               return parent::GetDescription($attributes);
+          // $p_image = getValid($this->Item, 'Image', $this->Image);
+          // if (!($this->AllowImage = $this->AllowImage && $p_image))
+          //      return parent::GetDescription($attributes);
           return "";
      }
      public function GetScript(){

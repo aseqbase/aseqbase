@@ -127,12 +127,34 @@ class Revise
                 !isValid($pars, "private")
             ) {
                 $dval = $value->getDefaultValue();
+                $name = $value->getName();
+                $val = $value->getValue($object);
                 $type = popBetween($pars, "field", "type") ?: ((is_null($dval) ? null : gettype($dval)) ?: ((isset($value->getSettableType)?$value->getSettableType():$value->getType() )?: pop($pars, "var")));
+                $type = strtolower((str_replace(["object", "<array", "<[", ","], "", $type ?? "") !== ($type ?? "")) ? "object" : ($type ?: "mixed"));
+                if(in_array($type, ["string"])){
+                    if(endsWith($name, "Script", "Tag", "Label")) $type = "script";
+                    elseif(endsWith($name, "Content")) $type = "content";
+                    elseif(endsWith($name, "Description")) $type = "texts";
+                    elseif(str_contains("$val$dval", "\n")) $type = "texts";
+                    elseif(startsWith($name, "Allow")) $type = "bool";
+                    elseif(endsWith($name, "Password","SecretKey","SoftKey","HardKey")) $type = "password";
+                    elseif(endsWith($name, "Amount", "Price")) $type = "number";
+                    elseif(endsWith($name, "Path")) $type = "path";
+                    elseif(endsWith($name, "Address")) $type = "address";
+                    elseif(endsWith($name, "Url")) $type = "url";
+                    elseif(endsWith($name, "Media")) $type = "media";
+                    elseif(endsWith($name, "File")) $type = "file";
+                    elseif(endsWith($name, "Image")) $type = "image";
+                    elseif(endsWith($name, "Video")) $type = "video";
+                    elseif(endsWith($name, "Audio")) $type = "audio";
+                    //elseif(endsWith($name, ["Name", "Class", "Unit", "Currency", "Key"])) $type = "value";
+                    else $type = "value";
+                }
                 $desc = pop($pars, "description");
                 yield [
-                    "Type" => $type = strtolower((str_replace(["object", "<array", "<[", ","], "", $type ?? "") !== ($type ?? "")) ? "object" : ($type ?: "mixed")),
-                    "Name" => $value->getName(),
-                    "Value" => $value->getValue($object),
+                    "Type" => $type,
+                    "Name" => $name,
+                    "Value" => $val,
                     "Title" => pop($pars, "title"),
                     "Description" => $desc = __(pop($pars, "abstract") ?? $desc, separator: Struct::$Break),
                     "Category" => pop($pars, "category"),

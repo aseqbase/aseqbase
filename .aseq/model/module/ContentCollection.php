@@ -349,16 +349,16 @@ class ContentCollection extends Collection{
 						    0,
 						    $this->ExcerptLength,
 						    $this->ExcerptSign
-					    ), styling:true, referring:$p_referring);
+					    ), styling:false, referring:$p_referring);
                     if($p_showexcerpt)
                         $p_excerpt = __(Convert::ToExcerpt(
 						    Convert::ToText($p_content),
 						    0,
 						    $this->ExcerptLength,
 						    $this->ExcerptSign
-					    ), styling:true, referring:$p_referring);
+					    ), styling:false, referring:$p_referring);
                 }
-                else $p_description = __($p_description, styling:true, referring:$p_referring);
+                else $p_description = __($p_description, styling:false, referring:$p_referring);
 
 			    if($p_showmeta){
 				    if($this->AllowAuthor)
@@ -451,4 +451,3 @@ class ContentCollection extends Collection{
         })()));
 	}
 }
-?>

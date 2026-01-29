@@ -355,7 +355,7 @@ class Struct
                         if (isEmpty($value))
                             continue;
                         else
-                            $attrdic[$value] = null;
+                            $attrdic["$value"] = null;
                     else {
                         $key = trim(strtolower($key));
                         //Detection
@@ -2956,6 +2956,10 @@ class Struct
                 padding: 0px;
                 margin: 0px;
             }
+            .contentinput:has(#$eid)>.tab-contents, .contentinput:has(#$eid)>.tab-contents>.tab-content .input{
+                border: none;
+                border-radius: 0px;
+            }
             .contentinput:has(#$eid).maximize{
                 position: fixed;
                 inset: 0;
@@ -3719,7 +3723,6 @@ class Struct
             background-color: transparent;
             color: inherit;
             text-align:left;
-            direction:ltr;
             width:100%;
             border:none;
             outline:none;
@@ -4173,7 +4176,7 @@ class Struct
         $update = "{$uniq}_Click();";
         $weekDays = ["Sa.", "Su.", "Mo.", "Tu.", "We.", "Th.", "Fr."];
         return
-            self::Style("
+            style("
                 .$uniq{
                     text-align: center;
                     display: flex;
@@ -4256,7 +4259,7 @@ class Struct
                     height: var(--size-4);
                 }
             ") .
-            self::Script("
+            script("
             function {$uniq}_Click(day = null){
                 const tso = " . (\_::$Back->TimeStampOffset * 1000) . ";
                 dt = new Date(
@@ -4486,7 +4489,7 @@ class Struct
         $content = Convert::ToSequence($content);
         $active = self::PopAttribute($attributes, "SelectedIndex") ?? 0;
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
-        return self::Style("
+        return style("
             #$id>.tab-contents{
                 min-height: 100%;
             }
@@ -4520,7 +4523,7 @@ class Struct
                 ["class" => "tabs", "id" => $id],
                 $attributes
             ) .
-            self::Script("function {$id}_openTab(tab, tabId){
+            script("function {$id}_openTab(tab, tabId){
             document.querySelectorAll('#$id>.tab-contents>.tab-content').forEach(content => content.classList.remove('active') & content.classList.remove('show') & content.classList.add('hide'));
             document.querySelectorAll('#$id>.tab-titles>.tab-title').forEach(title => title.classList.remove('active'));
             content = document.getElementById(tabId);
@@ -4781,7 +4784,7 @@ class Struct
             // self::Script(null, "https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js") .
             self::Style("#$id{height:" . (self::GetAttribute($attributes, "height") ?? "300px") . ";}") .
             self::Division("", ["id" => $id, "class" => "map"], $attributes) .
-            self::Script("map$id = L.map('$id').setView([$center[0], $center[1]], 13);
+            script("map$id = L.map('$id').setView([$center[0], $center[1]], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
         //, {attribution: '&copy; OpenStreetMap contributors'}
     ).addTo(map$id);

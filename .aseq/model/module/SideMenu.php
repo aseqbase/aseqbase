@@ -304,7 +304,6 @@ class SideMenu extends Module
 					text-decoration: none;
 					color: var(--fore-color-output);
 					background-color: var(--back-color-output);
-					border: var(--border-1) var(--back-color-special-output);
 					border-radius: var(--radius-3);
 					box-shadow: var(--shadow-1);
 					overflow: hidden;

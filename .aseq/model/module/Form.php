@@ -753,7 +753,7 @@ class Form extends Module
 							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : "")
 							,
 							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => $this->HeaderAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
-						) : Struct::LargeSlot("")) .
+						) : "") .
 						Struct::LargeSlot(
 							Struct::Form(
 								Struct::Rack(
@@ -773,8 +773,7 @@ class Form extends Module
 							) : "")
 							,
 							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate ? ["data-aos" => $this->ContentAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
-						) .
-						($this->AllowHeader ? "" : Struct::LargeSlot(""))
+						)
 					);
 			else
 				return

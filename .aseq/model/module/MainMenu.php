@@ -166,7 +166,6 @@ class MainMenu extends Module
 				text-decoration: none;
 				padding: 0px;
 				margin: 0px;
-				border: var(--border-1) var(--back-color-special-output);
 				border-radius: var(--radius-3);
 				box-shadow: var(--shadow-1);
 				display: flex;

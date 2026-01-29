@@ -233,6 +233,7 @@ class CommentForm extends Form
 			$rootId = get($received, "Root");
 			if (isValid($rootId)) {
 				popTimer();
+				$this->AllowAnimate =
 				$this->AllowHeader =
 					$this->AllowFooter = false;
 				$this->ContentClass = "";

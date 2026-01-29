@@ -322,7 +322,6 @@ class Content extends Module
 			.{$this->Name} .heading{
                     text-align: start;
                     padding: 0px;
-                    margin: 0px;
                     margin-bottom: calc(var(--size-0) / 2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}

@@ -483,7 +483,7 @@ class Map extends Module
 				const {lat,lng} = e.latlng;
 				if (marker) marker.setLatLng(e.latlng);
 				else marker = L.marker(e.latlng).addTo({$this->Name});
-				" . ($this->SelectedLocationPopup ? "marker.bindPopup(" . Script::Convert(__($this->SelectedLocationPopup)) . ").openPopup();" : "") . "
+				" . ($this->SelectedLocationPopup ? "marker.bindPopup(" . Script::Convert(isStatic($this->SelectedLocationPopup)?__($this->SelectedLocationPopup):$this->SelectedLocationPopup) . ").openPopup();" : "") . "
 				" . ($this->SelectedLocationScriptFunction ? "($this->SelectedLocationScriptFunction)({$this->Name}, e, err);" : "") . "
 				" . ($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction ? "fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}" . (\_::$Front->AllowTranslate ? "&accept-language=" . \_::$Front->Translate->Language : "") . "`)
 				.then(response => response.json())
@@ -493,7 +493,7 @@ class Map extends Module
 					if(data.display_name) e.address = data.display_name;
 					else err = 'Address not found';
 					e.metadata = data;
-					" . ($this->SelectedAddressPopup ? "marker.bindPopup(" . Script::Convert(__($this->SelectedAddressPopup)) . ").openPopup();" : "") . "
+					" . ($this->SelectedAddressPopup ? "marker.bindPopup(" . Script::Convert(isStatic($this->SelectedAddressPopup)?__($this->SelectedAddressPopup):$this->SelectedAddressPopup) . ").openPopup();" : "") . "
 					" . ($this->SelectedAddressScriptFunction ? "($this->SelectedAddressScriptFunction)({$this->Name}, e, err);" : "") . "
 				})
 				.catch(err => {

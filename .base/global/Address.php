@@ -336,7 +336,7 @@ class Address extends ArrayObject
         $this->AssetRoot = $this->Root . "asset/";
         $this->ScriptRoot = $this->AssetRoot . "script/";
         $this->StyleRoot = $this->AssetRoot . "style/";
-        $this->ContentRoot = $this->Root . "post/";
+        $this->ContentRoot = $this->Root . "content/";
         $this->CategoryRoot = $this->Root . "category/";
         $this->TagRoot = $this->Root . "tag/";
         $this->SearchRoot = $this->Root . "search/";

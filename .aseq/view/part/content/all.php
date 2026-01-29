@@ -7,7 +7,7 @@ $nav = new \MiMFa\Module\Navigation($Items);
 module("ContentCollection");
 $module = new \MiMFa\Module\ContentCollection();
 $name = $module->Name;
-$module->Title = !isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strlen($Title)) > 3 ? "$Title ".($Name?"($Name)":"") : between($Title, $Name);
+$module->Title = between($Title, $Name);//!isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strlen($Title)) > 3 ? "$Title ".($Name?"($Name)":"") : between($Title, $Name);
 $module->Description = pop($data, "Description");
 $module->DefaultImage = pop($data, 'Image');
 $module->AllowRoot = false;

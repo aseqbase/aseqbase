@@ -5,7 +5,7 @@ $Title = pop($data, 'Title');
 
 module("PrePage");
 $module = new \MiMFa\Module\PrePage();
-$module->Title = !isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strlen($Title)) > 3 ? "$Title " . ($Name ? "($Name)" : "") : between($Title, $Name);
+$module->Title = between($Title, $Name);//!isEmpty($Title) && !isEmpty($Name) && abs(strlen($Name) - strlen($Title)) > 3 ? "$Title ".($Name?"($Name)":"") : between($Title, $Name);
 $module->Description = get($data, 'Description');
 $module->Image = get($data, 'Image');
 
