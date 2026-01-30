@@ -108,27 +108,27 @@ class Template extends \Base
     public function Render()
     {
         if ($this->Initial)
-            struct($this->Initial);
+            render($this->Initial);
         else
             $this->RenderInitial();
         if ($this->Main)
-            struct($this->Main);
+            render($this->Main);
         else
             $this->RenderMain();
         if ($this->Header)
-            struct($this->Header);
+            render($this->Header);
         else
             $this->RenderHeader();
         if ($this->Content)
-            struct($this->Content);
+            render($this->Content);
         else
             $this->RenderContent();
         if ($this->Footer)
-            struct($this->Footer);
+            render($this->Footer);
         else
             $this->RenderFooter();
         if ($this->Final)
-            struct($this->Final);
+            render($this->Final);
         else
             $this->RenderFinal();
     }

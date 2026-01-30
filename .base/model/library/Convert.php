@@ -38,7 +38,7 @@ class Convert
         if ($value instanceof \Base)
             return $value->ToString();
         if (is_countable($value) || is_iterable($value))
-            return self::ToString($value);
+            return self::ToString(value: $value);
         //return self::ToJson($value);
         if (is_callable($value) || $value instanceof \Closure)
             return self::ToStatic($value(...$args));

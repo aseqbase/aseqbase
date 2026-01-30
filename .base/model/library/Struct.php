@@ -1748,9 +1748,9 @@ class Struct
     public static function BreakLine($content, $reference = null, ...$attributes)
     {
         if (is_null($content))
-            return self::Element("hr", ["class" => "break"], $attributes);
+            return self::Element("hr", ["class" => "breakline"], $attributes);
         $attr = [
-            "class" => "break",
+            "class" => "breakline",
             "style" =>
                 "display:flex;
                 flex-direction: column;
@@ -1764,12 +1764,8 @@ class Struct
             "style" =>
                 "background-color: var(--back-color);
                 font-size: 75%;
-                padding: calc(var(--size-0) * .5);
+                padding: calc(var(--size-0) / 2);
                 margin: 0px;
-                aspect-ratio: 1;
-                border: var(--border-1) #8883;
-                border-radius: var(--radius-5);
-                box-shadow: var(--shadow-2);
                 z-index:0;"
         ];
         $hr = self::Element("hr", ["style" => "width: 100%; margin-bottom: calc(-" . (strlen($content)) . " * 0.5 * 0.75 * var(--size-0));"]);

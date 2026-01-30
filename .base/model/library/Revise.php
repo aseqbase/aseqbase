@@ -132,7 +132,8 @@ class Revise
                 $type = popBetween($pars, "field", "type") ?: ((is_null($dval) ? null : gettype($dval)) ?: ((isset($value->getSettableType)?$value->getSettableType():$value->getType() )?: pop($pars, "var")));
                 $type = strtolower((str_replace(["object", "<array", "<[", ","], "", $type ?? "") !== ($type ?? "")) ? "object" : ($type ?: "mixed"));
                 if(in_array($type, ["string"])){
-                    if(endsWith($name, "Script", "Tag", "Label")) $type = "script";
+                    if(endsWith($name, "Script", "Tag")) $type = "script";
+                    elseif(endsWith($name, "Label")) $type = "string";
                     elseif(endsWith($name, "Content")) $type = "content";
                     elseif(endsWith($name, "Description")) $type = "texts";
                     elseif(str_contains("$val$dval", "\n")) $type = "texts";

@@ -1568,6 +1568,22 @@ function route($name = null, mixed $data = null, bool $print = true, string|int 
 }
 
 /**
+ * To get a Table from the DataBase
+ * @param string $name The raw table name (Without any prefix)
+ * @param bool $prefix Add table prefix to the name or not (default is true)
+ * @return DataTable The selected database's table
+ */
+function table(string $name, bool $prefix = true, string|int $origin = 0, int $depth = 999999, ?DataBase $source = null, $default = null)
+{
+	return new DataTable(
+		$source ?? \_::$Back->DataBase,
+		$name,
+		$prefix ? \_::$Back->DataBasePrefix : null,
+		\_::$Back->DataTableNameConvertors
+	);
+}
+
+/**
  * To get the url of the selected asset
  * @param non-empty-string $directory The relative file directory
  * @param string|null $name The asset file name
@@ -1604,36 +1620,31 @@ function asset($directory, string|null $name = null, string|array|null $extensio
  * - Footnotes with [^note sign] and [note sign]: url or note
  * - Auto-detect text direction
  * - And more...
- * @param mixed $content The data that is ready to print or a file address
+ * @param mixed $content The data that is ready to print
+ * @param string $path The relative file or directory path
  * @param array|null $replacements A key=>value array of all parts to their replacement matchs
+ * @param false|null|string|array $extension The extention like ".jpg" (leave null for default value ".php")
+ * @param string|int $origin The start layer of the sequences (a zero started index)
+ * @param int $depth How much layers it should iterate to find the correct address
+ * @param int $offset [optional] The offset where the reading starts.
+ * @param int|null $length [optional] Maximum length of data read. The default is to read until end of file is reached.
+ * @param string $address [optional] To get the filal found or maked address.
  * @return mixed Printed data
  */
-function render($content = null, $replacements = [])
+function render($content = null, $path = null, $replacements = [], $extension = false, string|int $origin = 0, int $depth = 999999, int $offset = 0, int|null $length = null, &$address = null)
 {
-	if(is_file($content)) return struct(null, $content, $replacements);
-	else return struct($content, null, $replacements);
+	if($path) $content .= open($path, $extension, $origin, $depth, $offset, $length, $address);
+	echo $content = Struct::Convert($replacements ? decode($content, Convert::ToItems($replacements)) : $content);
+	return $content;
 }
 
 /**
- * Convert markdown supported data and echo them on the client side
- * Also can render custom markups using the replacements dictionary
- * Supports all MarkDown markups, and custom markups such as:
- * - Inline code with backticks (`code`)
- * - Code blocks with greater-than sign (>)
- * - All type of multimedia embedding with ![alt](url)
- * - Add custom attributes to any tag with @{} after the markup
- * - Footnotes with [^note sign] and [note sign]: url or note
- * - Auto-detect text direction
- * - And more...
- * @param mixed $content The data that is ready to print
- * @param string|null $source The source file address
- * @param array|null $replacements A key=>value array of all parts to their replacement matchs
- * @return mixed Printed data
+ * To echo htmls to the client side
  */
-function struct($content = null, $source = null, ...$replacements)
+function struct($content = null, $source = null, ...$attributes)
 {
-	if($source) $content .= open($source);
-	echo $content = Struct::Convert($replacements ? decode($content, Convert::ToItems($replacements)) : $content);
+	if($source) echo $content = Struct::Embed($content, $source, ...$attributes);
+	else echo $content = Struct::Section($content, ...$attributes);
 	return $content;
 }
 /**
@@ -1656,23 +1667,6 @@ function style($content = null, $source = null, ...$attributes)
 	echo $content = Struct::Style($content, $source, ...$attributes);
 	return $content;
 }
-
-/**
- * To get a Table from the DataBase
- * @param string $name The raw table name (Without any prefix)
- * @param bool $prefix Add table prefix to the name or not (default is true)
- * @return DataTable The selected database's table
- */
-function table(string $name, bool $prefix = true, string|int $origin = 0, int $depth = 999999, ?DataBase $source = null, $default = null)
-{
-	return new DataTable(
-		$source ?? \_::$Back->DataBase,
-		$name,
-		$prefix ? \_::$Back->DataBasePrefix : null,
-		\_::$Back->DataTableNameConvertors
-	);
-}
-
 #endregion 
 
 
