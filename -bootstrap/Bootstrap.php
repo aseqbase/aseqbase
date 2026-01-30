@@ -425,7 +425,7 @@ class Bootstrap
     }
     public static function CreateGlobalFile($force = null)
     {
-        $parent = (self::$Arguments["b"] ?? null) ? ".base" : ".aseq";
+        $parent = (self::$Arguments["b"] ?? null) ? "base" : "aseq";
         if (!isset(self::$Configurations["Global"]))
             self::$Configurations["Global"] = [];
         return self::CreateFile(self::$DestinationDirectory . "global.php", fn() => "<?php

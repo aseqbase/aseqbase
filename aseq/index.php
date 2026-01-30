@@ -9,7 +9,7 @@
  */
 $directories = preg_split("/[\/\\\]/", trim(__DIR__, "/\\"));
 $GLOBALS["ASEQ"] = end($directories);/* Change it to null if the file is in the root directory */
-$GLOBALS["BASE"] = ".base";/* Change it to the parent directory if deferents */
+$GLOBALS["BASE"] = "base";/* Change it to the parent directory if deferents */
 
 /*
     Change \_::$Sequence

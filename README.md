@@ -93,7 +93,7 @@ Explore the ecosystem:
 		Destination Directory [D:\MyWebsite\]: D:\MyWebsite\
 		```
   4. Follow the steps to finish the installation of sources, database, etc.
-  5. [optional] Create an optional file named `global.php` in the root directory to change your-parent-directory-name (from the `.aseq`) using:
+  5. [optional] Create an optional file named `global.php` in the root directory to change your-parent-directory-name (from the `aseq`) using:
 		``` bash
 		> composer aseqbase:create global --base "your-parent-directory-name" -f
 		```
@@ -101,7 +101,7 @@ Explore the ecosystem:
 		``` bash
 		vendor/aseqbase/aseqbase> composer dev:create global --base "your-parent-directory-name" -f
 		```
-		**Note**: Do not forget to replace "your-parent-directory-name" with your item (default `.aseq`). 
+		**Note**: Do not forget to replace "your-parent-directory-name" with your item (default `aseq`). 
   6. Enjoy...
 <h4>Using</h4>
 
