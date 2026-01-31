@@ -155,7 +155,7 @@ class Content extends Module
       * @example ["News"=>10, "Default"=>5]
       * @category Parts
       */
-     public $RelatedsCount = ["News" => 10, "Default" => 5];
+     public $RelatedsCount = ["News" => 10, "Default" => 4];
 
      public $LeaveComment = true;
 
@@ -386,6 +386,10 @@ class Content extends Module
 				padding-top: var(--size-3);
 				padding-bottom: var(--size-3);
 			}
+               .{$this->Name}>:not(.title, .description, .content){
+                    padding-top: var(--size-max);
+                    padding-bottom: var(--size-max);
+               }
         ");
      }
 
@@ -401,9 +405,9 @@ class Content extends Module
                yield $this->GetContent();
                yield $this->GetSpecial();
                yield $this->GetAttaches();
+               yield $this->GetTags();
                yield $this->GetRelateds();
                yield $this->GetCommentsCollection();
-               yield $this->GetTags();
                yield $this->GetCommentForm();
           });
      }
@@ -592,7 +596,7 @@ class Content extends Module
                $p_tagsorder = Convert::FromSwitch($this->TagsOrder, $p_type);
                $tags = table("Tag")->SelectPairs("Name", "Title", "`Id` IN (" . join(",", $p_tags) . ") " . (isEmpty($p_tagsorder) ? "" : "ORDER BY $p_tagsorder") . " LIMIT $p_tagscount");
                if (count($tags) > 0)
-                    return Struct::$BreakLine . Struct::Division(
+                    return Struct::Division(
                          Struct::Heading6(Convert::FromSwitch($this->TagsLabel, $p_type)) .
                          join(PHP_EOL, loop(
                               $tags,
@@ -619,17 +623,22 @@ class Content extends Module
           if (isEmpty($p_tags))
                return null;
           $p_type = get($this->Item, 'Type');
-          $p_relatedstext = __(Convert::FromSwitch($this->RelatedsLabel, $p_type));
-          $p_relatedscount = Convert::FromSwitch($this->RelatedsCount, $p_type) ?? 5;
+          $p_relatedstext = Convert::FromSwitch($this->RelatedsLabel, $p_type);
+          $p_relatedscount = Convert::FromSwitch($this->RelatedsCount, $p_type) ?? 4;
           $p_relatedsorder = Convert::FromSwitch($this->RelatedsOrder, $p_type);
-          $rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Front->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Front->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
-          if (count($rels) > 0)
-               return Struct::$BreakLine . Struct::Division($p_relatedstext . join(PHP_EOL, loop(
-                    $rels,
-                    function ($v, $k) {
-                         return Struct::Link(isValid($v) ? $v : $k, $this->Root . $k, ["class" => "btn"]);
-                    }
-               )), ["class" => "relateds"]);
+          //$rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Front->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Front->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
+          $rels = table("Content")->Select("*", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Front->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Front->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
+          if (count($rels) > 0){
+               module("ContentCollection");
+               $cc = new ContentCollection($rels);
+               return ($p_relatedstext?Struct::Heading3($p_relatedstext):"") . $cc->ToString();
+               // return Struct::Division($p_relatedstext . join(PHP_EOL, loop(
+               //      $rels,
+               //      function ($v, $k) {
+               //           return Struct::Link(isValid($v) ? $v : $k, $this->Root . $k, ["class" => "btn"]);
+               //      }
+               // )), ["class" => "relateds"]);
+          }
      }
      public function GetCommentsCollection()
      {
@@ -661,7 +670,7 @@ class Content extends Module
                          break;
                }
                if (count($cc->Items) > 0)
-                    return Struct::$BreakLine . $cc->ToString();
+                    return $cc->ToString();
           }
      }
      public function GetCommentForm()
@@ -669,6 +678,6 @@ class Content extends Module
           if (!$this->LeaveComment)
                return null;
           $this->CommentForm->Relation = get($this->Item, 'Id');
-          return Struct::$BreakLine . $this->CommentForm->Handle();
+          return $this->CommentForm->Handle();
      }
 }

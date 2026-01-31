@@ -69,7 +69,7 @@ class MainMenu extends Module
 				line-height: 1.5;
 				align-items: center;
 				flex-direction: row;
-				padding: calc(var(--size-0) / 2) var(--size-3);
+			    padding-inline-end: var(--size-3);
 				gap: var(--size-0);
 			}
 			.{$this->Name} .header .title{
