@@ -35,7 +35,7 @@ class Table extends Module
 
     /**
      * The database table key column name, to get items automatically
-     * @var null|string
+     * @var null|string|int
      */
     public $KeyColumn = "Id";
     /**
@@ -75,7 +75,7 @@ class Table extends Module
 
     /**
      * The database table key row name or index, to get items automatically
-     * @var null|string
+     * @var null|string|int
      */
     public $KeyRow = -1;
     /**
@@ -597,7 +597,7 @@ class Table extends Module
                     $cells[] = Convert::ToString($this->Footer);
             return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton($aaccess ? "Add another item" : false, $iaccess ? "Import items" : false, $eaccess ? "Export items" : false) . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . Struct::Table(join(PHP_EOL, $cells)) . parent::GetCloseTag();
         } elseif ($aaccess || $iaccess)
-            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton("Add your first item", $iaccess ? "Import items" : false) . Struct::Table("") . parent::GetCloseTag();
+            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton("Add your first item", $iaccess ? "Import items" : false,  $eaccess ? "Export items" : false,) . Struct::Table("") . parent::GetCloseTag();
         return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . Struct::Table("") . parent::GetCloseTag();
     }
 

@@ -225,6 +225,13 @@ class Address extends ArrayObject
      */
     public string|null $Root;
     /**
+     * The Public root Route
+     * @example
+     * "/public/"
+     * @var string
+     */
+    public string $PublicRoot;
+    /**
      * The Asset root Route
      * @example
      * "/asset/"
@@ -333,6 +340,7 @@ class Address extends ArrayObject
         $this->PublicAddress = $directory . $this->PublicDirectory;
 
         $this->Root = "/";
+        $this->PublicRoot = $this->Root . "public/";
         $this->AssetRoot = $this->Root . "asset/";
         $this->ScriptRoot = $this->AssetRoot . "script/";
         $this->StyleRoot = $this->AssetRoot . "style/";

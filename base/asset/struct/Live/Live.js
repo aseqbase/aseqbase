@@ -514,6 +514,14 @@ class Live extends Array {
             if (tag instanceof Element) tag.removeAttribute(name);
         });
     }
+    toggleAttr(name, value = null) {
+        value = value ? String(value) : null;
+        return this.each(tag => {
+            if (tag instanceof Element)
+                if (tag.hasAttribute(name)) tag.removeAttribute(name);
+                else tag.addAttribute(name, value);
+        });
+    }
 
     css(property, value = null) {
         if (value === null) {

@@ -152,7 +152,7 @@ class Convert
         if ($len <= $maxlength)
             return $text;
         if ($reverse)
-            return $excerptedSign . substr($text, max(0, $len - $from - $maxlength), max(0, $maxlength - strlen($excerptedSign))) . ($from > strlen($excerptedSign) ? $excerptedSign : "");
+            return $excerptedSign . substr($text, max(0, $len - $from - $maxlength + strlen($excerptedSign)), max(0, $maxlength)) . ($from > strlen($excerptedSign) ? $excerptedSign : "");
         else
             return ($from > strlen($excerptedSign) ? $excerptedSign : "") . substr($text, $from, $maxlength - strlen($excerptedSign)) . $excerptedSign;
     }

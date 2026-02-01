@@ -32,7 +32,7 @@ class Translate
 	public $WrapPattern = "/(^\s*<[\w\W]*>\s*$)|(\$\{[\w\W]+\})|(\`.?[^\`]*.?\`)|('.?[^']*.?')|(\".?[^\"]*.?\")|(<\S[\w\W]*>)|(\d*[\.,:\-]?\d+)/u";
 	public $WrapStart = "<";
 	public $WrapEnd = ">";
-	public $ValidPattern = "/[A-Z]/i";//"/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-Z]/mi";
+	public $ValidPattern = "/[A-Z0-9]/i";//"/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-Z]/mi";
 	public $InvalidPattern = "/[^A-Z0-9\W\$\{\}]/i";//'/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
 	public $CorrectorPattern = "/(?:^\`([\w\W]+)\`$)|(?:^'([\w\W]+)'$)|(?:^\"([\w\W]+)\"$)|([\w\W]+)/u";
 	public $CorrectorReplacement = "$1$2$3$4";
@@ -96,7 +96,7 @@ class Translate
 	public function Get($text, $lang = null, $turn = null)
 	{
 		if (!$this->IsRootLanguage($text))
-			return $text;
+			return $text?preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $text):$text;
 		$dic = array();
 		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($ntext);
@@ -147,7 +147,7 @@ class Translate
 	public function GetHybrid($text, $replacements = [], $lang = null)
 	{
 		if (!$this->IsRootLanguage($text))
-			return $text;
+			return $text?preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $text):$text;
 		$text = encode($text, $replacements, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);

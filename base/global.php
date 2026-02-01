@@ -1462,7 +1462,7 @@ function model($name, mixed $data = [], bool $print = true, string|int $origin =
  */
 function library($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
+	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Library\\$used" : null;
 }
 /**
  * To interprete, the specified ComponentName
@@ -2899,22 +2899,22 @@ function isStatic($value): bool
 /**
  * Remove all changeable command signs from a url (such as ../ or /./.)
  * Change all backslashes to the slash
- * @param string $path The source path
+ * @param string $address The source address
  * @return array|string|null
  */
-function normalizeUrl(string $path): string|null
+function normalizeUrl(string $address): string|null
 {
-	return str_replace(["\\", " "], ["/", "%20"], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
+	return str_replace(["\\", " "], ["/", "%20"], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $address));
 }
 /**
  * Remove all changeable command signs from a path (such as ../ or /./.)
  * Change all slashes/backslashes to the DIRECTORY_SEPARATOR
- * @param string $path The source path
+ * @param string $address The source address
  * @return array|string|null
  */
-function normalizePath(string $path): string|null
+function normalizePath(string $address): string|null
 {
-	return str_replace(["/", "\\", "%20"], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, " "], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
+	return str_replace(["/", "\\", "%20"], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, " "], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $address));
 }
 
 /**

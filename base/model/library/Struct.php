@@ -23,6 +23,7 @@ class Struct
      * @var string
      */
     public static $BreakLine = "<hr/>";
+    public static $BreakWarp = "<div style='border-left:1px solid; height:100%; display:inline;'></div>";
 
     /**
      * Convert everything to a simple HTML format,
@@ -2606,7 +2607,7 @@ class Struct
             case 'radio':
             case 'radiobox':
             case 'radiobutton':
-                $content = $dataOptions($options, $attributes) . self::RadioInput($key, $value, $attributes);
+                $content = self::RadioInput($key, $value, $options, $attributes);
                 break;
             case 'choices':
             case 'choiceboxes':
@@ -2627,7 +2628,7 @@ class Struct
             case 'check':
             case 'checkbox':
             case 'checkbutton':
-                $content = $dataOptions($options, $attributes) . self::CheckInput($key, $value, $attributes);
+                $content = self::CheckInput($key, $value, $options, $attributes);
                 break;
             case 'bools':
             case 'booleans':
@@ -3319,7 +3320,7 @@ class Struct
      */
     public static function CheckInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value ? "1" : "0", "checkbox", ["class" => "checkinput", ...($value ? ["checked" => "checked"] : []), "onchange" => "this.value = this.checked?1:0;"], $attributes);
+        return self::Input($key, $value, "checkbox", ["class" => "checkinput"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag Collection
@@ -3357,7 +3358,7 @@ class Struct
      */
     public static function RadioInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $key, "radio", ["class" => "radioinput", ...($value ? ["checked" => "checked"] : [])], $attributes);
+        return self::Input($key, $value, "radio", ["class" => "radioinput"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag Collection

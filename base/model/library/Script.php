@@ -33,6 +33,8 @@ class Script
                 $object = str_replace("</script>", "<\/script>", $object);
                 return "$sp$object$sp";
             }
+            if (is_bool($object))
+                return $object ? "true" : "false";
             if (is_numeric($object))
                 return $object;
             if (is_subclass_of($object, "\Base"))
@@ -159,7 +161,7 @@ class Script
      * @param int $timeout The timeout for uploading the file in milliseconds
      * @return string The script part
      */
-    public static function Upload($formats = null, $target = null, $successScript = null, $errorScript = null, $readyScript = null, $progressScript = null, $timeout = 60000, $multiple = false, $binary = false)
+    public static function Upload($formats = null, $target = null, $successScript = null, $errorScript = null, $readyScript = null, $progressScript = null, $timeout = 60000, $method = "file", $multiple = false, $binary = false)
     {
         return "
             var input = document.createElement('input');
@@ -173,14 +175,14 @@ class Script
                     reader.addEventListener('load', (event) => {
                         const binaryData = event.target.result;
                         const base64Data = btoa(String.fromCharCode(...new Uint8Array(binaryData)));
-                        sendFileRequest(" . self::Convert($target) . ", 'data=' + encodeURIComponent(base64Data), null, " . ($successScript ?? "null") . ", " . ($errorScript ?? "null") . ", " . ($readyScript ?? "null") . ", " . ($progressScript ?? "null") . ", $timeout);
+                        sendRequest(" . self::Convert($method) . ", " . self::Convert($target) . ", {'name': encodeURIComponent(file['name']),'data': encodeURIComponent(base64Data)}, null, " . ($successScript ?? "null") . ", " . ($errorScript ?? "null") . ", " . ($readyScript ?? "null") . ", " . ($progressScript ?? "null") . ", $timeout);
                     });
                     reader.readAsArrayBuffer(file);
                     " : "
                     //URL.createObjectUrl(file);
                     const reader = new FileReader();
                     reader.addEventListener('load', (event) => {
-                        sendFile(null, 'data=' + encodeURIComponent(event.target.result), null, " . ($successScript ?? "null") . ", " . ($errorScript ?? "null") . ", " . ($readyScript ?? "null") . ", " . ($progressScript ?? "null") . ", $timeout);
+                        send(" . self::Convert($method) . ", null, {'name': encodeURIComponent(file['name']),'data': encodeURIComponent(event.target.result)}, null, " . ($successScript ?? "null") . ", " . ($errorScript ?? "null") . ", " . ($readyScript ?? "null") . ", " . ($progressScript ?? "null") . ", $timeout);
                     });
                     reader.readAsText(file);") . "
                 }
@@ -200,10 +202,10 @@ class Script
      * @param bool $binary To write the data as a binary file
      * @return string|null The file content, address (if sent null for $destinationAddress) or null otherwise
      */
-    public static function Download($object = null, $destinationAddress = null, $binary = false)
+    public static function Download($object = null, $destinationAddress = null, $method = "file", $binary = false)
     {
         if (is_null($object))
-            $object = receiveFile();
+            $object = receive($method);
         $objectName = get($object, "name") ?? "upload";
         if (is_array($object))
             $object = get($object, "data");
@@ -223,10 +225,28 @@ class Script
                 return $destinationAddress;
             else
                 return null;
-        } elseif ($destinationAddress)
+        } elseif ($destinationAddress) {
+            if (endsWith($destinationAddress, DIRECTORY_SEPARATOR))
+                $destinationAddress = Local::GenerateAddress($objectName, "", $destinationAddress, false);
             if (!Local::Write($destinationAddress, $object))
                 return null;
+        }
         return $object;
+    }
+    public static function Send($method = null, $url = null, $data = null, $selector = 'body', $success = null, $error = null, $ready = null, $progress = null, $timeout = null, $async = true)
+    {
+        return "send(" .
+            self::Convert($method) . "," .
+            self::Convert($url) . "," .
+            self::Convert($data) . "," .
+            self::Convert($selector) . "," .
+            (is_string($success) ? $success : (is_null($success) ? "null" : ("(data,err)=>" . self::Convert($success)))) . "," .
+            (is_string($error) ? $error : (is_null($error) ? "null" : ("(data,err)=>" . self::Convert($error)))) . "," .
+            (is_string($ready) ? $ready : (is_null($ready) ? "null" : ("(data,err)=>" . self::Convert($ready)))) . "," .
+            (is_string($progress) ? $progress : (is_null($progress) ? "null" : ("(data,err)=>" . self::Convert($progress)))) . "," .
+            self::Convert($timeout) . "," .
+            self::Convert($async)
+            . ")";
     }
     /**
      * Show an alert dialog
@@ -277,5 +297,56 @@ class Script
                 break;
         }
         return "console.$type(" . self::Convert(__($message)) . ")";
+    }
+    /**
+     * To copy on clipboard
+     * @param mixed $text
+     * @return string
+     */
+    public static function Copy($text = "")
+    {
+        return "copy(" . self::Convert($text) . ")";
+    }
+    /**
+     * To cut on clipboard
+     * @param mixed $text
+     * @return string
+     */
+    public static function Cut($text = "")
+    {
+        return "cut(" . self::Convert($text) . ")";
+    }
+    /**
+     * To paste from the clipboard
+     * @return string
+     */
+    public static function Paste()
+    {
+        return "paste()";
+    }
+    /**
+     * To open print preview
+     * @return string
+     */
+    public static function Print()
+    {
+        return "window.print()";
+    }
+
+    public static function Load($url = null, $target = null)
+    {
+        return "load(" . self::Convert($url) . "," . self::Convert($target) . ")";
+    }
+    public static function Reload()
+    {
+        return "reload()";
+    }
+    public static function Locate($url = null)
+    {
+        return "locate(" . self::Convert($url) . ")";
+    }
+    public static function Relocate($url = null)
+    {
+        return "relocate(" . self::Convert($url) . ")";
     }
 }

@@ -1,5 +1,8 @@
 <?php
 namespace MiMFa\Library;
+
+use DateTime;
+
 /**
  * A simple library to work by the local files and folders
  *@copyright All rights are reserved for MiMFa Development Group
@@ -19,12 +22,11 @@ class Local
 		if ((empty($address)) || isAbsoluteUrl($address))
 			return $address;
 		$address = self::GetRelativeAddress(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $address));
-		$p = ltrim(normalizeUrl($address), "/");
 		$d = ltrim(preg_replace("/[\?#@].*$/", "", $address), DIRECTORY_SEPARATOR);
+		$p = ltrim($address = normalizeUrl($address), "/");
 		foreach (\_::$Sequence as $dir => $root)
 			if (file_exists($dir . $d))
 				return $root . $p;
-		$address = normalizeUrl($address);
 		if (!startsWith($address, "/")) {
 			$dirs = explode("/", \_::$User->Direction);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
@@ -61,7 +63,7 @@ class Local
 			return null;
 		foreach (\_::$Sequence as $dir => $root)
 			if (startsWith($url, $root))
-				return substr($url, strlen($root));
+				return substr($url, strlen($root) - 1);
 		return PREG_Replace("/^\w+:\/*[^\/]+/", "", $url);
 	}
 	/**
@@ -122,13 +124,14 @@ class Local
 		if (empty($path))
 			return null;
 		$path = preg_match("/^[a-z]+\:/i", $path) ? $path :
-		(preg_match("/^[\/\\\]/i", $path) ? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : (\_::$Address->Address . $path));
+			(preg_match("/^[\/\\\]/i", $path) ? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : (\_::$Address->Address . $path));
 		foreach (\_::$Sequence as $directory => $root)
 			if (startsWith($path, $directory))
 				return $path;
 			elseif (startsWith($path, $root))
 				return \_::$Address->Directory . ltrim(self::GetAddress(substr($path, strlen($root))), DIRECTORY_SEPARATOR);
-		if(preg_match("/^[a-z]+\:/i", $path)) return self::GetAddress($path);
+		if (preg_match("/^[a-z]+\:/i", $path))
+			return self::GetAddress($path);
 		return \_::$Address->Directory . ltrim(self::GetAddress($path), DIRECTORY_SEPARATOR);
 	}
 	/**
@@ -172,6 +175,71 @@ class Local
 	public static function GenerateOrganizedDirectory(string|null $rootDirectory = null): string
 	{
 		return self::CreateDirectory(($rootDirectory ?: \_::$Address->PublicAddress) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR);
+	}
+
+	public static function SanitizeName(string $name): string
+	{
+		return preg_replace("/[^A-Z0-9._\- \(\)]/iu", '_', $name);
+	}
+
+	/**
+	 * Find an exists file or directory, then get the internal path
+	 * @param mixed $address Probable file or directory internal path
+	 * @return string|null
+	 */
+	public static function Get($address)
+	{
+		$address = self::GetAddress($address);
+		if (!$address)
+			return null;
+		return is_dir($address) ?
+			self::GetDirectory($address) :
+			self::GetFile($address);
+	}
+	public static function Exists($address): bool
+	{
+		$address = self::GetAddress($address);
+		if (!$address)
+			return false;
+		return is_dir($address) ?
+			self::DirectoryExists($address) :
+			self::FileExists($address);
+	}
+	public static function Delete($address)
+	{
+		$address = self::GetAddress($address);
+		if (!$address)
+			return null;
+		return is_dir($address) ?
+			self::DeleteDirectory($address) :
+			self::DeleteFile($address);
+	}
+	public static function Rename($address, $newName): bool
+	{
+		$address = self::GetAddress($address);
+		if (!$address || empty($newName))
+			return false;
+		return is_dir($address) ?
+			self::RenameDirectory($address, $newName) :
+			self::RenameFile($address, $newName);
+	}
+	public static function Move($sourceAddress, $destAddress): bool
+	{
+		$sourceAddress = self::GetAddress($sourceAddress);
+		if (!$sourceAddress)
+			return false;
+		return is_dir($sourceAddress) ?
+			self::MoveDirectory($sourceAddress, $destAddress) :
+			self::MoveFile($sourceAddress, $destAddress);
+	}
+	public static function Copy($sourceAddress, $destAddress): bool
+	{
+		$sourceAddress = self::GetAddress($sourceAddress);
+		if (!$sourceAddress)
+			return false;
+		return is_dir($sourceAddress) ?
+			self::CopyDirectory($sourceAddress, $destAddress) :
+			self::CopyFile($sourceAddress, $destAddress);
 	}
 
 	/**
@@ -238,6 +306,12 @@ class Local
 		}
 		return $i;
 	}
+	public static function RenameDirectory(string $sourceDirectory, string $newName)
+	{
+		$dir = dirname(rtrim($sourceDirectory, "\\\/"));
+		$newDirectory = $dir . DIRECTORY_SEPARATOR . self::SanitizeName($newName) . DIRECTORY_SEPARATOR;
+		return self::MoveDirectory($sourceDirectory, $newDirectory) ? true : false;
+	}
 	public static function MoveDirectory($sourceDirectory, $destDirectory, $recursive = true)
 	{
 		if (self::CopyDirectory($sourceDirectory, $destDirectory, $recursive))
@@ -267,6 +341,44 @@ class Local
 			foreach ($destDirectories as $d_dir)
 				$b = self::CopyDirectory($s_dir, $d_dir, $recursive) && $b;
 		return $b;
+	}
+	public static function GetDirectoryContents(string $directory): array
+	{
+		if (!is_dir($directory))
+			return [];
+		$items = [];
+		foreach (scandir($directory) as $name) {
+			if ($name === '.' || $name === '..')
+				continue;
+			if (is_dir($name = $directory . $name))
+				$items[] = $directory . $name . DIRECTORY_SEPARATOR;
+			else
+				$items[] = $directory . $name;
+		}
+		return $items;
+	}
+	public static function GetDirectoryItems(string $directory): \Generator
+	{
+		$nd = rtrim($directory, "/\/");
+		if (!is_dir($nd))
+			return;
+		foreach (scandir($nd) as $name) {
+			if ($name === '.' || $name === '..')
+				continue;
+			$fullPath = $directory . $name;
+			$stat = stat($fullPath);
+			yield [
+				"Name" => $name,
+				"IsDirectory" => $is_dir = is_dir($fullPath),
+				"Directory" => $directory,
+				"Path" => $fullPath . ($is_dir ? DIRECTORY_SEPARATOR : null),
+				"Size" => $stat['size'],
+				"Id" => $stat['uid'],
+				"MimeType" => $is_dir ? "Directory" : (function_exists("mime_content_type") ? mime_content_type($fullPath) : (strtoupper(preg_find("/(?<=\.)[a-z0-9]+$/", $name) ?? "") ?: "Unknown")),
+				"CreateTime" => new DateTime(Date("Y-m-d H:i:s", $stat['ctime'] ?? 0)),
+				"UpdateTime" => new DateTime(Date("Y-m-d H:i:s", $stat['mtime'] ?? 0))
+			];
+		}
 	}
 
 
@@ -306,6 +418,12 @@ class Local
 	{
 		$path = self::GetFile($path);
 		return empty($path) || unlink($path);
+	}
+	public static function RenameFile(string $sourcePath, string $newName)
+	{
+		$dir = dirname($sourcePath);
+		$newPath = $dir . DIRECTORY_SEPARATOR . self::SanitizeName($newName);
+		return self::MoveFile($sourcePath, $newPath) ? true : false;
 	}
 	public static function MoveFile($sourcePath, $destPath): bool
 	{
@@ -417,13 +535,14 @@ class Local
 		$maxSize = $maxSize ?? \_::$Back->MaximumFileSize;
 
 		if (!self::IsFileObject($object)) {
-			if(!$object) return null;//throw new \SilentException("There is not any file!");
+			if (!$object)
+				return null;//throw new \SilentException("There is not any file!");
 			// $objectsize = sizeof($object);
 			// if ($objectsize < $minSize)
 			// 	throw new \SilentException("The 'file size' is 'very small'!");
 			// elseif ($objectsize > $maxSize)
 			// 	throw new \SilentException("The 'file size' is 'very big'!");
-			if(self::Write($path = self::GenerateAddress(directory:$directory, format:first($extensions)??""), $object))
+			if (self::Write($path = self::GenerateAddress(directory: $directory, format: first($extensions) ?? ""), $object))
 				return $path;
 			return null;
 		}
