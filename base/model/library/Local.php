@@ -162,6 +162,8 @@ class Local
 	public static function GenerateAddress(string $fileName = "new", string $format = "", string|null $directory = null, bool $random = true): string
 	{
 		$directory = $directory ?: \_::$Address->TempAddress;
+		if(endswith($fileName, $format))
+			$fileName = substr($fileName, 0, strlen($fileName)-strlen($format));
 		do
 			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . "-" . getId($random) . $format;
 		while (file_exists($path));
@@ -478,7 +480,7 @@ class Local
 	 * @param int|null $length [optional] Maximum length of data read. The default is to read until end of file is reached.
 	 * @return string|false|null The function returns the read data or flse on failure or null if could not find the file.
 	 */
-	public static function Read(string|null $path = null, int $offset = 0, int|null $length = null)
+	public static function GetFileContent(string|null $path = null, int $offset = 0, int|null $length = null)
 	{
 		return $path ? file_get_contents(self::GetFile($path), offset: $offset, length: $length) : null;
 	}
@@ -488,7 +490,7 @@ class Local
 	 * @param $data The data to write. Can be either a string, an array or a each other data types.
 	 * @return string|false|null The function returns the number of bytes that were written to the file, or false on failure.
 	 */
-	public static function Write(string $path, $data = null, int $flags = 0)
+	public static function SetFileContent(string $path, $data = null, int $flags = 0)
 	{
 		return file_put_contents(self::GetAbsoluteAddress($path), Convert::ToString($data), flags: $flags);
 	}
@@ -542,7 +544,7 @@ class Local
 			// 	throw new \SilentException("The 'file size' is 'very small'!");
 			// elseif ($objectsize > $maxSize)
 			// 	throw new \SilentException("The 'file size' is 'very big'!");
-			if (self::Write($path = self::GenerateAddress(directory: $directory, format: first($extensions) ?? ""), $object))
+			if (self::SetFileContent($path = self::GenerateAddress(directory: $directory, format: first($extensions) ?? ""), $object))
 				return $path;
 			return null;
 		}

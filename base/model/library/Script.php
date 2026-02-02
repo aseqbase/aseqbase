@@ -153,6 +153,22 @@ class Script
             )) : $items;
         return isEmpty($val) ? "0" : ($isarr ? "[" + $val + "]" : $val);
     }
+
+    public static function Send($method = null, $target = null, $data = null, $selector = 'body', $success = null, $error = null, $ready = null, $progress = null, $timeout = null, $async = true)
+    {
+        return "send(" .
+            self::Convert($method) . "," .
+            self::Convert($target) . "," .
+            self::Convert($data) . "," .
+            self::Convert($selector) . "," .
+            (is_string($success) ? $success : (is_null($success) ? "null" : ("(data,err)=>" . self::Convert($success)))) . "," .
+            (is_string($error) ? $error : (is_null($error) ? "null" : ("(data,err)=>" . self::Convert($error)))) . "," .
+            (is_string($ready) ? $ready : (is_null($ready) ? "null" : ("(data,err)=>" . self::Convert($ready)))) . "," .
+            (is_string($progress) ? $progress : (is_null($progress) ? "null" : ("(data,err)=>" . self::Convert($progress)))) . "," .
+            self::Convert($timeout) . "," .
+            self::Convert($async)
+            . ")";
+    }
     /**
      * To upload a file from the client device
      * @param mixed $formats The acceptable formats like ".jpg,.png" or "image/*"
@@ -161,7 +177,7 @@ class Script
      * @param int $timeout The timeout for uploading the file in milliseconds
      * @return string The script part
      */
-    public static function Upload($formats = null, $target = null, $successScript = null, $errorScript = null, $readyScript = null, $progressScript = null, $timeout = 60000, $method = "file", $multiple = false, $binary = false)
+    public static function Upload($formats = null, $target = null, $success = null, $error = null, $ready = null, $progress = null, $timeout = 60000, $multiple = false, $binary = false, $method = "FILE")
     {
         return "
             var input = document.createElement('input');
@@ -170,21 +186,25 @@ class Script
             input.onchange = evt => {
                 " . ($multiple ? "const files = input.files;
                 for(const file of files)" : "const [file] = input.files;") . "
-                if (file) {" . ($binary ? "
-                    const reader = new FileReader();
+                if (file) {
+                    const reader = new FileReader();" .
+                    ($binary ? "
                     reader.addEventListener('load', (event) => {
-                        const binaryData = event.target.result;
-                        const base64Data = btoa(String.fromCharCode(...new Uint8Array(binaryData)));
-                        sendRequest(" . self::Convert($method) . ", " . self::Convert($target) . ", {'name': encodeURIComponent(file['name']),'data': encodeURIComponent(base64Data)}, null, " . ($successScript ?? "null") . ", " . ($errorScript ?? "null") . ", " . ($readyScript ?? "null") . ", " . ($progressScript ?? "null") . ", $timeout);
+                        " . self::Send($method, $target, [
+                        "name" => "\${file['name']}",
+                        "data" => "\${encodeURIComponent(btoa(String.fromCharCode(...new Uint8Array(event.target.result))))}"
+                    ], null, $success, $error, $ready, $progress, $timeout, false) . ";
                     });
                     reader.readAsArrayBuffer(file);
                     " : "
-                    //URL.createObjectUrl(file);
-                    const reader = new FileReader();
                     reader.addEventListener('load', (event) => {
-                        send(" . self::Convert($method) . ", null, {'name': encodeURIComponent(file['name']),'data': encodeURIComponent(event.target.result)}, null, " . ($successScript ?? "null") . ", " . ($errorScript ?? "null") . ", " . ($readyScript ?? "null") . ", " . ($progressScript ?? "null") . ", $timeout);
+                        " . self::Send($method, $target, [
+                        "name" => "\${file['name']}",
+                        "data" => "\${encodeURIComponent(event.target.result)}"
+                    ], null, $success, $error, $ready, $progress, $timeout) . ";
                     });
-                    reader.readAsText(file);") . "
+                    reader.readAsText(file);
+                    ") . "
                 }
             }
             _(input).trigger('click');
@@ -202,11 +222,12 @@ class Script
      * @param bool $binary To write the data as a binary file
      * @return string|null The file content, address (if sent null for $destinationAddress) or null otherwise
      */
-    public static function Download($object = null, $destinationAddress = null, $method = "file", $binary = false)
+    public static function Download($object = null, $destinationAddress = null, $binary = false, $method = "FILE")
     {
         if (is_null($object))
             $object = receive($method);
         $objectName = get($object, "name") ?? "upload";
+        warning($objectName);
         if (is_array($object))
             $object = get($object, "data");
         if (!$object)
@@ -216,38 +237,24 @@ class Script
             return null;
 
         if ($destinationAddress === true) {
-            if (Local::Write($destinationAddress = Local::GenerateAddress($objectName, "", \_::$Address->PublicAddress), $object))
+            if (Local::SetFileContent($destinationAddress = Local::GenerateAddress($objectName, "", \_::$Address->PublicAddress), $object))
                 return $destinationAddress;
             else
                 return null;
         } elseif ($destinationAddress === false) {
-            if (Local::Write($destinationAddress = Local::GenerateAddress($objectName, "", \_::$Address->TempAddress), $object))
+            if (Local::SetFileContent($destinationAddress = Local::GenerateAddress($objectName, "", \_::$Address->TempAddress), $object))
                 return $destinationAddress;
             else
                 return null;
         } elseif ($destinationAddress) {
             if (endsWith($destinationAddress, DIRECTORY_SEPARATOR))
                 $destinationAddress = Local::GenerateAddress($objectName, "", $destinationAddress, false);
-            if (!Local::Write($destinationAddress, $object))
+            if (!Local::SetFileContent($destinationAddress, $object))
                 return null;
         }
         return $object;
     }
-    public static function Send($method = null, $url = null, $data = null, $selector = 'body', $success = null, $error = null, $ready = null, $progress = null, $timeout = null, $async = true)
-    {
-        return "send(" .
-            self::Convert($method) . "," .
-            self::Convert($url) . "," .
-            self::Convert($data) . "," .
-            self::Convert($selector) . "," .
-            (is_string($success) ? $success : (is_null($success) ? "null" : ("(data,err)=>" . self::Convert($success)))) . "," .
-            (is_string($error) ? $error : (is_null($error) ? "null" : ("(data,err)=>" . self::Convert($error)))) . "," .
-            (is_string($ready) ? $ready : (is_null($ready) ? "null" : ("(data,err)=>" . self::Convert($ready)))) . "," .
-            (is_string($progress) ? $progress : (is_null($progress) ? "null" : ("(data,err)=>" . self::Convert($progress)))) . "," .
-            self::Convert($timeout) . "," .
-            self::Convert($async)
-            . ")";
-    }
+
     /**
      * Show an alert dialog
      * @param mixed $message

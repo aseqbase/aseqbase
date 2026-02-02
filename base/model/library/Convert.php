@@ -332,7 +332,7 @@ class Convert
     {
         if (is_null($obj))
             return "null";
-        return json_encode($obj, flags: $flags??(JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
+        return json_encode($obj, flags: $flags ?? (JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
     }
     public static function FromJson($json, $flags = null): null|array
     {
@@ -341,7 +341,7 @@ class Convert
         if (isEmpty($json) || (trim(strtolower($json)) === "null"))
             return null;
         if (isJson($json))
-            return json_decode($json, flags: $flags??(JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
+            return json_decode($json, flags: $flags ?? (JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
         return preg_split('/\r?\n/', $json . "");
     }
 
@@ -444,6 +444,90 @@ class Convert
     {
         return self::FromCells(self::FieldsToCells($fields), $delimiter, $enclosure, $eol);
     }
+
+    /**
+     * Compress files and folders paths syncronusly into a zip file
+     * @param string $destPath The output zip file path
+     * @param array $paths The input files and folders paths
+     * @return array The list of files added to the zip
+     */
+    public static function ToZipFile(string $destPath, ...$paths){
+        return iterator_to_array(self::ToZipFileAsync($destPath, ...$paths));
+    }
+    /**
+     * Compress files and folders paths asyncronusly into a zip file
+     * @param string $destPath The output zip file path
+     * @param array $paths The input files and folders paths
+     * @return \Generator<mixed, string, mixed, void> The list of files added to the zip
+     */
+    public static function ToZipFileAsync(string $destPath, ...$paths)
+    {
+        // Simple in-app zip using PHP's ZipArchive
+        $zip = new \ZipArchive();
+        $destPath = Local::GetAbsoluteAddress($destPath);
+        $zipDir = dirname($destPath);
+        if (!is_dir($zipDir))
+            Local::CreateDirectory($zipDir);
+
+        $zip->open($destPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        foreach ($paths as $p) {
+            $full = Local::GetAbsoluteAddress($p);
+            if (is_dir($full)) {
+                $RootInZip = rtrim($p, DIRECTORY_SEPARATOR);
+                $files = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($full),
+                    \RecursiveIteratorIterator::SELF_FIRST
+                );
+                foreach ($files as $file) {
+                    $path = $file->getPathname();
+                    if ($file->isDir())
+                        $zip->addEmptyDir(str_replace($full, $RootInZip, $path));
+                    else
+                        $zip->addFile($path, str_replace($full, $RootInZip, $path));
+                    yield $path;
+                }
+            } else {
+                $rel = ltrim($p, '/');
+                $zip->addFile($full, $rel);
+                yield $full;
+            }
+        }
+
+        $zip->close();
+    }
+    /**
+     * Decompress a zip file syncronusly into files and folders
+     * @param string $sourcePath The source zip file path
+     * @param mixed $destDirectory The destination directory path
+     * @return array The list of extracted files
+     */
+    public static function FromZipFile(string $sourcePath, $destDirectory = null){
+        return iterator_to_array(self::FromZipFileAsync($sourcePath, $destDirectory));
+    }
+    /**
+     * Decompress a zip file asyncronusly into files and folders
+     * @param string $sourcePath The source zip file path
+     * @param mixed $destDirectory The destination directory path
+     * @return \Generator<mixed, string, mixed, void> The list of extracted files
+     */
+    public static function FromZipFileAsync(string $sourcePath, $destDirectory = null)
+    {
+        $zip = new \ZipArchive();
+        $sourcePath = Local::GetAbsoluteAddress($sourcePath);
+        if ($zip->open($sourcePath) === TRUE) {
+            $extractPath = $destDirectory ? Local::GetAbsoluteAddress($destDirectory) : Local::GetAbsoluteAddress(dirname($sourcePath));
+            if (!is_dir($extractPath))
+                $extractPath = Local::CreateDirectory($extractPath);
+            $zip->extractTo($extractPath);
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $stat = $zip->statIndex($i);
+                yield $extractPath . DIRECTORY_SEPARATOR . $stat['name'];
+            }
+            $zip->close();
+        }
+    }
+
     /**
      * Convert Key Value parameters to a flat Table
      * @param mixed $fields A key value pairs array

@@ -155,7 +155,7 @@ class Table extends Module
                             }";
     public $MediaWidth = "var(--size-5)";
     public $MediaHeight = "var(--size-5)";
-    public $BorderSize = 1;
+    public $BorderSize = "1px";
     public $AllowDecoration = true;
     public $TextWrap = false;
     public $TextLength = 50;

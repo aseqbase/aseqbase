@@ -122,6 +122,8 @@ class General extends Template
 			}
 			body>nav .header{
 				color: var(--fore-color-special);
+				padding-left: var(--size-0);
+				padding-right: var(--size-0);
 			}
 			body>nav :is(.header, .header a, .header a:visited, .header a:hover){
 				text-decoration: none;

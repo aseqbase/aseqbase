@@ -3057,19 +3057,19 @@ class Struct
             }
         ") . self::Script("
             function {$id}_injectInText(prepend = '', append = ''){
-                return _('#$id').selectedText(_('#$id').selectedText().split(/\\n/g).map(l=>isEmpty(l)?l:l.replace(/^(\s*)([\s\S]*\S)(\s*)$/g, '\$1'+prepend+'\$2'+append+'\$3')));
+                return _('#$id').selectedText((_('#$id').selectedText() || '').split(/\\n/g).map(l=>isEmpty(l)?l:l.replace(/^(\s*)([\s\S]*\S)(\s*)$/g, '\$1'+prepend+'\$2'+append+'\$3')));
             }
             function {$id}_injectOutText(prepend = '', append = ''){
                 return _('#$id').selectedText(prepend+_('#$id').selectedText()+append);
             }
             function {$id}_injectInLines(prepend = '', append = ''){
-                return _('#$id').selectedLines(_('#$id').selectedLines().map(l=>prepend+l+append));
+                return _('#$id').selectedLines((_('#$id').selectedLines() || ['']).map(l=>prepend+l+append));
             }
             function {$id}_injectOutLines(prepend = '', append = ''){
-                return _('#$id').selectedLines([prepend, ..._('#$id').selectedLines(), append]);
+                return _('#$id').selectedLines([prepend, ...(_('#$id').selectedLines() || ['']), append]);
             }
             function {$id}_replaceInLines(pattern = /.*/, replacement = ''){
-                return _('#$id').selectedLines(_('#$id').selectedLines().map(l=>l.replace(pattern, replacement)));
+                return _('#$id').selectedLines((_('#$id').selectedLines() || ['']).map(l=>l.replace(pattern, replacement)));
             }
         ") . self::Division(
             self::Tiles($options ?: [
@@ -3100,7 +3100,7 @@ class Struct
                 self::Icon("file-code", "{$id}_injectOutLines('```', '```')", ["Tooltip" => "Code Block"]),
                 self::Icon("code", "{$id}_injectInLines(' > ')", ["Tooltip" => "Code Script"]),
                 self::Icon("link", "var url=prompt('Enter the URL:','https://'); if(url){ {$id}_injectInText('[',']('+url+')');}", ["Tooltip" => "Link"]),
-                self::Icon("square", "var act=prompt('Enter the JS Action or URL:','https://'); if(act){ _('#$id').selectedText( {$id}_injectInText('!Button[',']('+act+')');}", ["Tooltip" => "Button"]),
+                self::Icon("square", "var act=prompt('Enter the JS Action or URL:','https://'); if(act){ {$id}_injectInText('!Button[',']('+act+')');}", ["Tooltip" => "Button"]),
                 self::Icon("image", "var url=prompt('Enter the Media URL or Icon name:','https://'); if(url){ {$id}_injectInText('![',']('+url+')');}", ["Tooltip" => "Image, Video, Audio, Icon, ..."]),
                 self::Icon("minus", "{$id}_injectOutText('\\n---','---\\n')", ["Tooltip" => "Horizontal Rule"]),
             ], ["class"=>"tools"]) .
