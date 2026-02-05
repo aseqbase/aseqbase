@@ -284,7 +284,42 @@ class General extends Template
 				border: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			
+			body .contextmenu{
+                background-color: var(--back-color-special);
+                color: var(--fore-color-special);
+				box-shadow: var(--shadow-max);
+				flex-direction: column;
+			}
+			body .contextmenu>*{
+				padding: calc(var(--size-0) / 2) var(--size-1);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				flex-direction: row;
+				gap: var(--size-0);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body .contextmenu>*>*{
+				display: flex;
+				align-items: center;
+				flex-direction: row;
+				gap: var(--size-0);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body .contextmenu>:is(*[onclick],*[href]){
+				cursor: pointer;
+			}
+			body .contextmenu>:is(*[onclick],*[href]):hover{
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
+				font-weight: bold;
+				box-shadow: var(--shadow-1);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body .contextmenu>:is(hr,br){
+				padding: 0px;
+				margin: calc(var(--size-0) / 2) var(--size-1);
+			}
 			body>.prepage {
 				padding-top: calc(1.5 * var(--size-max));
 			}

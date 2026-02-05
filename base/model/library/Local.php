@@ -164,9 +164,11 @@ class Local
 		$directory = $directory ?: \_::$Address->TempAddress;
 		if(endswith($fileName, $format))
 			$fileName = substr($fileName, 0, strlen($fileName)-strlen($format));
-		do
-			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . "-" . getId($random) . $format;
-		while (file_exists($path));
+		$postfix = null;
+		do {
+			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . $postfix . $format;
+			$postfix =  "-" . getId($random);
+		} while (file_exists($path));
 		return $path;
 	}
 	/**
@@ -181,7 +183,7 @@ class Local
 
 	public static function SanitizeName(string $name): string
 	{
-		return preg_replace("/[^A-Z0-9._\- \(\)]/iu", '_', $name);
+		return preg_replace("/[^A-Za-z0-9._\- \(\)]/iu", '_', $name);
 	}
 
 	/**
@@ -194,7 +196,7 @@ class Local
 		$address = self::GetAddress($address);
 		if (!$address)
 			return null;
-		return is_dir($address) ?
+		return is_dir(trim($address, "/\\")) ?
 			self::GetDirectory($address) :
 			self::GetFile($address);
 	}
@@ -203,7 +205,7 @@ class Local
 		$address = self::GetAddress($address);
 		if (!$address)
 			return false;
-		return is_dir($address) ?
+		return is_dir(trim($address, "/\\")) ?
 			self::DirectoryExists($address) :
 			self::FileExists($address);
 	}
@@ -212,7 +214,7 @@ class Local
 		$address = self::GetAddress($address);
 		if (!$address)
 			return null;
-		return is_dir($address) ?
+		return is_dir(trim($address, "/\\")) ?
 			self::DeleteDirectory($address) :
 			self::DeleteFile($address);
 	}
@@ -221,7 +223,7 @@ class Local
 		$address = self::GetAddress($address);
 		if (!$address || empty($newName))
 			return false;
-		return is_dir($address) ?
+		return is_dir(trim($address, "/\\")) ?
 			self::RenameDirectory($address, $newName) :
 			self::RenameFile($address, $newName);
 	}
@@ -230,7 +232,7 @@ class Local
 		$sourceAddress = self::GetAddress($sourceAddress);
 		if (!$sourceAddress)
 			return false;
-		return is_dir($sourceAddress) ?
+		return is_dir(trim($sourceAddress, "/\\")) ?
 			self::MoveDirectory($sourceAddress, $destAddress) :
 			self::MoveFile($sourceAddress, $destAddress);
 	}
@@ -239,7 +241,7 @@ class Local
 		$sourceAddress = self::GetAddress($sourceAddress);
 		if (!$sourceAddress)
 			return false;
-		return is_dir($sourceAddress) ?
+		return is_dir(trim($sourceAddress, "/\\")) ?
 			self::CopyDirectory($sourceAddress, $destAddress) :
 			self::CopyFile($sourceAddress, $destAddress);
 	}
@@ -310,9 +312,9 @@ class Local
 	}
 	public static function RenameDirectory(string $sourceDirectory, string $newName)
 	{
-		$dir = dirname(rtrim($sourceDirectory, "\\\/"));
-		$newDirectory = $dir . DIRECTORY_SEPARATOR . self::SanitizeName($newName) . DIRECTORY_SEPARATOR;
-		return self::MoveDirectory($sourceDirectory, $newDirectory) ? true : false;
+		$dir = dirname($sourceDirectory = rtrim($sourceDirectory, "\\\/"));
+		$newDirectory = $dir . DIRECTORY_SEPARATOR . self::SanitizeName($newName);
+		return rename($sourceDirectory, $newDirectory);
 	}
 	public static function MoveDirectory($sourceDirectory, $destDirectory, $recursive = true)
 	{
@@ -324,7 +326,9 @@ class Local
 	{
 		set_time_limit(24 * 60 * 60);
 		$b = true;
+		$sourceDirectory = rtrim($sourceDirectory, "\\\/");
 		$sourcePaths = scandir($sourceDirectory);
+		$destDirectory = rtrim($destDirectory, "\\\/").DIRECTORY_SEPARATOR;
 		if ($recursive)
 			foreach ($sourcePaths as $source) {
 				$bn = basename($source);
@@ -425,7 +429,7 @@ class Local
 	{
 		$dir = dirname($sourcePath);
 		$newPath = $dir . DIRECTORY_SEPARATOR . self::SanitizeName($newName);
-		return self::MoveFile($sourcePath, $newPath) ? true : false;
+		return rename($sourcePath, $newPath);
 	}
 	public static function MoveFile($sourcePath, $destPath): bool
 	{

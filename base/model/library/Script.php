@@ -177,7 +177,7 @@ class Script
      * @param int $timeout The timeout for uploading the file in milliseconds
      * @return string The script part
      */
-    public static function Upload($formats = null, $target = null, $success = null, $error = null, $ready = null, $progress = null, $timeout = 60000, $multiple = false, $binary = false, $method = "FILE")
+    public static function UploadDialog($formats = null, $target = null, $success = null, $error = null, $ready = null, $progress = null, $timeout = 60000, $multiple = false, $binary = false, $method = "FILE")
     {
         return "
             var input = document.createElement('input');
@@ -281,7 +281,7 @@ class Script
      */
     public static function Prompt($message = "", $default = null)
     {
-        return "prompt(" . self::Convert(__($message)) . ", " . self::Convert(__($default)) . ")";
+        return "prompt(" . self::Convert(__($message)) . ", " . self::Convert($default) . ")";
     }
     /**
      * Show message on the client side console

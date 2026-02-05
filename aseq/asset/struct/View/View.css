@@ -4,7 +4,7 @@
  */
 
 .show {
-  display: inherit !important;
+  display: revert-layer !important;
 }
 
 .hide {
@@ -38,7 +38,7 @@
 }
 .hover-hide,
 .parent-hover-hide {
-  display: inherit !important;
+  display: revert-layer !important;
 }
 
 :hover>.hover-hide,
@@ -52,7 +52,7 @@
 
 :hover>.hover-show,
 :hover>*>.parent-hover-show {
-  display: inherit !important;
+  display: revert-layer !important;
 }
 .hover-visible,
 .parent-hover-visible {
@@ -92,7 +92,7 @@
     visibility: visible !important;
   }
   .xxl-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .xxl-block {
     display: block !important;
@@ -110,7 +110,7 @@
     visibility: visible !important;
   }
   .xxl-range-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .xxl-range-block {
     display: block !important;
@@ -142,7 +142,7 @@
     visibility: visible !important;
   }
   .xl-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .xl-block {
     display: block !important;
@@ -160,7 +160,7 @@
     visibility: visible !important;
   }
   .xl-range-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .xl-range-block {
     display: block !important;
@@ -192,7 +192,7 @@
     visibility: visible !important;
   }
   .lg-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .lg-block {
     display: block !important;
@@ -210,7 +210,7 @@
     visibility: visible !important;
   }
   .lg-range-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .lg-range-block {
     display: block !important;
@@ -242,7 +242,7 @@
     visibility: visible !important;
   }
   .md-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .md-block {
     display: block !important;
@@ -260,7 +260,7 @@
     visibility: visible !important;
   }
   .md-range-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .md-range-block {
     display: block !important;
@@ -292,7 +292,7 @@
     visibility: visible !important;
   }
   .sm-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .sm-block {
     display: block !important;
@@ -310,7 +310,7 @@
     visibility: visible !important;
   }
   .sm-range-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .sm-range-block {
     display: block !important;
@@ -345,7 +345,7 @@
     visibility: visible !important;
   }
   .xs-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .xs-block {
     display: block !important;
@@ -363,7 +363,7 @@
     visibility: visible !important;
   }
   .xs-range-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .xs-range-block {
     display: block !important;
@@ -395,7 +395,7 @@
     visibility: visible !important;
   }
   .xxs-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .xxs-block {
     display: block !important;
@@ -413,7 +413,7 @@
     visibility: visible !important;
   }
   .xxs-range-show {
-    display: inherit !important;
+    display: revert-layer !important;
   }
   .xxs-range-block {
     display: block !important;

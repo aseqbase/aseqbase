@@ -221,6 +221,17 @@ class Live extends Array {
     parent() {
         return (new Live(this.each((elem) => elem.parentNode).flat()));
     }
+    parents() {
+        const parentsSet = new Set();
+        this.each((elem) => {
+            let parent = elem.parentNode;
+            while (parent) {
+                parentsSet.add(parent);
+                parent = parent.parentNode;
+            }
+        });
+        return (new Live(Array.from(parentsSet)));
+    }
     children() {
         return (new Live(this.each((elem) => Array.from(elem.children)).flat()));
     }
@@ -235,9 +246,19 @@ class Live extends Array {
         if (this.length === 0) return (new Live());
         return (new Live([this[this.length - 1]]));
     }
-
     find(query = null, mode = null) {
         return new Live(this.each((elem) => new Live(query, mode, elem)).flat());
+    }
+    matches(query = null) {
+        return new Live(this.each((elem) => new Live(getQuery(elem)+" "+query)).flat());
+    }
+    contains(element) {
+        for (const elem of this) {
+            if (elem instanceof Element && element instanceof Element) {
+                if (elem.contains(element)) return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -281,7 +302,7 @@ class Live extends Array {
                         });
                         newScript.textContent = oldScript.textContent;
                         oldScript.parentNode?.replaceChild(newScript, oldScript);
-                    } catch (e) { }
+                    } catch (e) {}
                 }
             }
         });
@@ -506,7 +527,7 @@ class Live extends Array {
     addAttr(name, value = null) {
         value = value ? String(value) : null;
         return this.each(tag => {
-            if (tag instanceof Element) tag.addAttribute(name, value);
+            if (tag instanceof Element) tag.setAttribute(name, value);
         });
     }
     removeAttr(name) {
@@ -519,7 +540,7 @@ class Live extends Array {
         return this.each(tag => {
             if (tag instanceof Element)
                 if (tag.hasAttribute(name)) tag.removeAttribute(name);
-                else tag.addAttribute(name, value);
+                else tag.setAttribute(name, value);
         });
     }
 

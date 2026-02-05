@@ -29,11 +29,17 @@ library("Revise");
 class Base extends \ArrayObject
 {
 	/**
-	 * The main name of the object
+	 * The name of the object
 	 * @internal
 	 * @var string|null
 	 */
 	public $Name = null;
+	/**
+	 * The main name of the object
+	 * @internal
+	 * @var string|null
+	 */
+	public $MainName = null;
 	/**
 	 * The main router of the object
 	 * @internal
@@ -65,6 +71,7 @@ class Base extends \ArrayObject
 
 	function __construct($setDefaults = true, $setRevises = true)
 	{
+		$this->MainName = $this->Get_ClassName();
 		if ($setDefaults)
 			$this->Set_Defaults();
 		if ($setRevises)
@@ -93,7 +100,7 @@ class Base extends \ArrayObject
 
 	public function Set_Defaults()
 	{
-		$this->Name = \_::$Back->EncryptNames ? (substr($this->Get_Namespace(), 0, 1) . RandomString(10)) : ($this->Name ?? $this->get_className()) . "_" . $this->Get_Namespace();
+		$this->Name = \_::$Back->EncryptNames ? (substr($this->Get_Namespace(), 0, 1) . RandomString(10)) : ($this->Name ?? $this->MainName) . "_" . $this->Get_Namespace();
 		return $this;
 	}
 

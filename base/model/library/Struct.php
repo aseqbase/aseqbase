@@ -1,5 +1,8 @@
 <?php
 namespace MiMFa\Library;
+
+use ReflectionFiber;
+
 /**
  * A simple library to create default and standard HTML tags
  *@copyright All rights are reserved for MiMFa Development Group
@@ -195,11 +198,11 @@ class Struct
                     $object = preg_replace_callback("/\s?(^[^\W].*){$attrPatt}$/miu", fn($m) => self::Element($m[1], "p", ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == $fdir ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
 
                     $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
-                    
+
                     // Lines
-                    $object = preg_replace("/\s?^(\-{3,})(.+)\1{$attrPatt}(?=<|$)/imu", Struct::BreakLine("\$2", null, ["id" => "\$3", "class" => "\$4"], "\$5"), $object)??$object;
-                    $object = preg_replace("/\s?^\-{3,}{$attrPatt}(?=<|$)/im", Struct::Element(null, "hr", ["id" => "\$1", "class" => "\$2"], "\$3"), $object)??$object;
-                    
+                    $object = preg_replace("/\s?^(\-{3,})(.+)\1{$attrPatt}(?=<|$)/imu", self::BreakLine("\$2", null, ["id" => "\$3", "class" => "\$4"], "\$5"), $object) ?? $object;
+                    $object = preg_replace("/\s?^\-{3,}{$attrPatt}(?=<|$)/im", self::Element(null, "hr", ["id" => "\$1", "class" => "\$2"], "\$3"), $object) ?? $object;
+
                     // Texts
                     // Strong: **text**
                     $object = preg_replace_callback(
@@ -256,7 +259,7 @@ class Struct
                     $object = encode($object, $dic, pattern: $tagPatt);// To keep all previous tags unchanged
 
                     // Signs
-                    $object = preg_replace("/(\r\n)|(\n\r)|((?<!>))\r?\n\r?/", self::$Break, $object)??$object;
+                    $object = preg_replace("/(\r\n)|(\n\r)|((?<!>))\r?\n\r?/", self::$Break, $object) ?? $object;
 
                     return $fdir == \_::$Front->Translate->Direction ? decode($object, $dic) : self::Division(decode($object, $dic), ["class" => "be $fdir"]);
                 }
@@ -400,7 +403,7 @@ class Struct
                 foreach ($attrdic as $key => $value)
                     switch ($key) {
                         case "tooltip":
-                            $inners .= Struct::Tooltip(__($value));
+                            $inners .= self::Tooltip(__($value));
                             break;
                         case "style":
                             if (self::$AttributesOptimization && $optimization) {
@@ -744,7 +747,7 @@ class Struct
         ") .
             self::Division(
                 [
-                    Struct::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']),
+                    self::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']),
                     $content
                 ]
                 ,
@@ -762,7 +765,7 @@ class Struct
     {
         $id = "_" . getId(true);
         return self::Element(
-            Struct::Icon($icon) . Struct::Division(__($content, referring: true) . self::Tooltip("Double click to hide")) . Struct::Icon("close", "document.getElementById('$id')?.remove()"),
+            self::Icon($icon) . self::Division(__($content, referring: true) . self::Tooltip("Double click to hide")) . self::Icon("close", "document.getElementById('$id')?.remove()"),
             "div",
             [
                 "id" => $id,
@@ -866,9 +869,9 @@ class Struct
         if (!$source)
             return null;
         if (startsWith($source, "icon", "fa", "fa-"))
-            return self::Element("", "i", ["class" => "image " . strtolower($source)], $attributes) . ($content ? Struct::Tooltip($content) : "");
+            return self::Element("", "i", ["class" => "image " . strtolower($source)], $attributes) . ($content ? self::Tooltip($content) : "");
         elseif (isIdentifier($source))
-            return self::Element("", "i", ["class" => "image icon fa fa-" . strtolower($source)], $attributes) . ($content ? Struct::Tooltip($content) : "");
+            return self::Element("", "i", ["class" => "image icon fa fa-" . strtolower($source)], $attributes) . ($content ? self::Tooltip($content) : "");
         else {
             $srcs = [];
             $src = $source;
@@ -907,7 +910,7 @@ class Struct
         if (isIdentifier($source))
             return self::Icon($source, null, ["class" => "media"], $attributes);
         if (isUrl($source))
-            switch (strtolower(preg_find("/\.\w+$/", $source)??"")) {
+            switch (strtolower(preg_find("/\.\w+$/", $source) ?? "")) {
                 case ".ogg":
                 case ".mp3":
                 case ".wav":
@@ -1531,7 +1534,7 @@ class Struct
         return self::Element(__($content), "div", ["class" => "tiles"], $attributes);
     }
     /**
-     * The Tile Item \<DIV\> HTML Tag
+     * The Tile Item \<ACTION\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param string|null|array|callable $action The source path or onclick event script, (Use class names with full namespaces in callable references)
      * @param mixed $attributes Other custom attributes of the Tag
@@ -1540,6 +1543,70 @@ class Struct
     public static function Tile($content, $action = null, ...$attributes)
     {
         return self::Action($action ? self::Media($content) : $content, $action, ["class" => "tile"], $attributes);
+    }
+    /**
+     * A Menus Collection of evertythings \<NAV\> HTML Tag
+     * @param mixed $content The menus of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Menu($content, ...$attributes)
+    {
+        if (is_countable($content)) {
+            $res = [];
+            foreach ($content as $k => $item)
+                $res[] = is_numeric($k) ? __($item) : self::Action(__($k), $item);
+            $content = $res;
+            return self::Element($content, "div", ["class" => "menu"], $attributes);
+        }
+        return self::Element($content, "div", ["class" => "menu"], $attributes);
+    }
+    /**
+     * A Menus Collection of evertythings \<NAV\> HTML Tag
+     * @param mixed $content The menus of the Tag
+     * @param string $selector The css selector to bind the context menu
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function ContextMenu($content, $selector = null, ...$attributes)
+    {
+        $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
+        return self::Style("
+            #$id {
+                position: absolute;
+                display: none;
+                font-family: var(--font);
+                font-size: var(--size-0);
+                font-weight: lighter;
+                max-width: 80%;
+                min-width: 120px;
+                width: max-content;
+                box-shadow: var(--shadow-max);
+                z-index: -9999;
+                transition: var(--transition-0);
+                flex-direction: column;
+            }
+            #$id.active {
+                display: flex;
+                z-index: 9999;
+            }
+        ") . self::Menu($content, ["id" => $id, "class" => "contextmenu"], ...$attributes) .
+            script("
+                _(document).on('contextmenu', function(e) {
+                    _('nav.menu.contextmenu').removeClass('active');
+                    var menu = document.getElementById('$id');
+                    if(".($selector?("_(".Script::Convert($selector).").contains(e.target)"):"_(e.target).contains(menu)")."){
+                        e.preventDefault();
+                        menu.style.top = e.pageY + 'px';
+                        menu.style.left = e.pageX + 'px';
+                        menu.classList.add('active');
+                    }
+                });
+                _(document).on('click', function(e) {
+                    _('nav.menu.contextmenu').removeClass('active');
+                    _('#$id').removeClass('active');
+                });
+            ");
     }
 
     /**
@@ -1615,7 +1682,7 @@ class Struct
         if (strtolower(pop($options, "Type") ?? "") === "head")
             return self::Element(__($content ?? ""), "th", $options, ["class" => "table-cell"], $attributes);
         else
-            return self::Element(__($content ?? "", referring: true), "td", $options, ["class" => "table-cell"], $attributes);
+            return self::Element(__($content ?? ""), "td", $options, ["class" => "table-cell"], $attributes);
     }
     #endregion
 
@@ -1789,20 +1856,72 @@ class Struct
         return self::Element(__($content, styling: true, referring: true), "p", ["class" => "paragraph"], $attributes);
     }
     /**
-     * The \<Data\> HTML Tag
+     * The \<BIG\> HTML Tag
      * @param mixed $content The content of the Tag
-     * @param mixed $attributes Other custom attributes of the Tag,
-     * "DecimalSeparator"=>".",
-     * "Separator"=>","
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Number($content, ...$attributes)
+    public static function Big($content, $reference = null, ...$attributes)
     {
-        $content = $content + 0;
-        $decimalPoint = self::PopAttribute($attributes, "DecimalSeparator") ?? ".";
-        $thousandSep = self::PopAttribute($attributes, "Separator") ?? ",";
-        $decimals = is_float($content) ? strlen(substr(strrchr($content, "."), 1)) : 0;
-        return self::Element(number_format($content, $decimals, $decimalPoint, $thousandSep), "data", ["class" => "number", "value" => $content], $attributes);
+        if (!is_null($reference))
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "big", ["class" => "big"], $attributes);
+        return self::Element(__($content), "big", ["class" => "big"], $attributes);
+    }
+    /**
+     * The \<SMALL\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Small($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "small", ["class" => "small"], $attributes);
+        return self::Element(__($content), "small", ["class" => "small"], $attributes);
+    }
+    /**
+     * The \<sup\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Super($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "sup", ["class" => "super"], $attributes);
+        return self::Element(__($content), "sup", ["class" => "super"], $attributes);
+    }
+    /**
+     * The \<sub\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null|array $reference The hyper reference path
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Sub($content, $reference = null, ...$attributes)
+    {
+        if (!is_null($reference))
+            if (is_array($reference)) {
+                $attributes = Convert::ToIteration($reference, ...$attributes);
+                $reference = null;
+            } else
+                return self::Element(self::Link($content, $reference), "sub", ["class" => "sub"], $attributes);
+        return self::Element(__($content), "sub", ["class" => "sub"], $attributes);
     }
     /**
      * The \<SPAN\> HTML Tag
@@ -1856,23 +1975,6 @@ class Struct
         return self::Element(__($content), "b", ["class" => "bold"], $attributes);
     }
     /**
-     * The \<BIG\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param string|null|array $reference The hyper reference path
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Big($content, $reference = null, ...$attributes)
-    {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "big", ["class" => "big"], $attributes);
-        return self::Element(__($content), "big", ["class" => "big"], $attributes);
-    }
-    /**
      * The \<i\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param string|null|array $reference The hyper reference path
@@ -1924,55 +2026,20 @@ class Struct
         return self::Element(__($content), "strike", ["class" => "strike"], $attributes);
     }
     /**
-     * The \<SMALL\> HTML Tag
+     * The \<Data\> HTML Tag
      * @param mixed $content The content of the Tag
-     * @param string|null|array $reference The hyper reference path
-     * @param mixed $attributes Other custom attributes of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag,
+     * "DecimalSeparator"=>".",
+     * "Separator"=>","
      * @return string
      */
-    public static function Small($content, $reference = null, ...$attributes)
+    public static function Number($content, ...$attributes)
     {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "small", ["class" => "small"], $attributes);
-        return self::Element(__($content), "small", ["class" => "small"], $attributes);
-    }
-    /**
-     * The \<sup\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param string|null|array $reference The hyper reference path
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Super($content, $reference = null, ...$attributes)
-    {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "sup", ["class" => "super"], $attributes);
-        return self::Element(__($content), "sup", ["class" => "super"], $attributes);
-    }
-    /**
-     * The \<sub\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param string|null|array $reference The hyper reference path
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Sub($content, $reference = null, ...$attributes)
-    {
-        if (!is_null($reference))
-            if (is_array($reference)) {
-                $attributes = Convert::ToIteration($reference, ...$attributes);
-                $reference = null;
-            } else
-                return self::Element(self::Link($content, $reference), "sub", ["class" => "sub"], $attributes);
-        return self::Element(__($content), "sub", ["class" => "sub"], $attributes);
+        $content = $content + 0;
+        $decimalPoint = self::PopAttribute($attributes, "DecimalSeparator") ?? ".";
+        $thousandSep = self::PopAttribute($attributes, "Separator") ?? ",";
+        $decimals = is_float($content) ? strlen(substr(strrchr($content, "."), 1)) : 0;
+        return self::Element(number_format($content, $decimals, $decimalPoint, $thousandSep), "data", ["class" => "number", "value" => $content], $attributes);
     }
 
     /**
@@ -2011,9 +2078,9 @@ class Struct
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Progress($value, $content = null,...$attributes)
+    public static function Progress($value, $content = null, ...$attributes)
     {
-        return self::Element($content??"", "progress", ["class" => "progress"],is_null($value)?[]:["value" => $value], $attributes);
+        return self::Element($content ?? "", "progress", ["class" => "progress"], is_null($value) ? [] : ["value" => $value], $attributes);
     }
     /**
      * The \<HIDDEN\> HTML Tag
@@ -2022,9 +2089,9 @@ class Struct
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Hidden($value, $content = null,...$attributes)
+    public static function Hidden($value, $content = null, ...$attributes)
     {
-        return self::Element($content??"", "hidden", ["class" => "hidden", "value" => $value], $attributes);
+        return self::Element($content ?? "", "hidden", ["class" => "hidden", "value" => $value], $attributes);
     }
     /**
      * The \<DATA\> HTML Tag
@@ -2122,7 +2189,7 @@ class Struct
         return self::Action(self::Icon($content, null), $action, ["class" => "icon"], $attributes);
     }
     /**
-     * The \<DIV\> HTML Tag
+     * The \<ACTION\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param string|null|array|callable $action The source path or onclick event script, (Use class names with full namespaces in callable references)
      * @param mixed $attributes Other custom attributes of the Tag
@@ -2175,7 +2242,7 @@ class Struct
                 }));
             };
         return self::Element($content, "form", $action ? ((isScript($action) && !isUrl($action)) ? ["onsubmit" => $action] : ["action" => $action]) : [], ["enctype" => "multipart/form-data", "method" => "get", "Id" => $id, "class" => "form"], $attributes)
-            . (empty($Interaction) ? "" : Struct::Script($Interaction === true ? "handleForm('form#$id');" : $Interaction));
+            . (empty($Interaction) ? "" : self::Script($Interaction === true ? "handleForm('form#$id');" : $Interaction));
     }
     /**
      * Detect the type of inputed value
@@ -2204,12 +2271,14 @@ class Struct
                     return "text";
             else
                 return strtolower(gettype($value));
-        elseif (is_string($type)){
+        elseif (is_string($type)) {
             $type = preg_replace("/(\bnull\s*\|)|(\|\s*null\b)|\?/i", "", $type);
-            if(str_contains($type, "|")) return "object";
-            else return strtolower($type);
+            if (str_contains($type, "|"))
+                return "object";
+            else
+                return strtolower($type);
             //return strtolower(first(preg_split("/\|/", $type)));
-        }elseif (is_callable($type) || ($type instanceof \Closure))
+        } elseif (is_callable($type) || ($type instanceof \Closure))
             return self::InputDetector($type($type, $value), $value);
         elseif (is_object($type) || ($type instanceof \stdClass))
             return self::InputDetector(getValid($type, "Type", null), $value);
@@ -2322,7 +2391,7 @@ class Struct
         $isRequired = self::HasAttribute($attributes, "required");
         // $isDisabled = self::HasAttribute($attributes, "disabled");
         // if ($isDisabled)
-        //     $content = Struct::Division($value, ["class" => "input"], $attributes);
+        //     $content = self::Division($value, ["class" => "input"], $attributes);
         $id = self::GetAttribute($attributes, "Id") ?? Convert::ToId($key);
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
         $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title", "placeholder" => self::PopAttribute($attributes, "PlaceHolder")]));
@@ -2649,7 +2718,7 @@ class Struct
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::IntInput($key, $value, [...(is_null($min)?[]:['min' => $min]), ...(is_null($max)?[]:['max' => $max])], $attributes);
+                $content = self::IntInput($key, $value, [...(is_null($min) ? [] : ['min' => $min]), ...(is_null($max) ? [] : ['max' => $max])], $attributes);
                 break;
             case 'short':
                 $min = -255;
@@ -2668,7 +2737,7 @@ class Struct
                     $min = min($options);
                     $max = max($options);
                 }
-                $content = self::NumberInput($key, $value, [...(is_null($min)?[]:['min' => $min]), ...(is_null($max)?[]:['max' => $max])], $attributes);
+                $content = self::NumberInput($key, $value, [...(is_null($min) ? [] : ['min' => $min]), ...(is_null($max) ? [] : ['max' => $max])], $attributes);
                 break;
             case 'range':
                 $min = 0;
@@ -3072,47 +3141,47 @@ class Struct
                 return _('#$id').selectedLines((_('#$id').selectedLines() || ['']).map(l=>l.replace(pattern, replacement)));
             }
         ") . self::Division(
-            self::Tiles($options ?: [
-                self::Icon("align-left", "{$id}_injectInLines('!{','} @{be align left}')", ["Tooltip" => "Align Left"]),
-                self::Icon("align-center", "{$id}_injectInLines('!{','} @{be align center}')", ["Tooltip" => "Align Center"]),
-                self::Icon("align-right", "{$id}_injectInLines('!{','} @{be align right}')", ["Tooltip" => "Align Right"]),
-                self::Icon("align-justify", "{$id}_injectInLines('!{','} @{be align justify}')", ["Tooltip" => "Align Justify"]),
-                self::Icon("chevron-left", "{$id}_injectInLines('!{','} @{be rtl}')", ["Tooltip" => "Right to Left Direction"]),
-                self::Icon("chevron-right", "{$id}_injectInLines('!{','} @{be ltr}')", ["Tooltip" => "Left to Right Direction"]),
-                self::Icon("list-ul", "{$id}_injectInLines('\\t- ')", ["Tooltip" => "Unordered List"]),
-                self::Icon("list-ol", "{$id}_injectInLines( '\\t+ ')", ["Tooltip" => "Ordered List"]),
-                self::Icon("indent", "{$id}_injectInLines('\\t')", ["Tooltip" => "Indention"]),
-                self::Icon("outdent", "{$id}_replaceInLines(/^\\t/, '')", ["Tooltip" => "Outdention"]),
-                self::Icon("bold", "{$id}_injectInText('*','*')", ["Tooltip" => "Bold"]),
-                self::Icon("italic", "{$id}_injectInText('+','+')", ["Tooltip" => "Italic"]),
-                self::Icon("underline", "{$id}_injectInText('_','_')", ["Tooltip" => "Underline"]),
-                self::Icon("strikethrough", "{$id}_injectInText('-','-')", ["Tooltip" => "Strikethrough"]),
-                self::Icon("superscript", "{$id}_injectInText('^(',')')", ["Tooltip" => "Superscript"]),
-                self::Icon("subscript", "{$id}_injectInText('~(',')')", ["Tooltip" => "Subscript"]),
-                self::Icon("paragraph", "{$id}_injectOutLines('', '')", ["Tooltip" => "Paragraph"]),
-                self::Button("H1", "{$id}_injectInLines('# ')", ["Tooltip" => "Heading 1"]),
-                self::Button("H2", "{$id}_injectInLines('## ')", ["Tooltip" => "Heading 2"]),
-                self::Button("H3", "{$id}_injectInLines('### ')", ["Tooltip" => "Heading 3"]),
-                self::Button("H4", "{$id}_injectInLines('#### ')", ["Tooltip" => "Heading 4"]),
-                self::Button("H5", "{$id}_injectInLines('##### ')", ["Tooltip" => "Heading 5"]),
-                self::Button("H6", "{$id}_injectInLines('###### ')", ["Tooltip" => "Heading 6"]),
-                self::Icon("quote-right", "{$id}_injectOutLines('\"\"\"', '\"\"\"')", ["Tooltip" => "Block Quote"]),
-                self::Icon("file-code", "{$id}_injectOutLines('```', '```')", ["Tooltip" => "Code Block"]),
-                self::Icon("code", "{$id}_injectInLines(' > ')", ["Tooltip" => "Code Script"]),
-                self::Icon("link", "var url=prompt('Enter the URL:','https://'); if(url){ {$id}_injectInText('[',']('+url+')');}", ["Tooltip" => "Link"]),
-                self::Icon("square", "var act=prompt('Enter the JS Action or URL:','https://'); if(act){ {$id}_injectInText('!Button[',']('+act+')');}", ["Tooltip" => "Button"]),
-                self::Icon("image", "var url=prompt('Enter the Media URL or Icon name:','https://'); if(url){ {$id}_injectInText('![',']('+url+')');}", ["Tooltip" => "Image, Video, Audio, Icon, ..."]),
-                self::Icon("minus", "{$id}_injectOutText('\\n---','---\\n')", ["Tooltip" => "Horizontal Rule"]),
-            ], ["class"=>"tools"]) .
-            self::Element($value ?? "", "textarea", [
-                "id" => $id,
-                "name" => Convert::ToKey($key),
-                "placeholder" => Convert::ToTitle($key),
-                "class" => "input",
-                "rows" => "10"
-            ], ...$attributes),
-            ["class" => "markdowninput $class", "style" => $style]
-        );
+                    self::Tiles($options ?: [
+                        self::Icon("align-left", "{$id}_injectInLines('!{','} @{be align left}')", ["Tooltip" => "Align Left"]),
+                        self::Icon("align-center", "{$id}_injectInLines('!{','} @{be align center}')", ["Tooltip" => "Align Center"]),
+                        self::Icon("align-right", "{$id}_injectInLines('!{','} @{be align right}')", ["Tooltip" => "Align Right"]),
+                        self::Icon("align-justify", "{$id}_injectInLines('!{','} @{be align justify}')", ["Tooltip" => "Align Justify"]),
+                        self::Icon("chevron-left", "{$id}_injectInLines('!{','} @{be rtl}')", ["Tooltip" => "Right to Left Direction"]),
+                        self::Icon("chevron-right", "{$id}_injectInLines('!{','} @{be ltr}')", ["Tooltip" => "Left to Right Direction"]),
+                        self::Icon("list-ul", "{$id}_injectInLines('\\t- ')", ["Tooltip" => "Unordered List"]),
+                        self::Icon("list-ol", "{$id}_injectInLines( '\\t+ ')", ["Tooltip" => "Ordered List"]),
+                        self::Icon("indent", "{$id}_injectInLines('\\t')", ["Tooltip" => "Indention"]),
+                        self::Icon("outdent", "{$id}_replaceInLines(/^\\t/, '')", ["Tooltip" => "Outdention"]),
+                        self::Icon("bold", "{$id}_injectInText('*','*')", ["Tooltip" => "Bold"]),
+                        self::Icon("italic", "{$id}_injectInText('+','+')", ["Tooltip" => "Italic"]),
+                        self::Icon("underline", "{$id}_injectInText('_','_')", ["Tooltip" => "Underline"]),
+                        self::Icon("strikethrough", "{$id}_injectInText('-','-')", ["Tooltip" => "Strikethrough"]),
+                        self::Icon("superscript", "{$id}_injectInText('^(',')')", ["Tooltip" => "Superscript"]),
+                        self::Icon("subscript", "{$id}_injectInText('~(',')')", ["Tooltip" => "Subscript"]),
+                        self::Icon("paragraph", "{$id}_injectOutLines('', '')", ["Tooltip" => "Paragraph"]),
+                        self::Button("H1", "{$id}_injectInLines('# ')", ["Tooltip" => "Heading 1"]),
+                        self::Button("H2", "{$id}_injectInLines('## ')", ["Tooltip" => "Heading 2"]),
+                        self::Button("H3", "{$id}_injectInLines('### ')", ["Tooltip" => "Heading 3"]),
+                        self::Button("H4", "{$id}_injectInLines('#### ')", ["Tooltip" => "Heading 4"]),
+                        self::Button("H5", "{$id}_injectInLines('##### ')", ["Tooltip" => "Heading 5"]),
+                        self::Button("H6", "{$id}_injectInLines('###### ')", ["Tooltip" => "Heading 6"]),
+                        self::Icon("quote-right", "{$id}_injectOutLines('\"\"\"', '\"\"\"')", ["Tooltip" => "Block Quote"]),
+                        self::Icon("file-code", "{$id}_injectOutLines('```', '```')", ["Tooltip" => "Code Block"]),
+                        self::Icon("code", "{$id}_injectInLines(' > ')", ["Tooltip" => "Code Script"]),
+                        self::Icon("link", "var url=prompt('Enter the URL:','https://'); if(url){ {$id}_injectInText('[',']('+url+')');}", ["Tooltip" => "Link"]),
+                        self::Icon("square", "var act=prompt('Enter the JS Action or URL:','https://'); if(act){ {$id}_injectInText('!Button[',']('+act+')');}", ["Tooltip" => "Button"]),
+                        self::Icon("image", "var url=prompt('Enter the Media URL or Icon name:','https://'); if(url){ {$id}_injectInText('![',']('+url+')');}", ["Tooltip" => "Image, Video, Audio, Icon, ..."]),
+                        self::Icon("minus", "{$id}_injectOutText('\\n---','---\\n')", ["Tooltip" => "Horizontal Rule"]),
+                    ], ["class" => "tools"]) .
+                    self::Element($value ?? "", "textarea", [
+                        "id" => $id,
+                        "name" => Convert::ToKey($key),
+                        "placeholder" => Convert::ToTitle($key),
+                        "class" => "input",
+                        "rows" => "10"
+                    ], ...$attributes),
+                    ["class" => "markdowninput $class", "style" => $style]
+                );
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -3252,7 +3321,7 @@ class Struct
     {
         $class = "_" . getId();
         return self::Action(
-            Struct::Icon($value ? "toggle-on" : "toggle-off", null, ["class" => $class]),
+            self::Icon($value ? "toggle-on" : "toggle-off", null, ["class" => $class]),
             "icon_$class = document.querySelector('.icon.$class');
             cb_$class = document.querySelector('.switchinput.$class');
                     if(cb_$class.value == '0'){
@@ -3962,7 +4031,7 @@ class Struct
      * The \<INPUT\> HTML Tag
      * @param mixed $key The tag name, id, or placeholder
      * @param mixed $value The tag default value
-     * @param array $symbols An array of symbols from The minimum key to The maximum key (for example [0=>Struct::Icon('star')])
+     * @param array $symbols An array of symbols from The minimum key to The maximum key (for example [0=>self::Icon('star')])
      * @param mixed $attributes The custom attributes of the Tag
      * @return string
      */
@@ -4129,7 +4198,7 @@ class Struct
         $countDown = $from >= $to;
         $counter = $id;
         $interval = $id . "_i";
-        return Struct::Element(Struct::Span($from) . Struct::Script(
+        return self::Element(self::Span($from) . self::Script(
             "var $counter = " . ($countDown ? $from : $to) . ";" .
             "var $interval = setInterval(function(){
 			    if($counter " . ($countDown ? "<" : ">") . "= {$to}) {" . (
@@ -4173,7 +4242,7 @@ class Struct
         $update = "{$uniq}_Click();";
         $weekDays = ["Sa.", "Su.", "Mo.", "Tu.", "We.", "Th.", "Fr."];
         return
-            style("
+            self::Style("
                 .$uniq{
                     text-align: center;
                     display: flex;
@@ -4486,7 +4555,7 @@ class Struct
         $content = Convert::ToSequence($content);
         $active = self::PopAttribute($attributes, "SelectedIndex") ?? 0;
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
-        return style("
+        return self::Style("
             #$id>.tab-contents{
                 min-height: 100%;
             }
