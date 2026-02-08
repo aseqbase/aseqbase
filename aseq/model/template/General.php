@@ -297,9 +297,10 @@ class General extends Template
 				justify-content: space-between;
 				flex-direction: row;
 				gap: var(--size-0);
+				width: 100%;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			body .contextmenu>*>*{
+			body .contextmenu>*>:not(.contextmenu){
 				display: flex;
 				align-items: center;
 				flex-direction: row;

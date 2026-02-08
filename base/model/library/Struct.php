@@ -44,7 +44,9 @@ class Struct
      */
     public static function Convert($object, ...$args)
     {
-        if (!is_null($object)) {
+        $translate = \_::$Front->AllowTranslate;
+        if (!is_null($object)) try {
+            \_::$Front->AllowTranslate = false;
             if (is_string($object)) {
                 if (preg_match("/(?<!\\\)\<[^\>]+(?<!\\\)\>/i", $object))
                     return $object;
@@ -297,6 +299,8 @@ class Struct
             if (is_callable($object) || $object instanceof \Closure)
                 return self::Convert($object(...$args));
             return self::Division(Convert::ToString($object));
+        } finally {
+            \_::$Front->AllowTranslate = $translate;
         }
         return "";
     }
@@ -1575,11 +1579,8 @@ class Struct
             #$id {
                 position: absolute;
                 display: none;
-                font-family: var(--font);
                 font-size: var(--size-0);
                 font-weight: lighter;
-                max-width: 80%;
-                min-width: 120px;
                 width: max-content;
                 box-shadow: var(--shadow-max);
                 z-index: -9999;
@@ -1593,17 +1594,32 @@ class Struct
         ") . self::Menu($content, ["id" => $id, "class" => "contextmenu"], ...$attributes) .
             script("
                 _(document).on('contextmenu', function(e) {
-                    _('nav.menu.contextmenu').removeClass('active');
+                    _('.menu.contextmenu:not(#$id)').removeClass('active');
                     var menu = document.getElementById('$id');
-                    if(".($selector?("_(".Script::Convert($selector).").contains(e.target)"):"_(e.target).contains(menu)")."){
+                    if(menu && ".($selector?("_(".Script::Convert($selector).").contains(e.target)"):"_(e.target).contains(menu)")."){
                         e.preventDefault();
-                        menu.style.top = e.pageY + 'px';
-                        menu.style.left = e.pageX + 'px';
+                        if(e.pageY + menu.offsetHeight > window.innerHeight) menu.style.top = e.pageY - menu.offsetHeight + 'px';
+                        else menu.style.top = e.pageY + 'px';
+                        if(e.pageX + menu.offsetWidth > window.innerWidth || e.pageX < 0 || e.pageX + menu.offsetWidth < 0 || e.pageX > window.innerWidth) menu.style.left = e.pageX - menu.offsetWidth + 'px';
+                        else menu.style.left = e.pageX + 'px';
                         menu.classList.add('active');
                     }
                 });
+                _('.menu.contextmenu>*:has(.menu.contextmenu)').on('mouseenter', function(e) {
+                    _(e.target).matches('>.menu.contextmenu').each(function(menu){
+                        menu.style.display = 'absolute';
+                        if(e.target.offsetTop + menu.offsetHeight > window.innerHeight) menu.style.top = e.target.offsetTop - menu.offsetHeight + 'px';
+                        else menu.style.top = e.target.offsetTop + 'px';
+                        if(e.target.offsetLeft + menu.offsetWidth > window.innerWidth || e.target.offsetLeft < 0 || e.target.offsetLeft + menu.offsetWidth < 0 || e.target.offsetLeft > window.innerWidth) menu.style.left = e.target.offsetLeft - menu.offsetWidth + 'px';
+                        else menu.style.left = e.target.offsetLeft + e.target.offsetWidth + 'px';
+                        menu.classList.add('active');
+                    });
+                });
+                _('.menu.contextmenu>*:has(.menu.contextmenu)').on('mouseleave', function(e) {
+                    _(e.target).matches('>.menu.contextmenu').removeClass('active');
+                });
                 _(document).on('click', function(e) {
-                    _('nav.menu.contextmenu').removeClass('active');
+                    _('.menu.contextmenu').removeClass('active');
                     _('#$id').removeClass('active');
                 });
             ");

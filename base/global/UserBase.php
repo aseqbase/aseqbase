@@ -539,7 +539,7 @@ class UserBase
 	public function EncryptPassword($password)
 	{
 		if ($this->PasswordSecure)
-			return sha1($password); //More safe method
+			return crypt($password, \_::$Back->SoftKey);
 		else
 			return $password;
 	}

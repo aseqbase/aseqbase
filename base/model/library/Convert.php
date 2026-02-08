@@ -451,7 +451,8 @@ class Convert
      * @param array $paths The input files and folders paths
      * @return array The list of files added to the zip
      */
-    public static function ToZipFile(string $destPath, ...$paths){
+    public static function ToZipFile(string $destPath, ...$paths)
+    {
         return iterator_to_array(self::ToZipFileAsync($destPath, ...$paths));
     }
     /**
@@ -463,12 +464,12 @@ class Convert
     public static function ToZipFileAsync(string $destPath, ...$paths)
     {
         // Simple in-app zip using PHP's ZipArchive
-        $zip = new \ZipArchive();
         $destPath = Local::GetAbsoluteAddress($destPath);
         $zipDir = dirname($destPath);
         if (!is_dir($zipDir))
             Local::CreateDirectory($zipDir);
 
+        $zip = new \ZipArchive();
         $zip->open($destPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
         foreach ($paths as $p) {
@@ -502,7 +503,8 @@ class Convert
      * @param mixed $destDirectory The destination directory path
      * @return array The list of extracted files
      */
-    public static function FromZipFile(string $sourcePath, $destDirectory = null){
+    public static function FromZipFile(string $sourcePath, $destDirectory = null)
+    {
         return iterator_to_array(self::FromZipFileAsync($sourcePath, $destDirectory));
     }
     /**
@@ -672,6 +674,14 @@ class Convert
         return $data;
     }
 
+    public static function ToCompactNumber($number, $divisors = ['T' => 1000000000000, 'G' => 1000000000, 'M' => 1000000, 'K' => 1000])
+    {
+        foreach ($divisors as $suffix => $divisor) {
+            if ($number >= $divisor)
+                return round($number / $divisor, 1) . $suffix;
+        }
+        return $number;
+    }
 
     /**
      * To convert a string to DateTime or compatible it with a DateTimeZone

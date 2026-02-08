@@ -416,7 +416,7 @@ class BackBase
 
 	public function HardKey($seed)
 	{
-		return $seed . $this->SecretKey . $seed;
+		return crypt($this->SecretKey, $seed);
 	}
 
 	public function IsLatestVersion(): bool|null

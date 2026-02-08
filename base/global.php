@@ -1,13 +1,14 @@
 <?php
 
-use MiMFa\Library\Convert;
 use MiMFa\Library\DataBase;
 use MiMFa\Library\DataTable;
-use MiMFa\Library\Struct;
 use MiMFa\Library\Internal;
 use MiMFa\Library\Local;
-use MiMFa\Library\Script;
+use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
+use MiMFa\Library\Script;
+use MiMFa\Library\Convert;
+use MiMFa\Library\Translate;
 
 /**
  * All the Global Static Variables and Functions You need to indicate and handle requests and responses
@@ -519,6 +520,144 @@ function popReceived($key = null, $default = null, array|string|null $method = n
 #endregion 
 
 
+#region UPLOADING
+
+function upload($target, $name = null, $type = null){
+    return Local::Load(Local::GetFileContent($target), $name ?? basename($target), $type);
+}
+
+#endregion 
+
+
+#region DOWNLOADING
+
+/**
+ * To download a file from the client device
+ * @param string|bool|null $target Set true to store in public directory,
+ * false to store in temp,
+ * null to dont store,
+ * or an address otherwise
+ * @return string|null The file content, address (if sent null for $target) or null otherwise
+ */
+function download($target = null, $extensions = null, $minSize = null, $maxSize = null, $method = "FILE")
+{
+	$object = receive($method);
+	if(!is_array($object)) return null;
+
+	$objectName = get($object, "name");
+	if (!$objectName)
+		throw new \SilentException("The 'file name' is not 'acceptable'!");
+	$allow = true;
+	foreach (($extensions ?? \_::$Back->GetAcceptableFormats()) as $ext)
+		if ($allow = endsWith($objectName, $ext))
+			break;
+	if (!$allow)
+		throw new \SilentException("The 'file format' is not 'acceptable'!");
+	$objectSize = get($object, "size");
+	if ($objectSize)
+		if ($objectSize < ($minSize ?? \_::$Back->MinimumFileSize))
+			throw new \SilentException("The 'file size' is 'smaller than' " . Convert::ToCompactNumber(\_::$Back->MinimumFileSize) . "B!");
+		elseif ($objectSize > ($maxSize ?? \_::$Back->MaximumFileSize))
+			throw new \SilentException("The 'file size' is 'bigger than' " . Convert::ToCompactNumber(\_::$Back->MaximumFileSize) . "B!");
+	
+	if (is_array($object))
+		$object = get($object, "data");
+	if (!$object)
+		throw new \SilentException("The 'file data' is not 'available'!");
+
+	$object = base64_decode(urldecode($object));
+
+	if ($target === true) {
+		if (!Local::SetFileContent($target = Local::GenerateAddress($objectName, "", \_::$Address->PublicAddress), $object))
+			return false;
+	} elseif ($target === false) {
+		if (!Local::SetFileContent($target = Local::GenerateAddress($objectName, "", \_::$Address->TempAddress), $object))
+			return false;
+	} elseif ($target) {
+		if (endsWith($target, DIRECTORY_SEPARATOR))
+			$target = Local::GenerateAddress($objectName, "", $target, false);
+		if (!Local::SetFileContent($target, $object))
+			return false;
+	} else {
+		if (!Local::SetFileContent($target = \_::$Address->TempAddress . $objectName, $object))
+			return false;
+		$target = Local::GetFileContent($target);
+	}
+
+	return $target;
+}
+
+/**
+ * To download any file from the client device
+ * This method receives sent files by a chunks-based algorithm
+ * @param string|bool|null $target Set true to store in public directory,
+ * false to store in temp,
+ * null to dont store,
+ * or an address otherwise
+ * @param mixed $extensions The acceptable extensions like [".jpg",".png",...]
+ * @return: It will return:
+ * the file data if finished (and $target is null),
+ * the file address if finished (and $target is not null),
+ * null if there not received anythings,
+ * A number between 0-1 if chunk recorded successfully, or
+ * false if failed the chunk recording
+ */
+function downloadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $method = "STREAM")
+{
+	$object = receive($method);
+	if(!is_array($object)) return null;
+
+	$objectName = get($object, "name");
+	if (!$objectName)
+		throw new \SilentException("The 'file name' is not 'acceptable'!");
+	$allow = true;
+	foreach (($extensions ?? \_::$Back->GetAcceptableFormats()) as $ext)
+		if ($allow = endsWith($objectName, $ext))
+			break;
+	if (!$allow)
+		throw new \SilentException("The 'file format' is not 'acceptable'!");
+	$objectSize = get($object, "size");
+	if ($objectSize)
+		if ($objectSize < ($minSize ?? \_::$Back->MinimumFileSize))
+			throw new \SilentException("The 'file size' is 'smaller than' " . Convert::ToCompactNumber(\_::$Back->MinimumFileSize) . "B!");
+		elseif ($objectSize > ($maxSize ?? \_::$Back->MaximumFileSize))
+			throw new \SilentException("The 'file size' is 'bigger than' " . Convert::ToCompactNumber(\_::$Back->MaximumFileSize) . "B!");
+	$chunk = get($object, "chunk") ?: 0;
+	$total = get($object, "total") ?: 1;
+	
+	if (is_array($object))
+		$object = get($object, "data");
+	if (!$object)
+		throw new \SilentException("The 'file chunk data' is not 'available'!");
+
+	$object = base64_decode(urldecode($object));
+
+	if ($target === true) {
+		if (!Local::AddFileContent($target = \_::$Address->PublicAddress . $objectName, $object))
+			return false;
+	} elseif ($target === false) {
+		if (!Local::AddFileContent($target = \_::$Address->TempAddress . $objectName, $object))
+			return false;
+	} elseif ($target) {
+		if (endsWith($target, DIRECTORY_SEPARATOR))
+			$target = $target . $objectName;
+		if (!Local::AddFileContent($target, $object))
+			return false;
+	} else {
+		if (!Local::AddFileContent($target = \_::$Address->TempAddress . $objectName, $object))
+			return false;
+		if ($chunk >= ($total - 1))
+			$target = Local::GetFileContent($target);
+	}
+
+	if ($chunk >= ($total - 1))
+		return $target;
+	return $chunk / $total;
+}
+
+#endregion 
+
+
 #region REQUESTING
 
 /**
@@ -602,14 +741,12 @@ function prompt($message = null, $callback = null, $default = null)
 function response($content = null, $status = null)
 {
 	responseStatus($status);
-	echo $content = Convert::ToString($content);
-	return $content;
+	echo Convert::ToString($content);
 }
 
 /**
  * Show a modal output in the client side
  * @param mixed $content The data that is ready to print
- * @return mixed Printed data
  */
 function modal($content = null)
 {
@@ -619,51 +756,43 @@ function modal($content = null)
 /**
  * Show a message result output to the client side
  * @param mixed $message The data that is ready to print
- * @return mixed Printed data
  */
 function message($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return script(Script::Log($message->getMessage(), "message"));
-	echo $message = Struct::Result($message);
-	return $message;
+		script(Script::Log($message->getMessage(), "message"));
+	else echo Struct::Result($message);
 }
 /**
  * Show a success result output to the client side
  * @param mixed $message The data that is ready to print
- * @return mixed Printed data
  */
 function success($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return script(Script::Log($message->getMessage(), "success"));
-	echo $message = Struct::Success($message);
-	return $message;
+		script(Script::Log($message->getMessage(), "success"));
+	else echo Struct::Success($message);
 }
 /**
  * Show a warning result output to the client side
  * @param mixed $message The data that is ready to print
- * @return mixed Printed data
  */
 function warning($message = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return script(Script::Log($message->getMessage(), "warn"));
-	echo $message = Struct::Warning($message);
-	return $message;
+		script(Script::Log($message->getMessage(), "warn"));
+	else echo Struct::Warning($message);
 }
 /**
  * Show an error result output to the client side
  * @param mixed $message The data that is ready to print
- * @return mixed Printed data
  */
 function error($message = null)
 {
 	responseStatus(400);
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return script(Script::Log($message->getMessage(), "error"));
-	echo $message = Struct::Error($message);
-	return $message;
+		script(Script::Log($message->getMessage(), "error"));
+	else echo Struct::Error($message);
 }
 
 /**
@@ -700,7 +829,17 @@ function report($message = null, $type = "log", $secret = null)
 	if ($log)
 		file_put_contents(address(\_::$Address->LogAddress . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
 	if (!$secret)
-		return script(Script::Log($message, $type));
+		script(Script::Log($message, $type));
+}
+
+/**
+ * To response progress message on the console
+ * @param mixed $message
+ */
+function progress($progress = null, $message = null)
+{
+	responseStatus(300);
+    return report(($progress * 100) . "% " . $message);
 }
 
 /**
@@ -766,9 +905,8 @@ function responseBreaker($content = null, $forward = null, $delay = 0)
 		$forward = getForePath();
 	$forward = $forward ?? receiveGet("Next") ?? receiveGet("Previous");
 	$script = "window.location.assign(" . (isValid($forward) ? Script::Convert(Local::GetUrl($forward)) : "location.href") . ")";
-	echo ($content = Convert::ToString($content)) .
+	echo (Convert::ToString($content)) .
 		Struct::Script($delay ? "setTimeout(()=>$script, $delay);" : "$script;");
-	return $content;
 }
 
 /**
@@ -778,7 +916,7 @@ function responseBreaker($content = null, $forward = null, $delay = 0)
  */
 function entireResponse($output = null, $target = null)
 {
-	response(Struct::Script(
+	return response(Struct::Script(
 		Internal::MakeScript(
 			$output,
 			null,
@@ -894,61 +1032,72 @@ function deliverFile($output = null, $status = null, $type = null, bool $attachm
  * @param mixed $content The data that is ready to print
  * @return mixed Printed data
  */
-function deliverModal($content = null)
+function deliverModal($content = null, $status = null)
 {
-	return deliver(Struct::Modal($content));
+	return deliver(Struct::Modal($content), $status);
 }
 /**
  * To deliver a message result output to the client side
  * @param mixed $message The data that is ready to print
  * @return mixed Printed data
  */
-function deliverMessage($message = null)
+function deliverMessage($message = null, $status = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Log($message->getMessage(), "message"), 400);
-	return deliver(Struct::Result($message));
+		return deliverScript(Script::Log($message->getMessage(), "message"), $status ?? 400);
+	return deliver(Struct::Result($message), $status);
 }
 /**
  * To deliver a success result output to the client side
  * @param mixed $message The data that is ready to print
  * @return mixed Printed data
  */
-function deliverSuccess($message = null)
+function deliverSuccess($message = null, $status = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Log($message->getMessage(), "success"), 400);
-	return deliver(Struct::Success($message));
+		return deliverScript(Script::Log($message->getMessage(), "success"), $status ?? 400);
+	return deliver(Struct::Success($message), $status);
 }
 /**
  * To deliver a warning result output to the client side
  * @param mixed $message The data that is ready to print
  * @return mixed Printed data
  */
-function deliverWarning($message = null)
+function deliverWarning($message = null, $status = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Log($message->getMessage(), "warn"), 400);
-	return deliver(Struct::Warning($message));
+		return deliverScript(Script::Log($message->getMessage(), "warn"), $status ?? 400);
+	return deliver(Struct::Warning($message), $status);
 }
 /**
  * To deliver an error result output to the client side
  * @param mixed $message The data that is ready to print
  * @return mixed Printed data
  */
-function deliverError($message = null)
+function deliverError($message = null, $status = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Log($message->getMessage(), "error"), 400);
-	return deliver(Struct::Error($message), 400);
+		return deliverScript(Script::Log($message->getMessage(), "error"), $status ?? 400);
+	return deliver(Struct::Error($message), $status);
 }
 /**
  * To deliver message on the console
  * @param mixed $message
  */
-function deliverReport($message = null)
+function deliverReport($message = null, $type = "log", $secret = null, $status = null)
 {
-	return deliverScript(Script::Log($message));
+	eraseResponse(); // Clean any remaining output buffers
+	responseStatus($status);
+	report($message, $type, $secret);
+	finalize();
+}
+/**
+ * To deliver progress message on the console
+ * @param mixed $message
+ */
+function deliverProgress($progress = null, $message = null, $status = null)
+{
+    return deliverReport(($progress * 100) . "% " . $message, status: $status ?? 300);
 }
 
 /**
@@ -1391,18 +1540,18 @@ function usingBefores($directory, string|null $name = null)
 	$directory = strtolower($directory ?? "");
 	$name = strtolower($name ?? "");
 	if (isset(\_::$BeforeActions[$directory][$name]))
-		response(\_::$BeforeActions[$directory][$name]);
+		return response(\_::$BeforeActions[$directory][$name]);
 	elseif (isset(\_::$BeforeActions[$directory . $name]))
-		response(\_::$BeforeActions[$directory . $name]);
+		return response(\_::$BeforeActions[$directory . $name]);
 }
 function usingAfters($directory, string|null $name = null)
 {
 	$directory = strtolower($directory ?? "");
 	$name = strtolower($name ?? "");
 	if (isset(\_::$AfterActions[$directory][$name]))
-		response(\_::$AfterActions[$directory][$name]);
+		return response(\_::$AfterActions[$directory][$name]);
 	elseif (isset(\_::$AfterActions[$directory . $name]))
-		response(\_::$AfterActions[$directory . $name]);
+		return response(\_::$AfterActions[$directory . $name]);
 }
 
 /**
@@ -2501,7 +2650,7 @@ function getClientIp($version = null): string|null
 }
 function getClientCode($key = null): string|null
 {
-	return md5($key . (getClientIp() ?? $_SERVER['HTTP_USER_AGENT'] ?? null));
+	return crypt(md5(getClientIp() ?? $_SERVER['HTTP_USER_AGENT'] ?? ""), $key ?? \_::$Back->SoftKey);
 }
 
 /**
@@ -3006,13 +3155,14 @@ function async($action, $callback = null, ...$args)
  */
 function __(mixed $value, bool $translating = true, bool $styling = false, bool|null $referring = null, $separator = "\n", $lang = null, $depth = null): string|null
 {
-	$value = MiMFa\Library\Convert::ToString(
+	$value = Convert::ToString(
 		is_array($value) ? join($separator, loop($value, fn($v) => __($v, $translating, $styling, $referring))) : $value
 	);
 	if ($translating && \_::$Front->AllowTranslate)
 		$value = \_::$Front->Translate->Get($value, $lang, $depth);
+	else $value = Translate::Trim($value);
 	if ($styling)
-		$value = MiMFa\Library\Style::DoStyle(
+		$value = Style::DoStyle(
 			$value,
 			\_::$Front->KeyWords
 		);

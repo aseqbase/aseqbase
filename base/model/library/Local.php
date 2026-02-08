@@ -108,7 +108,7 @@ class Local
 				"/[\/\\\]+/",
 				DIRECTORY_SEPARATOR,
 				preg_replace(
-					"/(^\w+:\/\/[^\/\\]+\/?)|([\?#@].*$)/",
+					"/(^\w+:\/\/[^\/\\\]+\/?)|([\?#@].*$)/",
 					"",
 					$path
 				)
@@ -162,12 +162,13 @@ class Local
 	public static function GenerateAddress(string $fileName = "new", string $format = "", string|null $directory = null, bool $random = true): string
 	{
 		$directory = $directory ?: \_::$Address->TempAddress;
-		if(endswith($fileName, $format))
-			$fileName = substr($fileName, 0, strlen($fileName)-strlen($format));
+		if (endswith($fileName, $format))
+			$fileName = substr($fileName, 0, strlen($fileName) - strlen($format));
 		$postfix = null;
+		$fileName = Convert::ToExcerpt(self::SanitizeName($fileName), 0, 50, "");
 		do {
-			$path = $directory . Convert::ToExcerpt(Convert::ToKey($fileName, true, '/[^A-Za-z0-9\_ \(\)]/'), 0, 50, "") . $postfix . $format;
-			$postfix =  "-" . getId($random);
+			$path = $directory . $fileName . $postfix . $format;
+			$postfix = "-" . getId($random);
 		} while (file_exists($path));
 		return $path;
 	}
@@ -196,7 +197,7 @@ class Local
 		$address = self::GetAddress($address);
 		if (!$address)
 			return null;
-		return is_dir(trim($address, "/\\")) ?
+		return is_dir(rtrim($address, "/\\")) ?
 			self::GetDirectory($address) :
 			self::GetFile($address);
 	}
@@ -205,7 +206,7 @@ class Local
 		$address = self::GetAddress($address);
 		if (!$address)
 			return false;
-		return is_dir(trim($address, "/\\")) ?
+		return is_dir(rtrim($address, "/\\")) ?
 			self::DirectoryExists($address) :
 			self::FileExists($address);
 	}
@@ -214,7 +215,7 @@ class Local
 		$address = self::GetAddress($address);
 		if (!$address)
 			return null;
-		return is_dir(trim($address, "/\\")) ?
+		return is_dir(rtrim($address, "/\\")) ?
 			self::DeleteDirectory($address) :
 			self::DeleteFile($address);
 	}
@@ -223,7 +224,7 @@ class Local
 		$address = self::GetAddress($address);
 		if (!$address || empty($newName))
 			return false;
-		return is_dir(trim($address, "/\\")) ?
+		return is_dir(rtrim($address, "/\\")) ?
 			self::RenameDirectory($address, $newName) :
 			self::RenameFile($address, $newName);
 	}
@@ -232,7 +233,7 @@ class Local
 		$sourceAddress = self::GetAddress($sourceAddress);
 		if (!$sourceAddress)
 			return false;
-		return is_dir(trim($sourceAddress, "/\\")) ?
+		return is_dir(rtrim($sourceAddress, "/\\")) ?
 			self::MoveDirectory($sourceAddress, $destAddress) :
 			self::MoveFile($sourceAddress, $destAddress);
 	}
@@ -241,7 +242,7 @@ class Local
 		$sourceAddress = self::GetAddress($sourceAddress);
 		if (!$sourceAddress)
 			return false;
-		return is_dir(trim($sourceAddress, "/\\")) ?
+		return is_dir(rtrim($sourceAddress, "/\\")) ?
 			self::CopyDirectory($sourceAddress, $destAddress) :
 			self::CopyFile($sourceAddress, $destAddress);
 	}
@@ -286,11 +287,12 @@ class Local
 			$dir = DIRECTORY_SEPARATOR;
 		$dirs = explode(DIRECTORY_SEPARATOR, trim($directory, DIRECTORY_SEPARATOR));
 		foreach ($dirs as $d)
-			if (!is_dir($dir .= $d)) {
+			if (is_dir($dir .= $d))
+				$dir .= DIRECTORY_SEPARATOR;
+			else {
 				mkdir($dir, $permissions, true);
 				self::CreateFile(($dir .= DIRECTORY_SEPARATOR) . "index.html", "<!--Silence is the Best-->");
-			} else
-				$dir .= DIRECTORY_SEPARATOR;
+			}
 		return $dir;
 	}
 	public static function DeleteDirectory($directory)
@@ -312,40 +314,45 @@ class Local
 	}
 	public static function RenameDirectory(string $sourceDirectory, string $newName)
 	{
-		$dir = dirname($sourceDirectory = rtrim($sourceDirectory, "\\\/"));
-		$newDirectory = $dir . DIRECTORY_SEPARATOR . self::SanitizeName($newName);
+		$newDirectory = Local::GenerateAddress($newName, "", dirname($sourceDirectory = rtrim($sourceDirectory, "\\\/")) . DIRECTORY_SEPARATOR, false);
 		return rename($sourceDirectory, $newDirectory);
 	}
-	public static function MoveDirectory($sourceDirectory, $destDirectory, $recursive = true)
+	public static function MoveDirectory($sourceDirectory, $destDirectory)
 	{
-		if (self::CopyDirectory($sourceDirectory, $destDirectory, $recursive))
-			return self::DeleteDirectory($sourceDirectory);
-		return false;
-	}
-	public static function CopyDirectory($sourceDirectory, $destDirectory, $recursive = true): bool
-	{
-		set_time_limit(24 * 60 * 60);
-		$b = true;
 		$sourceDirectory = rtrim($sourceDirectory, "\\\/");
-		$sourcePaths = scandir($sourceDirectory);
-		$destDirectory = rtrim($destDirectory, "\\\/").DIRECTORY_SEPARATOR;
-		if ($recursive)
-			foreach ($sourcePaths as $source) {
-				$bn = basename($source);
-				if (is_dir($source))
-					$b = self::CopyDirectory($source, self::CreateDirectory($destDirectory . $bn)) && $b;
-				else
-					$b = self::CopyFile($source, $destDirectory . $bn) && $b;
-			}
-		return $b;
+		$destDirectory = rtrim($destDirectory, "\\\/");
+		self::CreateDirectory(dirname($destDirectory));
+		return rename($sourceDirectory, $destDirectory);
 	}
-	public static function CopyDirectories($sourceDirectories, $destDirectories, $recursive = true): bool
+	public static function CopyDirectory($sourceDirectory, $destDirectory): bool
+	{
+		$sourceDirectory = rtrim($sourceDirectory, "\\\/");
+		$destDirectory = rtrim($destDirectory, "\\\/");
+		self::CreateDirectory(dirname($destDirectory));
+		if (!is_dir($sourceDirectory))
+			return false;
+		if (!is_dir($destDirectory))
+			mkdir($destDirectory);
+		foreach (scandir($sourceDirectory, SCANDIR_SORT_NONE) as $item) {
+			if ($item === '.' || $item === '..')
+				continue;
+			$sourceItem = $sourceDirectory . DIRECTORY_SEPARATOR . $item;
+			$destItem = $destDirectory . DIRECTORY_SEPARATOR . $item;
+			if (is_dir($sourceItem)) {
+				if (!self::CopyDirectory($sourceItem, $destItem))
+					return false;
+			} elseif (!copy($sourceItem, $destItem))
+				return false;
+		}
+		return true;
+	}
+	public static function CopyDirectories($sourceDirectories, $destDirectories): bool
 	{
 		set_time_limit(24 * 60 * 60);
 		$b = true;
 		foreach ($sourceDirectories as $s_dir)
 			foreach ($destDirectories as $d_dir)
-				$b = self::CopyDirectory($s_dir, $d_dir, $recursive) && $b;
+				$b = self::CopyDirectory($s_dir, $d_dir) && $b;
 		return $b;
 	}
 	public static function GetDirectoryContents(string $directory): array
@@ -353,7 +360,7 @@ class Local
 		if (!is_dir($directory))
 			return [];
 		$items = [];
-		foreach (scandir($directory) as $name) {
+		foreach (scandir($directory, SCANDIR_SORT_NONE) as $name) {
 			if ($name === '.' || $name === '..')
 				continue;
 			if (is_dir($name = $directory . $name))
@@ -368,7 +375,7 @@ class Local
 		$nd = rtrim($directory, "/\/");
 		if (!is_dir($nd))
 			return;
-		foreach (scandir($nd) as $name) {
+		foreach (scandir($nd, SCANDIR_SORT_NONE) as $name) {
 			if ($name === '.' || $name === '..')
 				continue;
 			$fullPath = $directory . $name;
@@ -427,8 +434,9 @@ class Local
 	}
 	public static function RenameFile(string $sourcePath, string $newName)
 	{
-		$dir = dirname($sourcePath);
-		$newPath = $dir . DIRECTORY_SEPARATOR . self::SanitizeName($newName);
+		$extension = preg_find("/(\.[^.]*)$/u", $newName) ?? "";
+		$newName = $extension ? substr($newName, 0, -strlen($extension)) : $newName;
+		$newPath = Local::GenerateAddress($newName, $extension, dirname($sourcePath) . DIRECTORY_SEPARATOR, false);
 		return rename($sourcePath, $newPath);
 	}
 	public static function MoveFile($sourcePath, $destPath): bool
@@ -439,33 +447,12 @@ class Local
 	}
 	public static function CopyFile($sourcePath, $destPath): bool
 	{
-		set_time_limit(24 * 60 * 60);
-		$b = false;
 		$sourcePath = self::GetFile($sourcePath);
 		$destPath = self::GetAddress($destPath);
-		$s_file = fopen($sourcePath, "rb");
-		if ($s_file) {
-			$d_file = fopen($destPath, "wb");
-			if ($d_file) {
-				while (!feof($s_file)) {
-					fwrite($d_file, fread($s_file, 1024 * 8), 1024 * 8);
-				}
-				$b = true;
-			}
-		}
-
-		if ($s_file) {
-			fclose($s_file);
-		}
-		if ($d_file) {
-			fclose($d_file);
-		}
-
-		return $b;
+		return copy($sourcePath, $destPath);
 	}
 	public static function CopyFiles($sourcePaths, $destPaths): bool
 	{
-		set_time_limit(24 * 60 * 60);
 		$b = true;
 		foreach ($sourcePaths as $s_path)
 			foreach ($destPaths as $d_path)
@@ -497,6 +484,16 @@ class Local
 	public static function SetFileContent(string $path, $data = null, int $flags = 0)
 	{
 		return file_put_contents(self::GetAbsoluteAddress($path), Convert::ToString($data), flags: $flags);
+	}
+	/**
+	 * To append data into an exists file or the new file
+	 * @param string $path The relative file path
+	 * @param $data The data to write. Can be either a string, an array or a each other data types.
+	 * @return string|false|null The function returns the number of bytes that were written to the file, or false on failure.
+	 */
+	public static function AddFileContent(string $path, $data = null, int $flags = 0)
+	{
+		return file_put_contents(self::GetAbsoluteAddress($path), Convert::ToString($data), flags: $flags | FILE_APPEND);
 	}
 
 
@@ -572,11 +569,11 @@ class Local
 		if ($object["size"] < $minSize) {
 			if ($deleteSource)
 				self::DeleteFile($sourceFile);
-			throw new \SilentException("The 'file size' is 'very small'!");
+			    throw new \SilentException("The 'file size' is 'smaller than' ".Convert::ToCompactNumber($minSize)."B!");
 		} elseif ($object["size"] > $maxSize) {
 			if ($deleteSource)
 				self::DeleteFile($sourceFile);
-			throw new \SilentException("The 'file size' is 'very big'!");
+			    throw new \SilentException("The 'file size' is 'bigger than' ".Convert::ToCompactNumber($maxSize)."B!");
 		}
 
 		if ($directory === false) {

@@ -169,90 +169,181 @@ class Script
             self::Convert($async)
             . ")";
     }
+
     /**
      * To upload a file from the client device
-     * @param mixed $formats The acceptable formats like ".jpg,.png" or "image/*"
+     * @param mixed $extensions The acceptable formats like ".jpg,.png" or "image/*"
      * @param bool $multiple Allow to select multiple files
-     * @param bool $binary To read the file as binary data
      * @param int $timeout The timeout for uploading the file in milliseconds
      * @return string The script part
      */
-    public static function UploadDialog($formats = null, $target = null, $success = null, $error = null, $ready = null, $progress = null, $timeout = 60000, $multiple = false, $binary = false, $method = "FILE")
+    public static function Upload($target = null, $extensions = null, $minSize = null, $maxSize = null, $success = null, $error = null, $ready = null, $progress = null, $timeout = 60000, $multiple = false, $method = "FILE")
     {
         return "
             var input = document.createElement('input');
             input.setAttribute('Type' , 'file');
-            input.setAttribute('accept', " . self::Convert($formats) . ");
+            input.setAttribute('accept', " . self::Convert($extensions ?? \_::$Back->GetAcceptableFormats()) . ");
             input.onchange = evt => {
-                " . ($multiple ? "const files = input.files;
-                for(const file of files)" : "const [file] = input.files;") . "
-                if (file) {
-                    const reader = new FileReader();" .
-                    ($binary ? "
-                    reader.addEventListener('load', (event) => {
-                        " . self::Send($method, $target, [
-                        "name" => "\${file['name']}",
-                        "data" => "\${encodeURIComponent(btoa(String.fromCharCode(...new Uint8Array(event.target.result))))}"
-                    ], null, $success, $error, $ready, $progress, $timeout, false) . ";
-                    });
-                    reader.readAsArrayBuffer(file);
-                    " : "
-                    reader.addEventListener('load', (event) => {
-                        " . self::Send($method, $target, [
-                        "name" => "\${file['name']}",
-                        "data" => "\${encodeURIComponent(event.target.result)}"
-                    ], null, $success, $error, $ready, $progress, $timeout) . ";
-                    });
-                    reader.readAsText(file);
-                    ") . "
-                }
+                try{
+                    number = 1;
+                    count = 1;
+                    " . ($multiple ? "const files = input.files;
+                    count = files.length;
+                    for(const file of files)" : "const [file] = input.files;") . "
+                        if (file) {
+                            if(file.size < " . self::Convert($minSize = $minSize ?? \_::$Back->MinimumFileSize) . ") {
+                                " . self::Error("The 'file size' is 'smaller than' " . Convert::ToCompactNumber($minSize) . "B!") . ";
+                                return;
+                            }
+                            if(file.size > " . self::Convert($maxSize = $maxSize ?? \_::$Back->MaximumFileSize) . ") {
+                                " . self::Error("The 'file size' is 'bigger than' " . Convert::ToCompactNumber($maxSize) . "B!") . ";
+                                return;
+                            }
+                            const reader = new FileReader();
+                            data = event.target.result;
+                            data = new Uint8Array(data);
+                            // for(let j = 0; j < data.length; j++)
+                            //     data[j] = String.fromCharCode(data[j]);
+                            data = String.fromCharCode(...data);
+                            data = btoa(data);
+                            reader.addEventListener('load', (event) => {
+                            " . self::Send($method, $target, [
+                                    "name" => "\${file.name}",
+                                    "size" => "\${file.size}",
+                                    "count" => "\${count}",
+                                    "number" => "\${number}",
+                                    "data" => "\${encodeURIComponent(data)}"
+                                ], null, $success, $error, $ready, $progress, $timeout, false) . ";
+                            });
+                            reader.readAsArrayBuffer(file);
+                            number++;
+                        }
+                } catch(ex) { " . self::Error("\${ex}") . "; }
+            }
+            _(input).trigger('click');
+            return false;
+        ";
+    }
+    public static function Download($target = null, $name = null, $type = null)
+    {
+        if(isUrl($target))
+            return "load('" . self::Convert($target) . "', true)";
+        else
+            return self::Convert(function($target, $name, $type){
+                upload($target, $name, $type);
+        }, $target, $name, $type);
+    }
+    
+    /**
+     * To upload any types of files from the client device
+     * This method sends files by a chunks-based algorithm
+     * @param mixed $extensions The acceptable extensions like [".jpg",".png",...]
+     * @param bool $multiple Allow to select multiple files
+     * @param int|null $timeout The timeout for uploading the file in milliseconds
+     * @param int|null $speed The chunk size in bytes, default is 100KB
+     * @return string The script part
+     */
+    public static function UploadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $success = null, $error = null, $ready = null, $progress = null, $timeout = null, $speed = null, $multiple = false, $method = "STREAM")
+    {
+        return "
+            var input = document.createElement('input');
+            input.setAttribute('Type' , 'file');
+            input.setAttribute('accept', " . self::Convert($extensions ?? \_::$Back->GetAcceptableFormats()) . ");
+            input.onchange = evt => {
+                try{
+                    number = 1;
+                    count = 1;
+                    " . ($multiple ? "const files = input.files;
+                    count = files.length;
+                    for(const file of files)" : "const [file] = input.files;") . "
+                        if (file) {
+                            if(file.size < " . self::Convert($minSize = $minSize ?? \_::$Back->MinimumFileSize) . ") {
+                                " . self::Error("The 'file size' is 'smaller than' " . Convert::ToCompactNumber($minSize) . "B!") . ";
+                                return;
+                            }
+                            if(file.size > " . self::Convert($maxSize = $maxSize ?? \_::$Back->MaximumFileSize) . ") {
+                                " . self::Error("The 'file size' is 'bigger than' " . Convert::ToCompactNumber($maxSize) . "B!") . ";
+                                return;
+                            }
+                            var chunksSize = " . ($speed ?? 100000) . ";
+                            var currentChunk = 0;
+                            const reader = new FileReader();
+                            reader.addEventListener('load', (event) => {
+                                const data = event.target.result;
+                                const totalChunks = Math.ceil(data.byteLength / chunksSize);
+                                for(let i = 0; i < totalChunks; i++) {
+                                    chunkData = data.slice(i * chunksSize, (i + 1) * chunksSize);
+                                    chunkData = new Uint8Array(chunkData);
+                                    // for(let j = 0; j < chunkData.length; j++)
+                                    //     chunkData[j] = String.fromCharCode(chunkData[j]);
+                                    chunkData = String.fromCharCode(...chunkData);
+                                    //chunkData = encrypt(chunkData, ".self::Convert(getClientCode()).");
+                                    chunkData = btoa(chunkData);
+                                    " . self::Send($method, $target, [
+                                        "name" => "\${file.name}",
+                                        "size" => "\${file.size}",
+                                        "chunk" => "\${i}",
+                                        "total" => "\${totalChunks}",
+                                        "number" => "\${number}",
+                                        "count" => "\${count}",
+                                        "data" => "\${encodeURIComponent(chunkData)}"
+                                    ], null, $success, $error, $ready, $progress, $timeout ?? 60000, false) . ";
+                                }
+                            });
+                            reader.readAsArrayBuffer(file);
+                            number++;
+                        }
+                } catch(ex) { " . self::Error("\${ex}") . "; }
             }
             _(input).trigger('click');
             return false;
         ";
     }
 
-    /**
-     * To download a file from the client device
-     * @param string|array|null $object The source file or files
-     * @param string|bool|null $destinationAddress Set true to store in public directory,
-     * false to store in temp,
-     * null to dont store,
-     * or an address otherwise
-     * @param bool $binary To write the data as a binary file
-     * @return string|null The file content, address (if sent null for $destinationAddress) or null otherwise
-     */
-    public static function Download($object = null, $destinationAddress = null, $binary = false, $method = "FILE")
+    public static function SetMemo($key = "", $value = null, $expires = 0, $path = "/", $secure = false)
     {
-        if (is_null($object))
-            $object = receive($method);
-        $objectName = get($object, "name") ?? "upload";
-        warning($objectName);
-        if (is_array($object))
-            $object = get($object, "data");
-        if (!$object)
-            return null;
-        $object = urldecode($object);
-        if ($binary && (($object = base64_decode($object)) === false))
-            return null;
+        return "setMemo(" . self::Convert($key) . ", " . self::Convert($value) . ", " . self::Convert($expires) . ", " . self::Convert($path) . ", " . self::Convert($secure) . ")";
+    }
+    public static function GetMemo($key = "")
+    {
+        return "getMemo(" . self::Convert($key) . ")";
+    }
 
-        if ($destinationAddress === true) {
-            if (Local::SetFileContent($destinationAddress = Local::GenerateAddress($objectName, "", \_::$Address->PublicAddress), $object))
-                return $destinationAddress;
-            else
-                return null;
-        } elseif ($destinationAddress === false) {
-            if (Local::SetFileContent($destinationAddress = Local::GenerateAddress($objectName, "", \_::$Address->TempAddress), $object))
-                return $destinationAddress;
-            else
-                return null;
-        } elseif ($destinationAddress) {
-            if (endsWith($destinationAddress, DIRECTORY_SEPARATOR))
-                $destinationAddress = Local::GenerateAddress($objectName, "", $destinationAddress, false);
-            if (!Local::SetFileContent($destinationAddress, $object))
-                return null;
-        }
-        return $object;
+    /**
+     * Show an message dialog
+     * @param mixed $message
+     * @return string
+     */
+    public static function Message($message = "")
+    {
+        return "Struct.message(" . self::Convert($message) . ")";
+    }
+    /**
+     * Show an success dialog
+     * @param mixed $message
+     * @return string
+     */
+    public static function Success($message = "")
+    {
+        return "Struct.success(" . self::Convert($message) . ")";
+    }
+    /**
+     * Show an warning dialog
+     * @param mixed $message
+     * @return string
+     */
+    public static function Warning($message = "")
+    {
+        return "Struct.warning(" . self::Convert($message) . ")";
+    }
+    /**
+     * Show an error dialog
+     * @param mixed $message
+     * @return string
+     */
+    public static function Error($message = "")
+    {
+        return "Struct.error(" . self::Convert($message) . ")";
     }
 
     /**

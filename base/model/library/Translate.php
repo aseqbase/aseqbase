@@ -36,8 +36,8 @@ class Translate
 	public $InvalidPattern = "/[^A-Z0-9\W\$\{\}]/i";//'/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
 	public $CorrectorPattern = "/(?:^\`([\w\W]+)\`$)|(?:^'([\w\W]+)'$)|(?:^\"([\w\W]+)\"$)|([\w\W]+)/u";
 	public $CorrectorReplacement = "$1$2$3$4";
-	public $TrimmerPattern = "/(?:\\$\{([^\}]+)\})|((?<!\\$\{)[\w\W]+(?!\}))/u";
-	public $TrimmerReplacement = "$1$2";
+	public static $TrimmerPattern = "/(?:\\$\{([^\}]+)\})|((?<!\\$\{)[\w\W]+(?!\}))/u";
+	public static $TrimmerReplacement = "$1$2";
 	/**
 	 * To have a deep translate
 	 */
@@ -96,7 +96,7 @@ class Translate
 	public function Get($text, $lang = null, $turn = null)
 	{
 		if (!$this->IsRootLanguage($text))
-			return $text?preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $text):$text;
+			return $text?self::Trim($text):$text;
 		$dic = array();
 		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($ntext);
@@ -105,7 +105,7 @@ class Translate
 		$turn = $turn ?? $this->Turn;
 		if (($d = $turn - 1) >= 0)
 			foreach ($dic as $key => $value)
-				$dic[$key] = $this->Get(preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $value), $lang, $d);
+				$dic[$key] = $this->Get(self::Trim($value), $lang, $d);
 
 		if ($data) {
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
@@ -121,7 +121,7 @@ class Translate
 
 		if (!$this->CaseSensitive)
 			$data = self::DetectCaseStatus($data, $text);
-		return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $data);
+		return self::Trim($data);
 	}
 	public function GetDeep($text, $lang = null, $turn = null)
 	{
@@ -147,7 +147,7 @@ class Translate
 	public function GetHybrid($text, $replacements = [], $lang = null)
 	{
 		if (!$this->IsRootLanguage($text))
-			return $text?preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $text):$text;
+			return $text?self::Trim($text):$text;
 		$text = encode($text, $replacements, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($text);
 		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
@@ -162,8 +162,8 @@ class Translate
 		}
 		$data = decode($data, $replacements);
 		if ($this->CaseSensitive)
-			return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, $data);
-		return preg_replace($this->TrimmerPattern, $this->TrimmerReplacement, self::DetectCaseStatus($data, $data));
+			return self::Trim($data);
+		return self::Trim(self::DetectCaseStatus($data, $data));
 	}
 
 	public function GetAll($condition = null, $params = [], $hasKey = false)
@@ -356,6 +356,11 @@ class Translate
 	public function GetAccessCondition($tablePrefix = "")
 	{
 		return "{$tablePrefix}MetaData IS NULL OR {$tablePrefix}MetaData NOT REGEXP '\\\\s*[\"'']?lang[\"'']?\\\\s*:' OR {$tablePrefix}MetaData REGEXP '\\\\s*[\"'']?lang[\"'']?\\\\s*:\\\\s*[\"'']" . $this->Language . "[\"'']'";
+	}
+
+	public static function Trim($text)
+	{
+		return preg_replace(self::$TrimmerPattern, self::$TrimmerReplacement, $text);
 	}
 
 	public static function DetectDirection($text)
