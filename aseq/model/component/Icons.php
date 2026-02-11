@@ -17,8 +17,8 @@ class Icons
 		if(self::$CDN)
 			return Struct::Style(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css").
 			Struct::Script(null, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/js/all.min.js", ["async"]);
-		else return Struct::Style(null, asset(\_::$Address->StructDirectory, "Icons/style/Style.css", optimize: false), ["async"]).
-		Struct::Script(null, asset(\_::$Address->StructDirectory, "Icons/script/Script.js", optimize: false), ["async"]);
+		else return Struct::Style(null, asset(\_::$Address->GlobalStructDirectory, "Icons/style/Style.css", optimize: false), ["async"]).
+		Struct::Script(null, asset(\_::$Address->GlobalStructDirectory, "Icons/script/Script.js", optimize: false), ["async"]);
 	}
 	public static function GetStyle($root = null)
 	{

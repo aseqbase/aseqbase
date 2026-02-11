@@ -5,7 +5,7 @@ use DateTime;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
-use MiMFa\Library\Local;
+use MiMFa\Library\Storage;
 use MiMFa\Library\DataTable;
 module("Navigation");
 /**
@@ -610,7 +610,7 @@ class Table extends Module
             if (isFile($value))
                 return "<th>" . Struct::Media($value) . "</th>";
             else if (isAbsoluteUrl($value))
-                return "<th>" . Struct::Link(getPage($value), $value) . "</th>";
+                return "<th>" . Struct::Link(getUrlResource($value), $value) . "</th>";
             else
                 return "<th>" . __($value, translating: $this->AllowLabelTranslation) . "</th>";
         }
@@ -623,7 +623,7 @@ class Table extends Module
         if (isFile($value))
             return "<td>" . Struct::Media($value) . "</td>";
         if (isAbsoluteUrl($value))
-            return "<td>" . Struct::Link(getPage($value), $value) . "</td>";
+            return "<td>" . Struct::Link(getUrlResource($value), $value) . "</td>";
         $value = __($value, translating: $this->AllowDataTranslation);
         if (!$this->TextWrap && !startsWith($value, "<"))
             return "<td>" . Convert::ToExcerpt(Convert::ToText($value), 0, $this->TextLength, "..." . Struct::Tooltip($value)) . "</td>";
@@ -812,8 +812,8 @@ class Table extends Module
             $this->Form->Class = "container";
             $this->Form->ContentClass = "col-lg-8";
             $this->Form->CancelLabel = "Cancel";
-            $this->Form->SuccessPath = \_::$User->Url;
-            $this->Form->BackPath = \_::$User->Url;
+            $this->Form->SuccessPath = \_::$Address->Url;
+            $this->Form->BackPath = \_::$Address->Url;
             $this->Form->BackLabel = null;
             $this->form->AllowAnimate = false;
             //$form->AllowHeader = false;
@@ -1124,7 +1124,7 @@ class Table extends Module
             }
         }
         if ($e == 0 && $s > 0)
-            return deliverBreaker(Struct::Success("All $s items imported successfully!"));
+            return deliverRedirect(Struct::Success("All $s items imported successfully!"));
         elseif ($s == 0)
             return Struct::Error("Could not import any items!");
         else
@@ -1156,7 +1156,7 @@ class Table extends Module
                     loop($fields, fn($r, $ri) => loop($r, fn($v, $k) => in_array($k, $cols) ? [$cols[$k], $v] : null, false, true));
                 $this->Items = Convert::FieldsToCells($fields);
             }
-        Local::Load(Convert::FromCells($this->Items), ($this->Title ?: \_::$User->Page) . ".csv");
+        return uploadContent(Convert::FromCells($this->Items), ($this->Title ?: \_::$Address->UrlResource) . ".csv");
     }
     public function AddRow($values)
     {
@@ -1170,7 +1170,7 @@ class Table extends Module
             if (isEmpty($v))
                 unset($values[$k]);
         if ($this->DataTable->Insert($values))
-            return deliverBreaker(Struct::Success("The 'information' added successfully!"));
+            return deliverRedirect(Struct::Success("The 'information' added successfully!"));
         return Struct::Error("You can not 'add' this item!");
     }
     public function ModifyRow($values)
@@ -1184,7 +1184,7 @@ class Table extends Module
             if (!is_array($values))
                 return $values;
             if ($this->DataTable->Update([$this->ModifyCondition, "{$this->KeyColumn}=:{$this->KeyColumnName}"], $values))
-                return deliverBreaker(Struct::Success("The information updated successfully!"));
+                return deliverRedirect(Struct::Success("The information updated successfully!"));
             return Struct::Error("You can not 'update' this item!");
         }
     }
@@ -1197,7 +1197,7 @@ class Table extends Module
         if (!\_::$User->HasAccess($this->RemoveAccess))
             return Struct::Error("You have not access to delete!");
         if ($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumnName}"], [":{$this->KeyColumnName}" => $value]))
-            return deliverBreaker(Struct::Success("The 'items' removed successfully!"));
+            return deliverRedirect(Struct::Success("The 'items' removed successfully!"));
         return Struct::Error("You can not 'remove' this item!");
     }
 
@@ -1271,17 +1271,17 @@ class Table extends Module
             if ($received) {
                 $clearPrev = isValid($values, $this->KeyColumn) && $this->DataTable;
                 foreach ($received as $k => $v)
-                    if (Local::IsFileObject($v)) {
+                    if (Storage::IsFileObject($v)) {
                         $values[$k] = $clearPrev ? $this->DataTable->SelectValue("`$k`", "`$this->KeyColumn`=:$this->KeyColumn", [":$this->KeyColumn" => $values[$this->KeyColumn]]) : null;
                         if (isValid($values[$k]))
-                            Local::DeleteFile($values[$k]);
+                            Storage::DeleteFile($values[$k]);
                         unset($values[$k]);
                         $type = getValid($this->CellsTypes, $k, "");
                         if (is_string($type))
                             $type = \_::$Back->GetAcceptableFormats($type);
                         else
                             $type = \_::$Back->GetAcceptableFormats();
-                        $values[$k] = Local::GetUrl(Local::StoreFile($v, extensions: $type));
+                        $values[$k] = Storage::GetUrl(Storage::StoreFile($v, extensions: $type));
                     } elseif (isEmpty($v))
                         unset($values[$k]);
             }

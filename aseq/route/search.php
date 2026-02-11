@@ -3,7 +3,7 @@ $computeData = pop($data, "Compute")??[];
 $filter = pop($computeData, "Filter")??[];
 $viewData = pop($data, "View")??[];
 $received = receive();
-$query = getBetween($received, "q", "Query")??urldecode(\_::$User->Page);
+$query = getBetween($received, "q", "Query")??urldecode(\_::$Address->UrlResource);
 $cat = getBetween($received, "Cat", "Category");
 return route("contents", [
     "Compute"=>[
@@ -19,7 +19,7 @@ return route("contents", [
             "WindowTitle" => pop($viewData, "WindowTitle") ?? get($items, "Title") ?? [$query, $cat],
             "Description" => pop($viewData, "Description") ?? "Found <b>\"" . count($items) . "\"</b> results for searching <b>\"$query\"</b>!",
             "ShowRoot" => pop($viewData, "ShowRoot") ?? true,
-            "Root" => pop($viewData, "Root") ?? \_::$Address->ContentRoot,
+            "Root" => pop($viewData, "Root") ?? \_::$Address->ContentRootPath,
             "Items" => $items,
             ...$viewData
         ]);

@@ -23,11 +23,11 @@ class reCaptcha
          */
         public static function GetScript(string|null $siteKey)
         {
-                $siteKey = $siteKey ?? self::$SiteKey ?? \_::$Back->ReCaptchaSiteKey;
-                return Struct::Script(null, 'https://www.google.com/recaptcha/api.js?render=' . \_::$Back->ReCaptchaSiteKey) .
+                $siteKey = $siteKey ?? self::$SiteKey ?? \_::$Front->ReCaptchaSiteKey;
+                return Struct::Script(null, 'https://www.google.com/recaptcha/api.js?render=' . \_::$Front->ReCaptchaSiteKey) .
                         Struct::Script(
                         "grecaptcha.ready(function() {
-                                        grecaptcha.execute('" . \_::$Back->ReCaptchaSiteKey . "', {action: 'submit'}).then(function(token) {
+                                        grecaptcha.execute('" . \_::$Front->ReCaptchaSiteKey . "', {action: 'submit'}).then(function(token) {
                                         document.getElementById('" . self::$FieldName . "').value = token;
                                         });
                                 });"
@@ -43,7 +43,7 @@ class reCaptcha
          */
         public static function GetHtml(string|null $siteKey)
         {
-                $siteKey = $siteKey ?? self::$SiteKey ?? \_::$Back->ReCaptchaSiteKey;
+                $siteKey = $siteKey ?? self::$SiteKey ?? \_::$Front->ReCaptchaSiteKey;
                 return "<input id='" . self::$FieldName . "' name='" . self::$FieldName . "'/>";
         }
 
@@ -56,7 +56,7 @@ class reCaptcha
         public static function GetAnswer(string|null $siteKey, $remoteIp = null)
         {
                 $remoteIp = $remoteIp ?? self::$SiteKey ?? $_SERVER['REMOTE_ADDR'];
-                $siteKey = $siteKey ?? \_::$Back->ReCaptchaSiteKey;
+                $siteKey = $siteKey ?? \_::$Front->ReCaptchaSiteKey;
                 $captcha = false;
                 $captcha = popReceived(self::$FieldName, null, "POST");
                 if ($captcha)
@@ -77,4 +77,4 @@ class reCaptcha
         }
 }
 
-if(isValid(\_::$Back->ReCaptchaSiteKey)) \_::$Front->Append("head", reCaptcha::GetScript(\_::$Back->ReCaptchaSiteKey));
+if(isValid(\_::$Front->ReCaptchaSiteKey)) \_::$Front->Append("head", reCaptcha::GetScript(\_::$Front->ReCaptchaSiteKey));

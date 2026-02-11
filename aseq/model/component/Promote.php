@@ -20,10 +20,10 @@ class Promote{
 			  '@context': 'https://schema.org/',
 			  '@type': 'WebSite',
 			  'name': `".Convert::ToText($name??\_::$Front->FullName)."`,
-			  'url': `".($url??\_::$User->Host)."`,
+			  'url': `".($url??\_::$Address->UrlOrigin)."`,
 			  'potentialAction': {
 				'@type': 'SearchAction',
-				'target': `".($searchUrl??(\_::$User->Host.'/search?q={search_term_string}'))."`,
+				'target': `".($searchUrl??(\_::$Address->UrlOrigin.'/search?q={search_term_string}'))."`,
 				'query-input': 'required name=search_term_string'
 			  }
 			}"
@@ -40,12 +40,12 @@ class Promote{
 			  'author': {
 				'@type': 'Person',
 				'name': `".get($author,'Name' )."`,
-				'url': `".getValid($author,'Url',(\_::$User->Host.(isValid($author,'Name' )?"":'/'.get($author,'Name' ))))."`
+				'url': `".getValid($author,'Url',(\_::$Address->UrlOrigin.(isValid($author,'Name' )?"":'/'.get($author,'Name' ))))."`
 			  },
 			  'publisher': {
 				'@type': 'Organization',
 				'name': `".get($publisher,'Name' )."`,
-				'url': `".getValid($publisher,'Url',(\_::$User->Host.(isValid($publisher,'Name' )?"":'/'.get($publisher,'Name' ))))."`
+				'url': `".getValid($publisher,'Url',(\_::$Address->UrlOrigin.(isValid($publisher,'Name' )?"":'/'.get($publisher,'Name' ))))."`
 				'logo': {
 				  '@type': 'ImageObject',
 				  'url': `".getValid($publisher,'Url',\_::$Front->LogoPath)."`

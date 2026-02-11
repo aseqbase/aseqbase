@@ -333,8 +333,12 @@ class Revise
         }
     }
 
+    public static function ToString($object)
+    {
+        return self::HandleForm($object);
+    }
     public static function Render($object)
     {
-        return response(self::HandleForm($object));
+        return response(self::ToString($object));
     }
 }

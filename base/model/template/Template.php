@@ -136,7 +136,7 @@ class Template extends \Base
     public function RenderInitial()
     {
         region("initial");
-        $title = $this->WindowTitle ?? [preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/", "", \_::$User->Direction)];
+        $title = $this->WindowTitle ?? [preg_replace("/[^A-Za-z0-9\/]+|(\.[A-z]+$)/", "", \_::$Address->UrlRoute)];
         response(Struct::Title(Convert::ToTitle(is_array($title) ? [...$title, ...[\_::$Front->Name]] : $title)));
         response(Struct::Logo(getFullUrl($this->WindowLogo ?? \_::$Front->LogoPath)));
         response(Struct::Style("

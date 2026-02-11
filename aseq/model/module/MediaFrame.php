@@ -17,7 +17,7 @@ class MediaFrame extends IFrame{
 		$this->Source = $source;
 		$this->BackColor =
 		$this->BorderColor = $color;
-		$this->Image = \MiMFa\Library\Local::GetUrl($logo??asset("/asset/technology/$name.png"));
+		$this->Image = \MiMFa\Library\Storage::GetUrl($logo??asset("/asset/technology/$name.png"));
 	}
 }
 ?>

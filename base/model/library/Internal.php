@@ -208,6 +208,6 @@ class Internal
     }
 }
 
-Internal::$Directory = \_::$Address->PrivateAddress . "internal" . DIRECTORY_SEPARATOR;
-Local::CreateDirectory(\_::$Address->PrivateAddress);
-Local::CreateDirectory(Internal::$Directory);
+Internal::$Directory = \_::$Address->PrivateDirectory . "internal" . DIRECTORY_SEPARATOR;
+Storage::CreateDirectory(\_::$Address->PrivateDirectory);
+Storage::CreateDirectory(Internal::$Directory);

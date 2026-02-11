@@ -10,7 +10,7 @@ if (\_::$Front->AnimationSpeed) {
 		get($data, "CDN")?
 		Struct::Style(null, 'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css') .
 		Struct::Script(null, 'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js', ['crossorigin' => 'anonymous']):
-		Struct::Style(null, asset(\_::$Address->StructDirectory,'Animate/Animate.css')) .
-		Struct::Script(null, asset(\_::$Address->StructDirectory,'Animate/Animate.js'), ['crossorigin' => 'anonymous']);
+		Struct::Style(null, asset(\_::$Address->GlobalStructDirectory,'Animate/Animate.css')) .
+		Struct::Script(null, asset(\_::$Address->GlobalStructDirectory,'Animate/Animate.js'), ['crossorigin' => 'anonymous']);
 	\_::$Front->Finals[] = Struct::Script("AOS.init(" . Script::Convert($data) . ");");
 }

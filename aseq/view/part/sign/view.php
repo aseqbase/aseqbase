@@ -2,7 +2,7 @@
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 try{
-$data = !isEmpty($data) ? $data : \_::$User->Get(preg_find("/\b[^\/\\\\?]+/", \_::$Router->Direction??""));
+$data = !isEmpty($data) ? $data : \_::$User->Get(\_::$Address->UrlResource);
 if (!isEmpty($data)) {
     module("Form");
     module("Field");

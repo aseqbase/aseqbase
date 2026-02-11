@@ -5,7 +5,7 @@ use DateTime;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
-use MiMFa\Library\Local;
+use MiMFa\Library\Storage;
 use MiMFa\Library\DataTable;
 module("Table");
 /**
@@ -342,7 +342,7 @@ class Profile extends Table{
                         }
             })());
         $form->Image = getValid($record,"Image" ,$this->Image??"plus");
-        $form->SuccessPath = \_::$User->Url;
+        $form->SuccessPath = \_::$Address->Url;
         return $form->Handle();
     }
 	public function DoAddHandle($value){
@@ -466,11 +466,11 @@ class Profile extends Table{
 	public function NormalizeValues($values){
         try{
             foreach (receiveFile()??[] as $k=>$v)
-                if(Local::IsFileObject($v)){
+                if(Storage::IsFileObject($v)){
                     $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)) $type = \_::$Back->GetAcceptableFormats($type);
                     else $type = \_::$Back->GetAcceptableFormats();
-                    $values[$k] = Local::GetUrl(Local::StoreFile($v, extensions:$type));
+                    $values[$k] = Storage::GetUrl(Storage::StoreFile($v, extensions:$type));
                 }
                 else unset($values[$k]);
         }catch(\Exception $ex){ return Struct::Error($ex); }

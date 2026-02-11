@@ -300,22 +300,22 @@ let isVisible = (element, partiallyVisible = true) => {
 };
 let isFocused = (element) => document.activeElement === element;
 
-// Function to generate a unique Path selector for an element
-let getPath = (element) => {
-	let tagName = element.tagName;
-	if (!tagName) return null;
-	tagName = tagName.toLowerCase();
-	if (tagName === 'html') return 'html';
-	if (element.parentElement) return `${getPath(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
-	return tagName;
-}
 // Function to generate a unique XPath selector for an element
 let getXPath = (element) => {
 	let tagName = element.tagName;
 	if (!tagName) return null;
 	tagName = tagName.toLowerCase();
 	if (tagName === 'html') return 'html';
-	if (element.parentElement) return `${getPath(element.parentElement)}/${tagName}[${(Array.from(element.parentElement.children).indexOf(element))}]`;
+	if (element.parentElement) return `${getXPath(element.parentElement)}/${tagName}[${(Array.from(element.parentElement.children).indexOf(element))}]`;
+	return tagName;
+}
+// Function to generate a unique Path selector for an element
+let getFullQuery = (element) => {
+	let tagName = element.tagName;
+	if (!tagName) return null;
+	tagName = tagName.toLowerCase();
+	if (tagName === 'html') return 'html';
+	if (element.parentElement) return `${getFullQuery(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
 	return tagName;
 }
 // Function to generate a unique CSS selector for an element
@@ -325,7 +325,7 @@ let getQuery = (element) => {
 	if (!tagName) return null;
 	tagName = tagName.toLowerCase();
 	if (tagName === 'html') return 'html';
-	if (element.parentElement) return `${getPath(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
+	if (element.parentElement) return `${getQuery(element.parentElement)}>${tagName}:nth-child(${(Array.from(element.parentElement.children).indexOf(element) + 1)})`;
 	return tagName;
 }
 
@@ -394,10 +394,10 @@ let send = function (
 	url = null,
 	data = null,
 	selector = 'body',
-	success = null,
-	error = null,
-	ready = null,
-	progress = null,
+	onSuccess = null,
+	onError = null,
+	onMessage = null,
+	onProgress = null,
 	timeout = null,
 	async = true) {
 
@@ -408,11 +408,10 @@ let send = function (
 	const elems = noEffects ? [] : document.querySelectorAll(selector);
 	const opacity = noEffects ? 1 : document.querySelector(selector).style.opacity;
 	url = url ? url : location.href;
-	timeout = timeout || 60000;
 	method = (method || "POST").toUpperCase();
 	let isForm = false;
 	let contentType = 'application/x-www-form-urlencoded; charset=utf-8';
-	
+
 	switch (method) {
 		case "GET":
 		case "POST":
@@ -449,34 +448,30 @@ let send = function (
 		}
 	}
 
-	success = success ?? function (result = null, err = null) {
-		if (err) error(result, err);
-		else {
-			try { document.querySelector(selector + ' .result').remove(); } catch { }
-			if (!isEmpty(result)) {
-				result += "";
-				result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'Form submitted successfully!';
+	onSuccess = onSuccess ?? function (result = null, err = null, xhr = null) {
+		if (err) console.error(err);
+		if (!isEmpty(result)) {
+			result += "";
+			result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'Form submitted successfully!';
 
-				// If server returned a full HTML document, replace the whole page instead of appending it.
-				// This prevents browsers (notably Firefox) from appending full pages into containers
-				// and causing "chained pages" behavior.
-				if (typeof result === 'string' && /<!doctype\s+html|<\s*html|<\s*body/i.test(result)) {
-					document.open();
-					document.write(result);
-					document.close();
-					return;
-				}
-				if (!isEmpty(result)) {
-					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Struct.result(result);
-					if (isForm) _(selector).append(result);
-					else _(selector).prepend(result);
-				}
+			// If server returned a full HTML document, replace the whole page instead of appending it.
+			// This prevents browsers (notably Firefox) from appending full pages into containers
+			// and causing "chained pages" behavior.
+			if (typeof result === 'string' && /<!doctype\s+html|<\s*html|<\s*body/i.test(result)) {
+				document.open();
+				document.write(result);
+				document.close();
+				return;
+			}
+			if (!isEmpty(result)) {
+				if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Struct.result(result);
+				if (isForm) _(selector).append(result);
+				else _(selector).prepend(result);
 			}
 		}
 	};
 
-	error = error ?? function (result = null, err = null) {
-		try { document.querySelector(selector + ' .result').remove(); } catch { }
+	onError = onError ?? function (result = null, err = null, xhr = null) {
 		if (!isEmpty(result)) {
 			result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'There was a problem!';
 			if (!isEmpty(result)) {
@@ -488,21 +483,24 @@ let send = function (
 		}
 	};
 
-	ready = ready ?? function (result = null, err = null) {
-		try { document.querySelector(selector + ' .result').remove(); } catch { }
+	onMessage = onMessage ?? function (result = null, err = null, xhr = null) {
+		if (!isEmpty(result)) {
+			result = (typeof (result) === 'object') ? result.statusText : result;
+			if (result) {
+				result += "";
+				if (isForm) _(selector).append(result);
+				else _(selector).prepend(result);
+			}
+		}
 	};
 
-	progress = progress ?? function (result = null, err = null) {
+	onProgress = onProgress ?? function (result = null, err = null, xhr = null) {
 		if (!isEmpty(result)) {
 			result = (typeof (result) === 'object') ? result.statusText : result;
 			if (result) {
 				result += "";
 				try { document.querySelector(selector + ' .result').remove(); } catch { }
-				{
-					if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Struct.result(result);
-					if (isForm) _(selector).append(result);
-					else _(selector).prepend(result);
-				}
+				console.log(result);
 			}
 		}
 	};
@@ -512,41 +510,41 @@ let send = function (
 
 	if (contentType) xhr.setRequestHeader('Content-Type', contentType);
 
-	if (async) xhr.timeout = timeout;
+	if (async && timeout) xhr.timeout = timeout || 60000;
 
-	xhr.upload.addEventListener('progress', progress);
+	xhr.upload.addEventListener('progress', (xhr)=>onProgress(xhr.response, null, xhr));
 
 	xhr.onload = function () {
 		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
-
-		if (xhr.status >= 200 && xhr.status < 300) {
+		if (xhr.status >= 200 && xhr.status < 300)
 			try {
 				let response = xhr.response;
-				try { response = JSON.parse(response); } catch { }
-				success(response);
+				if(response) try { response = JSON.parse(response); } catch { }
+				if (xhr.status == 200) onSuccess(response, null, xhr);
+				else onMessage(response, null, xhr);
 			} catch (e) {
-				error("There was a problem on retrieving data!<br>" + e.message, xhr.status);
+				err = "There was a problem on retrieving data! \n" + e.message;
+				if (xhr.status == 200) onSuccess(null, err, xhr);
+				else onMessage(null, err, xhr);
 			}
-		} else {
-			error(xhr.response, xhr.status);
-		}
+		else onError(xhr.response, xhr.status, xhr);
 	};
 
 	xhr.onerror = function () {
 		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
-		error('Network Error' + (xhr.statusText ? "<br>" + xhr.statusText : ""), xhr.status);
+		onError('Network Error' + (xhr.statusText ? " \n" + xhr.statusText : ""), xhr.status, xhr);
 	};
 
 	xhr.ontimeout = function () {
 		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
-		error('Timeout' + (xhr.statusText ? "<br>" + xhr.statusText : ""), xhr.status ?? 'timeout');
+		onError('Timeout' + (xhr.statusText ? " \n" + xhr.statusText : ""), xhr.status ?? 'timeout', xhr);
 	};
 
 	xhr.onloadstart = function () {
-		ready(xhr.statusText, xhr.status);
+		//try { document.querySelector(selector + ' .result').remove(); } catch { }
 		btns.forEach(btn => btn.classList.add('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = '.5');
 	};
@@ -561,10 +559,10 @@ let sendWithRetry = function (
 	url = null,
 	data = null,
 	selector = 'body',
-	success = null,
-	error = null,
-	ready = null,
-	progress = null,
+	onSuccess = null,
+	onError = null,
+	onMessage = null,
+	onProgress = null,
 	timeout = null,
 	retryOptions = null,
 	async = true) {
@@ -578,23 +576,23 @@ let sendWithRetry = function (
 
 	function tryOnce(resolve, reject) {
 		attempt++;
-		const onSuccess = function (res, st) {
-			if (success) try { success(res, st); } catch (e) { /* ignore callback errors */ }
+		const onSuccessN = function (res, st) {
+			if (onSuccess) try { onSuccess(res, st); } catch (e) { /* ignore callback errors */ }
 			resolve(res);
 		};
-		const onError = function (res, st) {
+		const onErrorN = function (res, st) {
 			if (isTransientError(res, st) && attempt <= opts.retries) {
 				const delay = opts.backoff * Math.pow(2, attempt - 1);
 				setTimeout(() => tryOnce(resolve, reject), delay);
 			} else {
-				if (error) try { error(res, st); } catch (e) { /* ignore callback errors */ }
+				if (onError) try { onError(res, st); } catch (e) { /* ignore callback errors */ }
 				reject({ response: res, status: st });
 			}
 		};
 
 		// call underlying send (keeps original behavior)
 		try {
-			send(method, url, data, selector, onSuccess, onError, ready, progress, timeout, async);
+			send(method, url, data, selector, onSuccessN, onErrorN, onMessage, onProgress, timeout, async);
 		} catch (e) {
 			// if send itself throws, treat as transient and retry if possible
 			if (attempt <= opts.retries) setTimeout(() => tryOnce(resolve, reject), opts.backoff * Math.pow(2, attempt - 1));
@@ -602,8 +600,8 @@ let sendWithRetry = function (
 		}
 	}
 
-	// If caller provided callbacks (success/error) we behave callback-style and return undefined
-	if (isDefined(success) && success !== null) {
+	// If caller provided callbacks (onSuccess/onError) we behave callback-style and return undefined
+	if (isDefined(onSuccess) && onSuccess !== null) {
 		tryOnce(() => { }, () => { });
 		return;
 	}
@@ -611,23 +609,23 @@ let sendWithRetry = function (
 	// Promise-style
 	return new Promise((resolve, reject) => tryOnce(resolve, reject));
 };
-let sendGet = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return send('GET', url, data, selector, success, error, ready, progress, timeout);
+let sendGet = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return send('GET', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendPost = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return send('POST', url, data, selector, success, error, ready, progress, timeout);
+let sendPost = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return send('POST', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendPut = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return send('PUT', url, data, selector, success, error, ready, progress, timeout);
+let sendPut = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return send('PUT', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendPatch = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return send('PATCH', url, data, selector, success, error, ready, progress, timeout);
+let sendPatch = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return send('PATCH', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendDelete = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return send('DELETE', url, data, selector, success, error, ready, progress, timeout);
+let sendDelete = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return send('DELETE', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendFile = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	if (data) return send('FILE', url, data, selector, success, error, ready, progress, timeout);
+let sendFile = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	if (data) return send('FILE', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 	else {
 		input.setAttribute('type', 'file');
 		res = null;
@@ -636,7 +634,7 @@ let sendFile = function (url = null, data = null, selector = 'body', success = n
 			if (file) {
 				const reader = new FileReader();
 				reader.addEventListener('load', (event) => {
-					res = send('FILE', url, encodeURIComponent(event.target.result), selector, success, error, ready, progress, timeout);
+					res = send('FILE', url, encodeURIComponent(event.target.result), selector, onSuccess, onError, onMessage, onProgress, timeout);
 				});
 				reader.readAsDataURL(file);
 			}
@@ -645,14 +643,14 @@ let sendFile = function (url = null, data = null, selector = 'body', success = n
 		return res;
 	}
 };
-let sendStream = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return send('STREAM', url, data, selector, success, error, ready, progress, timeout);
+let sendStream = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return send('STREAM', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendInternal = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return send('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
+let sendInternal = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return send('INTERNAL', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendExternal = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return send('EXTERNAL', url, data, selector, success, error, ready, progress, timeout);
+let sendExternal = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return send('EXTERNAL', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
 
 let sendRequest = function (
@@ -660,44 +658,44 @@ let sendRequest = function (
 	url = null,
 	data = null,
 	selector = 'body',
-	success = null,
-	error = null,
-	ready = null,
-	progress = null,
+	onSuccess = null,
+	onError = null,
+	onMessage = null,
+	onProgress = null,
 	timeout = null) {
-	return send(method, url, data, selector, success, error, ready, progress, timeout, false);
+	return send(method, url, data, selector, onSuccess, onError, onMessage, onProgress, timeout, false);
 };
 let trySendRequest = function (
 	method = 'POST',
 	url = null,
 	data = null,
 	selector = 'body',
-	success = null,
-	error = null,
-	ready = null,
-	progress = null,
+	onSuccess = null,
+	onError = null,
+	onMessage = null,
+	onProgress = null,
 	timeout = null,
 	retryOptions = null) {
 	// keep parity with sendRequest which sets async to false by default
-	return trySend(method, url, data, selector, success, error, ready, progress, timeout, retryOptions, false);
+	return trySend(method, url, data, selector, onSuccess, onError, onMessage, onProgress, timeout, retryOptions, false);
 };
-let sendGetRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return sendRequest('GET', url, data, selector, success, error, ready, progress, timeout);
+let sendGetRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return sendRequest('GET', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendPostRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return sendRequest('POST', url, data, selector, success, error, ready, progress, timeout);
+let sendPostRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return sendRequest('POST', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendPutRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return sendRequest('PUT', url, data, selector, success, error, ready, progress, timeout);
+let sendPutRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return sendRequest('PUT', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendPatchRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return sendRequest('PATCH', url, data, selector, success, error, ready, progress, timeout);
+let sendPatchRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return sendRequest('PATCH', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendDeleteRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return sendRequest('DELETE', url, data, selector, success, error, ready, progress, timeout);
+let sendDeleteRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return sendRequest('DELETE', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendFileRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	if (data) return sendRequest('FILE', url, data, selector, success, error, ready, progress, timeout);
+let sendFileRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	if (data) return sendRequest('FILE', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 	else {
 		input.setAttribute('type', 'file');
 		res = null;
@@ -706,7 +704,7 @@ let sendFileRequest = function (url = null, data = null, selector = 'body', succ
 			if (file) {
 				const reader = new FileReader();
 				reader.addEventListener('load', (event) => {
-					res = sendRequest('FILE', url, encodeURIComponent(event.target.result), selector, success, error, ready, progress, timeout);
+					res = sendRequest('FILE', url, encodeURIComponent(event.target.result), selector, onSuccess, onError, onMessage, onProgress, timeout);
 				});
 				reader.readAsDataURL(file);
 			}
@@ -715,12 +713,12 @@ let sendFileRequest = function (url = null, data = null, selector = 'body', succ
 		return res;
 	}
 };
-let sendStreamRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return sendRequest('STREAM', url, data, selector, success, error, ready, progress, timeout);
+let sendStreamRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return sendRequest('STREAM', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendInternalRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return sendRequest('INTERNAL', url, data, selector, success, error, ready, progress, timeout);
+let sendInternalRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return sendRequest('INTERNAL', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };
-let sendExternalRequest = function (url = null, data = null, selector = 'body', success = null, error = null, ready = null, progress = null, timeout = null) {
-	return sendRequest('EXTERNAL', url, data, selector, success, error, ready, progress, timeout);
+let sendExternalRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
+	return sendRequest('EXTERNAL', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
 };

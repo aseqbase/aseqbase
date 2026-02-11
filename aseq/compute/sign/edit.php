@@ -1,21 +1,21 @@
 <?php
 use MiMFa\Library\Struct;
 
-use MiMFa\Library\Local;
+use MiMFa\Library\Storage;
 
 popReceived("submit", null, "post");
 $imgchange = false;
 $received = receivePost();
 if ($imgObj = receiveFile("Image")) {
-    if (isValid($imgObj, "size") && Local::IsFileObject($imgObj)) {
+    if (isValid($imgObj, "size") && Storage::IsFileObject($imgObj)) {
         $img = \_::$User->GetValue("Image");
         message("Trying to change the profile picture!");
-        if (isValid($img) && !Local::DeleteFile($img))
+        if (isValid($img) && !Storage::DeleteFile($img))
             error("Could not delete your previous picture!");
         else {
-            $img = Local::StoreImage($imgObj, \_::$Address->PublicAddress . "image".DIRECTORY_SEPARATOR."profile".DIRECTORY_SEPARATOR);
+            $img = Storage::StoreImage($imgObj, \_::$Address->PublicDirectory . "image".DIRECTORY_SEPARATOR."profile".DIRECTORY_SEPARATOR);
             if (!is_null($img)) {
-                $received["Image"] = Local::GetUrl($img);
+                $received["Image"] = Storage::GetUrl($img);
                 $imgchange = true;
             }
         }
@@ -25,7 +25,7 @@ if ($imgObj = receiveFile("Image")) {
     //if(\_::$Front->Confirm("Are you sure to remove your profile picture?")){
         $img = \_::$User->GetValue("Image");
         message("Trying to remove the profile picture!");
-        if (isValid($img) && !Local::DeleteFile($img)) {
+        if (isValid($img) && !Storage::DeleteFile($img)) {
             error("Could not delete the profile picture!");
             unset($received["Image" ]);
         } else {

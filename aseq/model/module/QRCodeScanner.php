@@ -133,7 +133,7 @@ class QRCodeScanner extends Module
 	public function Get()
 	{
 		if ($this->Local)
-			$this->ScriptSource = asset(\_::$Address->StructDirectory, "Scanner/Scanner.js");
+			$this->ScriptSource = asset(\_::$Address->GlobalStructDirectory, "Scanner/Scanner.js");
 		return Struct::Script(null, $this->ScriptSource) .
 			Struct::OpenTag("video", $this->GetDefaultAttributes()) .
 			$this->BrowserNotSupportError .
@@ -151,8 +151,8 @@ class QRCodeScanner extends Module
 	{
 		return Struct::Script("
 		try{
-			if(!Instascan.Scanner) Struct.script.load(null, '" . asset(\_::$Address->StructDirectory, "Scanner/Scanner.js", optimize: true) . "');
-			} catch{Struct.script.load(null, '" . asset(\_::$Address->StructDirectory, "Scanner/Scanner.js", optimize: true) . "');}
+			if(!Instascan.Scanner) Struct.script.load(null, '" . asset(\_::$Address->GlobalStructDirectory, "Scanner/Scanner.js", optimize: true) . "');
+			} catch{Struct.script.load(null, '" . asset(\_::$Address->GlobalStructDirectory, "Scanner/Scanner.js", optimize: true) . "');}
 			{$this->Name} = new Instascan.Scanner({video: document.querySelector('.{$this->Name} video')});
 			{$this->Name}.addListener('scan', function (content) {
 				" . ($this->AllowMask ? "

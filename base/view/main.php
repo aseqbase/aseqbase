@@ -1,6 +1,6 @@
 <?php
 $templ = \_::$Front->CreateTemplate("Template");
-$name = pop($data, "Name") ?? \_::$User->Direction;
+$name = pop($data, "Name") ?? \_::$Address->UrlRoute;
 $templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??between($name, \_::$Front->Name);
 $alternative = pop($data, "Alternative") ?? "404";
 $content = pop($data, "Content");

@@ -256,6 +256,8 @@ class Live extends Array {
         for (const elem of this) {
             if (elem instanceof Element && element instanceof Element) {
                 if (elem.contains(element)) return true;
+                for(const child of elem.querySelectorAll("*"))
+                    if (child === element) return true;
             }
         }
         return false;

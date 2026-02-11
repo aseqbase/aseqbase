@@ -21,42 +21,6 @@ class BackBase
 	public $Items = [];
 
 	/**
-	 * The Date Time Zone
-	 * @var string
-	 * @field value
-	 * @category Time
-	 */
-	public $DateTimeZone = "UTC";
-	/**
-	 * The Date Time Locale
-	 * @var string
-	 * @field value
-	 * @category Time
-	 */
-	public $DateTimeLocale = "en-US";
-	/**
-	 * The Date Time Format
-	 * @var string
-	 * @example: "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
-	 * @field value
-	 * @category Time
-	 */
-	public $DateTimeFormat = "Y-m-d H:i:s";
-	/**
-	 * Current Date Time
-	 * @var string
-	 * @field value
-	 * @category Time
-	 */
-	public $CurrentDateTime = "now";
-	/**
-	 * Date Time Stamp Seconds Offset (TSO)
-	 * @var int
-	 * @category Time
-	 */
-	public $TimeStampOffset = 0;
-
-	/**
 	 * The period of caching, Type
 	 * @template null  To don't remove caches
 	 * @template "v"   To remove caches with each kernel updates
@@ -83,84 +47,11 @@ class BackBase
 	public $ReportLevel = 2;
 
 	/**
-	 * Allow to reduce size of documents for increasing site speed
-	 * @var bool
-	 * @category Optimization
-	 */
-	public $AllowReduceSize = true;
-	/**
-	 * Allow to analyze all text and signing them, to improve the website's SEO
-	 * @var bool
-	 * @category Optimization
-	 */
-	public $AllowTextAnalyzing = false;
-	/**
-	 * Allow to analyze all text and linking contents to their called names or titles, to improve the website's SEO
-	 * @var bool
-	 * @category Optimization
-	 */
-	public $AllowContentReferring = false;
-	/**
-	 * Allow to analyze all text and linking categories to their called names or titles, to improve the website's SEO
-	 * @var bool
-	 * @category Optimization
-	 */
-	public $AllowCategoryReferring = false;
-	/**
-	 * Allow to analyze all text and linking tags to their called names or titles, to improve the website's SEO
-	 * @var bool
-	 * @category Optimization
-	 */
-	public $AllowTagReferring = false;
-	/**
-	 * Allow to analyze all text and linking users to their called names, to improve the website's SEO
-	 * @var bool
-	 * @category Optimization
-	 */
-	public $AllowUserReferring = false;
-
-	/**
 	 * Encrypt the name of elements and everything to reduce the possibility of scraping data by robots
 	 * @var bool
 	 * @category Security
 	 */
 	public $EncryptNames = true;
-	/**
-	 * Default site key for ReCaptcha
-	 * @var string
-	 * @category Security
-	 */
-	public $ReCaptchaSiteKey = null;
-
-	/**
-	 * Allow Selecting on Page
-	 * @var bool
-	 * @category Security
-	 */
-	public $AllowSelecting = true;
-	/**
-	 * Allow ContextMenu on Page
-	 * @var bool
-	 * @category Security
-	 */
-	public $AllowContextMenu = true;
-
-	/**
-	 * The accessibility mode: 1 for whitelisted IPs, -1 for blacklisted IPs
-	 * @default null
-	 * @field short
-	 * @var mixed
-	 * @category Security
-	 */
-	public $AccessMode = null;
-	/**
-	 * Patterns to detect IPs
-	 * @default []
-	 * @field array
-	 * @var array<string>
-	 * @category Security
-	 */
-	public $AccessPatterns = array();
 
 
 	/**
@@ -174,7 +65,7 @@ class BackBase
 	 * @var int
 	 * @category Security
 	 */
-	public $MaximumFileSize = 50000000;
+	public $MaximumFileSize = 100000000;
 	/**
 	 * Acceptable image formats
 	 * @field array
@@ -210,6 +101,24 @@ class BackBase
 	 * @category Security
 	 */
 	public $AcceptableFileFormats = [".zip", ".rar"];
+
+	/**
+	 * The accessibility mode: 1 for whitelisted IPs, -1 for blacklisted IPs
+	 * @default null
+	 * @field short
+	 * @var mixed
+	 * @category Security
+	 */
+	public $AccessMode = null;
+	/**
+	 * Patterns to detect IPs
+	 * @default []
+	 * @field array
+	 * @var array<string>
+	 * @category Security
+	 */
+	public $AccessPatterns = array();
+
 
 	/**
 	 * 0: Not show Errors; 1: To show Errors

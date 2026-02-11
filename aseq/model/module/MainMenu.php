@@ -275,7 +275,7 @@ class MainMenu extends Module
 		if (!\_::$User->HasAccess(getValid($item, "Access", \_::$User->VisitAccess)))
 			return null;
 		$path = getBetween($item, "Path");
-		$act = endsWith(\_::$User->Path, $path) ? 'active' : "";
+		$act = endsWith(\_::$Address->UrlBase, $path) ? 'active' : "";
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Struct::Item(

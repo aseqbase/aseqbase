@@ -1,7 +1,7 @@
 <?php 
 $templ = \_::$Front->CreateTemplate("Splash");
 $templ->WindowTitle = pop($data, "WindowTitle")??get($data, 'Title' )??get($data, 'Name' )??\_::$Front->FullName;
-$templ->WindowLogo = MiMFa\Library\Local::GetUrl(pop($data, "WindowLogo") ??\_::$Front->FullLogoPath??\_::$Front->LogoPath);
+$templ->WindowLogo = MiMFa\Library\Storage::GetUrl(pop($data, "WindowLogo") ??\_::$Front->FullLogoPath??\_::$Front->LogoPath);
 $templ->SupTitle = pop($data, "SupTitle") ?? \_::$Front->Owner;
 $templ->Title =  pop($data, "Title") ?? \_::$Front->Name;
 $templ->SubTitle =  pop($data, "SubTitle") ;

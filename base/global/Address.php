@@ -14,208 +14,276 @@ class Address extends ArrayObject
     public string|null $Name;
 
     /**
+     * Full part of the current url
+     * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp"
+     * @var string|null
+     */
+    public string|null $Url = null;
+    /**
+     * The Base part of the current url
+     * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php"
+     * @var string|null
+     */
+    public string|null $UrlBase = null;
+    /**
+     * The Origin part of the current url
+     * @example: "https://www.mimfa.net:80"
+     * @var string|null
+     */
+    public string|null $UrlOrigin = null;
+    /**
+     * The Host name part of the current url
+     * @example: "www.mimfa.net"
+     * @var string|null
+     */
+    public string|null $UrlHost = null;
+    /**
+     * The Domain name part of the current url
+     * @example: "mimfa.net"
+     * @var string|null
+     */
+    public string|null $UrlDomain = null;
+    /**
+     * The Request part of the current url
+     * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
+     * @var string|null
+     */
+    public string|null $UrlRequest = null;
+    /**
+     * The Path part of the current url from the root
+     * @example: "/Category/mimfa/service/web.php"
+     * @var string|null
+     */
+    public string|null $UrlPath = null;
+    /**
+     * The Route part of the current url from the root
+     * @example: "Category/mimfa/service/web.php"
+     * @var string|null
+     */
+    public string|null $UrlRoute = null;
+    /**
+     * The last part of the current direction url
+     * @example: "web.php"
+     * @var string|null
+     */
+    public string|null $UrlResource = null;
+    /**
+     * The query part of the current url
+     * @example: "p=3&l=10"
+     * @var string|null
+     */
+    public string|null $UrlQuery = null;
+    /**
+     * The fragment or anchor part of the current url
+     * @example: "serp"
+     * @var string|null
+     */
+    public string|null $UrlFragment = null;
+
+
+    /**
      * @example
      * "/"
      */
-    public string|null $Directory;
+    public string|null $GlobalDirectory;
     /**
      * @example
      * "/model/"
      */
-    public string $ModelDirectory;
+    public string $GlobalModelDirectory;
     /**
      * @example
      * "/view/"
      */
-    public string $ViewDirectory;
+    public string $GlobalViewDirectory;
     /**
      * @example
      * "/compute/"
      */
 
-    public string $ComputeDirectory;
+    public string $GlobalComputeDirectory;
     /**
      * @example
      * "/route/"
      */
-    public string $RouteDirectory;
+    public string $GlobalRouteDirectory;
     /**
      * @example
      * "/asset/"
      */
-    public string $AssetDirectory;
+    public string $GlobalAssetDirectory;
     /**
      * @example
      * "/model/library/"
      */
-    public string $LibraryDirectory;
+    public string $GlobalLibraryDirectory;
     /**
      * @example
      * "/model/component/"
      */
-    public string $ComponentDirectory;
+    public string $GlobalComponentDirectory;
     /**
      * @example
      * "/model/template/"
      */
-    public string $TemplateDirectory;
+    public string $GlobalTemplateDirectory;
     /**
      * @example
      * "/model/module/"
      */
-    public string $ModuleDirectory;
+    public string $GlobalModuleDirectory;
     /**
      * @example
      * "/view/page/"
      */
-    public string $PageDirectory;
+    public string $GlobalPageDirectory;
     /**
      * @example
      * "/view/region/"
      */
-    public string $RegionDirectory;
+    public string $GlobalRegionDirectory;
     /**
      * @example
      * "/view/part/"
      */
-    public string $PartDirectory;
+    public string $GlobalPartDirectory;
     /**
      * @example
      * "/asset/struct/"
      */
-    public string $StructDirectory;
+    public string $GlobalStructDirectory;
     /**
      * @example
      * "/asset/script/"
      */
-    public string $ScriptDirectory;
+    public string $GlobalScriptDirectory;
     /**
      * @example
      * "/asset/style/"
      */
-    public string $StyleDirectory;
+    public string $GlobalStyleDirectory;
     /**
      * @example
      * "/temp/"
      */
-    public string $TempDirectory;
+    public string $GlobalTempDirectory;
     /**
      * @example
      * "/log/"
      */
-    public string $LogDirectory;
+    public string $GlobalLogDirectory;
     /**
      * @example
      * "/private/"
      */
-    public string $PrivateDirectory;
+    public string $GlobalPrivateDirectory;
     /**
      * @example
      * "/public/"
      */
-    public string $PublicDirectory;
+    public string $GlobalPublicDirectory;
 
     /**
      * 
      * @example
      * "home/public_html/"
      */
-    public string $Address;
+    public string $Directory;
     /**
      * @example
      * "home/public_html/model/"
      */
-    public string $ModelAddress;
+    public string $ModelDirectory;
     /**
      * @example
      * "home/public_html/view/"
      */
-    public string $ViewAddress;
+    public string $ViewDirectory;
     /**
      * @example
      * "home/public_html/compute/"
      */
-    public string $ComputeAddress;
+    public string $ComputeDirectory;
     /**
      * @example
      * "home/public_html/route/"
      */
-    public string $RouteAddress;
+    public string $RouteDirectory;
     /**
      * @example
      * "home/public_html/asset/"
      */
-    public string $AssetAddress;
+    public string $AssetDirectory;
     /**
      * @example
      * "home/public_html/model/library/"
      */
-    public string $LibraryAddress;
+    public string $LibraryDirectory;
     /**
      * @example
      * "home/public_html/model/component/"
      */
-    public string $ComponentAddress;
+    public string $ComponentDirectory;
     /**
      * @example
      * "home/public_html/model/template/"
      */
-    public string $TemplateAddress;
+    public string $TemplateDirectory;
     /**
      * @example
      * "home/public_html/model/module/"
      */
-    public string $ModuleAddress;
+    public string $ModuleDirectory;
     /**
      * @example
      * "home/public_html/view/page/"
      */
-    public string $PageAddress;
+    public string $PageDirectory;
     /**
      * @example
      * "home/public_html/view/region/"
      */
-    public string $RegionAddress;
+    public string $RegionDirectory;
     /**
      * @example
      * "home/public_html/view/part/"
      */
-    public string $PartAddress;
+    public string $PartDirectory;
     /**
      * @example
      * "home/public_html/asset/struct/"
      */
-    public string $StructAddress;
+    public string $StructDirectory;
     /**
      * @example
      * "home/public_html/asset/script/"
      */
-    public string $ScriptAddress;
+    public string $ScriptDirectory;
     /**
      * @example
      * "home/public_html/asset/style/"
      */
-    public string $StyleAddress;
+    public string $StyleDirectory;
     /**
      * @example
      * "home/public_html/temp/"
      */
-    public string $TempAddress;
+    public string $TempDirectory;
     /**
      * @example
      * "home/public_html/log/"
      */
-    public string $LogAddress;
+    public string $LogDirectory;
     /**
      * @example
      * "home/public_html/private/"
      */
-    public string $PrivateAddress;
+    public string $PrivateDirectory;
     /**
      * @example
      * "home/public_html/public/"
      */
-    public string $PublicAddress;
+    public string $PublicDirectory;
 
     /**
      * The root path
@@ -223,70 +291,70 @@ class Address extends ArrayObject
      * "/"
      * @var string|null
      */
-    public string|null $Root;
+    public string|null $RootPath;
     /**
      * The Public root Route
      * @example
      * "/public/"
      * @var string
      */
-    public string $PublicRoot;
+    public string $PublicRootPath;
     /**
      * The Asset root Route
      * @example
      * "/asset/"
      * @var string
      */
-    public string $AssetRoot;
+    public string $AssetRootPath;
     /**
      * The Script root Route
      * @example
      * "/script/"
      * @var string
      */
-    public string $ScriptRoot;
+    public string $ScriptRootPath;
     /**
      * The Style root Route
      * @example
      * "/style/"
      * @var string
      */
-    public string $StyleRoot;
+    public string $StyleRootPath;
     /**
      * The Content root Route
      * @example
      * "/content/"
      * @var string
      */
-    public string $ContentRoot;
+    public string $ContentRootPath;
     /**
      * The Category root Route
      * @example
      * "/category/"
      * @var string
      */
-    public string $CategoryRoot;
+    public string $CategoryRootPath;
     /**
      * The Tag root Route
      * @example
      * "/tag/"
      * @var string
      */
-    public string $TagRoot;
+    public string $TagRootPath;
     /**
      * The Search root Route
      * @example
      * "/search/"
      * @var string
      */
-    public string $SearchRoot;
+    public string $SearchRootPath;
     /**
      * The User root Route
      * @example
      * "/user/"
      * @var string
      */
-    public string $UserRoot;
+    public string $UserRootPath;
 
 
     public function __construct(
@@ -295,60 +363,72 @@ class Address extends ArrayObject
     ) {
         $this->Name = $name;
 
-        $this->Directory = DIRECTORY_SEPARATOR;
-        $this->ModelDirectory = $this->Directory . "model" . DIRECTORY_SEPARATOR;
-        $this->ViewDirectory = $this->Directory . "view" . DIRECTORY_SEPARATOR;
-        $this->ComputeDirectory = $this->Directory . "compute" . DIRECTORY_SEPARATOR;
-        $this->RouteDirectory = $this->Directory . "route" . DIRECTORY_SEPARATOR;
-        $this->AssetDirectory = $this->Directory . "asset" . DIRECTORY_SEPARATOR;
-        $this->TempDirectory = $this->Directory . "temp" . DIRECTORY_SEPARATOR;
-        $this->LibraryDirectory = $this->ModelDirectory . "library" . DIRECTORY_SEPARATOR;
-        $this->ComponentDirectory = $this->ModelDirectory . "component" . DIRECTORY_SEPARATOR;
-        $this->TemplateDirectory = $this->ModelDirectory . "template" . DIRECTORY_SEPARATOR;
-        $this->ModuleDirectory = $this->ModelDirectory . "module" . DIRECTORY_SEPARATOR;
-        $this->PageDirectory = $this->ViewDirectory . "page" . DIRECTORY_SEPARATOR;
-        $this->RegionDirectory = $this->ViewDirectory . "region" . DIRECTORY_SEPARATOR;
-        $this->PartDirectory = $this->ViewDirectory . "part" . DIRECTORY_SEPARATOR;
-        $this->StructDirectory = $this->AssetDirectory . "struct" . DIRECTORY_SEPARATOR;
-        $this->ScriptDirectory = $this->AssetDirectory . "script" . DIRECTORY_SEPARATOR;
-        $this->StyleDirectory = $this->AssetDirectory . "style" . DIRECTORY_SEPARATOR;
-        $this->LogDirectory = $this->Directory . "log" . DIRECTORY_SEPARATOR;
-        $this->PrivateDirectory = $this->Directory . "private" . DIRECTORY_SEPARATOR;
-        $this->PublicDirectory = $this->Directory . "public" . DIRECTORY_SEPARATOR;
+        $this->GlobalDirectory = DIRECTORY_SEPARATOR;
+        $this->GlobalModelDirectory = $this->GlobalDirectory . "model" . DIRECTORY_SEPARATOR;
+        $this->GlobalViewDirectory = $this->GlobalDirectory . "view" . DIRECTORY_SEPARATOR;
+        $this->GlobalComputeDirectory = $this->GlobalDirectory . "compute" . DIRECTORY_SEPARATOR;
+        $this->GlobalRouteDirectory = $this->GlobalDirectory . "route" . DIRECTORY_SEPARATOR;
+        $this->GlobalAssetDirectory = $this->GlobalDirectory . "asset" . DIRECTORY_SEPARATOR;
+        $this->GlobalTempDirectory = $this->GlobalDirectory . "temp" . DIRECTORY_SEPARATOR;
+        $this->GlobalLibraryDirectory = $this->GlobalModelDirectory . "library" . DIRECTORY_SEPARATOR;
+        $this->GlobalComponentDirectory = $this->GlobalModelDirectory . "component" . DIRECTORY_SEPARATOR;
+        $this->GlobalTemplateDirectory = $this->GlobalModelDirectory . "template" . DIRECTORY_SEPARATOR;
+        $this->GlobalModuleDirectory = $this->GlobalModelDirectory . "module" . DIRECTORY_SEPARATOR;
+        $this->GlobalPageDirectory = $this->GlobalViewDirectory . "page" . DIRECTORY_SEPARATOR;
+        $this->GlobalRegionDirectory = $this->GlobalViewDirectory . "region" . DIRECTORY_SEPARATOR;
+        $this->GlobalPartDirectory = $this->GlobalViewDirectory . "part" . DIRECTORY_SEPARATOR;
+        $this->GlobalStructDirectory = $this->GlobalAssetDirectory . "struct" . DIRECTORY_SEPARATOR;
+        $this->GlobalScriptDirectory = $this->GlobalAssetDirectory . "script" . DIRECTORY_SEPARATOR;
+        $this->GlobalStyleDirectory = $this->GlobalAssetDirectory . "style" . DIRECTORY_SEPARATOR;
+        $this->GlobalLogDirectory = $this->GlobalDirectory . "log" . DIRECTORY_SEPARATOR;
+        $this->GlobalPrivateDirectory = $this->GlobalDirectory . "private" . DIRECTORY_SEPARATOR;
+        $this->GlobalPublicDirectory = $this->GlobalDirectory . "public" . DIRECTORY_SEPARATOR;
 
         $directory = rtrim(str_replace(["\\", "/"], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR], $directory), DIRECTORY_SEPARATOR);
 
-        $this->Address = $directory . DIRECTORY_SEPARATOR;
-        $this->ModelAddress = $directory . $this->ModelDirectory;
-        $this->ViewAddress = $directory . $this->ViewDirectory;
-        $this->ComputeAddress = $directory . $this->ComputeDirectory;
-        $this->RouteAddress = $directory . $this->RouteDirectory;
-        $this->AssetAddress = $directory . $this->AssetDirectory;
-        $this->TempAddress = $directory . $this->TempDirectory;
-        $this->LibraryAddress = $directory . $this->LibraryDirectory;
-        $this->ComponentAddress = $directory . $this->ComponentDirectory;
-        $this->TemplateAddress = $directory . $this->TemplateDirectory;
-        $this->ModuleAddress = $directory . $this->ModuleDirectory;
-        $this->PageAddress = $directory . $this->PageDirectory;
-        $this->RegionAddress = $directory . $this->RegionDirectory;
-        $this->PartAddress = $directory . $this->PartDirectory;
-        $this->StructAddress = $directory . $this->StructDirectory;
-        $this->ScriptAddress = $directory . $this->ScriptDirectory;
-        $this->StyleAddress = $directory . $this->StyleDirectory;
-        $this->LogAddress = $directory . $this->LogDirectory;
-        $this->PrivateAddress = $directory . $this->PrivateDirectory;
-        $this->PublicAddress = $directory . $this->PublicDirectory;
+        $this->Directory = $directory . DIRECTORY_SEPARATOR;
+        $this->ModelDirectory = $directory . $this->GlobalModelDirectory;
+        $this->ViewDirectory = $directory . $this->GlobalViewDirectory;
+        $this->ComputeDirectory = $directory . $this->GlobalComputeDirectory;
+        $this->RouteDirectory = $directory . $this->GlobalRouteDirectory;
+        $this->AssetDirectory = $directory . $this->GlobalAssetDirectory;
+        $this->TempDirectory = $directory . $this->GlobalTempDirectory;
+        $this->LibraryDirectory = $directory . $this->GlobalLibraryDirectory;
+        $this->ComponentDirectory = $directory . $this->GlobalComponentDirectory;
+        $this->TemplateDirectory = $directory . $this->GlobalTemplateDirectory;
+        $this->ModuleDirectory = $directory . $this->GlobalModuleDirectory;
+        $this->PageDirectory = $directory . $this->GlobalPageDirectory;
+        $this->RegionDirectory = $directory . $this->GlobalRegionDirectory;
+        $this->PartDirectory = $directory . $this->GlobalPartDirectory;
+        $this->StructDirectory = $directory . $this->GlobalStructDirectory;
+        $this->ScriptDirectory = $directory . $this->GlobalScriptDirectory;
+        $this->StyleDirectory = $directory . $this->GlobalStyleDirectory;
+        $this->LogDirectory = $directory . $this->GlobalLogDirectory;
+        $this->PrivateDirectory = $directory . $this->GlobalPrivateDirectory;
+        $this->PublicDirectory = $directory . $this->GlobalPublicDirectory;
 
-        $this->Root = "/";
-        $this->PublicRoot = $this->Root . "public/";
-        $this->AssetRoot = $this->Root . "asset/";
-        $this->ScriptRoot = $this->AssetRoot . "script/";
-        $this->StyleRoot = $this->AssetRoot . "style/";
-        $this->ContentRoot = $this->Root . "content/";
-        $this->CategoryRoot = $this->Root . "category/";
-        $this->TagRoot = $this->Root . "tag/";
-        $this->SearchRoot = $this->Root . "search/";
-        $this->UserRoot = $this->Root . "user/";
+        $this->RootPath = "/";
+        $this->PublicRootPath = $this->RootPath . "public/";
+        $this->AssetRootPath = $this->RootPath . "asset/";
+        $this->ScriptRootPath = $this->AssetRootPath . "script/";
+        $this->StyleRootPath = $this->AssetRootPath . "style/";
+        $this->ContentRootPath = $this->RootPath . "content/";
+        $this->CategoryRootPath = $this->RootPath . "category/";
+        $this->TagRootPath = $this->RootPath . "tag/";
+        $this->SearchRootPath = $this->RootPath . "search/";
+        $this->UserRootPath = $this->RootPath . "user/";
+        
+        $this->Url = getUrl();
+        $this->UrlBase = getUrlBase();
+        $this->UrlOrigin = getUrlOrigin();
+        $this->UrlHost = getUrlHost();
+        $this->UrlDomain = getUrlDomain();
+        $this->UrlRequest = getUrlRequest();
+        $this->UrlPath = getUrlPath();
+        $this->UrlRoute = getUrlRoute();
+        $this->UrlResource = getUrlResource();
+        $this->UrlQuery = getUrlQuery();
+        $this->UrlFragment = getUrlFragment();
     }
 
     // public function __get($name)

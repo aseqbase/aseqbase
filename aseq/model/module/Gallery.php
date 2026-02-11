@@ -2,7 +2,7 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
-use MiMFa\Library\Local;
+use MiMFa\Library\Storage;
 module("Collection");
 /**
  * To show a gallery of images

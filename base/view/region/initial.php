@@ -15,7 +15,7 @@
 		<meta name="abstract" content="<?php echo \_::$Front->FullDescription; ?>">
 		<meta name="description" content="<?php echo \_::$Front->FullDescription; ?>">
 		<meta name="twitter:Description" content="<?php echo \_::$Front->Description; ?>">
-		<meta name="twitter:Image" content="<?php echo \MiMFa\Library\Local::GetUrl(\_::$Front->LogoPath); ?>">
+		<meta name="twitter:Image" content="<?php echo \MiMFa\Library\Storage::GetUrl(\_::$Front->LogoPath); ?>">
 		<!-- LICENCE PART: Don`t remove this part -->
 		<meta name="framework" content="aseqbase">
 		<!-- LICENCE PART -->

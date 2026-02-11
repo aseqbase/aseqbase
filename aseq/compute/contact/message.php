@@ -7,12 +7,12 @@ $received = receivePost();
 if (!get($received, "Message"))
 	response($form->GetError("Your message could not be empty!"));
 else {
-	$form->MailSubject = \_::$User->Domain . ": Message from '" . (get($received, "Name") ?? get(\_::$User, "Name")) . "'";
+	$form->MailSubject = \_::$Address->UrlDomain . ": Message from '" . (get($received, "Name") ?? get(\_::$User, "Name")) . "'";
 	$form->ReceiverEmail = \_::$Front->ReceiverEmail;
 	$form->SenderEmail = get($received, "Email") ?? get(\_::$User, "Email");
 	table("Message")->Insert([
 		"UserId" => \_::$User ? \_::$User->Id : null,
-		"Relation" => \_::$User->Url,
+		"Relation" => \_::$Address->Url,
 		"Name" => Convert::ToText(getValid($received, "Name", \_::$User ? \_::$User->Name : null)),
 		"From" => $form->SenderEmail,
 		"To" => $form->ReceiverEmail,

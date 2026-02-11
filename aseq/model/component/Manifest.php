@@ -1,13 +1,13 @@
 <?php namespace MiMFa\Component;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Local;
+use MiMFa\Library\Storage;
 
 class Manifest
 {
 	public static function Store($data)
 	{
-		$path = \_::$Address->ScriptDirectory . "manifest.json";
-		if (!isEmpty($data) && !Local::FileExists($path)) save( Convert::ToJson($data), $path);
+		$path = \_::$Address->GlobalScriptDirectory . "manifest.json";
+		if (!isEmpty($data) && !Storage::FileExists($path)) save( Convert::ToJson($data), $path);
 		return $path;
 	}
 }

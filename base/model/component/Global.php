@@ -1,6 +1,6 @@
 <?php namespace MiMFa\Component;
 use MiMFa\Library\Struct;
-\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'global.js', optimize: true));
-\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'Math.js', optimize: true));
-\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'Array.js', optimize: true));
-\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'Struct.js', optimize: true));
+\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->GlobalScriptDirectory, 'global.js', optimize: true));
+\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->GlobalScriptDirectory, 'Math.js', optimize: true));
+\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->GlobalScriptDirectory, 'Array.js', optimize: true));
+\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->GlobalScriptDirectory, 'Struct.js', optimize: true));

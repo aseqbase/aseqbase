@@ -3,7 +3,7 @@
 use MiMFa\Library\DataBase;
 use MiMFa\Library\DataTable;
 use MiMFa\Library\Internal;
-use MiMFa\Library\Local;
+use MiMFa\Library\Storage;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
 use MiMFa\Library\Script;
@@ -51,7 +51,7 @@ $GLOBALS["ROOT_DIR"] = preg_replace("/[\/\\\][^\/\\\]+$/", "", __DIR__) . DIRECT
 require_once(__DIR__ . DIRECTORY_SEPARATOR . "global" . DIRECTORY_SEPARATOR . "Address.php");
 \_::$Address = new Address($GLOBALS["ASEQBASE"], $GLOBALS["DIR"]);
 
-library("Local");
+library("Storage");
 library("Convert");
 library("Struct");
 library("Style");
@@ -79,8 +79,8 @@ run("User");
 run("global/Base");
 run("global/Types");
 
-Local::CreateDirectory(\_::$Address->LogAddress);
-Local::CreateDirectory(\_::$Address->TempAddress);
+Storage::CreateDirectory(\_::$Address->LogDirectory);
+Storage::CreateDirectory(\_::$Address->TempDirectory);
 register_shutdown_function('cleanupTemp', false);
 
 component("Component");
@@ -127,7 +127,7 @@ function finalize(string|null|int $status = null, $data = [], bool $print = true
 function send($method = null, $url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
 	if (isEmpty($url))
-		$url = getPath();
+		$url = getUrlBase();
 	if (isEmpty($method))
 		$method = "POST";
 	else
@@ -172,7 +172,7 @@ function send($method = null, $url = null, mixed $data = [], array|null $options
 function sendGet($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
 	if (isEmpty($url))
-		$url = getPath();
+		$url = getUrlBase();
 	$curl = curl_init();
 	$queryParams = http_build_query($data);
 	$urlWithParams = $url . (strpos($url, '?') === false ? '?' : '&') . $queryParams;
@@ -200,7 +200,7 @@ function sendGet($url = null, mixed $data = [], array|null $options = null, arra
 function sendPost($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
 	if (isEmpty($url))
-		$url = getPath();
+		$url = getUrlBase();
 	$curl = curl_init($url);
 	curl_setopt($curl, CURLOPT_POST, true); // Use POST method
 	curl_setopt($curl, CURLOPT_POSTFIELDS, is_array($data) ? http_build_query($data) : $data); // Data to be posted
@@ -247,7 +247,7 @@ function sendPatch($url = null, mixed $data = [], array|null $options = null, ar
 function sendFile($url = null, mixed $data = [], array|null $options = null, array|null $headers = null, null|bool $secure = null, int $timeout = 60, $async = false)
 {
 	if (isEmpty($url))
-		$url = getPath();
+		$url = getUrlBase();
 	$curl = curl_init($url);
 	curl_setopt($curl, CURLOPT_POST, true);
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Return the response as a string
@@ -336,7 +336,7 @@ function receive(array|string|null $method = null)
 		switch ($method = trim(strtolower($method))) {
 			case "file":
 			case "files":
-				$method = $_FILES ?: ((isset($_REQUEST["__METHOD"]) && startsWith(strtolower($_REQUEST["__METHOD"]), "file"))? $_POST : []);
+				$method = $_FILES ?: ((isset($_REQUEST["__METHOD"]) && startsWith(strtolower($_REQUEST["__METHOD"]), "file")) ? $_POST : []);
 				break;
 			case "public":
 			case "get":
@@ -475,8 +475,8 @@ function received($key = null, $default = null, array|string|null $method = null
 	else
 		return get(\_::Cache($method, fn() => receive($method)), $key) ??
 			($method ? $default :
-			(Local::Store(received($key, null, "file"), $directory?:\_::$Address->TempAddress)?:$default)
-		);
+				(Storage::Store(received($key, null, "file"), $directory ?: \_::$Address->TempDirectory) ?: $default)
+			);
 }
 /**
  * Receive a parameter from the client side then remove it
@@ -522,8 +522,88 @@ function popReceived($key = null, $default = null, array|string|null $method = n
 
 #region UPLOADING
 
-function upload($target, $name = null, $type = null){
-    return Local::Load(Local::GetFileContent($target), $name ?? basename($target), $type);
+/**
+ * Sends a file to download by the client side.
+ * @param string $sourcePath The absolute or relative path to the file.
+ * @param string|null $name Optional filename to force download with a specific name.
+ * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
+ * @param int|null $status The HTTP status code (e.g., 200, 404).
+ * @throws \Exception If the file path is invalid or the file cannot be read.
+ */
+function upload($sourcePath = null, ?string $name = null, $type = null, null|string $encoding = null, $status = null)
+{
+	eraseResponse(); // Clean any remaining output buffers
+
+	$sourcePath = Storage::GetFile($sourcePath);
+	if ($sourcePath)
+		responseStatus($status);
+	else
+		return;
+
+	if (!$type) {
+		// Attempt to guess content type if not provided
+		$finfo = finfo_open(FILEINFO_MIME_TYPE);
+		$type = finfo_file($finfo, $sourcePath);
+		finfo_close($finfo);
+	}
+	if ($encoding) {
+		ini_set('mbstring.detect_order', 'auto');
+		ini_set('default_charset', $encoding);
+		if (!str_contains($type, "charset="))
+			$type .= "; charset=$encoding";
+	}
+	header("Content-Type: application/force-download");
+	header("Content-Type: " . $type);
+
+	header("Content-Disposition: attachment; filename=\"" . Storage::SanitizeName($name ?? basename($sourcePath)) . '"');
+	header('Content-Length: ' . filesize($sourcePath));
+	header('Expires: 0');
+	header('Cache-Control: must-revalidate');
+	header('Pragma: public');
+	if ($encoding)
+		response("\xEF\xBB\xBF");
+	readfile($sourcePath);
+	finalize();
+}
+/**
+ * Sends a contents to download by the client side.
+ * @param string $content The output content to be sent.
+ * @param string|null $name Optional filename to force download with a specific name.
+ * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
+ * @param bool $attached Whether to display the file inline in the browser or as an attachment.
+ * @param int|null $status The HTTP status code (e.g., 200, 404).
+ * @throws \Exception If the file path is invalid or the file cannot be read.
+ */
+function uploadContent($content, $name = null, $type = null, ?string $encoding = null, $status = null)
+{
+	eraseResponse(); // Clean any remaining output buffers
+
+	if ($content)
+		responseStatus($status);
+	else
+		return;
+
+	$name = $name ?? "download.txt";
+	$type = $type ?? "text/plain";
+	$encoding = ($encoding ?: \_::$Front->Encoding) ?: "UTF-8";
+	header("Content-Type: application/force-download");
+	if ($type) {
+		ini_set('mbstring.detect_order', 'auto');
+		ini_set('default_charset', $encoding);
+		if (!str_contains($type, "charset="))
+			$type .= "; charset=$encoding";
+		header("Content-Type: " . $type);
+	}
+
+	header("Content-Disposition: attachment; filename=\"" . Storage::SanitizeName($name) . '"');
+	header('Content-Length: ' . strlen($content));
+	//header("Etag: " . md5_file($sourcePath)); // Simple ETag (entity tag) response header is an identifier for a specific version of a resource. It lets caches be more efficient and save
+	header('Expires: 0');
+	header('Cache-Control: must-revalidate');
+	header('Pragma: public');
+	if ($encoding)
+		response("\xEF\xBB\xBF");
+	deliver($content);
 }
 
 #endregion 
@@ -533,16 +613,17 @@ function upload($target, $name = null, $type = null){
 
 /**
  * To download a file from the client device
- * @param string|bool|null $target Set true to store in public directory,
+ * @param string|bool|null $destPath Set true to store in public directory,
  * false to store in temp,
  * null to dont store,
  * or an address otherwise
- * @return string|null The file content, address (if sent null for $target) or null otherwise
+ * @return string|null The file content, address (if sent null for $destPath) or null otherwise
  */
-function download($target = null, $extensions = null, $minSize = null, $maxSize = null, $method = "FILE")
+function download($destPath = null, $extensions = null, $minSize = null, $maxSize = null, $method = "FILE")
 {
 	$object = receive($method);
-	if(!is_array($object)) return null;
+	if (!$object || !is_array($object))
+		return null;
 
 	$objectName = get($object, "name");
 	if (!$objectName)
@@ -559,7 +640,7 @@ function download($target = null, $extensions = null, $minSize = null, $maxSize 
 			throw new \SilentException("The 'file size' is 'smaller than' " . Convert::ToCompactNumber(\_::$Back->MinimumFileSize) . "B!");
 		elseif ($objectSize > ($maxSize ?? \_::$Back->MaximumFileSize))
 			throw new \SilentException("The 'file size' is 'bigger than' " . Convert::ToCompactNumber(\_::$Back->MaximumFileSize) . "B!");
-	
+
 	if (is_array($object))
 		$object = get($object, "data");
 	if (!$object)
@@ -567,45 +648,47 @@ function download($target = null, $extensions = null, $minSize = null, $maxSize 
 
 	$object = base64_decode(urldecode($object));
 
-	if ($target === true) {
-		if (!Local::SetFileContent($target = Local::GenerateAddress($objectName, "", \_::$Address->PublicAddress), $object))
+	if ($destPath === true) {
+		if (!Storage::SetFileContent($destPath = Storage::GenerateAddress($objectName, "", \_::$Address->PublicDirectory), $object))
 			return false;
-	} elseif ($target === false) {
-		if (!Local::SetFileContent($target = Local::GenerateAddress($objectName, "", \_::$Address->TempAddress), $object))
+	} elseif ($destPath === false) {
+		if (!Storage::SetFileContent($destPath = Storage::GenerateAddress($objectName, "", \_::$Address->TempDirectory), $object))
 			return false;
-	} elseif ($target) {
-		if (endsWith($target, DIRECTORY_SEPARATOR))
-			$target = Local::GenerateAddress($objectName, "", $target, false);
-		if (!Local::SetFileContent($target, $object))
+	} elseif ($destPath) {
+		if (endsWith($destPath, DIRECTORY_SEPARATOR))
+			$destPath = Storage::GenerateAddress($objectName, "", $destPath, false);
+		if (!Storage::SetFileContent($destPath, $object))
 			return false;
 	} else {
-		if (!Local::SetFileContent($target = \_::$Address->TempAddress . $objectName, $object))
+		if (!Storage::SetFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
 			return false;
-		$target = Local::GetFileContent($target);
+		$destPath = Storage::GetFileContent($destPath);
 	}
 
-	return $target;
+	return $destPath;
 }
 
 /**
  * To download any file from the client device
  * This method receives sent files by a chunks-based algorithm
- * @param string|bool|null $target Set true to store in public directory,
+ * @param string|bool|null $destPath Set true to store in public directory,
  * false to store in temp,
  * null to dont store,
  * or an address otherwise
  * @param mixed $extensions The acceptable extensions like [".jpg",".png",...]
  * @return: It will return:
- * the file data if finished (and $target is null),
- * the file address if finished (and $target is not null),
+ * the file data if finished (and $destPath is null),
+ * the file address if finished (and $destPath is not null),
  * null if there not received anythings,
  * A number between 0-1 if chunk recorded successfully, or
+ * true if the first chunk recorded
  * false if failed the chunk recording
  */
-function downloadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $method = "STREAM")
+function downloadStream($destPath = null, $extensions = null, $minSize = null, $maxSize = null, $speed = null, $method = "STREAM")
 {
 	$object = receive($method);
-	if(!is_array($object)) return null;
+	if (!$object || !is_array($object))
+		return null;
 
 	$objectName = get($object, "name");
 	if (!$objectName)
@@ -624,7 +707,7 @@ function downloadStream($target = null, $extensions = null, $minSize = null, $ma
 			throw new \SilentException("The 'file size' is 'bigger than' " . Convert::ToCompactNumber(\_::$Back->MaximumFileSize) . "B!");
 	$chunk = get($object, "chunk") ?: 0;
 	$total = get($object, "total") ?: 1;
-	
+
 	if (is_array($object))
 		$object = get($object, "data");
 	if (!$object)
@@ -632,26 +715,34 @@ function downloadStream($target = null, $extensions = null, $minSize = null, $ma
 
 	$object = base64_decode(urldecode($object));
 
-	if ($target === true) {
-		if (!Local::AddFileContent($target = \_::$Address->PublicAddress . $objectName, $object))
+	if ($destPath === true) {
+		if (!Storage::AddFileContent($destPath = \_::$Address->PublicDirectory . $objectName, $object))
 			return false;
-	} elseif ($target === false) {
-		if (!Local::AddFileContent($target = \_::$Address->TempAddress . $objectName, $object))
+	} elseif ($destPath === false) {
+		if (!Storage::AddFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
 			return false;
-	} elseif ($target) {
-		if (endsWith($target, DIRECTORY_SEPARATOR))
-			$target = $target . $objectName;
-		if (!Local::AddFileContent($target, $object))
+	} elseif ($destPath) {
+		if (endsWith($destPath, DIRECTORY_SEPARATOR))
+			$destPath = $destPath . $objectName;
+		if (!Storage::AddFileContent($destPath, $object))
 			return false;
 	} else {
-		if (!Local::AddFileContent($target = \_::$Address->TempAddress . $objectName, $object))
+		if (!Storage::AddFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
 			return false;
 		if ($chunk >= ($total - 1))
-			$target = Local::GetFileContent($target);
+			$destPath = Storage::GetFileContent($destPath);
 	}
 
-	if ($chunk >= ($total - 1))
-		return $target;
+	if ($total > 1 && $chunk == 0)
+		return true;
+	if ($chunk >= ($total - 1)){
+		// if(stat($destPath)["size"] > ($objectSize - $speed))
+			return $destPath;
+		// else {
+		// 	Storage::DeleteFile($destPath);
+		// 	throw new \SilentException("The 'file data' is not 'complete'!");
+		// }
+	}
 	return $chunk / $total;
 }
 
@@ -668,7 +759,7 @@ function downloadStream($target = null, $extensions = null, $minSize = null, $ma
  */
 function request($intent = null, $callback = null)
 {
-	return beforeUsing(\_::$Address->Directory, "finalize", function () use ($intent, $callback) {
+	return beforeUsing(\_::$Address->GlobalDirectory, "finalize", function () use ($intent, $callback) {
 		$callbackScript = "(data,err)=>_('body').after(data??err)";
 		$progressScript = "null";
 		$timeout = 60000;
@@ -743,66 +834,106 @@ function response($content = null, $status = null)
 	responseStatus($status);
 	echo Convert::ToString($content);
 }
+/**
+ * To response a procedure script on the client side
+ * it will destruct after execution
+ * @param mixed $script The script, It could be a script to change the progress value on the client side
+ * @param mixed $status The header status
+ */
+function procedure($script = null, $status = 211)
+{
+	response(Struct::Procedure($script), $status);
+}
+/**
+ * Print this content on the client side then reload the page
+ * @param mixed $message The data that is ready to print
+ * @param string|bool|null $target Send the target url or
+ * true to go forward,
+ * false to go to the previous page,
+ * and null otherwise...
+ * If leave null it will try to find the next or previous request into the getted url,
+ * or will reload the page otherwise
+ * @param int $delay A milliseconds number to drop a delay in breaking page
+ */
+function redirect($message = null, $target = null, $delay = 0, $status = 299)
+{
+	if ($target === false)
+		$target = getBackUrl();
+	elseif ($target === true)
+		$target = getForeUrl();
+	$target = $target ?? receiveGet("Next") ?? receiveGet("Previous");
+	$script = "window.location.assign(" . (isValid($target) ? Script::Convert(Storage::GetUrl($target)) : "location.href") . ")";
+	response((Convert::ToString($message)) .
+		Struct::Script($delay ? "setTimeout(()=>$script, $delay);" : "$script;"), $status);
+}
 
 /**
  * Show a modal output in the client side
  * @param mixed $content The data that is ready to print
  */
-function modal($content = null)
+function modal($content = null, $status = null)
 {
-	return response(Struct::Modal($content));
+	responseStatus($status);
+	echo Struct::Modal($content);
 }
 
 /**
  * Show a message result output to the client side
  * @param mixed $message The data that is ready to print
  */
-function message($message = null)
+function message($message = null, $status = null)
 {
+	responseStatus($status);
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		script(Script::Log($message->getMessage(), "message"));
-	else echo Struct::Result($message);
-}
-/**
- * Show a success result output to the client side
- * @param mixed $message The data that is ready to print
- */
-function success($message = null)
-{
-	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		script(Script::Log($message->getMessage(), "success"));
-	else echo Struct::Success($message);
+	else
+		echo Struct::Message($message);
 }
 /**
  * Show a warning result output to the client side
  * @param mixed $message The data that is ready to print
  */
-function warning($message = null)
+function warning($message = null, $status = null)
 {
+	responseStatus($status);
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		script(Script::Log($message->getMessage(), "warn"));
-	else echo Struct::Warning($message);
+	else
+		echo Struct::Warning($message);
+}
+/**
+ * Show a success result output to the client side
+ * @param mixed $message The data that is ready to print
+ */
+function success($message = null, $status = 200)
+{
+	responseStatus($status);
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		script(Script::Log($message->getMessage(), "success"));
+	else
+		echo Struct::Success($message);
 }
 /**
  * Show an error result output to the client side
  * @param mixed $message The data that is ready to print
  */
-function error($message = null)
+function error($message = null, $status = 400)
 {
-	responseStatus(400);
+	responseStatus($status);
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
 		script(Script::Log($message->getMessage(), "error"));
-	else echo Struct::Error($message);
+	else
+		echo Struct::Error($message);
 }
-
 /**
  * Show message on the client side console or log it in the server side
  * @param mixed $message The data that is ready to print
  * @param string $type The type of the message: log, info, warn, error
  * @param mixed $secret If set to false it will not log in the server side
  */
-function report($message = null, $type = "log", $secret = null)
+function report($message = null, $type = "log", $secret = null, $status = null)
 {
+	responseStatus($status);
 	$log = false;
 	if ($secret !== false)
 		switch (strtolower($type)) {
@@ -827,19 +958,9 @@ function report($message = null, $type = "log", $secret = null)
 				break;
 		}
 	if ($log)
-		file_put_contents(address(\_::$Address->LogAddress . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
+		file_put_contents(path(\_::$Address->LogDirectory . "$log.log"), date('d/M/Y H:i:s') . "\t\"" . preg_replace("/\"/", "\\\"", $message ?? "") . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
 	if (!$secret)
 		script(Script::Log($message, $type));
-}
-
-/**
- * To response progress message on the console
- * @param mixed $message
- */
-function progress($progress = null, $message = null)
-{
-	responseStatus(300);
-    return report(($progress * 100) . "% " . $message);
 }
 
 /**
@@ -888,54 +1009,17 @@ function responseStatus($status = null)
 	}
 	return false;
 }
-/**
- * Print this content on the client side then reload the page
- * @param mixed $content The data that is ready to print
- * @param mixed $url The next url to show after rendering output,
- * @param int $delay A milliseconds number to drop a delay in breaking page
- * if leave null it will try to find the next or previous request into the getted url,
- * or will reload the page otherwise
- * @param $forward Send the target url or send true to go forward, false to go to the previous page, and null otherwise
- */
-function responseBreaker($content = null, $forward = null, $delay = 0)
-{
-	if ($forward === false)
-		$forward = getBackPath();
-	elseif ($forward === true)
-		$forward = getForePath();
-	$forward = $forward ?? receiveGet("Next") ?? receiveGet("Previous");
-	$script = "window.location.assign(" . (isValid($forward) ? Script::Convert(Local::GetUrl($forward)) : "location.href") . ")";
-	echo (Convert::ToString($content)) .
-		Struct::Script($delay ? "setTimeout(()=>$script, $delay);" : "$script;");
-}
 
-/**
- * Replace the output with all the document in the client side
- * @param mixed $output The data that is ready to print
- * @param string $target The url to show without updating the page
- */
-function entireResponse($output = null, $target = null)
-{
-	return response(Struct::Script(
-		Internal::MakeScript(
-			$output,
-			null,
-			"(data,err)=>{"
-			($output ? "document.open();document.write(data??err);document.close();" : "") .
-			($target ? "window.history.pushState(null, null, `" . getFullUrl($target) . "`);" : "") .
-			"}"
-		)
-	));
-}
 /**
  * Clean (erase) the output buffer and turn off output buffering
  */
-function eraseResponse()
+function eraseResponse(): bool|null
 {
 	if (ob_get_level())
 		return ob_end_clean(); // Clean any remaining output buffers
 	return null;
 }
+
 #endregion 
 
 
@@ -949,8 +1033,52 @@ function deliver($output = null, $status = null)
 {
 	eraseResponse(); // Clean any remaining output buffers
 	responseStatus($status);
+	responseHeader("Connection", "close");
 	if ($output) {
-		echo Convert::ToString($output);
+		$output = Convert::ToString($output);
+		responseHeader("Content-Length", strlen($output));
+		echo $output;
+		finalize();
+	} else
+		finalize();
+}
+/**
+ * Print only this JSON on the client side, Clear before then end
+ * @param mixed $output The JSON string or an Object to be converted to JSON that is ready to print
+ * @param mixed $status The header status
+ */
+function deliverJson($output = null, $status = null)
+{
+	eraseResponse(); // Clean any remaining output buffers
+	responseStatus($status);
+	responseType("application/json");
+	responseHeader("Connection", "close");
+	$output = isJson($output) ? $output : Convert::ToJson($output);
+	if ($output) {
+		$output = Convert::ToString($output);
+		responseHeader("Content-Length", strlen($output));
+		echo $output;
+		finalize();
+	} else
+		finalize();
+	finalize();
+}
+/**
+ * Print only this XML on the client side, Clear before then end
+ * @param mixed $output The XML string or an Object to be converted to XML that is ready to print
+ * @param mixed $status The header status
+ */
+function deliverXml($output = null, $status = null)
+{
+	eraseResponse(); // Clean any remaining output buffers
+	responseStatus($status);
+	responseType("application/xml");
+	responseHeader("Connection", "close");
+	$output = is_string($output) ? $output : Convert::ToXmlString($output);
+	if ($output) {
+		$output = Convert::ToString($output);
+		responseHeader("Content-Length", strlen($output));
+		echo $output;
 		finalize();
 	} else
 		finalize();
@@ -963,68 +1091,6 @@ function deliver($output = null, $status = null)
 function deliverScript($output = null, $status = null)
 {
 	deliver(Struct::Script($output), $status);
-}
-/**
- * Print only this JSON on the client side, Clear before then end
- * @param mixed $output The data that is ready to print
- * @param mixed $status The header status
- */
-function deliverJson($output = null, $status = null)
-{
-	eraseResponse(); // Clean any remaining output buffers
-	responseType("application/json");
-	deliver(isJson($output) ? $output : Convert::ToJson($output), $status);
-}
-/**
- * Print only this XML on the client side, Clear before then end
- * @param mixed $output The data that is ready to print
- * @param mixed $status The header status
- */
-function deliverXml($output = null, $status = null)
-{
-	eraseResponse(); // Clean any remaining output buffers
-	responseType("application/xml");
-	deliver(is_string($output) ? $output : Convert::ToXmlString($output), $status);
-}
-/**
- * Sends a file to the client side.
- * @param string $output The absolute or relative path to the file.
- * @param int|null $status The HTTP status code (e.g., 200, 404).
- * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
- * @param bool $attachment Whether to display the file inline in the browser or as an attachment.
- * @param string|null $name Optional filename to force download with a specific name.
- * @throws \Exception If the file path is invalid or the file cannot be read.
- */
-function deliverFile($output = null, $status = null, $type = null, bool $attachment = false, ?string $name = null)
-{
-	eraseResponse(); // Clean any remaining output buffers
-
-	$output = Local::GetFile($output);
-	if ($output)
-		responseStatus($status);
-	else {
-		responseStatus(404);
-		finalize();
-	}
-	if ($type)
-		header("Content-Type: $type");
-	else {
-		// Attempt to guess content type if not provided
-		$finfo = finfo_open(FILEINFO_MIME_TYPE);
-		$type = finfo_file($finfo, $output);
-		finfo_close($finfo);
-		header("Content-Type: " . $type);
-	}
-	// Sanitize the filename
-	$n = explode("/", $output);
-	$name = preg_replace('/[^\w\-.]/', '_', $name ?? end($n));
-	$disposition = $attachment ? 'attachment' : 'inline';
-	header("Content-Disposition: $disposition; filename=\"" . ($name ?? basename($output)) . '"');
-	header('Content-Length: ' . filesize($output));
-	//header("Etag: " . md5_file($output)); // Simple ETag (entity tag) response header is an identifier for a specific version of a resource. It lets caches be more efficient and save
-	//Read and output the file
-	readfile($output);
-	finalize();
 }
 
 /**
@@ -1044,19 +1110,8 @@ function deliverModal($content = null, $status = null)
 function deliverMessage($message = null, $status = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Log($message->getMessage(), "message"), $status ?? 400);
-	return deliver(Struct::Result($message), $status);
-}
-/**
- * To deliver a success result output to the client side
- * @param mixed $message The data that is ready to print
- * @return mixed Printed data
- */
-function deliverSuccess($message = null, $status = null)
-{
-	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Log($message->getMessage(), "success"), $status ?? 400);
-	return deliver(Struct::Success($message), $status);
+		return deliverScript(Script::Log($message->getMessage(), "message"), $status);
+	return deliver(Struct::Message($message), $status);
 }
 /**
  * To deliver a warning result output to the client side
@@ -1066,56 +1121,60 @@ function deliverSuccess($message = null, $status = null)
 function deliverWarning($message = null, $status = null)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Log($message->getMessage(), "warn"), $status ?? 400);
+		return deliverScript(Script::Log($message->getMessage(), "warn"), $status);
 	return deliver(Struct::Warning($message), $status);
+}
+/**
+ * To deliver a success result output to the client side
+ * @param mixed $message The data that is ready to print
+ * @return mixed Printed data
+ */
+function deliverSuccess($message = null, $status = 200)
+{
+	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
+		return deliverScript(Script::Log($message->getMessage(), "success"), $status);
+	return deliver(Struct::Success($message), $status);
 }
 /**
  * To deliver an error result output to the client side
  * @param mixed $message The data that is ready to print
  * @return mixed Printed data
  */
-function deliverError($message = null, $status = null)
+function deliverError($message = null, $status = 400)
 {
 	if (is_a($message, "Exception") || is_subclass_of($message, "Exception"))
-		return deliverScript(Script::Log($message->getMessage(), "error"), $status ?? 400);
+		return deliverScript(Script::Log($message->getMessage(), "error"), $status);
 	return deliver(Struct::Error($message), $status);
 }
 /**
- * To deliver message on the console
- * @param mixed $message
+ * To deliver procedure script on the client side
+ * it will destruct after execution
+ * @param mixed $script The script, It could be a script to change the progress value on the client side
+ * @return void
  */
-function deliverReport($message = null, $type = "log", $secret = null, $status = null)
+function deliverProcedure($script = null, $status = 211)
 {
-	eraseResponse(); // Clean any remaining output buffers
-	responseStatus($status);
-	report($message, $type, $secret);
-	finalize();
-}
-/**
- * To deliver progress message on the console
- * @param mixed $message
- */
-function deliverProgress($progress = null, $message = null, $status = null)
-{
-    return deliverReport(($progress * 100) . "% " . $message, status: $status ?? 300);
+	deliver(Struct::Procedure($script), $status);
 }
 
 /**
  * Print only this output on the client side then reload the page
- * @param mixed $output The data that is ready to print
- * @param mixed $status The header status
- * @param $forward Send the target url or send true to go forward, false to go to the previous page, and null otherwise
- * @param int $delay A milliseconds number to drop a delay in breaking page
- * if leave null it will try to find the next or previous request into the getted url,
+ * @param mixed $message The data that is ready to print
+ * @param string|bool|null $target Send the target url or
+ * true to go forward,
+ * false to go to the previous page,
+ * and null otherwise...
+ * If leave null it will try to find the next or previous request into the getted url,
  * or will reload the page otherwise
+ * @param int $delay A milliseconds number to drop a delay in breaking page
  */
-function deliverBreaker($output = null, $status = null, $forward = null, $delay = 0)
+function deliverRedirect($output = null, $target = null, $delay = 0, $status = 299)
 {
-	eraseResponse(); // Clean any remaining output buffers
-	responseStatus($status);
-	responseBreaker($output, $forward, $delay);
+	eraseResponse();
+	redirect($output, $target, $delay, $status);
 	finalize();
 }
+
 #endregion 
 
 
@@ -1187,12 +1246,12 @@ function share($output = null, $with = null)
  */
 function auth($minaccess = 0, bool|string $assign = true, bool|string|int|null $exit = true)
 {
-	if (isValid(\_::$Router->StatusMode)) {
+	if (isValid(\_::$Front->StatusMode)) {
 		if ($assign) {
 			if (is_string($assign))
 				load($assign);
 			else
-				route(\_::$Router->StatusMode ?? \_::$Router->RestrictionRouteName, alternative: "403");
+				route(\_::$Front->StatusMode ?? \_::$Front->RestrictionRouteName, alternative: "403");
 		}
 		if ($exit !== false)
 			finalize($exit);
@@ -1208,7 +1267,7 @@ function auth($minaccess = 0, bool|string $assign = true, bool|string|int|null $
 				if (is_string($assign))
 					load($assign);
 				else
-					route(\_::$Router->RestrictionRouteName, alternative: "401");
+					route(\_::$Front->RestrictionRouteName, alternative: "401");
 			}
 			if ($exit !== false)
 				finalize($exit);
@@ -1222,10 +1281,10 @@ function auth($minaccess = 0, bool|string $assign = true, bool|string|int|null $
 		if (is_string($assign))
 			load($assign);
 		elseif (
-			startsWith(\_::$User->Request, \_::$User->InHandlerPath) ||
-			startsWith(\_::$User->Request, \_::$User->UpHandlerPath) ||
-			startsWith(\_::$User->Request, \_::$User->RecoverHandlerPath) ||
-			startsWith(\_::$User->Request, \_::$User->ActiveHandlerPath)
+			startsWith(\_::$Address->UrlRequest, \_::$User->InHandlerPath) ||
+			startsWith(\_::$Address->UrlRequest, \_::$User->UpHandlerPath) ||
+			startsWith(\_::$Address->UrlRequest, \_::$User->RecoverHandlerPath) ||
+			startsWith(\_::$Address->UrlRequest, \_::$User->ActiveHandlerPath)
 		)
 			return true;
 		else
@@ -1252,11 +1311,11 @@ function setTimer($timeout = 60000, $key = null)
 {
 	if ($timeout < 1)
 		return false;
-	return setSecret(getClientCode("Timer_" . ($key ?? \_::$User->Direction)), time() + max(1, $timeout / 1000));
+	return setSecret(getClientCode("Timer_" . ($key ?? \_::$Address->UrlPath)), time() + max(1, $timeout / 1000));
 }
 function getTimer($key = null)
 {
-	$key = getClientCode("Timer_" . ($key ?? \_::$User->Direction));
+	$key = getClientCode("Timer_" . ($key ?? \_::$Address->UrlPath));
 	if (hasSecret($key)) {
 		$remains = getSecret($key) - time();
 		if ($remains <= 0)
@@ -1268,7 +1327,7 @@ function getTimer($key = null)
 function popTimer($key = null)
 {
 	$remains = getTimer($key);
-	popSecret(getClientCode("Timer_" . ($key ?? \_::$User->Direction)));
+	popSecret(getClientCode("Timer_" . ($key ?? \_::$Address->UrlPath)));
 	return $remains;
 }
 function hasTimer($key = null)
@@ -1341,17 +1400,17 @@ function decrypt($cipher, $key = null)
  * @param false|null|string|array $extension The extention like ".jpg" (leave null for default value ".php")
  * @param string|int $origin The start layer of the sequences (a zero started index)
  * @param int $depth How much layers it should iterate in searching
- * @param string $address [optional] To get the filal found address.
  * @return string|null The correct path of the file or null if its could not find
  */
-function address(string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999)
+function path(string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999)
 {
 	$path = str_replace(["\\", "/"], DIRECTORY_SEPARATOR, $path ?? "");
 	$extension = $extension === false ? "" : $extension ?? \_::$Extension;
 	$path = preg_replace("/(?<!\\" . DIRECTORY_SEPARATOR . ")\\" . DIRECTORY_SEPARATOR . "$/", DIRECTORY_SEPARATOR . "index", $path);
 	if (!endsWith($path, $extension) && !endsWith($path, DIRECTORY_SEPARATOR))
 		$path .= $extension;
-	if (file_exists($path)) return $path;
+	if (file_exists($path))
+		return $path;
 	//$toSeq = $depth < 0 ? (count(\_::$Sequence) + $depth) : ($origin + $depth);
 	if (is_string($origin)) {
 		$key = null;
@@ -1366,7 +1425,7 @@ function address(string|null $path = null, $extension = false, string|int $origi
 		if (is_null($key))
 			$origin = 0;
 	}
-	$address = null;
+	$pres = null;
 	$scount = count(\_::$Sequence);
 	$origin = $origin < 0 ? ($scount + $origin) : min($scount, $origin);
 	$toSeq = $depth < 0 ? ($scount + $depth) : min($scount, $origin + $depth);
@@ -1376,8 +1435,8 @@ function address(string|null $path = null, $extension = false, string|int $origi
 		if (++$seqInd < $origin)
 			continue;
 		elseif ($seqInd < $toSeq) {
-			if (file_exists($address = $dir . $path))
-				return $address;
+			if (file_exists($pres = $dir . $path))
+				return $pres;
 		} else
 			return null;
 	return null;
@@ -1393,13 +1452,13 @@ function address(string|null $path = null, $extension = false, string|int $origi
  * @param int $depth How much layers it should iterate to find the correct address
  * @param int $offset [optional] The offset where the reading starts.
  * @param int|null $length [optional] Maximum length of data read. The default is to read until end of file is reached.
- * @param string $address [optional] To get the filal found or maked address.
+ * @param string $fullPath [optional] To get the filal found or maked address.
  * @return string|false|null The function returns the read data or flse on failure or null if could not find the file.
  */
-function open(string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $offset = 0, int|null $length = null, &$address = null)
+function open(string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $offset = 0, int|null $length = null, &$fullPath = null)
 {
-	$address = address($path, $extension, $origin, $depth);
-	return $address ? file_get_contents($address, offset: $offset, length: $length) : null;
+	$fullPath = path($path, $extension, $origin, $depth);
+	return $fullPath ? file_get_contents($fullPath, offset: $offset, length: $length) : null;
 }
 /**
  * To write data into an exists file or by a relative path or the new file by the exact path
@@ -1408,12 +1467,13 @@ function open(string|null $path = null, $extension = false, string|int $origin =
  * @param false|null|string|array $extension The extention like ".jpg" (leave null for default value ".php")
  * @param string|int $origin The start layer of the sequences (a zero started index)
  * @param int $depth How much layers it should iterate to find the correct address
+ * @param string $fullPath [optional] To get the filal found or maked address.
  * @return string|false|null The function returns the number of bytes that were written to the file, or false on failure.
  */
-function save($data, string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $flags = 0, &$address = null)
+function save($data, string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $flags = 0, &$fullPath = null)
 {
-	$address = address($path, $extension, $origin, $depth);
-	return file_put_contents($address = $address ?: ($path ? Local::GetAbsoluteAddress($path) : Local::GenerateAddress()), Convert::ToString($data), flags: $flags);
+	$fullPath = path($path, $extension, $origin, $depth);
+	return file_put_contents($fullPath = $fullPath ?: ($path ? Storage::GetAbsoluteAddress($path) : Storage::GenerateAddress()), Convert::ToString($data), flags: $flags);
 }
 
 /**
@@ -1487,8 +1547,8 @@ function using(string|null $directory, string|null $name = null, mixed $data = [
 		usingBefores($directory, $used = $name);
 		if (
 			$path =
-			address("$directory$name", $extension, $origin, $depth) ??
-			address($directory . ($used = $alternative), $extension, $origin, $depth)
+			path("$directory$name", $extension, $origin, $depth) ??
+			path($directory . ($used = $alternative), $extension, $origin, $depth)
 		)
 			return $require ?
 				requiring(path: $path, data: $data, print: $print, default: $default, once: $once) :
@@ -1576,7 +1636,7 @@ function runSequence($name, mixed $data = [], bool $print = true, string|int $or
 	$depth = min($depth, count(\_::$Sequence)) - 1;
 	$res = [];
 	for (; $origin <= $depth; $depth--)
-		$res[] = using(\_::$Address->Directory, $name, $data, $print, $depth, 1, $alternative, $default, require: $require, once: $once);
+		$res[] = using(\_::$Address->GlobalDirectory, $name, $data, $print, $depth, 1, $alternative, $default, require: $require, once: $once);
 	return $res;
 }
 /**
@@ -1588,7 +1648,7 @@ function runSequence($name, mixed $data = [], bool $print = true, string|int $or
  */
 function run($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, bool $require = true, bool $once = true)
 {
-	return using(\_::$Address->Directory, $name, $data, $print, $origin, $depth, $alternative, $default, require: $require, once: $once);
+	return using(\_::$Address->GlobalDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, require: $require, once: $once);
 }
 
 /**
@@ -1600,7 +1660,7 @@ function run($name, mixed $data = [], bool $print = true, string|int $origin = 0
  */
 function model($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true);
+	return using(\_::$Address->GlobalModelDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true);
 }
 /**
  * To interprete, the specified LibraryName
@@ -1611,7 +1671,7 @@ function model($name, mixed $data = [], bool $print = true, string|int $origin =
  */
 function library($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->LibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Library\\$used" : null;
+	return using(\_::$Address->GlobalLibraryDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Library\\$used" : null;
 }
 /**
  * To interprete, the specified ComponentName
@@ -1622,7 +1682,7 @@ function library($name, mixed $data = [], bool $print = true, string|int $origin
  */
 function component($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Component\\$used" : null;
+	return using(\_::$Address->GlobalComponentDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Component\\$used" : null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -1633,7 +1693,7 @@ function component($name, mixed $data = [], bool $print = true, string|int $orig
  */
 function module($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Module\\$used" : null;
+	return using(\_::$Address->GlobalModuleDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Module\\$used" : null;
 }
 /**
  * To interprete, the specified TemplateName
@@ -1644,7 +1704,7 @@ function module($name, mixed $data = [], bool $print = true, string|int $origin 
  */
 function template($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->TemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
+	return using(\_::$Address->GlobalTemplateDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
 
 /**
@@ -1656,7 +1716,7 @@ function template($name, mixed $data = [], bool $print = true, string|int $origi
  */
 function view($name = null, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ViewDirectory, $name ?? \_::$Front->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default, once: true);
+	return using(\_::$Address->GlobalViewDirectory, $name ?? \_::$Front->DefaultViewName, $data, $print, $origin, $depth, $alternative, $default, once: true);
 }
 
 /**
@@ -1668,7 +1728,7 @@ function view($name = null, mixed $data = [], bool $print = true, string|int $or
  */
 function region($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->RegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->GlobalRegionDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified pagename
@@ -1679,7 +1739,7 @@ function region($name, mixed $data = [], bool $print = true, string|int $origin 
  */
 function page($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->PageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->GlobalPageDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified partname
@@ -1690,7 +1750,7 @@ function page($name, mixed $data = [], bool $print = true, string|int $origin = 
  */
 function part($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->PartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->GlobalPartDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 /**
  * To interprete, the specified computionname
@@ -1701,7 +1761,7 @@ function part($name, mixed $data = [], bool $print = true, string|int $origin = 
  */
 function compute($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->ComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->GlobalComputeDirectory, $name, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
@@ -1713,7 +1773,7 @@ function compute($name, mixed $data = [], bool $print = true, string|int $origin
  */
 function route($name = null, mixed $data = null, bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->RouteDirectory, $name ?? \_::$Router->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->GlobalRouteDirectory, $name ?? \_::$Front->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
@@ -1741,7 +1801,7 @@ function table(string $name, bool $prefix = true, string|int $origin = 0, int $d
  */
 function asset($directory, string|null $name = null, string|array|null $extensions = null, $optimize = false, string|int $origin = 0, int $depth = 999999, $default = null)
 {
-	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Address->AssetRoot, $directory ?? "");
+	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Address->AssetRootPath, $directory ?? "");
 	$i = 0;
 	if (!is_array($extensions))
 		$extensions = [$extensions ?? ""];
@@ -1749,7 +1809,7 @@ function asset($directory, string|null $name = null, string|array|null $extensio
 	try {
 		usingBefores($directory, $name);
 		do {
-			if ($path = address("$directory$name", $extension, $origin, $depth))
+			if ($path = path("$directory$name", $extension, $origin, $depth))
 				return getFullUrl($path, $optimize);
 		} while ($extension = isset($extensions[$i]) ? $extensions[$i++] : null);
 		return $default;
@@ -1777,12 +1837,13 @@ function asset($directory, string|null $name = null, string|array|null $extensio
  * @param int $depth How much layers it should iterate to find the correct address
  * @param int $offset [optional] The offset where the reading starts.
  * @param int|null $length [optional] Maximum length of data read. The default is to read until end of file is reached.
- * @param string $address [optional] To get the filal found or maked address.
+ * @param string $fullPath [optional] To get the filal found or maked address.
  * @return mixed Printed data
  */
-function render($content = null, $path = null, $replacements = [], $extension = false, string|int $origin = 0, int $depth = 999999, int $offset = 0, int|null $length = null, &$address = null)
+function render($content = null, $path = null, $replacements = [], $extension = false, string|int $origin = 0, int $depth = 999999, int $offset = 0, int|null $length = null, &$fullPath = null)
 {
-	if($path) $content .= open($path, $extension, $origin, $depth, $offset, $length, $address);
+	if ($path = $path ?? $fullPath)
+		$content .= open($path, $extension, $origin, $depth, $offset, $length, $fullPath);
 	echo $content = Struct::Convert($replacements ? decode($content, Convert::ToItems($replacements)) : $content);
 	return $content;
 }
@@ -1792,8 +1853,10 @@ function render($content = null, $path = null, $replacements = [], $extension = 
  */
 function struct($content = null, $source = null, ...$attributes)
 {
-	if($source) echo $content = Struct::Embed($content, $source, ...$attributes);
-	else echo $content = Struct::Section($content, ...$attributes);
+	if ($source)
+		echo $content = Struct::Embed($content, $source, ...$attributes);
+	else
+		echo $content = Struct::Section($content, ...$attributes);
 	return $content;
 }
 /**
@@ -2397,23 +2460,23 @@ function getId($random = false): int
 
 /**
  * Get the full part of the referrer url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
  */
-function getBackPath()
+function getBackUrl()
 {
 	return $_SERVER['HTTP_REFERER'] ?? null ?: receiveGet("BackPath") ?? receiveGet("Previous");
 }
 /**
  * Get the full part of the referrer url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
  */
-function getForePath()
+function getForeUrl()
 {
 	return receiveGet("ForePath") ?? receiveGet("Next");
 }
 /**
  * Get the full part of a url pointed to cache status
- * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
+ * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp&v=3.21"
  * @return string|null
  */
 function getFullUrl(string|null $path = null, bool $optimize = true): string|null
@@ -2421,107 +2484,118 @@ function getFullUrl(string|null $path = null, bool $optimize = true): string|nul
 	if ($path === null)
 		$path = getUrl();
 	if ($optimize)
-		return Local::OptimizeUrl(Local::GetUrl($path));
-	return Local::GetUrl($path);
+		return Storage::OptimizeUrl(Storage::GetUrl($path));
+	return Storage::GetUrl($path);
 }
 /**
  * Get the full part of a url
- * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp"
+ * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp"
  * @return string|null
  */
-function getUrl(string|null $path = null): string|null
+function getUrl(string|null $url = null): string|null
 {
-	if ($path === null)
-		$path = getHost() . ($_SERVER["REQUEST_URI"] ?? null ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING'] ?? null ? "?" . $_SERVER['QUERY_STRING'] : "")));
-	return preg_replace("/^([\/\\\])/", rtrim(getHost(), "/\\") . "$1", $path);
-}
-/**
- * Get the host part of a url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:5046"
- * @return string|null
- */
-function getHost(string|null $path = null): string|null
-{
-	$pat = "/^\w+\:\/*[^\/]+/";
-	if ($path == null || !preg_match($pat, $path))
-		$path = ((empty($https = $_SERVER['HTTPS'] ?? null) || $https == 'off' || ($_SERVER['SERVER_PORT'] ?? null) != 443) ? "http" : "https") . "://" . ($_SERVER["HTTP_HOST"] ?? null);
-	return preg_Find($pat, $path) ?? "";
-}
-/**
- * Get the site name part of a url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "www.mimfa.net"
- * @return string|null
- */
-function getSite(string|null $path = null): string|null
-{
-	return preg_replace("/(^\w+:\/*)|(\:\d+$)/", "", getHost($path));
-}
-/**
- * Get the domain name part of a url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "mimfa.net"
- * @return string|null
- */
-function getDomain(string|null $path = null): string|null
-{
-	return preg_replace("/(^\w+:\/*(www\.)?)|(\:\d+$)/", "", getHost($path));
+	if ($url === null)
+		$url = getUrlOrigin() . ($_SERVER["REQUEST_URI"] ?? null ?: (($_SERVER["PHP_SELF"] ?? null) . ($_SERVER['QUERY_STRING'] ?? null ? "?" . $_SERVER['QUERY_STRING'] : "")));
+	return preg_replace("/^([\/\\\])/", rtrim(getUrlOrigin(), "/\\") . "$1", $url);
 }
 /**
  * Get the path part of a url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net/Category/mimfa/service/web.php"
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net/Category/mimfa/service/web.php"
  * @return string|null
  */
-function getPath(string|null $path = null): string|null
+function getUrlBase(string|null $url = null): string|null
 {
-	return preg_Find("/(^[^\?#]*)/", $path ?? getUrl());
+	return preg_Find("/(^[^\?#]*)/", $url ?? getUrl());
+}
+/**
+ * Get the host part of a url
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "https://www.mimfa.net:80"
+ * @return string|null
+ */
+function getUrlOrigin(string|null $url = null): string|null
+{
+	$pat = "/^\w+\:\/*[^\/]+/";
+	if ($url == null || !preg_match($pat, $url))
+		$url = ((empty($https = $_SERVER['HTTPS'] ?? null) || $https == 'off' || ($_SERVER['SERVER_PORT'] ?? null) != 443) ? "http" : "https") . "://" . ($_SERVER["HTTP_HOST"] ?? null);
+	return preg_Find($pat, $url) ?? "";
 }
 /**
  * Get the request part of a url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "/Category/mimfa/service/web.php?p=3&l=10#serp"
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "/Category/mimfa/service/web.php?p=3&l=10#serp"
  * @return string|null
  */
-function getRequest(string|null $path = null): string|null
+function getUrlRequest(string|null $url = null): string|null
 {
-	if ($path == null)
-		$path = getUrl();
-	return preg_Replace("/(^\w+:\/*[^\/]+)/", "", $path);
+	if ($url == null)
+		$url = getUrl();
+	return preg_Replace("/(^\w+:\/*[^\/]+)/", "", $url);
 }
 /**
  * Get the direction part of a url from the root
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "Category/mimfa/service/web.php"
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "/Category/mimfa/service/web.php"
  * @return string|null
  */
-function getDirection(string|null $path = null): string|null
+function getUrlPath(string|null $url = null): string|null
 {
-	if ($path == null)
-		$path = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
-	return preg_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/", "", $path);
+	if ($url == null)
+		$url = getUrl();
+	return preg_Replace("/(^\w+:\/*[^\/]+)|([\?#].+$)/", "", $url);
+}
+/**
+ * Get the direction part of a url from the root
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "Category/mimfa/service/web.php"
+ * @return string|null
+ */
+function getUrlRoute(string|null $url = null): string|null
+{
+	if ($url == null)
+		$url = getUrl();//ltrim($_SERVER["REQUEST_URI"],"\\\/");
+	return preg_Replace("/(^\w+:\/*[^\/]+\/)|([\?#].+$)/", "", $url);
 }
 /**
  * Get the last part of a direction url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "web.php"
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "web.php"
  * @return string|null
  */
-function getPage(string|null $path = null): string|null
+function getUrlResource(string|null $url = null): string|null
 {
-	return last(preg_split("/[\\\\\/]/i", getDirection($path)));
+	return last(preg_split("/[\\\\\/]/i", getUrlRoute($url)));
+}
+/**
+ * Get the site name part of a url
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "www.mimfa.net"
+ * @return string|null
+ */
+function getUrlHost(string|null $url = null): string|null
+{
+	return preg_replace("/(^\w+:\/*)|(\:\d+$)/", "", getUrlOrigin($url));
+}
+/**
+ * Get the domain name part of a url
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "mimfa.net"
+ * @return string|null
+ */
+function getUrlDomain(string|null $url = null): string|null
+{
+	return preg_replace("/(^\w+:\/*(www\.)?)|(\:\d+$)/", "", getUrlOrigin($url));
 }
 /**
  * Get the query part of a url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "p=3&l=10"
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "p=3&l=10"
  * @return string|null
  */
-function getQuery(string|null $path = null): string|null
+function getUrlQuery(string|null $url = null): string|null
 {
-	return preg_Find("/((?<=\?)[^#]*(?=$|#))/", $path ?? getUrl());
+	return preg_Find("/((?<=\?)[^#]*(?=$|#))/", $url ?? getUrl());
 }
 /**
  * Get the fragment or anchor part of a url
- * @example: "https://www.mimfa.net:5046/Category/mimfa/service/web.php?p=3&l=10#serp" => "serp"
+ * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp" => "serp"
  * @return string|null
  */
-function getFragment(string|null $path = null): string|null
+function getUrlFragment(string|null $url = null): string|null
 {
-	return preg_Find("/((?<=#)[^\/\?#\\\]*(?=$|[\/\?#\\\]))/", $path ?? getUrl());
+	return preg_Find("/((?<=#)[^\/\?#\\\]*(?=$|[\/\?#\\\]))/", $url ?? getUrl());
 }
 
 /**
@@ -2658,9 +2732,9 @@ function getClientCode($key = null): string|null
  * @example: "do-not-reply@mimfa.net"
  * @return string|null
  */
-function createEmail($name = "do-not-reply", string|null $path = null): string|null
+function createEmail($name = "do-not-reply", string|null $host = null): string|null
 {
-	return $name . "@" . getDomain($path);
+	return $name . "@" . getUrlDomain($host);
 }
 
 #endregion 
@@ -2676,7 +2750,7 @@ function cleanupTemp($full = true)
 {
 	$i = 0;
 	if ($full)
-		$i += cleanup(\_::$Address->TempAddress);
+		$i += cleanup(\_::$Address->TempDirectory);
 	else
 		foreach ($_FILES as $file)
 			if (isset($file["tmp_name"]) && is_file($file["tmp_name"]) && ++$i)
@@ -2699,8 +2773,8 @@ function cleanup($directory = null)
 				rmdir($file);
 			}
 	} else {
-		$i += cleanup(\_::$Address->TempAddress);
-		$i += cleanup(\_::$Address->LogAddress);
+		$i += cleanup(\_::$Address->TempDirectory);
+		$i += cleanup(\_::$Address->LogDirectory);
 		clearSecrets();
 		\_::$User->Session->Clear();
 	}
@@ -2782,7 +2856,7 @@ function getSecret($key)
 		unset($_SESSION[$key]);
 		return null;
 	}
-	if (str_starts_with(\_::$User->Request ?? "/", $item['path'])) {
+	if (str_starts_with(\_::$Address->UrlRequest ?? "/", $item['path'])) {
 		$value = $item['secure'] ? decrypt($item['value']) : $item['value'];
 		return ($item['convert'] ?? null) ? Convert::FromJson($value) : $value;
 	} else
@@ -2812,7 +2886,7 @@ function hasSecret($key)
 		popSecret($key);
 		return false;
 	}
-	if (str_starts_with(\_::$User->Request ?? "/", $item['path']))
+	if (str_starts_with(\_::$Address->UrlRequest ?? "/", $item['path']))
 		return true;
 	else
 		return false;
@@ -2900,21 +2974,21 @@ function isAseq(string|null $directory): bool
 }
 function isBase(string|null $directory): bool
 {
-	return Local::FileExists($directory . "global/BackBase.php")
-		&& Local::FileExists($directory . "Front.php")
-		&& Local::FileExists($directory . "global.php")
-		&& Local::FileExists($directory . "initialize.php");
+	return Storage::FileExists($directory . "global/BackBase.php")
+		&& Storage::FileExists($directory . "Front.php")
+		&& Storage::FileExists($directory . "global.php")
+		&& Storage::FileExists($directory . "initialize.php");
 }
 function isInAseq(string|null $filePath): bool
 {
-	$filePath = preg_replace("/^\\\\/", \_::$Address->Directory, str_replace(\_::$Address->Directory, "", trim($filePath ?? getUrl())));
+	$filePath = preg_replace("/^\\\\/", \_::$Address->GlobalDirectory, str_replace(\_::$Address->GlobalDirectory, "", trim($filePath ?? getUrl())));
 	if (isFormat($filePath, \_::$Extension))
 		return file_exists($filePath);
 	return is_dir($filePath) || file_exists($filePath . \_::$Extension);
 }
 function isInBase(string|null $filePath): bool
 {
-	$filePath = __DIR__ . DIRECTORY_SEPARATOR . preg_replace("/^\\\\/", "", str_replace(\_::$Address->Directory, "", trim($filePath ?? getUrl())));
+	$filePath = __DIR__ . DIRECTORY_SEPARATOR . preg_replace("/^\\\\/", "", str_replace(\_::$Address->GlobalDirectory, "", trim($filePath ?? getUrl())));
 	if (isFormat($filePath, \_::$Extension))
 		return file_exists($filePath);
 	return is_dir($filePath) || file_exists($filePath . \_::$Extension);
@@ -2928,7 +3002,7 @@ function isInBase(string|null $filePath): bool
  */
 function isFormat(string|null $path, string|array ...$formats)
 {
-	$p = getPath(strtolower($path));
+	$p = getUrlBase(strtolower($path));
 	foreach ($formats as $format)
 		if (is_array($format)) {
 			foreach ($format as $forma)
@@ -2948,7 +3022,7 @@ function isFile(string|null $url, string ...$formats): bool
 {
 	if (count($formats) == 0)
 		array_push($formats, \_::$Back->AcceptableFileFormats, \_::$Back->AcceptableDocumentFormats, \_::$Back->AcceptableImageFormats, \_::$Back->AcceptableAudioFormats, \_::$Back->AcceptableVideoFormats);
-	return isUrl($url) && isFormat(getPath($url), $formats);
+	return isUrl($url) && isFormat(getUrlBase($url), $formats);
 }
 /**
  * Check if the string is a relative or absolute URL
@@ -3048,22 +3122,22 @@ function isStatic($value): bool
 /**
  * Remove all changeable command signs from a url (such as ../ or /./.)
  * Change all backslashes to the slash
- * @param string $address The source address
+ * @param string $url The source address
  * @return array|string|null
  */
-function normalizeUrl(string $address): string|null
+function normalizeUrl(string $url): string|null
 {
-	return str_replace(["\\", " "], ["/", "%20"], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $address));
+	return str_replace(["\\", " "], ["/", "%20"], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $url));
 }
 /**
  * Remove all changeable command signs from a path (such as ../ or /./.)
  * Change all slashes/backslashes to the DIRECTORY_SEPARATOR
- * @param string $address The source address
+ * @param string $path The source address
  * @return array|string|null
  */
-function normalizePath(string $address): string|null
+function normalizePath(string $path): string|null
 {
-	return str_replace(["/", "\\", "%20"], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, " "], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $address));
+	return str_replace(["/", "\\", "%20"], [DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, " "], preg_replace("/([\/\\\]\.+)|(\.+[\/\\\])/", "", $path));
 }
 
 /**
@@ -3160,48 +3234,49 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 	);
 	if ($translating && \_::$Front->AllowTranslate)
 		$value = \_::$Front->Translate->Get($value, $lang, $depth);
-	else $value = Translate::Trim($value);
+	else
+		$value = Translate::Trim($value);
 	if ($styling)
 		$value = Style::DoStyle(
 			$value,
 			\_::$Front->KeyWords
 		);
 	if ($referring ?? $styling) {
-		if (\_::$Back->AllowContentReferring)
+		if (\_::$Front->AllowContentReferring)
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Address->ContentRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->ContentRootPath . strtolower($k));
 				},
 				keyWords: table("Content")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
-		if (\_::$Back->AllowCategoryReferring)
+		if (\_::$Front->AllowCategoryReferring)
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Address->CategoryRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->CategoryRootPath . strtolower($k));
 				},
 				keyWords: table("Category")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
-		if (\_::$Back->AllowTagReferring)
+		if (\_::$Front->AllowTagReferring)
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Address->TagRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->TagRootPath . strtolower($k));
 				},
 				keyWords: table("Tag")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
 				caseSensitive: true
 			);
-		if (\_::$Back->AllowUserReferring)
+		if (\_::$Front->AllowUserReferring)
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Address->UserRoot . strtolower($k));
+					return Struct::Link($v, \_::$Address->UserRootPath . strtolower($k));
 				},
 				keyWords: table("User")->SelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
 				both: false,
@@ -3328,15 +3403,15 @@ function array_find_keys($array, callable $searching)
 //  */
 // function test_address($directory = null, string $name = "Configuration")
 // {
-// 	echo addressing($directory ?? \_::$Address->Directory, $name);
+// 	echo addressing($directory ?? \_::$Address->GlobalDirectory, $name);
 // 	echo "<br>ASEQ: " . \_::$Address->Name;
-// 	echo "<br>ASEQ->Path: " . \_::$User->Path;
-// 	echo "<br>ASEQ->Dir: " . \_::$Address->Directory;
+// 	echo "<br>ASEQ->Path: " . \_::$Address->UrlBase;
+// 	echo "<br>ASEQ->Dir: " . \_::$Address->GlobalDirectory;
 // 	echo "<br>OTHER ASEQ: <br>";
 // 	var_dump(\_::$Address);
 // 	echo "<br>BASE: " . \_::$Address->Name;
-// 	echo "<br>BASE->Path: " . \_::$User->Path;
-// 	echo "<br>BASE->Dir: " . \_::$Address->Directory;
+// 	echo "<br>BASE->Path: " . \_::$Address->UrlBase;
+// 	echo "<br>BASE->Dir: " . \_::$Address->GlobalDirectory;
 // 	echo "<br>OTHER BASE: <br>";
 // 	var_dump(\_::$Address);
 // 	echo "<br><br>ADDRESSES: <br>";
@@ -3344,14 +3419,14 @@ function array_find_keys($array, callable $searching)
 // }
 // function test_url()
 // {
-// 	echo "<br>URL: " . \_::$User->Url;
-// 	echo "<br>HOST: " . \_::$User->Host;
-// 	echo "<br>SITE: " . \_::$User->Site;
-// 	echo "<br>PATH: " . \_::$User->Path;
-// 	echo "<br>REQUEST: " . \_::$User->Request;
-// 	echo "<br>DIRECTION: " . \_::$User->Direction;
-// 	echo "<br>QUERY: " . \_::$User->Query;
-// 	echo "<br>FRAGMENT: " . \_::$User->Fragment;
+// 	echo "<br>URL: " . \_::$Address->Url;
+// 	echo "<br>HOST: " . \_::$Address->UrlOrigin;
+// 	echo "<br>SITE: " . \_::$Address->UrlHost;
+// 	echo "<br>PATH: " . \_::$Address->UrlBase;
+// 	echo "<br>REQUEST: " . \_::$Address->UrlRequest;
+// 	echo "<br>DIRECTION: " . \_::$Address->UrlRoute;
+// 	echo "<br>QUERY: " . \_::$Address->UrlQuery;
+// 	echo "<br>FRAGMENT: " . \_::$Address->UrlFragment;
 // }
 // function test_access($func, $res = null)
 // {

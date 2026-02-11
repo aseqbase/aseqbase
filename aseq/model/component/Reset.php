@@ -1,2 +1,2 @@
 <?php
-\_::$Front->Libraries[] = MiMFa\Library\Struct::Style(null, asset(\_::$Address->StyleDirectory,'reset.css', optimize: true));
+\_::$Front->Libraries[] = MiMFa\Library\Struct::Style(null, asset(\_::$Address->GlobalStyleDirectory,'reset.css', optimize: true));

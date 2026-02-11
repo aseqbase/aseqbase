@@ -86,7 +86,7 @@ class Forum extends Content
 
      public function GetMessage($subject, $message, $icon = "clock")
      {
-          return Struct::Division(Struct::Image(null, $icon) . Struct::Heading3($subject) . Struct::Result($message), ["class" => "be center"]);
+          return Struct::Division(Struct::Image(null, $icon) . Struct::Heading3($subject) . Struct::Message($message), ["class" => "be center"]);
      }
 
 }

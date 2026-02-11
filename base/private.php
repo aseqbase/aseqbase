@@ -5,4 +5,4 @@ if(
 ) exit(401);
 
 require_once(__DIR__.DIRECTORY_SEPARATOR."initialize.php");
-if(auth(\_::$User->AdminAccess)) run(normalizePath(\_::$User->Direction));
+if(auth(\_::$User->AdminAccess)) run(normalizePath(\_::$Address->UrlRoute));

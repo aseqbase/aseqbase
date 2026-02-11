@@ -2,7 +2,7 @@
 $viewData = pop($data, "View");
 view(get($viewData, "ViewName")??"message", data: [
     "WindowTitle" => \_::$Front->FullName,
-    "WindowLogo" => MiMFa\Library\Local::GetUrl(\_::$Front->LogoPath),
+    "WindowLogo" => MiMFa\Library\Storage::GetUrl(\_::$Front->LogoPath),
     "SupTitle" => \_::$Front->Owner,
     "Title" => \_::$Front->Name,
     "SupDescription" => "Internal Server Error 500",

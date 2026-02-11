@@ -5,9 +5,9 @@ runSequence("route");//Is deprecated and will remove from version 8
 initialize();
 if (auth(\_::$User->VisitAccess, assign: true)) {
     customize();
-    if (isValid(\_::$User->Request))
+    if (isValid(\_::$Address->UrlRequest))
         \_::$Router->Handle();
     else
-        route(\_::$Router->DefaultRouteName);
+        route(\_::$Front->DefaultRouteName);
 }
 finalize();

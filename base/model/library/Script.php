@@ -154,17 +154,17 @@ class Script
         return isEmpty($val) ? "0" : ($isarr ? "[" + $val + "]" : $val);
     }
 
-    public static function Send($method = null, $target = null, $data = null, $selector = 'body', $success = null, $error = null, $ready = null, $progress = null, $timeout = null, $async = true)
+    public static function Send($method = null, $target = null, $data = null, $selector = 'body', $onSuccessScript = null, $onErrorScript = null, $onMessageScript = null, $onProgressScript = null, $timeout = null, $async = true)
     {
         return "send(" .
             self::Convert($method) . "," .
             self::Convert($target) . "," .
             self::Convert($data) . "," .
             self::Convert($selector) . "," .
-            (is_string($success) ? $success : (is_null($success) ? "null" : ("(data,err)=>" . self::Convert($success)))) . "," .
-            (is_string($error) ? $error : (is_null($error) ? "null" : ("(data,err)=>" . self::Convert($error)))) . "," .
-            (is_string($ready) ? $ready : (is_null($ready) ? "null" : ("(data,err)=>" . self::Convert($ready)))) . "," .
-            (is_string($progress) ? $progress : (is_null($progress) ? "null" : ("(data,err)=>" . self::Convert($progress)))) . "," .
+            (is_string($onSuccessScript) ? $onSuccessScript : (is_null($onSuccessScript) ? "null" : ("(data,err)=>" . self::Convert($onSuccessScript)))) . "," .
+            (is_string($onErrorScript) ? $onErrorScript : (is_null($onErrorScript) ? "null" : ("(data,err)=>" . self::Convert($onErrorScript)))) . "," .
+            (is_string($onMessageScript) ? $onMessageScript : (is_null($onMessageScript) ? "null" : ("(data,err)=>" . self::Convert($onMessageScript)))) . "," .
+            (is_string($onProgressScript) ? $onProgressScript : (is_null($onProgressScript) ? "null" : ("(data,err)=>" . self::Convert($onProgressScript)))) . "," .
             self::Convert($timeout) . "," .
             self::Convert($async)
             . ")";
@@ -177,12 +177,13 @@ class Script
      * @param int $timeout The timeout for uploading the file in milliseconds
      * @return string The script part
      */
-    public static function Upload($target = null, $extensions = null, $minSize = null, $maxSize = null, $success = null, $error = null, $ready = null, $progress = null, $timeout = 60000, $multiple = false, $method = "FILE")
+    public static function Upload($target = null, $extensions = null, $minSize = null, $maxSize = null, $onSuccessScript = null, $onErrorScript = null, $onMessageScript = null, $onProgressScript = null, $timeout = null, $multiple = false, $method = "FILE")
     {
         return "
             var input = document.createElement('input');
             input.setAttribute('Type' , 'file');
             input.setAttribute('accept', " . self::Convert($extensions ?? \_::$Back->GetAcceptableFormats()) . ");
+            input.setAttribute('multiple', " . ($multiple ? "true" : "false") . ");
             input.onchange = evt => {
                 try{
                     number = 1;
@@ -213,7 +214,7 @@ class Script
                                     "count" => "\${count}",
                                     "number" => "\${number}",
                                     "data" => "\${encodeURIComponent(data)}"
-                                ], null, $success, $error, $ready, $progress, $timeout, false) . ";
+                                ], null, $onSuccessScript, $onErrorScript, $onMessageScript, $onProgressScript, $timeout, false) . ";
                             });
                             reader.readAsArrayBuffer(file);
                             number++;
@@ -243,12 +244,13 @@ class Script
      * @param int|null $speed The chunk size in bytes, default is 100KB
      * @return string The script part
      */
-    public static function UploadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $success = null, $error = null, $ready = null, $progress = null, $timeout = null, $speed = null, $multiple = false, $method = "STREAM")
+    public static function UploadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $onSuccessScript = null, $onErrorScript = null, $onMessageScript = null, $onProgressScript = null, $timeout = null, $speed = null, $multiple = false, $method = "STREAM")
     {
         return "
             var input = document.createElement('input');
             input.setAttribute('Type' , 'file');
             input.setAttribute('accept', " . self::Convert($extensions ?? \_::$Back->GetAcceptableFormats()) . ");
+            input.setAttribute('multiple', " . ($multiple ? "true" : "false") . ");
             input.onchange = evt => {
                 try{
                     number = 1;
@@ -287,7 +289,7 @@ class Script
                                         "number" => "\${number}",
                                         "count" => "\${count}",
                                         "data" => "\${encodeURIComponent(chunkData)}"
-                                    ], null, $success, $error, $ready, $progress, $timeout ?? 60000, false) . ";
+                                    ], null, $onSuccessScript, $onErrorScript, $onMessageScript, $onProgressScript, $timeout, true) . ";
                                 }
                             });
                             reader.readAsArrayBuffer(file);

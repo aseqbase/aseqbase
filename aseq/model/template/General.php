@@ -310,7 +310,7 @@ class General extends Template
 			body .contextmenu>:is(*[onclick],*[href]){
 				cursor: pointer;
 			}
-			body .contextmenu>:is(*[onclick],*[href]):hover{
+			body .contextmenu>:is(action, *[onclick],*[href]):hover{
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				font-weight: bold;

@@ -4,7 +4,7 @@ namespace MiMFa\Module;
 use MiMFa\Library\Contact;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
-use MiMFa\Library\Local;
+use MiMFa\Library\Storage;
 
 module("Form");
 class CommentForm extends Form
@@ -59,7 +59,7 @@ class CommentForm extends Form
 				$row["Contact"],
 				$subject ?? __($this->MailSubject ?? ("$notification " . getValid($row, "Subject", "Your Comment"))),
 				$message ?? [
-					$notification => Struct::Link(getValid($row, "Subject", "Your Comment"), \_::$User->Path),
+					$notification => Struct::Link(getValid($row, "Subject", "Your Comment"), \_::$Address->UrlBase),
 					"Subject" => Convert::ToText(get($data, "Subject")),
 					"Name" => Convert::ToText(getValid($data, "Name", \_::$User ? \_::$User->Name : null)),
 					"Contact" => getValid($data, "Contact", \_::$User ? \_::$User->Email : null),
@@ -151,13 +151,13 @@ class CommentForm extends Form
 					if (!$att) {
 						$att = receiveFile("Attach");
 						if ($att) {
-							if (Local::IsFileObject($att))
-								$att = Local::GetUrl(Local::Store($att));
+							if (Storage::IsFileObject($att))
+								$att = Storage::GetUrl(Storage::Store($att));
 							elseif (is_array($att)) {
 								$att = [];
 								foreach ($att as $file) {
-									if (Local::IsFileObject($file))
-										$att[] = Local::GetUrl(Local::Store($file));
+									if (Storage::IsFileObject($file))
+										$att[] = Storage::GetUrl(Storage::Store($file));
 								}
 							}
 						}

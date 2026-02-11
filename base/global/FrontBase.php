@@ -3,7 +3,7 @@
 use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Internal;
-use MiMFa\Library\Local;
+use MiMFa\Library\Storage;
 use MiMFa\Library\Revise;
 use MiMFa\Library\Script;
 
@@ -108,7 +108,34 @@ abstract class FrontBase
 	 */
 	public $ReceiverEmail = null;
 
-	
+    /**
+     * The status of all server response: 400, 404, 500, etc.
+     * @default null
+     * @var mixed
+     * @category Security
+     */
+    public $StatusMode = null;
+
+    /**
+     * The default view name to show when restriction
+     * @var string
+     * @category Security
+     */
+    public $RestrictionRouteName = "403";
+    /**
+     * Default message to show when restriction
+     * @var string
+     * @category Security
+     */
+    public $RestrictionContent = "Unfortunately, you have no access to the site now!<br>Please try a few minutes later...";
+
+    /**
+     * The view name to show pages
+     * @var string
+     * @default "main"
+     * @category Template
+     */
+    public string $DefaultRouteName = "main";
 	/**
 	 * The website default template class
 	 * @default "Template"
@@ -116,7 +143,7 @@ abstract class FrontBase
 	 * @category Template
 	 * @var string
 	 */
-	public $DefaultTemplate = "Template";
+	public string $DefaultTemplateName = "Template";
 	/**
 	 * The website view name
 	 * @default "main"
@@ -124,7 +151,7 @@ abstract class FrontBase
 	 * @category Template
 	 * @var string
 	 */
-	public $DefaultViewName = "main";
+	public string $DefaultViewName = "main";
 	/**
 	 * @field value
 	 * @category Template
@@ -181,6 +208,43 @@ abstract class FrontBase
 	 * @category Language
 	 */
 	public $Encoding = "utf-8";
+
+	/**
+	 * The Date Time Zone
+	 * @var string
+	 * @field value
+	 * @category Time
+	 */
+	public $DateTimeZone = "UTC";
+	/**
+	 * The Date Time Locale
+	 * @var string
+	 * @field value
+	 * @category Time
+	 */
+	public $DateTimeLocale = "en-US";
+	/**
+	 * The Date Time Format
+	 * @var string
+	 * @example: "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
+	 * @field value
+	 * @category Time
+	 */
+	public $DateTimeFormat = "Y-m-d H:i:s";
+	/**
+	 * Current Date Time
+	 * @var string
+	 * @field value
+	 * @category Time
+	 */
+	public $CurrentDateTime = "now";
+	/**
+	 * Date Time Stamp Seconds Offset (TSO)
+	 * @var int
+	 * @category Time
+	 */
+	public $TimeStampOffset = 0;
+
 	/**
 	 * @category Template
 	 * @var int
@@ -341,6 +405,57 @@ abstract class FrontBase
 	 */
 	public $PatternPalette = array("/asset/pattern/main.svg", "/asset/pattern/doddle.png", "/asset/pattern/doddle-fantasy.png", "/asset/pattern/triangle.png", "/asset/pattern/slicksline.png", "/asset/pattern/doddle-mess.png");
 
+
+	/**
+	 * Allow to reduce size of documents for increasing site speed
+	 * @var bool
+	 * @category Optimization
+	 */
+	public $AllowReduceSize = true;
+	/**
+	 * Allow to analyze all text and signing them, to improve the website's SEO
+	 * @var bool
+	 * @category Optimization
+	 */
+	public $AllowTextAnalyzing = false;
+	/**
+	 * Allow to analyze all text and linking contents to their called names or titles, to improve the website's SEO
+	 * @var bool
+	 * @category Optimization
+	 */
+	public $AllowContentReferring = false;
+	/**
+	 * Allow to analyze all text and linking categories to their called names or titles, to improve the website's SEO
+	 * @var bool
+	 * @category Optimization
+	 */
+	public $AllowCategoryReferring = false;
+	/**
+	 * Allow to analyze all text and linking tags to their called names or titles, to improve the website's SEO
+	 * @var bool
+	 * @category Optimization
+	 */
+	public $AllowTagReferring = false;
+	/**
+	 * Allow to analyze all text and linking users to their called names, to improve the website's SEO
+	 * @var bool
+	 * @category Optimization
+	 */
+	public $AllowUserReferring = false;
+	/**
+	 * Allow Selecting on Page
+	 * @var bool
+	 * @category Security
+	 */
+	public $AllowSelecting = true;
+	/**
+	 * Allow ContextMenu on Page
+	 * @var bool
+	 * @category Security
+	 */
+	public $AllowContextMenu = true;
+	
+
 	/**
 	 * A simple library to Session management
 	 * @internal
@@ -396,6 +511,7 @@ abstract class FrontBase
 	 */
 	public $DefaultDirection = null;
 
+	
 	public function __construct()
 	{
 		Revise::Load($this);
@@ -447,7 +563,7 @@ abstract class FrontBase
 
 	public function CreateTemplate($name = null, $data = [])
 	{
-		return new (template($name, $data, alternative: $this->DefaultTemplate))();
+		return new (template($name, $data, alternative: $this->DefaultTemplateName))();
 	}
 
 	/**
@@ -558,7 +674,7 @@ abstract class FrontBase
 	 */
 	public function Overlay(int $index = 0)
 	{
-		return Local::GetUrl($this->LoopPalette($this->OverlayPalette, $index));
+		return Storage::GetUrl($this->LoopPalette($this->OverlayPalette, $index));
 	}
 	/**
 	 * To get the Pattern image by index
@@ -566,7 +682,7 @@ abstract class FrontBase
 	 */
 	public function Pattern(int $index = 0)
 	{
-		return Local::GetUrl($this->LoopPalette($this->PatternPalette, $index));
+		return Storage::GetUrl($this->LoopPalette($this->PatternPalette, $index));
 	}
 
 
@@ -589,7 +705,7 @@ abstract class FrontBase
 	 * @param mixed $callback The call back handler
 	 * @example: iterateRequest("document.querySelectorAll('body input')", function(selectedItems)=>{ //do somework })
 	 */
-	function Bring($intents = null, $callback = null)
+	public function Bring($intents = null, $callback = null)
 	{
 		$callbackScript = "(data,err)=>{_(item).before(data,err); _(item).remove();}";
 		$progressScript = "null";
@@ -612,6 +728,24 @@ abstract class FrontBase
 				["id" => $id]
 			));
 	}
+	/**
+	 * Replace the output with all the document in the client side
+	 * @param mixed $output The data that is ready to print
+	 * @param string $address The url to show without updating the page
+	 */
+	public function Cover($output = null, $address = null)
+	{
+		return response(Struct::Script(
+			Internal::MakeScript(
+				$output,
+				null,
+				"(data,err)=>{"
+				($output ? "document.open();document.write(data??err);document.close();" : "") .
+				($address ? "window.history.pushState(null, null, `" . getFullUrl($address) . "`);" : "") .
+				"}"
+			)
+		));
+	}
 
 	/**
 	 * Get all specific parts of the client side
@@ -632,7 +766,7 @@ abstract class FrontBase
 	public function Set($selector = null, $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Address->GlobalDirectory,
 			"finalize",
 			fn() => response(Struct::Script($this->MakeSetScript($selector, $handler, $args, false)))
 		);
@@ -661,7 +795,7 @@ abstract class FrontBase
 	public function Delete($selector = "body")
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Address->GlobalDirectory,
 			"finalize",
 			fn() => $this->Append("body", Struct::Script($this->MakeDeleteScript($selector, false)))
 		);
@@ -683,7 +817,7 @@ abstract class FrontBase
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Address->GlobalDirectory,
 			"finalize",
 			fn() => $this->Append("body", Struct::Script($this->MakeBeforeScript($selector, $handler, $args, false)))
 		);
@@ -715,7 +849,7 @@ abstract class FrontBase
 	public function After($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Address->GlobalDirectory,
 			"finalize",
 			fn() => $this->Append("body", Struct::Script($this->MakeAfterScript($selector, $handler, $args, false)))
 		);
@@ -746,7 +880,7 @@ abstract class FrontBase
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Address->GlobalDirectory,
 			"finalize",
 			fn() => $this->Append("body", Struct::Script($this->MakeFillScript($selector, $handler, $args, false)))
 		);
@@ -778,7 +912,7 @@ abstract class FrontBase
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Address->GlobalDirectory,
 			"finalize",
 			fn() => $this->Append("body", Struct::Script($this->MakePrependScript($selector, $handler, $args, false)))
 		);
@@ -809,7 +943,7 @@ abstract class FrontBase
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->Directory,
+			\_::$Address->GlobalDirectory,
 			"finalize",
 			fn() => $this->Append("body", Struct::Script($this->MakeAppendScript($selector, $handler, $args, false)))
 		);

@@ -1,79 +1,20 @@
 <?php
-library("Session");
-library("Contact");
-library("Cryptograph");
-library("SpecialCrypt");
-
 use MiMFa\Library\Contact;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Cryptograph;
 use MiMFa\Library\SpecialCrypt;
 use MiMFa\Library\DataTable;
+use MiMFa\Library\Revise;
 use MiMFa\Library\Struct;
+
+library("Revise");
+library("Session");
+library("Contact");
+library("Cryptograph");
+library("SpecialCrypt");
 
 class UserBase
 {
-    /**
-     * Full part of the current url
-     * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php?p=3&l=10#serp"
-     * @var string|null
-     */
-    public string|null $Url = null;
-    /**
-     * The path part of the current url
-     * @example: "https://www.mimfa.net:5056/Category/mimfa/service/web.php"
-     * @var string|null
-     */
-    public string|null $Path = null;
-    /**
-     * The host part of the current url
-     * @example: "https://www.mimfa.net:5056"
-     * @var string|null
-     */
-    public string|null $Host = null;
-    /**
-     * The site name part of the current url
-     * @example: "www.mimfa.net"
-     * @var string|null
-     */
-    public string|null $Site = null;
-    /**
-     * The domain name part of the current url
-     * @example: "mimfa.net"
-     * @var string|null
-     */
-    public string|null $Domain = null;
-    /**
-     * The request part of the current url
-     * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
-     * @var string|null
-     */
-    public string|null $Request = null;
-    /**
-     * The direction part of the current url from the root
-     * @example: "Category/mimfa/service/web.php"
-     * @var string|null
-     */
-    public string|null $Direction = null;
-    /**
-     * The last part of the current direction url
-     * @example: "web.php"
-     * @var string|null
-     */
-    public string|null $Page = null;
-    /**
-     * The query part of the current url
-     * @example: "p=3&l=10"
-     * @var string|null
-     */
-    public string|null $Query = null;
-    /**
-     * The fragment or anchor part of the current url
-     * @example: "serp"
-     * @var string|null
-     */
-    public string|null $Fragment = null;
-
 	public $DefaultImagePath = "user";
 	public $HandlerPath = "/sign";
 	public $SignHandlerPath = "/sign/sign";
@@ -86,24 +27,47 @@ class UserBase
 	public $RecoverHandlerPath = "/sign/recover";
 	public $ActiveHandlerPath = "/sign/active";
 
-	public $PasswordSecure = true;
+	/**
+	 * @var bool
+	 * @category Security
+	 */
+	public $SecurePassword = true;
 
+	/**
+	 * @category Security
+	 */
 	public $TokenDelimiter = "�";
+	/**
+	 * @category Security
+	 */
 	public $TokenDateTimeFormat = "Y/m/d";
 
 	/**
 	 * Direct activate or deactivate the user abilities
+	 * @internal
 	 * @var mixed
 	 */
 	public $Active = true;
 	/**
-	 * Initial User Default Status:
-	 *		true/1:		Activated
-	 *		false/-1:		Deactivated
+	 * Active User Default Status:
+	 * @category Security
 	 * @var int
 	 */
 	public $ActiveStatus = 1;
+	/**
+	 * Initial User Default Status:
+	 * for example
+	 *		true/1:			Activated
+	 *		false/-1:		Deactivated
+	 * @category Security
+	 * @var int
+	 */
 	public $InitialStatus = 0;
+	/**
+	 * Deactive User Default Status:
+	 * @category Security
+	 * @var int
+	 */
 	public $DeactiveStatus = -1;
 
 
@@ -171,26 +135,77 @@ class UserBase
 	public $VisitAccess = 0;
 
 
+	/**
+	 * @internal
+	 */
 	public $Id = null;
+	/**
+	 * @internal
+	 */
 	public $GroupId = null;
+	/**
+	 * @internal
+	 */
 	protected $Access = 0;
+	/**
+	 * @internal
+	 */
 	protected $Accesses = array();
+	/**
+	 * @internal
+	 */
 	public $Authorize;
 
+	/**
+	 * @internal
+	 */
 	public $Signature = null;
+	/**
+	 * @internal
+	 */
 	public $Image = null;
+	/**
+	 * @internal
+	 */
 	public $Name = null;
+	/**
+	 * @internal
+	 */
 	public $Email = null;
 
+	/**
+	 * @internal
+	 */
 	public $TemporarySignature = null;
+	/**
+	 * @internal
+	 */
 	private $TemporaryPassword = null;
+	/**
+	 * @internal
+	 */
 	public $TemporaryImage = null;
+	/**
+	 * @internal
+	 */
 	public $TemporaryName = null;
+	/**
+	 * @internal
+	 */
 	public $TemporaryEmail = null;
 
 
+	/**
+	 * @internal
+	 */
 	public DataTable $DataTable;
+	/**
+	 * @internal
+	 */
 	public DataTable $GroupDataTable;
+	/**
+	 * @internal
+	 */
 	public Cryptograph $Cryptograph;
 
 	/**
@@ -220,22 +235,13 @@ class UserBase
 
 	public function __construct()
 	{
+		Revise::Load($this);
+		
 		$this->Cryptograph = new SpecialCrypt();
 		$this->Session = new \MiMFa\Library\Session(new DataTable(\_::$Back->DataBase, "Session", \_::$Back->DataBasePrefix, \_::$Back->DataTableNameConvertors), $this->Cryptograph, \_::$Address->Name);
 		$this->Session->AccessibleData = $this->AccessibleData;
 		$this->Session->EncryptKey = $this->EncryptKey;
 		$this->Session->EncryptValue = $this->EncryptValue;
-
-        $this->Url = getUrl();
-        $this->Host = getHost();
-        $this->Site = getSite();
-        $this->Domain = getDomain();
-        $this->Path = getPath();
-        $this->Request = getRequest();
-        $this->Direction = getDirection();
-        $this->Page = getPage();
-        $this->Query = getQuery();
-        $this->Fragment = getFragment();
 
 		$this->Access = $this->GuestAccess;
 		$this->Authorize = fn() => load($this->InHandlerPath);
@@ -244,8 +250,8 @@ class UserBase
 		$this->GroupDataTable = table("UserGroup");
 
 		if ($this->Active) $this->Refresh();
-		\MiMFa\Library\Revise::Decode($this, takeValid($this->GetGroup(), "MetaData", "[]"));
-		\MiMFa\Library\Revise::Decode($this, takeValid($this->Get(), "MetaData", "[]"));
+		Revise::Decode($this, takeValid($this->GetGroup(), "MetaData", "[]"));
+		Revise::Decode($this, takeValid($this->Get(), "MetaData", "[]"));
 	}
 
 	public function Refresh()
@@ -447,7 +453,7 @@ class UserBase
 	}
 	public function GenerateEmail($name = null, $fake = false)
 	{
-		return Convert::ToKey($name ?? $this->Signature ?? ("user_" . getId(true))) . ($fake ? uniqid("+") : "") . "@" . $this->Domain;
+		return Convert::ToKey($name ?? $this->Signature ?? ("user_" . getId(true))) . ($fake ? uniqid("+") : "") . "@" . \_::$Address->UrlDomain;
 	}
 
 	/**
@@ -538,14 +544,14 @@ class UserBase
 	}
 	public function EncryptPassword($password)
 	{
-		if ($this->PasswordSecure)
+		if ($this->SecurePassword)
 			return crypt($password, \_::$Back->SoftKey);
 		else
 			return $password;
 	}
 	public function DecryptPassword($password)
 	{
-		if ($this->PasswordSecure)
+		if ($this->SecurePassword)
 			return null;
 		else
 			return $password;
@@ -595,7 +601,7 @@ class UserBase
 		$this->TemporaryName = takeValid($person, "Name");
 		$this->TemporaryImage = takeValid($person, "Image");
 		$this->TemporaryPassword = takeValid($person, "Password");
-		$path = $this->Host . ($handlerPath ?? $this->HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
+		$path = \_::$Address->UrlOrigin . ($handlerPath ?? $this->HandlerPath) . "?" . $tokenKey . "=" . urlencode($this->EncryptToken($tokenKey, $this->TemporarySignature));
 		$dic = array();
 		$dic['$HYPERLINK'] = Struct::Link($linkAnchor, $path);
 		$dic['$LINK'] = Struct::Link($path, $path);

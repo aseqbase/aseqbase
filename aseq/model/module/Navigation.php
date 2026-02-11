@@ -308,7 +308,7 @@ class Navigation extends Module
 	{
 		return Convert::ToString(function () {
 			yield parent::Get();
-			$url = \_::$User->Path . "?";
+			$url = \_::$Address->UrlBase . "?";
 			$fromP = $this->GetFromPage();
 			$toP = $this->GetToPage();
 			$query = receiveGet() ?? array();
@@ -321,7 +321,7 @@ class Navigation extends Module
 			$maxLimit = $this->AllowCount ? min($this->Count, $this->MaxLimit) : $this->MaxLimit;
 			if ($this->MinLimit < $maxLimit)
 				yield Struct::Division(
-					Struct::RangeInput(null, $this->Limit, $this->MinLimit, $maxLimit, ["onchange" => "load('/" . \_::$User->Direction . "?" . preg_replace("/\&{$this->LimitRequest}\=\d+/", "", \_::$User->Query ?? "") . "&{$this->LimitRequest}='+this.value);"]) .
+					Struct::RangeInput(null, $this->Limit, $this->MinLimit, $maxLimit, ["onchange" => "load('" . \_::$Address->UrlPath . "?" . preg_replace("/\&{$this->LimitRequest}\=\d+/", "", \_::$Address->UrlQuery ?? "") . "&{$this->LimitRequest}='+this.value);"]) .
 					($this->AllowCount ? Struct::Span($this->Count) : 0)
 					,
 					["class" => "rangepanel"]

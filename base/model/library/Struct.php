@@ -44,9 +44,7 @@ class Struct
      */
     public static function Convert($object, ...$args)
     {
-        $translate = \_::$Front->AllowTranslate;
-        if (!is_null($object)) try {
-            \_::$Front->AllowTranslate = false;
+        if (!is_null($object)) {
             if (is_string($object)) {
                 if (preg_match("/(?<!\\\)\<[^\>]+(?<!\\\)\>/i", $object))
                     return $object;
@@ -194,8 +192,8 @@ class Struct
                     // Links
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)/iu", fn($m) => self::Link($m[1], $m[1]), $object) ?? $object;
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)/iu", fn($m) => self::Link($m[1], "mailto:{$m[1]}"), $object) ?? $object;
-                    $object = preg_replace_callback("/\B{$pre}\#(\w+){$attrPatt}/iu", fn($m) => self::Link("#" . $m[1], \_::$Address->SearchRoot . urlencode("#" . $m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
-                    $object = preg_replace_callback("/\B{$pre}\@(\w+){$attrPatt}/iu", fn($m) => self::Link("@" . $m[1], \_::$Address->UserRoot . urlencode($m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
+                    $object = preg_replace_callback("/\B{$pre}\#(\w+){$attrPatt}/iu", fn($m) => self::Link("#" . $m[1], \_::$Address->SearchRootPath . urlencode("#" . $m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
+                    $object = preg_replace_callback("/\B{$pre}\@(\w+){$attrPatt}/iu", fn($m) => self::Link("@" . $m[1], \_::$Address->UserRootPath . urlencode($m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
 
                     $object = preg_replace_callback("/\s?(^[^\W].*){$attrPatt}$/miu", fn($m) => self::Element($m[1], "p", ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == $fdir ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
 
@@ -299,8 +297,6 @@ class Struct
             if (is_callable($object) || $object instanceof \Closure)
                 return self::Convert($object(...$args));
             return self::Division(Convert::ToString($object));
-        } finally {
-            \_::$Front->AllowTranslate = $translate;
         }
         return "";
     }
@@ -429,12 +425,12 @@ class Struct
                             break;
                         case "href":
                             if (get($attrdic, "rel"))
-                                $attrs .= " " . self::Attribute($key, \MiMFa\Library\Local::GetUrl($value));
+                                $attrs .= " " . self::Attribute($key, \MiMFa\Library\Storage::GetUrl($value));
                             else
                                 $attrs .= " " . self::Attribute($key, $value);
                             break;
                         case "src":
-                            $attrs .= " " . self::Attribute($key, \MiMFa\Library\Local::GetUrl($value));
+                            $attrs .= " " . self::Attribute($key, \MiMFa\Library\Storage::GetUrl($value));
                             break;
                         default:
                             if (startsWith($key, "on")) {
@@ -696,16 +692,28 @@ class Struct
     {
         return self::Meta("keywords", is_array($content) ? join(", ", $content) : $content, $attributes);
     }
-    public static function Script($content = null, $source = null, ...$attributes)
-    {
-        return self::Element(Convert::ToString($content), "script", is_null($source) ? ["type" => "text/javascript"] : ["src" => $source], $attributes);
-    }
     public static function Style($content = null, $source = null, ...$attributes)
     {
         if (isValid($content))
             return self::Element(Convert::ToString($content), "style", $attributes);
         else
             return self::Relation("stylesheet", $source, $attributes);
+    }
+    public static function Script($content = null, $source = null, ...$attributes)
+    {
+        return self::Element(Convert::ToString($content), "script", is_null($source) ? ["type" => "text/javascript"] : ["src" => $source], $attributes);
+    }
+    /**
+     * To execute a script then remove it
+     * @param mixed $script
+     * @param array $attributes
+     * @return string
+     */
+    public static function Procedure($script, ...$attributes)
+    {
+        $id = self::GetAttribute($attributes, "Id") ?? ("_" . getId(true));
+        return self::Element(Convert::ToString($script).";
+            document.getElementById('$id')?.remove();", "script", ["id"=>$id, "type" => "text/javascript"], $attributes);
     }
     #endregion
 
@@ -765,7 +773,7 @@ class Struct
             ]
         ) . self::Script("_('#$id').appendTo(_('body'));");
     }
-    public static function Result($content, $icon = "bell", $wait = 10000, ...$attributes)
+    public static function Result($content, $icon = "circle", $timeout = null, ...$attributes)
     {
         $id = "_" . getId(true);
         return self::Element(
@@ -775,10 +783,14 @@ class Struct
                 "id" => $id,
                 "class" => "result $id",
                 "ondblclick" => "this.style.display = 'none'",
-                "onmouseenter" => "this.classList.remove('$id');",
+                "onclick" => "this.classList.remove('$id');",
             ],
             $attributes
-        ) . self::Script("setTimeout(function(){ return document.querySelector('#$id.$id')?.remove();}, $wait); scrollThere('body>#$id');");
+        ) . ($timeout?self::Script("setTimeout(function(){ return document.querySelector('#$id.$id')?.remove();}, $timeout); scrollThere('body>#$id');"):"");
+    }
+    public static function Message($content, ...$attributes)
+    {
+        return self::Result($content, "bell", 10000, ["class" => "message"], $attributes);
     }
     public static function Success($content, ...$attributes)
     {
@@ -930,7 +942,7 @@ class Struct
                 default:
                     return self::Image($content, $source, ["class" => "media"], $attributes);
             }
-        return self::Element(self::Convert($content ?? ""), "div", ["style" => "background-image: url('" . \MiMFa\Library\Local::GetUrl($source) . "');", "class" => "media"], ...$attributes);
+        return self::Element(self::Convert($content ?? ""), "div", ["style" => "background-image: url('" . \MiMFa\Library\Storage::GetUrl($source) . "');", "class" => "media"], ...$attributes);
     }
     /**
      * A \<DIV\> HTML Tag with a media as the background
@@ -2094,9 +2106,9 @@ class Struct
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Progress($value, $content = null, ...$attributes)
+    public static function ProgressBar($value = null, $content = null, ...$attributes)
     {
-        return self::Element($content ?? "", "progress", ["class" => "progress"], is_null($value) ? [] : ["value" => $value], $attributes);
+        return self::Element($content ?? "", "progress", ["class" => "progressbar"], is_null($value) ? [] : ["value" => $value], $attributes);
     }
     /**
      * The \<HIDDEN\> HTML Tag
@@ -2172,7 +2184,7 @@ class Struct
             $content = null;
         }
         if (is_null($content))
-            $content = $reference;//getDomain($reference);
+            $content = $reference;//getUrlDomain($reference);
         return self::Element(__($content), "a", ["href" => $reference, "class" => "link"], $attributes);
     }
     /**
@@ -2903,7 +2915,7 @@ class Struct
                 break;
             case 'progress':
             case 'progressbar':
-                $content = self::Progress($value, $key, $attributes);
+                $content = self::ProgressBar($value, $key, $attributes);
                 break;
             default:
                 if (is_string($type))
@@ -4343,7 +4355,7 @@ class Struct
             ") .
             script("
             function {$uniq}_Click(day = null){
-                const tso = " . (\_::$Back->TimeStampOffset * 1000) . ";
+                const tso = " . (\_::$Front->TimeStampOffset * 1000) . ";
                 dt = new Date(
                     document.querySelector('.$uniq .Y$uniq').innerText+'-'+
                     document.querySelector('.$uniq .M$uniq').innerText+'-'+
@@ -4359,7 +4371,7 @@ class Struct
                     sd = 1;
                     ed = new Date(gdt.getFullYear(), gdt.getMonth()+1, 0).getDate();
                     sw = (new Date(dt.getFullYear(), dt.getMonth(), sd).getDay()+1)%7;
-                    if(" . (\_::$Back->DateTimeZone == "UTC" ? "false" : "true") . ")
+                    if(" . (\_::$Front->DateTimeZone == "UTC" ? "false" : "true") . ")
                         switch(dt.getMonth() + 1){
                             case 1:
                             case 2:
@@ -4737,7 +4749,7 @@ class Struct
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading3($title) .
-                script(null, asset(\_::$Address->StructDirectory, "Chart/Chart.js")) .
+                script(null, asset(\_::$Address->GlobalStructDirectory, "Chart/Chart.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {
@@ -4906,11 +4918,4 @@ class Struct
     ");
     }
     #endregion
-}
-
-/**
- * @deprecated - Use MiMFa\Library\Struct insted of this class
- */
-class Html extends Struct
-{
 }

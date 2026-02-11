@@ -5,7 +5,7 @@ $filter = pop($computeData, "Filter") ?? [];
 return route("search", [
     "Compute" => [
         "Filter" => [
-            "Category" => implode("/", array_slice(explode("/", \_::$User->Direction), 1)),
+            "Category" => implode("/", array_slice(explode("/", \_::$Address->UrlRoute), 1)),
             ...$filter
         ],
         ...$computeData

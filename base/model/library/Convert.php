@@ -28,43 +28,43 @@ class Convert
 
     /**
      * Convert everything to a static format
-     * @param mixed $value
+     * @param mixed $object
      * @return string
      */
-    public static function ToStatic($value, ...$args)
+    public static function ToStatic($object, ...$args)
     {
-        if (isStatic($value))
-            return $value;
-        if ($value instanceof \Base)
-            return $value->ToString();
-        if (is_countable($value) || is_iterable($value))
-            return self::ToString(value: $value);
-        //return self::ToJson($value);
-        if (is_callable($value) || $value instanceof \Closure)
-            return self::ToStatic($value(...$args));
-        if ($value instanceof \DateTime)
-            return self::ToShownDateTimeString($value);
-        if ($value instanceof \stdClass)
-            return self::ToStatic((array) $value, ...$args);
-        return $value;
+        if (isStatic($object))
+            return $object;
+        if ($object instanceof \Base)
+            return $object->ToString();
+        if (is_countable($object) || is_iterable($object))
+            return self::ToString($object);
+        //return self::ToJson($object);
+        if (is_callable($object) || $object instanceof \Closure)
+            return self::ToStatic($object(...$args));
+        if ($object instanceof \DateTime)
+            return self::ToShownDateTimeString($object);
+        if ($object instanceof \stdClass)
+            return self::ToStatic((array) $object, ...$args);
+        return $object;
     }
 
     /**
      * Convert everything to a simple string format
-     * @param mixed $value
+     * @param mixed $object
      * @return string
      */
-    public static function ToString($value, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", string $default = "")
+    public static function ToString($object, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", string $default = "")
     {
-        if (is_null($value))
+        if (is_null($object))
             return $default;
-        if (isStatic($value))
-            return "$value";
-        if ($value instanceof \Base)
-            return $value->ToString();
-        if (is_countable($value) || is_iterable($value)) {
+        if (isStatic($object))
+            return "$object";
+        if ($object instanceof \Base)
+            return $object->ToString();
+        if (is_countable($object) || is_iterable($object)) {
             $texts = array();
-            foreach ($value as $key => $val) {
+            foreach ($object as $key => $val) {
                 $item = self::ToString($val, $separator, $assignFormat, $arrayFormat, $default);
                 if (is_numeric($key))
                     array_push($texts, $item);
@@ -90,25 +90,25 @@ class Convert
             }
             return str_replace("{0}", join($separator, $texts), $arrayFormat);
         }
-        return (self::ToStatic($value) ?? $default) . "";
+        return (self::ToStatic($object) ?? $default) . "";
     }
 
-    public static function ToHtml($value, ...$args)
+    public static function ToHtml($object, ...$args)
     {
-        return Struct::Convert($value, ...$args);
+        return Struct::Convert($object, ...$args);
     }
-    public static function ToStyle($value, ...$args)
+    public static function ToStyle($object, ...$args)
     {
-        return Style::Convert($value, ...$args);
+        return Style::Convert($object, ...$args);
     }
-    public static function ToScript($value, ...$args)
+    public static function ToScript($object, ...$args)
     {
-        return Script::Convert($value, ...$args);
+        return Script::Convert($object, ...$args);
     }
 
     /**
      * Separate a text to multiple paragraphs
-     * @param string $text
+     * @param string $string
      * @return array<string>
      */
     public static function ToParagraphs($html, $getText = false)
@@ -140,70 +140,70 @@ class Convert
 
     /**
      * Get an Excerpt text of a bigger one
-     * @param string $text
+     * @param string $string
      * @return string
      */
-    public static function ToExcerpt($text, $from = 0, $maxlength = 100, $excerptedSign = "...", $reverse = false)
+    public static function ToExcerpt($string, $from = 0, $maxlength = 100, $excerptedSign = "...", $reverse = false)
     {
-        if (!isValid($text))
-            return $text;
-        $text = trim(self::ToText($text));
-        $len = strlen($text);
+        if (!isValid($string))
+            return $string;
+        $string = trim(self::ToText($string));
+        $len = strlen($string);
         if ($len <= $maxlength)
-            return $text;
+            return $string;
         if ($reverse)
-            return $excerptedSign . substr($text, max(0, $len - $from - $maxlength + strlen($excerptedSign)), max(0, $maxlength)) . ($from > strlen($excerptedSign) ? $excerptedSign : "");
+            return $excerptedSign . substr($string, max(0, $len - $from - $maxlength + strlen($excerptedSign)), max(0, $maxlength)) . ($from > strlen($excerptedSign) ? $excerptedSign : "");
         else
-            return ($from > strlen($excerptedSign) ? $excerptedSign : "") . substr($text, $from, $maxlength - strlen($excerptedSign)) . $excerptedSign;
+            return ($from > strlen($excerptedSign) ? $excerptedSign : "") . substr($string, $from, $maxlength - strlen($excerptedSign)) . $excerptedSign;
     }
 
     /**
      * Convert a text to an Identifier
-     * @param string $text
+     * @param string $string
      * @return string
      */
-    public static function ToId($text, $random = false)
+    public static function ToId($string, $random = false)
     {
-        return self::ToKey($text, true, '/[^A-Za-z0-9\_\-\$]/') . "_" . getId($random);
+        return "_" . self::ToKey($string, true, '/[^A-Za-z0-9\_\-\$]/') . "_" . getId($random);
     }
     /**
      * Convert a text to a Key Name
-     * @param string $text
+     * @param string $string
      * @return string
      */
-    public static function ToKey($text, $normalize = false, $invalid = '/[^\w\[\]\_\-\$]/')
+    public static function ToKey($string, $normalize = false, $invalid = '/[^\w\[\]\_\-\$]/')
     {
-        if (is_null($text))
+        if (is_null($string))
             return "_" . getId();
-        if (!$normalize && !preg_match($invalid, $text))
-            return $text;
-        return preg_replace($invalid, "", ucwords($text ?? ""));
+        if (!$normalize && !preg_match($invalid, $string))
+            return $string;
+        return preg_replace($invalid, "", ucwords($string ?? ""));
     }
     /**
      * Convert everything to a suitable value format in string
-     * @param mixed $value
+     * @param mixed $object
      * @return string
      */
-    public static function ToValue($value, ...$types)
+    public static function ToValue($object, ...$types)
     {
-        if (is_null($value) || $value == "")
+        if (is_null($object) || $object == "")
             return "null";
         else {
-            if (is_string($value) && (count($types) === 0 || in_array("string", $types) || in_array("mixed", $types)))
-                return self::ToStringValue($value);
-            if (is_countable($value) || is_iterable($value))
-                return self::ToArrayValue($value);
-            return trim($value . "");
+            if (is_string($object) && (count($types) === 0 || in_array("string", $types) || in_array("mixed", $types)))
+                return self::ToStringValue($object);
+            if (is_countable($object) || is_iterable($object))
+                return self::ToArrayValue($object);
+            return trim($object . "");
         }
     }
-    public static function ToStringValue($value, $quote = '"')
+    public static function ToStringValue($object, $quote = '"')
     {
-        return $quote . preg_replace('/(?<=^|[^\\\\])' . $quote . '/', "\\" . $quote, $value) . $quote;
+        return $quote . preg_replace('/(?<=^|[^\\\\])' . $quote . '/', "\\" . $quote, $object) . $quote;
     }
-    public static function ToArrayValue($value, $indention = "\n\t")
+    public static function ToArrayValue($object, $indention = "\n\t")
     {
         $texts = array();
-        foreach ($value as $key => $val)
+        foreach ($object as $key => $val)
             if (is_numeric($key))
                 if (is_countable($val) || is_iterable($val))
                     array_push($texts, self::ToArrayValue($val, $indention . "\t"));
@@ -224,28 +224,28 @@ class Convert
     public static function ToTitle()
     {
         $ls = [];
-        foreach (self::ToIteration(func_get_args()) as $text)
-            if (!is_null($text))
-                $ls[] = ucwords(trim(preg_replace('/(?<=[^A-Z\s]{2})([A-Z])/', " $1", preg_replace('/\W/', " ", $text))));
+        foreach (self::ToIteration(func_get_args()) as $string)
+            if (!is_null($string))
+                $ls[] = ucwords(trim(preg_replace('/(?<=[^A-Z\s]{2})([A-Z])/', " $1", preg_replace('/\W/', " ", $string))));
         return join(" - ", array_unique($ls));
     }
 
     /**
      * Convert a text to a secreted text
-     * @param string $text
+     * @param string $string
      * @return string
      */
-    public static function ToSecret($text, $secretChar = "*", $showCharsFromFirst = 0, $showCharsFromLast = 0)
+    public static function ToSecret($string, $secretChar = "*", $showCharsFromFirst = 0, $showCharsFromLast = 0)
     {
-        $txts = str_split($text . "");
-        $text = "";
+        $txts = str_split($string . "");
+        $string = "";
         for ($i = 0; $i < $showCharsFromFirst; $i++)
-            $text .= $txts[$i];
+            $string .= $txts[$i];
         for ($i = $showCharsFromFirst; $i < count($txts) - $showCharsFromLast; $i++)
-            $text .= $secretChar;
+            $string .= $secretChar;
         for ($i = count($txts) - $showCharsFromLast; $i < count($txts); $i++)
-            $text .= $txts[$i];
-        return $text;
+            $string .= $txts[$i];
+        return $string;
     }
 
     /**
@@ -294,7 +294,7 @@ class Convert
     }
     /**
      * To convert a value to Imag, and write text to the image using TrueType fonts
-     * @param mixed $value
+     * @param mixed $object
      * @param int $width To Pixels
      * @param int $height To Pixels
      * @param array $backColor An array of one byte (0-255) values for [Red, Green, Blue, Alpha (A value between 0 and 127. 0 indicates completely opaque while 127 indicates completely transparent)] 
@@ -303,7 +303,7 @@ class Convert
      * @param string|null $fontPath A TrueType font (Leave null for default)
      * @return - The image/png data ready to convert to Data URI
      */
-    public static function ToImage($value, $width = 100, $height = 100, $backColor = [0, 0, 0, 127], $foreColor = [255, 255, 255, 0], $fontSize = 50, $fontPath = null, $angle = 0, $multipleX = 0.1, $multipleY = 0.75)
+    public static function ToImage($object, $width = 100, $height = 100, $backColor = [0, 0, 0, 127], $foreColor = [255, 255, 255, 0], $fontSize = 50, $fontPath = null, $angle = 0, $multipleX = 0.1, $multipleY = 0.75)
     {
         if (!function_exists('imagecreatetruecolor'))
             return null;
@@ -312,27 +312,27 @@ class Convert
         $background = imagecolorallocatealpha($image, $backColor[0] ?? 0, $backColor[1] ?? 0, $backColor[2] ?? 0, $backColor[3] ?? 127);
         $textColor = imagecolorallocatealpha($image, $foreColor[0] ?? 255, $foreColor[1] ?? 255, $foreColor[2] ?? 255, $foreColor[3] ?? 0);
         imagefilledrectangle($image, 0, 0, $width, $height, $background);
-        $fontPath = $fontPath ?? address("/asset/font/Default.ttf");
-        imagettftext($image, $fontSize, $angle, intval($multipleX * $width), intval($multipleY * $height), $textColor, $fontPath, self::ToString($value ?? ""));
+        $fontPath = $fontPath ?? path("/asset/font/Default.ttf");
+        imagettftext($image, $fontSize, $angle, intval($multipleX * $width), intval($multipleY * $height), $textColor, $fontPath, self::ToString($object ?? ""));
         ob_start();
         imagepng($image);
         return ob_get_clean();
     }
     /**
      * To convert a value to its useable Data URI
-     * @param mixed $value
+     * @param mixed $object
      * @param mixed $mime
      */
-    public static function ToDataUri($value, $mime)
+    public static function ToDataUri($object, $mime)
     {
-        return $value ? 'data:' . $mime . ';base64,' . base64_encode(self::ToString($value)) : null;
+        return $object ? 'data:' . $mime . ';base64,' . base64_encode(self::ToString($object)) : null;
     }
 
-    public static function ToJson($obj, $flags = null)
+    public static function ToJson($object, $flags = null)
     {
-        if (is_null($obj))
+        if (is_null($object))
             return "null";
-        return json_encode($obj, flags: $flags ?? (JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
+        return json_encode($object, flags: $flags ?? (JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
     }
     public static function FromJson($json, $flags = null): null|array
     {
@@ -345,12 +345,12 @@ class Convert
         return preg_split('/\r?\n/', $json . "");
     }
 
-    public static function ToXml($data, \SimpleXMLElement|null $root = null)
+    public static function ToXml($object, \SimpleXMLElement|null $root = null)
     {
         if ($root === null) {
             $root = new \SimpleXMLElement('<root/>');
         }
-        foreach (self::ToIteration($data) as $key => $value) {
+        foreach (self::ToIteration($object) as $key => $value) {
             if (is_array($value) || is_object($value)) {
                 self::ToXml($value, $root->addChild(is_numeric($key) ? "item$key" : $key));
             } else {
@@ -359,34 +359,34 @@ class Convert
         }
         return $root;
     }
-    public static function FromXml(\SimpleXMLElement|null $data, bool $asArray = false): object|array|null
+    public static function FromXml(\SimpleXMLElement|null $object, bool $asArray = false): object|array|null
     {
         libxml_use_internal_errors(true); // suppress XML parsing errors
         try {
-            return json_decode(json_encode($data), $asArray);
+            return json_decode(json_encode($object), $asArray);
         } catch (\Exception $e) {
             return null;
         }
     }
-    public static function ToXmlString($data, \SimpleXMLElement|null $root = null)
+    public static function ToXmlString($object, \SimpleXMLElement|null $root = null)
     {
-        return self::ToXml($data, $root)->asXML();
+        return self::ToXml($object, $root)->asXML();
     }
-    public static function FromXmlString($data, bool $asArray = false): object|array|null
+    public static function FromXmlString($object, bool $asArray = false): object|array|null
     {
         libxml_use_internal_errors(true); // suppress XML parsing errors
         try {
-            return json_decode(json_encode(new \SimpleXMLElement(self::ToString($data))), $asArray);
+            return json_decode(json_encode(new \SimpleXMLElement(self::ToString($object))), $asArray);
         } catch (\Exception $e) {
             return null;
         }
     }
 
-    public static function FromFormData($data, &$files = [])
+    public static function FromFormData($object, &$files = [])
     {
         // Define the boundary from the raw data
-        preg_match('/^\s*(-+\S+)/', $data, $matches);
-        $blocks = preg_split("/$matches[1]/", $data);
+        preg_match('/^\s*(-+\S+)/', $object, $matches);
+        $blocks = preg_split("/$matches[1]/", $object);
         array_pop($blocks); // remove the last block as it is empty
         $res = array();
         foreach ($blocks as $block) {
@@ -412,7 +412,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'temp_name' => Local::GenerateAddress($filename, ".tmp", \_::$Address->TempDirectory),
+                                'temp_name' => Storage::GenerateAddress($filename, ".tmp", \_::$Address->GlobalTempDirectory),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );
@@ -436,100 +436,65 @@ class Convert
         return $res;
     }
 
-    public static function ToFields($svString, $delimiter = ',', $enclosure = '"', $eol = "\n")
+    public static function ToFields($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {
-        return self::CellsToFields(self::ToCells($svString, $delimiter, $enclosure, $eol));
+        return iterator_to_array(self::ToFieldsIterator($string, $delimiter, $enclosure, $eol));
+    }
+    public static function ToFieldsIterator($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
+    {
+        return self::CellsToFieldsIterator(self::ToCellsIterator($string, $delimiter, $enclosure, $eol));
     }
     public static function FromFields($fields, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {
         return self::FromCells(self::FieldsToCells($fields), $delimiter, $enclosure, $eol);
     }
 
-    /**
-     * Compress files and folders paths syncronusly into a zip file
-     * @param string $destPath The output zip file path
-     * @param array $paths The input files and folders paths
-     * @return array The list of files added to the zip
-     */
-    public static function ToZipFile(string $destPath, ...$paths)
+    public static function CellsToFields($cells)
     {
-        return iterator_to_array(self::ToZipFileAsync($destPath, ...$paths));
-    }
-    /**
-     * Compress files and folders paths asyncronusly into a zip file
-     * @param string $destPath The output zip file path
-     * @param array $paths The input files and folders paths
-     * @return \Generator<mixed, string, mixed, void> The list of files added to the zip
-     */
-    public static function ToZipFileAsync(string $destPath, ...$paths)
-    {
-        // Simple in-app zip using PHP's ZipArchive
-        $destPath = Local::GetAbsoluteAddress($destPath);
-        $zipDir = dirname($destPath);
-        if (!is_dir($zipDir))
-            Local::CreateDirectory($zipDir);
-
-        $zip = new \ZipArchive();
-        $zip->open($destPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-
-        foreach ($paths as $p) {
-            $full = Local::GetAbsoluteAddress($p);
-            if (is_dir($full)) {
-                $RootInZip = rtrim($p, DIRECTORY_SEPARATOR);
-                $files = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($full),
-                    \RecursiveIteratorIterator::SELF_FIRST
-                );
-                foreach ($files as $file) {
-                    $path = $file->getPathname();
-                    if ($file->isDir())
-                        $zip->addEmptyDir(str_replace($full, $RootInZip, $path));
-                    else
-                        $zip->addFile($path, str_replace($full, $RootInZip, $path));
-                    yield $path;
-                }
+        if (!$cells)
+            return [];
+        $c = 0;
+        $fields = [];
+        foreach ($cells as $row) {
+            if ($c === 0) {
+                $keys = $row;
+                // $length = count($row);
+                // for ($i = 0; $i < $length; $i++)
+                //     $keys[$i] = $row[$i];
             } else {
-                $rel = ltrim($p, '/');
-                $zip->addFile($full, $rel);
-                yield $full;
+                $cols = [];
+                foreach ($row as $i => $value)
+                    if (isset($keys[$i]))
+                        $cols[$keys[$i]] = $value;
+                //else $cols[$keys[$i] = $i] = $value;
+                $fields[] = $cols;
             }
+            $c++;
         }
-
-        $zip->close();
+        return $fields;
     }
-    /**
-     * Decompress a zip file syncronusly into files and folders
-     * @param string $sourcePath The source zip file path
-     * @param mixed $destDirectory The destination directory path
-     * @return array The list of extracted files
-     */
-    public static function FromZipFile(string $sourcePath, $destDirectory = null)
+    public static function CellsToFieldsIterator($cells)
     {
-        return iterator_to_array(self::FromZipFileAsync($sourcePath, $destDirectory));
-    }
-    /**
-     * Decompress a zip file asyncronusly into files and folders
-     * @param string $sourcePath The source zip file path
-     * @param mixed $destDirectory The destination directory path
-     * @return \Generator<mixed, string, mixed, void> The list of extracted files
-     */
-    public static function FromZipFileAsync(string $sourcePath, $destDirectory = null)
-    {
-        $zip = new \ZipArchive();
-        $sourcePath = Local::GetAbsoluteAddress($sourcePath);
-        if ($zip->open($sourcePath) === TRUE) {
-            $extractPath = $destDirectory ? Local::GetAbsoluteAddress($destDirectory) : Local::GetAbsoluteAddress(dirname($sourcePath));
-            if (!is_dir($extractPath))
-                $extractPath = Local::CreateDirectory($extractPath);
-            $zip->extractTo($extractPath);
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $stat = $zip->statIndex($i);
-                yield $extractPath . DIRECTORY_SEPARATOR . $stat['name'];
+        if (!$cells)
+            return [];
+        $c = 0;
+        foreach ($cells as $row) {
+            if ($c === 0) {
+                $keys = $row;
+                // $length = count($row);
+                // for ($i = 0; $i < $length; $i++)
+                //     $keys[$i] = $row[$i];
+            } else {
+                $cols = [];
+                foreach ($row as $i => $value)
+                    if (isset($keys[$i]))
+                        $cols[$keys[$i]] = $value;
+                //else $cols[$keys[$i] = $i] = $value;
+                yield $cols;
             }
-            $zip->close();
+            $c++;
         }
     }
-
     /**
      * Convert Key Value parameters to a flat Table
      * @param mixed $fields A key value pairs array
@@ -555,36 +520,15 @@ class Convert
         });
         return $cells;
     }
-    public static function CellsToFields($cells): array
+    public static function ToCells($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {
-        if (!$cells)
-            return [];
-        $c = 0;
-        $fields = [];
-        foreach ($cells as $row) {
-            if ($c === 0) {
-                $keys = $row;
-                // $length = count($row);
-                // for ($i = 0; $i < $length; $i++)
-                //     $keys[$i] = $row[$i];
-            } else {
-                $cols = [];
-                foreach ($row as $i => $value)
-                    if (isset($keys[$i]))
-                        $cols[$keys[$i]] = $value;
-                //else $cols[$keys[$i] = $i] = $value;
-                $fields[] = $cols;
-            }
-            $c++;
-        }
-        return $fields;
+        return iterator_to_array(self::ToCellsIterator($string, $delimiter, $enclosure, $eol));
     }
-    public static function ToCells($svString, $delimiter = ',', $enclosure = '"', $eol = "\n"): array
+    public static function ToCellsIterator($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {
-        if (isEmpty($svString))
+        if (isEmpty($string))
             return [];
-        $cells = [];
-        $length = strlen($svString);
+        $length = strlen($string);
         $index = 0;
         $normalize = function ($v) {
             if (($v . "") === "")
@@ -601,11 +545,11 @@ class Convert
             $column = '';
             $inEnclosure = false;
             do {
-                $char = $svString[$index++];
+                $char = $string[$index++];
                 if ($inEnclosure) {
                     if ($char == $enclosure) {
                         if ($index < $length) {
-                            $char = $svString[$index];
+                            $char = $string[$index];
                             if ($char == $enclosure) {
                                 $column .= $char;
                                 $index++;
@@ -622,7 +566,7 @@ class Convert
                     }
                 } else if ($char == $enclosure) {
                     if ($index < $length) {
-                        $char = $svString[$index++];
+                        $char = $string[$index++];
                         if ($char == $enclosure) {
                             $column .= $char;
                         } else {
@@ -638,7 +582,7 @@ class Convert
                     $column = '';
                 } else if ($char == "\r") {
                     if ($index < $length) {
-                        $char = $svString[$index];
+                        $char = $string[$index];
                         if ($char == $eol) {
                             $index++;
                         }
@@ -657,9 +601,8 @@ class Convert
                     break;
                 }
             } while ($index < $length);
-            $cells[] = $row;
+            yield $row;
         }
-        return $cells;
     }
     public static function FromCells($cells, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
@@ -688,7 +631,7 @@ class Convert
      */
     public static function ToDateTime(\DateTime|string|null $dateTime = null, \DateTimeZone|null $dateTimeZone = null)
     {
-        return (is_string($dateTime) || is_null($dateTime)) ? new \DateTime($dateTime ?? \_::$Back->CurrentDateTime, $dateTimeZone ?? new \DateTimeZone(\_::$Back->DateTimeZone)) : $dateTime;
+        return (is_string($dateTime) || is_null($dateTime)) ? new \DateTime($dateTime ?? \_::$Front->CurrentDateTime, $dateTimeZone ?? new \DateTimeZone(\_::$Front->DateTimeZone)) : $dateTime;
     }
     /**
      * Get the DateTime as a String type suitable to save or send to the databases
@@ -705,29 +648,29 @@ class Convert
      */
     public static function ToShownDateTime($dateTime = null, \DateTimeZone|null $dateTimeZone = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Back->TimeStampOffset));
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Front->TimeStampOffset));
     }
     public static function FromShownDateTime($dateTime = null, \DateTimeZone|null $dateTimeZone = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Back->TimeStampOffset));
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Front->TimeStampOffset));
     }
     /**
      * Get the DateTime as a String type suitable to show on website
      */
     public static function ToShownDateTimeString($dateTime = null, \DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Back->TimeStampOffset))
-            ->format($dateTimeFormat ?? \_::$Back->DateTimeFormat);
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() + ($tolerance ?? \_::$Front->TimeStampOffset))
+            ->format($dateTimeFormat ?? \_::$Front->DateTimeFormat);
     }
     public static function FromShownDateTimeString($dateTime = null, \DateTimeZone|null $dateTimeZone = null, string|null $dateTimeFormat = null, $tolerance = null)
     {
-        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Back->TimeStampOffset))
-            ->format($dateTimeFormat ?? \_::$Back->DateTimeFormat);
+        return (new \DateTime())->setTimestamp(self::ToDateTime($dateTime, $dateTimeZone)->getTimestamp() - ($tolerance ?? \_::$Front->TimeStampOffset))
+            ->format($dateTimeFormat ?? \_::$Front->DateTimeFormat);
     }
 
     public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
-        $path = $path ?? Local::GenerateAddress("table", ".csv", random: false);
+        $path = $path ?? Storage::GenerateAddress("table", ".csv", random: false);
         $fstream = fopen($path, 'r+b');
         foreach ($cells as $fields)
             fputcsv($fstream, $fields, $delimiter, $enclosure, "\\", $eol);
@@ -742,7 +685,7 @@ class Convert
         return null;
     }
 
-    public static function FromDynamicString($text, &$additionalKeys = array(), $addDefaultKeys = true)
+    public static function FromDynamicString($string, &$additionalKeys = array(), $addDefaultKeys = true)
     {
         if ($addDefaultKeys) {
             $email = \_::$Front->ReceiverEmail;
@@ -751,13 +694,13 @@ class Convert
             if (!isset($additionalKeys['$HOSTEMAIL']))
                 $additionalKeys['$HOSTEMAIL'] = $email;
             if (!isset($additionalKeys['$HOSTLINK']))
-                $additionalKeys['$HOSTLINK'] = Struct::Link(\_::$User->Site, \_::$User->Host);
+                $additionalKeys['$HOSTLINK'] = Struct::Link(\_::$Address->UrlHost, \_::$Address->UrlOrigin);
             if (!isset($additionalKeys['$HOST']))
-                $additionalKeys['$HOST'] = \_::$User->Host;
+                $additionalKeys['$HOST'] = \_::$Address->UrlOrigin;
             if (!isset($additionalKeys['$URLLINK']))
-                $additionalKeys['$URLLINK'] = Struct::Link(\_::$User->Url, \_::$User->Url);
+                $additionalKeys['$URLLINK'] = Struct::Link(\_::$Address->Url, \_::$Address->Url);
             if (!isset($additionalKeys['$URL']))
-                $additionalKeys['$URL'] = \_::$User->Url;
+                $additionalKeys['$URL'] = \_::$Address->Url;
             if (!isValid($additionalKeys, '$SIGNATURE'))
                 $additionalKeys['$SIGNATURE'] = \_::$User->TemporarySignature;
             if (!isValid($additionalKeys, '$NAME'))
@@ -791,24 +734,24 @@ class Convert
                 return (strlen($a) == strlen($b)) ? 0 : ((strlen($a) < strlen($b)) ? 1 : -1);
             });
         }
-        $text = str_replace(array_keys($additionalKeys), array_values($additionalKeys), $text);
+        $string = str_replace(array_keys($additionalKeys), array_values($additionalKeys), $string);
         //foreach ($additionalKeys as $key => $value)
-        //    $text = str_replace($key, $value??"", $text);
-        return $text;
+        //    $string = str_replace($key, $value??"", $string);
+        return $string;
     }
 
-    public static function FromSwitch($obj, $key, $defultValue = null)
+    public static function FromSwitch($object, $key, $defultValue = null)
     {
         return (
-            is_null($obj) || is_string($obj)
-            ? $obj
+            is_null($object) || is_string($object)
+            ? $object
             : (
-                is_array($obj) || $obj instanceof \stdClass
-                ? (getBetween($obj, $key, "Default") ?? last($obj))
+                is_array($object) || $object instanceof \stdClass
+                ? (getBetween($object, $key, "Default") ?? last($object))
                 : (
-                    is_callable($obj) || $obj instanceof \Closure
-                    ? self::FromSwitch($obj($key), $key, $defultValue)
-                    : $obj
+                    is_callable($object) || $object instanceof \Closure
+                    ? self::FromSwitch($object($key), $key, $defultValue)
+                    : $object
                 )
             )
         ) ?? $defultValue;

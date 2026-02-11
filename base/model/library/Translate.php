@@ -165,8 +165,7 @@ class Translate
 			return self::Trim($data);
 		return self::Trim(self::DetectCaseStatus($data, $data));
 	}
-
-	public function GetAll($condition = null, $params = [], $hasKey = false)
+	public function GetLexicon($condition = null, $params = [], $hasKey = false)
 	{
 		$rows = $this->DataTable->Select("*", $condition, $params);
 		$row = [];
@@ -204,11 +203,25 @@ class Translate
 			[":KeyCode" => $code, ":ValueOptions" => Convert::ToJson($data)]
 		);
 	}
-
-	public function SetAll($values)
+	public function SetItem($item)
+	{
+		$row = [];
+		$vals = [];
+		if ($item["KEY"] ?? null) {
+			$row[":KeyCode"] = $vals["x"] = $item["KEY"];
+			unset($item["KEY"]);
+		} else
+			$row[":KeyCode"] = $this->CreateCode($vals["x"] = first($item));
+		foreach ($item as $key => $val)
+			if ($key && $val)
+				$vals[strtolower($key)] = $val;
+		$row[":ValueOptions"] = Convert::ToJson($vals);
+		return $this->DataTable->Replace($row);
+	}
+	public function SetLexicon($lexicon)
 	{
 		$args = [];
-		foreach ($values as $value) {
+		foreach ($lexicon as $value) {
 			$row = [];
 			$vals = [];
 			if ($value["KEY"] ?? null) {

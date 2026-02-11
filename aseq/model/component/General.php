@@ -1,10 +1,16 @@
-<?php namespace MiMFa\Component;
+<?php
+namespace MiMFa\Component;
 use MiMFa\Library\Struct;
-class GeneralStyle{
-	public static function Variables($rootSelector = ":root") { return "
+use MiMFa\Library\Storage;
+
+class GeneralStyle
+{
+	public static function Variables($rootSelector = ":root")
+	{
+		return "
 		$rootSelector{
-			--dir: ".(\_::$Front->Translate->Direction??\_::$Front->DefaultDirection).";
-			--lang: ".(\_::$Front->Translate->Language??\_::$Front->DefaultLanguage).";
+			--dir: " . (\_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection) . ";
+			--lang: " . (\_::$Front->Translate->Language ?? \_::$Front->DefaultLanguage) . ";
 			--color-black: " . \_::$Front->Color(0) . ";
 			--color-red: " . \_::$Front->Color(1) . ";
 			--color-green: " . \_::$Front->Color(2) . ";
@@ -14,6 +20,8 @@ class GeneralStyle{
 			--color-magenta: " . \_::$Front->Color(6) . ";
 			--color-white: " . \_::$Front->Color(7) . ";
 			--color-gray: #888888;
+			" .
+			GeneralStyle::MakeVariables(\_::$Front->ColorPalette, "color", 8) . "
 			--fore-color: " . \_::$Front->ForeColor(0) . ";
 			--fore-color-input: " . \_::$Front->ForeColor(1) . ";
 			--fore-color-output: " . \_::$Front->ForeColor(2) . ";
@@ -25,114 +33,33 @@ class GeneralStyle{
 			--back-color-output: " . \_::$Front->BackColor(2) . ";
 			--back-color-special: " . \_::$Front->BackColor(3) . ";
 			--back-color-special-input: " . \_::$Front->BackColor(4) . ";
-			--back-color-special-output: " . \_::$Front->BackColor(5) . ";".(
-			\_::$Front->SwitchMode?"
-			--fore-color-0: " . \_::$Front->BackColor(0) . ";
-			--fore-color-1: " . \_::$Front->BackColor(1) . ";
-			--fore-color-2: " . \_::$Front->BackColor(2) . ";
-			--fore-color-3: " . \_::$Front->BackColor(3) . ";
-			--fore-color-4: " . \_::$Front->BackColor(4) . ";
-			--fore-color-5: " . \_::$Front->BackColor(5) . ";
-			--back-color-0: " . \_::$Front->ForeColor(0) . ";
-			--back-color-1: " . \_::$Front->ForeColor(1) . ";
-			--back-color-2: " . \_::$Front->ForeColor(2) . ";
-			--back-color-3: " . \_::$Front->ForeColor(3) . ";
-			--back-color-4: " . \_::$Front->ForeColor(4) . ";
-			--back-color-5: " . \_::$Front->ForeColor(5) . ";":"
-			--fore-color-0: " . \_::$Front->ForeColor(0) . ";
-			--fore-color-1: " . \_::$Front->ForeColor(1) . ";
-			--fore-color-2: " . \_::$Front->ForeColor(2) . ";
-			--fore-color-3: " . \_::$Front->ForeColor(3) . ";
-			--fore-color-4: " . \_::$Front->ForeColor(4) . ";
-			--fore-color-5: " . \_::$Front->ForeColor(5) . ";
-			--back-color-0: " . \_::$Front->BackColor(0) . ";
-			--back-color-1: " . \_::$Front->BackColor(1) . ";
-			--back-color-2: " . \_::$Front->BackColor(2) . ";
-			--back-color-3: " . \_::$Front->BackColor(3) . ";
-			--back-color-4: " . \_::$Front->BackColor(4) . ";
-			--back-color-5: " . \_::$Front->BackColor(5) . ";"
-			)."
+			--back-color-special-output: " . \_::$Front->BackColor(5) . ";
+			" . (
+			\_::$Front->SwitchMode ?
+			GeneralStyle::MakeVariables(\_::$Front->BackColorPalette, "fore-color") .
+			GeneralStyle::MakeVariables(\_::$Front->ForeColorPalette, "back-color")
+			:
+			GeneralStyle::MakeVariables(\_::$Front->ForeColorPalette, "fore-color") .
+			GeneralStyle::MakeVariables(\_::$Front->BackColorPalette, "back-color")
+		) . "
 			--font: " . \_::$Front->Font(0) . ";
 			--font-input: " . \_::$Front->Font(1) . ";
 			--font-output: " . \_::$Front->Font(2) . ";
 			--font-special: " . \_::$Front->Font(3) . ";
 			--font-special-input: " . \_::$Front->Font(4) . ";
 			--font-special-output: " . \_::$Front->Font(5) . ";
-			--size-0: " . \_::$Front->Size(0) . ";
-			--size-1: " . \_::$Front->Size(1) . ";
-			--size-2: " . \_::$Front->Size(2) . ";
-			--size-3: " . \_::$Front->Size(3) . ";
-			--size-4: " . \_::$Front->Size(4) . ";
-			--size-5: " . \_::$Front->Size(5) . ";
-			--size-min: " . first(\_::$Front->SizePalette) . ";
-			--size-max: " . last(\_::$Front->SizePalette) . ";
-			--shadow-0: " . \_::$Front->Shadow(0) . ";
-			--shadow-1: " . \_::$Front->Shadow(1) . ";
-			--shadow-2: " . \_::$Front->Shadow(2) . ";
-			--shadow-3: " . \_::$Front->Shadow(3) . ";
-			--shadow-4: " . \_::$Front->Shadow(4) . ";
-			--shadow-5: " . \_::$Front->Shadow(5) . ";
-			--shadow-min: " . first(\_::$Front->ShadowPalette) . ";
-			--shadow-max: " . last(\_::$Front->ShadowPalette) . ";
-			--border-0: " . \_::$Front->Border(0) . ";
-			--border-1: " . \_::$Front->Border(1) . ";
-			--border-2: " . \_::$Front->Border(2) . ";
-			--border-3: " . \_::$Front->Border(3) . ";
-			--border-4: " . \_::$Front->Border(4) . ";
-			--border-5: " . \_::$Front->Border(5) . ";
-			--border-min: " . first(\_::$Front->BorderPalette) . ";
-			--border-max: " . last(\_::$Front->BorderPalette) . ";
-			--radius-0: " . \_::$Front->Radius(0) . ";
-			--radius-1: " . \_::$Front->Radius(1) . ";
-			--radius-2: " . \_::$Front->Radius(2) . ";
-			--radius-3: " . \_::$Front->Radius(3) . ";
-			--radius-4: " . \_::$Front->Radius(4) . ";
-			--radius-5: " . \_::$Front->Radius(5) . ";
-			--radius-min: " . first(\_::$Front->RadiusPalette) . ";
-			--radius-max: " . last(\_::$Front->RadiusPalette) . ";
-			--transition-0: " . \_::$Front->Transition(0) . ";
-			--transition-1: " . \_::$Front->Transition(1) . ";
-			--transition-2: " . \_::$Front->Transition(2) . ";
-			--transition-3: " . \_::$Front->Transition(3) . ";
-			--transition-4: " . \_::$Front->Transition(4) . ";
-			--transition-5: " . \_::$Front->Transition(5) . ";
-			--transition-min: " . first(\_::$Front->TransitionPalette) . ";
-			--transition-max: " . last(\_::$Front->TransitionPalette) . ";
+			" .
+			GeneralStyle::MakeVariables(\_::$Front->SizePalette, "size") .
+			GeneralStyle::MakeVariables(\_::$Front->ShadowPalette, "shadow") .
+			GeneralStyle::MakeVariables(\_::$Front->BorderPalette, "border") .
+			GeneralStyle::MakeVariables(\_::$Front->RadiusPalette, "radius") .
+			GeneralStyle::MakeVariables(\_::$Front->TransitionPalette, "transition") . "
 			--animation-speed: " . \_::$Front->AnimationSpeed . "ms;
-			
-			--overlay-0: \"" . \_::$Front->Overlay(0) . "\";
-			--overlay-1: \"" . \_::$Front->Overlay(1) . "\";
-			--overlay-2: \"" . \_::$Front->Overlay(2) . "\";
-			--overlay-3: \"" . \_::$Front->Overlay(3) . "\";
-			--overlay-4: \"" . \_::$Front->Overlay(4) . "\";
-			--overlay-5: \"" . \_::$Front->Overlay(5) . "\";
-			--overlay-min: " . first(\_::$Front->OverlayPalette) . ";
-			--overlay-max: " . last(\_::$Front->OverlayPalette) . ";
-			--pattern-0: \"" . \_::$Front->Pattern(0) . "\";
-			--pattern-1: \"" . \_::$Front->Pattern(1) . "\";
-			--pattern-2: \"" . \_::$Front->Pattern(2) . "\";
-			--pattern-3: \"" . \_::$Front->Pattern(3) . "\";
-			--pattern-4: \"" . \_::$Front->Pattern(4) . "\";
-			--pattern-5: \"" . \_::$Front->Pattern(5) . "\";
-			--pattern-min: " . first(\_::$Front->PatternPalette) . ";
-			--pattern-max: " . last(\_::$Front->PatternPalette) . ";
-			--overlay-url-0: URL(\"" . \_::$Front->Overlay(0) . "\");
-			--overlay-url-1: URL(\"" . \_::$Front->Overlay(1) . "\");
-			--overlay-url-2: URL(\"" . \_::$Front->Overlay(2) . "\");
-			--overlay-url-3: URL(\"" . \_::$Front->Overlay(3) . "\");
-			--overlay-url-4: URL(\"" . \_::$Front->Overlay(4) . "\");
-			--overlay-url-5: URL(\"" . \_::$Front->Overlay(5) . "\");
-			--overlay-url-min: URL(\"" . first(\_::$Front->OverlayPalette) . "\");
-			--overlay-url-max: URL(\"" . last(\_::$Front->OverlayPalette) . "\");
-			--pattern-url-0: URL(\"" . \_::$Front->Pattern(0) . "\");
-			--pattern-url-1: URL(\"" . \_::$Front->Pattern(1) . "\");
-			--pattern-url-2: URL(\"" . \_::$Front->Pattern(2) . "\");
-			--pattern-url-3: URL(\"" . \_::$Front->Pattern(3) . "\");
-			--pattern-url-4: URL(\"" . \_::$Front->Pattern(4) . "\");
-			--pattern-url-5: URL(\"" . \_::$Front->Pattern(5) . "\");
-			--pattern-url-min: URL(\"" . first(\_::$Front->PatternPalette) . "\");
-			--pattern-url-max: URL(\"" . last(\_::$Front->PatternPalette) . "\");
-			
+			" .
+			GeneralStyle::MakeVariables(\_::$Front->OverlayPalette, "overlay", handle: fn($v) => "\"" . Storage::GetUrl($v) . "\"") .
+			GeneralStyle::MakeVariables(\_::$Front->PatternPalette, "pattern", handle: fn($v) => "\"" . Storage::GetUrl($v) . "\"") .
+			GeneralStyle::MakeVariables(\_::$Front->OverlayPalette, "overlay-url", handle: fn($v) => "URL(\"" . Storage::GetUrl($v) . "\")") .
+			GeneralStyle::MakeVariables(\_::$Front->PatternPalette, "pattern-url", handle: fn($v) => "URL(\"" . Storage::GetUrl($v) . "\")") . "
 			--owner: \"" . __(\_::$Front->Owner, true, false) . "\";
 			--name: \"" . __(\_::$Front->Name, true, false) . "\";
 			--slogan: \"" . __(\_::$Front->Slogan, true, false) . "\";
@@ -156,7 +83,21 @@ class GeneralStyle{
 			--error-symbol-path-url: URL(\"" . asset(\_::$Front->ErrorSymbolPath) . "\");
 		}";
 	}
-	public static function SwitchVariables($rootSelector = ":root") { return "
+	public static function MakeVariables($palette, $name, $minimum = 6, callable|null $handle = null)
+	{
+		$handle = $handle ?? fn($v) => $v;
+		$count = count($palette);
+		$sep = "\r\t\t\t";
+		return
+			$sep .
+			"--$name-min: " . $handle(first($palette)) . ";$sep" .
+			($minimum ? join("", loop($minimum, fn($v, $k, $i) => "--$name-$i: " . $handle(\_::$Front->LoopPalette($palette, $i)) . ";$sep")) : "") .
+			($count > $minimum ? join("", loop(array_slice($palette, $minimum), fn($v, $k, $i) => is_int($k) ? ("--$name-" . ($k + $minimum) . ": " . $handle($v) . ";$sep") : ("--$name-$k: " . $handle($v) . ";$sep"))) : "") .
+			"--$name-max: " . $handle(last($palette)) . ";$sep";
+	}
+	public static function SwitchVariables($rootSelector = ":root")
+	{
+		return "
 		$rootSelector{
 			--fore-color: " . \_::$Front->BackColor(0) . ";
 			--fore-color-input: " . \_::$Front->BackColor(1) . ";
@@ -174,5 +115,5 @@ class GeneralStyle{
 	}
 }
 \_::$Front->Libraries[] = Struct::Style(GeneralStyle::Variables());
-\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->StyleDirectory,'general.css', optimize: true));
-\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->ScriptDirectory, 'general.js', optimize: true));
+\_::$Front->Libraries[] = Struct::Style(null, asset(\_::$Address->GlobalStyleDirectory, 'general.css', optimize: true));
+\_::$Front->Libraries[] = Struct::Script(null, asset(\_::$Address->GlobalScriptDirectory, 'general.js', optimize: true));

@@ -232,16 +232,6 @@ class Base extends \ArrayObject
 		$this->Render();
 		finalize();
 	}
-	/**
-	 * To echo as the whole contents then finalize the connection
-	 */
-	public function Breaker($forward = null, $delay = 0)
-	{
-		eraseResponse();
-		$this->Render();
-		responseBreaker(forward:$forward, delay:$delay);
-		finalize();
-	}
 
 	public function ToString()
 	{

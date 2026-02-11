@@ -11,38 +11,15 @@ use MiMFa\Library\Convert;
  */
 class RouterBase extends ArrayObject
 {
+    /**
+     * @internal
+     */
     public $Routes = [];
 
-
+    /**
+     * @internal
+     */
     public bool $IsActive = true;
-
-    /**
-     * The status of all server response: 400, 404, 500, etc.
-     * @default null
-     * @var mixed
-     * @category Security
-     */
-    public $StatusMode = null;
-
-    /**
-     * The view name to show pages
-     * @var string|null
-     * @default "main"
-     * @category General
-     */
-    public string|null $DefaultRouteName = "main";
-    /**
-     * The default view name to show when restriction
-     * @var string
-     * @category Security
-     */
-    public $RestrictionRouteName = "403";
-    /**
-     * Default message to show when restriction
-     * @var string
-     * @category Security
-     */
-    public $RestrictionContent = "Unfortunately, you have no access to the site now!<br>Please try a few minutes later...";
 
     /**
      * The request original method index
@@ -57,6 +34,7 @@ class RouterBase extends ArrayObject
      * INTERNAL:8,
      * EXTERNAL:9, 
      * OTHER:10
+     * @internal
      * @var int
      */
     public int|null $DefaultMethodIndex = null;
@@ -73,6 +51,7 @@ class RouterBase extends ArrayObject
      * INTERNAL:8,
      * EXTERNAL:9, 
      * OTHER:10
+     * @internal
      * @var string
      */
     public string|null $DefaultMethodName = null;
@@ -90,12 +69,25 @@ class RouterBase extends ArrayObject
      * INTERNAL:8,
      * EXTERNAL:9, 
      * OTHER:10
+     * @internal
      * @var int
      */
     public $Method = null;
+    /**
+     * @internal
+     */
     public $Result = null;
+    /**
+     * @internal
+     */
     public $Point = 0;
+    /**
+     * @internal
+     */
     public $Pattern = null;
+    /**
+     * @internal
+     */
     public $Taken = null;
 
     /**
@@ -103,15 +95,13 @@ class RouterBase extends ArrayObject
      * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
      * @var string|null
      */
-    public string|null $Request = null;
+    public string|null $CurrentRequest = null;
     /**
      * The current handled direction part of the url from the root
      * @example: "Category/mimfa/service/web.php"
      * @var string|null
      */
-    public string|null $Direction = null;
-
-    public string $Directory;
+    public string|null $CurrentRoute = null;
 
     public function __construct(
         $pattern = null,
@@ -127,13 +117,13 @@ class RouterBase extends ArrayObject
         $this->Method = $this->DefaultMethodName;
         do
             foreach ($this->Routes[$this->Method] ?? [] as $pat => $handlers)
-                if (preg_match($pat, $this->Request ?? "", $matches)) {
+                if (preg_match($pat, $this->CurrentRequest ?? "", $matches)) {
                     foreach ($handlers as $i => $handler) {
                         $this->Pattern = $pat;
                         $this->Point++;
                         $this->Taken = $matches[0];
-                        $this->Request = preg_replace($this->Pattern, "", $this->Request ?? "");
-                        $this->Direction = ltrim($this->Request, "/\\ ");
+                        $this->CurrentRequest = preg_replace($this->Pattern, "", $this->CurrentRequest ?? "");
+                        $this->CurrentRoute = ltrim($this->CurrentRequest, "/\\ ");
                         yield $handler;
                     }
                     if ($this->Point > 0)
@@ -176,8 +166,8 @@ class RouterBase extends ArrayObject
         $this->Point = 0;
         $this->Taken = null;
 
-        $this->Request = getRequest();
-        $this->Direction = getDirection();
+        $this->CurrentRequest = getUrlRequest();
+        $this->CurrentRoute = getUrlRoute();
 
         $this->DefaultMethodIndex = getMethodIndex();
         $this->DefaultMethodName = getMethodName();
@@ -322,7 +312,7 @@ class RouterBase extends ArrayObject
             $method = $this->Method;
             $pattern = $this->Pattern;
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                return (isStatic($handler ?? "")) ? route($handler ?? $this->Direction, $data, $print, $origin, $depth, $alternative, $default) :
+                return (isStatic($handler ?? "")) ? route($handler ?? $this->CurrentRoute, $data, $print, $origin, $depth, $alternative, $default) :
                     Convert::By($handler, $this);
             };
             if (isset($this->Routes[$method][$pattern]))
@@ -345,7 +335,7 @@ class RouterBase extends ArrayObject
             $pattern = $this->Pattern;
             if ($handler) {
                 $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
-                    return (isStatic($handler ?? "")) ? route($handler ?? $this->Direction, $data, $print, $origin, $depth, $alternative, $default) :
+                    return (isStatic($handler ?? "")) ? route($handler ?? $this->CurrentRoute, $data, $print, $origin, $depth, $alternative, $default) :
                         Convert::By($handler, $this);
                 };
                 foreach ($this->Routes as $mthd => $pttrns)
@@ -371,7 +361,7 @@ class RouterBase extends ArrayObject
             $pattern = $this->Pattern;
             $h = function () use ($handler, $data, $print, $origin, $depth, $alternative, $default) {
                 if ($this->Point <= 1)
-                    return (isStatic($handler ?? "")) ? route($handler ?? $this->Direction, $data, $print, $origin, $depth, $alternative, $default) :
+                    return (isStatic($handler ?? "")) ? route($handler ?? $this->CurrentRoute, $data, $print, $origin, $depth, $alternative, $default) :
                         Convert::By($handler, $this);
                 return null;
             };

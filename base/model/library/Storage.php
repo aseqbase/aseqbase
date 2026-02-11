@@ -2,38 +2,39 @@
 namespace MiMFa\Library;
 
 use DateTime;
+use RecursiveDirectoryIterator;
 
 /**
  * A simple library to work by the local files and folders
  *@copyright All rights are reserved for MiMFa Development Group
  *@author Mohammad Fathi
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
- *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#local See the Library Documentation
+ *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#storage See the Library Documentation
  */
-class Local
+class Storage
 {
 	/**
 	 * Get or Find a file, then get the external url
-	 * @param string|null $address Probable file external url or path
+	 * @param string|null $path Probable file external url or path
 	 * @return mixed
 	 */
-	public static function GetUrl($address)
+	public static function GetUrl($path)
 	{
-		if ((empty($address)) || isAbsoluteUrl($address))
-			return $address;
-		$address = self::GetRelativeAddress(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $address));
-		$d = ltrim(preg_replace("/[\?#@].*$/", "", $address), DIRECTORY_SEPARATOR);
-		$p = ltrim($address = normalizeUrl($address), "/");
+		if ((empty($path)) || isAbsoluteUrl($path))
+			return $path;
+		$path = self::GetRelativeAddress(str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $path));
+		$d = ltrim(preg_replace("/[\?#@].*$/", "", $path), DIRECTORY_SEPARATOR);
+		$p = ltrim($path = normalizeUrl($path), "/");
 		foreach (\_::$Sequence as $dir => $root)
 			if (file_exists($dir . $d))
 				return $root . $p;
-		if (!startsWith($address, "/")) {
-			$dirs = explode("/", \_::$User->Direction);
+		if (!startsWith($path, "/")) {
+			$dirs = explode("/", \_::$Address->UrlRoute);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
 			if (strlen($dirs) !== 0)
-				$address = "$dirs/$address";
+				$path = "$dirs/$path";
 		}
-		return $address;
+		return $path;
 	}
 	/**
 	 * Get the external absolute url
@@ -45,9 +46,9 @@ class Local
 		if ((empty($url)) || isAbsoluteUrl($url))
 			return $url;
 		if (startsWith($url, "/"))
-			return \_::$User->Host . $url;
+			return \_::$Address->UrlOrigin . $url;
 		else {
-			$dirs = explode("/", \_::$User->Url);
+			$dirs = explode("/", \_::$Address->Url);
 			$dirs = rtrim(implode("/", array_slice($dirs, 0, count($dirs) - 1)), "/");
 			return "$dirs/$url";
 		}
@@ -97,11 +98,11 @@ class Local
 
 	/**
 	 * To normalize the internal path
-	 * @param mixed $path Probable file internal path
+	 * @param mixed $url Probable file internal path
 	 */
-	public static function GetAddress($path)
+	public static function GetAddress($url)
 	{
-		if (empty($path))
+		if (empty($url))
 			return null;
 		return
 			preg_replace(
@@ -110,13 +111,13 @@ class Local
 				preg_replace(
 					"/(^\w+:\/\/[^\/\\\]+\/?)|([\?#@].*$)/",
 					"",
-					$path
+					$url
 				)
 			);
 	}
 	/**
 	 * To get absolute path from a relative one
-	 * @param  $path The relative path
+	 * @param  $path The relative address
 	 * @return string|null
 	 */
 	public static function GetAbsoluteAddress($path): string|null
@@ -124,15 +125,15 @@ class Local
 		if (empty($path))
 			return null;
 		$path = preg_match("/^[a-z]+\:/i", $path) ? $path :
-			(preg_match("/^[\/\\\]/i", $path) ? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : (\_::$Address->Address . $path));
+			(preg_match("/^[\/\\\]/i", $path) ? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : (\_::$Address->Directory . $path));
 		foreach (\_::$Sequence as $directory => $root)
 			if (startsWith($path, $directory))
 				return $path;
 			elseif (startsWith($path, $root))
-				return \_::$Address->Directory . ltrim(self::GetAddress(substr($path, strlen($root))), DIRECTORY_SEPARATOR);
+				return \_::$Address->GlobalDirectory . ltrim(self::GetAddress(substr($path, strlen($root))), DIRECTORY_SEPARATOR);
 		if (preg_match("/^[a-z]+\:/i", $path))
 			return self::GetAddress($path);
-		return \_::$Address->Directory . ltrim(self::GetAddress($path), DIRECTORY_SEPARATOR);
+		return \_::$Address->GlobalDirectory . ltrim(self::GetAddress($path), DIRECTORY_SEPARATOR);
 	}
 	/**
 	 * To get the relative address from a path
@@ -161,7 +162,7 @@ class Local
 	 */
 	public static function GenerateAddress(string $fileName = "new", string $format = "", string|null $directory = null, bool $random = true): string
 	{
-		$directory = $directory ?: \_::$Address->TempAddress;
+		$directory = $directory ?: \_::$Address->TempDirectory;
 		if (endswith($fileName, $format))
 			$fileName = substr($fileName, 0, strlen($fileName) - strlen($format));
 		$postfix = null;
@@ -179,7 +180,7 @@ class Local
 	 */
 	public static function GenerateOrganizedDirectory(string|null $rootDirectory = null): string
 	{
-		return self::CreateDirectory(($rootDirectory ?: \_::$Address->PublicAddress) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR);
+		return self::CreateDirectory(($rootDirectory ?: \_::$Address->PublicDirectory) . date("Y") . DIRECTORY_SEPARATOR . date("m") . DIRECTORY_SEPARATOR);
 	}
 
 	public static function SanitizeName(string $name): string
@@ -189,44 +190,44 @@ class Local
 
 	/**
 	 * Find an exists file or directory, then get the internal path
-	 * @param mixed $address Probable file or directory internal path
+	 * @param mixed $path Probable file or directory internal path
 	 * @return string|null
 	 */
-	public static function Get($address)
+	public static function Get($path)
 	{
-		$address = self::GetAddress($address);
-		if (!$address)
+		$path = self::GetAddress($path);
+		if (!$path)
 			return null;
-		return is_dir(rtrim($address, "/\\")) ?
-			self::GetDirectory($address) :
-			self::GetFile($address);
+		return is_dir(rtrim($path, "/\\")) ?
+			self::GetDirectory($path) :
+			self::GetFile($path);
 	}
-	public static function Exists($address): bool
+	public static function Exists($path): bool
 	{
-		$address = self::GetAddress($address);
-		if (!$address)
+		$path = self::GetAddress($path);
+		if (!$path)
 			return false;
-		return is_dir(rtrim($address, "/\\")) ?
-			self::DirectoryExists($address) :
-			self::FileExists($address);
+		return is_dir(rtrim($path, "/\\")) ?
+			self::DirectoryExists($path) :
+			self::FileExists($path);
 	}
-	public static function Delete($address)
+	public static function Delete($path)
 	{
-		$address = self::GetAddress($address);
-		if (!$address)
+		$path = self::GetAddress($path);
+		if (!$path)
 			return null;
-		return is_dir(rtrim($address, "/\\")) ?
-			self::DeleteDirectory($address) :
-			self::DeleteFile($address);
+		return is_dir(rtrim($path, "/\\")) ?
+			self::DeleteDirectory($path) :
+			self::DeleteFile($path);
 	}
-	public static function Rename($address, $newName): bool
+	public static function Rename($path, $newName): bool
 	{
-		$address = self::GetAddress($address);
-		if (!$address || empty($newName))
+		$path = self::GetAddress($path);
+		if (!$path || empty($newName))
 			return false;
-		return is_dir(rtrim($address, "/\\")) ?
-			self::RenameDirectory($address, $newName) :
-			self::RenameFile($address, $newName);
+		return is_dir(rtrim($path, "/\\")) ?
+			self::RenameDirectory($path, $newName) :
+			self::RenameFile($path, $newName);
 	}
 	public static function Move($sourceAddress, $destAddress): bool
 	{
@@ -252,23 +253,23 @@ class Local
 	 * @param mixed $path Probable file internal path
 	 * @return string|null
 	 */
-	public static function GetDirectory($path)
+	public static function GetDirectory($directory)
 	{
-		$path = self::GetAddress($path);
-		if (empty($path))
+		$directory = self::GetAddress(rtrim($directory, "\\\/"));
+		if (empty($directory))
 			return null;
-		if (is_dir($path))
-			return $path;
-		if (startsWith($path, \_::$Address->Address))
-			$path = substr($path, strlen(\_::$Address->Address));
-		foreach (\_::$Sequence as $directory => $p)
-			if (is_dir($directory . $path))
-				return $directory . $path;
+		if (is_dir($directory))
+			return $directory.DIRECTORY_SEPARATOR;
+		if (startsWith($directory, \_::$Address->Directory))
+			$directory = substr($directory, strlen(\_::$Address->Directory));
+		foreach (\_::$Sequence as $dir => $p)
+			if (is_dir($dir . $directory))
+				return $dir . $directory.DIRECTORY_SEPARATOR;
 		return null;
 	}
-	public static function DirectoryExists($path): bool
+	public static function DirectoryExists($directory): bool
 	{
-		return is_dir($path);
+		return is_dir(rtrim($directory, "\\\/"));
 	}
 	/**
 	 * To Create all Directories recursively
@@ -281,8 +282,8 @@ class Local
 	{
 		$dir = "";
 		$directory = self::GetAddress($directory);
-		if (startsWith($directory, \_::$Address->Address))
-			$directory = substr($directory, strlen($dir = \_::$Address->Address));
+		if (startsWith($directory, \_::$Address->Directory))
+			$directory = substr($directory, strlen($dir = \_::$Address->Directory));
 		elseif (startsWith($directory, DIRECTORY_SEPARATOR))
 			$dir = DIRECTORY_SEPARATOR;
 		$dirs = explode(DIRECTORY_SEPARATOR, trim($directory, DIRECTORY_SEPARATOR));
@@ -312,10 +313,10 @@ class Local
 		}
 		return $i;
 	}
-	public static function RenameDirectory(string $sourceDirectory, string $newName)
+	public static function RenameDirectory(string $directory, string $newName)
 	{
-		$newDirectory = Local::GenerateAddress($newName, "", dirname($sourceDirectory = rtrim($sourceDirectory, "\\\/")) . DIRECTORY_SEPARATOR, false);
-		return rename($sourceDirectory, $newDirectory);
+		$newDirectory = Storage::GenerateAddress($newName, "", dirname($directory = rtrim($directory, "\\\/")) . DIRECTORY_SEPARATOR, false);
+		return rename($directory, $newDirectory);
 	}
 	public static function MoveDirectory($sourceDirectory, $destDirectory)
 	{
@@ -360,13 +361,15 @@ class Local
 		if (!is_dir($directory))
 			return [];
 		$items = [];
-		foreach (scandir($directory, SCANDIR_SORT_NONE) as $name) {
+		$files = new \DirectoryIterator($directory);
+		foreach ($files as $file) {
+			$name = $file->getFilename();
 			if ($name === '.' || $name === '..')
 				continue;
-			if (is_dir($name = $directory . $name))
-				$items[] = $directory . $name . DIRECTORY_SEPARATOR;
+			if ($file->isDir())
+				$items[] = $file->getPathname() . DIRECTORY_SEPARATOR;
 			else
-				$items[] = $directory . $name;
+				$items[] = $file->getPathname();
 		}
 		return $items;
 	}
@@ -375,21 +378,22 @@ class Local
 		$nd = rtrim($directory, "/\/");
 		if (!is_dir($nd))
 			return;
-		foreach (scandir($nd, SCANDIR_SORT_NONE) as $name) {
+		$files = new \DirectoryIterator($directory);
+		foreach ($files as $file) {
+			$name = $file->getFilename();
 			if ($name === '.' || $name === '..')
 				continue;
-			$fullPath = $directory . $name;
-			$stat = stat($fullPath);
+			$fullPath = $file->getPathname();
 			yield [
 				"Name" => $name,
-				"IsDirectory" => $is_dir = is_dir($fullPath),
+				"IsDirectory" => $is_dir = $file->isDir(),
 				"Directory" => $directory,
 				"Path" => $fullPath . ($is_dir ? DIRECTORY_SEPARATOR : null),
-				"Size" => $stat['size'],
-				"Id" => $stat['uid'],
+				"Size" => $file->getSize(),
 				"MimeType" => $is_dir ? "Directory" : (function_exists("mime_content_type") ? mime_content_type($fullPath) : (strtoupper(preg_find("/(?<=\.)[a-z0-9]+$/", $name) ?? "") ?: "Unknown")),
-				"CreateTime" => new DateTime(Date("Y-m-d H:i:s", $stat['ctime'] ?? 0)),
-				"UpdateTime" => new DateTime(Date("Y-m-d H:i:s", $stat['mtime'] ?? 0))
+				"CreateTime" => new DateTime(Date(\_::$Front->DateTimeFormat??"Y-m-d H:i:s", $file->getCTime() ?? 0)),
+				"UpdateTime" => new DateTime(Date(\_::$Front->DateTimeFormat??"Y-m-d H:i:s", $file->getMTime() ?? 0)),
+				"AccessTime" => new DateTime(Date(\_::$Front->DateTimeFormat??"Y-m-d H:i:s", $file->getATime() ?? 0))
 			];
 		}
 	}
@@ -407,8 +411,8 @@ class Local
 			return null;
 		if (file_exists($path))
 			return $path;
-		if (startsWith($path, \_::$Address->Address))
-			$path = substr($path, strlen(\_::$Address->Address));
+		if (startsWith($path, \_::$Address->Directory))
+			$path = substr($path, strlen(\_::$Address->Directory));
 		foreach (\_::$Sequence as $directory => $p)
 			if (file_exists($directory . $path))
 				return $directory . $path;
@@ -432,12 +436,12 @@ class Local
 		$path = self::GetFile($path);
 		return empty($path) || unlink($path);
 	}
-	public static function RenameFile(string $sourcePath, string $newName)
+	public static function RenameFile(string $path, string $newName)
 	{
 		$extension = preg_find("/(\.[^.]*)$/u", $newName) ?? "";
 		$newName = $extension ? substr($newName, 0, -strlen($extension)) : $newName;
-		$newPath = Local::GenerateAddress($newName, $extension, dirname($sourcePath) . DIRECTORY_SEPARATOR, false);
-		return rename($sourcePath, $newPath);
+		$newPath = Storage::GenerateAddress($newName, $extension, dirname($path) . DIRECTORY_SEPARATOR, false);
+		return rename($path, $newPath);
 	}
 	public static function MoveFile($sourcePath, $destPath): bool
 	{
@@ -521,12 +525,12 @@ class Local
 	 */
 	public static function Temp($object, $minSize = null, $maxSize = null, ?array $extensions = null)
 	{
-		return self::Store($object, \_::$Address->TempAddress, $minSize, $maxSize, $extensions, true);
+		return self::Store($object, \_::$Address->TempDirectory, $minSize, $maxSize, $extensions, true);
 	}
 	/**
 	 * Save (Upload from the client side) something to the local storage
 	 * @param mixed $object A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -577,7 +581,7 @@ class Local
 		}
 
 		if ($directory === false) {
-			$directory = \_::$Address->TempAddress;
+			$directory = \_::$Address->TempDirectory;
 			$t = preg_find("/^[\w-]+\b/", $object["type"] ?? "");
 			if ($t)
 				$directory .= $t . DIRECTORY_SEPARATOR;
@@ -599,7 +603,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) file to the local storage
 	 * @param mixed $object A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -612,7 +616,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) image to the local storage
 	 * @param mixed $object An image object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum image size in byte
 	 * @param mixed $maxSize Maximum image size in byte
 	 * @param mixed $extensions Acceptable image extentions (leave default for "jpg","jpeg","png","bmp","gif","ico" formats)
@@ -630,7 +634,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) audio to the local storage
 	 * @param mixed $object A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -643,7 +647,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) video to the local storage
 	 * @param mixed $object A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -656,7 +660,7 @@ class Local
 	/**
 	 * Save (Upload from the client side) document to the local storage
 	 * @param mixed $object A file object or posted file key name
-	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicAddress as the destination
+	 * @param mixed $directory Leave null if you want to use \_::$Address->PublicDirectory as the destination
 	 * @param mixed $minSize Minimum file size in byte
 	 * @param mixed $maxSize Maximum file size in byte
 	 * @param mixed $extensions Acceptable extentions for example ["jpg","jpeg","png","bmp","gif","ico"]
@@ -666,46 +670,119 @@ class Local
 	{
 		return self::Store($object, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableDocumentFormats);
 	}
-	/**
-	 * Load (Download from the client side) something from the local storage,
-	 * Send somthing to download
-	 * @param mixed $content The content of the loaded file
-	 * @param string $name Optional filename to force download with a specific name.
-	 * @param string $type The file content type (e.g., "application/pdf", "image/jpeg").
-	 */
-	public static function Load($content, $name = "Export.txt", $type = "text/plain")
-	{
-		// Sanitize the filename
-		$name = preg_replace('/[^\w\-.]/', '_', $name);
-		// Clear output buffer if active
-		if (ob_get_level())
-			ob_clean();
+	
+	
+    /**
+     * Compress files and folders paths syncronusly into a zip file
+     * @param string $destPath The output zip file path
+     * @param array $paths The input files and folders paths
+     * @return array The list of files added to the zip
+     */
+    public static function Compress(string $destPath, ...$paths)
+    {
+        return iterator_to_array(self::CompressIterator($destPath, ...$paths));
+    }
+    /**
+     * Compress files and folders paths asyncronusly into a zip file
+     * @param string $destPath The output zip file path
+     * @param array $paths The input files and folders paths
+     * @return \Generator<mixed, string, mixed, void> The list of files added to the zip
+     */
+    public static function CompressIterator(string $destPath, ...$paths)
+    {
+        // Simple in-app zip using PHP's ZipArchive
+        $destPath = Storage::GetAbsoluteAddress($destPath);
+        $zipDir = dirname($destPath);
+        if (!is_dir($zipDir))
+            Storage::CreateDirectory($zipDir);
 
-		// ini_set('mbstring.internal_encoding', \_::$Front->Encoding);//deprecated
-		// ini_set('mbstring.http_input', 'auto');//deprecated
-		// ini_set('mbstring.http_output', \_::$Front->Encoding);//deprecated
-		ini_set('mbstring.detect_order', 'auto');
-		ini_set('default_charset', \_::$Front->Encoding);
+        $zip = new \ZipArchive();
+        $zip->open($destPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
-		header("Content-Disposition: attachment; filename=\"$name\"");
-		header("Content-Type: application/force-download");
-		header("Content-Type: $type; charset=" . \_::$Front->Encoding);
-		header('Expires: 0');
-		header('Cache-Control: must-revalidate');
-		header('Pragma: public');
+		$parent = self::ParentDirectory(...$paths);
+        foreach ($paths as $p) {
+            $full = rtrim(Storage::GetAbsoluteAddress($p), DIRECTORY_SEPARATOR);
+            $root = rtrim(str_replace($parent, "", $p), DIRECTORY_SEPARATOR);
+            if (is_dir($full)) {
+                $files = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($full),
+                    \RecursiveIteratorIterator::SELF_FIRST
+                );
+                foreach ($files as $file) {
+					$name = $file->getFilename();
+					if ($name === '.' || $name === '..')
+						continue;
+                    $path = $file->getPathname();
+                    if ($file->isDir())
+                        $zip->addEmptyDir(str_replace($full, $root, $path));
+                    else
+                        $zip->addFile($path, str_replace($full, $root, $path));
+                    yield $path;
+                }
+            } else {
+                $zip->addFile($full, $root);
+                yield $full;
+            }
+        }
 
-		response("\xEF\xBB\xBF");
-		deliver($content);
-	}
-	/**
-	 * Load (Download from the client side) file from the local storage,
-	 * Send somthing to download
-	 * @param string $path The absolute or relative path to the file.
-	 * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
-	 * @param string|null $name Optional filename to force download with a specific name.
-	 */
-	public static function LoadFile($path, $name = null, $type = null)
-	{
-		deliverFile($path, null, $type, true, $name);
-	}
+        $zip->close();
+    }
+    /**
+     * Decompress a zip file syncronusly into files and folders
+     * @param string $sourcePath The source zip file path
+     * @param mixed $destDirectory The destination directory path
+     * @return array The list of extracted files
+     */
+    public static function Decompress(string $sourcePath, $destDirectory = null)
+    {
+        return iterator_to_array(self::DecompressIterator($sourcePath, $destDirectory));
+    }
+    /**
+     * Decompress a zip file asyncronusly into files and folders
+     * @param string $sourcePath The source zip file path
+     * @param mixed $destDirectory The destination directory path
+     * @return \Generator<mixed, string, mixed, void> The list of extracted files
+     */
+    public static function DecompressIterator(string $sourcePath, $destDirectory = null)
+    {
+        $zip = new \ZipArchive();
+        $sourcePath = Storage::GetAbsoluteAddress($sourcePath);
+        if ($zip->open($sourcePath) === TRUE) {
+            $extractPath = $destDirectory ? Storage::GetAbsoluteAddress($destDirectory) : Storage::GetAbsoluteAddress(dirname($sourcePath));
+            if (!is_dir($extractPath))
+                $extractPath = Storage::CreateDirectory($extractPath);
+            $zip->extractTo($extractPath);
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $stat = $zip->statIndex($i);
+                yield $extractPath . DIRECTORY_SEPARATOR . $stat['name'];
+            }
+            $zip->close();
+        }
+    }
+
+	
+    public static function ParentDirectory(...$paths)
+    {
+		if($paths){
+			$sep = str_contains(first($paths), "/")?"/":"\\";
+			$sepPat = "/".preg_quote($sep)."/";
+			$l = count($paths);
+			for ($i=0; $i < $l; $i++)
+				$paths[$i] = preg_split($sepPat, rtrim($paths[$i], $sep));
+			$parts = [];
+			while(true){
+				$part = null;
+				for ($i=0; $i < $l; $i++) {
+        			if (count($paths[$i]) <= 1) return join($sep, $parts).$sep;
+					$p = array_shift($paths[$i]);
+					if ($part === null)
+						$part = $p;
+					elseif ($part !== $p)
+						return join($sep, $parts).$sep;
+				}
+				$parts[] = $part;
+			}
+		}
+		return null;
+    }
 }

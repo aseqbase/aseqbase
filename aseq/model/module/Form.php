@@ -94,7 +94,7 @@ class Form extends Module
 	{
 		parent::__construct();
 		$this->Set($title, $action, $method, $children, $description, $image);
-		$this->ReCaptchaSiteKey = \_::$Back->ReCaptchaSiteKey;
+		$this->ReCaptchaSiteKey = \_::$Front->ReCaptchaSiteKey;
 		$this->Signing = fn() => \_::$User->HasAccess() ? "" : part(\_::$User->InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);
@@ -694,7 +694,7 @@ class Form extends Module
 		if (($res = $this->CheckTimeBlock()) !== false)
 			return $res;
 		$name = $this->Name . "_Form";
-		$src = $this->Action ?? $this->Path ?? \_::$User->Path;
+		$src = $this->Action ?? $this->Path ?? \_::$Address->UrlBase;
 		if (is_array($this->Children) && count($this->Children) > 0) {
 			module("Field");
 			$attr = $this->Method ? [] : ["disabled"];
@@ -750,7 +750,7 @@ class Form extends Module
 							$this->GetHeader() .
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
-							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : "")
+							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$Address->UrlOrigin, ["class" => "back-button"]) : "")
 							,
 							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => $this->HeaderAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
 						) : "") .
@@ -784,7 +784,7 @@ class Form extends Module
 							$this->GetHeader() .
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
-							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$User->Host, ["class" => "back-button"]) : ""),
+							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$Address->UrlOrigin, ["class" => "back-button"]) : ""),
 							$this->AllowAnimate ? ["data-aos" => $this->HeaderAnimation, "data-aos-offset" => $this->AnimationOffset] : []
 						)
 						: ""
@@ -830,7 +830,7 @@ class Form extends Module
 			yield (isValid($this->SubmitLabel) ? Struct::SubmitButton($this->SubmitLabel, $this->SubmitValue, ["Name" => "submit", "class" => "main"]) : "");
 			yield (isValid(object: $this->ResetLabel) ? Struct::ResetButton($this->ResetLabel, null, ["Name" => "reset"]) : "");
 		}
-		yield (isValid($this->CancelLabel) ? Struct::Button($this->CancelLabel, $this->CancelPath ?? \_::$User->Host, ["Name" => "cancel"]) : "");
+		yield (isValid($this->CancelLabel) ? Struct::Button($this->CancelLabel, $this->CancelPath ?? \_::$Address->UrlOrigin, ["Name" => "cancel"]) : "");
 	}
 	public function GetFooter()
 	{
@@ -853,7 +853,7 @@ class Form extends Module
 
 	public function GetMessage($msg, ...$attr)
 	{
-		return Struct::Result($msg, attributes: $attr);
+		return Struct::Message($msg, attributes: $attr);
 	}
 	public function GetSuccess($msg = null, ...$attr)
 	{
@@ -919,7 +919,7 @@ class Form extends Module
 				\MiMFa\Library\Contact::SendHtmlEmail(
 					pop($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Front->SenderEmail,
 					pop($data, "ReceiverEmail") ?? $this->ReceiverEmail,
-					pop($data, "MailSubject") ?? $this->MailSubject ?? (\_::$User->Domain . ": A new form submitted"),
+					pop($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Address->UrlDomain . ": A new form submitted"),
 					pop($data, "MailMessage") ?? $data,
 					exception: $ex
 				)

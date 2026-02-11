@@ -2,7 +2,7 @@
 
 use MiMFa\Library\Convert;
 
-$path = implode("/", array_slice(explode("/", \_::$User->Direction), 1));
+$path = implode("/", array_slice(explode("/", \_::$Address->UrlRoute), 1));
 $parent = compute( "category/get", ["Direction" =>$path]);
 if(isEmpty($parent)) view(\_::$Front->DefaultViewName, ["Name" =>404]);
 else {
@@ -30,7 +30,7 @@ else {
             } elseif(is_array($items)) array_shift($items);
             else $items = [];
             view(pop($viewData, "ViewName") ?? "category", [
-                "Root" => pop($viewData, "Root") ?? \_::$Address->CategoryRoot,
+                "Root" => pop($viewData, "Root") ?? \_::$Address->CategoryRootPath,
                 "Items" => $items,
                 ...$viewData??[], 
                 ...$parent??[]
