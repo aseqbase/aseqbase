@@ -259,12 +259,12 @@ class Storage
 		if (empty($directory))
 			return null;
 		if (is_dir($directory))
-			return $directory.DIRECTORY_SEPARATOR;
+			return $directory . DIRECTORY_SEPARATOR;
 		if (startsWith($directory, \_::$Address->Directory))
 			$directory = substr($directory, strlen(\_::$Address->Directory));
 		foreach (\_::$Sequence as $dir => $p)
 			if (is_dir($dir . $directory))
-				return $dir . $directory.DIRECTORY_SEPARATOR;
+				return $dir . $directory . DIRECTORY_SEPARATOR;
 		return null;
 	}
 	public static function DirectoryExists($directory): bool
@@ -298,16 +298,20 @@ class Storage
 	}
 	public static function DeleteDirectory($directory)
 	{
-		$directory = trim($directory, "/\\");
+		$directory = rtrim($directory, "/\\");
 		$i = 0;
 		if (empty($directory))
 			return true;
-		elseif (is_dir($directory)) {
-			foreach (glob($directory . DIRECTORY_SEPARATOR . '*') as $file)
-				if (is_file($file) && ++$i)
-					unlink($file);
-				elseif (is_dir($file))
-					$i += self::DeleteDirectory($file);
+		elseif (is_dir(filename: $directory)) {
+			foreach (scandir($directory, SCANDIR_SORT_NONE) as $item) {
+				if ($item === '.' || $item === '..')
+					continue;
+				$path = $directory . DIRECTORY_SEPARATOR . $item;
+				if (is_file($path) && ++$i)
+					unlink($path);
+				elseif (is_dir($path))
+					$i += self::DeleteDirectory($path);
+			}
 			if (rmdir($directory))
 				$i++;
 		}
@@ -391,9 +395,9 @@ class Storage
 				"Path" => $fullPath . ($is_dir ? DIRECTORY_SEPARATOR : null),
 				"Size" => $file->getSize(),
 				"MimeType" => $is_dir ? "Directory" : (function_exists("mime_content_type") ? mime_content_type($fullPath) : (strtoupper(preg_find("/(?<=\.)[a-z0-9]+$/", $name) ?? "") ?: "Unknown")),
-				"CreateTime" => new DateTime(Date(\_::$Front->DateTimeFormat??"Y-m-d H:i:s", $file->getCTime() ?? 0)),
-				"UpdateTime" => new DateTime(Date(\_::$Front->DateTimeFormat??"Y-m-d H:i:s", $file->getMTime() ?? 0)),
-				"AccessTime" => new DateTime(Date(\_::$Front->DateTimeFormat??"Y-m-d H:i:s", $file->getATime() ?? 0))
+				"CreateTime" => new DateTime(Date(\_::$Front->DateTimeFormat ?? "Y-m-d H:i:s", $file->getCTime() ?? 0)),
+				"UpdateTime" => new DateTime(Date(\_::$Front->DateTimeFormat ?? "Y-m-d H:i:s", $file->getMTime() ?? 0)),
+				"AccessTime" => new DateTime(Date(\_::$Front->DateTimeFormat ?? "Y-m-d H:i:s", $file->getATime() ?? 0))
 			];
 		}
 	}
@@ -573,11 +577,11 @@ class Storage
 		if ($object["size"] < $minSize) {
 			if ($deleteSource)
 				self::DeleteFile($sourceFile);
-			    throw new \SilentException("The 'file size' is 'smaller than' ".Convert::ToCompactNumber($minSize)."B!");
+			throw new \SilentException("The 'file size' is 'smaller than' " . Convert::ToCompactNumber($minSize) . "B!");
 		} elseif ($object["size"] > $maxSize) {
 			if ($deleteSource)
 				self::DeleteFile($sourceFile);
-			    throw new \SilentException("The 'file size' is 'bigger than' ".Convert::ToCompactNumber($maxSize)."B!");
+			throw new \SilentException("The 'file size' is 'bigger than' " . Convert::ToCompactNumber($maxSize) . "B!");
 		}
 
 		if ($directory === false) {
@@ -670,119 +674,120 @@ class Storage
 	{
 		return self::Store($object, $directory, $minSize, $maxSize, $extensions ?? \_::$Back->AcceptableDocumentFormats);
 	}
-	
-	
-    /**
-     * Compress files and folders paths syncronusly into a zip file
-     * @param string $destPath The output zip file path
-     * @param array $paths The input files and folders paths
-     * @return array The list of files added to the zip
-     */
-    public static function Compress(string $destPath, ...$paths)
-    {
-        return iterator_to_array(self::CompressIterator($destPath, ...$paths));
-    }
-    /**
-     * Compress files and folders paths asyncronusly into a zip file
-     * @param string $destPath The output zip file path
-     * @param array $paths The input files and folders paths
-     * @return \Generator<mixed, string, mixed, void> The list of files added to the zip
-     */
-    public static function CompressIterator(string $destPath, ...$paths)
-    {
-        // Simple in-app zip using PHP's ZipArchive
-        $destPath = Storage::GetAbsoluteAddress($destPath);
-        $zipDir = dirname($destPath);
-        if (!is_dir($zipDir))
-            Storage::CreateDirectory($zipDir);
 
-        $zip = new \ZipArchive();
-        $zip->open($destPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+	/**
+	 * Compress files and folders paths syncronusly into a zip file
+	 * @param string $destPath The output zip file path
+	 * @param array $paths The input files and folders paths
+	 * @return array The list of files added to the zip
+	 */
+	public static function Compress(string $destPath, ...$paths)
+	{
+		return iterator_to_array(self::CompressIterator($destPath, ...$paths));
+	}
+	/**
+	 * Compress files and folders paths asyncronusly into a zip file
+	 * @param string $destPath The output zip file path
+	 * @param array $paths The input files and folders paths
+	 * @return \Generator<mixed, string, mixed, void> The list of files added to the zip
+	 */
+	public static function CompressIterator(string $destPath, ...$paths)
+	{
+		// Simple in-app zip using PHP's ZipArchive
+		$destPath = Storage::GetAbsoluteAddress($destPath);
+		$zipDir = dirname($destPath);
+		if (!is_dir($zipDir))
+			Storage::CreateDirectory($zipDir);
+
+		$zip = new \ZipArchive();
+		$zip->open($destPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
 		$parent = self::ParentDirectory(...$paths);
-        foreach ($paths as $p) {
-            $full = rtrim(Storage::GetAbsoluteAddress($p), DIRECTORY_SEPARATOR);
-            $root = rtrim(str_replace($parent, "", $p), DIRECTORY_SEPARATOR);
-            if (is_dir($full)) {
-                $files = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($full),
-                    \RecursiveIteratorIterator::SELF_FIRST
-                );
-                foreach ($files as $file) {
+		foreach ($paths as $p) {
+			$full = rtrim(Storage::GetAbsoluteAddress($p), DIRECTORY_SEPARATOR);
+			$root = rtrim(str_replace($parent, "", $p), DIRECTORY_SEPARATOR);
+			if (is_dir($full)) {
+				$files = new \RecursiveIteratorIterator(
+					new \RecursiveDirectoryIterator($full),
+					\RecursiveIteratorIterator::SELF_FIRST
+				);
+				foreach ($files as $file) {
 					$name = $file->getFilename();
 					if ($name === '.' || $name === '..')
 						continue;
-                    $path = $file->getPathname();
-                    if ($file->isDir())
-                        $zip->addEmptyDir(str_replace($full, $root, $path));
-                    else
-                        $zip->addFile($path, str_replace($full, $root, $path));
-                    yield $path;
-                }
-            } else {
-                $zip->addFile($full, $root);
-                yield $full;
-            }
-        }
+					$path = $file->getPathname();
+					if ($file->isDir())
+						$zip->addEmptyDir(str_replace($full, $root, $path));
+					else
+						$zip->addFile($path, str_replace($full, $root, $path));
+					yield $path;
+				}
+			} else {
+				$zip->addFile($full, $root);
+				yield $full;
+			}
+		}
 
-        $zip->close();
-    }
-    /**
-     * Decompress a zip file syncronusly into files and folders
-     * @param string $sourcePath The source zip file path
-     * @param mixed $destDirectory The destination directory path
-     * @return array The list of extracted files
-     */
-    public static function Decompress(string $sourcePath, $destDirectory = null)
-    {
-        return iterator_to_array(self::DecompressIterator($sourcePath, $destDirectory));
-    }
-    /**
-     * Decompress a zip file asyncronusly into files and folders
-     * @param string $sourcePath The source zip file path
-     * @param mixed $destDirectory The destination directory path
-     * @return \Generator<mixed, string, mixed, void> The list of extracted files
-     */
-    public static function DecompressIterator(string $sourcePath, $destDirectory = null)
-    {
-        $zip = new \ZipArchive();
-        $sourcePath = Storage::GetAbsoluteAddress($sourcePath);
-        if ($zip->open($sourcePath) === TRUE) {
-            $extractPath = $destDirectory ? Storage::GetAbsoluteAddress($destDirectory) : Storage::GetAbsoluteAddress(dirname($sourcePath));
-            if (!is_dir($extractPath))
-                $extractPath = Storage::CreateDirectory($extractPath);
-            $zip->extractTo($extractPath);
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $stat = $zip->statIndex($i);
-                yield $extractPath . DIRECTORY_SEPARATOR . $stat['name'];
-            }
-            $zip->close();
-        }
-    }
+		$zip->close();
+	}
+	/**
+	 * Decompress a zip file syncronusly into files and folders
+	 * @param string $sourcePath The source zip file path
+	 * @param mixed $destDirectory The destination directory path
+	 * @return array The list of extracted files
+	 */
+	public static function Decompress(string $sourcePath, $destDirectory = null)
+	{
+		return iterator_to_array(self::DecompressIterator($sourcePath, $destDirectory));
+	}
+	/**
+	 * Decompress a zip file asyncronusly into files and folders
+	 * @param string $sourcePath The source zip file path
+	 * @param mixed $destDirectory The destination directory path
+	 * @return \Generator<mixed, string, mixed, void> The list of extracted files
+	 */
+	public static function DecompressIterator(string $sourcePath, $destDirectory = null)
+	{
+		$zip = new \ZipArchive();
+		$sourcePath = Storage::GetAbsoluteAddress($sourcePath);
+		if ($zip->open($sourcePath) === TRUE) {
+			$extractPath = $destDirectory ? Storage::GetAbsoluteAddress($destDirectory) : Storage::GetAbsoluteAddress(dirname($sourcePath));
+			if (!is_dir($extractPath))
+				$extractPath = Storage::CreateDirectory($extractPath);
+			$zip->extractTo($extractPath);
+			for ($i = 0; $i < $zip->numFiles; $i++) {
+				$stat = $zip->statIndex($i);
+				yield $extractPath . DIRECTORY_SEPARATOR . $stat['name'];
+			}
+			$zip->close();
+		}
+	}
 
-	
-    public static function ParentDirectory(...$paths)
-    {
-		if($paths){
-			$sep = str_contains(first($paths), "/")?"/":"\\";
-			$sepPat = "/".preg_quote($sep)."/";
+
+	public static function ParentDirectory(...$paths)
+	{
+		if ($paths) {
+			$sep = str_contains(first($paths), "/") ? "/" : "\\";
+			$sepPat = "/" . preg_quote($sep) . "/";
 			$l = count($paths);
-			for ($i=0; $i < $l; $i++)
+			for ($i = 0; $i < $l; $i++)
 				$paths[$i] = preg_split($sepPat, rtrim($paths[$i], $sep));
 			$parts = [];
-			while(true){
+			while (true) {
 				$part = null;
-				for ($i=0; $i < $l; $i++) {
-        			if (count($paths[$i]) <= 1) return join($sep, $parts).$sep;
+				for ($i = 0; $i < $l; $i++) {
+					if (count($paths[$i]) <= 1)
+						return join($sep, $parts) . $sep;
 					$p = array_shift($paths[$i]);
 					if ($part === null)
 						$part = $p;
 					elseif ($part !== $p)
-						return join($sep, $parts).$sep;
+						return join($sep, $parts) . $sep;
 				}
 				$parts[] = $part;
 			}
 		}
 		return null;
-    }
+	}
 }
