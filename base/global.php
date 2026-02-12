@@ -534,7 +534,7 @@ function upload($sourcePath = null, ?string $name = null, $type = null, null|str
 {
 	eraseResponse(); // Clean any remaining output buffers
 
-	$sourcePath = Storage::GetFile($sourcePath);
+	$sourcePath = Storage::FindFile($sourcePath);
 	if ($sourcePath)
 		responseStatus($status);
 	else
@@ -649,14 +649,14 @@ function download($destPath = null, $extensions = null, $minSize = null, $maxSiz
 	$object = base64_decode(urldecode($object));
 
 	if ($destPath === true) {
-		if (!Storage::SetFileContent($destPath = Storage::GenerateAddress($objectName, "", \_::$Address->PublicDirectory), $object))
+		if (!Storage::SetFileContent($destPath = Storage::GenerateUniquePath(\_::$Address->PublicDirectory, $objectName, random:true), $object))
 			return false;
 	} elseif ($destPath === false) {
-		if (!Storage::SetFileContent($destPath = Storage::GenerateAddress($objectName, "", \_::$Address->TempDirectory), $object))
+		if (!Storage::SetFileContent($destPath = Storage::GenerateUniquePath(\_::$Address->TempDirectory, $objectName, random:true), $object))
 			return false;
 	} elseif ($destPath) {
 		if (endsWith($destPath, DIRECTORY_SEPARATOR))
-			$destPath = Storage::GenerateAddress($objectName, "", $destPath, false);
+			$destPath = Storage::GenerateUniquePath($destPath, $objectName);
 		if (!Storage::SetFileContent($destPath, $object))
 			return false;
 	} else {
@@ -716,18 +716,18 @@ function downloadStream($destPath = null, $extensions = null, $minSize = null, $
 	$object = base64_decode(urldecode($object));
 
 	if ($destPath === true) {
-		if (!Storage::AddFileContent($destPath = \_::$Address->PublicDirectory . $objectName, $object))
+		if (!Storage::AppendFileContent($destPath = \_::$Address->PublicDirectory . $objectName, $object))
 			return false;
 	} elseif ($destPath === false) {
-		if (!Storage::AddFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
+		if (!Storage::AppendFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
 			return false;
 	} elseif ($destPath) {
 		if (endsWith($destPath, DIRECTORY_SEPARATOR))
 			$destPath = $destPath . $objectName;
-		if (!Storage::AddFileContent($destPath, $object))
+		if (!Storage::AppendFileContent($destPath, $object))
 			return false;
 	} else {
-		if (!Storage::AddFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
+		if (!Storage::AppendFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
 			return false;
 		if ($chunk >= ($total - 1))
 			$destPath = Storage::GetFileContent($destPath);
@@ -1473,7 +1473,7 @@ function open(string|null $path = null, $extension = false, string|int $origin =
 function save($data, string|null $path = null, $extension = false, string|int $origin = 0, int $depth = 999999, int $flags = 0, &$fullPath = null)
 {
 	$fullPath = path($path, $extension, $origin, $depth);
-	return file_put_contents($fullPath = $fullPath ?: ($path ? Storage::GetAbsoluteAddress($path) : Storage::GenerateAddress()), Convert::ToString($data), flags: $flags);
+	return file_put_contents($fullPath = $fullPath ?: ($path ? Storage::GetAbsolutePath($path) : Storage::GenerateUniquePath()), Convert::ToString($data), flags: $flags);
 }
 
 /**
@@ -1801,7 +1801,7 @@ function table(string $name, bool $prefix = true, string|int $origin = 0, int $d
  */
 function asset($directory, string|null $name = null, string|array|null $extensions = null, $optimize = false, string|int $origin = 0, int $depth = 999999, $default = null)
 {
-	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Address->AssetRootPath, $directory ?? "");
+	$directory = preg_replace("/([\\\\\/]?asset[\\\\\/])|(^[\\\\\/]?)/", \_::$Address->AssetRootUrlPath, $directory ?? "");
 	$i = 0;
 	if (!is_array($extensions))
 		$extensions = [$extensions ?? ""];
@@ -2974,10 +2974,10 @@ function isAseq(string|null $directory): bool
 }
 function isBase(string|null $directory): bool
 {
-	return Storage::FileExists($directory . "global/BackBase.php")
-		&& Storage::FileExists($directory . "Front.php")
-		&& Storage::FileExists($directory . "global.php")
-		&& Storage::FileExists($directory . "initialize.php");
+	return file_exists($directory . "global/BackBase.php")
+		&& file_exists($directory . "Front.php")
+		&& file_exists($directory . "global.php")
+		&& file_exists($directory . "initialize.php");
 }
 function isInAseq(string|null $filePath): bool
 {
@@ -3246,7 +3246,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Address->ContentRootPath . strtolower($k));
+					return Struct::Link($v, \_::$Address->ContentRootUrlPath . strtolower($k));
 				},
 				keyWords: table("Content")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -3256,7 +3256,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Address->CategoryRootPath . strtolower($k));
+					return Struct::Link($v, \_::$Address->CategoryRootUrlPath . strtolower($k));
 				},
 				keyWords: table("Category")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -3266,7 +3266,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Address->TagRootPath . strtolower($k));
+					return Struct::Link($v, \_::$Address->TagRootUrlPath . strtolower($k));
 				},
 				keyWords: table("Tag")->SelectPairs("`Name`", "`Title`", "ORDER BY LENGTH(`Title`) DESC"),
 				both: true,
@@ -3276,7 +3276,7 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 			$value = Style::DoProcess(
 				$value,
 				process: function ($v, $k) {
-					return Struct::Link($v, \_::$Address->UserRootPath . strtolower($k));
+					return Struct::Link($v, \_::$Address->UserRootUrlPath . strtolower($k));
 				},
 				keyWords: table("User")->SelectPairs("`Name`", "`Name`", "ORDER BY LENGTH(`Name`) DESC"),
 				both: false,

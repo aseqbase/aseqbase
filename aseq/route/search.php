@@ -19,7 +19,7 @@ return route("contents", [
             "WindowTitle" => pop($viewData, "WindowTitle") ?? get($items, "Title") ?? [$query, $cat],
             "Description" => pop($viewData, "Description") ?? "Found <b>\"" . count($items) . "\"</b> results for searching <b>\"$query\"</b>!",
             "ShowRoot" => pop($viewData, "ShowRoot") ?? true,
-            "Root" => pop($viewData, "Root") ?? \_::$Address->ContentRootPath,
+            "Root" => pop($viewData, "Root") ?? \_::$Address->ContentRootUrlPath,
             "Items" => $items,
             ...$viewData
         ]);

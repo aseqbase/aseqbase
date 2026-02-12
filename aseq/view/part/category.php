@@ -9,7 +9,7 @@ $module->Title = between($Title, $Name);//!isEmpty($Title) && !isEmpty($Name) &&
 $module->Description = get($data, 'Description');
 $module->Image = get($data, 'Image');
 
-$Root = pop($data, 'Root') ?? \_::$Address->CategoryRootPath;
+$Root = pop($data, 'Root') ?? \_::$Address->CategoryRootUrlPath;
 $items = pop($data, "Items");
 $name = $module->Name;// To do not change the name of module
 pod($module, $data);

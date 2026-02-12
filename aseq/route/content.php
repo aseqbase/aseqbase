@@ -6,7 +6,7 @@ function findContent($router, &$data)
 {
     $computeData = get($data, "Compute")??[];
     if(!is_array($computeData)) return Convert::By($computeData);
-    $path = explode("/", trim(urldecode($router->Direction) ?? "", "/\\"));
+    $path = explode("/", trim(urldecode($router->CurrentRoute) ?? "", "/\\"));
     $name = last($path);
     if (count($path) > 1)
         $path = implode("/", array_slice($path, 0, count($path) - 1));

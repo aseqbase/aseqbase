@@ -192,8 +192,8 @@ class Struct
                     // Links
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z]{2,10}\:\/{2}[\/a-z_0-9\?\=\&\#\%\.\(\)\[\]\+\-\!\~\$]+)/iu", fn($m) => self::Link($m[1], $m[1]), $object) ?? $object;
                     $object = preg_replace_callback("/\b(?<![\"\'`])([a-z_0-9.\-]+\@[a-z_0-9.\-]+)/iu", fn($m) => self::Link($m[1], "mailto:{$m[1]}"), $object) ?? $object;
-                    $object = preg_replace_callback("/\B{$pre}\#(\w+){$attrPatt}/iu", fn($m) => self::Link("#" . $m[1], \_::$Address->SearchRootPath . urlencode("#" . $m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
-                    $object = preg_replace_callback("/\B{$pre}\@(\w+){$attrPatt}/iu", fn($m) => self::Link("@" . $m[1], \_::$Address->UserRootPath . urlencode($m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
+                    $object = preg_replace_callback("/\B{$pre}\#(\w+){$attrPatt}/iu", fn($m) => self::Link("#" . $m[1], \_::$Address->SearchRootUrlPath . urlencode("#" . $m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
+                    $object = preg_replace_callback("/\B{$pre}\@(\w+){$attrPatt}/iu", fn($m) => self::Link("@" . $m[1], \_::$Address->UserRootUrlPath . urlencode($m[1]), ["id" => $m[2] ?? null, "class" => ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
 
                     $object = preg_replace_callback("/\s?(^[^\W].*){$attrPatt}$/miu", fn($m) => self::Element($m[1], "p", ["id" => ($m[2] ?? null)], ($dir = Translate::DetectDirection($m[1])) == $fdir ? ["class" => ($m[3] ?? null)] : ["class" => "be $dir " . ($m[3] ?? null)], $m[4] ?? []), $object) ?? $object;
 

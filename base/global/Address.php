@@ -14,74 +14,6 @@ class Address extends ArrayObject
     public string|null $Name;
 
     /**
-     * Full part of the current url
-     * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp"
-     * @var string|null
-     */
-    public string|null $Url = null;
-    /**
-     * The Base part of the current url
-     * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php"
-     * @var string|null
-     */
-    public string|null $UrlBase = null;
-    /**
-     * The Origin part of the current url
-     * @example: "https://www.mimfa.net:80"
-     * @var string|null
-     */
-    public string|null $UrlOrigin = null;
-    /**
-     * The Host name part of the current url
-     * @example: "www.mimfa.net"
-     * @var string|null
-     */
-    public string|null $UrlHost = null;
-    /**
-     * The Domain name part of the current url
-     * @example: "mimfa.net"
-     * @var string|null
-     */
-    public string|null $UrlDomain = null;
-    /**
-     * The Request part of the current url
-     * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
-     * @var string|null
-     */
-    public string|null $UrlRequest = null;
-    /**
-     * The Path part of the current url from the root
-     * @example: "/Category/mimfa/service/web.php"
-     * @var string|null
-     */
-    public string|null $UrlPath = null;
-    /**
-     * The Route part of the current url from the root
-     * @example: "Category/mimfa/service/web.php"
-     * @var string|null
-     */
-    public string|null $UrlRoute = null;
-    /**
-     * The last part of the current direction url
-     * @example: "web.php"
-     * @var string|null
-     */
-    public string|null $UrlResource = null;
-    /**
-     * The query part of the current url
-     * @example: "p=3&l=10"
-     * @var string|null
-     */
-    public string|null $UrlQuery = null;
-    /**
-     * The fragment or anchor part of the current url
-     * @example: "serp"
-     * @var string|null
-     */
-    public string|null $UrlFragment = null;
-
-
-    /**
      * @example
      * "/"
      */
@@ -285,76 +217,145 @@ class Address extends ArrayObject
      */
     public string $PublicDirectory;
 
+    
+    /**
+     * Full part of the current url
+     * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php?p=3&l=10#serp"
+     * @var string|null
+     */
+    public string|null $Url = null;
+    /**
+     * The Base part of the current url
+     * @example: "https://www.mimfa.net:80/Category/mimfa/service/web.php"
+     * @var string|null
+     */
+    public string|null $UrlBase = null;
+    /**
+     * The Origin part of the current url
+     * @example: "https://www.mimfa.net:80"
+     * @var string|null
+     */
+    public string|null $UrlOrigin = null;
+    /**
+     * The Host name part of the current url
+     * @example: "www.mimfa.net"
+     * @var string|null
+     */
+    public string|null $UrlHost = null;
+    /**
+     * The Domain name part of the current url
+     * @example: "mimfa.net"
+     * @var string|null
+     */
+    public string|null $UrlDomain = null;
+    /**
+     * The Request part of the current url
+     * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
+     * @var string|null
+     */
+    public string|null $UrlRequest = null;
+    /**
+     * The Path part of the current url from the root
+     * @example: "/Category/mimfa/service/web.php"
+     * @var string|null
+     */
+    public string|null $UrlPath = null;
+    /**
+     * The Route part of the current url from the root
+     * @example: "Category/mimfa/service/web.php"
+     * @var string|null
+     */
+    public string|null $UrlRoute = null;
+    /**
+     * The last part of the current direction url
+     * @example: "web.php"
+     * @var string|null
+     */
+    public string|null $UrlResource = null;
+    /**
+     * The query part of the current url
+     * @example: "p=3&l=10"
+     * @var string|null
+     */
+    public string|null $UrlQuery = null;
+    /**
+     * The fragment or anchor part of the current url
+     * @example: "serp"
+     * @var string|null
+     */
+    public string|null $UrlFragment = null;
+
+
     /**
      * The root path
      * @example
      * "/"
      * @var string|null
      */
-    public string|null $RootPath;
+    public string|null $RootUrlPath;
     /**
      * The Public root Route
      * @example
      * "/public/"
      * @var string
      */
-    public string $PublicRootPath;
+    public string $PublicRootUrlPath;
     /**
      * The Asset root Route
      * @example
      * "/asset/"
      * @var string
      */
-    public string $AssetRootPath;
+    public string $AssetRootUrlPath;
     /**
      * The Script root Route
      * @example
      * "/script/"
      * @var string
      */
-    public string $ScriptRootPath;
+    public string $ScriptRootUrlPath;
     /**
      * The Style root Route
      * @example
      * "/style/"
      * @var string
      */
-    public string $StyleRootPath;
+    public string $StyleRootUrlPath;
     /**
      * The Content root Route
      * @example
      * "/content/"
      * @var string
      */
-    public string $ContentRootPath;
+    public string $ContentRootUrlPath;
     /**
      * The Category root Route
      * @example
      * "/category/"
      * @var string
      */
-    public string $CategoryRootPath;
+    public string $CategoryRootUrlPath;
     /**
      * The Tag root Route
      * @example
      * "/tag/"
      * @var string
      */
-    public string $TagRootPath;
+    public string $TagRootUrlPath;
     /**
      * The Search root Route
      * @example
      * "/search/"
      * @var string
      */
-    public string $SearchRootPath;
+    public string $SearchRootUrlPath;
     /**
      * The User root Route
      * @example
      * "/user/"
      * @var string
      */
-    public string $UserRootPath;
+    public string $UserRootUrlPath;
 
 
     public function __construct(
@@ -407,16 +408,16 @@ class Address extends ArrayObject
         $this->PrivateDirectory = $directory . $this->GlobalPrivateDirectory;
         $this->PublicDirectory = $directory . $this->GlobalPublicDirectory;
 
-        $this->RootPath = "/";
-        $this->PublicRootPath = $this->RootPath . "public/";
-        $this->AssetRootPath = $this->RootPath . "asset/";
-        $this->ScriptRootPath = $this->AssetRootPath . "script/";
-        $this->StyleRootPath = $this->AssetRootPath . "style/";
-        $this->ContentRootPath = $this->RootPath . "content/";
-        $this->CategoryRootPath = $this->RootPath . "category/";
-        $this->TagRootPath = $this->RootPath . "tag/";
-        $this->SearchRootPath = $this->RootPath . "search/";
-        $this->UserRootPath = $this->RootPath . "user/";
+        $this->RootUrlPath = "/";
+        $this->PublicRootUrlPath = $this->RootUrlPath . "public/";
+        $this->AssetRootUrlPath = $this->RootUrlPath . "asset/";
+        $this->ScriptRootUrlPath = $this->AssetRootUrlPath . "script/";
+        $this->StyleRootUrlPath = $this->AssetRootUrlPath . "style/";
+        $this->ContentRootUrlPath = $this->RootUrlPath . "content/";
+        $this->CategoryRootUrlPath = $this->RootUrlPath . "category/";
+        $this->TagRootUrlPath = $this->RootUrlPath . "tag/";
+        $this->SearchRootUrlPath = $this->RootUrlPath . "search/";
+        $this->UserRootUrlPath = $this->RootUrlPath . "user/";
         
         $this->Url = getUrl();
         $this->UrlBase = getUrlBase();

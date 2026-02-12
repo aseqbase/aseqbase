@@ -412,7 +412,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'temp_name' => Storage::GenerateAddress($filename, ".tmp", \_::$Address->GlobalTempDirectory),
+                                'temp_name' => Storage::GenerateUniquePath(\_::$Address->GlobalTempDirectory, $filename, ".tmp"),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );
@@ -438,11 +438,7 @@ class Convert
 
     public static function ToFields($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {
-        return iterator_to_array(self::ToFieldsIterator($string, $delimiter, $enclosure, $eol));
-    }
-    public static function ToFieldsIterator($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
-    {
-        return self::CellsToFieldsIterator(self::ToCellsIterator($string, $delimiter, $enclosure, $eol));
+        return self::CellsToFields(self::ToCells($string, $delimiter, $enclosure, $eol));
     }
     public static function FromFields($fields, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {
@@ -473,28 +469,6 @@ class Convert
         }
         return $fields;
     }
-    public static function CellsToFieldsIterator($cells)
-    {
-        if (!$cells)
-            return [];
-        $c = 0;
-        foreach ($cells as $row) {
-            if ($c === 0) {
-                $keys = $row;
-                // $length = count($row);
-                // for ($i = 0; $i < $length; $i++)
-                //     $keys[$i] = $row[$i];
-            } else {
-                $cols = [];
-                foreach ($row as $i => $value)
-                    if (isset($keys[$i]))
-                        $cols[$keys[$i]] = $value;
-                //else $cols[$keys[$i] = $i] = $value;
-                yield $cols;
-            }
-            $c++;
-        }
-    }
     /**
      * Convert Key Value parameters to a flat Table
      * @param mixed $fields A key value pairs array
@@ -522,12 +496,9 @@ class Convert
     }
     public static function ToCells($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {
-        return iterator_to_array(self::ToCellsIterator($string, $delimiter, $enclosure, $eol));
-    }
-    public static function ToCellsIterator($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
-    {
         if (isEmpty($string))
             return [];
+        $cells = [];
         $length = strlen($string);
         $index = 0;
         $normalize = function ($v) {
@@ -601,8 +572,9 @@ class Convert
                     break;
                 }
             } while ($index < $length);
-            yield $row;
+            $cells[] = $row;
         }
+        return $cells;
     }
     public static function FromCells($cells, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
@@ -670,7 +642,7 @@ class Convert
 
     public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
-        $path = $path ?? Storage::GenerateAddress("table", ".csv", random: false);
+        $path = $path ?? Storage::GenerateUniquePath(prefix:"table", suffix:".csv", random: false);
         $fstream = fopen($path, 'r+b');
         foreach ($cells as $fields)
             fputcsv($fstream, $fields, $delimiter, $enclosure, "\\", $eol);

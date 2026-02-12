@@ -7,7 +7,7 @@ class Manifest
 	public static function Store($data)
 	{
 		$path = \_::$Address->GlobalScriptDirectory . "manifest.json";
-		if (!isEmpty($data) && !Storage::FileExists($path)) save( Convert::ToJson($data), $path);
+		if (!isEmpty($data) && !file_exists($path)) save( Convert::ToJson($data), $path);
 		return $path;
 	}
 }

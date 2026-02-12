@@ -185,8 +185,8 @@ class ContentCollection extends Collection{
 
 	function __construct($items = null){
         parent::__construct($items);
-        $this->Root = $this->Root??\_::$Address->ContentRootPath;
-        $this->CollectionRoot = $this->CollectionRoot??\_::$Address->CategoryRootPath;
+        $this->Root = $this->Root??\_::$Address->ContentRootUrlPath;
+        $this->CollectionRoot = $this->CollectionRoot??\_::$Address->CategoryRootUrlPath;
         $this->CheckAccess = fn($item)=>\_::$User->HasAccess(getValid($item, 'Access' , 0));
     }
 
@@ -365,7 +365,7 @@ class ContentCollection extends Collection{
                         doValid(
                             function($val) use(&$p_meta){
                                 $authorName = table("User")->SelectRow("Signature , Name","Id=:Id",[":Id"=>$val]);
-                                if(!isEmpty($authorName)) $p_meta .=  " ".Struct::Link($authorName["Name" ],\_::$Address->UserRootPath.$authorName["Signature" ],["class"=>"author"]);
+                                if(!isEmpty($authorName)) $p_meta .=  " ".Struct::Link($authorName["Name" ],\_::$Address->UserRootUrlPath.$authorName["Signature" ],["class"=>"author"]);
                             },
                             $item,
                             'AuthorId'

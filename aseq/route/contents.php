@@ -31,7 +31,7 @@ if (isEmpty($items)) {
 
 view(pop($viewData, "ViewName") ?? "contents", [
     "Title" => pop($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", \_::$Address->UrlResource), $cat, pop($data, "DefaultTitle") ?? "Contents"),
-    "Root" => pop($viewData, "Root") ?? \_::$Address->ContentRootPath,
+    "Root" => pop($viewData, "Root") ?? \_::$Address->ContentRootUrlPath,
     "Description" => pop($viewData, "Description"),
     "Items" => $items,
     ...$viewData??[]
