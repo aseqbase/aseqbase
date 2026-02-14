@@ -48,9 +48,9 @@ class Forum extends Content
           $this->CommentForm->AttachPlaceHolder = "Attach something";
      }
 
-     public function Get()
+     public function GetInner()
      {
-          $val = parent::Get();
+          $val = parent::GetInner();
           if ($this->LeaveCommentStartTime && Convert::ToDateTime() < $this->LeaveCommentStartTime)
                return $this->GetMessage(
                     Convert::ToShownDateTimeString() . " < " . Convert::ToShownDateTimeString($this->LeaveCommentStartTime),

@@ -5,7 +5,7 @@ use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
 class MainMenu extends Module
 {
-	public $Tag = "nav";
+	public string|null $TagName = "nav";
 	public $Class = "row";
 	public $Image = null;
 	public $Items = null;
@@ -29,8 +29,8 @@ class MainMenu extends Module
 	public $LogoHeight = "calc(var(--size-5) - var(--size-0) / 2)";
 	public $FixedMargin = "calc(var(--size-1) * 3)";
 	public $ToggleLabel;
-    public $Printable = false;
-    public $ZIndex = "9999";
+	public $Printable = false;
+	public $ZIndex = "9999";
 
 	public function __construct($items = null)
 	{
@@ -41,9 +41,10 @@ class MainMenu extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Struct::Style(
+        yield parent::GetStyle();
+        yield Struct::Style(
 			"
-			.{$this->Name} {
+			.{$this->MainClass} {
 				" . ($this->AllowFixed ? "
 				opacity: 0.95;
 				position: fixed;
@@ -52,16 +53,16 @@ class MainMenu extends Module
 				right:0;
 				z-index: 999;
 			}
-			.{$this->Name}-margin{
+			.{$this->MainClass}-margin{
 				min-height: {$this->FixedMargin};
 			}
 			" : "
 			}") . "
-			.{$this->Name} .inside{
+			.{$this->MainClass} .inside{
 				display: flex;
 				flex-wrap: wrap;
 			}
-			.{$this->Name} .header{
+			.{$this->MainClass} .header{
 				margin: 0;
 				width: fit-content;
 				display: flex;
@@ -72,10 +73,10 @@ class MainMenu extends Module
 			    padding-inline-end: var(--size-3);
 				gap: var(--size-0);
 			}
-			.{$this->Name} .header .title{
+			.{$this->MainClass} .header .title{
 				" . (isValid($this->Description) ? "line-height: var(--size-2);" : "") . "
 			}
-			.{$this->Name} .header .image{
+			.{$this->MainClass} .header .image{
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: 100% auto;
@@ -86,14 +87,14 @@ class MainMenu extends Module
 				height: {$this->LogoHeight};
 				font-size: var(--size-0);
 			}
-			" . ($this->AllowDefaultButtons? "
-			.{$this->Name} ul:not(.sub-items) {
+			" . ($this->AllowDefaultButtons ? "
+			.{$this->MainClass} ul:not(.sub-items) {
 				min-width: fit-content;
 				max-width: 70%;
 				margin-inline-end: 100px;
 			}
-			" : "") ."
-			.{$this->Name} ul:not(.sub-items) {
+			" : "") . "
+			.{$this->MainClass} ul:not(.sub-items) {
 				list-style: none;
 				list-style-type: none;
 				margin: 0;
@@ -103,7 +104,7 @@ class MainMenu extends Module
 				align-items: center;
 			}
 
-			.{$this->Name} ul.sub-items {
+			.{$this->MainClass} ul.sub-items {
 				display: none;
 				position: fixed;
 				min-width: 160px;
@@ -116,7 +117,7 @@ class MainMenu extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 				
-			.{$this->Name} ul.sub-items .sub-items {
+			.{$this->MainClass} ul.sub-items .sub-items {
 				display: flex;
 				position: relative;
 				font-size: 90%;
@@ -137,7 +138,7 @@ class MainMenu extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name} ul.sub-items>li>:is(.button, .button:visited){
+			.{$this->MainClass} ul.sub-items>li>:is(.button, .button:visited){
 				width: 100%;
 				text-decoration: none;
 				padding: calc(var(--size-1) / 2) var(--size-1);
@@ -148,7 +149,7 @@ class MainMenu extends Module
 
 			" .
 			($this->AllowOthers ? "
-			.{$this->Name} .other{
+			.{$this->MainClass} .other{
 				text-align: end;
 				width: fit-content;
 				position: absolute;
@@ -162,7 +163,7 @@ class MainMenu extends Module
 				" . ((\_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
 			}
 
-			.{$this->Name} .other form{
+			.{$this->MainClass} .other form{
 				text-decoration: none;
 				padding: 0px;
 				margin: 0px;
@@ -174,35 +175,35 @@ class MainMenu extends Module
 				justify-content: space-between;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .other form:is(:hover, :active, :focus) {
+			.{$this->MainClass} .other form:is(:hover, :active, :focus) {
 				font-weight: bold;
 				color: var(--fore-color-input);
 				background-color: var(--back-color-input);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .other form :is(input, .input, .input:is(:hover, :active, :focus)) {
+			.{$this->MainClass} .other form :is(input, .input, .input:is(:hover, :active, :focus)) {
 				padding: calc(var(--size-0) / 2) var(--size-0);
 				border: none;
 				outline: none;
 				background-color: transparent;
 				color: unset;
 			}
-			.{$this->Name} .other form:not(:hover, :active, :focus) :is(input, .input, .input:not(:hover, :active, :focus)){
+			.{$this->MainClass} .other form:not(:hover, :active, :focus) :is(input, .input, .input:not(:hover, :active, :focus)){
 				/*padding: calc(var(--size-0) / 2) 0px;*/
 				width: 0px;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .other form:is(:hover, :active, :focus) :is(input, .input, .input:is(:hover, :active, :focus)){
+			.{$this->MainClass} .other form:is(:hover, :active, :focus) :is(input, .input, .input:is(:hover, :active, :focus)){
 				/*padding: calc(var(--size-0) / 2) var(--size-0);*/
 				width: 200px;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .other form :is(button, .button)  {
+			.{$this->MainClass} .other form :is(button, .button)  {
 				aspect-ratio: 1;
 				padding: calc(var(--size-0) / 2);
 				border-radius: var(--radius-max);
 			}
-			.{$this->Name} :is(.other .other-item>.button, .other>.icon, .other>.button){
+			.{$this->MainClass} :is(.other .other-item>.button, .other>.icon, .other>.button){
 				background-color: inherit;
 				color: inherit;
 				width: 50px;
@@ -215,7 +216,7 @@ class MainMenu extends Module
 				align-items: center;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} :is(.other .other-item>.button, .other>.icon, .other>.button):hover{
+			.{$this->MainClass} :is(.other .other-item>.button, .other>.icon, .other>.button):hover{
 				box-shadow: var(--shadow-3);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -223,51 +224,52 @@ class MainMenu extends Module
 		);
 	}
 
-	public function Get()
+	public function GetInner()
 	{
-		return Convert::ToString(function () {
-			yield Struct::OpenTag("div", ["class"=>"inside"]);
-			if ($this->AllowBranding)
-				yield Struct::Division(
-					(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Front->Path) : "") .
-					Struct::Division(
-						(isValid($this->Description) ? Struct::Division(__($this->Description), ['class' => 'description']) : "") .
-						(isValid($this->Title) ? Struct::Link(Struct::Division(__($this->Title), ['class' => 'title']), \_::$Front->Path) : ""),
-					["class" => "brand"]),
-				["class" => "header"]);
-			if ($this->AllowItems)
-				if (count($this->Items) > 0)
-					yield Struct::Items(
-						function () {
-							foreach ($this->Items as $item)
-								yield $this->CreateItem($item, 1);
-						}
-						,
-						["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : "") . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : "")]
-					);
-			if ($this->AllowOthers) {
-				$defaultButtons = [];
-				if ($this->AllowDefaultButtons) {
-					module("SearchForm");
-					module("TemplateButton");
-					module("UserMenu");
-					$defaultButtons[] = new SearchForm();
-					$defaultButtons[] = new TemplateButton();
-					if (\_::$User->AllowSigning) {
-						$usermenu = new UserMenu();
-						$usermenu->Class = "other-item";
-						$defaultButtons[] = $usermenu;
+		yield Struct::OpenTag("div", ["class" => "inside"]);
+		if ($this->AllowBranding)
+			yield Struct::Division(
+				(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Front->Path) : "") .
+				Struct::Division(
+					(isValid($this->Description) ? Struct::Division(__($this->Description), ['class' => 'description']) : "") .
+					(isValid($this->Title) ? Struct::Link(Struct::Division(__($this->Title), ['class' => 'title']), \_::$Front->Path) : ""),
+					["class" => "brand"]
+				),
+				["class" => "header"]
+			);
+		if ($this->AllowItems)
+			if (count($this->Items) > 0)
+				yield Struct::Items(
+					function () {
+						foreach ($this->Items as $item)
+							yield $this->CreateItem($item, 1);
 					}
-				}
-				yield Struct::Division([
-						...($this->Content? (is_array($this->Content)?$this->Content:[$this->Content]) : []),
-						...($defaultButtons? $defaultButtons : [])
-					],
-					["class" => "other view {$this->ShowOthersScreenSize}-show {$this->HideOthersScreenSize}-hide"]
+					,
+					["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : "") . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : "")]
 				);
+		if ($this->AllowOthers) {
+			$defaultButtons = [];
+			if ($this->AllowDefaultButtons) {
+				module("SearchForm");
+				module("TemplateButton");
+				module("UserMenu");
+				$defaultButtons[] = new SearchForm();
+				$defaultButtons[] = new TemplateButton();
+				if (\_::$User->AllowSigning) {
+					$usermenu = new UserMenu();
+					$usermenu->Class = "other-item";
+					$defaultButtons[] = $usermenu;
+				}
 			}
-			yield Struct::CloseTag("div");
-		});
+			yield Struct::Division(
+				[
+					...($this->Content ? (is_array($this->Content) ? $this->Content : [$this->Content]) : []),
+					...($defaultButtons ? $defaultButtons : [])
+				],
+				["class" => "other view {$this->ShowOthersScreenSize}-show {$this->HideOthersScreenSize}-hide"]
+			);
+		}
+		yield Struct::CloseTag("div");
 	}
 
 	protected function CreateItem($item, $ind = 1)
@@ -279,19 +281,19 @@ class MainMenu extends Module
 		$ind++;
 		$count = count(getValid($item, "Items", []));
 		return Struct::Item(
-			($ind <=2? Struct::Button(
-				($this->AllowItemsImage&& ($t = getBetween($item, "Icon", "Image"))?Struct::Image(null, $t):"").
-				($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name"))?__($t):"").
-				($count > 0?$this->ToggleLabel:"").
-				($this->AllowItemsDescription && ($t = get($item, "Description"))?Struct::Division(__($t), ["class"=>"description"]):""),
+			($ind <= 2 ? Struct::Button(
+				($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
+				($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name")) ? __($t) : "") .
+				($count > 0 ? $this->ToggleLabel : "") .
+				($this->AllowItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description"]) : ""),
 				$path,
 				get($item, "Attributes")
-				) :
+			) :
 				Struct::Button(
-					($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image"))?Struct::Image(null, $t):"").
-					($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name"))?__($t):"").
-					($count > 0?$this->ToggleLabel:"").
-					($this->AllowSubItemsDescription && ($t = get($item, "Description"))?Struct::Division(__($t), ["class"=>"description"]):""),
+					($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
+					($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name")) ? __($t) : "") .
+					($count > 0 ? $this->ToggleLabel : "") .
+					($this->AllowSubItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description"]) : ""),
 					$path,
 					get($item, "Attributes")
 				)
@@ -312,6 +314,6 @@ class MainMenu extends Module
 
 	public function AfterHandle()
 	{
-		return parent::AfterHandle() . ($this->AllowFixed ? "<div class='{$this->Name}-margin be unprintable top-invisible'></div>" : "");
+		return parent::AfterHandle() . ($this->AllowFixed ? "<div class='{$this->MainClass}-margin be unprintable top-invisible'></div>" : "");
 	}
 }

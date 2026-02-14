@@ -11,7 +11,7 @@ use MiMFa\Library\Struct;
  */
 class Collection extends Module
 {
-	public $TitleTag = "h2";
+	public string|null $TitleTagName = "h2";
 	public $Class = "container";
 	/**.
 	 * An array of items, which contains a Key-Value based array of features
@@ -79,15 +79,16 @@ class Collection extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Struct::Style("
-			.{$this->Name}{
+		yield parent::GetStyle();
+		yield Struct::Style("
+			.{$this->MainClass}{
 				display: grid;
 				gap: 3vmax;
 			}
-			.{$this->Name}>.row{
+			.{$this->MainClass}>.row{
 				gap: 3vmax;
 			}
-			.{$this->Name} .item{
+			.{$this->MainClass} .item{
 				background-color: var(--back-color);
 				color: var(--fore-color);
 				font-size: var(--size-1);
@@ -98,14 +99,14 @@ class Collection extends Module
 				box-shadow: var(--shadow-1);
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} .item:hover{
+			.{$this->MainClass} .item:hover{
 				background-color: var(--back-color-input);
 				color: var(--fore-color-input);
 				border-radius: var(--radius-1);
 				box-shadow: var(--shadow-2);
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} .item .image{
+			.{$this->MainClass} .item .image{
 				margin: 2vmax;
 				overflow: hidden;
 				height: 5vmax;
@@ -113,79 +114,67 @@ class Collection extends Module
 				width: 100%;
 				max-width: 100%;
 			}
-			.{$this->Name} .item .image img{
+			.{$this->MainClass} .item .image img{
 				width: auto !important;
 				width:  100%;
 				max-width: 100%;
 			}
-			.{$this->Name} .item .description{
+			.{$this->MainClass} .item .description{
 				background-color: var(--back-color);
 				color: var(--fore-color);
 				text-align: start;
 				padding: 2vmin 2vmax;
 				margin-bottom: 0px;
 			}
-			.{$this->Name} .item .icon{
+			.{$this->MainClass} .item .icon{
 				padding: 20px;
 				margin-bottom: 3vh;
 				border: var(--border-0) var(--fore-color);
 				border-radius: 50%;
 			}
-			.{$this->Name} .item .btn{
+			.{$this->MainClass} .item .btn{
 				margin: 2vmax 5px;
 			}
 		");
 	}
 
-	public function Get()
+	public function GetInner()
 	{
-		return parent::Get() . join(PHP_EOL, iterator_to_array((function () {
-			module("Image");
-			$img = new Image();
-			$img->AllowOrigin = false;
-			$img->Class = "image";
-			yield $img->GetStyle();
-			$i = 0;
-			foreach (Convert::ToItems($this->Items) as $item) {
-				if ($i % $this->MaximumColumns === 0)
-					yield "<div class='row'>";
-				if (is_string($item))
-					yield $item;
-				else if (\_::$User->HasAccess(getValid($item, 'Access', \_::$User->VisitAccess))) {
-					$p_meta = getValid($item, 'MetaData', null);
-					if ($p_meta !== null) {
-						$p_meta = Convert::FromJson($p_meta);
-						pod($this, $p_meta);
-					}
-					$p_meta = null;
-					$p_image = getValid($item, 'Image', $this->DefaultImage);
-					$p_name = __(getBetween($item, 'Title', 'Name') ?? $this->DefaultTitle, true, false);
-					$p_description = getValid($item, 'Description', $this->DefaultDescription);
-					$p_description = is_null($p_description) ? null : __($p_description, styling: true, referring: true);
-					$p_link = ($l = get($item, 'Path')) ? $l : ($this->Root ? $this->Root . getBetween($item, 'Id', 'Name') : $this->DefaultPath);
-					$p_buttons = getValid($item, 'Buttons', $this->DefaultButtons);
-					$img->Source = $p_image;
-					if (is_null($p_description))
-						if (is_null($p_buttons))
-							yield Struct::Button(
-								(isEmpty($img->Source) ? "" : $img->ToString()) .
-								Struct::Heading4($p_name),
-								$p_link,
-								["class" => "item col-sm"],
-								$this->Animation ? " data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed) . "' data-aos='{$this->Animation}'" : null
-							);
-						else
-							yield Struct::Division(
-								Struct::Link(
-									(isEmpty($img->Source) ? "" : $img->ToString()) .
-									Struct::Heading4($p_name),
-									$p_link
-								) .
-								Convert::ToString($p_buttons) .
-								(isValid($p_link) ? Struct::Button($this->MoreButtonLabel, $p_link, ["target" => "blank"]) : ""),
-								["class" => "item col-sm"],
-								$this->Animation ? "data-aos='{$this->Animation}'" : null
-							);
+		yield parent::GetScript();
+		module("Image");
+		$img = new Image();
+		$img->AllowOrigin = false;
+		$img->Class = "image";
+		yield $img->GetStyle();
+		$i = 0;
+		foreach (Convert::ToItems($this->Items) as $item) {
+			if ($i % $this->MaximumColumns === 0)
+				yield "<div class='row'>";
+			if (is_string($item))
+				yield $item;
+			else if (\_::$User->HasAccess(getValid($item, 'Access', \_::$User->VisitAccess))) {
+				$p_meta = getValid($item, 'MetaData', null);
+				if ($p_meta !== null) {
+					$p_meta = Convert::FromJson($p_meta);
+					pod($this, $p_meta);
+				}
+				$p_meta = null;
+				$p_image = getValid($item, 'Image', $this->DefaultImage);
+				$p_name = __(getBetween($item, 'Title', 'Name') ?? $this->DefaultTitle, true, false);
+				$p_description = getValid($item, 'Description', $this->DefaultDescription);
+				$p_description = is_null($p_description) ? null : __($p_description, styling: true, referring: true);
+				$p_link = ($l = get($item, 'Path')) ? $l : ($this->Root ? $this->Root . getBetween($item, 'Id', 'Name') : $this->DefaultPath);
+				$p_buttons = getValid($item, 'Buttons', $this->DefaultButtons);
+				$img->Source = $p_image;
+				if (is_null($p_description))
+					if (is_null($p_buttons))
+						yield Struct::Button(
+							(isEmpty($img->Source) ? "" : $img->ToString()) .
+							Struct::Heading4($p_name),
+							$p_link,
+							["class" => "item col-sm"],
+							$this->Animation ? " data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed) . "' data-aos='{$this->Animation}'" : null
+						);
 					else
 						yield Struct::Division(
 							Struct::Link(
@@ -193,18 +182,29 @@ class Collection extends Module
 								Struct::Heading4($p_name),
 								$p_link
 							) .
-							Struct::Division(Convert::ToExcerpt($p_description, 0, $this->ExcerptLength), ["class" => "description"]) .
 							Convert::ToString($p_buttons) .
 							(isValid($p_link) ? Struct::Button($this->MoreButtonLabel, $p_link, ["target" => "blank"]) : ""),
 							["class" => "item col-sm"],
 							$this->Animation ? "data-aos='{$this->Animation}'" : null
 						);
-				}
-				if (++$i % $this->MaximumColumns === 0)
-					yield "</div>";
+				else
+					yield Struct::Division(
+						Struct::Link(
+							(isEmpty($img->Source) ? "" : $img->ToString()) .
+							Struct::Heading4($p_name),
+							$p_link
+						) .
+						Struct::Division(Convert::ToExcerpt($p_description, 0, $this->ExcerptLength), ["class" => "description"]) .
+						Convert::ToString($p_buttons) .
+						(isValid($p_link) ? Struct::Button($this->MoreButtonLabel, $p_link, ["target" => "blank"]) : ""),
+						["class" => "item col-sm"],
+						$this->Animation ? "data-aos='{$this->Animation}'" : null
+					);
 			}
-			if ($i % $this->MaximumColumns !== 0)
+			if (++$i % $this->MaximumColumns === 0)
 				yield "</div>";
-		})()));
+		}
+		if ($i % $this->MaximumColumns !== 0)
+			yield "</div>";
 	}
 }

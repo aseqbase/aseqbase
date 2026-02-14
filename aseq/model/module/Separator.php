@@ -67,7 +67,7 @@ class Separator extends Module
 
 
         return Struct::Style("
-            .{$this->Name} {
+            .{$this->MainClass} {
                 {$backgroundImageStyle}
                 min-height: {$this->Height};
                 min-width: {$this->Width};

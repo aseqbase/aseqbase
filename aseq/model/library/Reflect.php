@@ -137,7 +137,7 @@ class Reflect{
             description: $reflection->Description,
             method: "POST",
             image:"edit",
-            children: self::GetFields($objectOrReflection)
+            items: self::GetFields($objectOrReflection)
         );
         $form->Id = "{$reflection->Name}EditForm";
         $form->Template = "both";

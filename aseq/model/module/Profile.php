@@ -110,89 +110,89 @@ class Profile extends Table{
 			backgroound-color: var(--back-color-input);
 			color: var(--fore-color-input);
 		}
-		.{$this->Name} tr th{
+		.{$this->MainClass} tr th{
 			font-weight: bold;
 		}
-		.{$this->Name} :is(thead, tfoot) tr :is(td, th){
+		.{$this->MainClass} :is(thead, tfoot) tr :is(td, th){
             padding: 10px;
 		}
-		.{$this->Name} tbody tr :is(td,th){
+		.{$this->MainClass} tbody tr :is(td,th){
             padding: 2px 10px !important;
 		}
-		.{$this->Name} tr :is(td,th){
+		.{$this->MainClass} tr :is(td,th){
             align-content: center;
             align-items: center;
 			".Style::DoProperty("text-wrap",($this->TextWrap===true?"pretty":($this->TextWrap===false?"nowrap":$this->TextWrap)))."
 		}
-		.{$this->Name} tr :is(td,th):has(.media:not(.icon)){
+		.{$this->MainClass} tr :is(td,th):has(.media:not(.icon)){
             display: flex;
             align-items: center;
             text-align: center;
             justify-content: center;
 		}
-		.{$this->Name} tr :is(td,th) .media:not(.icon){
+		.{$this->MainClass} tr :is(td,th) .media:not(.icon){
 			".Style::DoProperty("width",$this->MediaWidth)."
 			".Style::DoProperty("height",$this->MediaHeight)."
 			display: block;
 		}
-		.{$this->Name} .media.icon{
+		.{$this->MainClass} .media.icon{
 			cursor: pointer;
 		}
-		.{$this->Name} .media.icon:hover{
+		.{$this->MainClass} .media.icon:hover{
 			border-color: transparent;
 			".Style::UniversalProperty("filter","drop-shadow(var(--shadow-2))")."
 		}
-		.{$this->Name} .field {
+		.{$this->MainClass} .field {
 			width: 100%;
 		}
-		.{$this->Name} .input {
+		.{$this->MainClass} .input {
 			width: 100%;
 		}
-        table.dataTable.{$this->Name} tbody :is(td, tr) {
+        table.dataTable.{$this->MainClass} tbody :is(td, tr) {
             text-align: -webkit-auto;
         }
-        table.dataTable.{$this->Name} thead :is(th, tr) {
+        table.dataTable.{$this->MainClass} thead :is(th, tr) {
             text-align: center;
         }
-        table.dataTable.{$this->Name} tbody tr :is(th, td) span.number {
+        table.dataTable.{$this->MainClass} tbody tr :is(th, td) span.number {
             margin: calc(var(--size-0) / 2);
         }
 		".($this->OddEvenColumns?"
-            table.dataTable.{$this->Name} tbody tr:nth-child(even) :is(td, th):nth-child(odd) {
+            table.dataTable.{$this->MainClass} tbody tr:nth-child(even) :is(td, th):nth-child(odd) {
                 background-color: #88888817;
             }
-            table.dataTable.{$this->Name} tbody tr:nth-child(odd) :is(td, th):nth-child(odd) {
+            table.dataTable.{$this->MainClass} tbody tr:nth-child(odd) :is(td, th):nth-child(odd) {
                 background-color: #88888815;
             }
 		":"").($this->OddEvenRows?"
-            table.dataTable.{$this->Name} tbody tr:nth-child(odd) {
+            table.dataTable.{$this->MainClass} tbody tr:nth-child(odd) {
                 background-color: #8881;
             }
 		":"").($this->HoverableRows?"
-            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)):hover {
+            table.dataTable.{$this->MainClass} tbody tr:is(:nth-child(odd), :nth-child(even)):hover {
                 background-color: #8882;
 				".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
 		":"").($this->HoverableCells?"
-            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
+            table.dataTable.{$this->MainClass} tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
                 background-color: transparent;
                 outline: 1px solid var(--color-yellow);
                 border-radius: var(--radius-1);
 				".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
-            table.dataTable.{$this->Name} tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
+            table.dataTable.{$this->MainClass} tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
                 background-color: transparent;
                 outline: 1px solid var(--color-green);
                 border-radius: var(--radius-1);
 				".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
-            table.dataTable.{$this->Name} tfoot :is(th, td) {
+            table.dataTable.{$this->MainClass} tfoot :is(th, td) {
                 text-align: center;
             }
         ":""));
 	}
 
-	public function Get(){
+	public function GetInner(){
 		$isc = $this->Controlable;
 		$isu = $isc && $this->Updatable && \_::$User->HasAccess($this->UpdateAccess);
 		if(isValid($this->DataTable) && isValid($this->KeyColumn)){
@@ -213,8 +213,8 @@ class Profile extends Table{
 		$isc = $isc && ($vaccess || $aaccess || $maccess || $raccess);
         $secret = received("secret")??$this->ViewSecret;
         $res = Struct::Division(
-            ($maccess? Struct::Icon("edit","{$this->Name}_Modify(`$key`);", ["class"=>"table-item-modify"]) : "").
-            ($raccess? Struct::Icon("trash","{$this->Name}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")
+            ($maccess? Struct::Icon("edit","{$this->MainClass}_Modify(`$key`);", ["class"=>"table-item-modify"]) : "").
+            ($raccess? Struct::Icon("trash","{$this->MainClass}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")
         );
         if($secret === $this->ViewSecret)
             $res .= $this->GetViewFields($key);
@@ -228,18 +228,18 @@ class Profile extends Table{
 	public function GetScript(){
 		return Struct::Script("_(document).ready(()=>{".
         ($this->Controlable?("
-				function {$this->Name}_View(key){
-					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
+				function {$this->MainClass}_View(key){
+					sendPatch(null, 'secret={$this->ViewSecret}&{$this->KeyColumn}='+key, `.{$this->MainClass}`);
 				}".($this->Updatable?(\_::$User->HasAccess($this->AddAccess)?"
-				function {$this->Name}_Create(){
-					sendPatch(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->Name}`);
+				function {$this->MainClass}_Create(){
+					sendPatch(null, 'secret={$this->AddSecret}&{$this->KeyColumn}=$this->AddSecret', `.{$this->MainClass}`);
 				}":"").(\_::$User->HasAccess($this->ModifyAccess)?"
-				function {$this->Name}_Modify(key){
-					sendPatch(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->Name}`);
+				function {$this->MainClass}_Modify(key){
+					sendPatch(null, 'secret={$this->ModifySecret}&{$this->KeyColumn}='+key, `.{$this->MainClass}`);
 				}":"").(\_::$User->HasAccess($this->RemoveAccess)?"
-				function {$this->Name}_Delete(key){
+				function {$this->MainClass}_Delete(key){
 					".($this->SevereSecure?"if(confirm(`".__("Are you sure you want to remove this item?")."`))":"")."
-						sendDelete(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->Name}`,
+						sendDelete(null, `secret={$this->RemoveSecret}&{$this->KeyColumn}=`+key, `.{$this->MainClass}`,
 						(data, err)=>{
 							load();
 						});
@@ -273,7 +273,7 @@ class Profile extends Table{
             description:get($this->Items,"Description")??$this->Description,
             action:'#',
             method:"",
-            children:(function(){
+            items:(function(){
                 foreach ($this->Items as $k=>$cell){
                     $type = getValid($this->CellsTypes, $k, "");
                     if(is_string($type)){
@@ -326,7 +326,7 @@ class Profile extends Table{
         $form->Set(
             title:"Add {$this->Title}",
             description:$this->Description,
-            children:(function() use($record, $value){
+            items:(function() use($record, $value){
                 $schemas = $this->DataTable->DataBase->Select(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
@@ -366,7 +366,7 @@ class Profile extends Table{
         $form->Set(
             title:getBetween($this->Items,"Title","Name")??$this->Title,
             description:get($this->Items,"Description")??$this->Description,
-            children:(function() use($value){
+            items:(function() use($value){
                 $schemas = $this->DataTable->DataBase->Select(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS

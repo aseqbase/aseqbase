@@ -46,18 +46,18 @@ class Carousel extends Collection
 	public function GetStyle()
 	{
 		return Struct::Style("
-		.{$this->Name} .carousel-inner{
+		.{$this->MainClass} .carousel-inner{
 			height: 100%;
 			padding: 0px;
 		}
-		.{$this->Name} .carousel-item.media{
+		.{$this->MainClass} .carousel-item.media{
 			height: 100%;
 			background-position: center;
 			background-repeat: no-repeat;
 			background-size: cover;
 			padding: 0px;
 		}
-		.{$this->Name} .carousel-item .carousel-caption{
+		.{$this->MainClass} .carousel-item .carousel-caption{
 			background-color: {$this->CaptionBackColor};
 			color: {$this->CaptionForeColor};
 			text-align: start;
@@ -69,19 +69,19 @@ class Carousel extends Collection
 			margin-inline-start: 2%;
 			margin-inline-end: 2%;
 		}
-		.{$this->Name} .carousel-item .carousel-caption>*{
+		.{$this->MainClass} .carousel-item .carousel-caption>*{
 			margin: initial;
 			text-align: start;
 		}
 		");
 	}
 
-	public function Get()
+	public function GetInner()
 	{
 		return join(PHP_EOL, iterator_to_array((function () {
 			$indicators = [];
 			$inners = [];
-			$target = "." . $this->Name;
+			$target = "." . $this->MainClass;
 			$i = 0;
 			foreach (Convert::ToItems($this->Items) as $item) {
 				$active = $i == $this->ActiveItem;

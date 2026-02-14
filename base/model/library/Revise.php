@@ -157,7 +157,7 @@ class Revise
                     "Name" => $name,
                     "Value" => $val,
                     "Title" => pop($pars, "title"),
-                    "Description" => $desc = __(pop($pars, "abstract") ?? $desc, separator: Struct::$Break),
+                    "Description" => $desc = __(pop($pars, "abstract") ?? $desc ?? "", separator: Struct::$Break),
                     "Category" => pop($pars, "category"),
                     "Required" => pop($pars, "required"),
                     "Options" => pop($pars, "options"),
@@ -266,7 +266,7 @@ class Revise
             description: getBetween(self::Parameters($reflection->getDocComment()), "Abstract", "Description"),
             method: self::$PutMethod,
             image: "edit",
-            children: Struct::Tabs($tabs, ["Id" => $tid])
+            items: Struct::Tabs($tabs, ["Id" => $tid])
         );
         $form->Id = "{$name}Form";
         $form->ContentClass = "col-lg-12";
@@ -275,7 +275,7 @@ class Revise
         $form->SubmitLabel = "Update";
         $form->ResetLabel = "Reset";
         $form->AllowHeader = false;
-        $form->Buttons = Struct::Button("Recover to Defaults", "send('" . self::$DelMethod . "', null, {Name:'{$form->Name}'})");
+        $form->Buttons = Struct::Button("Recover to Defaults", "send('" . self::$DelMethod . "', null, {Name:'{$form->MainClass}'})");
         return Struct::Style("
             #$tid>.tab-titles{
                 margin-bottom: var(--size-1);

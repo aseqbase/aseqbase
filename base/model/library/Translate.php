@@ -376,11 +376,11 @@ class Translate
 		return preg_replace(self::$TrimmerPattern, self::$TrimmerReplacement, $text);
 	}
 
-	public static function DetectDirection($text)
+	public static function DetectDirection($text, $default = null)
 	{
 		if (isEmpty($text))
 			return null;
-		return preg_match("/^[\s\d\-*\/\\\\+\.?=_\]\[{}()&\^%\$#@!~`'\"<>|]*[\p{Arabic}\p{Hebrew}]/u", $text) ? "rtl" : "ltr";
+		return preg_match("/^[\s\d\-*\/\\\\+\.?=_\]\[{}()&\^%\$#@!~`'\"<>|]*[\p{Arabic}\p{Hebrew}]/u", $text) ? "rtl" : $default;
 	}
 
 	/**

@@ -42,7 +42,7 @@ class Player extends Module
 	public function GetStyle()
 	{
 		return Struct::Style("
-			.{$this->Name}>.controls{
+			.{$this->MainClass}>.controls{
 				opacity: 0;
 				display: inline-flex;
 				position: absolute;
@@ -54,7 +54,7 @@ class Player extends Module
 				" . \MiMFa\Library\Style::UniversalProperty("text-stroke", "1px var(--back-color-special)") . "
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}>.controls>.button {
+			.{$this->MainClass}>.controls>.button {
 				aspect-ratio: 1;
 				text-align: center;
 				display: inline;
@@ -62,19 +62,19 @@ class Player extends Module
 				cursor: pointer;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}>.controls>.button:hover {
+			.{$this->MainClass}>.controls>.button:hover {
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				" . \MiMFa\Library\Style::UniversalProperty("text-stroke", "0px") . "
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name}:hover>.controls{
+			.{$this->MainClass}:hover>.controls{
 				opacity: 1;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name}>.content {
+			.{$this->MainClass}>.content {
 				" . \MiMFa\Library\Style::DoProperty("min-width", $this->MinWidth) . "
 				" . \MiMFa\Library\Style::DoProperty("min-height", $this->MinHeight) . "
 				" . \MiMFa\Library\Style::DoProperty("max-width", $this->MaxWidth) . "
@@ -87,41 +87,41 @@ class Player extends Module
 				overflow:auto;
 			}
 
-			.{$this->Name}>.content::-webkit-scrollbar {
+			.{$this->MainClass}>.content::-webkit-scrollbar {
 				background: var(--back-color-special);
 				width: 0px;
 				height: 0px;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover>.content::-webkit-scrollbar {
+			.{$this->MainClass}:hover>.content::-webkit-scrollbar {
 				width: 5px;
 				height: 5px;
 			}
-			.{$this->Name}>.content::-webkit-scrollbar:hover {
+			.{$this->MainClass}>.content::-webkit-scrollbar:hover {
 				//background: var(--back-color-input);
 				width: 10px;
 				height: 10px;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}>.content::-webkit-scrollbar-track {
+			.{$this->MainClass}>.content::-webkit-scrollbar-track {
 				border-radius: 1px;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}>.content::-webkit-scrollbar-track:hover {
+			.{$this->MainClass}>.content::-webkit-scrollbar-track:hover {
 				border-radius: 0px;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}>.content::-webkit-scrollbar-thumb {
+			.{$this->MainClass}>.content::-webkit-scrollbar-thumb {
 				background: var(--fore-color-special);
 				border-radius: 5px;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}>.content::-webkit-scrollbar-thumb:hover {
+			.{$this->MainClass}>.content::-webkit-scrollbar-thumb:hover {
 				background: var(--fore-color-input);
 				" . ($this->AllowZoom ? "cursor: grab;" : "") . "
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}>.content>:not(.page,html,head,body,style,script,link,meta,title) {
+			.{$this->MainClass}>.content>:not(.page,html,head,body,style,script,link,meta,title) {
 				min-width: auto;
 				width: auto;
 				height: 100%;
@@ -137,7 +137,7 @@ class Player extends Module
 		");
 	}
 
-	public function Get()
+	public function GetInner()
 	{
 		return Convert::ToString($this->GetElements($this->Content, $this->Source));
 	}
@@ -180,61 +180,61 @@ class Player extends Module
 
 	public function GetScript(){
 		return Struct::Script(($this->AllowZoom ? "
-			let {$this->Name}slider = null;
-			let {$this->Name}mouseDown = false;
-			let {$this->Name}startX, {$this->Name}scrollLeft;
-			let {$this->Name}startY, {$this->Name}scrollTop;
+			let {$this->MainClass}slider = null;
+			let {$this->MainClass}mouseDown = false;
+			let {$this->MainClass}startX, {$this->MainClass}scrollLeft;
+			let {$this->MainClass}startY, {$this->MainClass}scrollTop;
 
-			let {$this->Name}startDragging = function (e) {
-				{$this->Name}mouseDown = true;
-				{$this->Name}startX = e.pageX - {$this->Name}slider.offsetLeft;
-				{$this->Name}startY = e.pageY - {$this->Name}slider.offsetTop;
-				{$this->Name}scrollLeft = {$this->Name}slider.scrollLeft;
-				{$this->Name}scrollTop = {$this->Name}slider.scrollTop;
+			let {$this->MainClass}startDragging = function (e) {
+				{$this->MainClass}mouseDown = true;
+				{$this->MainClass}startX = e.pageX - {$this->MainClass}slider.offsetLeft;
+				{$this->MainClass}startY = e.pageY - {$this->MainClass}slider.offsetTop;
+				{$this->MainClass}scrollLeft = {$this->MainClass}slider.scrollLeft;
+				{$this->MainClass}scrollTop = {$this->MainClass}slider.scrollTop;
 			};
-			let {$this->Name}stopDragging = function (event) {
-				{$this->Name}slider.style.cursor = 'grab';
-				{$this->Name}mouseDown = false;
+			let {$this->MainClass}stopDragging = function (event) {
+				{$this->MainClass}slider.style.cursor = 'grab';
+				{$this->MainClass}mouseDown = false;
 			};
 			_(document).ready(
 				function(){
-					{$this->Name}slider = document.querySelector('.{$this->Name}>.content');
+					{$this->MainClass}slider = document.querySelector('.{$this->MainClass}>.content');
 
-					{$this->Name}slider.addEventListener('mousemove', (e) => {
+					{$this->MainClass}slider.addEventListener('mousemove', (e) => {
 						e.preventDefault();
-						if(!{$this->Name}mouseDown) { return; }
-						{$this->Name}slider.style.cursor = 'grabbing';
-						const x = e.pageX - {$this->Name}slider.offsetLeft;
-						const y = e.pageY - {$this->Name}slider.offsetTop;
-						const scrollx = x - {$this->Name}startX;
-						const scrolly = y - {$this->Name}startY;
-						{$this->Name}slider.scrollLeft = {$this->Name}scrollLeft - scrollx;
-						{$this->Name}slider.scrollTop = {$this->Name}scrollTop - scrolly;
+						if(!{$this->MainClass}mouseDown) { return; }
+						{$this->MainClass}slider.style.cursor = 'grabbing';
+						const x = e.pageX - {$this->MainClass}slider.offsetLeft;
+						const y = e.pageY - {$this->MainClass}slider.offsetTop;
+						const scrollx = x - {$this->MainClass}startX;
+						const scrolly = y - {$this->MainClass}startY;
+						{$this->MainClass}slider.scrollLeft = {$this->MainClass}scrollLeft - scrollx;
+						{$this->MainClass}slider.scrollTop = {$this->MainClass}scrollTop - scrolly;
 					});
 
 					// Add the event listeners
-					{$this->Name}slider.addEventListener('mousedown', {$this->Name}startDragging, false);
-					{$this->Name}slider.addEventListener('mouseup', {$this->Name}stopDragging, false);
-					{$this->Name}slider.addEventListener('mouseleave', {$this->Name}stopDragging, false);
+					{$this->MainClass}slider.addEventListener('mousedown', {$this->MainClass}startDragging, false);
+					{$this->MainClass}slider.addEventListener('mouseup', {$this->MainClass}stopDragging, false);
+					{$this->MainClass}slider.addEventListener('mouseleave', {$this->MainClass}stopDragging, false);
 
-					{$this->Name}slider.addEventListener('dblclick', (e) => { {$this->Name}_Zoom(); });
+					{$this->MainClass}slider.addEventListener('dblclick', (e) => { {$this->MainClass}_Zoom(); });
 				}
 			);
 		" : "") . "
-			let {$this->Name}_Source = " . (isValid($this->Source) ? Script::Convert($this->Source) : "null") . "
+			let {$this->MainClass}_Source = " . (isValid($this->Source) ? Script::Convert($this->Source) : "null") . "
 
-			function {$this->Name}_Set(content, source = null){
-				{$this->Name}_Source = source??{$this->Name}_Source??content;
-				if(content !== null) _('.{$this->Name}>.content').html(content);
+			function {$this->MainClass}_Set(content, source = null){
+				{$this->MainClass}_Source = source??{$this->MainClass}_Source??content;
+				if(content !== null) _('.{$this->MainClass}>.content').html(content);
 			}
-			function {$this->Name}_Clear(){
-				_('.{$this->Name}>.content').html('');
+			function {$this->MainClass}_Clear(){
+				_('.{$this->MainClass}>.content').html('');
 			}
-			function {$this->Name}_Focus(){
-				_('.{$this->Name}>.controls').toggle(" . \_::$Front->AnimationSpeed . ");
+			function {$this->MainClass}_Focus(){
+				_('.{$this->MainClass}>.controls').toggle(" . \_::$Front->AnimationSpeed . ");
 			}
-			function {$this->Name}_Reset(){
-				let box = document.querySelector('.{$this->Name}>.content>*');
+			function {$this->MainClass}_Reset(){
+				let box = document.querySelector('.{$this->MainClass}>.content>*');
 				box.style.width = null;
 				box.style.height = null;
 				box.style.left = null;
@@ -242,12 +242,12 @@ class Player extends Module
 				zoomX = 0;
 			}
 			let zoomX = 0;
-			function {$this->Name}_Zoom(){
-				if(zoomX > 0) {$this->Name}_Reset();
-				else {$this->Name}_ZoomIn(2);
+			function {$this->MainClass}_Zoom(){
+				if(zoomX > 0) {$this->MainClass}_Reset();
+				else {$this->MainClass}_ZoomIn(2);
 			}
-			function {$this->Name}_ZoomIn(x = 1){
-				let box = document.querySelector('.{$this->Name}>.content>*');
+			function {$this->MainClass}_ZoomIn(x = 1){
+				let box = document.querySelector('.{$this->MainClass}>.content>*');
 				let width = box.offsetWidth;
 				let height = box.offsetHeight;
 				box.style.width = (width*(x*1.2))+'px';
@@ -256,8 +256,8 @@ class Player extends Module
 				box.parentElement.scrollTop += height*1.1;
 				zoomX+=x;
 			}
-			function {$this->Name}_ZoomOut(x = 1){
-				let box = document.querySelector('.{$this->Name}>.content>*');
+			function {$this->MainClass}_ZoomOut(x = 1){
+				let box = document.querySelector('.{$this->MainClass}>.content>*');
 				let width = box.offsetWidth;
 				let height = box.offsetHeight;
 				box.style.width = (width/(x*1.2))+'px';
@@ -266,11 +266,11 @@ class Player extends Module
 				box.parentElement.scrollTop -= height*1.1;
 				zoomX-=x;
 			}
-			function {$this->Name}_Download(){
-				open({$this->Name}_Source, '_blank');
+			function {$this->MainClass}_Download(){
+				open({$this->MainClass}_Source, '_blank');
 			}
-			function {$this->Name}_Share(){
-				share({$this->Name}_Source);
+			function {$this->MainClass}_Share(){
+				share({$this->MainClass}_Source);
 			}
 		");
 	}
@@ -299,41 +299,41 @@ class Player extends Module
 
 	public function SetScript($content = "", $source = null)
 	{
-		return $this->Name . "_Set(" .
+		return $this->MainClass . "_Set(" .
 			Script::Convert($content ?? $this->Content) . ", " .
 			Script::Convert($source ?? $this->Source) . ");";
 	}
 	public function ClearScript()
 	{
-		return $this->Name . "_Clear();";
+		return $this->MainClass . "_Clear();";
 	}
 	public function FocusScript()
 	{
-		return $this->Name . "_Focus();";
+		return $this->MainClass . "_Focus();";
 	}
 	public function ResetScript()
 	{
-		return $this->Name . "_Reset();";
+		return $this->MainClass . "_Reset();";
 	}
 	public function ZoomScript()
 	{
-		return $this->Name . "_Zoom();";
+		return $this->MainClass . "_Zoom();";
 	}
 	public function ZoomInScript()
 	{
-		return $this->Name . "_ZoomIn();";
+		return $this->MainClass . "_ZoomIn();";
 	}
 	public function ZoomOutScript()
 	{
-		return $this->Name . "_ZoomOut();";
+		return $this->MainClass . "_ZoomOut();";
 	}
 	public function DownloadScript()
 	{
-		return $this->Name . "_Download();";
+		return $this->MainClass . "_Download();";
 	}
 	public function ShareScript()
 	{
-		return $this->Name . "_Share();";
+		return $this->MainClass . "_Share();";
 	}
 }
 ?>

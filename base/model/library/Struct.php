@@ -1,8 +1,6 @@
 <?php
 namespace MiMFa\Library;
 
-use ReflectionFiber;
-
 /**
  * A simple library to create default and standard HTML tags
  *@copyright All rights are reserved for MiMFa Development Group

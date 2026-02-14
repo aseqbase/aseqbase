@@ -5,7 +5,7 @@ use MiMFa\Library\Style;
 use MiMFa\Library\Struct;
 class Field extends Module
 {
-	public $Tag = "div";
+	public string|null $TagName = "div";
 	public $Class = "field";
 	public $Template = null;
 	/**
@@ -132,7 +132,7 @@ class Field extends Module
 	public function GetBothStyle()
 	{
 		return Struct::Style("
-			.{$this->Name}{
+			.{$this->MainClass}{
 				" . Style::DoProperty("min-width", $this->MinWidth) . "
 				" . Style::DoProperty("min-height", $this->MinHeight) . "
 				" . Style::DoProperty("max-width", $this->MaxWidth) . "
@@ -143,7 +143,7 @@ class Field extends Module
 				text-align: start;
 				display: table-row;
 			}
-			.{$this->Name} label.title{
+			.{$this->MainClass} label.title{
 				width: fit-content;
 				display: table-cell;
 				position: relative;
@@ -154,7 +154,7 @@ class Field extends Module
 				z-index: 1;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .input{
+			.{$this->MainClass} .input{
 				" . Style::DoProperty("color", $this->ForeColor) . "
 				" . Style::DoProperty("background-color", $this->BackColor) . "
 				display: table-cell;
@@ -166,7 +166,7 @@ class Field extends Module
 				" . Style::DoProperty("border-radius", \_::$Front->Radius(0)) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} label.description{
+			.{$this->MainClass} label.description{
 				text-align: initial;
 				display: block;
 				font-size: 75%;
@@ -174,11 +174,11 @@ class Field extends Module
 				opacity: 0.5;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover .input{
+			.{$this->MainClass}:hover .input{
 				" . Style::DoProperty("border-color", $this->BorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover label.description{
+			.{$this->MainClass}:hover label.description{
 				opacity: 0.75;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -187,7 +187,7 @@ class Field extends Module
 	public function GetHorizontalStyle()
 	{
 		return Struct::Style("
-			.{$this->Name}{
+			.{$this->MainClass}{
 				" . Style::DoProperty("min-width", $this->MinWidth) . "
 				" . Style::DoProperty("min-height", $this->MinHeight) . "
 				" . Style::DoProperty("max-width", $this->MaxWidth) . "
@@ -198,7 +198,7 @@ class Field extends Module
 				text-align: start;
 				display: table-row;
 			}
-			.{$this->Name} label.title{
+			.{$this->MainClass} label.title{
 				" . Style::DoProperty("color", $this->ForeColor) . "
 				" . Style::DoProperty("background-color", $this->BackColor) . "
 				width: fit-content;
@@ -215,7 +215,7 @@ class Field extends Module
 				z-index: 1;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .input{
+			.{$this->MainClass} .input{
 				" . Style::DoProperty("color", $this->ForeColor) . "
 				" . Style::DoProperty("background-color", $this->BackColor) . "
 				display: table-cell;
@@ -228,7 +228,7 @@ class Field extends Module
 				" . Style::DoProperty("border-radius", \_::$Front->Radius(0)) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} label.description{
+			.{$this->MainClass} label.description{
 				text-align: initial;
 				vertical-align: middle;
 				display: table-cell;
@@ -237,15 +237,15 @@ class Field extends Module
 				opacity: 0;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover label.title{
+			.{$this->MainClass}:hover label.title{
 				" . Style::DoProperty("border-color", $this->BorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover .input{
+			.{$this->MainClass}:hover .input{
 				" . Style::DoProperty("border-color", $this->BorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover label.description{
+			.{$this->MainClass}:hover label.description{
 				opacity: 0.75;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -254,7 +254,7 @@ class Field extends Module
 	public function GetVerticalStyle()
 	{
 		return Struct::Style("
-			.{$this->Name}{
+			.{$this->MainClass}{
 				" . Style::DoProperty("min-width", $this->MinWidth) . "
 				" . Style::DoProperty("min-height", $this->MinHeight) . "
 				" . Style::DoProperty("max-width", $this->MaxWidth) . "
@@ -264,7 +264,7 @@ class Field extends Module
 				font-size: var(--size-1);
 				text-align: start;
 			}
-			.{$this->Name} label.title{
+			.{$this->MainClass} label.title{
 				" . Style::DoProperty("color", $this->ForeColor) . "
 				" . Style::DoProperty("background-color", $this->BackColor) . "
 				width: fit-content;
@@ -281,7 +281,7 @@ class Field extends Module
 				z-index: 1;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .input{
+			.{$this->MainClass} .input{
 				" . Style::DoProperty("color", $this->ForeColor) . "
 				" . Style::DoProperty("background-color", $this->BackColor) . "
 				font-size: 100%;
@@ -292,7 +292,7 @@ class Field extends Module
 				" . Style::DoProperty("border-radius", \_::$Front->Radius(0)) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} label.description{
+			.{$this->MainClass} label.description{
 				text-align: initial;
 				display: block;
 				font-size: 50%;
@@ -301,17 +301,17 @@ class Field extends Module
 				opacity: 0;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover label.title{
+			.{$this->MainClass}:hover label.title{
 				font-size: 75%;
 				" . Style::DoProperty("border-color", $this->BorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover .input{
+			.{$this->MainClass}:hover .input{
 				font-size: 125%;
 				" . Style::DoProperty("border-color", $this->BorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover label.description{
+			.{$this->MainClass}:hover label.description{
 				font-size: 75%;
 				opacity: 0.75;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
@@ -319,177 +319,174 @@ class Field extends Module
 		");
 	}
 
-	public function Get()
+	public function GetInner()
 	{
-		return Convert::ToString(function () {
-			$type = Struct::InputDetector($this->Type, $this->Value);
-			$placeHolder = __($this->PlaceHolder ?? $this->Title);
-			$attributes = [
-				["class" => "input" . ($this->Lock ? " disabled" : "")],
-				($this->Required ? ["required" => true] : []),
-				(isValid($placeHolder) ? ["placeholder" => $placeHolder] : []),
-				$this->Attributes
-			];
-			$startTag = "";
-			$id = Struct::PopAttribute($attributes, "id") ?? Convert::ToId($this->Key);
-			$iid = $id . "_input";
-			if (isValid($this->Title))
-				$startTag .= Struct::Label($this->Title, $id, ["class" => "title"]);
-			$endTag = "";
-			if (isValid($this->Description))
-				$endTag .= Struct::Label($this->Description, $id, ["class" => "description"]);
-			yield $this->GetContent();
-			switch ($type) {
-				case 'doc':
-				case 'document':
-				case 'image':
-				case 'audio':
-				case 'video':
-				case 'file':
-					yield $startTag;
-					$p = null;
-					if (isValid($this->Value)) {
-						module("Player");
-						$p = new Player($this->Value);
-						$p->Style = new Style();
-						$p->Style->BackgroundColor = $this->BackColor;
-						$p->Style->Color = $this->ForeColor;
-						$p->Style->Border = "1px solid " . $this->BorderColor;
-						$p->MinWidth = $this->MinWidth ?? "auto";
-						$p->MinHeight = $this->MinHeight ?? $p->MinHeight;
-						$p->Height = $this->MaxHeight ?? "25vmin";
-						$p->Width = $this->Width ?? $p->Width;
-						$p->MaxWidth = $this->MaxWidth ?? "100%";
-						$p->MaxHeight = $this->MaxHeight ?? "25vmin";
-						$p->Id = "Player" . getId();
-						if (!$this->Lock)
-							$p->PrependControls =
-								Struct::Icon("trash", "
+		$type = Struct::InputDetector($this->Type, $this->Value);
+		$placeHolder = __($this->PlaceHolder ?? $this->Title);
+		$attributes = [
+			["class" => "input" . ($this->Lock ? " disabled" : "")],
+			($this->Required ? ["required" => true] : []),
+			(isValid($placeHolder) ? ["placeholder" => $placeHolder] : []),
+			$this->Attributes
+		];
+		$startTag = "";
+		$id = Struct::PopAttribute($attributes, "id") ?? Convert::ToId($this->Key);
+		$iid = $id . "_input";
+		if (isValid($this->Title))
+			$startTag .= Struct::Label($this->Title, $id, ["class" => "title"]);
+		$endTag = "";
+		if (isValid($this->Description))
+			$endTag .= Struct::Label($this->Description, $id, ["class" => "description"]);
+		yield $this->GetContent();
+		switch ($type) {
+			case 'doc':
+			case 'document':
+			case 'image':
+			case 'audio':
+			case 'video':
+			case 'file':
+				yield $startTag;
+				$p = null;
+				if (isValid($this->Value)) {
+					module("Player");
+					$p = new Player($this->Value);
+					$p->Style = new Style();
+					$p->Style->BackgroundColor = $this->BackColor;
+					$p->Style->Color = $this->ForeColor;
+					$p->Style->Border = "1px solid " . $this->BorderColor;
+					$p->MinWidth = $this->MinWidth ?? "auto";
+					$p->MinHeight = $this->MinHeight ?? $p->MinHeight;
+					$p->Height = $this->MaxHeight ?? "25vmin";
+					$p->Width = $this->Width ?? $p->Width;
+					$p->MaxWidth = $this->MaxWidth ?? "100%";
+					$p->MaxHeight = $this->MaxHeight ?? "25vmin";
+					$p->Id = "Player" . getId();
+					if (!$this->Lock)
+						$p->PrependControls =
+							Struct::Icon("trash", "
 								document.getElementById('$iid').setAttribute('disabled','disabled');
 								document.getElementById('{$p->Id}').style.opacity='0.5';
 								document.getElementById('{$p->Id}').style.borderColor='#f33';", ["class" => "button"]) .
-								Struct::Icon("edit", "
+							Struct::Icon("edit", "
 								document.getElementById('$iid').removeAttribute('disabled');
 								document.getElementById('{$p->Id}').style.opacity='1';
 								document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
 								document.getElementById('$iid').click();", ["class" => "button"]);
-						yield $p->ToString();
-						$attributes["style"] = ($attributes["style"] ?? "") . " display:none;";
+					yield $p->ToString();
+					$attributes["style"] = ($attributes["style"] ?? "") . " display:none;";
+				}
+				$others = "";
+				$accept = "";
+				if (isValid($this->Options))
+					$accept = join("|", array_values($this->Options));
+				else
+					switch ($type) {
+						case 'doc':
+						case 'document':
+							$accept = " accept='" . join(", ", \_::$Back->AcceptableDocumentFormats) . "'";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+							break;
+						case "image":
+							$accept = " accept='" . join(", ", \_::$Back->AcceptableImageFormats) . "'";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+							break;
+						case "audio":
+							$accept = " accept='" . join(", ", \_::$Back->AcceptableAudioFormats) . "'";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+							break;
+						case "video":
+							$accept = " accept='" . join(", ", \_::$Back->AcceptableVideoFormats) . "'";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+							break;
+						default:
+							$accept = "";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+							break;
 					}
-					$others = "";
-					$accept = "";
-					if (isValid($this->Options))
-						$accept = join("|", array_values($this->Options));
-					else
-						switch ($type) {
-							case 'doc':
-							case 'document':
-								$accept = " accept='" . join(", ", \_::$Back->AcceptableDocumentFormats) . "'";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
-								break;
-							case "image":
-								$accept = " accept='" . join(", ", \_::$Back->AcceptableImageFormats) . "'";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
-								break;
-							case "audio":
-								$accept = " accept='" . join(", ", \_::$Back->AcceptableAudioFormats) . "'";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
-								break;
-							case "video":
-								$accept = " accept='" . join(", ", \_::$Back->AcceptableVideoFormats) . "'";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
-								break;
-							default:
-								$accept = "";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
-								break;
-						}
-					yield Struct::Input($this->Key, null, "file", ["Id" => $iid, "Name" => $this->Key, "class" => "fileinput"], $accept, $attributes)
-						. $others;
-					yield $endTag;
-					break;
-				case 'docs':
-				case 'documents':
-				case 'images':
-				case 'audios':
-				case 'videos':
-				case 'files':
-					yield $startTag;
-					$p = "";
-					if (isValid($this->Value)) {
-						module("Player");
-						$p = new Player($this->Value);
-						$p->Style = new Style();
-						$p->Style->BackgroundColor = $this->BackColor;
-						$p->Style->Color = $this->ForeColor;
-						$p->Style->Border = "1px solid " . $this->BorderColor;
-						$p->MinWidth = $this->MinWidth ?? "auto";
-						$p->MinHeight = $this->MinHeight ?? $p->MinHeight;
-						$p->Height = $this->MaxHeight ?? "25vmin";
-						$p->Width = $this->Width ?? $p->Width;
-						$p->MaxWidth = $this->MaxWidth ?? "100%";
-						$p->MaxHeight = $this->MaxHeight ?? "25vmin";
-						$p->Id = "Player" . getId();
-						if (!$this->Lock)
-							$p->PrependControls =
-								Struct::Icon("trash", "
+				yield Struct::Input($this->Key, null, "file", ["Id" => $iid, "Name" => $this->Key, "class" => "fileinput"], $accept, $attributes)
+					. $others;
+				yield $endTag;
+				break;
+			case 'docs':
+			case 'documents':
+			case 'images':
+			case 'audios':
+			case 'videos':
+			case 'files':
+				yield $startTag;
+				$p = "";
+				if (isValid($this->Value)) {
+					module("Player");
+					$p = new Player($this->Value);
+					$p->Style = new Style();
+					$p->Style->BackgroundColor = $this->BackColor;
+					$p->Style->Color = $this->ForeColor;
+					$p->Style->Border = "1px solid " . $this->BorderColor;
+					$p->MinWidth = $this->MinWidth ?? "auto";
+					$p->MinHeight = $this->MinHeight ?? $p->MinHeight;
+					$p->Height = $this->MaxHeight ?? "25vmin";
+					$p->Width = $this->Width ?? $p->Width;
+					$p->MaxWidth = $this->MaxWidth ?? "100%";
+					$p->MaxHeight = $this->MaxHeight ?? "25vmin";
+					$p->Id = "Player" . getId();
+					if (!$this->Lock)
+						$p->PrependControls =
+							Struct::Icon("trash", "
 								document.getElementById('$iid').setAttribute('disabled','disabled');
 								document.getElementById('{$p->Id}').style.opacity='0.5';
 								document.getElementById('{$p->Id}').style.borderColor='#f33';", ["class" => "button"]) .
-								Struct::Icon("edit", "
+							Struct::Icon("edit", "
 								document.getElementById('$iid').removeAttribute('disabled');
 								document.getElementById('{$p->Id}').style.opacity='1';
 								document.getElementById('{$p->Id}').style.borderColor='{$this->BorderColor}';
 								document.getElementById('$iid').click();", ["class" => "button"]);
-						yield $p->ToString();
-						$attributes["style"] = ($attributes["style"] ?? "") . " display:none;";
+					yield $p->ToString();
+					$attributes["style"] = ($attributes["style"] ?? "") . " display:none;";
+				}
+				$others = "";
+				$accept = "";
+				if (isValid($this->Options))
+					$accept = join("|", array_values($this->Options));
+				else
+					switch ($type) {
+						case 'docs':
+						case 'documents':
+							$accept = " accept='" . join(", ", \_::$Back->AcceptableDocumentFormats) . "'";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+							break;
+						case "images":
+							$accept = " accept='" . join(", ", \_::$Back->AcceptableImageFormats) . "'";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+							break;
+						case "audios":
+							$accept = " accept='" . join(", ", \_::$Back->AcceptableAudioFormats) . "*'";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+							break;
+						case "videos":
+							$accept = " accept='" . join(", ", \_::$Back->AcceptableVideoFormats) . "'";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
+							break;
+						default:
+							$accept = "";
+							$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
+							break;
 					}
-					$others = "";
-					$accept = "";
-					if (isValid($this->Options))
-						$accept = join("|", array_values($this->Options));
-					else
-						switch ($type) {
-							case 'docs':
-							case 'documents':
-								$accept = " accept='" . join(", ", \_::$Back->AcceptableDocumentFormats) . "'";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
-								break;
-							case "images":
-								$accept = " accept='" . join(", ", \_::$Back->AcceptableImageFormats) . "'";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
-								break;
-							case "audios":
-								$accept = " accept='" . join(", ", \_::$Back->AcceptableAudioFormats) . "*'";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
-								break;
-							case "videos":
-								$accept = " accept='" . join(", ", \_::$Back->AcceptableVideoFormats) . "'";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].children[0].removeAttribute(attr);};");
-								break;
-							default:
-								$accept = "";
-								$others = is_null($p) ? "" : Struct::Script("document.getElementById('$iid').onchange = function () { if(this.files.length > 0) for(attr of ['src', 'alt']) document.getElementById('{$p->Id}').children[1].children[0].removeAttribute(attr);};");
-								break;
-						}
-					yield Struct::Input($this->Key, null, "file", ["Id" => $iid, "Name" => $this->Key, "class" => "fileinput", "multiple" => null], $accept, $attributes)
-						. $others;
-					yield $endTag;
-					break;
-				default:
-					yield Struct::Field(
-						type: $this->Type,
-						key: $this->Key,
-						value: $this->Value,
-						description: $this->Description,
-						title: $this->Title,
-						wrapper: false,
-						options: $this->Options,
-						attributes: $attributes
-					);
-					break;
-			}
-		});
+				yield Struct::Input($this->Key, null, "file", ["Id" => $iid, "Name" => $this->Key, "class" => "fileinput", "multiple" => null], $accept, $attributes)
+					. $others;
+				yield $endTag;
+				break;
+			default:
+				yield Struct::Field(
+					type: $this->Type,
+					key: $this->Key,
+					value: $this->Value,
+					description: $this->Description,
+					title: $this->Title,
+					wrapper: false,
+					options: $this->Options,
+					attributes: $attributes
+				);
+				break;
+		}
 	}
 }
-?>

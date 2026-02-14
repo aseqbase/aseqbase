@@ -193,11 +193,11 @@ class Script
                     for(const file of files)" : "const [file] = input.files;") . "
                         if (file) {
                             if(file.size < " . self::Convert($minSize = $minSize ?? \_::$Back->MinimumFileSize) . ") {
-                                " . self::Error("The 'file size' is 'smaller than' " . Convert::ToCompactNumber($minSize) . "B!") . ";
+                                " . self::Alert("The 'file size' is 'smaller than' " . Convert::ToCompactNumber($minSize) . "B!") . ";
                                 return;
                             }
                             if(file.size > " . self::Convert($maxSize = $maxSize ?? \_::$Back->MaximumFileSize) . ") {
-                                " . self::Error("The 'file size' is 'bigger than' " . Convert::ToCompactNumber($maxSize) . "B!") . ";
+                                " . self::Alert("The 'file size' is 'bigger than' " . Convert::ToCompactNumber($maxSize) . "B!") . ";
                                 return;
                             }
                             const reader = new FileReader();
@@ -219,7 +219,7 @@ class Script
                             reader.readAsArrayBuffer(file);
                             number++;
                         }
-                } catch(ex) { " . self::Error("\${ex}") . "; }
+                } catch(ex) { " . self::Alert("\${ex}") . "; }
             }
             _(input).trigger('click');
             return false;
@@ -260,11 +260,11 @@ class Script
                     for(const file of files)" : "const [file] = input.files;") . "
                         if (file) {
                             if(file.size < " . self::Convert($minSize = $minSize ?? \_::$Back->MinimumFileSize) . ") {
-                                " . self::Error("The 'file size' is 'smaller than' " . Convert::ToCompactNumber($minSize) . "B!") . ";
+                                " . self::Alert("The 'file size' is 'smaller than' " . Convert::ToCompactNumber($minSize) . "B!") . ";
                                 return;
                             }
                             if(file.size > " . self::Convert($maxSize = $maxSize ?? \_::$Back->MaximumFileSize) . ") {
-                                " . self::Error("The 'file size' is 'bigger than' " . Convert::ToCompactNumber($maxSize) . "B!") . ";
+                                " . self::Alert("The 'file size' is 'bigger than' " . Convert::ToCompactNumber($maxSize) . "B!") . ";
                                 return;
                             }
                             var chunksSize = " . ($speed ?? 100000) . ";
@@ -295,7 +295,7 @@ class Script
                             reader.readAsArrayBuffer(file);
                             number++;
                         }
-                } catch(ex) { " . self::Error("\${ex}") . "; }
+                } catch(ex) { " . self::Alert("\${ex}") . "; }
             }
             _(input).trigger('click');
             return false;
@@ -396,7 +396,7 @@ class Script
                 $type = "log";
                 break;
         }
-        return "console.$type(" . self::Convert(__($message)) . ")";
+        return "console.$type(" . self::Convert($message) . ")";
     }
     /**
      * To copy on clipboard

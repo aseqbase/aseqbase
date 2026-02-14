@@ -12,9 +12,9 @@ class General extends Template
      */
 	public $BackgroundImage = null;
 
-	public function __construct($setDefaults = true, $setRevises = true)
+	public function __construct()
 	{
-		parent::__construct($setDefaults, $setRevises);
+		parent::__construct();
         component("Manifest");
 		component("Reset");
 		component("General");
@@ -323,6 +323,12 @@ class General extends Template
 			}
 			body>.prepage {
 				padding-top: calc(1.5 * var(--size-max));
+			}
+			body>.prepage:has(>.cover){
+				padding: 0px;
+			}
+			body>.prepage>.cover {
+				padding-top: calc(4 * var(--size-max));
 			}
 			.page{
 				padding: var(--size-1);

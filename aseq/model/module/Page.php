@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
 
 use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
@@ -12,23 +13,23 @@ use \MiMFa\Library\Convert;
  */
 class Page extends Module
 {
-    public $AllowTitle = true;
-    public $AllowDescription = true;
-    public $AllowImage = true;
-    public $Content = null;
-    public $Tag = "main";
+	public $AllowTitle = true;
+	public $AllowDescription = true;
+	public $AllowImage = true;
+	public $Content = null;
+	public string|null $TagName = "main";
 	public $Class = "page";
-    public $Attributes = " onclick='viewSideMenu(false)'";
+	public $Attributes = " onclick='viewSideMenu(false)'";
 
-    public function GetStyle()
-    {
-        return Struct::Style("
-            .{$this->Name} {
+	public function GetStyle()
+	{
+		return Struct::Style("
+            .{$this->MainClass} {
                 width: 100%;
                 height: max-content;
             }
 
-            .{$this->Name} > .page {
+            .{$this->MainClass} > .page {
                 width: 100%;
                 height: max-content;
                 padding: 0;
@@ -37,42 +38,45 @@ class Page extends Module
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
-            .{$this->Name} > .page > .frame {
+            .{$this->MainClass} > .page > .frame {
                 width: 100%;
                 height: max-content;
                 padding: 0;
                 margin: 0;
             }
 
-            .{$this->Name} > .page.active {
+            .{$this->MainClass} > .page.active {
                 opacity: 1;
             }
         ");
-    }
-	
-    public function Get()
-    {
-        return Convert::ToString(function () {
-            yield $this->GetTitle();       // Handle and yield the title
-            yield $this->GetDescription();  // Handle and yield the description
+	}
 
-            // Internal Page
-            yield Struct::Division(
-				Struct::Division(
-					Convert::ToString($this->Content)
-				, ["class"=>"frame"]),
-			["class"=> "page internal-page active", "Id" => "internal"]);
+	public function GetInner()
+	{
+		yield $this->GetTitle();       // Handle and yield the title
+		yield $this->GetDescription();  // Handle and yield the description
 
-            // External Page (using iframe)
-            yield Struct::Division(Struct::Embed("", null, ["class"=> "frame"]), ["class"=> "page external-page", "Id" => "external", "style" => "display:none;"]);
+		// Internal Page
+		yield Struct::Division(
+			Struct::Division(
+				Convert::ToString($this->Content)
+				,
+				["class" => "frame"]
+			),
+			["class" => "page internal-page active", "Id" => "internal"]
+		);
 
-            // Embed Page (using iframe)
-            yield Struct::Division(Struct::Embed("",  null,["class"=> "frame"]), ["class"=> "page embed-page", "Id" => "embed", "style" => "display:none;"]);
-        });
-    }
+		// External Page (using iframe)
+		yield Struct::Division(Struct::Embed("", null, ["class" => "frame"]), ["class" => "page external-page", "Id" => "external", "style" => "display:none;"]);
 
-	public function GetScript(){
-		return parent::GetScript().Struct::Script("
+		// Embed Page (using iframe)
+		yield Struct::Division(Struct::Embed("", null, ["class" => "frame"]), ["class" => "page embed-page", "Id" => "embed", "style" => "display:none;"]);
+	}
+
+	public function GetScript()
+	{
+		yield parent::GetScript();
+		yield Struct::Script("
 			var ReadyHtml = {
 				load: (data=``)=> [
 					`<style>
@@ -150,32 +154,32 @@ class Page extends Module
 					}
 					</style>`,`<div class='error'>`,data,`</div>`].join(`\r\n`)
 			};
-			function {$this->Name}_ShowFrame(selector = `.{$this->Name}`){
-				_(`.{$this->Name}>.page`).removeClass(`active`);
-				_(`.{$this->Name}>.page`).hide();
-				_(`.{$this->Name} `+selector).addClass(`active`);
-				_(`.{$this->Name} `+selector).show();
+			function {$this->MainClass}_ShowFrame(selector = `.{$this->MainClass}`){
+				_(`.{$this->MainClass}>.page`).removeClass(`active`);
+				_(`.{$this->MainClass}>.page`).hide();
+				_(`.{$this->MainClass} `+selector).addClass(`active`);
+				_(`.{$this->MainClass} `+selector).show();
 			}
-			function {$this->Name}_ViewInternal(link,anim=null,cls=null, selector = `#internal`){
-				{$this->Name}_InjectInternal(link,anim,cls, selector);
-				{$this->Name}_ShowFrame(selector);
+			function {$this->MainClass}_ViewInternal(link,anim=null,cls=null, selector = `#internal`){
+				{$this->MainClass}_InjectInternal(link,anim,cls, selector);
+				{$this->MainClass}_ShowFrame(selector);
 			}
-			function {$this->Name}_ViewExternal(link,anim=null,cls=null, selector = `#external`){
-				{$this->Name}_InjectExternal(link,anim,cls, selector);
-				{$this->Name}_ShowFrame(selector);
+			function {$this->MainClass}_ViewExternal(link,anim=null,cls=null, selector = `#external`){
+				{$this->MainClass}_InjectExternal(link,anim,cls, selector);
+				{$this->MainClass}_ShowFrame(selector);
 			}
-			function {$this->Name}_ViewEmbed(link,anim=null,cls=null, selector = `#embed`){
-				{$this->Name}_EmbedExternal(link,anim,cls, selector);
-				{$this->Name}_ShowFrame(selector);
+			function {$this->MainClass}_ViewEmbed(link,anim=null,cls=null, selector = `#embed`){
+				{$this->MainClass}_EmbedExternal(link,anim,cls, selector);
+				{$this->MainClass}_ShowFrame(selector);
 			}
 
-			function {$this->Name}_InjectInternal(link, anim=null, cls=null, selector = `#internal`){
+			function {$this->MainClass}_InjectInternal(link, anim=null, cls=null, selector = `#internal`){
 				selector += `>.frame`;
 				const frame = _(selector)[0];
 				frame.innerHTML = ReadyHtml.load();
 				if(!isEmpty(cls)) frame.addClass(cls);
 				if(!isEmpty(anim)) frame.setAttribute(`data-aos`,(isEmpty(anim)?``:anim));
-				_(selector).load(`/private.php?".(isEmpty(\_::$Address->UrlQuery)?"":(\_::$Address->UrlQuery))."`".", null, {name:link,animation:anim,class:cls},
+				_(selector).load(`/private.php?" . (isEmpty(\_::$Address->UrlQuery) ? "" : (\_::$Address->UrlQuery)) . "`" . ", null, {name:link,animation:anim,class:cls},
 					function(data){
 						if(!data) frame.innerHTML = ReadyHtml.connectionError(`Please check your connection...`);
 					},
@@ -185,13 +189,13 @@ class Page extends Module
 				);
 			}
 
-			function {$this->Name}_InjectExternal(link,anim=null, cls=null, selector = `#external`){
+			function {$this->MainClass}_InjectExternal(link,anim=null, cls=null, selector = `#external`){
 				const frame = _(selector)[0];
 				frame.innerHTML = ReadyHtml.load();
 				frame.innerHTML = `<iframe is='x-frame' data-loading-page=\``+ReadyHtml.load()+`\` data-aos='`+anim+`' class='frame `+cls+`' src='`+link+`'></iframe>`;
 			}
 
-			function {$this->Name}_EmbedExternal(link,anim=null, cls=null, selector = `#embed`){
+			function {$this->MainClass}_EmbedExternal(link,anim=null, cls=null, selector = `#embed`){
 				const frame = _(selector+` .frame`)[0];
 				frame.src = link;
 			}

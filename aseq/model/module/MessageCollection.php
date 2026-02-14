@@ -15,7 +15,7 @@ module("Collection");
 class MessageCollection extends Collection
 {
     // --- General Properties (Mostly retained/adapted) ---
-    public $TitleTag = "h5";
+    public string|null $TitleTagName = "h5";
     public $MaximumColumns = 1;
     public $Animation = null;
 
@@ -59,7 +59,7 @@ class MessageCollection extends Collection
     public function GetStyle()
     {
         return Struct::Style("
-            .{$this->Name} {
+            .{$this->MainClass} {
                 display: flex;
                 flex-direction: column;
                 padding: var(--size-2) var(--size-1);
@@ -68,7 +68,7 @@ class MessageCollection extends Collection
                 overflow-x:hidden;
                 max-height:inherit;
             }
-            .{$this->Name} div.item {
+            .{$this->MainClass} div.item {
                 display: flex;
                 flex-direction: column;
                 max-width: 70%;
@@ -79,24 +79,24 @@ class MessageCollection extends Collection
                 box-shadow: var(--shadow-1);
                 border-radius: var(--radius-1);
             }
-            .{$this->Name} div.item:not(.sender) {
+            .{$this->MainClass} div.item:not(.sender) {
                 align-self: flex-start;
                 background-color: var(--back-color-special);
                 color: var(--fore-color-special);
                 margin-inline-start: auto;
                 border-top-right-radius: var(--size-0); /* Smaller radius for the tail side */
             }
-            .{$this->Name} div.item.sender {
+            .{$this->MainClass} div.item.sender {
                 align-self: flex-end;
                 background-color: var(--color-green);
                 color: var(--color-white);
                 margin-inline-end: auto;
                 border-top-left-radius: var(--size-0); /* Smaller radius for the tail side */
             }
-            .{$this->Name} div.item:not(.sender) .author {
+            .{$this->MainClass} div.item:not(.sender) .author {
 				color: var(--color-blue);
             }
-            .{$this->Name} div.item::before {
+            .{$this->MainClass} div.item::before {
                 content: '';
                 position: absolute;
                 top: 0;
@@ -106,26 +106,26 @@ class MessageCollection extends Collection
                 height: var(--size-3);
                 background: linear-gradient(135deg, var(--color-light) 0%, var(--color-light) 50%, transparent 50%, transparent);
             }
-            .{$this->Name} div.item.deactive {
+            .{$this->MainClass} div.item.deactive {
                 opacity: 0.7;
             }
 
-            .{$this->Name} div.item .message {
+            .{$this->MainClass} div.item .message {
                 margin-bottom: var(--size-0);
                 padding-inline-end: var(--size-4); /* Space for timestamp/status */
                 overflow-wrap: break-word;
             }
-            .{$this->Name} div.item .author {
+            .{$this->MainClass} div.item .author {
                 font-size: var(--size-0);
                 font-weight: bold;
                 display: block;
                 padding-bottom: 2px;
                 margin-bottom: 2px;
             }
-            .{$this->Name} div.item .content {
+            .{$this->MainClass} div.item .content {
                 font-size: var(--size-1);
             }
-            .{$this->Name} div.item .quote {
+            .{$this->MainClass} div.item .quote {
                 opacity: 0.6;
                 border-inline-start: 4px solid var(--color-blue); /* Messenger quote bar */
                 padding: calc(var(--size-0) / 2) var(--size-0);
@@ -138,17 +138,17 @@ class MessageCollection extends Collection
                 overflow: hidden;
                 max-height: calc(var(--size-1) * 5);
             }
-            .{$this->Name} div.item .quote *{
+            .{$this->MainClass} div.item .quote *{
                 font-size: 90%;
             }
-            .{$this->Name} div.item .quote .content {
+            .{$this->MainClass} div.item .quote .content {
                 overflow: hidden;
                 text-overflow: ellipsis;
                 display: -webkit-box;
                 -webkit-line-clamp: 4;
                 -webkit-box-orient: vertical;
             }
-            .{$this->Name} div.item .image {
+            .{$this->MainClass} div.item .image {
                 border-radius: var(--radius-1);
                 overflow: hidden;
                 max-width: 100%;
@@ -156,7 +156,7 @@ class MessageCollection extends Collection
                 margin-bottom: var(--size-0);
             }
 
-            .{$this->Name} div.item .metadata {
+            .{$this->MainClass} div.item .metadata {
                 position: absolute;
                 bottom: 3px;
                 right: 6px;
@@ -166,14 +166,14 @@ class MessageCollection extends Collection
                 align-items: center;
                 white-space: nowrap;
             }
-            .{$this->Name} div.item .metadata .status-icon {
+            .{$this->MainClass} div.item .metadata .status-icon {
                 margin-inline-start: 4px;
                 font-size: calc(var(--size-0) * 0.8);
             }
-            .{$this->Name} div.item:not(.sender) .metadata .status-icon {
+            .{$this->MainClass} div.item:not(.sender) .metadata .status-icon {
                  color: var(--color-gray); 
             }
-            .{$this->Name} .item .sidebtn{
+            .{$this->MainClass} .item .sidebtn{
                 position: absolute;
                 top: 50%;
                 transform: translateY(-50%);
@@ -183,27 +183,27 @@ class MessageCollection extends Collection
                 border-radius: var(--radius-3);
                 z-index: 10;
             }
-            .{$this->Name} .item:not(.sender) .sidebtn {
+            .{$this->MainClass} .item:not(.sender) .sidebtn {
                 right: -50px; /* Position to the left of sent message */
             }
-            .{$this->Name} .item.sender .sidebtn {
+            .{$this->MainClass} .item.sender .sidebtn {
                 left: -50px; /* Position to the right of received message */
             }
             
             /* Show buttons on bubble hover */
-            .{$this->Name} div.item:hover > .sidebtn{
+            .{$this->MainClass} div.item:hover > .sidebtn{
                 opacity: 1;
             }
-            .{$this->Name} .item .sidebtn > * {
+            .{$this->MainClass} .item .sidebtn > * {
                 background-color: transparent;
                 padding: 4px;
                 font-size: var(--size-1);
                 opacity: 0.8;
             }
-            .{$this->Name} .item .sidebtn > *:hover {
+            .{$this->MainClass} .item .sidebtn > *:hover {
                 opacity: 1;
             }
-            .{$this->Name} div.item .replies {
+            .{$this->MainClass} div.item .replies {
                 margin-top: var(--size-1);
                 padding-top: var(--size-1);
                 border-top: 1px solid rgba(0, 0, 0, 0.1);
@@ -212,7 +212,7 @@ class MessageCollection extends Collection
         ");
     }
 
-    public function Get($items = null)
+    public function GetInner($items = null)
     {
         return join(PHP_EOL, iterator_to_array((function () use ($items) {
             $i = 0;
@@ -270,9 +270,9 @@ class MessageCollection extends Collection
                 // --- 2. SIDE BUTTONS (Hidden/Hovered Context Menu) ---
                 if ($p_showreplybutton || $p_showeditbutton || $p_showdeletebutton)
                     yield Struct::Division(
-                        ($p_showdeletebutton ? Struct::Button($p_deletebuttontext, "{$this->Name}_Delete(this, '.{$this->Name} #{$uid}', $p_id);") : null) .
-                        ($p_showeditbutton ? Struct::Button($p_editbuttontext, "{$this->Name}_Edit(this, '.{$this->Name} #{$uid}', $p_id);") : null) .
-                        ($p_showreplybutton ? Struct::Button($p_replybuttontext, "{$this->Name}_Reply(this, '.{$this->Name} #{$uid}', $p_id);") : null),
+                        ($p_showdeletebutton ? Struct::Button($p_deletebuttontext, "{$this->MainClass}_Delete(this, '.{$this->MainClass} #{$uid}', $p_id);") : null) .
+                        ($p_showeditbutton ? Struct::Button($p_editbuttontext, "{$this->MainClass}_Edit(this, '.{$this->MainClass} #{$uid}', $p_id);") : null) .
+                        ($p_showreplybutton ? Struct::Button($p_replybuttontext, "{$this->MainClass}_Reply(this, '.{$this->MainClass} #{$uid}', $p_id);") : null),
                         ["class" => 'sidebtn']
                     );
 
@@ -357,9 +357,9 @@ class MessageCollection extends Collection
         $action = $this->Action ? Script::Convert($this->Action) : "null";
         return Struct::Script(
             "
-            {$this->Name} = document.querySelector('.{$this->Name}');
-            {$this->Name}.scrollTo(0,{$this->Name}.scrollHeight)
-            function {$this->Name}_Edit(btn, selector, forid) {
+            {$this->MainClass} = document.querySelector('.{$this->MainClass}');
+            {$this->MainClass}.scrollTo(0,{$this->MainClass}.scrollHeight)
+            function {$this->MainClass}_Edit(btn, selector, forid) {
                 sbjbox = document.querySelector(selector+'>.subject');
                 msgbox = document.querySelector(selector+'>.message .full');
                 attbox = document.querySelector(selector+'>.message .attach');
@@ -393,7 +393,7 @@ class MessageCollection extends Collection
                     msgbox.focus();
                 }
             }" . "
-            function {$this->Name}_Delete(btn, selector, forid) {
+            function {$this->MainClass}_Delete(btn, selector, forid) {
                 if(confirm(`" . __("Are you sure to delete this command?") . "`))
                     sendDelete(
                         $action,
@@ -405,15 +405,15 @@ class MessageCollection extends Collection
                     );
             }" .
             "
-            {$this->Name}_status = null;
-            function {$this->Name}_Status(btn, selector, forid, status) {
+            {$this->MainClass}_status = null;
+            function {$this->MainClass}_Status(btn, selector, forid, status) {
                     sendPatch(
                         $action,
-                        {Id:forid, Status:{$this->Name}_status = {$this->Name}_status===0 || status?1:0},
+                        {Id:forid, Status:{$this->MainClass}_status = {$this->MainClass}_status===0 || status?1:0},
                         selector,
                         (data, err)=>{
                             if(!err)
-                                if({$this->Name}_status) {
+                                if({$this->MainClass}_status) {
                                     btn.innerHTML = `{$this->WaitingLabel}`;
                                     document.querySelector(selector).classList.remove('deactive');
                                 }
@@ -425,7 +425,7 @@ class MessageCollection extends Collection
                     );
             }" .
             "
-            function {$this->Name}_Reply(btn, selector, forid) {
+            function {$this->MainClass}_Reply(btn, selector, forid) {
                 rbox = document.querySelector(selector + ' .reply-box');
                 if(!rbox.querySelector('form')) {
                     sendPatch(

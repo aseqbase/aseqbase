@@ -5,7 +5,7 @@ use MiMFa\Component\GeneralStyle;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 class TemplateButton extends Module{
-	public $Tag = "button";
+	public string|null $TagName = "button";
 	public $Class = null;
 	public $LightIcon = "sun";
 	public $DarkIcon = "moon";
@@ -20,7 +20,7 @@ class TemplateButton extends Module{
 			else $this->Class = "icon";
 		$isDark = \_::$Front->GetMode() < 0 && !\_::$Front->SwitchMode;
 		$this->Attributes["onclick"] = "
-		switchStyleId = '{$this->Name}-switch-styles';
+		switchStyleId = '{$this->MainClass}-switch-styles';
 		switchStyle = document.getElementById(switchStyleId);
 		switchContent = ".Script::Convert($isDark?
 			Struct::Media($this->DarkLabel, $this->DarkIcon):
@@ -37,15 +37,15 @@ class TemplateButton extends Module{
 			switchStyle.innerHTML = `".GeneralStyle::SwitchVariables()."`;
 			document.head.append(switchStyle);
 		}
-		if({$this->Name}_SwitchMode) {
-			document.querySelector('.{$this->Name} .media').outerHTML = content;
-			setMemo('".\_::$Front->SwitchRequest."', {$this->Name}_SwitchMode = false);
+		if({$this->MainClass}_SwitchMode) {
+			document.querySelector('.{$this->MainClass} .media').outerHTML = content;
+			setMemo('".\_::$Front->SwitchRequest."', {$this->MainClass}_SwitchMode = false);
 		} else {
-			document.querySelector('.{$this->Name} .media').outerHTML = switchContent;
-			setMemo('".\_::$Front->SwitchRequest."', {$this->Name}_SwitchMode = true);
+			document.querySelector('.{$this->MainClass} .media').outerHTML = switchContent;
+			setMemo('".\_::$Front->SwitchRequest."', {$this->MainClass}_SwitchMode = true);
 		}";
 	}
-	public function Get(){
+	public function GetInner(){
 		return $this->GetTitle().$this->GetDescription().
 		(\_::$Front->GetMode() < 0?
 			Struct::Media($this->LightLabel, $this->LightIcon):
@@ -54,7 +54,8 @@ class TemplateButton extends Module{
 		$this->GetContent();
     }
 	public function GetScript(){
-		return parent::GetScript().Struct::Script("var {$this->Name}_SwitchMode = ".(\_::$Front->SwitchMode?"true":"false").";");
+		yield parent::GetScript();
+		yield Struct::Script("var {$this->MainClass}_SwitchMode = ".(\_::$Front->SwitchMode?"true":"false").";");
     }
 }
 ?>

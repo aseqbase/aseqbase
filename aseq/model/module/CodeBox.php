@@ -1,4 +1,5 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
 
 use \MiMFa\Library\Struct;
 use \MiMFa\Library\Convert;
@@ -12,7 +13,7 @@ use \MiMFa\Library\Convert;
  */
 class CodeBox extends Module
 {
-    public $ContentTag = "textarea";
+    public string|null $ContentTagName =  "textarea";
     public $ContentId = null;
     public $CopyButtonLabel = "Copy";
     public $PasteButtonLabel = "Paste";
@@ -23,7 +24,7 @@ class CodeBox extends Module
     public function GetStyle()
     {
         return Struct::Style("
-            .{$this->Name} {$this->ContentTag} {
+            .{$this->MainClass} {$this->ContentTagName} {
                 background-Color: var(--back-color-special-input);
                 Color: var(--fore-color-special-input);
                 border-radius: var(--radius-1);
@@ -35,27 +36,24 @@ class CodeBox extends Module
         ");
     }
 
-    public function Get()
+    public function GetInner()
     {
-        return Convert::ToString(function () {
-            $id = $this->ContentId ?? ($this->Name . "_" . rand(1, 99999));
-            yield $this->GetTitle();  // Handle and yield the title
-            yield $this->GetDescription(); // Handle and yield the description
-            yield $this->GetContent(["Id" => $id, "rows" => $this->Rows, "cols" => $this->Columns]);
-            if (isValid($this->CopyButtonLabel) || isValid($this->PasteButtonLabel)) {
-                module("Panel");
-                $this->ControlBox = new Panel();
-                $this->ControlBox->Content = function () use ($id) {
-                    if (isValid($this->CopyButtonLabel))
-                        return Struct::Button($this->CopyButtonLabel, "copyFrom('$id');", ["class"=> "btn"]);
-                    if (isValid($this->PasteButtonLabel))
-                        return Struct::Button($this->PasteButtonLabel, "pasteInto('$id');", ["class"=> "btn"]);
-                    return ""; // Return empty string if neither button is valid
-                };
-            }
-			if(isValid($this->ControlBox)) yield $this->ControlBox->ToString(); // Handle and yield the panel
-        });
+        $id = $this->ContentId ?? ($this->MainClass . "_" . rand(1, 99999));
+        yield $this->GetTitle();  // Handle and yield the title
+        yield $this->GetDescription(); // Handle and yield the description
+        yield $this->GetContent(["Id" => $id, "rows" => $this->Rows, "cols" => $this->Columns]);
+        if (isValid($this->CopyButtonLabel) || isValid($this->PasteButtonLabel)) {
+            module("Panel");
+            $this->ControlBox = new Panel();
+            $this->ControlBox->Content = function () use ($id) {
+                if (isValid($this->CopyButtonLabel))
+                    return Struct::Button($this->CopyButtonLabel, "copyFrom('$id');", ["class" => "btn"]);
+                if (isValid($this->PasteButtonLabel))
+                    return Struct::Button($this->PasteButtonLabel, "pasteInto('$id');", ["class" => "btn"]);
+                return ""; // Return empty string if neither button is valid
+            };
+        }
+        if (isValid($this->ControlBox))
+            yield $this->ControlBox->ToString(); // Handle and yield the panel
     }
 }
-
-?>

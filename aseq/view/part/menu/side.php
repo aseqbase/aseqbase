@@ -21,6 +21,6 @@ pod($module, $data);
 $module->Render();
 response(Struct::Script("
 	function viewSideMenu(show){
-		{$module->Name}_ViewSideMenu(show);
+		{$module->MainClass}_ViewSideMenu(show);
 	}
 "));

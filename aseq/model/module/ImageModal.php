@@ -10,8 +10,9 @@ class ImageModal extends Modal
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Struct::Style("
-		.{$this->Name} .content .image{
+        yield parent::GetStyle();
+        yield Struct::Style("
+		.{$this->MainClass} .content .image{
 			background-position: center;
 			background-repeat: no-repeat;
 			background-size: contain;
@@ -22,10 +23,11 @@ class ImageModal extends Modal
 	}
 	public function GetScript()
 	{
-		return parent::GetScript() . Struct::Script("
-			function {$this->Name}_Set(content, source = null){
-				{$this->Name}_Source = source??{$this->Name}_Source??content;
-				if(content !== null) _('.{$this->Name}>.content').html(
+		yield parent::GetScript();
+		yield Struct::Script("
+			function {$this->MainClass}_Set(content, source = null){
+				{$this->MainClass}_Source = source??{$this->MainClass}_Source??content;
+				if(content !== null) _('.{$this->MainClass}>.content').html(
 		" . (
 			$this->AllowOrigin ? "content.endsWith(\".svg\")?
 				(`<iframe class=\"image\" style=\"height: 100%; width: auto;\" src=\"`+content+`\"></iframe>`):
@@ -53,7 +55,7 @@ class ImageModal extends Modal
 
 	public function ShowScript($title = null, $description = null, $content = null, $buttonsContent = null, $source = null)
 	{
-		return $this->Name . "_Show(" .
+		return $this->MainClass . "_Show(" .
 			Script::Convert($title ?? $this->Title) . ", " .
 			Script::Convert($description ?? $this->Description) . ", " .
 			Script::Convert($this->GetContents($content ?? $this->Content)) . ", " .

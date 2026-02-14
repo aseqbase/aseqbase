@@ -14,7 +14,8 @@ class MessageModal extends Modal{
 		$this->Image = $image;
 	}
 	public function GetStyle(){
-		return parent::GetStyle().Struct::Style("
+        yield parent::GetStyle();
+        yield Struct::Style("
 		");
 	}
 }

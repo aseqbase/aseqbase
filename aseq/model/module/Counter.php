@@ -16,7 +16,7 @@ class Counter extends Module
 	public $Period = 1000;
 	public $Action = null;
 	public $ShowFunctionName = null;
-	public $ContentTag = "span";
+	public string|null $ContentTagName = "span";
 
 	public function __construct($from, $to = 0, $action = null, $step = 1)
 	{
@@ -25,12 +25,12 @@ class Counter extends Module
 		$this->To = $to;
 		$this->Step = $step;
 		$this->Action = $action;
-		$this->Id = $this->Name . "_" . getId();
+		$this->Id = $this->MainClass . "_" . getId();
 	}
 
 	public function GetContent($attrs = null)
 	{
-		return Struct::Element($this->From, $this->ContentTag, ["class" => "content"], $attrs);
+		return Struct::Element($this->From, $this->ContentTagName, ["class" => "content"], $attrs);
 	}
 
 	public function GetScript()

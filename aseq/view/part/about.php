@@ -21,8 +21,8 @@ $module->Description = \_::$Front->FullSlogan;
 $module->Render();
 $separator->Render();
 
-$module->Set_Defaults();
-$separator->Set_Defaults();
+// $module->Set_Defaults();
+// $separator->Set_Defaults();
 $module->Style->BackgroundColor =
     $separator->Style->BackgroundColor = "var(--color-white)";
 $separator->MergeBottom = false;

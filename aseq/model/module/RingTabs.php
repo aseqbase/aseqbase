@@ -30,8 +30,9 @@ class RingTabs extends Module{
     }
 
 	public function GetStyle(){
-		return parent::GetStyle().Struct::Style("
-			.{$this->Name} {
+        yield parent::GetStyle();
+        yield Struct::Style("
+			.{$this->MainClass} {
 				min-height: 50vh;
 				display: flex;
 				align-content: center;
@@ -40,39 +41,39 @@ class RingTabs extends Module{
 				overflow: hidden;
 			}
 
-			.{$this->Name} .tabs{
+			.{$this->MainClass} .tabs{
 				max-width: 100%;
 			}
 
-			.{$this->Name} .tab{
+			.{$this->MainClass} .tab{
 				text-align: center;
 				display:none;
 			}
-			.{$this->Name} .tab.active{
+			.{$this->MainClass} .tab.active{
 				display:block;
 			}
 
-			.{$this->Name} .tab .btn:hover{
+			.{$this->MainClass} .tab .btn:hover{
 				font-weight: bold;
 			}
 
-			.{$this->Name} .sign{
+			.{$this->MainClass} .sign{
 				text-align: center;
 			}
-			.{$this->Name} .sign .btn{
+			.{$this->MainClass} .sign .btn{
 				font-size: var(--size-2);
 				color: var(--fore-color-output);
 				border-color: transparent;
 				margin: 0px 5px;
 			}
-			.{$this->Name} .sign .btn:hover{
+			.{$this->MainClass} .sign .btn:hover{
 				background-color: var(--back-color-output);
 				font-size: var(--size-2);
 				color: var(--fore-color-output);
 				border-color: var(--fore-color-output);
 				border-radius: var(--radius-2);
 			}
-			.{$this->Name} .menu {
+			.{$this->MainClass} .menu {
 				min-height: ".($this->CenterSize+$this->ButtonsSize*2)."px;
 				display: -webkit-box;
 				display: -webkit-flex;
@@ -91,7 +92,7 @@ class RingTabs extends Module{
 				border:none;
 			}
 
-			.{$this->Name} .menu>.center {
+			.{$this->MainClass} .menu>.center {
 				width: {$this->CenterSize}px;
 				height: {$this->CenterSize}px;
 				border-radius: 50%;
@@ -100,12 +101,12 @@ class RingTabs extends Module{
 				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
-			.{$this->Name} .menu>.center:hover {
+			.{$this->MainClass} .menu>.center:hover {
 				box-shadow: 0px 0px 50px var(--back-color-output);
 				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
-			.{$this->Name} .menu>.center:before {
+			.{$this->MainClass} .menu>.center:before {
 				position: absolute;
 				content: '';
 				width: {$this->CenterSize}px;
@@ -125,43 +126,43 @@ class RingTabs extends Module{
 				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
-			.{$this->Name} .menu>.center>a{
+			.{$this->MainClass} .menu>.center>a{
 				color: var(--fore-color-output);
 				position: absolute;
 				text-align: center;
 				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
-			.{$this->Name} .menu>.center>a>:first-child{
+			.{$this->MainClass} .menu>.center>a>:first-child{
 				background-color: var(--back-color-output);
 				box-shadow: var(--shadow-3);
 				cursor: pointer;
 				border: var(--border-1) var(--back-color-output);
 				border-radius: 100%;
 			}
-			.{$this->Name} .menu>.center>a>:first-child:hover {
+			.{$this->MainClass} .menu>.center>a>:first-child:hover {
 				box-shadow: var(--shadow-4);
 				border:  var(--border-1) var(--back-color-output);
 				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
 
-			.{$this->Name} .menu>.center>a>:first-child{
+			.{$this->MainClass} .menu>.center>a>:first-child{
 				line-height: {$this->ButtonsSize}px;
 				width: {$this->ButtonsSize}px;
 				height: {$this->ButtonsSize}px;
 				border-radius: 100%;
 			}
-			.{$this->Name} .menu>.center>a>:first-child>.media:not(.icon){
+			.{$this->MainClass} .menu>.center>a>:first-child>.media:not(.icon){
 				background-size: 40% 40%;
 				width: ".($this->ButtonsSize/2)."px;
 				height: ".($this->ButtonsSize/2)."px;
                 ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-output)"):"")."
 			}
-			.{$this->Name} .menu>.center>a>:first-child>.media.icon{
+			.{$this->MainClass} .menu>.center>a>:first-child>.media.icon{
 				line-height: {$this->ButtonsSize}px;
 				font-size: calc({$this->ButtonsSize}px * 0.4);
                 ".($this->AllowChangeColor? \MiMFa\Library\Style::DropColor("var(--fore-color-output)"):"")."
 			}
-			.{$this->Name} .menu>.center>a:hover>:first-child>.media {
+			.{$this->MainClass} .menu>.center>a:hover>:first-child>.media {
 				font-size: calc({$this->ButtonsSize}px * 0.6);
 				background-size: 60% 60%;
 				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
@@ -169,11 +170,10 @@ class RingTabs extends Module{
 		");
 	}
 
-	public function Get(){
+	public function GetInner(){
 		$count = count($this->Items);
-		if($count > 0)
-			return Convert::ToString(function(){
-				yield parent::Get();
+		if($count > 0) {
+				yield parent::GetInner();
 				$btns = [];
 				$tags = [];
 				loop($this->Items, function($v,$k,$i) use(&$btns, &$tags){
@@ -209,15 +209,16 @@ class RingTabs extends Module{
 					Struct::Division($tags,["class"=>"tabs"]),
 					["class"=>$this->TabsClass, "data-aos"=>"zoom-in", "data-aos-duration"=>"1500"]
 				);
-			});
+			}
 		else return null;
 	}
 
 	public function GetScript(){
-		return parent::GetScript().(count($this->Items) > 0? Struct::Script("
+		yield parent::GetScript();
+		yield (count($this->Items) > 0? Struct::Script("
 			_(function(){
-				".(isValid($this->Path)?"_('.{$this->Name} .menu>.center:before').click(function () { load('{$this->Path}'); });":"")."
-				const bselector = '.{$this->Name} .menu>.center>a';
+				".(isValid($this->Path)?"_('.{$this->MainClass} .menu>.center:before').click(function () { load('{$this->Path}'); });":"")."
+				const bselector = '.{$this->MainClass} .menu>.center>a';
 
 				const buttons = _(bselector);
 				const count = buttons.length;

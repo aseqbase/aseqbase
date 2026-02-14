@@ -15,10 +15,10 @@ class Members extends Module
     public function GetStyle()
     {
         return Struct::Style("
-            .{$this->Name} .items {
+            .{$this->MainClass} .items {
                 gap: var(--size-1);
             }
-            .{$this->Name} .teammember {
+            .{$this->MainClass} .teammember {
                 background-color: var(--back-color) var(--overlay-url-0);
                 background-size: 100% auto;
                 text-align: center;
@@ -31,19 +31,19 @@ class Members extends Module
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
-            .{$this->Name} .teammember:hover {
+            .{$this->MainClass} .teammember:hover {
                 background-color: var(--back-color-input);
                 box-shadow: var(--shadow-2);
                 border: var(--border-1) var(--fore-color-input);
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
-            .{$this->Name} .teammember .image {
+            .{$this->MainClass} .teammember .image {
                 overflow: visible;
                 text-align: center;
             }
 
-            .{$this->Name} .teammember div.image img {
+            .{$this->MainClass} .teammember div.image img {
                 background-color: var(--back-color);
                 border-radius: 100%;
                 width: 200px;
@@ -53,35 +53,35 @@ class Members extends Module
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
-            .{$this->Name} .teammember:hover div.image img {
+            .{$this->MainClass} .teammember:hover div.image img {
                 background-color: var(--back-color-input);
                 border: var(--border-1) var(--fore-color-input);
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
-            .{$this->Name} .teammember .title {
+            .{$this->MainClass} .teammember .title {
                 text-align: center;
                 margin-top: 30px !important;
                 margin-bottom: 30px !important;
             }
 
-            .{$this->Name} .teammember .title * {
+            .{$this->MainClass} .teammember .title * {
                 font-size: var(--size-1);
                 margin: -5px !important;
             }
 
-            .{$this->Name} .teammember .title div {
+            .{$this->MainClass} .teammember .title div {
                 font-size: var(--size-2);
                 font-size: 150%;
             }
 
-            .{$this->Name} .teammember .features {
+            .{$this->MainClass} .teammember .features {
                 text-align: center;
                 margin-top: 10px;
                 margin-bottom: 10px;
             }
 
-            .{$this->Name} .teammember .features div {
+            .{$this->MainClass} .teammember .features div {
                 background-color: var(--back-color);
                 border-radius: var(--radius-2);
                 border: var(--border-1) var(--fore-color-output);
@@ -90,36 +90,36 @@ class Members extends Module
                 display: inline-block;
             }
 
-            .{$this->Name} .teammember .list-group {
+            .{$this->MainClass} .teammember .list-group {
                 margin: 2vmax 3vmax;
                 border: none;
             }
 
-            .{$this->Name} .teammember .list-item {
+            .{$this->MainClass} .teammember .list-item {
                 background-color: transparent;
                 padding: 1vmin 0px;
                 margin: initial;
                 border: none;
             }
 
-            .{$this->Name} .teammember .list-item a {
+            .{$this->MainClass} .teammember .list-item a {
                 text-wrap: wrap;
                 overflow-wrap: anywhere;
             }
 
-            .{$this->Name} .teammember .badge {
+            .{$this->MainClass} .teammember .badge {
                 font-size: inherit;
                 font-weight: normal;
                 background-color: var(--back-color);
                 color: var(--fore-color);
             }
 
-            .{$this->Name} .teammember .badge.main {
+            .{$this->MainClass} .teammember .badge.main {
                 background-color: var(--fore-color);
                 color: var(--back-color);
             }
 
-            .{$this->Name} .teammember .badge:hover {
+            .{$this->MainClass} .teammember .badge:hover {
                 font-weight: bold;
                 background-color: var(--back-color-output);
                 color: var(--fore-color-output);
@@ -127,7 +127,7 @@ class Members extends Module
         ");
     }
 
-    public function Get()
+    public function GetInner()
     {
         $menu = $this->Items;
         $count = count($menu);

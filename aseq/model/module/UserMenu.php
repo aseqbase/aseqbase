@@ -21,15 +21,16 @@ class UserMenu extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Struct::Style("
-			.{$this->Name} .menu{
+        yield parent::GetStyle();
+        yield Struct::Style("
+			.{$this->MainClass} .menu{
 				overflow: hidden;
 			}
-			.{$this->Name} .menu .media{
+			.{$this->MainClass} .menu .media{
 				width: 100%;
 				aspect-ratio: 1;
 			}
-			.{$this->Name} .sub-items{
+			.{$this->MainClass} .sub-items{
 				display: none;
 				position: absolute;
 				top: auto;
@@ -49,12 +50,12 @@ class UserMenu extends Module
 				z-index: 9;
             	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-2)") . "
 			}
-			.{$this->Name} .sub-items .name{
+			.{$this->MainClass} .sub-items .name{
 				background-color: var(--fore-color-output);
 				color: var(--back-color-output);
 				" . \MiMFa\Library\Style::UniversalProperty("word-wrap", "break-word") . "
 			}
-			.{$this->Name} .sub-items .bio>:not(html,head,body,style,script,link,meta,title){
+			.{$this->MainClass} .sub-items .bio>:not(html,head,body,style,script,link,meta,title){
             	font-size: 80%;
 				opacity: 0.8;
 				background-color: var(--back-color-input);
@@ -64,7 +65,7 @@ class UserMenu extends Module
 				padding: var(--size-0) var(--size-1);
 				" . \MiMFa\Library\Style::UniversalProperty("word-wrap", "break-word") . "
 			}
-			.{$this->Name} .sub-items :is(.link, .button):not(.name){
+			.{$this->MainClass} .sub-items :is(.link, .button):not(.name){
             	width: 100%;
             	text-align: initial;
             	padding: calc(var(--size-0) / 2) var(--size-1);
@@ -72,13 +73,13 @@ class UserMenu extends Module
 				align-content: center;
 				justify-content: space-between;
 			}
-			.{$this->Name}:hover .sub-items{
+			.{$this->MainClass}:hover .sub-items{
             	display: grid;
             	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-2)") . "
 			}
 		");
 	}
-	public function Get()
+	public function GetInner()
 	{
 		if ($this->Items == null) {
 			if (!\_::$User->HasAccess(\_::$User->UserAccess))
@@ -117,6 +118,6 @@ class UserMenu extends Module
 							yield $item;
 				}, ["class" => "sub-items"]) . $this->GetContent();
 		}
-		return parent::Get();
+		return parent::GetInner();
 	}
 }

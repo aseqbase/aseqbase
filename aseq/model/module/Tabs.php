@@ -53,13 +53,14 @@ class Tabs extends Module
 
     public function GetStyle()
     {
-        return parent::GetStyle() . Struct::Style("
-        .$this->Name>.tab-titles>.tab-title>:is(*,*:hover){border:none; outline:none;}
-        .$this->Name>.tab-titles>.tab-title{display:inline-block; padding:calc(var(--size-1) / 5) calc(var(--size-1) / 2); border-bottom: var(--border-1) #8885;}
-        .$this->Name>.tab-titles>.tab-title.active{border: var(--border-1) #8888; border-bottom: none;}
+        yield parent::GetStyle();
+        yield Struct::Style("
+        .$this->MainClass>.tab-titles>.tab-title>:is(*,*:hover){border:none; outline:none;}
+        .$this->MainClass>.tab-titles>.tab-title{display:inline-block; padding:calc(var(--size-1) / 5) calc(var(--size-1) / 2); border-bottom: var(--border-1) #8885;}
+        .$this->MainClass>.tab-titles>.tab-title.active{border: var(--border-1) #8888; border-bottom: none;}
         ");
     }
-    public function Get()
+    public function GetInner()
     {
         return Struct::Division(
                 $this->PrependTitles .
@@ -70,7 +71,7 @@ class Tabs extends Module
                         $tooltip = $this->AllowTitlesDescription?(get($v, "Description")??$this->Description):null;
                         return Struct::Button(
                             ($this->AllowTitlesLabel?Struct::Span(get($v, 'Title')??$this->Title):null) . ($this->AllowTitlesImage ? Struct::Media("", getBetween($v, "Image", "Icon")??$this->Image) : ""),
-                            getBetween($v, "Path", "Action")??"{$this->Name}_openTab(this, '$this->Name-tab-$i')",
+                            getBetween($v, "Path", "Action")??"{$this->MainClass}_openTab(this, '$this->MainClass-tab-$i')",
                             $name?["name"=>$name]:[], 
                             get($v, "Attributes")??[],
                             ["class" => "tab-title $this->TitleClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " active" : "")]). 
@@ -92,7 +93,7 @@ class Tabs extends Module
                                 ($this->AllowImage?Struct::Media(get($v, 'Title')??$this->Title, getBetween($v, "Image", "Icon")??$this->Image, ["class" => "image"]):"") .
                                 ($this->AllowTitle?Struct::Heading1(get($v, 'Title')??$this->Title, ["class" => "title"]):"") .
                                 Struct::Division(Convert::ToString($content), ["class" => "content"]);
-                        }return Struct::Element($v, "div", $name?["name"=>$name]:[], ["class" => "tab-content $this->ContentClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " view show" : " view hide"), "id" => "$this->Name-tab-$i"]);
+                        }return Struct::Element($v, "div", $name?["name"=>$name]:[], ["class" => "tab-content $this->ContentClass" . ($k === $this->SelectedIndex || $i === $this->SelectedIndex ? " view show" : " view hide"), "id" => "$this->MainClass-tab-$i"]);
                     }
                 )). $this->AppendContents,
                 ["class" => "tab-contents $this->ContentsClass"]
@@ -100,12 +101,13 @@ class Tabs extends Module
     }
     public function GetScript()
     {
-        return parent::GetScript() . Struct::Script("function {$this->Name}_openTab({$this->Name}_tab, {$this->Name}_tabId){
-            document.querySelectorAll('.$this->Name>.tab-contents>.tab-content').forEach(content => content.classList.remove('show') & content.classList.add('hide'));
-            document.querySelectorAll('.$this->Name>.tab-titles>.tab-title').forEach(title => title.classList.remove('active'));
-            document.getElementById({$this->Name}_tabId).classList.remove('hide');
-            document.getElementById({$this->Name}_tabId).classList.add('show');
-            {$this->Name}_tab.classList.add('active');
+		yield parent::GetScript();
+		yield Struct::Script("function {$this->MainClass}_openTab({$this->MainClass}_tab, {$this->MainClass}_tabId){
+            document.querySelectorAll('.$this->MainClass>.tab-contents>.tab-content').forEach(content => content.classList.remove('show') & content.classList.add('hide'));
+            document.querySelectorAll('.$this->MainClass>.tab-titles>.tab-title').forEach(title => title.classList.remove('active'));
+            document.getElementById({$this->MainClass}_tabId).classList.remove('hide');
+            document.getElementById({$this->MainClass}_tabId).classList.add('show');
+            {$this->MainClass}_tab.classList.add('active');
         }");
     }
 }

@@ -29,31 +29,17 @@ library("Revise");
 class Base extends \ArrayObject
 {
 	/**
-	 * The name of the object
-	 * @internal
-	 * @var string|null
-	 */
-	public $Name = null;
-	/**
 	 * The main name of the object
 	 * @internal
 	 * @var string|null
 	 */
-	public $MainName = null;
+	public $Name = null;
 	/**
 	 * The main router of the object
 	 * @internal
 	 * @var Router
 	 */
 	public $Router = null;
-	/**
-	 * Additional Children of the object
-	 * @internal
-	 * @field collection
-	 * @var array<string|Base|callable>|Base|callable|string
-	 * @medium
-	 */
-	public $Children = null;
 	/**
 	 * This object is convertable to string and able to embed anywhere or not
 	 * @internal
@@ -69,13 +55,10 @@ class Base extends \ArrayObject
 	 */
 	public $Handled = 0;
 
-	function __construct($setDefaults = true, $setRevises = true)
+	function __construct()
 	{
-		$this->MainName = $this->Get_ClassName();
-		if ($setDefaults)
-			$this->Set_Defaults();
-		if ($setRevises)
-			\MiMFa\Library\Revise::Load($this);
+		$this->Name = $this->Get_ClassName();
+		\MiMFa\Library\Revise::Load($this);
 		$this->Router = (new Router())
 			->Get(fn(&$router) => $this->Get())
 			->Post(fn(&$router) => $this->Post())
@@ -87,21 +70,6 @@ class Base extends \ArrayObject
 			->Internal(fn(&$router) => $this->Internal())
 			->External(fn(&$router) => $this->External())
 			->Default(fn(&$router) => $this->Default());
-	}
-
-	public function New($setDefaults = true, $setRevises = true)
-	{
-		if ($setDefaults)
-			$this->Set_Defaults();
-		if ($setRevises)
-			\MiMFa\Library\Revise::Load($this);
-		return $this;
-	}
-
-	public function Set_Defaults()
-	{
-		$this->Name = \_::$Back->EncryptNames ? (substr($this->Get_Namespace(), 0, 1) . RandomString(10)) : ($this->Name ?? $this->MainName) . "_" . $this->Get_Namespace();
-		return $this;
 	}
 
 	public function Get_Class()
@@ -124,35 +92,6 @@ class Base extends \ArrayObject
 	{
 		$v = $this->Get_Namespaces();
 		return end($v);
-	}
-
-	public function AddChild($child)
-	{
-		if (is_null($this->Children))
-			$this->Children = array();
-		//if(!is_null($child)) $child = is_subclass_of($child,"Base")? function()use($child){ $child->ToString(); }:$child;
-		if (is_string($this->Children))
-			$this->Children .= MiMFa\Library\Convert::ToString($child);
-		else
-			array_push($this->Children, $child);
-		return true;
-	}
-	public function RemoveChild($child)
-	{
-		if (is_null($this->Children))
-			$this->Children = array();
-		//if(!is_null($child)) $child = is_subclass_of($child,"Base")? function() use($child){ $child->ToString(); }:$child;
-		if (is_string($this->Children)) {
-			$this->Children = str_replace(MiMFa\Library\Convert::ToString($child), "", $this->Children);
-			return true;
-		} else {
-			$key = array_search($child, $this->Children);
-			if ($key) {
-				unset($this->Children[$key]);
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public function Get()
@@ -198,7 +137,7 @@ class Base extends \ArrayObject
 
 	public function Handler($received = null)
 	{
-		return MiMFa\Library\Struct::Convert($received ?? $this->Children) . MiMFa\Library\Struct::Convert($this->__toArray());
+		return MiMFa\Library\Struct::Convert($received ?? $this->Items) . MiMFa\Library\Struct::Convert($this->__toArray());
 	}
 
 	/**

@@ -1,10 +1,12 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
 module("Image");
-class QRCodeBox extends Image{
-	public $AllowOrigin = true;
-	public $AllowContent = false;
-	public $Width = "100%";
-	public $Height = "100%";
+class QRCodeBox extends Image
+{
+    public $AllowOrigin = true;
+    public $AllowContent = false;
+    public $Width = "100%";
+    public $Height = "100%";
     public $Root = "https://api.qrserver.com/v1/create-qr-code/?data=";
 
     /**
@@ -17,13 +19,15 @@ class QRCodeBox extends Image{
         $this->Content = $content;
     }
 
-	public function Get(){
-		$this->Source = $this->Convert($this->Content);
-		return parent::Get().($this->AllowContent? $this->GetContent() : "");
+    public function GetInner()
+    {
+        $this->Source = $this->Convert($this->Content);
+        yield parent::GetScript();
+        yield ($this->AllowContent ? $this->GetContent() : "");
     }
-    
-	public function Convert($val){
-		return $this->Root.urlencode(\MiMFa\Library\Convert::ToString($val));
+
+    public function Convert($val)
+    {
+        return $this->Root . urlencode(\MiMFa\Library\Convert::ToString($val));
     }
 }
-?>

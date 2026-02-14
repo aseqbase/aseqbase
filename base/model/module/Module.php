@@ -2,6 +2,8 @@
 namespace MiMFa\Module;
 library("Style");
 library("Convert");
+
+use Generator;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
 use MiMFa\Library\Convert;
@@ -45,11 +47,11 @@ class Module extends \Base
       */
      public $Id = null;
      /**
-      * The custom name for the module
+      * The main class name for the module
       * @var enum-string
       * @small
       */
-     public $Name = null;
+     public $MainClass = null;
      /**
       * The custom classes for the module
       * @var string
@@ -80,27 +82,27 @@ class Module extends \Base
       * @var enum-string
       * @small
       */
-     public $Tag = "div";
+     public string|null $TagName = "div";
      /**
       * The specific tag name to add Title
       * @var enum-string
       * @small
       */
-     public $TitleTag = "h3";
+     public string|null $TitleTagName = "h3";
      public $TitleClass = "title";
      /**
       * The specific tag name to add Description
       * @var enum-string
       * @small
       */
-     public $DescriptionTag = "div";
+     public string|null $DescriptionTagName = "div";
      public $DescriptionClass = "description";
      /**
       * The specific tag name to add Content
       * @var enum-string
       * @small
       */
-     public $ContentTag = null;
+     public string|null $ContentTagName = null;
      public $ContentClass = "content";
      /**
       * Attached Attributes of the main tag of this module
@@ -114,19 +116,32 @@ class Module extends \Base
       * @medium
       */
      public $Attachments = null;
+	/**
+	 * Additional Children of the object
+	 * @internal
+	 * @field collection
+	 * @var mixed
+	 */
+	public $Items = null;
      /**
       * The Module Style
       * @var Style
       */
      public null|string|Style $Style = null;
      /**
-      * To custom Styles
+      * To replace your custom Styles instead of defaults
       * @var string
       * @code CSS
       */
      public $Styles = null;
      /**
-      * To custom Scripts
+      * To replace your custom Structs instead of defaults
+      * @var string
+      * @code CSS
+      */
+     public $Structs = null;
+     /**
+      * To replace your custom Scripts instead of defaults
       * @var string
       * @code JS
       */
@@ -168,40 +183,150 @@ class Module extends \Base
      public $Visual = true;
      public $Printable = true;
 
+
      public function __construct()
      {
           parent::__construct();
-          $this->Router->On()->Get()->Unset()->Route(fn() => Convert::ToString(function () {
-               if ($this->Styles === null) yield $this->GetStyle();
-               elseif ($this->Styles) yield Struct::Style($this->Styles);
-               yield $this->GetOpenTag() . $this->Get() . $this->GetCloseTag();
-               if ($this->Scripts === null) yield $this->GetScript();
-               elseif ($this->Scripts) yield Struct::Script($this->Scripts);
-          }));
+		$this->MainClass = \_::$Back->EncryptNames ? (substr($this->Get_Namespace(), 0, 1) . RandomString(10)) : ($this->MainClass ?? $this->Name) . "_" . $this->Get_Namespace();
+     }
+
+
+     public function Get()
+     {
+          if ($this->Styles === null)
+               yield $this->GetStyle();
+          elseif ($this->Styles)
+               yield Struct::Style($this->Styles);
+          if ($this->Structs === null)
+               yield $this->GetStruct();
+          elseif ($this->Structs)
+               yield Struct::Convert($this->Structs);
+          if ($this->Scripts === null)
+               yield $this->GetScript();
+          elseif ($this->Scripts)
+               yield Struct::Script($this->Scripts);
+     }
+
+     /**
+      * Get the default module Styles
+      * @return Generator|string|null
+      */
+     public function GetStyle()
+     {
+          return null;
+     }
+     /**
+      * Get the default module Struct
+      * @return Generator|string|null
+      */
+     public function GetStruct()
+     {
+          yield $this->GetBefore();
+          yield $this->GetInner();
+          yield $this->GetAfter();
+     }
+     /**
+      * Get the default module Scripts
+      * @return Generator|string|null
+      */
+     public function GetScript()
+     {
+          return null;
      }
 
      /**
       * Get the Open tag of the element
-      * @param string|null The specific TagName, set null for default
+      * @return string|null
       */
-     public function GetOpenTag($tag = null)
+     public function GetBefore()
      {
           $st = null;
-          if ($this->Style) $st = is_string($this->Style) ? $this->Style : $this->Style->Get();
-          if ($tag = $tag ?? $this->Tag) {
+          if ($this->Style)
+               $st = is_string($this->Style) ? $this->Style : $this->Style->Get();
+          if ($this->TagName) {
                $attr = Struct::Attributes($this->GetDefaultAttributes(), $this->Attachments, $inners, $outers);
-               return join("", [$outers, "<$tag ", $attr, $st ? " style=\"{$st}\">" : ">", $inners]);
-          } elseif ($st) return "<style>.{$this->Name}{ $st }</style>";
+               return join("", [$outers, "<{$this->TagName} ", $attr, $st ? " style=\"{$st}\">" : ">", $inners]);
+          } elseif ($st)
+               return "<style>.{$this->MainClass}{ $st }</style>";
           return null;
      }
      /**
-      * Get the Close tag of the element
-      * @param string|null The specific TagName, set null for default
+      * Get all the HTML document and elements of the Module
+      * @return Generator|string|null
       */
-     public function GetCloseTag($tag = null)
+     public function GetInner()
      {
-          if ($tag = $tag ?? $this->Tag) return "</$tag>" . Convert::ToString($this->Attachments);
+          yield $this->GetTitle();
+          yield $this->GetDescription();
+          yield $this->GetContent();
+     }
+     /**
+      * Get the Close tag of the element
+      * @return string|null
+      */
+     public function GetAfter()
+     {
+          if ($this->TagName)
+               return "</{$this->TagName}>" . Convert::ToString($this->Attachments);
           return null;
+     }
+
+     /**
+      * @return string|null
+      */
+     public function GetTitle($args = [])
+     {
+          return Convert::ToString(function () use ($args) {
+               $args = Struct::Attributes([["class" => $this->TitleClass], $args], $atcm, $inners, $outers);
+               if (isValid($this->Title)) {
+                    yield (isValid($this->TitleTagName) ? join("", [$outers, "<", $this->TitleTagName, " $args>", $inners]) : ($inners . $outers));
+                    if (is_string($this->Title))
+                         yield __($this->Title);
+                    elseif (is_callable($this->Title))
+                         yield ($this->Title)($args);
+                    else
+                         yield $this->Title;
+                    yield (isValid($this->TitleTagName) ? join("", ["</", $this->TitleTagName . ">"]) : "");
+               }
+          });
+     }
+     /**
+      * @return string|null
+      */
+     public function GetDescription($args = [])
+     {
+          return Convert::ToString(function () use ($args) {
+               $args = Struct::Attributes([["class" => $this->DescriptionClass], $args], $atcm, $inners, $outers);
+               if (isValid($this->Description)) {
+                    yield (isValid($this->DescriptionTagName) ? join("", [$outers, "<", $this->DescriptionTagName, " $args>", $inners]) : ($inners . $outers));
+                    if (is_string($this->Description))
+                         yield __($this->Description);
+                    elseif (is_callable($this->Description))
+                         yield ($this->Description)($args);
+                    else
+                         yield $this->Description;
+                    yield (isValid($this->DescriptionTagName) ? join("", ["</" . $this->DescriptionTagName . ">"]) : "");
+               }
+          });
+     }
+     /**
+      * @return string|null
+      */
+     public function GetContent($args = [])
+     {
+          return Convert::ToString(function () use ($args) {
+               $args = Struct::Attributes([["class" => $this->ContentClass], $args], $atcm, $inners, $outers);
+               if (isValid($this->Content)) {
+                    yield (isValid($this->ContentTagName) ? join("", [$outers, "<", $this->ContentTagName, " $args>", $inners]) : ($inners . $outers));
+                    if (is_string($this->Content))
+                         yield __(Struct::Convert($this->Content));
+                    elseif (is_callable($this->Content))
+                         yield ($this->Content)($args);
+                    else
+                         yield $this->Content;
+                    yield (isValid($this->ContentTagName) ? join("", ["</", $this->ContentTagName, ">"]) : "");
+               }
+          });
      }
 
      /**
@@ -212,7 +337,7 @@ class Module extends \Base
      {
           return [
                ($this->Id ? ["id" => $this->Id] : []),
-               ["class" => $this->Name . ' ' . $this->Class . $this->GetScreenClass() . ($this->Printable?'':' view unprintable')],
+               ["class" => $this->MainClass . ' ' . $this->Class . $this->GetScreenClass() . ($this->Printable ? '' : ' view unprintable')],
                (isEmpty($this->Attributes) ? [] : (is_array($this->Attributes) ? $this->Attributes : [Convert::ToString($this->Attributes, " ", "{0}={1} ")])),
                ($this->__toArray())
           ];
@@ -229,79 +354,7 @@ class Module extends \Base
                (isValid($this->HideFromScreenSize) ? " view " . $this->HideFromScreenSize . "-hide" : "");
      }
 
-     /**
-      * Get the default module Styles
-      */
-     public function GetStyle()
-     {
-          return null;
-     }
-     /**
-      * Get the default module Scripts
-      */
-     public function GetScript()
-     {
-          return null;
-     }
 
-     public function GetTitle($attrs = [])
-     {
-          return Convert::ToString(function () use ($attrs) {
-               $attrs = Struct::Attributes([["class"=> $this->TitleClass], $attrs], $atcm, $inners, $outers);
-               if (isValid($this->Title)) {
-                    yield (isValid($this->TitleTag) ? join("",[$outers,"<", $this->TitleTag , " $attrs>",$inners]) : ($inners.$outers));
-                    if (is_string($this->Title))
-                         yield __($this->Title);
-                    elseif (is_callable($this->Title))
-                         yield ($this->Title)($attrs);
-                    else
-                         yield $this->Title;
-                    yield (isValid($this->TitleTag) ? join("", ["</" , $this->TitleTag . ">"]) : "");
-               }
-          });
-     }
-     public function GetDescription($attrs = [])
-     {
-          return Convert::ToString(function () use ($attrs) {
-               $attrs = Struct::Attributes([["class"=> $this->DescriptionClass], $attrs], $atcm, $inners, $outers);
-               if (isValid($this->Description)) {
-                    yield (isValid($this->DescriptionTag) ? join("", [$outers, "<" , $this->DescriptionTag, " $attrs>", $inners]) : ($inners.$outers));
-                    if (is_string($this->Description))
-                         yield __($this->Description);
-                    elseif (is_callable($this->Description))
-                         yield ($this->Description)($attrs);
-                    else
-                         yield $this->Description;
-                    yield (isValid($this->DescriptionTag) ? join("", ["</" . $this->DescriptionTag . ">"]) : "");
-               }
-          });
-     }
-     public function GetContent($attrs = [])
-     {
-          return Convert::ToString(function () use ($attrs) {
-               $attrs = Struct::Attributes([["class"=> $this->ContentClass], $attrs], $atcm, $inners, $outers);
-               if (isValid($this->Content)) {
-                    yield (isValid($this->ContentTag) ? join("", [$outers, "<" , $this->ContentTag , " $attrs>", $inners]) : ($inners.$outers));
-                    if (is_string($this->Content))
-                         yield __(Struct::Convert($this->Content));
-                    elseif (is_callable($this->Content))
-                         yield ($this->Content)($attrs);
-                    else
-                         yield $this->Content;
-                    yield (isValid($this->ContentTag) ? join("", ["</", $this->ContentTag, ">"]) : "");
-               }
-               yield Convert::ToString($this->Children);
-          });
-     }
-
-     /**
-      * Get all the HTML document and elements of the Module
-      * @return string
-      */
-     public function Get()
-     {
-          return join("", [$this->GetTitle(), $this->GetDescription(), $this->GetContent()]);
-     }
      public function Handler($received = null)
      {
           return null;
@@ -313,7 +366,7 @@ class Module extends \Base
           $analyze = \_::$Front->AllowTextAnalyzing;
           \_::$Front->AllowTranslate = $translate && $this->AllowTranslate;
           \_::$Front->AllowTextAnalyzing = $analyze && $this->AllowTextAnalyzing;
-          $output = $this->BeforeHandle() . parent::Handle() . $this->AfterHandle();
+          $output = Convert::ToString([$this->BeforeHandle(), parent::Handle(), $this->AfterHandle()]);
           \_::$Front->AllowTranslate = $translate;
           \_::$Front->AllowTextAnalyzing = $analyze;
           return $output;
@@ -360,20 +413,49 @@ class Module extends \Base
           return $this->Handle();
      }
 
-
      public function ToString()
      {
           ob_start();
           $output = null;
-          if ($this->Rendered || $this->Handled){
+          if ($this->Rendered || $this->Handled) {
                if ($this->Visual) {
                     response($this->ReHandle());
                     $this->Rendered++;
-               }
-               else $output = $this->ReHandle();
-          }
-          else
+               } else
+                    $output = $this->ReHandle();
+          } else
                $output = $this->Render();
           return ob_get_clean() ?? $output;
      }
+
+
+	public function AddItem($child)
+	{
+		if (is_null($this->Items))
+			$this->Items = array();
+		//if(!is_null($child)) $child = is_subclass_of($child,"Base")? function()use($child){ $child->ToString(); }:$child;
+		if (is_string($this->Items))
+			$this->Items .= Convert::ToString($child);
+		else
+			array_push($this->Items, $child);
+		return true;
+	}
+	public function RemoveItem($child)
+	{
+		if (is_null($this->Items))
+			$this->Items = array();
+		//if(!is_null($child)) $child = is_subclass_of($child,"Base")? function() use($child){ $child->ToString(); }:$child;
+		if (is_string($this->Items)) {
+			$this->Items = str_replace(Convert::ToString($child), "", $this->Items);
+			return true;
+		} else {
+			$key = array_search($child, $this->Items);
+			if ($key) {
+				unset($this->Items[$key]);
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

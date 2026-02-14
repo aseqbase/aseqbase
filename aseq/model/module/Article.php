@@ -16,8 +16,9 @@ class Article extends Content
 
      public function GetStyle()
      {
-          return parent::GetStyle() . Struct::Style("
-          .{$this->Name}{
+          yield parent::GetStyle();
+          yield  Struct::Style("
+          .{$this->MainClass}{
                position: relative;
                inset: 0;
                display: contents;
@@ -25,14 +26,14 @@ class Article extends Content
                width: 100%;
                width: -webkit-fill-available;
           }
-          .{$this->Name} .heading{
+          .{$this->MainClass} .heading{
                text-align: start;
           }
-          .{$this->Name} .header.cover{
+          .{$this->MainClass} .header.cover{
                position: relative;
                width: 100%;
           }
-          ".($this->AllowShade?".{$this->Name} .header.cover>.media::after{
+          ".($this->AllowShade?".{$this->MainClass} .header.cover>.media::after{
                content: '';
                display: block;
                width: 100%;
@@ -44,37 +45,37 @@ class Article extends Content
                left: 0;
                z-index: 0;
           }":"")."
-          .{$this->Name} .header.cover :is(.title, .description, .title a:not(.button), .description a:not(.button)) {
+          .{$this->MainClass} .header.cover :is(.title, .description, .title a:not(.button), .description a:not(.button)) {
                color: var(--color-white);
           }
-          .{$this->Name} .header.cover>.division{
+          .{$this->MainClass} .header.cover>.division{
                position: initial !important;
           }
-          .{$this->Name} .header.cover>*>.container{
-               padding: max(calc(4 * var(--size-max)), 150px) var(--size-3) var(--size-0);
+          .{$this->MainClass} .header.cover>*>.container{
+               padding: 30vh var(--size-3) var(--size-0);
           }
-          .{$this->Name} .header.cover>*>.container *{
+          .{$this->MainClass} .header.cover>*>.container *{
                text-align: start;
           }
-          .{$this->Name} .header.cover .title{
+          .{$this->MainClass} .header.cover .title{
                margin-bottom: 0px;
           }
-          .{$this->Name} .header.cover .description{
+          .{$this->MainClass} .header.cover .description{
                margin-top: var(--size-0);
                font-size: var(--size-1);
                font-weight: normal;
                max-width: max(50%, 500px);
                text-align: start;
           }
-          .{$this->Name} .header.cover .description *{
+          .{$this->MainClass} .header.cover .description *{
                margin: 0px;
                text-align: start;
           }
-          .{$this->Name} .content{
+          .{$this->MainClass} .content{
                padding: var(--size-max) var(--size-3);
                margin-bottom: var(--size-max);
           }
-          .{$this->Name} .special{
+          .{$this->MainClass} .special{
                background-color: var(--back-color-special);
                color: var(--fore-color-special);
                width: 100%;
@@ -107,11 +108,12 @@ class Article extends Content
                     $this->GetButtons(),
                     ["class" => "title"],
                     $attributes
-               ) . Struct::Rack(
-                              $this->AllowDescription = ($this->AllowDescription ? $this->GetExcerpt() : null),
-                              ["class" => "description"],
-                              $attributes
-                         )),
+               ) . ($this->AllowDescription && $this->Description? Struct::Rack(
+                         $this->Description,
+                         ["class" => "description"],
+                         $attributes
+                    ) : "")
+               ),
                $p_image,
                [
                     "class" => "header"
@@ -139,8 +141,9 @@ class Article extends Content
      }
      
      public function GetScript(){
-          return parent::GetScript().Struct::Script("
-               _('.{$this->Name}>:not(.header, .container-fluid, .special)').addClass('container');
+		yield parent::GetScript();
+		yield Struct::Script("
+               _('.{$this->MainClass}>:not(.header, .container-fluid, .special)').addClass('container');
           ");
      }
 }

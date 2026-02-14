@@ -30,7 +30,7 @@ class Cards extends Collection
     public function GetStyle()
     {
         return Struct::Style("
-            .{$this->Name} .items .item {
+            .{$this->MainClass} .items .item {
                 background-color: var(--back-color)99;
                 color: var(--fore-color);
                 font-size: var(--size-1);
@@ -43,7 +43,7 @@ class Cards extends Collection
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
-            .{$this->Name} .items .item:hover {
+            .{$this->MainClass} .items .item:hover {
                 background-color: var(--back-color-input);
                 color: var(--fore-color-input);
                 border-radius: var(--radius-2);
@@ -51,7 +51,7 @@ class Cards extends Collection
                 " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . ";
             }
 
-            .{$this->Name} .items .item .image {
+            .{$this->MainClass} .items .item .image {
                 margin: 2vmax;
                 overflow: hidden;
                 height: 10%;
@@ -60,13 +60,13 @@ class Cards extends Collection
                 max-width: 100%;
             }
 
-            .{$this->Name} .items .item .image img {
+            .{$this->MainClass} .items .item .image img {
                 width: auto !important;
                 width: 100%;
                 max-width: 100%;
             }
 
-            .{$this->Name} .items .item .details {
+            .{$this->MainClass} .items .item .details {
                 background-color: var(--back-color);
                 color: var(--fore-color);
                 text-align: left;
@@ -74,20 +74,20 @@ class Cards extends Collection
                 margin-bottom: 0px;
             }
 
-            .{$this->Name} .items .item .icon {
+            .{$this->MainClass} .items .item .icon {
                 padding: 20px;
                 margin-bottom: 3vh;
                 border: var(--border-0) var(--fore-color);
                 border-radius: 50%;
             }
 
-            .{$this->Name} .items .item .btn {
+            .{$this->MainClass} .items .item .btn {
                 margin: 2vmax 5px;
             }
         ");
     }
 
-    public function Get()
+    public function GetInner()
     {
         module("Image" );
         $img = new \MiMFa\Module\Image();

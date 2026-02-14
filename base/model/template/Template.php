@@ -91,12 +91,11 @@ class Template extends \Base
      */
     public $Footer = null;
 
-    public function __construct($setDefaults = true, $setRevises = true)
+    public function __construct()
     {
-        parent::__construct($setDefaults, $setRevises);
+        parent::__construct();
         component("Global");
         component("Live");
-		\MiMFa\Library\Revise::Load($this);
     }
     public function Handler($received = null)
     {
@@ -337,11 +336,6 @@ class Template extends \Base
     }
     public function RenderContent()
     {
-        foreach ($this->Children ?? [] as $key => $value)
-            if (is_string($key))
-                response(Struct::Section($value, ["Id" => $key]));
-            else
-                response($value);
     }
     public function RenderFooter()
     {

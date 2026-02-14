@@ -13,7 +13,7 @@ use MiMFa\Library\Style;
  */
 class Map extends Module
 {
-	public $Tag = "div";
+	public string|null $TagName = "div";
 	public $Class = "be";
 	public $Local = true;
 	public $StyleSource = "https://unpkg.com/leaflet/dist/leaflet.css";
@@ -76,7 +76,7 @@ class Map extends Module
 	 * 		["Type"=>"marker", "Location"=>[latitude2, longitude2], "Popup"=>"It is here...", "Icon"=>"map-marker"]
 	 * ]
 	 */
-	public array $Items = [];
+	public $Items = [];
 	/**
 	 * The default marker ["Location"=>[latitude1, longitude1], "Popup"=>"It is here...", "Icon"=>"map-marker", "Active"=>true]
 	 */
@@ -325,20 +325,21 @@ class Map extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Struct::Style(
+        yield parent::GetStyle();
+        yield Struct::Style(
 			($this->Fill ? "
-				*:has(.{$this->Name}){
+				*:has(.{$this->MainClass}){
 				    display: flex;
     				flex-direction: column;
 					padding: 0px;
 					margin: 0px;
 				}
-				.{$this->Name}{
+				.{$this->MainClass}{
 					position: relative;
 					flex-grow: 1;
 				}
 			" : "") .
-			".{$this->Name}{
+			".{$this->MainClass}{
 				background-color: var(--back-color-input);
 				color: var(--fore-color-input);
 				display: flex;
@@ -348,14 +349,14 @@ class Map extends Module
 				text-align: center;
 			}
 
-			.{$this->Name} .custom-icon{
+			.{$this->MainClass} .custom-icon{
 				background-color: transparent;
 				border: none;
 				outline: none;
 				font-size: var(--size-0);
 			}
 
-			.{$this->Name} :is(.leaflet-popup-content-wrapper, .leaflet-popup-tip){
+			.{$this->MainClass} :is(.leaflet-popup-content-wrapper, .leaflet-popup-tip){
 				background-color: var(--back-color);
 				color: var(--fore-color);
 				font-family: var(--font), var(--font-input), var(--font-output);
@@ -365,29 +366,29 @@ class Map extends Module
 				border-radius: var(--radius-1);
 				box-shadow: var(--shadow-4);
 			}
-			.{$this->Name} .leaflet-control{
+			.{$this->MainClass} .leaflet-control{
 				border: none;
 				outline: none;
 				background-color: transparent;
 				color: var(--fore-color);
 				font-size: var(--size-0);
 			}
-			.{$this->Name} .leaflet-control h3{
+			.{$this->MainClass} .leaflet-control h3{
 				margin: 0px;
 				font-size: var(--size-1);
 			}
-			.{$this->Name} .leaflet-control.leaflet-control-attribution{
+			.{$this->MainClass} .leaflet-control.leaflet-control-attribution{
 				opacity: 0.25;
 				background-color: transparent;
 			}
-			.{$this->Name} .leaflet-control:not(.leaflet-control-attribution) :is(div, section, ul, li){
+			.{$this->MainClass} .leaflet-control:not(.leaflet-control-attribution) :is(div, section, ul, li){
 				background-color: var(--back-color-input);
 				color: var(--fore-color-input);
 				border: none;
 				outline: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .leaflet-control:not(.leaflet-control-attribution)>:is(button, [role=button], a){
+			.{$this->MainClass} .leaflet-control:not(.leaflet-control-attribution)>:is(button, [role=button], a){
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				border: var(--border-1) var(--fore-color-output);
@@ -400,22 +401,22 @@ class Map extends Module
 				text-align: center;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .leaflet-control:not(.leaflet-control-attribution)>:is(button, [role=button], a):hover{
+			.{$this->MainClass} .leaflet-control:not(.leaflet-control-attribution)>:is(button, [role=button], a):hover{
 				background-color: var(--back-color-special-output);
 				color: var(--fore-color-special-output);
 				border-color: var(--fore-color-special-output);
 				text-decoration: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .leaflet-control-layers-toggle{
+			.{$this->MainClass} .leaflet-control-layers-toggle{
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				border-color: var(--fore-color-special-output);
 			}
-			.{$this->Name} .leaflet-bar-part>.button-state{
+			.{$this->MainClass} .leaflet-bar-part>.button-state{
 				line-height: var(--size-5);
 			}
-			.{$this->Name} .leaflet-control-layers-list {
+			.{$this->MainClass} .leaflet-control-layers-list {
 				box-shadow: var(--shadow-5);
 				border-radius: var(--radius-1);
 				border: var(--border-1) var(--fore-color-output);
@@ -427,12 +428,12 @@ class Map extends Module
 		);
 	}
 
-	public function Get()
+	public function GetInner()
 	{
-		return Struct::Division(parent::Get(), ["class" => "top"]) .
+		return Struct::Division(parent::GetInner(), ["class" => "top"]) .
 			Struct::Division(
 				Struct::Division([
-					($this->MyLocationButton ? Struct::Button($this->MyLocationButton, "{$this->Name}.locate({ setView: true, maxZoom: $this->Zoom })", ["class" => "my-location"]) : ""),
+					($this->MyLocationButton ? Struct::Button($this->MyLocationButton, "{$this->MainClass}.locate({ setView: true, maxZoom: $this->Zoom })", ["class" => "my-location"]) : ""),
 				], attributes: ["class" => "control-box"]) .
 				Struct::Division("", ["class" => "message"])
 				,
@@ -452,15 +453,15 @@ class Map extends Module
 	}
 	public function InitializeScript()
 	{
-		return "{$this->Name}_Items = new Map();
-		const {$this->Name} = L.map('{$this->Id}', {zoomControl: false}).setView(" . Script::Convert($this->Location) . ", {$this->Zoom});
+		return "{$this->MainClass}_Items = new Map();
+		const {$this->MainClass} = L.map('{$this->Id}', {zoomControl: false}).setView(" . Script::Convert($this->Location) . ", {$this->Zoom});
 			defaultTailsFormat = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 			defaultTailsAttrs = {maxZoom: 19};
-			L.tileLayer(defaultTailsFormat, defaultTailsAttrs).addTo({$this->Name});
-		function {$this->Name}_MapColor(adjust=null,invert=null){
+			L.tileLayer(defaultTailsFormat, defaultTailsAttrs).addTo({$this->MainClass});
+		function {$this->MainClass}_MapColor(adjust=null,invert=null){
 			adjustattach = 'adjust';
 			invertattach = 'invert';
-			mc = document.querySelector('.{$this->Name} .leaflet-pane .leaflet-tile-pane');
+			mc = document.querySelector('.{$this->MainClass} .leaflet-pane .leaflet-tile-pane');
 			if (!adjust && !invert) mc.classList.remove('be');
 			else mc.classList.add('be');
 			if (adjust) mc.classList.add(adjustattach);
@@ -468,23 +469,23 @@ class Map extends Module
 			if (invert) mc.classList.add(invertattach);
 			else mc.classList.remove(invertattach);
 		}
-		" . ($this->Invert ? "{$this->Name}_MapColor(false, true);" : "");
+		" . ($this->Invert ? "{$this->MainClass}_MapColor(false, true);" : "");
 	}
 	public function Events_InitializeScript()
 	{
 		return join(PHP_EOL, [
-			($this->LocatePopup || $this->LocateScriptFunction ? "{$this->Name}.on('locationfound', function (e, err) {
-				" . ($this->LocateScriptFunction ? "return ($this->LocateScriptFunction)({$this->Name}, e, null)" : ($this->LocatePopup ? "L.circle(e.latlng, e.accuracy).addTo({$this->Name})" : "")) .
+			($this->LocatePopup || $this->LocateScriptFunction ? "{$this->MainClass}.on('locationfound', function (e, err) {
+				" . ($this->LocateScriptFunction ? "return ($this->LocateScriptFunction)({$this->MainClass}, e, null)" : ($this->LocatePopup ? "L.circle(e.latlng, e.accuracy).addTo({$this->MainClass})" : "")) .
 				($this->LocatePopup ? "?.bindPopup(" . Script::Convert(__($this->LocatePopup)) . ").openPopup();" : ";") . "
 			});" : ""),
 			($this->SelectedLocationPopup || $this->SelectedAddressPopup || $this->SelectedLocationScriptFunction || $this->SelectedAddressScriptFunction ? "
 			let marker;
-			{$this->Name}.on('click', function (e, err) {
+			{$this->MainClass}.on('click', function (e, err) {
 				const {lat,lng} = e.latlng;
 				if (marker) marker.setLatLng(e.latlng);
-				else marker = L.marker(e.latlng).addTo({$this->Name});
+				else marker = L.marker(e.latlng).addTo({$this->MainClass});
 				" . ($this->SelectedLocationPopup ? "marker.bindPopup(" . Script::Convert(isStatic($this->SelectedLocationPopup)?__($this->SelectedLocationPopup):$this->SelectedLocationPopup) . ").openPopup();" : "") . "
-				" . ($this->SelectedLocationScriptFunction ? "($this->SelectedLocationScriptFunction)({$this->Name}, e, err);" : "") . "
+				" . ($this->SelectedLocationScriptFunction ? "($this->SelectedLocationScriptFunction)({$this->MainClass}, e, err);" : "") . "
 				" . ($this->SelectedAddressPopup || $this->SelectedAddressScriptFunction ? "fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=\${lat}&lon=\${lng}" . (\_::$Front->AllowTranslate ? "&accept-language=" . \_::$Front->Translate->Language : "") . "`)
 				.then(response => response.json())
 				.then(data => {
@@ -494,26 +495,26 @@ class Map extends Module
 					else err = 'Address not found';
 					e.metadata = data;
 					" . ($this->SelectedAddressPopup ? "marker.bindPopup(" . Script::Convert(isStatic($this->SelectedAddressPopup)?__($this->SelectedAddressPopup):$this->SelectedAddressPopup) . ").openPopup();" : "") . "
-					" . ($this->SelectedAddressScriptFunction ? "($this->SelectedAddressScriptFunction)({$this->Name}, e, err);" : "") . "
+					" . ($this->SelectedAddressScriptFunction ? "($this->SelectedAddressScriptFunction)({$this->MainClass}, e, err);" : "") . "
 				})
 				.catch(err => {
-					" . ($this->SelectedAddressScriptFunction ? "($this->SelectedAddressScriptFunction)({$this->Name}, e, err);" : "") . "
+					" . ($this->SelectedAddressScriptFunction ? "($this->SelectedAddressScriptFunction)({$this->MainClass}, e, err);" : "") . "
 				});" : "") . "
 
 			});" : ""),
-			($this->LocationError ? "{$this->Name}.on('locationerror', function () {" . $this->ErrorScript($this->LocationError) . "});" : ""),
-			($this->TilesError ? "{$this->Name}.on('tileerror', function () {" . $this->ErrorScript($this->TilesError) . "});" : "")
+			($this->LocationError ? "{$this->MainClass}.on('locationerror', function () {" . $this->ErrorScript($this->LocationError) . "});" : ""),
+			($this->TilesError ? "{$this->MainClass}.on('tileerror', function () {" . $this->ErrorScript($this->TilesError) . "});" : "")
 		]);
 	}
 	public function Controls_InitializeScript()
 	{
 		return join(PHP_EOL, [
-			($this->CompassPosition ? "L.control.compass({ position:" . Script::Convert($this->CompassPosition) . ", autoActive: true}).addTo({$this->Name});" : ""),
+			($this->CompassPosition ? "L.control.compass({ position:" . Script::Convert($this->CompassPosition) . ", autoActive: true}).addTo({$this->MainClass});" : ""),
 			($this->RecenterPosition ? "
 			L.easyButton('fa-home', function(btn, map){
 					map.setView(" . Script::Convert($this->Location) . ", $this->Zoom);
 				}, {position:" . Script::Convert($this->RecenterPosition) . "}
-			).addTo({$this->Name});
+			).addTo({$this->MainClass});
 			" : ";"),
 			($this->LocatePosition ? "L.control.locate({
 				position: " . (Script::Convert($this->LocatePosition)) . ",
@@ -531,9 +532,9 @@ class Map extends Module
 				// 	enableHighAccuracy: true,
 				// 	maxZoom: $this->Zoom
 				// }
-			}).addTo({$this->Name});" : ""),
-			($this->FullScreenPosition ? "L.control.fullscreen({ content: '<i class=\"fas fa-expand fa-lg\"></i>', position:" . Script::Convert($this->FullScreenPosition) . "}).addTo({$this->Name});" : ""),
-			($this->ZoomPosition ? "L.control.zoom({ position:" . Script::Convert($this->ZoomPosition) . "}).addTo({$this->Name});" : ""),
+			}).addTo({$this->MainClass});" : ""),
+			($this->FullScreenPosition ? "L.control.fullscreen({ content: '<i class=\"fas fa-expand fa-lg\"></i>', position:" . Script::Convert($this->FullScreenPosition) . "}).addTo({$this->MainClass});" : ""),
+			($this->ZoomPosition ? "L.control.zoom({ position:" . Script::Convert($this->ZoomPosition) . "}).addTo({$this->MainClass});" : ""),
 			($this->LayersPosition ? "L.control.layers(" . (is_null($this->BaseLayers) ? "{
 					'Default Mode': L.tileLayer(defaultTailsFormat, defaultTailsAttrs),
 					" . ($this->Invert ? "
@@ -546,16 +547,16 @@ class Map extends Module
 					'Satellite Mode': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution: 'Tiles © Esri — Source: USGS, NOAA', maxZoom: 18})
 				}" : (is_string($this->BaseLayers) ? $this->BaseLayers : Script::Convert($this->BaseLayers))) . ",
 				" . (is_string($this->OverlayLayers) ? $this->OverlayLayers : Script::Convert($this->OverlayLayers)) . ",
-				{ icon: 'fa-eye', position:" . Script::Convert($this->LayersPosition) . "}).addTo({$this->Name});" : ""),
+				{ icon: 'fa-eye', position:" . Script::Convert($this->LayersPosition) . "}).addTo({$this->MainClass});" : ""),
 			($this->AdjustmentPosition ? "L.easyButton('fa-adjust', function(btn, map){
-					mc = document.querySelector('.{$this->Name} .leaflet-pane .leaflet-tile-pane');
-					{$this->Name}_MapColor(false, !mc.classList.contains('invert'));
-				}, {position:" . Script::Convert($this->AdjustmentPosition) . "}).addTo({$this->Name});" : ""),
-			($this->MeasurePosition ? "L.control.measure({position:" . Script::Convert($this->MeasurePosition) . "}).addTo({$this->Name});" : ""),
-			($this->PinMarkerPosition ? "L.easyButton('fa-map-pin', function(btn, map){L.marker(map.getCenter()).addTo({$this->Name})}, {position:" . Script::Convert($this->PinMarkerPosition) . "}).addTo({$this->Name});" : ""),
-			($this->PrintPosition ? "L.control.browserPrint({position:" . Script::Convert($this->PrintPosition) . "}).addTo({$this->Name});" : ""),
-			($this->DrawPosition ? "{$this->Name}.addControl(new L.Control.Draw({position:" . Script::Convert($this->DrawPosition) . "}));" : ""),
-			($this->ScalePosition ? "L.control.scale({ position:" . Script::Convert($this->ScalePosition) . "}).addTo({$this->Name});" : "")
+					mc = document.querySelector('.{$this->MainClass} .leaflet-pane .leaflet-tile-pane');
+					{$this->MainClass}_MapColor(false, !mc.classList.contains('invert'));
+				}, {position:" . Script::Convert($this->AdjustmentPosition) . "}).addTo({$this->MainClass});" : ""),
+			($this->MeasurePosition ? "L.control.measure({position:" . Script::Convert($this->MeasurePosition) . "}).addTo({$this->MainClass});" : ""),
+			($this->PinMarkerPosition ? "L.easyButton('fa-map-pin', function(btn, map){L.marker(map.getCenter()).addTo({$this->MainClass})}, {position:" . Script::Convert($this->PinMarkerPosition) . "}).addTo({$this->MainClass});" : ""),
+			($this->PrintPosition ? "L.control.browserPrint({position:" . Script::Convert($this->PrintPosition) . "}).addTo({$this->MainClass});" : ""),
+			($this->DrawPosition ? "{$this->MainClass}.addControl(new L.Control.Draw({position:" . Script::Convert($this->DrawPosition) . "}));" : ""),
+			($this->ScalePosition ? "L.control.scale({ position:" . Script::Convert($this->ScalePosition) . "}).addTo({$this->MainClass});" : "")
 		]);
 	}
 	public function Items_InitializeScript()
@@ -594,7 +595,7 @@ class Map extends Module
 	 */
 	public function LocateScript($location = null, $zoom = null, $animate = true)
 	{
-		return is_null($location) ? "{$this->Name}.locate(" . ($zoom ?? $this->Zoom) . ")" : "{$this->Name}." . ($animate ? "flyTo" : "setView") . "(" . Script::Convert($location) . ", " . ($zoom ?? $this->Zoom) . ")";
+		return is_null($location) ? "{$this->MainClass}.locate(" . ($zoom ?? $this->Zoom) . ")" : "{$this->MainClass}." . ($animate ? "flyTo" : "setView") . "(" . Script::Convert($location) . ", " . ($zoom ?? $this->Zoom) . ")";
 	}
 
 	/**
@@ -636,7 +637,7 @@ class Map extends Module
 			array_push($this->PluginsStyleSources, ...(is_array($stylesLibrary) ? $stylesLibrary : [$stylesLibrary]));
 		if ($scriptsLibrary)
 			array_push($this->PluginsScriptSources, ...(is_array($scriptsLibrary) ? $scriptsLibrary : [$scriptsLibrary]));
-		return "L.control.$name(" . self::AttributesScript($attributes) . ").addTo({$this->Name})";
+		return "L.control.$name(" . self::AttributesScript($attributes) . ").addTo({$this->MainClass})";
 	}
 	/**
 	 * To add a button on the map
@@ -674,7 +675,7 @@ class Map extends Module
 	public function AddButtonScript($icon, $action, $position = "topleft", $attributes = [])
 	{
 		$attributes["position"] = $position;
-		return "L.easyButton(" . Script::Convert($icon) . ", " . (is_string($action) ? $action : Script::Convert($action)) . ", " . self::AttributesScript($attributes) . ").addTo({$this->Name})";
+		return "L.easyButton(" . Script::Convert($icon) . ", " . (is_string($action) ? $action : Script::Convert($action)) . ", " . self::AttributesScript($attributes) . ").addTo({$this->MainClass})";
 	}
 	/**
 	 * To register a new icon for the map
@@ -751,7 +752,7 @@ class Map extends Module
 	 */
 	public function GetItemScript($type = "marker", $location = null, $id = null)
 	{
-		return "{$this->Name}_Items.get(" . $this->CreateKeyScript($type, $location, $id) . ")";
+		return "{$this->MainClass}_Items.get(" . $this->CreateKeyScript($type, $location, $id) . ")";
 	}
 	/**
 	 * To set something to the map
@@ -782,19 +783,19 @@ class Map extends Module
 	{
 		return "{
 			let key = " . $this->CreateKeyScript($type, $location, $id) . ";
-			let layer = {$this->Name}_Items.get(key);
+			let layer = {$this->MainClass}_Items.get(key);
 			if(layer) {
-				{$this->Name}.removeLayer(layer);
-				{$this->Name}_Items.delete(key);
-			} else layer = L.$type(" . (is_null($location) ? "{$this->Name}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
-			let la = layer.addTo({$this->Name});
+				{$this->MainClass}.removeLayer(layer);
+				{$this->MainClass}_Items.delete(key);
+			} else layer = L.$type(" . (is_null($location) ? "{$this->MainClass}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
+			let la = layer.addTo({$this->MainClass});
 			let popup = " . Script::Convert($popup) . ";
 			if(popup) {
 				let pp = la.bindPopup(popup);
 				let activePopup = " . Script::Convert($active) . ";
 				if(activePopup) pp.openPopup();
 			}
-			{$this->Name}_Items.set(key, layer);
+			{$this->MainClass}_Items.set(key, layer);
 		}";
 	}
 	/**
@@ -822,20 +823,20 @@ class Map extends Module
 	{
 		return "{
 			let key = " . $this->CreateKeyScript($type, $location, $id) . ";
-			let layer = {$this->Name}_Items.get(key);
+			let layer = {$this->MainClass}_Items.get(key);
 			if(layer) {
-				{$this->Name}.removeLayer(layer);
-				{$this->Name}_Items.delete(key);
+				{$this->MainClass}.removeLayer(layer);
+				{$this->MainClass}_Items.delete(key);
 			}
-			layer = L.$type(" . (is_null($location) ? "{$this->Name}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
-			let la = layer.addTo({$this->Name});
+			layer = L.$type(" . (is_null($location) ? "{$this->MainClass}.getCenter()" : Script::Convert($location)) . ", " . self::AttributesScript($attributes) . ");
+			let la = layer.addTo({$this->MainClass});
 			let popup = " . Script::Convert($popup) . ";
 			if(popup) {
 				let pp = la.bindPopup(popup);
 				let activePopup = " . Script::Convert($active) . ";
 				if(activePopup) pp.openPopup();
 			}
-			{$this->Name}_Items.set(key, layer);
+			{$this->MainClass}_Items.set(key, layer);
 		}";
 	}
 	/**
@@ -866,24 +867,24 @@ class Map extends Module
 	{
 		return "{
 			let key = " . $this->CreateKeyScript($type, $location, $id) . ";
-			let layer = {$this->Name}_Items.get(key);
+			let layer = {$this->MainClass}_Items.get(key);
 			if(layer) {
-				{$this->Name}.removeLayer(layer);
-				{$this->Name}_Items.delete(key);
+				{$this->MainClass}.removeLayer(layer);
+				{$this->MainClass}_Items.delete(key);
 			}
 		}";
 	}
 
 	public function MessageScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Struct.message(" . Script::Convert(__($message)) . ");";
+		return "document.querySelector('.{$this->MainClass} .message').innerHTML = Struct.message(" . Script::Convert(__($message)) . ");";
 	}
 	public function SuccessScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Struct.success(" . Script::Convert(__($message)) . ");";
+		return "document.querySelector('.{$this->MainClass} .message').innerHTML = Struct.success(" . Script::Convert(__($message)) . ");";
 	}
 	public function ErrorScript($message = null)
 	{
-		return "document.querySelector('.{$this->Name} .message').innerHTML = Struct.error(" . Script::Convert(__($message)) . ");";
+		return "document.querySelector('.{$this->MainClass} .message').innerHTML = Struct.error(" . Script::Convert(__($message)) . ");";
 	}
 }

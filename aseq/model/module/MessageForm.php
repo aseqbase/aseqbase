@@ -69,29 +69,30 @@ class MessageForm extends Form
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Struct::Style("
-		.{$this->Name} {
+        yield parent::GetStyle();
+        yield Struct::Style("
+		.{$this->MainClass} {
 			padding: 0px;
 			margin: 0px;
 		}
-		.{$this->Name} .content {
+		.{$this->MainClass} .content {
 			padding: 0px;
 		    background-color: transparent;
 		}
-		.{$this->Name} .form {
+		.{$this->MainClass} .form {
 			padding: 0px;
 		}
-		.{$this->Name} .form .group {
+		.{$this->MainClass} .form .group {
 			padding: 0px;
 		}");
 	}
-	public function Get()
+	public function GetInner()
 	{
 		if (!$this->CheckAccess($this->Access ?? \_::$User->UserAccess, false)) {
 			$this->Signing = true;
 			return $this->GetSigning();
 		}
-		return parent::Get();
+		return parent::GetInner();
 	}
 	public function GetFields()
 	{

@@ -46,43 +46,43 @@ class SignInForm extends Form{
 
 	public function GetStyle(){
 		if($this->AllowDecoration) return ((\_::$User->HasAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Struct::Style("
-			.{$this->Name} .btn.facebook {
+			.{$this->MainClass} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}
 
-			.{$this->Name} .btn.twitter {
+			.{$this->MainClass} .btn.twitter {
 				background-color: #42AEEC55 !important;
 			}
 
-			.{$this->Name} .btn.linkedin {
+			.{$this->MainClass} .btn.linkedin {
 				background-color: #0e86a855 !important;
 			}
 
-			.{$this->Name} .btn.facebook:hover {
+			.{$this->MainClass} .btn.facebook:hover {
 				background-color: #405D9D !important;
 			}
 
-			.{$this->Name} .btn.twitter:hover {
+			.{$this->MainClass} .btn.twitter:hover {
 				background-color: #42AEEC !important;
 			}
 
-			.{$this->Name} .btn.linkedin:hover {
+			.{$this->MainClass} .btn.linkedin:hover {
 				background-color: #0e86a8 !important;
 			}
-			.{$this->Name} div.welcome {
+			.{$this->MainClass} div.welcome {
 				text-align: center;
 			}
-			.{$this->Name} div.welcome p.welcome {
+			.{$this->MainClass} div.welcome p.welcome {
 				text-align: center;
 			}
 		");
 		else return parent::GetStyle();
 	}
 
-	public function Get(){
+	public function GetInner(){
 		if(\_::$User->HasAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
 			return $this->GetHeader().Convert::ToString($this->Welcome);
-        else return parent::Get();
+        else return parent::GetInner();
 	}
 	public function GetHeader(){
         if(\_::$User->HasAccess(\_::$User->UserAccess) && !isEmpty($this->WelcomeFormat))

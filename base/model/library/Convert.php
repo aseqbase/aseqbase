@@ -258,8 +258,8 @@ class Convert
             return [];
         elseif (is_string($values))
             return preg_split($splitPattern, $values);
-        elseif (is_subclass_of($values, "\Base"))
-            return $values->Children;
+        elseif (is_subclass_of($values, "\\MiMFa\\Module\\Module"))
+            return $values->Items;
         elseif (is_callable($values) || $values instanceof \Closure)
             return self::ToItems($values());
         elseif ($values instanceof \Traversable)

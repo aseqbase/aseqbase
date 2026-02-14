@@ -521,11 +521,11 @@ let send = function (
 			try {
 				let response = xhr.response;
 				if(response) try { response = JSON.parse(response); } catch { }
-				if (xhr.status == 200) onSuccess(response, null, xhr);
+				if (xhr.status <= 201 || xhr.status >= 290) onSuccess(response, null, xhr);
 				else onMessage(response, null, xhr);
 			} catch (e) {
 				err = "There was a problem on retrieving data! \n" + e.message;
-				if (xhr.status == 200) onSuccess(null, err, xhr);
+				if (xhr.status <= 201 || xhr.status >= 290) onSuccess(null, err, xhr);
 				else onMessage(null, err, xhr);
 			}
 		else onError(xhr.response, xhr.status, xhr);

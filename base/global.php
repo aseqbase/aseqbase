@@ -1,5 +1,4 @@
 <?php
-
 use MiMFa\Library\DataBase;
 use MiMFa\Library\DataTable;
 use MiMFa\Library\Internal;
@@ -57,6 +56,7 @@ library("Struct");
 library("Style");
 library("Script");
 library("Internal");
+library("Translate");
 
 received();//To set the __METHOD and cache received data
 
@@ -649,10 +649,10 @@ function download($destPath = null, $extensions = null, $minSize = null, $maxSiz
 	$object = base64_decode(urldecode($object));
 
 	if ($destPath === true) {
-		if (!Storage::SetFileContent($destPath = Storage::GenerateUniquePath(\_::$Address->PublicDirectory, $objectName, random:true), $object))
+		if (!Storage::SetFileContent($destPath = Storage::GenerateUniquePath(\_::$Address->PublicDirectory, $objectName, random: true), $object))
 			return false;
 	} elseif ($destPath === false) {
-		if (!Storage::SetFileContent($destPath = Storage::GenerateUniquePath(\_::$Address->TempDirectory, $objectName, random:true), $object))
+		if (!Storage::SetFileContent($destPath = Storage::GenerateUniquePath(\_::$Address->TempDirectory, $objectName, random: true), $object))
 			return false;
 	} elseif ($destPath) {
 		if (endsWith($destPath, DIRECTORY_SEPARATOR))
@@ -735,9 +735,9 @@ function downloadStream($destPath = null, $extensions = null, $minSize = null, $
 
 	if ($total > 1 && $chunk == 0)
 		return true;
-	if ($chunk >= ($total - 1)){
+	if ($chunk >= ($total - 1)) {
 		// if(stat($destPath)["size"] > ($objectSize - $speed))
-			return $destPath;
+		return $destPath;
 		// else {
 		// 	Storage::DeleteFile($destPath);
 		// 	throw new \SilentException("The 'file data' is not 'complete'!");

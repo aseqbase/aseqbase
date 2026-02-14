@@ -17,6 +17,7 @@ class BackBase
 	/**
 	 * Additional items to use in back-end
 	 * @var array
+	 * @internal
 	 */
 	public $Items = [];
 
@@ -59,7 +60,7 @@ class BackBase
 	 * @var int
 	 * @category Security
 	 */
-	public $MinimumFileSize = 1000;
+	public $MinimumFileSize = 0;
 	/**
 	 * The minimum file size available to uploud
 	 * @var int

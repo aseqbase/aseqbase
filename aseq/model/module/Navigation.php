@@ -197,21 +197,22 @@ class Navigation extends Module
 
 	public function GetStyle()
 	{
-		return parent::GetStyle() . Struct::Style("
-			.{$this->Name}{
+        yield parent::GetStyle();
+        yield Struct::Style("
+			.{$this->MainClass}{
 				padding: 10px;
 				margin: 0px;
 				width: 100%;
 				text-align: center;
 				align-items: center;
 			}
-			.{$this->Name} a,.{$this->Name} a:visited{
+			.{$this->MainClass} a,.{$this->MainClass} a:visited{
 			}
-			.{$this->Name} .contents{
+			.{$this->MainClass} .contents{
 				display: inline-block;
 				width: fit-content;
 			}
-			.{$this->Name} .contents .buttonspanel{
+			.{$this->MainClass} .contents .buttonspanel{
 				display: flex;
 				align-items: center;
 				flex-wrap: wrap;
@@ -220,7 +221,7 @@ class Navigation extends Module
 				align-content: center;
 			}
 			" . ($this->MinLimit < $this->MaxLimit ? "
-			.{$this->Name} .rangepanel{
+			.{$this->MainClass} .rangepanel{
 				display: flex;
 				width: 100%;
 				align-content: stretch;
@@ -229,18 +230,18 @@ class Navigation extends Module
 				flex-direction: row;
 				flex-wrap: wrap;
 			}
-			.{$this->Name} .rangepanel .rangeinput{
+			.{$this->MainClass} .rangepanel .rangeinput{
 				background-color: var(--back-color-input);
 				" . ($this->AllowCount ? "min-width: 70%;max-width: 95%;" : "width: 100%;") . "
 			}
-			.{$this->Name} .rangepanel span{
+			.{$this->MainClass} .rangepanel span{
 				font-size: var(--size-0);
 				padding: 0px 5px;
 			}
 
 			/*Chrome*/
 			@media screen and (-webkit-min-device-pixel-ratio:0) {
-				.{$this->Name} input[type='range'] {
+				.{$this->MainClass} input[type='range'] {
 					height: var(--size-1);
 					overflow: hidden;
 					-webkit-appearance: none;
@@ -248,13 +249,13 @@ class Navigation extends Module
 					background-color: var(--back-color-input);
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.{$this->Name} input[type='range']::-webkit-slider-runnable-track {
+				.{$this->MainClass} input[type='range']::-webkit-slider-runnable-track {
 					height: 100%;
 					-webkit-appearance: none;
 					color: var(--fore-color-input);
 					background-color: var(--fore-color-input);
 				}
-				.{$this->Name} input[type='range']::-webkit-slider-thumb {
+				.{$this->MainClass} input[type='range']::-webkit-slider-thumb {
 					aspect-ratio: 1;
 					-webkit-appearance: none;
 					height: 100%;
@@ -266,96 +267,94 @@ class Navigation extends Module
 					box-shadow: " . (\_::$Front->Translate->Direction == "rtl" ? "" : "-") . "100vw 0 0 calc(100vw - var(--size-1) / 2) var(--fore-color-input);
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.{$this->Name} input[type='range']:hover::-webkit-slider-thumb {
+				.{$this->MainClass} input[type='range']:hover::-webkit-slider-thumb {
 					border-color: var(--fore-color-input);
 					background-color: var(--fore-color-input);
 				}
 			}
 			/*FF*/
-			.{$this->Name} input[type='range']::-moz-range-progress {
+			.{$this->MainClass} input[type='range']::-moz-range-progress {
 				background-color: var(--fore-color-input);
 			}
-			.{$this->Name} input[type='range']::-moz-range-track {
+			.{$this->MainClass} input[type='range']::-moz-range-track {
 				background-color: var(--back-color-input);
 			}
 			/*IE*/
-			.{$this->Name} input[type='range']::-ms-fill-lower {
+			.{$this->MainClass} input[type='range']::-ms-fill-lower {
 				background-color: var(--fore-color-input);
 			}
-			.{$this->Name} input[type='range']::-ms-fill-upper {
+			.{$this->MainClass} input[type='range']::-ms-fill-upper {
 				background-color: var(--back-color-input);
 			}
 			" : "") .
 			"
-			.{$this->Name} .item{
+			.{$this->MainClass} .item{
 				font-size: var(--size-2);
 				font-weight: bold;
 				padding: 0px 5px;
 				margin: 5px;
 			}
-			.{$this->Name} .item.active{
+			.{$this->MainClass} .item.active{
 				color: var(--fore-color-input);
 			}
 
-			.{$this->Name} :is(.item.next, .item.back){
+			.{$this->MainClass} :is(.item.next, .item.back){
 				font-size: var(--size-1);
 				font-weight: normal;
 			}
 		");
 	}
 
-	public function Get()
+	public function GetInner()
 	{
-		return Convert::ToString(function () {
-			yield parent::Get();
-			$url = \_::$Address->UrlBase . "?";
-			$fromP = $this->GetFromPage();
-			$toP = $this->GetToPage();
-			$query = receiveGet() ?? array();
-			if (isset($query[$this->CountRequest]))
-				$query[$this->CountRequest] = $this->Count . "";
-			$right = \_::$Front->Translate->Direction == "rtl" ? "left" : "right";
-			$left = \_::$Front->Translate->Direction == "rtl" ? "right" : "left";
+		yield parent::GetInner();
+		$url = \_::$Address->UrlBase . "?";
+		$fromP = $this->GetFromPage();
+		$toP = $this->GetToPage();
+		$query = receiveGet() ?? array();
+		if (isset($query[$this->CountRequest]))
+			$query[$this->CountRequest] = $this->Count . "";
+		$right = \_::$Front->Translate->Direction == "rtl" ? "left" : "right";
+		$left = \_::$Front->Translate->Direction == "rtl" ? "right" : "left";
 
-			yield "<div class='contents'>";
-			$maxLimit = $this->AllowCount ? min($this->Count, $this->MaxLimit) : $this->MaxLimit;
-			if ($this->MinLimit < $maxLimit)
-				yield Struct::Division(
-					Struct::RangeInput(null, $this->Limit, $this->MinLimit, $maxLimit, ["onchange" => "load('" . \_::$Address->UrlPath . "?" . preg_replace("/\&{$this->LimitRequest}\=\d+/", "", \_::$Address->UrlQuery ?? "") . "&{$this->LimitRequest}='+this.value);"]) .
-					($this->AllowCount ? Struct::Span($this->Count) : 0)
-					,
-					["class" => "rangepanel"]
-				);
+		yield "<div class='contents'>";
+		$maxLimit = $this->AllowCount ? min($this->Count, $this->MaxLimit) : $this->MaxLimit;
+		if ($this->MinLimit < $maxLimit)
+			yield Struct::Division(
+				Struct::RangeInput(null, $this->Limit, $this->MinLimit, $maxLimit, ["onchange" => "load('" . \_::$Address->UrlPath . "?" . preg_replace("/\&{$this->LimitRequest}\=\d+/", "", \_::$Address->UrlQuery ?? "") . "&{$this->LimitRequest}='+this.value);"]) .
+				($this->AllowCount ? Struct::Span($this->Count) : 0)
+				,
+				["class" => "rangepanel"]
+			);
 
-			yield Struct::OpenTag("div", ["class" => "buttonspanel"]);
-			if (isValid($this->BackLink))
-				yield Struct::Link(Struct::Icon("arrow-$left", null, ["class" => "item"]), $this->BackLink, ["class" => "item back"]);
-			elseif ($this->Page > 1) {
-				if ($this->AllowFirst && $fromP > 1)
-					yield Struct::Link($query[$this->PageRequest] = 1, $url . http_build_query($query), ["class" => "item first"]);
-				$query[$this->PageRequest] = $this->Page - 1;
-				yield Struct::Link(Struct::Icon("arrow-$left", null, ["class" => "item"]), $url . http_build_query($query), ["class" => "item back"]);
-			}
+		yield Struct::OpenTag("div", ["class" => "buttonspanel"]);
+		if (isValid($this->BackLink))
+			yield Struct::Link(Struct::Icon("arrow-$left", null, ["class" => "item"]), $this->BackLink, ["class" => "item back"]);
+		elseif ($this->Page > 1) {
+			if ($this->AllowFirst && $fromP > 1)
+				yield Struct::Link($query[$this->PageRequest] = 1, $url . http_build_query($query), ["class" => "item first"]);
+			$query[$this->PageRequest] = $this->Page - 1;
+			yield Struct::Link(Struct::Icon("arrow-$left", null, ["class" => "item"]), $url . http_build_query($query), ["class" => "item back"]);
+		}
 
-			if ($this->Numbers > 1)
-				for ($i = $fromP; $i <= $toP; $i++)
-					if ($i == $this->Page)
-						yield Struct::Span($i, null, ["class" => "item active"]);
-					else {
-						$query[$this->PageRequest] = $i . "";
-						yield Struct::Link($i, $url . http_build_query($query), ["class" => "item"]);
-					}
+		if ($this->Numbers > 1)
+			for ($i = $fromP; $i <= $toP; $i++)
+				if ($i == $this->Page)
+					yield Struct::Span($i, null, ["class" => "item active"]);
+				else {
+					$query[$this->PageRequest] = $i . "";
+					yield Struct::Link($i, $url . http_build_query($query), ["class" => "item"]);
+				}
 
-			if (isValid($this->NextLink))
-				yield Struct::Link(Struct::Icon("arrow-$right", null, ["class" => "item"]), $this->NextLink, ["class" => "item next"]);
-			elseif ($this->Page * $this->Limit < $this->Count) {
-				$query[$this->PageRequest] = $this->Page + 1;
-				yield Struct::Link(Struct::Icon("arrow-$right", null, ["class" => "item"]), $url . http_build_query($query), ["class" => "item next"]);
-				if ($this->AllowLast && $toP < $this->Numbers)
-					yield Struct::Link($query[$this->PageRequest] = $this->Numbers, $url . http_build_query($query), ["class" => "item last"]);
-			}
-			yield Struct::CloseTag();
-			yield "</div>";
-		});
+		if (isValid($this->NextLink))
+			yield Struct::Link(Struct::Icon("arrow-$right", null, ["class" => "item"]), $this->NextLink, ["class" => "item next"]);
+		elseif ($this->Page * $this->Limit < $this->Count) {
+			$query[$this->PageRequest] = $this->Page + 1;
+			yield Struct::Link(Struct::Icon("arrow-$right", null, ["class" => "item"]), $url . http_build_query($query), ["class" => "item next"]);
+			if ($this->AllowLast && $toP < $this->Numbers)
+				yield Struct::Link($query[$this->PageRequest] = $this->Numbers, $url . http_build_query($query), ["class" => "item last"]);
+		}
+		yield Struct::CloseTag();
+		yield "</div>";
 	}
 }

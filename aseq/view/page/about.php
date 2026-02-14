@@ -16,18 +16,18 @@ $opsc = count($ops);
 $dpsc = count($dps);
 response(
 	Struct::Style("
-		.{$module->Name} .heading{
+		.{$module->MainClass} .heading{
 			font-size: var(--size-3);
 			margin-top: var(--size-0);
 			text-align: center;
 		}
-		.{$module->Name} .image{
+		.{$module->MainClass} .image{
 			padding: var(--size-5);
 			".Style::UniversalProperty("filter", "drop-shadow(
 					-8px -4px 0 var(--back-color-special)
 				)")."
 		}
-		.{$module->Name} .image img{
+		.{$module->MainClass} .image img{
 			max-width: 25vmax;
 		}
 		.page *{

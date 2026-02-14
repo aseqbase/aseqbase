@@ -17,7 +17,7 @@ class TimeCounter extends Counter{
 	}
 
 	public function GetContent($attrs = null){
-		return Struct::Element(gmdate("H:i:s", $this->From), $this->ContentTag, ["class"=>"content"], $attrs);
+		return Struct::Element(gmdate("H:i:s", $this->From), $this->ContentTagName, ["class"=>"content"], $attrs);
 	}
 }
 ?>

@@ -16,8 +16,9 @@ class Modal extends Player{
 	public $BackgroundMask = "#00000099";
 
 	public function GetStyle(){
-		return parent::GetStyle().Struct::Style("
-			.{$this->Name} {
+        yield parent::GetStyle();
+        yield Struct::Style("
+			.{$this->MainClass} {
 				background-Color: var(--back-color-special);
 				Color: var(--fore-color-special);
 				border-radius: var(--radius-2);
@@ -37,7 +38,7 @@ class Modal extends Player{
 				box-shadow: var(--shadow-5);
 			}
 			/* Expanding image detail */
-			.{$this->Name}>.body>.detail {
+			.{$this->MainClass}>.body>.detail {
 				opacity:0;
 				Color: var(--fore-color);
 				position: absolute;
@@ -47,12 +48,12 @@ class Modal extends Player{
 				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)").";
 			}
 
-			.{$this->Name}:hover>.body>.detail {
+			.{$this->MainClass}:hover>.body>.detail {
 				opacity: 1;
 				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)").";
 			}
 
-			.{$this->Name}>.body>.detail>.title {
+			.{$this->MainClass}>.body>.detail>.title {
 				border-top: var(--border-1) var(--fore-color);
 				border-right: var(--border-1) var(--fore-color);
 				background-Color: var(--back-color);
@@ -67,7 +68,7 @@ class Modal extends Player{
 			}
 
 			/* Expanding image text */
-			.{$this->Name}>.body>.detail>.description {
+			.{$this->MainClass}>.body>.detail>.description {
 				background-Color: var(--back-color);
 				Color: var(--fore-color);
 				font-size: var(--size-1);
@@ -79,7 +80,7 @@ class Modal extends Player{
 			}
 			".(
 			isValid($this->BackgroundMask)?"
-			.{$this->Name}-background-mask {
+			.{$this->MainClass}-background-mask {
 				background: {$this->BackgroundMask};
 				width: 100%;
 				z-index:1;
@@ -88,7 +89,7 @@ class Modal extends Player{
 			);
 	}
 
-	public function Get(){
+	public function GetInner(){
 		return Convert::ToString($this->GetElements($this->Title, $this->Description, $this->Content, $this->ButtonsContent, $this->Source));
 	}
 
@@ -104,38 +105,39 @@ class Modal extends Player{
 	}
 
 	public function GetScript(){
-		return parent::GetScript().Struct::Script("
-			function {$this->Name}_Initialize(title = null, description = null, content = null, buttonsContent = null, source = null){
+		yield parent::GetScript();
+		yield Struct::Script("
+			function {$this->MainClass}_Initialize(title = null, description = null, content = null, buttonsContent = null, source = null){
 				if(content === null) {
 					content = title;
 					title = null;
 				}
-				{$this->Name}_Set(content, source);
-				if(isEmpty(title)) _('.{$this->Name}>.body>.detail>.title').hide();
-				else _('.{$this->Name}>.body>.detail>.title').show().text(title);
-				if(isEmpty(description)) _('.{$this->Name}>.body>.detail>.description').hide();
-				else _('.{$this->Name}>.body>.detail>.description').show().text(description);
-				if(buttonsContent !== null) _('.{$this->Name}>.buttons').html({$this->ButtonsScript('${buttonsContent}')});
-				_('.{$this->Name},.{$this->Name}-background-mask').removeClass('hide');
-				_('.{$this->Name},.{$this->Name}-background-mask').fadeIn(".\_::$Front->AnimationSpeed.");
-				//scrollThere('.{$this->Name} .body');
+				{$this->MainClass}_Set(content, source);
+				if(isEmpty(title)) _('.{$this->MainClass}>.body>.detail>.title').hide();
+				else _('.{$this->MainClass}>.body>.detail>.title').show().text(title);
+				if(isEmpty(description)) _('.{$this->MainClass}>.body>.detail>.description').hide();
+				else _('.{$this->MainClass}>.body>.detail>.description').show().text(description);
+				if(buttonsContent !== null) _('.{$this->MainClass}>.buttons').html({$this->ButtonsScript('${buttonsContent}')});
+				_('.{$this->MainClass},.{$this->MainClass}-background-mask').removeClass('hide');
+				_('.{$this->MainClass},.{$this->MainClass}-background-mask').fadeIn(".\_::$Front->AnimationSpeed.");
+				//scrollThere('.{$this->MainClass} .body');
 			}
-			function {$this->Name}_Show(){
+			function {$this->MainClass}_Show(){
 				{$this->InitializeScript()}
 			}
-			function {$this->Name}_Hide(){
+			function {$this->MainClass}_Hide(){
 				{$this->ClearScript()};
-				_('.{$this->Name},.{$this->Name}-background-mask').fadeOut(".\_::$Front->AnimationSpeed.");
-				_('.{$this->Name}>.body>.detail>.title').text('');
-				_('.{$this->Name}>.body>.detail>.description').text('');
-				_('.{$this->Name}>.buttons').html('');
+				_('.{$this->MainClass},.{$this->MainClass}-background-mask').fadeOut(".\_::$Front->AnimationSpeed.");
+				_('.{$this->MainClass}>.body>.detail>.title').text('');
+				_('.{$this->MainClass}>.body>.detail>.description').text('');
+				_('.{$this->MainClass}>.buttons').html('');
 			}
-			function {$this->Name}_ModalFocus(){
-				_('.{$this->Name}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
+			function {$this->MainClass}_ModalFocus(){
+				_('.{$this->MainClass}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
 				{$this->FocusScript()};
 			}
-			function {$this->Name}_ModalInfo(){
-				_('.{$this->Name}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
+			function {$this->MainClass}_ModalInfo(){
+				_('.{$this->MainClass}>.body>.detail').slideToggle(".\_::$Front->AnimationSpeed.");
 			}
 		");
 	}
@@ -156,7 +158,7 @@ class Modal extends Player{
 	}
 
 	public function BeforeHandle(){
-		if(isValid(object: $this->BackgroundMask)) return "<div class=\"background-mask ".$this->Name."-background-mask view hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
+		if(isValid(object: $this->BackgroundMask)) return "<div class=\"background-mask ".$this->MainClass."-background-mask view hide\" onclick=\"".($this->AllowClose?$this->HideScript():"")."\"></div>";
 	}
 
 	public function ButtonsScript($buttonsContent){
@@ -164,7 +166,7 @@ class Modal extends Player{
 	}
 
 	public function InitializeScript($title = null, $description = null, $content = null, $buttonsContent = null, $source = null){
-		return $this->Name."_Initialize(".
+		return $this->MainClass."_Initialize(".
 		Script::Convert($title??$this->Title).", ".
 		Script::Convert($description??$this->Description).", ".
 		Script::Convert($content??$this->Content).", ".
@@ -176,19 +178,19 @@ class Modal extends Player{
 		return script($this->ShowScript($content));
 	}
 	public function ShowScript($content = null){
-		return ($content?$this->InitializeScript(content: $content):"").$this->Name."_Show();";
+		return ($content?$this->InitializeScript(content: $content):"").$this->MainClass."_Show();";
 	}
 	public function Hide(){
 		return response($this->HideScript());
 	}
 	public function HideScript(){
-		return $this->Name."_Hide();";
+		return $this->MainClass."_Hide();";
 	}
 	public function ModalFocusScript(){
-		return $this->Name."_ModalFocus();";
+		return $this->MainClass."_ModalFocus();";
 	}
 	public function ModalInfoScript(){
-		return $this->Name."_ModalInfo();";
+		return $this->MainClass."_ModalInfo();";
 	}
 }
 ?>

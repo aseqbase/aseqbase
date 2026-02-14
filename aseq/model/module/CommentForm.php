@@ -71,13 +71,13 @@ class CommentForm extends Form
 		}
 	}
 
-	public function Get()
+	public function GetInner()
 	{
 		if (!$this->CheckAccess($this->Access ?? \_::$User->UserAccess, false)) {
 			$this->Signing = true;
 			return $this->GetSigning();
 		}
-		return parent::Get();
+		return parent::GetInner();
 	}
 	public function GetFields()
 	{

@@ -6,15 +6,16 @@ class FixedScreen extends Module{
     public $Printable = false;
 	
 	public function GetStyle(){
-		return parent::GetStyle().Struct::Style("
+        yield parent::GetStyle();
+        yield Struct::Style("
 			body{
 				padding: 0px;
 			}
-			.{$this->Name}{
+			.{$this->MainClass}{
 				display: flex;
 				justify-content: center;
 			}
-			.{$this->Name} .background{
+			.{$this->MainClass} .background{
 				height: 100vh;
 				width: 100vw;
 				background-position: center;
@@ -31,8 +32,8 @@ class FixedScreen extends Module{
 		");
 	}
 
-	public function Get(){
-		return Struct::Division(null,["class"=>"background","style"=>"background-image: url('{$this->Image}');"]).parent::Get();
+	public function GetInner(){
+		return Struct::Division(null,["class"=>"background","style"=>"background-image: url('{$this->Image}');"]).parent::GetInner();
 	}
 }
 ?>

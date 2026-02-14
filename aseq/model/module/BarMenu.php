@@ -1,8 +1,10 @@
-<?php namespace MiMFa\Module;
+<?php
+namespace MiMFa\Module;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
-class BarMenu extends Module{
-	public $Tag = "nav";
+class BarMenu extends Module
+{
+	public string|null $TagName =  "nav";
 	public $Items = null;
 	public $AllowLabels = false;
 	public $AllowAnimate = true;
@@ -11,16 +13,19 @@ class BarMenu extends Module{
 	public $AllowChangeColor = true;
 	public $ShowFromScreenSize = "sm";
 	public $Height = 40;
-    public $Printable = false;
+	public $Printable = false;
 
-	public function GetStyle(){
-		return parent::GetStyle().Struct::Style("
-			.{$this->Name}{
+	public function GetStyle()
+	{
+          yield parent::GetStyle();
+          yield Struct::Style(
+			"
+			.{$this->MainClass}{
 				text-transform: uppercase;
 				text-align: center;
 				width:100vw;
 				height: {$this->Height}px;
-				".((!$this->AllowMiddle)?"overflow: hidden;":"")."
+				" . ((!$this->AllowMiddle) ? "overflow: hidden;" : "") . "
 				position: fixed;
 				margin: 0px;
 				bottom: 0px;
@@ -33,25 +38,25 @@ class BarMenu extends Module{
 				align-items: stretch;
 				flex-wrap: wrap;
 				z-index: 999999;
-				".\MiMFa\Library\Style::UniversalProperty("filter","drop-shadow(0px 0px 20px #00000044)")."
-				".\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
+				" . \MiMFa\Library\Style::UniversalProperty("filter", "drop-shadow(0px 0px 20px #00000044)") . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name}:hover{
-				".\MiMFa\Library\Style::UniversalProperty("filter", "drop-shadow(0px 0px 30px #00000088)")."
-				".\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")."
+			.{$this->MainClass}:hover{
+				" . \MiMFa\Library\Style::UniversalProperty("filter", "drop-shadow(0px 0px 30px #00000088)") . "
+				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name} :is(button, .button, .icon[onclick]){
+			.{$this->MainClass} :is(button, .button, .icon[onclick]){
 				border: var(--border-0);
 				border-radius: var(--radius-0);
 				box-shadow: var(--shadow-0);
 			}
-			.{$this->Name} :is(button, .button, .icon[onclick]):hover{
+			.{$this->MainClass} :is(button, .button, .icon[onclick]):hover{
 				box-shadow: var(--shadow-2);
 			}
 			
-			.{$this->Name} .button {
+			.{$this->MainClass} .button {
 				border: none;
 				display: flex;
 				border-radius: var(--radius-0);
@@ -63,49 +68,49 @@ class BarMenu extends Module{
 				height: {$this->Height}px;
 				aspect-ratio: 1;
 			}
-			.{$this->Name} .button:hover {
+			.{$this->MainClass} .button:hover {
 				cursor: pointer;
 				border: none;
-				".(($this->AllowAnimate)?"background-color: var(--fore-color-output);
-				color: var(--back-color-output);":"").
-				\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
+				" . (($this->AllowAnimate) ? "background-color: var(--fore-color-output);
+				color: var(--back-color-output);" : "") .
+			\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name} .button>.media{
+			.{$this->MainClass} .button>.media{
 				height: 55%;
-    			margin: 15%;".
-				\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
+    			margin: 15%;" .
+			\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .button>.media:not(.icon){
+			.{$this->MainClass} .button>.media:not(.icon){
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 60%;
-				". (($this->AllowChangeColor)? \MiMFa\Library\Style::ToggleFilter(\_::$Front->GetMode()):"")."
+				" . (($this->AllowChangeColor) ? \MiMFa\Library\Style::ToggleFilter(\_::$Front->GetMode()) : "") . "
 			}
-			.{$this->Name} .button:hover>.media{
-				background-size: auto 70%;".
-				(($this->AllowAnimate)? \MiMFa\Library\Style::UniversalProperty("filter","none"):"").
-				\MiMFa\Library\Style::UniversalProperty("transition","var(--transition-1)")."
+			.{$this->MainClass} .button:hover>.media{
+				background-size: auto 70%;" .
+			(($this->AllowAnimate) ? \MiMFa\Library\Style::UniversalProperty("filter", "none") : "") .
+			\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name} .button>.media>span {
+			.{$this->MainClass} .button>.media>span {
 				text-shadow: 0px 5px 10px #000000aa;
 				display:none;
 			}
-			".(($this->AllowLabels)?"
-			.{$this->Name} .button:hover>.media>span {
+			" . (($this->AllowLabels) ? "
+			.{$this->MainClass} .button:hover>.media>span {
 				display:block;
 			}
-			":"")."
+			" : "") . "
 
-			.{$this->Name} .button:not(:last-child) {
+			.{$this->MainClass} .button:not(:last-child) {
 				border-right: none; /* Prevent double borders */
 			}
-			".
-			(($this->AllowMiddle)?"
-				.{$this->Name} .button.middle {
-					margin-top: -".($this->Height*0.25)."px;
-					height: ".($this->Height*1.25)."px;
+			" .
+			(($this->AllowMiddle) ? "
+				.{$this->MainClass} .button.middle {
+					margin-top: -" . ($this->Height * 0.25) . "px;
+					height: " . ($this->Height * 1.25) . "px;
 					border-radius: 100% 100% 0px 0px;
 					box-shadow: var(--shadow-1);
 					border-left: none !important;
@@ -113,58 +118,66 @@ class BarMenu extends Module{
 					border-bottom: none !important;
 					outline: none !important;
 				}
-				.{$this->Name} .button.middle:hover{
+				.{$this->MainClass} .button.middle:hover{
 					box-shadow:var(--shadow-2);
 				}
 
-				.{$this->Name} .button.right{
+				.{$this->MainClass} .button.right{
 					border-radius: 35% 0px 0px 0px;
 				}
-				.{$this->Name} .button.left{
+				.{$this->MainClass} .button.left{
 					border-radius: 0px 35% 0px 0px;
-				}":""
-			).($this->AllowSides?"
-				.{$this->Name} .button.first{
+				}" : ""
+			) . ($this->AllowSides ? "
+				.{$this->MainClass} .button.first{
 					border-radius: 50% 0px 0px 0px;
 				}
-				.{$this->Name} .button.last{
+				.{$this->MainClass} .button.last{
 					border-radius: 0px 50% 0px 0px;
-				}":"")
+				}" : "")
 		);
 	}
 
-	public function Get(){
-		return Convert::ToString(function(){
-            $rtl = \_::$Front->Translate->Direction == "rtl";
-            yield parent::Get();
-            $count = 0;
-            foreach ($this->Items as $item)
-                if(\_::$User->HasAccess(getValid($item,"Access" ,\_::$User->VisitAccess)))
-					$count++;
-            if($count > 0){
-                $size = 100 / $count;
-                $msize = 100 - $size * ($count-1);
-				$i = 1;
-                foreach ($this->Items as $item)
-					if(\_::$User->HasAccess(getValid($item,"Access" ,\_::$User->VisitAccess))) {
-                        $m = $count/floatval(2.0);
-                        $cls = "";
-                        $ism = false;
-                        if($i === 1) $cls = $rtl?"last":"first";
-                        elseif($i === $count) $cls = $rtl?"first":"last";
-                        elseif(($i <= $m) && (($i+1) >= $m)) $cls = $rtl?"right":"left";
-                        elseif((($i-1) >= $m) && ($i >= $m)) $cls = $rtl?"left":"right";
-                        elseif($ism =((($i-1) <= $m) && (($i+1) >= $m))) $cls = "middle";
-                        yield Struct::Button(
-							Struct::Media(
-								$this->AllowLabels?Struct::Span(getBetween($item, "Title" , 'Name' )):null,
-								getBetween($item, "Image" , 'Icon')
-							)
-							, get($item, 'Path')??""
-						, ['class'=>"item $cls"], get($item,"Attributes")??[]);
-						$i++;
-                    }
-            }
-        });
+	public function GetInner()
+	{
+		$rtl = \_::$Front->Translate->Direction == "rtl";
+		yield parent::GetInner();
+		$count = 0;
+		foreach ($this->Items as $item)
+			if (\_::$User->HasAccess(getValid($item, "Access", \_::$User->VisitAccess)))
+				$count++;
+		if ($count > 0) {
+			$size = 100 / $count;
+			$msize = 100 - $size * ($count - 1);
+			$i = 1;
+			foreach ($this->Items as $item)
+				if (\_::$User->HasAccess(getValid($item, "Access", \_::$User->VisitAccess))) {
+					$m = $count / floatval(2.0);
+					$cls = "";
+					$ism = false;
+					if ($i === 1)
+						$cls = $rtl ? "last" : "first";
+					elseif ($i === $count)
+						$cls = $rtl ? "first" : "last";
+					elseif (($i <= $m) && (($i + 1) >= $m))
+						$cls = $rtl ? "right" : "left";
+					elseif ((($i - 1) >= $m) && ($i >= $m))
+						$cls = $rtl ? "left" : "right";
+					elseif ($ism = ((($i - 1) <= $m) && (($i + 1) >= $m)))
+						$cls = "middle";
+					yield Struct::Button(
+						Struct::Media(
+							$this->AllowLabels ? Struct::Span(getBetween($item, "Title", 'Name')) : null,
+							getBetween($item, "Image", 'Icon')
+						)
+						,
+						get($item, 'Path') ?? ""
+						,
+						['class' => "item $cls"],
+						get($item, "Attributes") ?? []
+					);
+					$i++;
+				}
+		}
 	}
 }

@@ -13,7 +13,7 @@ if (get($data, "Active") !== false) {
     $module->Action = $action;
     $module->From = get($data, "From");
     $module->To = get($data, "To");
-    $module->Target = get($data, "Target") ?? $colModule->Name;
+    $module->Target = get($data, "Target") ?? $colModule->MainClass;
     pod($module, $data);
     $module->Render();
 }

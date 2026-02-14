@@ -87,61 +87,64 @@ class SignUpForm extends Form
 		$this->Action = \_::$User->UpHandlerPath;
 		$this->InitialStatus = \_::$User->InitialStatus;
 		$this->Welcome = $this->InitialStatus ? function () {
-			return part(\_::$User->DashboardHandlerPath, print: false); } :
+			return part(\_::$User->DashboardHandlerPath, print: false);
+		} :
 			function () {
-				return part(\_::$User->ActiveHandlerPath, print: false); };
+				return part(\_::$User->ActiveHandlerPath, print: false);
+			};
 	}
 
 	public function GetStyle()
 	{
-		if ($this->AllowDecoration)
-			return parent::GetStyle() . Struct::Style("
-			.{$this->Name} .btn.facebook {
+		if ($this->AllowDecoration) {
+			yield parent::GetStyle();
+			yield Struct::Style("
+			.{$this->MainClass} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}
 
-			.{$this->Name} .btn.twitter {
+			.{$this->MainClass} .btn.twitter {
 				background-color: #42AEEC55 !important;
 			}
 
-			.{$this->Name} .btn.linkedin {
+			.{$this->MainClass} .btn.linkedin {
 				background-color: #0e86a855 !important;
 			}
 
-			.{$this->Name} .btn.facebook:hover {
+			.{$this->MainClass} .btn.facebook:hover {
 				background-color: #405D9D !important;
 			}
 
-			.{$this->Name} .btn.twitter:hover {
+			.{$this->MainClass} .btn.twitter:hover {
 				background-color: #42AEEC !important;
 			}
 
-			.{$this->Name} .btn.linkedin:hover {
+			.{$this->MainClass} .btn.linkedin:hover {
 				background-color: #0e86a8 !important;
 			}
 
-			.{$this->Name} div.welcome {
+			.{$this->MainClass} div.welcome {
 				text-align: center;
 			}
-			.{$this->Name} div.welcome img.welcome {
+			.{$this->MainClass} div.welcome img.welcome {
 				width: 50%;
 				max-width: 300px;
 				border-radius: 100%;
 			}
-			.{$this->Name} div.welcome p.welcome {
+			.{$this->MainClass} div.welcome p.welcome {
 				text-align: center;
 			}
 		");
-		else
+		} else
 			return parent::GetStyle();
 	}
 
-	public function Get()
+	public function GetInner()
 	{
 		if (\_::$User->HasAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)
 			return $this->GetHeader() . Convert::ToString($this->Welcome);
 		else
-			return parent::Get();
+			return parent::GetInner();
 	}
 	public function GetHeader()
 	{
@@ -243,24 +246,24 @@ class SignUpForm extends Form
 	{
 		return Struct::Script("
 			_(document).ready(function () {
-				_(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					_(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
+				_(`.{$this->MainClass} :is(input, select, textarea)`).on('focus', function () {
+					_(this).parent().find(`.{$this->MainClass} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
-				_(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					_(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
+				_(`.{$this->MainClass} :is(input, select, textarea)`).on('blur', function () {
+					_(this).parent().find(`.{$this->MainClass} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
-                _('.{$this->Name} form').submit(function(e) {
+                _('.{$this->MainClass} form').submit(function(e) {
 					let error = null;
-					if (!_('.{$this->Name} form [name=\"Password\"]')?.val().match({$this->PasswordPattern})) 
+					if (!_('.{$this->MainClass} form [name=\"Password\"]')?.val().match({$this->PasswordPattern})) 
 						error = Struct.error(" . Script::Convert(__($this->PasswordTip)) . ");
-					else if (!_('.{$this->Name} form [name=\"Signature\"]')?.val().match({$this->SignaturePattern})) 
+					else if (!_('.{$this->MainClass} form [name=\"Signature\"]')?.val().match({$this->SignaturePattern})) 
 						error = Struct.error(" . Script::Convert(__($this->SignatureTip)) . ");
-					else if (_('.{$this->Name} form [name=\"PasswordConfirmation\"]')?.val() != _('.{$this->Name} form [name=Password]')?.val()) 
+					else if (_('.{$this->MainClass} form [name=\"PasswordConfirmation\"]')?.val() != _('.{$this->MainClass} form [name=Password]')?.val()) 
 						error = Struct.error(" . Script::Convert(__('New password and confirm password does not match!')) . ");
 					if(error) {
 						e.preventDefault();
-						_('.{$this->Name} form .result')?.remove();
-						_('.{$this->Name} form').append(error);
+						_('.{$this->MainClass} form .result')?.remove();
+						_('.{$this->MainClass} form').append(error);
 						return false;
 					}
 					return true;
@@ -274,11 +277,10 @@ class SignUpForm extends Form
 		if (!\_::$User->HasAccess(\_::$User->UserAccess))
 			try {
 				$received = receivePost();
-				if (isValid($received, "Email") || isValid($received, "Password")) {
-					$signature = get($received, "Signature");
+				if (($email = get($received, "Email")) && ($password = get($received, "Password"))) {
+					$signature = get($received, "Signature") ?? $email;
 					if (!preg_match($this->SignaturePattern, $signature))
 						return $this->GetError($this->SignatureTip);
-					$password = get($received, "Password");
 					if (!preg_match($this->PasswordPattern, $password))
 						return $this->GetError($this->PasswordTip);
 					$route = get($received, "Route");
@@ -290,7 +292,7 @@ class SignUpForm extends Form
 						\_::$User->SignUp(
 							signature: $signature,
 							password: $password,
-							email: get($received, "Email"),
+							email: $email,
 							name: null,
 							firstName: get($received, "FirstName"),
 							lastName: get($received, "LastName"),
@@ -301,7 +303,7 @@ class SignUpForm extends Form
 						) !== false
 					) {
 						$this->Result = true;
-						return $this->GetSuccess("Dear '" . \_::$User->TemporaryName . "', You registered successfully");
+						return $this->GetSuccess("Dear '" . (\_::$User->TemporaryName ?? "User") . "', You registered successfully");
 					} else
 						return $this->GetError("The user can not register with this email or username!");
 				} else

@@ -9,23 +9,23 @@ module("Separator"); // Assuming this function is defined elsewhere
 class Part extends Module
 {
     public $Image = null;
-    public $TitleTag = "h2";
-	public $Tag = "section";
+    public string|null $TitleTagName = "h2";
+	public string|null $TagName = "section";
 	public $Class = "part";
 
     public function GetStyle()
     {
         return Struct::Style("
-            .{$this->Name} {
+            .{$this->MainClass} {
                 font-size: var(--size-1);
                 padding: 3vmax; /* Simplified padding */
             }
 
-            .{$this->Name} .description {
+            .{$this->MainClass} .description {
                 font-size: var(--size-2);
             }
 
-            .{$this->Name} .image {
+            .{$this->MainClass} .image {
                 min-height: 20vh;
                 background-size: contain;
                 background-position: center;
@@ -35,7 +35,7 @@ class Part extends Module
         ");
     }
 
-    public function Get()
+    public function GetInner()
     {
         $titleHtml = $this->GetTitle(); // Assuming getTitle() returns HTML
 

@@ -11,8 +11,9 @@ class SideTabs extends Tabs{
 
 
 	public function GetStyle(){
-		return parent::GetStyle().Struct::Style("
-			.{$this->Name} {
+        yield parent::GetStyle();
+        yield Struct::Style("
+			.{$this->MainClass} {
 				display: flex;
 				align-content: center;
 				justify-content: center;
@@ -20,21 +21,21 @@ class SideTabs extends Tabs{
 				overflow: hidden;
 			}
 
-			.{$this->Name} .tab-contents{
+			.{$this->MainClass} .tab-contents{
 				max-width: 100%;
 			}
-			.{$this->Name} .tab-content{
+			.{$this->MainClass} .tab-content{
 				text-align: center;
 			}
 
-			.{$this->Name} .tab-titles {
+			.{$this->MainClass} .tab-titles {
 				display: flex;
 				flex-direction: row;
 				align-items: center;
 				justify-content: center;
     			flex-wrap: wrap;
 			}
-			.{$this->Name} .tab-titles .tab-title{
+			.{$this->MainClass} .tab-titles .tab-title{
 				margin: calc(var(--size-0) / 2);
 				padding: calc(var(--size-0) / 2) var(--size-0);
 				width: calc(100% - var(--size-0));
@@ -52,14 +53,14 @@ class SideTabs extends Tabs{
 				gap: var(--size-0);
 				". \MiMFa\Library\Style::UniversalProperty("transition","var(--transition-2)")."
 			}
-			.{$this->Name} .tab-titles .tab-title.active{
+			.{$this->MainClass} .tab-titles .tab-title.active{
 				background-color: inherit;
 				color: inherit;
 				box-shadow: none;
 			}
 				
 			@media screen and (min-width:765px){
-				.{$this->Name} .tab-titles {
+				.{$this->MainClass} .tab-titles {
 					flex-direction: column;
 					flex-wrap: wrap;
 				}

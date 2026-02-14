@@ -14,7 +14,7 @@ module("Collection");
  */
 class CommentCollection extends Collection
 {
-    public $TitleTag = "h5";
+    public string|null $TitleTagName = "h5";
 
     public $MaximumColumns = 1;
 
@@ -169,7 +169,7 @@ class CommentCollection extends Collection
     public function GetStyle()
     {
         return Struct::Style("
-			.{$this->Name} div.item {
+			.{$this->MainClass} div.item {
 				height: fit-attach;
                 width: -webkit-fill-available;
 				width: fit-content;
@@ -181,13 +181,13 @@ class CommentCollection extends Collection
 				border-radius: var(--radius-2);
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item:hover{
+			.{$this->MainClass} div.item:hover{
 				box-shadow: var(--shadow-2);
 				border-radius:  var(--radius-1);
 				background-Color: #88888818;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item.deactive {
+			.{$this->MainClass} div.item.deactive {
 				background-Color: #88888844;
 				box-shadow: var(--shadow-0);
 				border-radius: var(--radius-0);
@@ -195,7 +195,7 @@ class CommentCollection extends Collection
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 
-			.{$this->Name} div.item .subject{
+			.{$this->MainClass} div.item .subject{
                 margin-top: 0px;
 				font-size: var(--size-3);
                 text-transform: none;
@@ -207,22 +207,22 @@ class CommentCollection extends Collection
                 text-wrap-mode: wrap;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item:hover .subject{
+			.{$this->MainClass} div.item:hover .subject{
 				font-size: var(--size-3);
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item .author{
+			.{$this->MainClass} div.item .author{
                 display: flex;
                 align-items: center;
 			}
-			.{$this->Name} div.item .author .author-name{
+			.{$this->MainClass} div.item .author .author-name{
                 font-weight: bold;
 			}
-			.{$this->Name} div.item .author .author-name::after{
+			.{$this->MainClass} div.item .author .author-name::after{
 				content: ': ';
 				padding-inline-end: calc(var(--size-0) / 2);
 			}
-			.{$this->Name} .item .sidebtn{
+			.{$this->MainClass} .item .sidebtn{
                 position: absolute;
                 margin-top: calc(-1 * var(--size-3));
                 margin-inline-start: calc(-1 * var(--size-3));
@@ -231,11 +231,11 @@ class CommentCollection extends Collection
 				opacity: 0;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} :hover>*>.sidebtn{
+			.{$this->MainClass} :hover>*>.sidebtn{
                 padding: calc(var(--size-0) / 2);
             	opacity: 1;
 			}
-			.{$this->Name} .item .sidebtn>*{
+			.{$this->MainClass} .item .sidebtn>*{
                 aspect-ration: 1;
                 background-color: transparent;
                 margin: 0px calc(var(--size-0) / 2);
@@ -246,13 +246,13 @@ class CommentCollection extends Collection
                 z-index: 9;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} .item .sidebtn>*:hover{
+			.{$this->MainClass} .item .sidebtn>*:hover{
                 outline: none;
                 border: none;
 				opacity: 1;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item .author .author-image {
+			.{$this->MainClass} div.item .author .author-image {
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				opacity: 0.6;
@@ -271,11 +271,11 @@ class CommentCollection extends Collection
                 align-items: center;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item:hover .author .author-image{
+			.{$this->MainClass} div.item:hover .author .author-image{
 				opacity: 1;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item .message{
+			.{$this->MainClass} div.item .message{
                 gap: var(--size-0);
             	font-size: var(--size-1);
 				position: relative;
@@ -284,22 +284,22 @@ class CommentCollection extends Collection
                 text-wrap-mode: wrap;
 				" . (\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-			.{$this->Name} div.item .message :is(.excerpt, .full){
+			.{$this->MainClass} div.item .message :is(.excerpt, .full){
                 padding-inline-end: calc(var(--size-0) / 2);
 			}
-			.{$this->Name} div.item .attach{
+			.{$this->MainClass} div.item .attach{
                 font-size: var(--size-1);
             	text-align: justify;
 			}
-			.{$this->Name} div.item .metadata{
+			.{$this->MainClass} div.item .metadata{
 				font-size: calc(var(--size-0) * 0.8);
                 opacity: 0.8;
 			}
-			.{$this->Name} div.item .metadata>*{
+			.{$this->MainClass} div.item .metadata>*{
 				padding-inline-end: calc(var(--size-0) / 2);
                 display: inline-block;
 			}
-			.{$this->Name} div.item .replies{
+			.{$this->MainClass} div.item .replies{
                 gap: var(--size-0);
             	font-size: var(--size-1);
 				position: relative;
@@ -309,7 +309,7 @@ class CommentCollection extends Collection
 			}
         ");
     }
-    public function Get($items = null)
+    public function GetInner($items = null)
     {
         return join(PHP_EOL, iterator_to_array((function () use ($items) {
             module("Image");
@@ -431,19 +431,19 @@ class CommentCollection extends Collection
                     yield Struct::Division(
                         ($p_showdeletebutton ? Struct::Button(
                             $p_deletebuttontext,
-                            "{$this->Name}_Delete(this, '.{$this->Name} #{$uid}', $p_id);"
+                            "{$this->MainClass}_Delete(this, '.{$this->MainClass} #{$uid}', $p_id);"
                         ) : null) .
                         ($p_showeditbutton ? Struct::Button(
                             $p_editbuttontext,
-                            "{$this->Name}_Edit(this, '.{$this->Name} #{$uid}', $p_id);",
+                            "{$this->MainClass}_Edit(this, '.{$this->MainClass} #{$uid}', $p_id);",
                         ) : null) .
                         ($adminaccess ? Struct::Button(
                             $p_status ? $this->WaitingLabel : $this->PublishedLabel,
-                            "{$this->Name}_Status(this, '.{$this->Name} #{$uid}', $p_id, $p_status?false:true);",
+                            "{$this->MainClass}_Status(this, '.{$this->MainClass} #{$uid}', $p_id, $p_status?false:true);",
                         ) : null) .
                         ($p_showreplybutton ? Struct::Button(
                             $p_replybuttontext,
-                            "{$this->Name}_Reply(this, '.{$this->Name} #{$uid}', $p_id);",
+                            "{$this->MainClass}_Reply(this, '.{$this->MainClass} #{$uid}', $p_id);",
                         ) : null),
                         ["class" => 'sidebtn']
                     );
@@ -495,7 +495,7 @@ class CommentCollection extends Collection
         $action = $this->Action ? Script::Convert($this->Action) : "null";
         return Struct::Script(
             "
-            function {$this->Name}_Edit(btn, selector, forid) {
+            function {$this->MainClass}_Edit(btn, selector, forid) {
                 sbjbox = document.querySelector(selector+'>.subject');
                 msgbox = document.querySelector(selector+'>.message .full');
                 attbox = document.querySelector(selector+'>.message .attach');
@@ -529,7 +529,7 @@ class CommentCollection extends Collection
                     msgbox.focus();
                 }
             }" . "
-            function {$this->Name}_Delete(btn, selector, forid) {
+            function {$this->MainClass}_Delete(btn, selector, forid) {
                 if(confirm(`" . __("Are you sure to delete this command?") . "`))
                     sendDelete(
                         $action,
@@ -541,15 +541,15 @@ class CommentCollection extends Collection
                     );
             }" .
             "
-            {$this->Name}_status = null;
-            function {$this->Name}_Status(btn, selector, forid, status) {
+            {$this->MainClass}_status = null;
+            function {$this->MainClass}_Status(btn, selector, forid, status) {
                     sendPatch(
                         $action,
-                        {Id:forid, Status:{$this->Name}_status = {$this->Name}_status===0 || status?1:0},
+                        {Id:forid, Status:{$this->MainClass}_status = {$this->MainClass}_status===0 || status?1:0},
                         selector,
                         (data, err)=>{
                             if(!err)
-                                if({$this->Name}_status) {
+                                if({$this->MainClass}_status) {
                                     btn.innerHTML = `{$this->WaitingLabel}`;
                                     document.querySelector(selector).classList.remove('deactive');
                                 }
@@ -561,7 +561,7 @@ class CommentCollection extends Collection
                     );
             }" .
             "
-            function {$this->Name}_Reply(btn, selector, forid) {
+            function {$this->MainClass}_Reply(btn, selector, forid) {
                 rbox = document.querySelector(selector + ' .reply-box');
                 if(!rbox.querySelector('form')) {
                     sendPatch(

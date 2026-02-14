@@ -64,15 +64,15 @@ class Buttons extends Collection
 	 * @var string
 	 */
 	public $ThumbnailMaxHeight = "50vh";
-    public $Printable = false;
+	public $Printable = false;
 
 	public function GetStyle()
 	{
 		return Struct::Style("
-			.$this->Name {
+			.$this->MainClass {
 			}
 
-			.$this->Name>*>.item {
+			.$this->MainClass>*>.item {
 				height: fit-content;
 				background-Color: var(--back-color);
 				color: var(--fore-color);
@@ -84,7 +84,7 @@ class Buttons extends Collection
 				border:  var(--border-1) var(--fore-color-output);
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.$this->Name>*>.item:hover{
+			.$this->MainClass>*>.item:hover{
 				box-shadow:  var(--shadow-2);
 				border-radius:  var(--radius-2);
 				border:  var(--border-1) var(--fore-color);
@@ -93,7 +93,7 @@ class Buttons extends Collection
 			}
 
 			/* Style the images inside the grid */
-			.$this->Name>*>.item>.image {
+			.$this->MainClass>*>.item>.image {
 				margin: 0px;
 				opacity: 1; 
 				cursor: pointer; 
@@ -106,94 +106,91 @@ class Buttons extends Collection
 				overflow: hidden;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.$this->Name>*>.item:hover>.image{
+			.$this->MainClass>*>.item:hover>.image{
 				background-Color: var(--back-color);
 				opacity: 0.6;
 				" . \MiMFa\Library\Style::UniversalProperty("filter", "blur({$this->BlurSize})") . "
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.$this->Name>*>.item>.description{
+			.$this->MainClass>*>.item>.description{
 				background-Color: var(--back-color);
 				padding: 0px 1vmax;
 				position: relative;
 				bottom: 0px;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.$this->Name>*>.item:hover>.description{
+			.$this->MainClass>*>.item:hover>.description{
 				background-Color: var(--back-color);
 				padding: 3vmin 1vmax;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.$this->Name>*>.item>.description>h4{
+			.$this->MainClass>*>.item>.description>h4{
 				margin: 0px;
 				font-size: var(--size-0);
 				line-height: normal;
 				text-align: unset;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.$this->Name>*>.item:hover>.description>h4{
+			.$this->MainClass>*>.item:hover>.description>h4{
 				font-size: var(--size-1);
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.$this->Name>*>.item>.description>*:not(h4){
+			.$this->MainClass>*>.item>.description>*:not(h4){
 				display: none;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.$this->Name>*>.item:hover>.description>*:not(h4){
+			.$this->MainClass>*>.item:hover>.description>*:not(h4){
 				display: block;
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 		");
 	}
 
-	public function Get()
+	public function GetInner()
 	{
-		return Convert::ToString(function () {
-			module("Image" );
-			$img = new Image();
-			$img->Class = "image";
-			yield $img->GetStyle();
+		module("Image");
+		$img = new Image();
+		$img->Class = "image";
+		yield $img->GetStyle();
 
-			module("ImageModal");
-			$viewer = new ImageModal();
-			$viewer->Name = $this->Name . "_" . $viewer->Name;
+		module("ImageModal");
+		$viewer = new ImageModal();
+		$viewer->MainClass = $this->MainClass . "_" . $viewer->MainClass;
 
-			$i = 0;
-			//yield  "<div class='row'>";
-			foreach ($this->Items as $item) {
-				if ($i % $this->MaximumColumns === 0)
-					yield "<div class='row'>";
-				$p_image = getValid($item, 'Image' , $this->DefaultImage);
-				$p_name = getBetween($item, 'Name', 'Title')?? $this->DefaultTitle;
-				$p_title = getValid($item, 'Title' , $p_name);
-				$p_description = getValid($item, 'Description' , $this->DefaultDescription);
-				$p_content = getValid($item, 'Content' , $this->DefaultContent) ?? $p_description;
-				$p_download = get($item, 'Download');
-				$p_link = getValid($item, 'Link', $this->DefaultPath) ?? (isEmpty($this->MoreButtonLabel) ? null : $p_download ?? $p_image);
-				$p_path = getValid($item, 'Path' , $this->DefaultPath) ?? $p_link;
-				$p_buttons = getValid($item, 'ButtonsContent', $this->DefaultButtons);
-				$img->Source = $p_image;
-				$clickact = $viewer->InitializeScript($p_title, $p_description, ($p_link ?? $p_path ?? $p_image), $p_buttons, getFullUrl($p_download ?? $p_path ?? $p_link ?? $p_image));
-				$img->Attributes = ["onclick" => $clickact];
-				yield "<div class='item item-$i  col-md' " . ($this->Animation ? ("data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed / 2) . "' data-aos='{$this->Animation}'") : null) . ">";
-				yield $img->ToString();
-				yield "<div class='description'>";
-				yield Struct::Heading4($p_name, true, false);
-				yield Struct::Paragraph($p_description);
-				if (isValid($p_path))
-					yield Struct::Button($this->MoreButtonLabel, $clickact, ["class"=> "btn outline btn block"]);
-				yield Struct::Division(__($p_content ?? $p_description, true, false), ["class"=> "hide"]);
-				yield "</div>
+		$i = 0;
+		//yield  "<div class='row'>";
+		foreach ($this->Items as $item) {
+			if ($i % $this->MaximumColumns === 0)
+				yield "<div class='row'>";
+			$p_image = getValid($item, 'Image', $this->DefaultImage);
+			$p_name = getBetween($item, 'Name', 'Title') ?? $this->DefaultTitle;
+			$p_title = getValid($item, 'Title', $p_name);
+			$p_description = getValid($item, 'Description', $this->DefaultDescription);
+			$p_content = getValid($item, 'Content', $this->DefaultContent) ?? $p_description;
+			$p_download = get($item, 'Download');
+			$p_link = getValid($item, 'Link', $this->DefaultPath) ?? (isEmpty($this->MoreButtonLabel) ? null : $p_download ?? $p_image);
+			$p_path = getValid($item, 'Path', $this->DefaultPath) ?? $p_link;
+			$p_buttons = getValid($item, 'ButtonsContent', $this->DefaultButtons);
+			$img->Source = $p_image;
+			$clickact = $viewer->InitializeScript($p_title, $p_description, ($p_link ?? $p_path ?? $p_image), $p_buttons, getFullUrl($p_download ?? $p_path ?? $p_link ?? $p_image));
+			$img->Attributes = ["onclick" => $clickact];
+			yield "<div class='item item-$i  col-md' " . ($this->Animation ? ("data-aos-delay='" . ($i % $this->MaximumColumns * \_::$Front->AnimationSpeed / 2) . "' data-aos='{$this->Animation}'") : null) . ">";
+			yield $img->ToString();
+			yield "<div class='description'>";
+			yield Struct::Heading4($p_name, true, false);
+			yield Struct::Paragraph($p_description);
+			if (isValid($p_path))
+				yield Struct::Button($this->MoreButtonLabel, $clickact, ["class" => "btn outline btn block"]);
+			yield Struct::Division(__($p_content ?? $p_description, true, false), ["class" => "hide"]);
+			yield "</div>
 			</div>";
-				if (++$i % $this->MaximumColumns === 0)
-					yield "</div>";
-			}
-
-			if ($i % $this->MaximumColumns !== 0)
+			if (++$i % $this->MaximumColumns === 0)
 				yield "</div>";
+		}
 
-			yield $viewer->ToString();
-		});
+		if ($i % $this->MaximumColumns !== 0)
+			yield "</div>";
+
+		yield $viewer->ToString();
 	}
 }
-?>

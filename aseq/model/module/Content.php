@@ -17,7 +17,7 @@ class Content extends Module
      public $Root = null;
      public $CollectionRoot = null;
 
-     public $Tag = "article";
+     public string|null $TagName = "article";
      public $Class = "container";
      public $CommentForm = null;
      /**
@@ -101,7 +101,7 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
-     public $AllowRoot = true;
+     public $AllowRoute = true;
 
      /**
       * @var bool
@@ -302,7 +302,7 @@ class Content extends Module
      {
           $ralign = \_::$Front->Translate->Direction == "rtl" ? "left" : "right";
           return Struct::Style("
-			.{$this->Name} {
+			.{$this->MainClass} {
 				height: fit-content;
 				background-Color: var(--back-color-special);
 				color: var(--fore-color-special);
@@ -314,38 +314,38 @@ class Content extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name} .title{
+			.{$this->MainClass} .title{
 				margin-bottom: var(--size-2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->Name} .heading{
+			.{$this->MainClass} .heading{
                     text-align: start;
                     padding: 0px;
                     margin-bottom: calc(var(--size-0) / 2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .details{
+			.{$this->MainClass} .details{
 				font-size: var(--size-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .details .route{
+			.{$this->MainClass} .details .route{
                     opacity: 0.9;
 				padding-$ralign: var(--size-0);
 			}
-			.{$this->Name} .buttons{
+			.{$this->MainClass} .buttons{
 				text-align: $ralign;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .buttons>.button{
+			.{$this->MainClass} .buttons>.button{
             	     opacity: 0;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name}:hover .buttons>.button{
+			.{$this->MainClass}:hover .buttons>.button{
             	     opacity: 1;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .tags a{
+			.{$this->MainClass} .tags a{
                     line-height: 100%;
 				background-Color: inherit;
 				color: inherit;
@@ -353,7 +353,7 @@ class Content extends Module
 				border-radius: var(--radius-1);
             		margin: calc(var(--size-0) / 3);
 			}
-			.{$this->Name} .relateds a{
+			.{$this->MainClass} .relateds a{
                 	display: block;
 				background-Color: inherit;
 				color: inherit;
@@ -362,7 +362,7 @@ class Content extends Module
             		margin: calc(var(--size-0) / 3) 0px;
 			}
 			/* Style the images inside the grid */
-			.{$this->Name} .description .image {
+			.{$this->MainClass} .description .image {
 				width: $this->ImageWidth;
 				height: $this->ImageHeight;
 				min-height: $this->ImageMinHeight;
@@ -372,44 +372,42 @@ class Content extends Module
 				overflow: hidden;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .description{
+			.{$this->MainClass} .description{
             	     font-size: var(--size-2);
                     gap: var(--size-2);
                     text-align: justify;
 				position: relative;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->Name} .content{
+			.{$this->MainClass} .content{
                     line-height: 2em;
                     font-size: var(--size-1);
                     text-align: justify;
 				padding-top: var(--size-3);
 				padding-bottom: var(--size-3);
 			}
-               .{$this->Name}>:not(.title, .description, .content){
+               .{$this->MainClass}>:not(.title, .description, .content){
                     padding-top: var(--size-max);
                     padding-bottom: var(--size-max);
                }
         ");
      }
 
-     public function Get()
+     public function GetInner()
      {
-          return Convert::ToString(function () {
-               $this->Set();
-               if (!$this->GetAccess())
-                    return part(\_::$User->InHandlerPath, print: false);
+          $this->Set();
+          if (!$this->GetAccess())
+               return part(\_::$User->InHandlerPath, print: false);
 
-               yield $this->GetTitle();
-               yield $this->GetDescription();
-               yield $this->GetContent();
-               yield $this->GetSpecial();
-               yield $this->GetAttaches();
-               yield $this->GetTags();
-               yield $this->GetRelateds();
-               yield $this->GetCommentsCollection();
-               yield $this->GetCommentForm();
-          });
+          yield $this->GetTitle();
+          yield $this->GetDescription();
+          yield $this->GetContent();
+          yield $this->GetSpecial();
+          yield $this->GetAttaches();
+          yield $this->GetTags();
+          yield $this->GetRelateds();
+          yield $this->GetCommentsCollection();
+          yield $this->GetCommentForm();
      }
 
      public function GetAccess()
@@ -517,10 +515,10 @@ class Content extends Module
           $createTime = get($this->Item, 'CreateTime');
           $modifyTime = get($this->Item, 'UpdateTime');
           $p_meta = null;
-          if ($this->AllowRoot) {
+          if ($this->AllowRoute) {
                module("Route");
                $route = new \MiMFa\Module\Route($path);
-               $route->Tag = "span";
+               $route->TagName = "span";
                $route->Class = "route";
                $p_meta = $route->ToString();
           }
@@ -628,10 +626,10 @@ class Content extends Module
           $p_relatedsorder = Convert::FromSwitch($this->RelatedsOrder, $p_type);
           //$rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Front->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Front->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
           $rels = table("Content")->Select("*", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Front->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Front->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
-          if (count($rels) > 0){
+          if (count($rels) > 0) {
                module("ContentCollection");
                $cc = new ContentCollection($rels);
-               return ($p_relatedstext?Struct::Heading3($p_relatedstext):"") . $cc->ToString();
+               return ($p_relatedstext ? Struct::Heading3($p_relatedstext) : "") . $cc->ToString();
                // return Struct::Division($p_relatedstext . join(PHP_EOL, loop(
                //      $rels,
                //      function ($v, $k) {

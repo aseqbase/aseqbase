@@ -3,7 +3,7 @@
 use MiMFa\Library\Struct;
 
 class SearchForm extends Module{
-    public $Tag = null;
+    public string|null $TagName = null;
 	public $Path = "/search";
 	public $SubmitLabel = "<i class='icon fa fa-search'></i>";
 	public $PlaceHolder = "Search";
@@ -14,9 +14,9 @@ class SearchForm extends Module{
     public $Items = [];
     public $Printable = false;
 	
-	public function Get(){
+	public function GetInner(){
 		$src = $this->Path??"/search";
-		$dlName = $this->Items?$this->Name."_items":null;
+		$dlName = $this->Items?$this->MainClass."_items":null;
 		return Struct::Form(
 				parent::GetTitle().parent::GetDescription().
 				Struct::SearchInput($this->QueryKey, receiveGet($this->QueryKey)??$this->QueryValue, $dlName?["list"=>$dlName]:[], ["placeholder"=>__($this->PlaceHolder),...($this->RealtimeAction?["onkeyup"=>$this->RealtimeAction]:[])])

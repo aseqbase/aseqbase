@@ -81,28 +81,28 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		return Struct::Script("
 			_(document).ready(function () {
-				_(`.{$this->Name} :is(input, select, textarea)`).on('focus', function () {
-					_(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
+				_(`.{$this->MainClass} :is(input, select, textarea)`).on('focus', function () {
+					_(this).parent().find(`.{$this->MainClass} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
-				_(`.{$this->Name} :is(input, select, textarea)`).on('blur', function () {
-					_(this).parent().find(`.{$this->Name} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
+				_(`.{$this->MainClass} :is(input, select, textarea)`).on('blur', function () {
+					_(this).parent().find(`.{$this->MainClass} .input-group .text`).css('outline-color', 'var(--fore-color-output)');
 				});
-                if(_('.{$this->Name} form [name=Password]'))
-					_('.{$this->Name} form').submit(function(e) {
+                if(_('.{$this->MainClass} form [name=Password]'))
+					_('.{$this->MainClass} form').submit(function(e) {
 					let error = null;
-					if (!_('.{$this->Name} form [name=Password]')?.val().match({$this->PasswordPattern})) 
+					if (!_('.{$this->MainClass} form [name=Password]')?.val().match({$this->PasswordPattern})) 
 						error = Struct.error(" . \MiMFa\Library\Script::Convert($this->PasswordTip) . ");
-					else if (_('.{$this->Name} form [name=PasswordConfirmation]')?.val() != _('.{$this->Name} form [name=Password]')?.val()) 
+					else if (_('.{$this->MainClass} form [name=PasswordConfirmation]')?.val() != _('.{$this->MainClass} form [name=Password]')?.val()) 
 						error = Struct.error('New password and confirm password does not match!');
 					if(error) {
 						e.preventDefault();
-						_('.{$this->Name} form .result')?.remove();
-						_('.{$this->Name} form').append(error);
+						_('.{$this->MainClass} form .result')?.remove();
+						_('.{$this->MainClass} form').append(error);
 						return false;
 					}
 					return true;
                 });
-				else " . ($this->Interactive ? "handleForm('.{$this->Name} form', null, null, null, null, " . ($this->Timeout * 1000) . ");" : "") . "
+				else " . ($this->Interactive ? "handleForm('.{$this->MainClass} form', null, null, null, null, " . ($this->Timeout * 1000) . ");" : "") . "
 			});
 		");
 	}

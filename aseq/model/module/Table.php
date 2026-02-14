@@ -289,87 +289,87 @@ class Table extends Module
 			backgroound-color: var(--back-color-input);
 			color: var(--fore-color-input);
 		}
-		.{$this->Name} :is(tr, td, th){
+		.{$this->MainClass} :is(tr, td, th){
 			border-size: {$this->BorderSize};
             border-collapse:collapse;
 		}
-		.{$this->Name} tr th{
+		.{$this->MainClass} tr th{
 			font-weight: bold;
 		}
-		.{$this->Name} :is(thead, tfoot) tr :is(td, th){
+		.{$this->MainClass} :is(thead, tfoot) tr :is(td, th){
             padding: 10px;
 		}
-		.{$this->Name} tbody tr :is(td,th){
+		.{$this->MainClass} tbody tr :is(td,th){
             padding: 2px 10px !important;
 		}
-		.{$this->Name} tr :is(td,th){
+		.{$this->MainClass} tr :is(td,th){
             align-content: center;
             align-items: center;
 			" . Style::DoProperty("text-wrap", ($this->TextWrap === true ? "pretty" : ($this->TextWrap === false ? "nowrap" : $this->TextWrap))) . "
 		}
-		.{$this->Name} tr :is(td,th):has(.media:not(.icon)){
+		.{$this->MainClass} tr :is(td,th):has(.media:not(.icon)){
             display: flex;
             align-items: center;
             text-align: center;
             justify-content: center;
 		}
-		.{$this->Name} tr :is(td,th) .media:not(.icon){
+		.{$this->MainClass} tr :is(td,th) .media:not(.icon){
 			" . Style::DoProperty("width", $this->MediaWidth) . "
 			" . Style::DoProperty("height", $this->MediaHeight) . "
 			display: block;
 		}
-		.{$this->Name} .media.icon{
+		.{$this->MainClass} .media.icon{
 			cursor: pointer;
 		}
-		.{$this->Name} .media.icon:hover{
+		.{$this->MainClass} .media.icon:hover{
 			border-color: transparent;
 			" . Style::UniversalProperty("filter", "drop-shadow(var(--shadow-2))") . "
 		}
-		.{$this->Name} .field {
+		.{$this->MainClass} .field {
 			width: 100%;
 		}
-		.{$this->Name} :not(.field) .input {
+		.{$this->MainClass} :not(.field) .input {
             max-width: 100px;
 		}
-        .{$this->Name} table.dataTable tbody :is(td, tr) {
+        .{$this->MainClass} table.dataTable tbody :is(td, tr) {
             text-align: -webkit-auto;
         }
-        .{$this->Name} table.dataTable thead :is(th, tr) {
+        .{$this->MainClass} table.dataTable thead :is(th, tr) {
             text-align: center;
         }
-        .{$this->Name} table.dataTable tbody tr :is(th, td) span.number {
+        .{$this->MainClass} table.dataTable tbody tr :is(th, td) span.number {
             margin: calc(var(--size-0) / 2);
         }
 		" . ($this->OddEvenColumns ? "
-            .{$this->Name} table.dataTable tbody tr:nth-child(even) :is(td, th):nth-child(odd) {
+            .{$this->MainClass} table.dataTable tbody tr:nth-child(even) :is(td, th):nth-child(odd) {
                 background-color: #88888817;
             }
-            .{$this->Name} table.dataTable tbody tr:nth-child(odd) :is(td, th):nth-child(odd) {
+            .{$this->MainClass} table.dataTable tbody tr:nth-child(odd) :is(td, th):nth-child(odd) {
                 background-color: #88888815;
             }
 		" : "") . ($this->OddEvenRows ? "
-            .{$this->Name} table.dataTable tbody tr:nth-child(odd) {
+            .{$this->MainClass} table.dataTable tbody tr:nth-child(odd) {
                 background-color: #8881;
             }
 		" : "") . ($this->HoverableRows ? "
-            .{$this->Name} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)):hover {
+            .{$this->MainClass} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)):hover {
                 background-color: #8882;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
             }
 		" : "") . ($this->HoverableCells ? "
-            .{$this->Name} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
+            .{$this->MainClass} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)) td:hover {
                 background-color: transparent;
                 outline: 1px solid var(--color-yellow);
                 border-radius: var(--radius-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
             }
-            .{$this->Name} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
+            .{$this->MainClass} table.dataTable tbody tr:is(:nth-child(odd), :nth-child(even)) th:hover {
                 background-color: transparent;
                 outline: 1px solid var(--color-green);
                 border-radius: var(--radius-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
             }
-            .{$this->Name} table.dataTable tfoot :is(th, td) {
+            .{$this->MainClass} table.dataTable tfoot :is(th, td) {
                 text-align: center;
             }
         " : ""));
@@ -381,7 +381,7 @@ class Table extends Module
         $b = false;
         if ($b = is_null($this->Modal)) {
             $this->Modal = new Modal();
-            $this->Modal->Name = "InternalModal";
+            $this->Modal->MainClass = "InternalModal";
         }
         $this->Modal->AllowDownload =
             $this->Modal->AllowFocus =
@@ -401,7 +401,7 @@ class Table extends Module
         return $this->Modal->Handle();
     }
 
-    public function Get()
+    public function GetInner()
     {
         $isc = $this->Controlable;
         $isu = $isc && $this->Updatable && \_::$User->HasAccess($this->UpdateAccess);
@@ -467,9 +467,9 @@ class Table extends Module
 
         $addbutton = fn($add = "Add your first item", $import = false, $export = false) =>
             $aaccess || $iaccess || $eaccess ? Struct::Center(
-                ($add === false || !$aaccess ? "" : Struct::Button(__($add) . Struct::Icon("plus"), "{$this->Modal->Name}_Create();", ["class" => "table-item-create"], $add ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Add another Item"])) .
-                ($import === false || !$iaccess ? "" : Struct::Button(__($import) . Struct::Icon("download"), "{$this->Modal->Name}_Import();", ["class" => "table-items-import"], $import ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Import Items"])) .
-                ($export === false || !$eaccess ? "" : Struct::Button(__($export) . Struct::Icon("upload"), "{$this->Modal->Name}_Export();", ["class" => "table-items-export"], $export ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Export Items"]))
+                ($add === false || !$aaccess ? "" : Struct::Button(__($add) . Struct::Icon("plus"), "{$this->Modal->MainClass}_Create();", ["class" => "table-item-create"], $add ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Add another Item"])) .
+                ($import === false || !$iaccess ? "" : Struct::Button(__($import) . Struct::Icon("download"), "{$this->Modal->MainClass}_Import();", ["class" => "table-items-import"], $import ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Import Items"])) .
+                ($export === false || !$eaccess ? "" : Struct::Button(__($export) . Struct::Icon("upload"), "{$this->Modal->MainClass}_Export();", ["class" => "table-items-export"], $export ? [] : ["style" => "padding:calc(var(--size-0) / 2);border:none;", "Tooltip" => "Export Items"]))
             ) : null;
 
         if ($isc) {
@@ -500,10 +500,10 @@ class Table extends Module
                                         Struct::Hidden($rowid),
                                         ...[($hrn ? Struct::Span($rn++, null, ['class' => 'number']) : "")],
                                         ...Convert::ToSequence(Convert::By($this->PrependControlsCreator, $rowid, $row) ?? []),
-                                        ...($vaccess ? [Struct::Icon("eye", "{$this->Modal->Name}_View(`$rowid`);", ["class" => "table-item-view", "tooltip" => "Show"])] : []),
-                                        ...($maccess ? [Struct::Icon("edit", "{$this->Modal->Name}_Modify(`$rowid`);", ["class" => "table-item-modify", "tooltip" => "Modify"])] : []),
-                                        ...($daccess ? [Struct::Icon("copy", "{$this->Modal->Name}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate", "tooltip" => "Duplicate Copy"])] : []),
-                                        ...($raccess ? [Struct::Icon("trash", "{$this->Modal->Name}_Delete(`$rowid`);", ["class" => "table-item-delete", "tooltip" => "Remove"])] : []),
+                                        ...($vaccess ? [Struct::Icon("eye", "{$this->Modal->MainClass}_View(`$rowid`);", ["class" => "table-item-view", "tooltip" => "Show"])] : []),
+                                        ...($maccess ? [Struct::Icon("edit", "{$this->Modal->MainClass}_Modify(`$rowid`);", ["class" => "table-item-modify", "tooltip" => "Modify"])] : []),
+                                        ...($daccess ? [Struct::Icon("copy", "{$this->Modal->MainClass}_Duplicate(`$rowid`);", ["class" => "table-item-duplicate", "tooltip" => "Duplicate Copy"])] : []),
+                                        ...($raccess ? [Struct::Icon("trash", "{$this->Modal->MainClass}_Delete(`$rowid`);", ["class" => "table-item-delete", "tooltip" => "Remove"])] : []),
                                         ...Convert::ToSequence(Convert::By($this->AppendControlsCreator, $rowid, $row) ?? [])
                                     ]),
                                     ...$row
@@ -595,10 +595,16 @@ class Table extends Module
                     $cells[] = "</tr></tfoot>";
                 } else
                     $cells[] = Convert::ToString($this->Footer);
-            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton($aaccess ? "Add another item" : false, $iaccess ? "Import items" : false, $eaccess ? "Export items" : false) . (!$this->TopNavigation || is_null($this->NavigationBar) ? "" : $this->NavigationBar->ToString()) . Struct::Table(join(PHP_EOL, $cells)) . parent::GetCloseTag();
+            return ($isc ? $this->HandleModal() : "") .
+                $addbutton($aaccess ? "Add another item" : false, $iaccess ? "Import items" : false, $eaccess ? "Export items" : false) .
+                (($this->TopNavigation && !empty($this->NavigationBar)) ? $this->NavigationBar->ToString() : "") .
+                Struct::Table(join(PHP_EOL, $cells)) .
+                (($this->BottomNavigation && !empty($this->NavigationBar)) ? $this->NavigationBar->ToString() : "");
         } elseif ($aaccess || $iaccess)
-            return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . $addbutton("Add your first item", $iaccess ? "Import items" : false,  $eaccess ? "Export items" : false,) . Struct::Table("") . parent::GetCloseTag();
-        return ($isc ? $this->HandleModal() : "") . parent::GetOpenTag() . Struct::Table("") . parent::GetCloseTag();
+            return ($isc ? $this->HandleModal() : "") .
+                $addbutton("Add your first item", $iaccess ? "Import items" : false, $eaccess ? "Export items" : false, ) .
+                Struct::Table("");
+        return ($isc ? $this->HandleModal() : "") . Struct::Table("");
     }
 
     public function GetCell($value, $key, $record = [], bool $isHead = false)
@@ -635,7 +641,7 @@ class Table extends Module
         return Struct::Script(
             "_(document).ready(()=>{" .
             (!$this->AllowDecoration ? "" :
-                "$('.{$this->Name} table').DataTable({" .
+                "$('.{$this->MainClass} table').DataTable({" .
                 join(", ", [
                     ...(is_null($this->AllowCache) ? [] : ["stateSave: " . ($this->AllowCache ? "true" : "false")]),
                     ...(is_null($this->AllowPaging) ? [] : ["paging: " . ($this->AllowPaging ? ($localPaging ? "true" : "false") : "false")]),
@@ -687,66 +693,66 @@ class Table extends Module
                 "});
 			});") . ($this->Controlable ?
                 (is_null($this->Modal) ? "" : ("
-				function {$this->Modal->Name}_View(key){
-					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ViewSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+				function {$this->Modal->MainClass}_View(key){
+					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ViewSecret}','{$this->KeyColumn}':key}, `.{$this->MainClass}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}") . ($this->Updatable ? (\_::$User->HasAccess($this->ImportAccess) ? "
-				function {$this->Modal->Name}_Import(defaultValues = null){
-                    send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ImportSecret}','{$this->KeyColumn}':'{$this->ImportSecret}'}, `.{$this->Name}`,
+				function {$this->Modal->MainClass}_Import(defaultValues = null){
+                    send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ImportSecret}','{$this->KeyColumn}':'{$this->ImportSecret}'}, `.{$this->MainClass}`,
                         (data, err)=>{
                             " . $this->Modal->InitializeScript(null, null, '${data}') . "
                             if(defaultValues)
                                 for(x in defaultValues)try{
-                                    document.querySelector('.{$this->Modal->Name} *[name=\"'+x+'\"]').value = defaultValues[x];
+                                    document.querySelector('.{$this->Modal->MainClass} *[name=\"'+x+'\"]').value = defaultValues[x];
                                 }catch{}
                         }
                     );
 				}" : "") . (\_::$User->HasAccess($this->ExportAccess) ? "
-				function {$this->Modal->Name}_Export(defaultValues = null){
-                    sendRequest('{$this->Method}', null, {{$this->SecretKey}:'{$this->ExportSecret}','{$this->KeyColumn}':'{$this->ExportSecret}'}, `.{$this->Name}`,
+				function {$this->Modal->MainClass}_Export(defaultValues = null){
+                    sendRequest('{$this->Method}', null, {{$this->SecretKey}:'{$this->ExportSecret}','{$this->KeyColumn}':'{$this->ExportSecret}'}, `.{$this->MainClass}`,
                         (data, err)=>{
                             " . $this->Modal->InitializeScript(null, null, '${data}') . "
                             if(defaultValues)
                                 for(x in defaultValues)try{
-                                    document.querySelector('.{$this->Modal->Name} *[name=\"'+x+'\"]').value = defaultValues[x];
+                                    document.querySelector('.{$this->Modal->MainClass} *[name=\"'+x+'\"]').value = defaultValues[x];
                                 }catch{}
                         }
                     );
 				}" : "") . (\_::$User->HasAccess($this->AddAccess) ? "
-				function {$this->Modal->Name}_Create(defaultValues = null){
-					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->Name}`,
+				function {$this->Modal->MainClass}_Create(defaultValues = null){
+					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->AddSecret}','{$this->KeyColumn}':'{$this->AddSecret}'}, `.{$this->MainClass}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
                             if(defaultValues)
                                 for(x in defaultValues)try{
-                                    document.querySelector('.{$this->Modal->Name} *[name=\"'+x+'\"]').value = defaultValues[x];
+                                    document.querySelector('.{$this->Modal->MainClass} *[name=\"'+x+'\"]').value = defaultValues[x];
                                 }catch{}
 						}
 					);
 				}" : "") . (\_::$User->HasAccess($this->ModifyAccess) ? "
-				function {$this->Modal->Name}_Modify(key){
-					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+				function {$this->Modal->MainClass}_Modify(key){
+					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->ModifySecret}','{$this->KeyColumn}':key}, `.{$this->MainClass}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (\_::$User->HasAccess($this->DuplicateAccess) ? "
-				function {$this->Modal->Name}_Duplicate(key){
-					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+				function {$this->Modal->MainClass}_Duplicate(key){
+					send('{$this->Method}', null, {{$this->SecretKey}:'{$this->DuplicateSecret}','{$this->KeyColumn}':key}, `.{$this->MainClass}`,
 						(data, err)=>{
 							" . $this->Modal->InitializeScript(null, null, '${data}') . "
 						}
 					);
 				}" : "") . (\_::$User->HasAccess($this->RemoveAccess) ? "
-				function {$this->Modal->Name}_Delete(key){
+				function {$this->Modal->MainClass}_Delete(key){
 					" . ($this->SevereSecure ? "if(confirm(`" . __("Are you sure you want to remove this item?") . "`))" : "") . "
-						send('{$this->Method}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->Name}`,
+						send('{$this->Method}', null, {{$this->SecretKey}:'{$this->RemoveSecret}','{$this->KeyColumn}':key}, `.{$this->MainClass}`,
 						(data, err)=>{
                             if(err) console.error(err);
-                            if(data) return _('.{$this->Name} tr:has(hidden[value=\"'+key+'\"])').remove();
+                            if(data) return _('.{$this->MainClass} tr:has(hidden[value=\"'+key+'\"])').remove();
                             //load();
 						});
 				}" : "") : "")
@@ -754,15 +760,7 @@ class Table extends Module
         ) . ($this->RefreshTimeout ? (new (module("Counter"))(max(1, $this->RefreshTimeout / 1000), 0, "load()"))->GetScript() : "");
     }
 
-    public function AfterHandle()
-    {
-        if (!$this->BottomNavigation || is_null($this->NavigationBar))
-            return parent::AfterHandle();
-        else
-            return parent::AfterHandle() . ($this->TopNavigation ? $this->NavigationBar->ToString() : $this->NavigationBar->ToString());
-    }
-
-    public function Exclusive()
+    public function Exclusive(): mixed
     {
         $values = receive($this->Method) ?? [];
         $value = get($values, $this->KeyColumn);
@@ -851,7 +849,7 @@ class Table extends Module
             description: get($record, "Description"),
             action: '#',
             method: "",
-            children: (function () use ($record) {
+            items: (function () use ($record) {
                 foreach ($record as $k => $cell) {
                     $type = getValid($this->CellsTypes, $k, "");
                     if (is_string($type)) {
@@ -912,7 +910,7 @@ class Table extends Module
             title: "Import {$this->Title}",
             description: $this->Description,
             method: null,
-            children: (function () use ($record) {
+            items: (function () use ($record) {
                 $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME
                     FROM INFORMATION_SCHEMA.COLUMNS
@@ -943,7 +941,7 @@ class Table extends Module
             title: "Export {$this->Title}",
             description: $this->Description,
             method: null,
-            children: (function () use ($record) {
+            items: (function () use ($record) {
                 $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME
                     FROM INFORMATION_SCHEMA.COLUMNS
@@ -975,7 +973,7 @@ class Table extends Module
             title: "Add {$this->Title}",
             description: $this->Description,
             method: null,
-            children: (function () use (&$record, $value) {
+            items: (function () use (&$record, $value) {
                 $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
@@ -1023,7 +1021,7 @@ class Table extends Module
             title: "Add {$this->Title}",
             description: $this->Description,
             method: null,
-            children: (function () use (&$record, $value) {
+            items: (function () use (&$record, $value) {
                 $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
@@ -1068,7 +1066,7 @@ class Table extends Module
             title: getBetween($record, "Title", "Name"),
             description: get($record, "Description"),
             method: null,
-            children: (function () use ($record, $value) {
+            items: (function () use ($record, $value) {
                 $schemas = $this->DataTable->DataBase->TryFetchRows(
                     "SELECT COLUMN_NAME, COLUMN_TYPE, DATA_TYPE, COLUMN_DEFAULT, IS_NULLABLE, EXTRA
                     FROM INFORMATION_SCHEMA.COLUMNS
