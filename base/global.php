@@ -68,13 +68,13 @@ run("global/BackBase");
 run("Back");
 \_::$Back = new Back();
 
-run("global/FrontBase");
-run("Front");
-\_::$Front = new Front();
-
 run("global/UserBase");
 run("User");
 \_::$User = new User();
+
+run("global/FrontBase");
+run("Front");
+\_::$Front = new Front();
 
 run("global/Base");
 run("global/Types");
@@ -840,7 +840,7 @@ function response($content = null, $status = null)
  * @param mixed $script The script, It could be a script to change the progress value on the client side
  * @param mixed $status The header status
  */
-function procedure($script = null, $status = 211)
+function procedure($script = null, $status = 202)
 {
 	response(Struct::Procedure($script), $status);
 }
@@ -1152,7 +1152,7 @@ function deliverError($message = null, $status = 400)
  * @param mixed $script The script, It could be a script to change the progress value on the client side
  * @return void
  */
-function deliverProcedure($script = null, $status = 211)
+function deliverProcedure($script = null, $status = 202)
 {
 	deliver(Struct::Procedure($script), $status);
 }
@@ -2743,6 +2743,14 @@ function createEmail($name = "do-not-reply", string|null $host = null): string|n
 #region STORAGING
 
 /**
+ * Get the cached data or cache the data by execute the $generator
+ * @param mixed $key
+ * @param callable|null $generator
+ */
+function cache($key, callable|null $generator = null){
+	return \_::Cache($key, $generator);
+}
+/**
  * To cleanup all Temporary files, or received files in this request
  * @param mixed $full True to cleanup all Temporary files, false to cleanup only received files in this request
  */
@@ -3232,6 +3240,8 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 	$value = Convert::ToString(
 		is_array($value) ? join($separator, loop($value, fn($v) => __($v, $translating, $styling, $referring))) : $value
 	);
+
+	if(!\_::$Front) return $value;
 	if ($translating && \_::$Front->AllowTranslate)
 		$value = \_::$Front->Translate->Get($value, $lang, $depth);
 	else

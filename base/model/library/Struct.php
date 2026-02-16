@@ -710,8 +710,8 @@ class Struct
     public static function Procedure($script, ...$attributes)
     {
         $id = self::GetAttribute($attributes, "Id") ?? ("_" . getId(true));
-        return self::Element(Convert::ToString($script).";
-            document.getElementById('$id')?.remove();", "script", ["id"=>$id, "type" => "text/javascript"], $attributes);
+        return self::Element(Convert::ToString($script) . ";
+            document.getElementById('$id')?.remove();", "script", ["id" => $id, "type" => "text/javascript"], $attributes);
     }
     #endregion
 
@@ -784,7 +784,7 @@ class Struct
                 "onclick" => "this.classList.remove('$id');",
             ],
             $attributes
-        ) . ($timeout?self::Script("setTimeout(function(){ return document.querySelector('#$id.$id')?.remove();}, $timeout); scrollThere('body>#$id');"):"");
+        ) . ($timeout ? self::Script("setTimeout(function(){ return document.querySelector('#$id.$id')?.remove();}, $timeout); scrollThere('body>#$id');") : "");
     }
     public static function Message($content, ...$attributes)
     {
@@ -1473,13 +1473,30 @@ class Struct
      */
     public static function Collection($content, ...$attributes)
     {
+        $overflow = self::PopAttribute($attributes, "Overflow");
         if (is_countable($content)) {
             $res = [];
-            foreach ($content as $k => $item)
-                if (is_numeric($k))
-                    $res[] = $item;
-                else
-                    $res[] = self::Element(__($k), "dt") . self::Element(__($item), "dd");
+            if ($overflow) {
+                $i = 0;
+                $rs = [];
+                foreach ($content as $k => $item) {
+                    if (($i % $overflow) === 0) {
+                        if ($rs)
+                            $res[] = self::Element($rs, "dl", ["class" => "collection"], $attributes);
+                        $rs = [];
+                    }
+                    $rs[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
+                    $i++;
+                }
+                if ($rs)
+                    $res[] = self::Element($rs, "dl", ["class" => "collection"], $attributes);
+                return join(PHP_EOL, $res);
+            } else
+                foreach ($content as $k => $item)
+                    if (is_numeric($k))
+                        $res[] = $item;
+                    else
+                        $res[] = self::Element(__($k), "dt") . self::Element(__($item), "dd");
             return self::Element($res, "dl", ["class" => "collection"], $attributes);
         }
         return self::Element(__($content), "dl", ["class" => "collection"], $attributes);
@@ -1492,13 +1509,28 @@ class Struct
      */
     public static function List($content, ...$attributes)
     {
+        $overflow = self::PopAttribute($attributes, "Overflow");
         if (is_countable($content)) {
             $res = [];
-            foreach ($content as $k => $item)
-                //$res[] = self::Item($item);
-                $res[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
-            $content = $res;
-            return self::Element($content, "ol", ["class" => "list"], $attributes);
+            if ($overflow) {
+                $i = 0;
+                $rs = [];
+                foreach ($content as $k => $item) {
+                    if (($i % $overflow) === 0) {
+                        if ($rs)
+                            $res[] = self::Element($rs, "ol", ["class" => "list"], $attributes);
+                        $rs = [];
+                    }
+                    $rs[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
+                    $i++;
+                }
+                if ($rs)
+                    $res[] = self::Element($rs, "ol", ["class" => "list"], $attributes);
+                return join(PHP_EOL, $res);
+            } else
+                foreach ($content as $k => $item)
+                    $res[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
+            return self::Element($res, "ol", ["class" => "list"], $attributes);
         }
         return self::Element(__($content), "ol", ["class" => "list"], $attributes);
     }
@@ -1510,13 +1542,28 @@ class Struct
      */
     public static function Items($content, ...$attributes)
     {
+        $overflow = self::PopAttribute($attributes, "Overflow");
         if (is_countable($content)) {
             $res = [];
-            foreach ($content as $k => $item)
-                //$res[] = self::Item($item);
-                $res[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
-            $content = $res;
-            return self::Element($content, "ul", ["class" => "items"], $attributes);
+            if ($overflow) {
+                $i = 0;
+                $rs = [];
+                foreach ($content as $k => $item) {
+                    if (($i % $overflow) === 0) {
+                        if ($rs)
+                            $res[] = self::Element($rs, "ul", ["class" => "items"], $attributes);
+                        $rs = [];
+                    }
+                    $rs[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
+                    $i++;
+                }
+                if ($rs)
+                    $res[] = self::Element($rs, "ul", ["class" => "items"], $attributes);
+                return join(PHP_EOL, $res);
+            } else
+                foreach ($content as $k => $item)
+                    $res[] = self::Element((is_numeric($k) ? "" : self::Heading6($k)) . __($item), "li", ["class" => "item"]);
+            return self::Element($res, "ul", ["class" => "items"], $attributes);
         }
         return self::Element(__($content), "ul", ["class" => "items"], $attributes);
     }
@@ -1606,7 +1653,7 @@ class Struct
                 _(document).on('contextmenu', function(e) {
                     _('.menu.contextmenu:not(#$id)').removeClass('active');
                     var menu = document.getElementById('$id');
-                    if(menu && ".($selector?("_(".Script::Convert($selector).").contains(e.target)"):"_(e.target).contains(menu)")."){
+                    if(menu && " . ($selector ? ("_(" . Script::Convert($selector) . ").contains(e.target)") : "_(e.target).contains(menu)") . "){
                         e.preventDefault();
                         if(e.pageY + menu.offsetHeight > window.innerHeight) menu.style.top = e.pageY - menu.offsetHeight + 'px';
                         else menu.style.top = e.pageY + 'px';

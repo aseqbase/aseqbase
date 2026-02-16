@@ -44,7 +44,7 @@ class SideMenu extends Module
 	{
 		parent::__construct();
 		$this->Items = $items ?? $this->Items;
-		$this->Direction = \_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection;
+		$this->Direction = \_::$Front->Translate->Direction ?? \_::$Front->Direction;
 		$this->ToggleLabel = Struct::Icon("angle-down");
 	}
 

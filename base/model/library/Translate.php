@@ -12,7 +12,6 @@ require_once "Session.php";
  */
 class Translate
 {
-	public $Cache = null;
 	public DataTable $DataTable;
 	/**
 	 * A short version of language name (en|es|...)
@@ -22,20 +21,23 @@ class Translate
 	public $Language = "en";
 	public $DefaultLanguage = "en";
 	public $Encoding = "utf-8";
+	public $DefaultEncoding = "utf-8";
 	/**
 	 * The language default direction (ltr|rtl)
 	 * @var string
 	 */
 	public $Direction = "ltr";
+	public $DefaultDirection = "ltr";
 	public $ImagePathPattern = "https://unpkg.com/language-icons/icons/{0}.svg";
 	public $CodeLimit = 160;
-	public $WrapPattern = "/(^\s*<[\w\W]*>\s*$)|(\$\{[\w\W]+\})|(\`.?[^\`]*.?\`)|('.?[^']*.?')|(\".?[^\"]*.?\")|(<\S[\w\W]*>)|(\d*[\.,:\-]?\d+)/u";
+	public $WrapPattern = "/(^\s*<[\w\W]*>\s*$)|(\\$\{[\w\W]+\})|(\`.?[^\`]*.?\`)|('.?[^']*.?')|(\".?[^\"]*.?\")|(<\S[\w\W]*>)|(\d*[\.,:\-]?\d+)/u";
 	public $WrapStart = "<";
 	public $WrapEnd = ">";
 	public $ValidPattern = "/[A-Z0-9]/i";//"/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-Z]/mi";
-	public $InvalidPattern = "/[^A-Z0-9\W\$\{\}]/i";//'/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
+	public $InvalidPattern = "/[^A-Z0-9\W\\$\{\}]/i";//'/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
 	public $CorrectorPattern = "/(?:^\`([\w\W]+)\`$)|(?:^'([\w\W]+)'$)|(?:^\"([\w\W]+)\"$)|([\w\W]+)/u";
 	public $CorrectorReplacement = "$1$2$3$4";
+	public static $FullTrimmedPattern = "/^\\$\{[\w\W]+\}$/u";
 	public static $TrimmerPattern = "/(?:\\$\{([^\}]+)\})|((?<!\\$\{)[\w\W]+(?!\}))/u";
 	public static $TrimmerReplacement = "$1$2";
 	/**
@@ -61,13 +63,12 @@ class Translate
 	 */
 	public function Initialize(?string $defaultLang = null, ?string $defaultDirection = null, ?string $defaultEncoding = null, bool $caching = true)
 	{
-		$langs = $this->GetLanguages(defaultLang: $this->DefaultLanguage = $defaultLang);
-		setMemo("Lang", $this->Language = $this->GetLanguage($langs, $defaultLang));
-		setMemo("Direction", $this->Direction = $this->GetDirection($langs, $defaultDirection));
-		setMemo("Encoding", $this->Encoding = $this->GetEncoding($langs, $defaultEncoding));
+		$langs = $this->GetLanguages(defaultLang: $defaultLang);
+		setMemo("Lang", $this->Language = $this->GetLanguage($langs, $this->DefaultLanguage = $defaultLang));
+		setMemo("Direction", $this->Direction = $this->GetDirection($langs, $this->DefaultDirection = $defaultDirection));
+		setMemo("Encoding", $this->Encoding = $this->GetEncoding($langs, $this->DefaultEncoding = $defaultEncoding));
 		$this->GetValueQuery = $this->DataTable->SelectValueQuery("ValueOptions", $this->CaseSensitive ? "KeyCode=:KeyCode" : "LOWER(KeyCode)=:KeyCode");
-		if ($this->AllowCache = $caching)
-			$this->CacheAll();
+		$this->AllowCache = $caching;
 	}
 
 	/**
@@ -96,28 +97,33 @@ class Translate
 	public function Get($text, $lang = null, $turn = null)
 	{
 		if (!$this->IsRootLanguage($text))
-			return $text?self::Trim($text):$text;
+			return $text ? self::Trim($text) : $text;
+		// if(preg_match(self::$FullTrimmedPattern, $text))
+		// 	return $text?self::Trim($text):$text;
 		$dic = array();
 		$ntext = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($ntext);
-		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
+		$data = $this->AllowCache? $this->GetCache($code) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 
 		$turn = $turn ?? $this->Turn;
 		if (($d = $turn - 1) >= 0)
 			foreach ($dic as $key => $value)
-				$dic[$key] = $this->Get(self::Trim($value), $lang, $d);
+				$dic[$key] = $this->Get($value, $lang, $d);
 
 		if ($data) {
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
 			$data = $data[$lang ?? $this->Language] ?? $data["x"];
 		} else {
-			$data = $dic? $ntext : $text;
+			$data = $dic ? $ntext : $text;
 
-			if ($this->Deep) $data = $this->GetDeep($data, $lang, $turn - 1);
-			elseif ($this->AutoUpdate) $this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $data))]);
+			if ($this->Deep)
+				$data = $this->GetDeep($data, $lang, $turn - 1);
+			elseif ($this->AutoUpdate)
+				$this->DataTable->Replace([":KeyCode" => $code, ":ValueOptions" => Convert::ToJson(array("x" => $data))]);
 		}
 
-		if ($dic) $data = decode($data, $dic);
+		if ($dic)
+			$data = decode($data, $dic);
 
 		if (!$this->CaseSensitive)
 			$data = self::DetectCaseStatus($data, $text);
@@ -137,7 +143,7 @@ class Translate
 	public function GetReplace($text, $lang = null)
 	{
 		$lang = $lang ?? $this->Language;
-		foreach ($this->Cache as $code => $data) {
+		if($this->AllowCache) foreach ($this->Cache() as $code => $data) {
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
 			if (!$this->IsRootLanguage($text = str_replace($data["x"] ?? $code, $data[$lang] ?? $data["x"], $text)))
 				return $text;
@@ -147,10 +153,10 @@ class Translate
 	public function GetHybrid($text, $replacements = [], $lang = null)
 	{
 		if (!$this->IsRootLanguage($text))
-			return $text?self::Trim($text):$text;
+			return $text ? self::Trim($text) : $text;
 		$text = encode($text, $replacements, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($text);
-		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
+		$data =  $this->AllowCache ? $this->GetCache($code) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if ($data) {
 			$data = json_decode($data, flags: JSON_OBJECT_AS_ARRAY);
 			$data = $data[$lang ?? $this->Language] ?? $data["x"];
@@ -164,6 +170,10 @@ class Translate
 		if ($this->CaseSensitive)
 			return self::Trim($data);
 		return self::Trim(self::DetectCaseStatus($data, $data));
+	}
+	public function GetCache($key = null)
+	{
+		return $this->Cache()[$key]??null;
 	}
 	public function GetLexicon($condition = null, $params = [], $hasKey = false)
 	{
@@ -194,7 +204,7 @@ class Translate
 		$dic = array();
 		$text = encode($text, $dic, $this->WrapStart, $this->WrapEnd, $this->WrapPattern, $this->CorrectorPattern, $this->CorrectorReplacement);
 		$code = $this->CreateCode($text);
-		$data = $this->Cache !== null ? ($this->Cache[$code] ?? null) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
+		$data = $this->AllowCache ? $this->GetCache($code) : $this->DataTable->DataBase->FetchValueExecute($this->GetValueQuery, [":KeyCode" => $code]);
 		if (!$data)
 			$data = array("x" => $text);
 		if (!is_null($val))
@@ -216,7 +226,7 @@ class Translate
 			if ($key && $val)
 				$vals[strtolower($key)] = $val;
 		$row[":ValueOptions"] = Convert::ToJson($vals);
-		return $this->DataTable->Replace($row);
+		return $this->DataTable->Reset()->Replace($row);
 	}
 	public function SetLexicon($lexicon)
 	{
@@ -235,25 +245,32 @@ class Translate
 			$row[":ValueOptions"] = Convert::ToJson($vals);
 			$args[] = $row;
 		}
-		return $this->DataTable->Replace($args);
+		return $this->DataTable->Reset()->Replace($args);
 	}
 
-	public function CacheAll($condition = null, $params = [])
+	public function Cache()
 	{
-		$this->Cache = [];
-		if ($this->CaseSensitive)
-			foreach ($this->DataTable->Select("*", $condition, $params) as $value)
-				$this->Cache[$value["KeyCode"]] = $value["ValueOptions"];
-		else
-			foreach ($this->DataTable->Select("*", $condition, $params) as $value)
-				$this->Cache[strtolower($value["KeyCode"])] = $value["ValueOptions"];
-		unset($this->Cache[""]);
+		return cache("MiMFa\\Library\\Translate", function () {
+			$cache = [];
+			if ($this->CaseSensitive)
+				foreach ($this->DataTable->Select("*") as $value)
+					$cache[$value["KeyCode"]] = $value["ValueOptions"];
+			else
+				foreach ($this->DataTable->Select("*") as $value)
+					$cache[strtolower($value["KeyCode"])] = $value["ValueOptions"];
+			unset($cache[""]);
+			return $cache;
+		});
+	}
+	public function ClearCache()
+	{
+		cache("MiMFa\\Library\\Translate", null);
 	}
 
 	public function ClearAll($condition = null, $params = [])
 	{
-		$this->Cache = null;
-		return $this->DataTable->Delete($condition, $params);
+		$this->ClearCache();
+		return $this->DataTable->Reset()->Delete($condition, $params);
 	}
 	/**
 	 * Convert the normal text to a suitable an maximum CodeLimit counted key
@@ -308,6 +325,7 @@ class Translate
 			getMemo("Direction") ??
 			get($languages, $this->Language, "Direction") ??
 			$defaultDirection ??
+			$this->DefaultDirection ??
 			$this->Direction
 		);
 	}
@@ -321,6 +339,7 @@ class Translate
 			getMemo("Encoding") ??
 			get($languages, $this->Language, "Encoding") ??
 			$defaultEncoding ??
+			$this->DefaultEncoding ??
 			$this->Encoding
 		);
 	}
@@ -333,7 +352,7 @@ class Translate
 	 */
 	public function GetLanguages($condition = null, $params = [], $defaultLang = null)
 	{
-		return \_::Cache("Languages", function () use ($condition, $params, $defaultLang) {
+		return cache("Languages", function () use ($condition, $params, $defaultLang) {
 			$arr = [];
 			foreach ((Convert::FromJson(
 				$this->DataTable->SelectValue("ValueOptions", ["KeyCode=''", $condition], $params) ??

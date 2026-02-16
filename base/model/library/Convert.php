@@ -436,6 +436,10 @@ class Convert
         return $res;
     }
 
+    public static function ToFieldsIterator($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
+    {
+        return self::CellsToFieldsIterator(self::ToCellsIterator($string, $delimiter, $enclosure, $eol));
+    }
     public static function ToFields($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {
         return self::CellsToFields(self::ToCells($string, $delimiter, $enclosure, $eol));
@@ -445,6 +449,28 @@ class Convert
         return self::FromCells(self::FieldsToCells($fields), $delimiter, $enclosure, $eol);
     }
 
+    public static function CellsToFieldsIterator($cells)
+    {
+        if (!$cells)
+            return [];
+        $c = 0;
+        foreach ($cells as $row) {
+            if ($c === 0) {
+                $keys = $row;
+                // $length = count($row);
+                // for ($i = 0; $i < $length; $i++)
+                //     $keys[$i] = $row[$i];
+            } else {
+                $cols = [];
+                foreach ($row as $i => $value)
+                    if (isset($keys[$i]))
+                        $cols[$keys[$i]] = $value;
+                //else $cols[$keys[$i] = $i] = $value;
+                yield $cols;
+            }
+            $c++;
+        }
+    }
     public static function CellsToFields($cells)
     {
         if (!$cells)
@@ -493,6 +519,86 @@ class Convert
             return $k;
         });
         return $cells;
+    }
+    public static function ToCellsIterator($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
+    {
+        if (isEmpty($string))
+            return [];
+        $length = strlen($string);
+        $index = 0;
+        $normalize = function ($v) {
+            if (($v . "") === "")
+                return null;
+            else if (preg_match("/^\d+$/", $v))
+                return intval($v);
+            else if (preg_match("/^\d*.?\d+$/", $v))
+                return floatval($v);
+            else
+                return $v;
+        };
+        while ($index < $length) {
+            $row = [];
+            $column = '';
+            $inEnclosure = false;
+            do {
+                $char = $string[$index++];
+                if ($inEnclosure) {
+                    if ($char == $enclosure) {
+                        if ($index < $length) {
+                            $char = $string[$index];
+                            if ($char == $enclosure) {
+                                $column .= $char;
+                                $index++;
+                            } else {
+                                $inEnclosure = false;
+                            }
+                        } else {
+                            $inEnclosure = false;
+                            $row[] = $normalize($column);
+                            break;
+                        }
+                    } else {
+                        $column .= $char;
+                    }
+                } else if ($char == $enclosure) {
+                    if ($index < $length) {
+                        $char = $string[$index++];
+                        if ($char == $enclosure) {
+                            $column .= $char;
+                        } else {
+                            $inEnclosure = true;
+                            $column .= $char;
+                        }
+                    } else {
+                        $row[] = $normalize($column);
+                        break;
+                    }
+                } else if ($char == $delimiter) {
+                    $row[] = $normalize($column);
+                    $column = '';
+                } else if ($char == "\r") {
+                    if ($index < $length) {
+                        $char = $string[$index];
+                        if ($char == $eol) {
+                            $index++;
+                        }
+                    }
+                    $row[] = $normalize($column);
+                    break;
+                } else if ($char == $eol) {
+                    $row[] = $normalize($column);
+                    break;
+                } else {
+                    $column .= $char;
+                }
+
+                if ($index == $length) {
+                    $row[] = $normalize($column);
+                    break;
+                }
+            } while ($index < $length);
+            yield $row;
+        }
     }
     public static function ToCells($string, $delimiter = ',', $enclosure = '"', $eol = "\n")
     {

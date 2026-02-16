@@ -1,4 +1,6 @@
 <?php
+
+use MiMFa\Library\Storage;
 class AseqFront extends FrontBase
 {
 	/**
@@ -182,6 +184,7 @@ class AseqFront extends FrontBase
 	 */
 	public $Contacts = [];
 
+
 	/**
 	 * The website default template class
 	 * @var string
@@ -190,16 +193,68 @@ class AseqFront extends FrontBase
 	 * @category Template
 	 */
 	public $DefaultTemplate = "Main";
-	/**
-	 * @category Template
-	 */
-	public $DetectMode = true;
-	/**
-	 * @category Template
-	 */
-	public $AnimationSpeed = 500;
 
 	
+	/**
+	 * Fonts Palette
+	 * @field array<font>
+	 * @template array [normal, inside, outside]
+	 * @category Template
+	 * @var mixed
+	 */
+	public $FontPalette = array("'Dubai-Light', sans-serif", "'Dubai', sans-serif", "'Dubai', sans-serif");
+	/**
+	 * Shadows Palette
+	 * @field array<{'size' 'size' 'size' 'color'}>
+	 * @field array<text>
+	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
+	 * @var mixed
+	 */
+	public $ShadowPalette = array("none", "4px 7px 20px #00000005", "4px 7px 20px #00000015", "4px 7px 20px #00000030", "5px 10px 25px #00000030", "5px 10px 25px #00000050", "5px 10px 50px #00000050");
+	/**
+	 * Borders Palette
+	 * @field array<{'size', ['solid','double','dotted','dashed']}>
+	 * @field array<text>
+	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
+	 * @var mixed
+	 */
+	public $BorderPalette = array("0px", "1px solid", "2px solid", "5px solid", "10px solid", "25px solid");
+	/**
+	 * Radiuses Palette
+	 * @field array<size>
+	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
+	 * @var mixed
+	 */
+	public $RadiusPalette = array("unset", "3px", "5px", "25px", "50%", "100%");
+	/**
+	 * Transitions Palette
+	 * @field array<text>
+	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
+	 * @var mixed
+	 */
+	public $TransitionPalette = array("none", "all .25s linear", "all .5s linear", "all .75s linear", "all 1s linear", "all 1.5s linear");
+	/**
+	 * Overlays Palette
+	 * @field array<path>
+	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
+	 * @var mixed
+	 */
+	public $OverlayPalette = array("/asset/overlay/glass.png", "/asset/overlay/cotton.png", "/asset/overlay/cloud.png", "/asset/overlay/wings.svg", "/asset/overlay/sands.png", "/asset/overlay/dirty.png");
+	/**
+	 * Patterns Palette
+	 * @field array<path>
+	 * @template array [minimum, normal, medium, maximum, ...]
+	 * @category Template
+	 * @var mixed
+	 */
+	public $PatternPalette = array("/asset/pattern/main.svg", "/asset/pattern/doddle.png", "/asset/pattern/doddle-fantasy.png", "/asset/pattern/triangle.png", "/asset/pattern/slicksline.png", "/asset/pattern/doddle-mess.png");
+
+
 	/**
 	 * Allow to translate all text by internal algorithms
 	 * @var bool
@@ -228,57 +283,59 @@ class AseqFront extends FrontBase
 	 */
 	public $DateTimeFormat = 'H:i, d M y';
 
+	/**
+	 * @category Template
+	 * @var int
+	 */
+	public $AnimationSpeed = 0;
+	/**
+	 * @category Template
+	 */
+	public $DetectMode = true;
+	/**
+	 * @category Template
+	 */
+	public $SwitchMode = null;
+	/**
+	 * @category Template
+	 * @field short
+	 */
+	public $DefaultMode = null;
+	/**
+	 * @category Template
+	 * @field short
+	 */
+
+	public $CurrentMode = null;
+
+	/**
+	 * @field value
+	 * @category Template
+	 * @var string
+	 */
+	public $SwitchRequest = "SwitchMode";
+
 	public $AllowReduceSize = true;
 	public $AllowTextAnalyzing = true;
 	public $AllowContentReferring = true;
 	public $AllowCategoryReferring = false;
 	public $AllowTagReferring = true;
 	public $AllowUserReferring = false;
-	public $AllowSelecting = true;
-	public $AllowContextMenu = true;
-
-	/**
-	 * Allow to leave comments on posts
-	 * @var bool
-	 * @category Content
-	 */
-	public $AllowWriteComment = true;
-	/**
-	 * Access level to leave comments on posts
-	 * @var int
-	 * @category Content
-	 */
-	public $WriteCommentAccess = 1;
-	/**
-	 * Allow to read comments on posts
-	 * @var bool
-	 * @category Content
-	 */
-	public $AllowReadComment = true;
-	/**
-	 * Access level to read comments on posts
-	 * @var int
-	 * @category Content
-	 */
-	public $ReadCommentAccess = 0;
-	/**
-	 * Default status of new comments on posts
-	 * @var int
-	 * @category Content
-	 */
-	public $DefaultCommentStatus = 0;
-
-	/**
-	 * Default site key for ReCaptcha
-	 * @var string
-	 * @category Security
-	 */
-	public $ReCaptchaSiteKey = null;
 	
 	
 	public function __construct(){
 		parent::__construct();
 		
+		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
+		$this->SwitchMode = received($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
+		
+		if ($this->SwitchMode) {
+			$middle = $this->ForeColorPalette;
+			$this->ForeColorPalette = $this->BackColorPalette;
+			$this->BackColorPalette = $middle;
+			$this->CurrentMode = $this->GetMode($this->BackColor(0));
+		}
+
 		$menu = between($this->MainMenus,$this->SideMenus,$this->Shortcuts,$this->Services);
 		if(is_null($this->MainMenus)) $this->MainMenus = $menu;
 		if(is_null($this->SideMenus)) $this->SideMenus = $menu;
@@ -289,4 +346,81 @@ class AseqFront extends FrontBase
 		$this->BrandLogoPath = asset("logo/brand-logo-".$this->Translate->Language.".svg")??$this->BrandLogoPath;
 		$this->FullLogoPath = asset("logo/full-logo-".$this->Translate->Language.".svg")??$this->FullLogoPath;
 	}
+
+	/**
+	 * Get the lightness of a color with a number between -255 to +255
+	 * @param mixed $color A three, four, six or eight characters hexadecimal color numbers for example #f80 or #ff8800
+	 * @return float|int A number between -255 (for maximum in darkness) to +255 (for maximum in lightness)
+	 */
+	public function GetMode($color = null)
+	{
+		if (!isValid($color))
+			if (!is_null($this->CurrentMode))
+				return $this->CurrentMode;
+			else
+				return $this->GetMode($this->BackColor(0));
+		$l = strlen($color) > 6;
+		$rgb = preg_find_all($l ? '/\w\w/' : '/\w/', $color);
+		$sc = ($l ? hexdec(getValid($rgb, 0, 0)) + hexdec(getValid($rgb, 1, 0)) + hexdec(getValid($rgb, 2, 0)) :
+			hexdec(getValid($rgb, 0, 0)) * 16 + hexdec(getValid($rgb, 1, 0)) * 16 + hexdec(getValid($rgb, 2, 0)) * 16 - 3);
+		return $sc > 510 ? $sc - 510 : ($sc < 255 ? $sc - 255 : $sc - 382.5);
+	}
+	
+	/**
+	 * To get the Font by index
+	 * @param int $index 0:normal, 1:inside, 2:outside
+	 */
+	public function Font(int $index = 0)
+	{
+		return $this->LoopPalette($this->FontPalette, $index);
+	}
+	/**
+	 * To get the Shadow by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
+	public function Shadow(int $index = 0)
+	{
+		return $this->LimitPalette($this->ShadowPalette, $index);
+	}
+	/**
+	 * To get the Border size by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
+	public function Border(int $index = 0)
+	{
+		return $this->LimitPalette($this->BorderPalette, $index);
+	}
+	/**
+	 * To get the Radius size by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
+	public function Radius(int $index = 0)
+	{
+		return $this->LimitPalette($this->RadiusPalette, $index);
+	}
+	/**
+	 * To get the Transition by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
+	public function Transition(int $index = 0)
+	{
+		return $this->LimitPalette($this->TransitionPalette, $index);
+	}
+	/**
+	 * To get the Overlay image by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
+	public function Overlay(int $index = 0)
+	{
+		return Storage::GetUrl($this->LoopPalette($this->OverlayPalette, $index));
+	}
+	/**
+	 * To get the Pattern image by index
+	 * @param int $index 0:minimum, 1:normal, 2:medium, 3:maximum,...
+	 */
+	public function Pattern(int $index = 0)
+	{
+		return Storage::GetUrl($this->LoopPalette($this->PatternPalette, $index));
+	}
+
 }

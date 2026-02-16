@@ -35,28 +35,28 @@ class _
 	 * ]
 	 */
 	public static array $Sequence;
-	public static Address $Address;
+	public static $Address;
 
 	/**
 	 * To access all back-end tools
 	 */
-	public static BackBase $Back;
+	public static $Back;
 
 	/**
 	 * To access all addresses to a sequence of the website
 	 * and an array of all method=>patterns=>handler view names to handle all type request virtual paths
 	 */
-	public static RouterBase $Router;
+	public static $Router;
 
 	/**
 	 * To access all front-end tools
 	 */
-	public static FrontBase $Front;
+	public static $Front;
 
 	/**
 	 * To access the user service
 	 */
-	public static UserBase $User;
+	public static $User;
 	
 	/**
 	 * A Directory=>Name=>Fucntion array to apply the Function before using the Path
@@ -85,11 +85,12 @@ class _
 	/**
 	 * Get the cached data or cache the data by execute the $generator
 	 * @param mixed $key
-	 * @param callable $generator
+	 * @param callable|null $generator Send null to clear cache
 	 */
-	public static function Cache($key, callable $generator){
+	public static function Cache($key, callable|null $generator = null){
 		$key=isStatic($key)?($key?:0):gettype($key);
 		if(isset(self::$Caches[$key])) return self::$Caches[$key];
-		return self::$Caches[$key] = $generator();
+		elseif(!$generator) unset(self::$Caches[$key]);
+		else return self::$Caches[$key] = $generator($key);
 	}
 }

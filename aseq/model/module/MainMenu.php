@@ -2,7 +2,6 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
-use MiMFa\Library\Convert;
 class MainMenu extends Module
 {
 	public string|null $TagName = "nav";
@@ -25,6 +24,7 @@ class MainMenu extends Module
 	public $HideOthersScreenSize = 'md';
 	public $ShowOthersScreenSize = null;
 	public $AllowDefaultButtons = true;
+	public $SubItemsOverflow = 4;
 	public $LogoWidth = "auto";
 	public $LogoHeight = "calc(var(--size-5) - var(--size-0) / 2)";
 	public $FixedMargin = "calc(var(--size-1) * 3)";
@@ -41,8 +41,8 @@ class MainMenu extends Module
 
 	public function GetStyle()
 	{
-        yield parent::GetStyle();
-        yield Struct::Style(
+		yield parent::GetStyle();
+		yield Struct::Style(
 			"
 			.{$this->MainClass} {
 				" . ($this->AllowFixed ? "
@@ -104,44 +104,30 @@ class MainMenu extends Module
 				align-items: center;
 			}
 
-			.{$this->MainClass} ul.sub-items {
+			.{$this->MainClass} .dropdown-items {
 				display: none;
 				position: fixed;
 				min-width: 160px;
 				max-width: 90vw;
 				max-height: 70vh;
-				padding: 0px;
+				gap: var(--size-1);
 				overflow-x: hidden;
 				overflow-y: auto;
 				z-index: $this->ZIndex;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-				
-			.{$this->MainClass} ul.sub-items .sub-items {
-				display: flex;
-				position: relative;
-				font-size: 90%;
-				min-width: calc(5 * var(--size-5));
-				max-width: 500px;
-				width: 70vw;
-				max-height: 60vh;
+			.{$this->MainClass} .dropdown-items ul.sub-items{
 				padding: 0px;
-				padding-inline-start: var(--size-5);
-				padding-bottom: calc(var(--size-0) / 2);
-				overflow-x: hidden;
-				overflow-y: auto;
-				flex-wrap: wrap;
-				flex-direction: row;
-				align-content: stretch;
-				justify-content: flex-start;
-				align-items: stretch;
+			}
+
+			.{$this->MainClass} li.dropdown:hover>.dropdown-items {
+				display: flex;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
 			.{$this->MainClass} ul.sub-items>li>:is(.button, .button:visited){
 				width: 100%;
 				text-decoration: none;
-				padding: calc(var(--size-1) / 2) var(--size-1);
 				display: block;
 				text-align: start;
 				border: none;
@@ -160,7 +146,7 @@ class MainMenu extends Module
 				flex-wrap: nowrap;
 				padding: calc(var(--size-0) / 3) var(--size-0);
 				gap: calc(var(--size-0) * 0.5);
-				" . ((\_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection) == "rtl" ? "left" : "right") . ": var(--size-2);
+				" . ((\_::$Front->Translate->Direction ?? \_::$Front->Direction) == "rtl" ? "left" : "right") . ": var(--size-2);
 			}
 
 			.{$this->MainClass} .other form{
@@ -299,13 +285,12 @@ class MainMenu extends Module
 				)
 			) .
 			($count > 0 ?
-				Struct::Items(
-					function () use ($item, $ind) {
-						foreach ($item["Items"] as $itm)
-							yield $this->CreateItem($itm, $ind);
-					}
-					,
-					["class" => "sub-items sub-items-$ind"]
+				Struct::Division(
+					Struct::Items(
+						loop($item["Items"], fn($itm) => $this->CreateItem($itm, $ind)),
+						["class" => "sub-items sub-items-$ind", "overflow" => $this->SubItemsOverflow]
+					),
+					["class" => "dropdown-items"]
 				)
 				: ""),
 			["class" => $count > 0 ? "dropdown $act" : $act]

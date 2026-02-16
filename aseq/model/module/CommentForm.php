@@ -45,8 +45,8 @@ class CommentForm extends Form
 	{
 		parent::__construct();
 		$this->Relation = $relation;
-		$this->Access = $access ?? \_::$Back->WriteCommentAccess;
-		$this->DefaultStatus = \_::$User->HasAccess(\_::$User->AdminAccess) ? 1 : \_::$Back->DefaultCommentStatus;
+		$this->Access = $access ?? \_::$User->WriteCommentAccess;
+		$this->DefaultStatus = \_::$User->HasAccess(\_::$User->AdminAccess) ? 1 : \_::$User->DefaultCommentStatus;
 		$this->Template = "b";
 	}
 

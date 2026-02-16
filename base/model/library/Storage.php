@@ -609,7 +609,7 @@ class Storage
 		$destFile = self::GenerateUniquePath($directory, $fileName, ".$fileType");
 		if (is_uploaded_file($sourceFile) && move_uploaded_file($sourceFile, $destFile))
 			return $destFile;
-		if (rename($sourceFile, $destFile))
+		if (file_exists($sourceFile) && rename($sourceFile, $destFile))
 			return $destFile;
 		return $destFile;
 		if ($deleteSource)

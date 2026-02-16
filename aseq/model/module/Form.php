@@ -94,7 +94,7 @@ class Form extends Module
 	{
 		parent::__construct();
 		$this->Set($title, $action, $method, $items, $description, $image);
-		$this->ReCaptchaSiteKey = \_::$Front->ReCaptchaSiteKey;
+		$this->ReCaptchaSiteKey = \_::$User->CaptchaKey;
 		$this->Signing = fn() => \_::$User->HasAccess() ? "" : part(\_::$User->InHandlerPath, ["Router" => ["DefaultMethodIndex" => 1], "AllowHeader" => false, "ContentClass" => "col-lg"], print: false);
 		// $this->Router->All(function(){
 		// 	if($this->Status && $this->Router->DefaultMethodIndex > 1) \_::Status($this->Status);

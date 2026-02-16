@@ -168,7 +168,15 @@ class General extends Template
 			body>nav :is(button, .button, .icon[onclick]):hover{
 				box-shadow: var(--shadow-2);
 			}
-				
+			body>nav .dropdown-items {
+				padding: calc(var(--size-0) / 2);
+				color: var(--fore-color-special);
+				background-color: var(--back-color-special);
+				box-shadow: 0px 16px 16px 0px rgba(0,0,0,0.2);
+				border-end-start-radius: var(--radius-2);
+				border-end-end-radius: var(--radius-3);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
 			body>nav>.inside>ul>li:not(.sub-items)>.button{
 				text-transform: uppercase;
 			}
@@ -179,7 +187,6 @@ class General extends Template
 				display: inline-block;
 			}
 			body>nav ul:not(.sub-items)>li.active{
-				font-weight: bold;
 				box-shadow: var(--shadow-2);
 			}
 			body>nav ul:not(.sub-items)>li>:is(.button, .button:visited){
@@ -214,33 +221,16 @@ class General extends Template
 				background-color: var(--back-color-output);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			body>nav ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
-				display: block;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-
-			body>nav ul.sub-items {
-				color: var(--fore-color-special);
-				background-color: var(--back-color-special);
-				box-shadow: 0px 16px 16px 0px rgba(0,0,0,0.2);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body>nav ul.sub-items .sub-items {
-				background-color: #8881;
-				box-shadow: var(--shadow-1);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
 			body>nav ul.sub-items .sub-items li :is(.button, .button:visited) {
 				padding: calc(var(--size-0) / 2) var(--size-1);
 				background: transparent;
 				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			body>nav ul.sub-items>li {
 				display: block;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			body>nav ul.sub-items>li>:is(.button, .button:visited){
+				padding-inline-end: var(--size-max);
 				color: var(--fore-color-input);
 			}
 			body>nav ul.sub-items>li.dropdown{

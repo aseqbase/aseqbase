@@ -214,148 +214,146 @@ class MessageCollection extends Collection
 
     public function GetInner($items = null)
     {
-        return join(PHP_EOL, iterator_to_array((function () use ($items) {
-            $i = 0;
-            yield $this->GetTitle();
-            yield $this->GetDescription();
-            $adminaccess = \_::$User->HasAccess(\_::$User->AdminAccess);
-            $current_user_id = \_::$User->Id;
-            $items = Convert::ToItems($items ?? $this->Items);
+        $i = 0;
+        yield $this->GetTitle();
+        yield $this->GetDescription();
+        $adminaccess = \_::$User->HasAccess(\_::$User->AdminAccess);
+        $current_user_id = \_::$User->Id;
+        $items = Convert::ToItems($items ?? $this->Items);
 
-            foreach ($items as $k => $item) {
-                $p_userid = get($item, "UserId");
-                $p_status = get($item, "Status");
-                $is_sender = $p_userid && $p_userid == $current_user_id;
+        foreach ($items as $k => $item) {
+            $p_userid = get($item, "UserId");
+            $p_status = get($item, "Status");
+            $is_sender = $p_userid && $p_userid == $current_user_id;
 
-                if (!\_::$User->HasAccess(getValid($item, 'Access', \_::$User->VisitAccess)))
-                    continue;
-                if (isValid($this->Relation) && $this->Relation != get($item, 'Relation'))
-                    continue;
+            if (!\_::$User->HasAccess(getValid($item, 'Access', \_::$User->VisitAccess)))
+                continue;
+            if (isValid($this->Relation) && $this->Relation != get($item, 'Relation'))
+                continue;
 
-                $p_id = get($item, 'Id');
-                $p_image = getValid($item, 'Image', $this->DefaultImage);
-                $p_message = getValid($item, 'Content', $this->DefaultDescription);
-                $p_attach = Convert::FromJson(getValid($item, 'Attach', $this->DefaultContent));
-                $p_email = get($item, 'Contact');
-                $p_rootid = get($item, 'RootId'); // For quoting/replying
+            $p_id = get($item, 'Id');
+            $p_image = getValid($item, 'Image', $this->DefaultImage);
+            $p_message = getValid($item, 'Content', $this->DefaultDescription);
+            $p_attach = Convert::FromJson(getValid($item, 'Attach', $this->DefaultContent));
+            $p_email = get($item, 'Contact');
+            $p_rootid = get($item, 'RootId'); // For quoting/replying
 
-                $p_showmessage = $this->AllowContent;
-                $p_showattach = $this->AllowAttach;
-                $p_showimage = isValid($p_image) && $this->AllowImage;
-                $p_showmeta = $this->AllowMetaData;
-                $p_referring = $this->AutoReferring;
+            $p_showmessage = $this->AllowContent;
+            $p_showattach = $this->AllowAttach;
+            $p_showimage = isValid($p_image) && $this->AllowImage;
+            $p_showmeta = $this->AllowMetaData;
+            $p_referring = $this->AutoReferring;
 
-                $updateaccess = $adminaccess || ($p_email && get(\_::$User, "Email") == $p_email) || ($p_userid && $p_userid == $current_user_id);
+            $updateaccess = $adminaccess || ($p_email && get(\_::$User, "Email") == $p_email) || ($p_userid && $p_userid == $current_user_id);
 
-                // Button Labels (same as before)
-                $p_replybuttontext = !$this->AllowButtons ? null : __($this->ReplyButtonLabel);
-                $p_showreplybutton = !isEmpty($p_replybuttontext);
-                $p_editbuttontext = !$updateaccess || !$this->AllowButtons ? null : __($this->EditButtonLabel);
-                $p_showeditbutton = !isEmpty($p_editbuttontext);
-                $p_deletebuttontext = !$updateaccess || !$this->AllowButtons ? null : __($this->DeleteButtonLabel);
-                $p_showdeletebutton = !isEmpty($p_deletebuttontext);
+            // Button Labels (same as before)
+            $p_replybuttontext = !$this->AllowButtons ? null : __($this->ReplyButtonLabel);
+            $p_showreplybutton = !isEmpty($p_replybuttontext);
+            $p_editbuttontext = !$updateaccess || !$this->AllowButtons ? null : __($this->EditButtonLabel);
+            $p_showeditbutton = !isEmpty($p_editbuttontext);
+            $p_deletebuttontext = !$updateaccess || !$this->AllowButtons ? null : __($this->DeleteButtonLabel);
+            $p_showdeletebutton = !isEmpty($p_deletebuttontext);
 
-                // Status Icon: Check-double for 'read' (Status=1) vs Check-single for 'sent' (Status=0)
-                $p_status_icon = $this->AllowStatus && $is_sender ?
-                    Struct::Span($p_status ? "<i class='fa fa-check-double'></i>" : "<i class='fa fa-check'></i>", ["class" => "status-icon"]) :
-                    null;
-                $uid = "m_$p_id";
+            // Status Icon: Check-double for 'read' (Status=1) vs Check-single for 'sent' (Status=0)
+            $p_status_icon = $this->AllowStatus && $is_sender ?
+                Struct::Span($p_status ? "<i class='fa fa-check-double'></i>" : "<i class='fa fa-check'></i>", ["class" => "status-icon"]) :
+                null;
+            $uid = "m_$p_id";
 
-                // --- 1. START ITEM DIV ---
-                if ($i % $this->MaximumColumns === 0)
-                    yield "<div>";
+            // --- 1. START ITEM DIV ---
+            if ($i % $this->MaximumColumns === 0)
+                yield "<div>";
 
-                yield "<div id='$uid' class='item " . ($p_status ? "" : "deactive") . " " . ($is_sender ? "sender" : "") . "'" . ($this->Animation ? " data-aos='{$this->Animation}'" : "") . ">";
+            yield "<div id='$uid' class='item " . ($p_status ? "" : "deactive") . " " . ($is_sender ? "sender" : "") . "'" . ($this->Animation ? " data-aos='{$this->Animation}'" : "") . ">";
 
-                // --- 2. SIDE BUTTONS (Hidden/Hovered Context Menu) ---
-                if ($p_showreplybutton || $p_showeditbutton || $p_showdeletebutton)
-                    yield Struct::Division(
-                        ($p_showdeletebutton ? Struct::Button($p_deletebuttontext, "{$this->MainClass}_Delete(this, '.{$this->MainClass} #{$uid}', $p_id);") : null) .
-                        ($p_showeditbutton ? Struct::Button($p_editbuttontext, "{$this->MainClass}_Edit(this, '.{$this->MainClass} #{$uid}', $p_id);") : null) .
-                        ($p_showreplybutton ? Struct::Button($p_replybuttontext, "{$this->MainClass}_Reply(this, '.{$this->MainClass} #{$uid}', $p_id);") : null),
-                        ["class" => 'sidebtn']
-                    );
+            // --- 2. SIDE BUTTONS (Hidden/Hovered Context Menu) ---
+            if ($p_showreplybutton || $p_showeditbutton || $p_showdeletebutton)
+                yield Struct::Division(
+                    ($p_showdeletebutton ? Struct::Button($p_deletebuttontext, "{$this->MainClass}_Delete(this, '.{$this->MainClass} #{$uid}', $p_id);") : null) .
+                    ($p_showeditbutton ? Struct::Button($p_editbuttontext, "{$this->MainClass}_Edit(this, '.{$this->MainClass} #{$uid}', $p_id);") : null) .
+                    ($p_showreplybutton ? Struct::Button($p_replybuttontext, "{$this->MainClass}_Reply(this, '.{$this->MainClass} #{$uid}', $p_id);") : null),
+                    ["class" => 'sidebtn']
+                );
 
-                // --- 3. QUOTED REPLY (If RootId is present) ---
-                if ($this->AllowReplies && $p_rootid) {
-                    $parent_message = take($items, fn($v) => $v["Id"] == $p_rootid) ?? ["Id" => $p_rootid, "Name" => "Unknown User", "Content" => "Original message not found."];
-                    $quoted_author = get($parent_message, "Name");
-                    $quoted_text = Convert::ToExcerpt(Convert::ToText(getValid($parent_message, "Content", "")), 0, 50, "...");
+            // --- 3. QUOTED REPLY (If RootId is present) ---
+            if ($this->AllowReplies && $p_rootid) {
+                $parent_message = take($items, fn($v) => $v["Id"] == $p_rootid) ?? ["Id" => $p_rootid, "Name" => "Unknown User", "Content" => "Original message not found."];
+                $quoted_author = get($parent_message, "Name");
+                $quoted_text = Convert::ToExcerpt(Convert::ToText(getValid($parent_message, "Content", "")), 0, 50, "...");
 
-                    yield Struct::Span(
-                        ($this->AllowAuthor && $quoted_author? Struct::Span($quoted_author, null, ["class" => "author"]) : "") .
-                        Struct::Span($quoted_text, null, ["class" => "content"]),
-                        "#m_$p_rootid",
-                        ["class" => "quote"]
-                    );
-                }
-
-                // --- 4. MESSAGE CONTENT ---
-                yield "<div class='message'>";
-                if ($this->AllowAuthor && $p_author = get($item, "Name"))
-                    yield Struct::Span($p_author, null, ["class" => "author"]);
-
-                // Attached Image
-                if ($p_showimage && isValid($p_image)) {
-                    yield Struct::Division(Struct::Image($p_id, $p_image), ["class" => 'media-container']);
-                }
-
-                // Main Text Content
-                if ($p_showmessage && !isEmpty($p_message))
-                    yield "<div class='full'>" . __(Struct::Convert($p_message), referring: $p_referring) . "</div>";
-
-                // Attached Content
-                if ($p_showattach && isValid($p_attach))
-                    yield "<div class='attach'>" . (is_array($p_attach) && array_key_first($p_attach)===0?loop($p_attach, fn($v)=>Struct::Media($v)):Struct::Convert($p_attach)) . "</div>";
-
-                yield "</div>";
-
-                // --- 5. METADATA (Time & Status Icon) ---
-                if ($p_showmeta) {
-                    $p_meta_content = null;
-                    if ($this->AllowUpdateTime)
-                        doValid(
-                            function ($val) use (&$p_meta_content) {
-                                if (isValid($val))
-                                    $p_meta_content .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'createtime']);
-                            },
-                            $item,
-                            'UpdateTime'
-                        );
-                    elseif ($this->AllowCreateTime)
-                        doValid(
-                            function ($val) use (&$p_meta_content) {
-                                if (isValid($val))
-                                    $p_meta_content .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'createtime']);
-                            },
-                            $item,
-                            'CreateTime'
-                        );
-                    if ($p_status_icon)
-                        $p_meta_content .= $p_status_icon;
-
-                    if (isValid($p_meta_content))
-                        yield Struct::Division($p_meta_content, ["class" => 'metadata']);
-                }
-
-                // --- 6. REPLY FORM BOX (Always present for Reply button logic) ---
-                yield Struct::Division("", ["class" => "reply-box"]);
-
-                // --- 7. END ITEM DIV ---
-                yield "</div>";
-
-                if (++$i % $this->MaximumColumns === 0)
-                    yield "</div>";
+                yield Struct::Span(
+                    ($this->AllowAuthor && $quoted_author ? Struct::Span($quoted_author, null, ["class" => "author"]) : "") .
+                    Struct::Span($quoted_text, null, ["class" => "content"]),
+                    "#m_$p_rootid",
+                    ["class" => "quote"]
+                );
             }
-            if ($i % $this->MaximumColumns !== 0)
+
+            // --- 4. MESSAGE CONTENT ---
+            yield "<div class='message'>";
+            if ($this->AllowAuthor && $p_author = get($item, "Name"))
+                yield Struct::Span($p_author, null, ["class" => "author"]);
+
+            // Attached Image
+            if ($p_showimage && isValid($p_image)) {
+                yield Struct::Division(Struct::Image($p_id, $p_image), ["class" => 'media-container']);
+            }
+
+            // Main Text Content
+            if ($p_showmessage && !isEmpty($p_message))
+                yield "<div class='full'>" . __(Struct::Convert($p_message), referring: $p_referring) . "</div>";
+
+            // Attached Content
+            if ($p_showattach && isValid($p_attach))
+                yield "<div class='attach'>" . (is_array($p_attach) && array_key_first($p_attach) === 0 ? loop($p_attach, fn($v) => Struct::Media($v)) : Struct::Convert($p_attach)) . "</div>";
+
+            yield "</div>";
+
+            // --- 5. METADATA (Time & Status Icon) ---
+            if ($p_showmeta) {
+                $p_meta_content = null;
+                if ($this->AllowUpdateTime)
+                    doValid(
+                        function ($val) use (&$p_meta_content) {
+                            if (isValid($val))
+                                $p_meta_content .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'createtime']);
+                        },
+                        $item,
+                        'UpdateTime'
+                    );
+                elseif ($this->AllowCreateTime)
+                    doValid(
+                        function ($val) use (&$p_meta_content) {
+                            if (isValid($val))
+                                $p_meta_content .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'createtime']);
+                        },
+                        $item,
+                        'CreateTime'
+                    );
+                if ($p_status_icon)
+                    $p_meta_content .= $p_status_icon;
+
+                if (isValid($p_meta_content))
+                    yield Struct::Division($p_meta_content, ["class" => 'metadata']);
+            }
+
+            // --- 6. REPLY FORM BOX (Always present for Reply button logic) ---
+            yield Struct::Division("", ["class" => "reply-box"]);
+
+            // --- 7. END ITEM DIV ---
+            yield "</div>";
+
+            if (++$i % $this->MaximumColumns === 0)
                 yield "</div>";
-        })()));
+        }
+        if ($i % $this->MaximumColumns !== 0)
+            yield "</div>";
     }
 
     public function GetScript()
     {
         $action = $this->Action ? Script::Convert($this->Action) : "null";
-        return Struct::Script(
+        yield Struct::Script(
             "
             {$this->MainClass} = document.querySelector('.{$this->MainClass}');
             {$this->MainClass}.scrollTo(0,{$this->MainClass}.scrollHeight)

@@ -9,8 +9,8 @@ class GeneralStyle
 	{
 		return "
 		$rootSelector{
-			--dir: " . (\_::$Front->Translate->Direction ?? \_::$Front->DefaultDirection) . ";
-			--lang: " . (\_::$Front->Translate->Language ?? \_::$Front->DefaultLanguage) . ";
+			--dir: " . (\_::$Front->Translate->Direction ?? \_::$Front->Direction) . ";
+			--lang: " . (\_::$Front->Translate->Language ?? \_::$Front->Language) . ";
 			--color-black: " . \_::$Front->Color(0) . ";
 			--color-red: " . \_::$Front->Color(1) . ";
 			--color-green: " . \_::$Front->Color(2) . ";

@@ -33,7 +33,7 @@ class Forum extends Content
      function __construct()
      {
           parent::__construct();
-          $this->CommentForm->Access = \_::$Back->WriteCommentAccess;
+          $this->CommentForm->Access = \_::$User->WriteCommentAccess;
           $this->CommentForm->Title = $this->CommentTitle;
           $this->CommentForm->Description = $this->CommentDescription;
           $this->CommentForm->MessageType = $this->CommentType;

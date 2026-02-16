@@ -41,7 +41,7 @@ class MessageForm extends Form
 	{
 		parent::__construct();
 		$this->Relation = $relation;
-		$this->Access = $access ?? \_::$Back->WriteCommentAccess;
+		$this->Access = $access ?? \_::$User->WriteCommentAccess;
 		$this->DefaultStatus = 1;
 		$this->Template = null;
 	}

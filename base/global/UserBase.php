@@ -232,6 +232,21 @@ class UserBase
 	 */
 	public $EncryptValue = true;
 
+	
+	/**
+	 * Allow Selecting on Page
+	 * @var bool
+	 * @category Security
+	 */
+	public $AllowSelecting = true;
+	/**
+	 * Allow ContextMenu on Page
+	 * @var bool
+	 * @category Security
+	 */
+	public $AllowContextMenu = true;
+	
+
 
 	public function __construct()
 	{

@@ -33,6 +33,7 @@ class DataBase {
 		$conn = new \PDO($this->DefaultConnection, $this->UserName, $this->Password);
 		if ($this->ReportLevel)
 			$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+		if($this->Timeout) $conn->setAttribute(\PDO::ATTR_TIMEOUT, $this->Timeout/1000);
 		return $conn;
 	}
 	public function Reset(){
@@ -44,7 +45,6 @@ class DataBase {
 	
 	public function SessionTimeout($millisecond = 30000)
 	{
-		$this->Timeout = $millisecond;
 		$millisecond /= 1000;
 		$this->PreQuery = "SET SESSION wait_timeout = $millisecond; SET SESSION interactive_timeout = $millisecond;".$this->PreQuery;
 		return $this;
@@ -52,8 +52,8 @@ class DataBase {
 	public function Timeout($millisecond = 30000)
 	{
 		$this->Timeout = $millisecond;
-		$millisecond /= 1000;
-		$this->PreQuery = "SET GLOBAL wait_timeout = $millisecond; SET GLOBAL interactive_timeout = $millisecond;".$this->PreQuery;
+		// $millisecond /= 1000;
+		// $this->PreQuery = "SET GLOBAL wait_timeout = $millisecond; SET GLOBAL interactive_timeout = $millisecond;".$this->PreQuery;
 		return $this;
 	}
 

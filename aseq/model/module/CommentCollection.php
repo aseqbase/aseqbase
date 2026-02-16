@@ -311,7 +311,6 @@ class CommentCollection extends Collection
     }
     public function GetInner($items = null)
     {
-        return join(PHP_EOL, iterator_to_array((function () use ($items) {
             module("Image");
             $img = new Image();
             $img->Class = "image";
@@ -479,7 +478,7 @@ class CommentCollection extends Collection
                 yield $this->GetAttaches($item);
                 yield "</div>";
                 if (!isEmpty($p_replyes))
-                    yield Struct::Division(Struct::Division("", ["class" => "reply-box"]) . $this->Get($p_replyes), ["class" => "replies"]);
+                    yield Struct::Division(Struct::Division("", ["class" => "reply-box"]) . Convert::ToString($this->GetInner($p_replyes)), ["class" => "replies"]);
                 else
                     yield Struct::Division("", ["class" => "reply-box"]);
                 yield "</div>";
@@ -488,12 +487,11 @@ class CommentCollection extends Collection
             }
             if ($i % $this->MaximumColumns !== 0)
                 yield "</div>";
-        })()));
     }
     public function GetScript()
     {
         $action = $this->Action ? Script::Convert($this->Action) : "null";
-        return Struct::Script(
+        yield Struct::Script(
             "
             function {$this->MainClass}_Edit(btn, selector, forid) {
                 sbjbox = document.querySelector(selector+'>.subject');

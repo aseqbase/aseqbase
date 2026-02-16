@@ -1093,6 +1093,7 @@ class Table extends Module
     {
         if (!$this->DataTable || !\_::$User->HasAccess($this->ImportAccess))
             return Struct::Error("You have not access to 'import'!");
+        $this->DataTable->Reset();
         $s = 0;
         $e = 0;
         foreach ($cols ?: [] as $k => $v)
@@ -1124,7 +1125,7 @@ class Table extends Module
         if ($e == 0 && $s > 0)
             return deliverRedirect(Struct::Success("All $s items imported successfully!"));
         elseif ($s == 0)
-            return Struct::Error("Could not import any items!");
+            return Struct::Error("Could not import any item of ".count($rows)." items!");
         else
             return Struct::Warning("$s items imported and $e items failed!");
     }

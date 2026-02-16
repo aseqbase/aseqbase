@@ -30,7 +30,7 @@ class UserMenu extends Module
 				width: 100%;
 				aspect-ratio: 1;
 			}
-			.{$this->MainClass} .sub-items{
+			.{$this->MainClass} .dropdown-items{
 				display: none;
 				position: absolute;
 				top: auto;
@@ -47,15 +47,17 @@ class UserMenu extends Module
 				overflow-x: hidden;
 				overflow-y: auto;
 				text-align: initial;
+    			flex-direction: column;
+				gap: 0px;
 				z-index: 9;
             	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-2)") . "
 			}
-			.{$this->MainClass} .sub-items .name{
+			.{$this->MainClass} .dropdown-items .name{
 				background-color: var(--fore-color-output);
 				color: var(--back-color-output);
 				" . \MiMFa\Library\Style::UniversalProperty("word-wrap", "break-word") . "
 			}
-			.{$this->MainClass} .sub-items .bio>:not(html,head,body,style,script,link,meta,title){
+			.{$this->MainClass} .dropdown-items .bio>:not(html,head,body,style,script,link,meta,title){
             	font-size: 80%;
 				opacity: 0.8;
 				background-color: var(--back-color-input);
@@ -65,7 +67,7 @@ class UserMenu extends Module
 				padding: var(--size-0) var(--size-1);
 				" . \MiMFa\Library\Style::UniversalProperty("word-wrap", "break-word") . "
 			}
-			.{$this->MainClass} .sub-items :is(.link, .button):not(.name){
+			.{$this->MainClass} .dropdown-items :is(.link, .button):not(.name){
             	width: 100%;
             	text-align: initial;
             	padding: calc(var(--size-0) / 2) var(--size-1);
@@ -73,8 +75,8 @@ class UserMenu extends Module
 				align-content: center;
 				justify-content: space-between;
 			}
-			.{$this->MainClass}:hover .sub-items{
-            	display: grid;
+			.{$this->MainClass}:hover .dropdown-items{
+            	display: flex;
             	" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-2)") . "
 			}
 		");
@@ -116,7 +118,7 @@ class UserMenu extends Module
 								);
 						else
 							yield $item;
-				}, ["class" => "sub-items"]) . $this->GetContent();
+				}, ["class" => "dropdown-items"]) . $this->GetContent();
 		}
 		return parent::GetInner();
 	}
