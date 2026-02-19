@@ -157,9 +157,9 @@ class Content extends Module
       */
      public $RelatedsCount = ["News" => 10, "Default" => 4];
 
-     public $LeaveComment = true;
+     public $AllowLeaveComment = true;
 
-     public $ModifyComment = true;
+     public $AllowModifyComment = true;
      /**
       * @var bool
       * @category Parts
@@ -263,7 +263,7 @@ class Content extends Module
      function __construct()
      {
           parent::__construct();
-          $this->LeaveComment = \_::$User->AllowWriteComment;
+          $this->AllowLeaveComment = \_::$User->AllowWriteComment;
           $this->AllowComments = \_::$User->AllowReadComment;
           $this->AllowCommentsAccess = \_::$User->ReadCommentAccess;
           $this->Root = $this->Root ?? \_::$Address->ContentRootUrlPath;
@@ -648,11 +648,11 @@ class Content extends Module
                     "Relation=:rid AND " . authCondition(checkStatus: false) . " " . $this->CommentsLimitation,
                     [":rid" => get($this->Item, 'Id')]
                );
-               if (!$this->LeaveComment) {
+               if (!$this->AllowLeaveComment) {
                     $cc->ReplyButtonLabel =
                          $cc->DeleteButtonLabel = null;
                }
-               if (!$this->ModifyComment) {
+               if (!$this->AllowModifyComment) {
                     $cc->EditButtonLabel =
                          $cc->DeleteButtonLabel = null;
                }
@@ -673,7 +673,7 @@ class Content extends Module
      }
      public function GetCommentForm()
      {
-          if (!$this->LeaveComment)
+          if (!$this->AllowLeaveComment)
                return null;
           $this->CommentForm->Relation = get($this->Item, 'Id');
           return $this->CommentForm->Handle();

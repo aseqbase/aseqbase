@@ -648,24 +648,25 @@ function download($destPath = null, $extensions = null, $minSize = null, $maxSiz
 
 	$object = base64_decode(urldecode($object));
 
+	$contentResult = false;
 	if ($destPath === true) {
-		if (!Storage::SetFileContent($destPath = Storage::GenerateUniquePath(\_::$Address->PublicDirectory, $objectName, random: true), $object))
-			return false;
+		$destPath = Storage::GenerateUniquePath(\_::$Address->PublicDirectory, $objectName, random: true);
 	} elseif ($destPath === false) {
-		if (!Storage::SetFileContent($destPath = Storage::GenerateUniquePath(\_::$Address->TempDirectory, $objectName, random: true), $object))
-			return false;
+		$destPath = Storage::GenerateUniquePath(\_::$Address->TempDirectory, $objectName, random: true);
 	} elseif ($destPath) {
 		if (endsWith($destPath, DIRECTORY_SEPARATOR))
 			$destPath = Storage::GenerateUniquePath($destPath, $objectName);
-		if (!Storage::SetFileContent($destPath, $object))
-			return false;
 	} else {
-		if (!Storage::SetFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
-			return false;
-		$destPath = Storage::GetFileContent($destPath);
+		$destPath = \_::$Address->TempDirectory . $objectName;
+		$contentResult = true;
 	}
 
-	return $destPath;
+	if (!Storage::SetFileContent($destPath, $object))
+		return false;
+	elseif ($contentResult)
+		return Storage::GetFileContent($destPath);
+	else
+		return $destPath;
 }
 
 /**
@@ -715,35 +716,36 @@ function downloadStream($destPath = null, $extensions = null, $minSize = null, $
 
 	$object = base64_decode(urldecode($object));
 
+	$contentResult = false;
 	if ($destPath === true) {
-		if (!Storage::AppendFileContent($destPath = \_::$Address->PublicDirectory . $objectName, $object))
-			return false;
+		$destPath = \_::$Address->PublicDirectory . $objectName;
 	} elseif ($destPath === false) {
-		if (!Storage::AppendFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
-			return false;
+		$destPath = \_::$Address->TempDirectory . $objectName;
 	} elseif ($destPath) {
 		if (endsWith($destPath, DIRECTORY_SEPARATOR))
 			$destPath = $destPath . $objectName;
-		if (!Storage::AppendFileContent($destPath, $object))
-			return false;
 	} else {
-		if (!Storage::AppendFileContent($destPath = \_::$Address->TempDirectory . $objectName, $object))
-			return false;
-		if ($chunk >= ($total - 1))
-			$destPath = Storage::GetFileContent($destPath);
+		$destPath = \_::$Address->TempDirectory . $objectName;
+		$contentResult = true;
 	}
 
-	if ($total > 1 && $chunk == 0)
+	if ($chunk === 0 && !Storage::SetFileContent($destPath, $object))
+		return false;
+	elseif ($chunk !== 0 && !Storage::AppendFileContent($destPath, $object))
+		return false;
+	elseif ($chunk === 0 && $total > 1)
 		return true;
-	if ($chunk >= ($total - 1)) {
-		// if(stat($destPath)["size"] > ($objectSize - $speed))
-		return $destPath;
+	elseif ($chunk >= ($total - 1)) {
+		if ($contentResult)
+			return Storage::GetFileContent($destPath);
+		// elseif(stat($destPath)["size"] > ($objectSize - $speed))
+			return $destPath;
 		// else {
 		// 	Storage::DeleteFile($destPath);
 		// 	throw new \SilentException("The 'file data' is not 'complete'!");
 		// }
 	}
-	return $chunk / $total;
+	else return $chunk / $total;
 }
 
 #endregion 
@@ -2747,7 +2749,8 @@ function createEmail($name = "do-not-reply", string|null $host = null): string|n
  * @param mixed $key
  * @param callable|null $generator
  */
-function cache($key, callable|null $generator = null){
+function cache($key, callable|null $generator = null)
+{
 	return \_::Cache($key, $generator);
 }
 /**
@@ -3241,7 +3244,8 @@ function __(mixed $value, bool $translating = true, bool $styling = false, bool|
 		is_array($value) ? join($separator, loop($value, fn($v) => __($v, $translating, $styling, $referring))) : $value
 	);
 
-	if(!\_::$Front) return $value;
+	if (!\_::$Front)
+		return $value;
 	if ($translating && \_::$Front->AllowTranslate)
 		$value = \_::$Front->Translate->Get($value, $lang, $depth);
 	else

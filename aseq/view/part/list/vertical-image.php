@@ -63,7 +63,7 @@ response(Struct::MediumFrame(
                         ["class" => "top-controls"]
                     ) .
                     Struct::Heading5($v["Title"]) .
-                    Struct::Division($v["Description"], ["class" => "be small"]),
+                    Struct::Division(__($v["Description"]), ["class" => "be small"]),
                     ["class" => "content"]
                 ),
                 ["class" => "item", "style" => "border-color:{$v["Color"]};"]

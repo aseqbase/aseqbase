@@ -294,6 +294,7 @@ class Struct
             }
             if (is_callable($object) || $object instanceof \Closure)
                 return self::Convert($object(...$args));
+            if (is_bool($object)) return self::Icon($object?"check":"close");
             return self::Division(Convert::ToString($object));
         }
         return "";
@@ -3241,6 +3242,8 @@ class Struct
                         self::Icon("quote-right", "{$id}_injectOutLines('\"\"\"', '\"\"\"')", ["Tooltip" => "Block Quote"]),
                         self::Icon("file-code", "{$id}_injectOutLines('```', '```')", ["Tooltip" => "Code Block"]),
                         self::Icon("code", "{$id}_injectInLines(' > ')", ["Tooltip" => "Code Script"]),
+                        self::Icon("table", "{$id}_injectOutText('|','|')", ["Tooltip" => "Table cells"]),
+                        self::Icon("th", "{$id}_injectOutText('|','')", ["Tooltip" => "Table separator"]),
                         self::Icon("link", "var url=prompt('Enter the URL:','https://'); if(url){ {$id}_injectInText('[',']('+url+')');}", ["Tooltip" => "Link"]),
                         self::Icon("square", "var act=prompt('Enter the JS Action or URL:','https://'); if(act){ {$id}_injectInText('!Button[',']('+act+')');}", ["Tooltip" => "Button"]),
                         self::Icon("image", "var url=prompt('Enter the Media URL or Icon name:','https://'); if(url){ {$id}_injectInText('![',']('+url+')');}", ["Tooltip" => "Image, Video, Audio, Icon, ..."]),

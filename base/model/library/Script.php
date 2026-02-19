@@ -244,12 +244,12 @@ class Script
      * @param int|null $speed The chunk size in bytes, default is 100KB
      * @return string The script part
      */
-    public static function UploadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $onSuccessScript = null, $onErrorScript = null, $onMessageScript = null, $onProgressScript = null, $timeout = null, $speed = null, $multiple = false, $method = "STREAM")
+    public static function UploadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $onSuccessScript = null, $onErrorScript = null, $onMessageScript = null, $onProgressScript = null, $timeout = 999999999, $speed = null, $multiple = false, $method = "STREAM")
     {
         return "
             var input = document.createElement('input');
             input.setAttribute('Type' , 'file');
-            input.setAttribute('accept', " . self::Convert($extensions ?? \_::$Back->GetAcceptableFormats()) . ");
+            ".(count($extensions = $extensions ?? \_::$Back->GetAcceptableFormats())>0?"input.setAttribute('accept', " . self::Convert($extensions) . ");":"")."
             input.setAttribute('multiple', " . ($multiple ? "true" : "false") . ");
             input.onchange = evt => {
                 try{
