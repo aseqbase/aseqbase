@@ -46,6 +46,9 @@ class SignInForm extends Form{
 
 	public function GetStyle(){
 		if($this->AllowDecoration) return ((\_::$User->HasAccess(\_::$User->UserAccess) && !$this->MultipleSignIn)?"":parent::GetStyle()).Struct::Style("
+			.{$this->MainClass} .form {
+				max-width: 720px;
+			}
 			.{$this->MainClass} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}

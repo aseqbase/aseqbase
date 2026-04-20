@@ -5,16 +5,28 @@ class Front extends AseqFront {
 	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
 	public $Payment = '{"Network":"TRC-20","Currency":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}';
 
+	/**
+     * The main menu to show on the most pages
+     * @field object
+	 * @category Render
+     * @var array|null
+	 */
 	public $MainMenus = [
 		array("Name" => "HOME", "Path"=> "/home", "Image" => "home"),
-		array("Name" => "POSTS", "Path"=> "/posts", "Image" => "th-large", "Attributes" => "class='menu-link'"),
-		array("Name" =>"ABOUT","Path"=>"/about","Image" =>"info","Attributes"=> "class='menu-link'","Items"=> array(
-			array("Name" =>"CONTACTS","Path"=>"/contact","Image" =>"address-book","Attributes"=> "class='menu-link'"),
-			array("Name" =>"ABOUT","Path"=>"/about","Image" =>"info","Attributes"=> "class='menu-link'"),
-			array("Name" =>"TEAM","Path"=>"/team","Image" =>"group","Attributes"=> "class='menu-link'")
+		array("Name" => "POSTS", "Path"=> "/posts", "Image" => "th-large"),
+		array("Name" =>"ABOUT","Path"=>"/about","Image" =>"info","Items"=> array(
+			array("Name" =>"CONTACTS","Path"=>"/contact","Image" =>"address-book"),
+			array("Name" =>"ABOUT","Path"=>"/about","Image" =>"info"),
+			array("Name" =>"TEAM","Path"=>"/team","Image" =>"user-group")
 		))
 	];
 
+	/**
+     * The main shortcut menu to show on the most pages
+     * @field object
+	 * @category Render
+     * @var array|null
+	 */
 	public $Shortcuts = [
 		array("Name" => "Menu", "Path"=> "viewSideMenu()", "Image" => "bars"),
 		array("Name" => "Posts", "Path"=> "/posts", "Image" => "th-large"),
@@ -23,12 +35,24 @@ class Front extends AseqFront {
 		array("Name" => "About", "Path"=> "/about", "Image" => "quote-left")
 	];
 
+	/**
+     * The main menu items to show on the first page
+     * @field object
+	 * @category Render
+     * @var array|null
+	 */
 	public $Services = [
 		array("Name" => "MiMFa aseqbase", "Description" => "<p class='view md-hide'>A special framework for web development called \"aseqbase\" (a sequence-based framework) has been developed to implement safe, flexible, fast, and strong pure websites based on that, since 2018 so far.</p>", "Image" => "phone", "More" => "<a class='btn' href='/about'>MORE</a>"),
 		array("Name" => "OUR TARGET", "Description" => "<p class='view md-hide'>Develop websites by <u>a seq</u>uence-<u>base</u>d framework</p>", "Image" => "bullseye", "More" => "<a class='btn' href='/about'>MORE</a>"),
 		array("Name" => "WHAT IS WEB FRAMEWORK", "Description" => "<p class='view md-hide'>A web development framework is a set of resources and tools for software developers to build and manage web applications, web services and websites.</p>", "Image" => "quote-left", "More" => "<a href=\"introduction\">READ ABOUT ASEQBASE</a>")
 	];
 
+	/**
+     * The main contacts details to show on the most pages and contact page
+     * @field object
+	 * @category Render
+     * @var array|null
+	 */
 	public $Contacts = [
 		array("Name" => "Email", "Path"=> "mailto:aseqbase@mimfa.net", "Icon"=> "envelope"),
 		array("Name" => "Github", "Path"=> "http://github.com/mimfa", "Icon"=> "share-alt"),

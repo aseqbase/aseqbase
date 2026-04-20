@@ -39,7 +39,7 @@ class Live extends Array {
         return proxy;
     }
     toString(separator = "") {
-        return this.flatMap(el => el.textContent || "").join(separator);
+        return this.flatMap(el => (el instanceof Element ? el.textContent : el) || "").join(separator);
     }
 
     from(query = null, mode = null, source = null) {
@@ -107,20 +107,20 @@ class Live extends Array {
             if (arg !== undefined) {
                 if (Array.isArray(arg)) {
                     this.merge(...arg);
-                } else if (arg !== null && ('function' === typeof arg[Symbol.iterator]) && !(arg instanceof Node)) {
+                } else if (typeof arg === 'string')
+                    this.push(arg);
+                else if (arg !== null && ('function' === typeof arg[Symbol.iterator]) && !(arg instanceof Node)) {
                     if (arg instanceof XPathResult) {
                         this.merge(...Array.from((function* () {
                             let current;
                             while ((current = arg.iterateNext())) yield current;
                         })()));
-                    } else {
+                    } else
                         this.merge(...Array.from(arg));
-                    }
                 } else if (typeof arg === 'function') {
                     this.merge(arg(this, arg));
-                } else {
+                } else
                     this.push(arg);
-                }
             }
         }
         return this;
@@ -138,6 +138,17 @@ class Live extends Array {
     *whereIteration(condition, ...args) {
         for (const elem of this)
             if (condition(elem, ...args)) yield elem;
+    }
+
+    and(action, ...args) {
+        for(const res of this.eachIteration(action, ...args))
+            if(!res) return false;
+        return this.length > 0?this:null;
+    }
+    or(action, ...args) {
+        for(const res of this.eachIteration(action, ...args))
+            if(res) return true;
+        return this.length > 0?null:this;
     }
 
     each(action, ...args) {
@@ -167,7 +178,6 @@ class Live extends Array {
             el.dispatchEvent(evt);
         });
     }
-
 
     on(eventName, action, ...args) {
         if (!action) return this.trigger(eventName);
@@ -199,9 +209,6 @@ class Live extends Array {
         return this;
     }
 
-    submit(action = null, ...args) {
-        return this.on('submit', action, ...args);
-    }
     click(action = null, ...args) {
         return this.on('click', action, ...args);
     }
@@ -211,11 +218,30 @@ class Live extends Array {
     hover(actionIn = null, actionOut, ...args) {
         return this.on('mouseenter', actionIn, ...args).on('mouseleave', actionOut, ...args);
     }
+    enter(action = null, ...args) {
+        return this.on('mouseenter', action, ...args);
+    }
+    leave(action = null, ...args) {
+        return this.on('mouseleave', action, ...args);
+    }
     focus(action = null, ...args) {
         return this.on('focus', action, ...args);
     }
     blur(action = null, ...args) {
         return this.on('blur', action, ...args);
+    }
+    change(action = null, ...args) {
+        return this.on('change', action, ...args);
+    }
+    input(action = null, ...args) {
+        return this.on('input', action, ...args);
+    }
+    submit(action = null, ...args) {
+        return this.on('submit', action, ...args);
+    }
+    validate(action = null, ...args) {
+        if (!action) return this.and((elem) => elem.reportValidity());
+        else return this.each((elem) => action(elem.checkValidity(), elem, ...args));
     }
 
     parent() {
@@ -238,6 +264,12 @@ class Live extends Array {
     siblings() {
         return (new Live(this.each((elem) => (elem.parentNode ? Array.from(elem.parentNode.children) : []).filter(child => child !== elem)).flat()));
     }
+    previous() {
+        return this.each((elem) => elem.previousElementSibling);
+    }
+    next() {
+        return this.each((elem) => elem.nextElementSibling);
+    }
     first() {
         if (this.length === 0) return (new Live());
         return (new Live([this[0]]));
@@ -249,18 +281,21 @@ class Live extends Array {
     find(query = null, mode = null) {
         return new Live(this.each((elem) => new Live(query, mode, elem)).flat());
     }
+    has(query = null) {
+        return this.or((elem) => (new Live(getQuery(elem) + " " + query)).length>0);
+    }
     matches(query = null) {
-        return new Live(this.each((elem) => new Live(getQuery(elem)+" "+query)).flat());
+        return new Live(this.each((elem) => new Live(getQuery(elem) + " " + query)).flat());
     }
     contains(element) {
-        for (const elem of this) {
+        return this.or((elem) => {
             if (elem instanceof Element && element instanceof Element) {
                 if (elem.contains(element)) return true;
-                for(const child of elem.querySelectorAll("*"))
+                for (const child of elem.querySelectorAll("*"))
                     if (child === element) return true;
             }
-        }
-        return false;
+            return false;
+        });
     }
 
     /**
@@ -304,7 +339,7 @@ class Live extends Array {
                         });
                         newScript.textContent = oldScript.textContent;
                         oldScript.parentNode?.replaceChild(newScript, oldScript);
-                    } catch (e) {}
+                    } catch (e) { }
                 }
             }
         });
@@ -341,7 +376,7 @@ class Live extends Array {
                 (new Live(element)).append(tag);
             }
         });
-        else return this.appendTo(new Live(element));
+        else return new Live(element).append(this);
     }
     /**
      * The provided element(s) will be prepended to the selected elements.
@@ -375,7 +410,7 @@ class Live extends Array {
                 (new Live(element)).prepend(tag);
             }
         });
-        else return this.prependTo(new Live(element));
+        else return new Live(element).prepend(this);
     }
     replace(element) {
         if (Array.isArray(element)) return this.each(tag => {
@@ -574,8 +609,11 @@ class Live extends Array {
         });
     }
     hasClass(className) {
-        if (this.length === 0) return false;
-        return this[0] instanceof Element && this[0].classList.contains(className);
+        let res = false;
+        this.each(tag => {
+            if (tag instanceof Element) res = res || tag.classList.contains(className);
+        });
+        return res;
     }
 
     offset() {

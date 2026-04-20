@@ -81,7 +81,6 @@ class General extends Template
 				background-image: " . (isValid($this->BackgroundImage) ? "url('" . $this->BackgroundImage . "')" : "var(--overlay-url-0)") . "
 			}
 			body>.result:is(.message,.success,.error,.warning){
-				/*position: fixed;*/
 				font-size: var(--size-min);
 				background-color: var(--back-color-special);
 				border: var(--border-2);
@@ -93,6 +92,8 @@ class General extends Template
     			z-index: 900000000;
 			}
 			body .result:is(.message,.success,.error,.warning){
+				position: sticky;
+				bottom: var(--size-max);
 				width: 100% !important;
 			}
 			body .result:is(.message,.success,.error,.warning)>.division{
@@ -120,55 +121,54 @@ class General extends Template
 				color: var(--fore-color-special);
 				box-shadow: var(--shadow-2);
 			}
-			body>nav .header{
+			body>nav:has(.inside) .header{
 				color: var(--fore-color-special);
-				padding-left: var(--size-0);
-				padding-right: var(--size-0);
+				padding: calc(var(--size-0) / 2) var(--size-0);
 			}
-			body>nav :is(.header, .header a, .header a:visited, .header a:hover){
+			body>nav:has(.inside) :is(.header, .header a, .header a:visited, .header a:hover){
 				text-decoration: none;
 				font-weight: normal !important;
 			}
-			body>nav .header .title{
+			body>nav:has(.inside) .header .title{
 				font-size: var(--size-2);
 			}
-			body>nav .header .description{
+			body>nav:has(.inside) .header .description{
 				font-size: 75%;
 			}
-			body>nav ul li .image{
+			body>nav:has(.inside) ul li .image{
 				margin-inline-end: var(--size-0);
 			}
-			body>nav ul li .description{
+			body>nav:has(.inside) ul li .description{
 				font-size: var(--size-0);
 				color: #888b;
 				font-weight: normal;
 				line-height: 2em;
 			}
-			body>nav ul li:hover .description{
+			body>nav:has(.inside) ul li:hover .description{
 				font-size: var(--size-0);
 				color: unset;
 			}
 
-			body>nav ul li .icon{
+			body>nav:has(.inside) ul li .icon{
 				font-size: var(--size-1);
 			}
 
-			body>nav ul li.dropdown{
+			body>nav:has(.inside) ul li.dropdown{
 				position: initial;
 			}
-			body>nav ul li.dropdown ul{
+			body>nav:has(.inside) ul li.dropdown ul{
 				text-align: start;
 			}
 
-			body>nav :is(button, .button, .icon[onclick]){
+			body>nav:has(.inside) :is(button, .button, .icon[onclick]){
 				border: var(--border-0);
 				border-radius: var(--radius-0);
 				box-shadow: var(--shadow-0);
 			}
-			body>nav :is(button, .button, .icon[onclick]):hover{
+			body>nav:has(.inside) :is(button, .button, .icon[onclick]):hover{
 				box-shadow: var(--shadow-2);
 			}
-			body>nav .dropdown-items {
+			body>nav:has(.inside) .dropdown-items {
 				padding: calc(var(--size-0) / 2);
 				color: var(--fore-color-special);
 				background-color: var(--back-color-special);
@@ -181,15 +181,15 @@ class General extends Template
 				text-transform: uppercase;
 			}
 				
-			body>nav ul:not(.sub-items)>li {
+			body>nav:has(.inside) ul:not(.sub-items)>li {
 				background-color: transparent;
 				color: inherit;
 				display: inline-block;
 			}
-			body>nav ul:not(.sub-items)>li.active{
+			body>nav:has(.inside) ul:not(.sub-items)>li.active{
 				box-shadow: var(--shadow-2);
 			}
-			body>nav ul:not(.sub-items)>li>:is(.button, .button:visited){
+			body>nav:has(.inside) ul:not(.sub-items)>li>:is(.button, .button:visited){
 				background-color: transparent;
 				color: var(--fore-color-special);
 				border: none;
@@ -204,70 +204,70 @@ class General extends Template
 				flex-direction: row;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			body>nav ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
+			body>nav:has(.inside) ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
 				font-weight: bold;
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			body>nav ul:not(.sub-items)>li.active>:is(.button, .button:visited){
+			body>nav:has(.inside) ul:not(.sub-items)>li.active>:is(.button, .button:visited){
 				color: var(--fore-color);
 			}
-			body>nav ul:not(.sub-items)>li.active:hover>:is(.button, .button:visited){
+			body>nav:has(.inside) ul:not(.sub-items)>li.active:hover>:is(.button, .button:visited){
 				color: var(--fore-color);
 			}
-			body>nav ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
+			body>nav:has(.inside) ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
 				color: var(--fore-color-output);
 				background-color: var(--back-color-output);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			body>nav ul.sub-items .sub-items li :is(.button, .button:visited) {
+			body>nav:has(.inside) ul.sub-items .sub-items li :is(.button, .button:visited) {
 				padding: calc(var(--size-0) / 2) var(--size-1);
 				background: transparent;
 				border: none;
 			}
-			body>nav ul.sub-items>li {
+			body>nav:has(.inside) ul.sub-items>li {
 				display: block;
 			}
-			body>nav ul.sub-items>li>:is(.button, .button:visited){
+			body>nav:has(.inside) ul.sub-items>li>:is(.button, .button:visited){
 				padding-inline-end: var(--size-max);
 				color: var(--fore-color-input);
 			}
-			body>nav ul.sub-items>li.dropdown{
+			body>nav:has(.inside) ul.sub-items>li.dropdown{
 				display: block;
 				border-bottom: var(--border-1) transparent;
 			}
-			body>nav ul.sub-items>li.dropdown.active{
+			body>nav:has(.inside) ul.sub-items>li.dropdown.active{
 				box-shadow: var(--shadow-2);
 				border: none;
 			}
-			body>nav ul.sub-items>li.dropdown.active>:is(.button, .button:visited){
+			body>nav:has(.inside) ul.sub-items>li.dropdown.active>:is(.button, .button:visited){
 				font-weight: bold;
 				border: none;
 			}
-			body>nav ul.sub-items>li.dropdown:hover{
+			body>nav:has(.inside) ul.sub-items>li.dropdown:hover{
 				border-bottom-color: var(--back-color-output);
 				box-shadow: var(--shadow-1);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			body>nav ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
+			body>nav:has(.inside) ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
 				font-weight: bold;
 				border: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			body>nav ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
+			body>nav:has(.inside) ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
 				font-weight: bold;
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				border: none;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			body>nav ul.sub-items>li:not(.dropdown).active>:is(.button, .button:visited){
+			body>nav:has(.inside) ul.sub-items>li:not(.dropdown).active>:is(.button, .button:visited){
 				font-weight: bold;
 				box-shadow: var(--shadow-2);
 				border: none;
 			}
-			body>nav ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
+			body>nav:has(.inside) ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
 				font-weight: bold;
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
@@ -453,7 +453,7 @@ class General extends Template
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.button{
+			:not(nav, footer, header) .button{
 				text-decoration: none;
 				display: inline-flex;
 				flex-wrap: wrap;
@@ -516,7 +516,7 @@ class General extends Template
 				border-color: var(--back-color-output);
 			}
 
-			.input{
+			input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']), select, textarea{
 				padding: calc(var(--size-0) / 2) var(--size-0);
 			}
 			input[type='range'].rangeinput {

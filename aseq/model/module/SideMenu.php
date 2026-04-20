@@ -2,7 +2,6 @@
 namespace MiMFa\Module;
 use MiMFa\Library\Struct;
 use MiMFa\Library\Style;
-use MiMFa\Library\Convert;
 
 class SideMenu extends Module
 {
@@ -431,7 +430,7 @@ class SideMenu extends Module
 				if ($this->AllowTemplate)
 					$defaultButtons[] = new TemplateButton();
 			}
-			yield Struct::Division(
+			yield Struct::Box(
 				[
 					...($defaultButtons ? $defaultButtons : []),
 					...($this->Buttons ? (is_array($this->Buttons) ? $this->Buttons : [$this->Buttons]) : [])
@@ -472,7 +471,8 @@ class SideMenu extends Module
 		$path = getBetween($item, "Path");
 		$act = endsWith(\_::$Address->UrlBase, $path) ? 'active' : '';
 		$ind++;
-		$count = count(getValid($item, "Items", []));
+		$itms = loop(get($item, "Items")??[], fn($itm) => $this->CreateItem($itm, $ind));
+		$count = count($itms);
 		return Struct::Item(
 			($ind <= 2 ? Struct::Button(
 				($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
@@ -492,14 +492,7 @@ class SideMenu extends Module
 				)
 			) .
 			($count > 0 ?
-				Struct::Items(
-					function () use ($item, $ind) {
-						foreach ($item["Items"] as $itm)
-							yield $this->CreateItem($itm, $ind);
-					}
-					,
-					["class" => "sub-items sub-items-$ind"]
-				)
+				Struct::Items($itms,["class" => "sub-items sub-items-$ind"])
 				: ""),
 			["class" => $count > 0 ? "dropdown $act" : $act]
 		);

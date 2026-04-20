@@ -363,7 +363,7 @@ class Field extends Module
 					$p->Id = "Player" . getId();
 					if (!$this->Lock)
 						$p->PrependControls =
-							Struct::Icon("trash", "
+							Struct::Icon("trash-alt", "
 								document.getElementById('$iid').setAttribute('disabled','disabled');
 								document.getElementById('{$p->Id}').style.opacity='0.5';
 								document.getElementById('{$p->Id}').style.borderColor='#f33';", ["class" => "button"]) .
@@ -431,7 +431,7 @@ class Field extends Module
 					$p->Id = "Player" . getId();
 					if (!$this->Lock)
 						$p->PrependControls =
-							Struct::Icon("trash", "
+							Struct::Icon("trash-alt", "
 								document.getElementById('$iid').setAttribute('disabled','disabled');
 								document.getElementById('{$p->Id}').style.opacity='0.5';
 								document.getElementById('{$p->Id}').style.borderColor='#f33';", ["class" => "button"]) .

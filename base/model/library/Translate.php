@@ -30,16 +30,16 @@ class Translate
 	public $DefaultDirection = "ltr";
 	public $ImagePathPattern = "https://unpkg.com/language-icons/icons/{0}.svg";
 	public $CodeLimit = 160;
-	public $WrapPattern = "/(^\s*<[\w\W]*>\s*$)|(\\$\{[\w\W]+\})|(\`.?[^\`]*.?\`)|('.?[^']*.?')|(\".?[^\"]*.?\")|(<\S[\w\W]*>)|(\d*[\.,:\-]?\d+)/u";
+	public $WrapPattern = "/(^\s*<[\w\W]*>\s*$)|(\\$\{[\w\W]+\})|(\`.?[^\`]*.?\`)|('.?[^']*.?')|(\".?[^\"]*.?\")|(<\S[\w\W]*>)|(\d*[\.,:\-]?\d+)|(([\"\'\`’\-\(\)\[\],;\w]+[^\"\'\`’\-\(\)\[\],;\w\s]+[\"\'\`’\-\(\)\[\],;\w]+)+)/u";
 	public $WrapStart = "<";
 	public $WrapEnd = ">";
 	public $ValidPattern = "/[A-Z0-9]/i";//"/^[\s\d\-*\/\\\\+\.?=_\\]\\[{}()&\^%\$#@!~`'\"<>|]*[A-Z]/mi";
 	public $InvalidPattern = "/[^A-Z0-9\W\\$\{\}]/i";//'/^((\s+)|(\s*\<\w+[\s\S]*\>[\s\S]*\<\/\w+\>\s*)|([A-z0-9\-\.\_]+\@([A-z0-9\-\_]+\.[A-z0-9\-\_]+)+)|(([A-z0-9\-]+\:)?([\/\?\#]([^:\/\{\}\|\^\[\]\"\'\`\r\n\t\f]*)|(\:\d))+))$/';
 	public $CorrectorPattern = "/(?:^\`([\w\W]+)\`$)|(?:^'([\w\W]+)'$)|(?:^\"([\w\W]+)\"$)|([\w\W]+)/u";
 	public $CorrectorReplacement = "$1$2$3$4";
-	public static $FullTrimmedPattern = "/^\\$\{[\w\W]+\}$/u";
-	public static $TrimmerPattern = "/(?:\\$\{([^\}]+)\})|((?<!\\$\{)[\w\W]+(?!\}))/u";
-	public static $TrimmerReplacement = "$1$2";
+	public static $TrimmerPattern = "/(?:\\$\{([^\}]*)\})|(?:\`([^\`]+)\`)|(?:\'([^\']+)\')|(?:\"([^\"]+)\")|((?<!(?:\\$\{)([\`\'\"]))[\w\W]+(?!\6\}))/u";
+	//public static $TrimmerPattern = "/(?<!\\$\{)(?:(?:\\$\{([^\}]+)\})|(?:\`([^\`]+)\`)|(?:\'([^\']+)\')|(?:\"([^\"]+)\")|((?<!([\`\'\"]))[\w\W]+(?!\6)))(?!\})/u";
+	public static $TrimmerReplacement = "$1$2$3$4$5";
 	/**
 	 * To have a deep translate
 	 */

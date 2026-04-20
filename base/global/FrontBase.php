@@ -15,10 +15,10 @@ library("Translate");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Structures See the Structures Documentation
  */
-abstract class FrontBase
+class FrontBase
 {
 	/**
-	 * Additional items to use in back-end
+	 * Additional items to use
 	 * @var array
 	 */
 	public $Items = [];
@@ -92,7 +92,7 @@ abstract class FrontBase
 
 	/**
 	 * Default mail sender
-	 * @example: "do-not-reply@mimfa.net"
+	 * @example "do-not-reply@mimfa.net"
 	 * @field array
 	 * @var string|null|array<string>
 	 * @category Security
@@ -100,7 +100,7 @@ abstract class FrontBase
 	public $SenderEmail = null;
 	/**
 	 * Default mail reciever
-	 * @example: "info@mimfa.net"
+	 * @example "info@mimfa.net"
 	 * @field array
 	 * @var string|null|array<string>
 	 * @category Security
@@ -151,18 +151,6 @@ abstract class FrontBase
 	 * @var string
 	 */
 	public string $DefaultViewName = "main";
-	/**
-	 * @field value
-	 * @category Template
-	 * @var string
-	 */
-	public $DefaultSourceSelector = "body";
-	/**
-	 * @field value
-	 * @category Template
-	 * @var string
-	 */
-	public $DefaultDestinationSelector = "body";
 
 	/**
 	 * The main path
@@ -218,7 +206,7 @@ abstract class FrontBase
 	/**
 	 * The Date Time Format
 	 * @var string
-	 * @example: "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
+	 * @example "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
 	 * @field value
 	 * @category Time
 	 */
@@ -425,8 +413,8 @@ abstract class FrontBase
 			);
 		}
 
-		$this->SenderEmail = $this->SenderEmail ?: createEmail("do-not-reply");
-		$this->ReceiverEmail = $this->ReceiverEmail ?: createEmail("info");
+		$this->SenderEmail = $this->SenderEmail ?: createEmail("do-not-reply", $this->Path);
+		$this->ReceiverEmail = $this->ReceiverEmail ?: createEmail("info", $this->Path);
 	}
 
 	public function __get($name)
@@ -515,7 +503,7 @@ abstract class FrontBase
 	 * Interact with all specific script results of the client side one by one
 	 * @param mixed $intents The front iterator JS codes like an array 
 	 * @param mixed $callback The call back handler
-	 * @example: iterateRequest("document.querySelectorAll('body input')", function(selectedItems)=>{ //do somework })
+	 * @example iterateRequest("document.querySelectorAll('body input')", function(selectedItems)=>{ //do somework })
 	 */
 	public function Bring($intents = null, $callback = null)
 	{
@@ -563,11 +551,15 @@ abstract class FrontBase
 	 * Get all specific parts of the client side
 	 * @param mixed $selector The source selector
 	 * @param mixed $callback The call back handler
-	 * @example: get("body", function(selectedHtml)=>{ //do somework })
+	 * @example get("body", function(selectedHtml)=>{ //do somework })
 	 */
 	public function Get($selector = null, $callback = null)
 	{
-		request("Array.from(document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
+		return beforeUsing(
+			\_::$Address->RootDirectory,
+			"finalize",
+			fn() => response(Struct::Script(Script::Get($selector, $callback)))
+		);
 	}
 	/**
 	 * Replace the output with a special part of client side
@@ -578,26 +570,9 @@ abstract class FrontBase
 	public function Set($selector = null, $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->GlobalDirectory,
+			\_::$Address->RootDirectory,
 			"finalize",
-			fn() => response(Struct::Script($this->MakeSetScript($selector, $handler, $args, false)))
-		);
-	}
-	/**
-	 * Make a script to
-	 * Replace the output with a special part of client side
-	 * @param mixed $selector The destination selector
-	 * @param mixed $handler The data that is ready to print
-	 * @param mixed $args Handler input arguments
-	 */
-	public function MakeSetScript($selector = null, $handler = null, $args = [], $direct = true)
-	{
-		return Internal::MakeScript(
-			$handler,
-			$args,
-			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").replace(data??err)",
-			direct: $direct,
-			encrypt: false
+			fn() => response(Struct::Script(Script::Set($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -607,18 +582,10 @@ abstract class FrontBase
 	public function Delete($selector = "body")
 	{
 		return beforeUsing(
-			\_::$Address->GlobalDirectory,
+			\_::$Address->RootDirectory,
 			"finalize",
-			fn() => $this->Append("body", Struct::Script($this->MakeDeleteScript($selector, false)))
+			fn() => $this->Append("body", Struct::Script(Script::Delete($selector, false)))
 		);
-	}
-	/**
-	 * Make a script to Delete a special part of client side
-	 * @param mixed $selector The destination selector
-	 */
-	public function MakeDeleteScript($selector = "body", $direct = true)
-	{
-		return Internal::MakeStartScript(direct: $direct) . "document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultSourceSelector) . ").forEach(el=>el.remove())" . Internal::MakeEndScript(direct: $direct);
 	}
 	/**
 	 * Insert output before a special part of client side
@@ -629,27 +596,9 @@ abstract class FrontBase
 	public function Before($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->GlobalDirectory,
+			\_::$Address->RootDirectory,
 			"finalize",
-			fn() => $this->Append("body", Struct::Script($this->MakeBeforeScript($selector, $handler, $args, false)))
-		);
-	}
-	/**
-	 * Make a script to
-	 * Insert output before a special part of client side
-	 * @param mixed $selector The destination selector
-	 * @param mixed $handler The data that is ready to print
-	 * @param mixed $args Handler input arguments
-	 */
-	public function MakeBeforeScript($selector = "body", $handler = null, $args = [], $direct = true)
-	{
-		return Internal::MakeScript(
-			$handler,
-			$args,
-			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").before(data??err)"
-			,
-			direct: $direct,
-			encrypt: false
+			fn() => $this->Append("body", Struct::Script(Script::Before($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -661,26 +610,9 @@ abstract class FrontBase
 	public function After($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->GlobalDirectory,
+			\_::$Address->RootDirectory,
 			"finalize",
-			fn() => $this->Append("body", Struct::Script($this->MakeAfterScript($selector, $handler, $args, false)))
-		);
-	}
-	/**
-	 * Make a script to
-	 * Insert output after a special part of client side
-	 * @param mixed $selector The destination selector
-	 * @param mixed $handler The data that is ready to print
-	 * @param mixed $args Handler input arguments
-	 */
-	public function MakeAfterScript($selector = "body", $handler = null, $args = [], $direct = true)
-	{
-		return Internal::MakeScript(
-			$handler,
-			$args,
-			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").after(data??err)",
-			direct: $direct,
-			encrypt: false
+			fn() => $this->Append("body", Struct::Script(Script::After($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -692,27 +624,9 @@ abstract class FrontBase
 	public function Fill($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->GlobalDirectory,
+			\_::$Address->RootDirectory,
 			"finalize",
-			fn() => $this->Append("body", Struct::Script($this->MakeFillScript($selector, $handler, $args, false)))
-		);
-	}
-	/**
-	 * Make a script to
-	 * Print output inside a special part of client side
-	 * @param mixed $selector The destination selector
-	 * @param mixed $handler The data that is ready to print
-	 * @param mixed $args Handler input arguments
-	 */
-	public function MakeFillScript($selector = "body", $handler = null, $args = [], $direct = true)
-	{
-		return Internal::MakeScript(
-			$handler,
-			$args,
-			//"(data,err)=>document.querySelectorAll(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
-			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").html(data??err)",
-			direct: $direct,
-			encrypt: false
+			fn() => $this->Append("body", Struct::Script(Script::Fill($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -724,26 +638,9 @@ abstract class FrontBase
 	public function Prepend($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->GlobalDirectory,
+			\_::$Address->RootDirectory,
 			"finalize",
-			fn() => $this->Append("body", Struct::Script($this->MakePrependScript($selector, $handler, $args, false)))
-		);
-	}
-	/**
-	 * Make a script to
-	 * Prepend output on a special part of client side
-	 * @param mixed $selector The destination selector
-	 * @param mixed $handler The data that is ready to print
-	 * @param mixed $args Handler input arguments
-	 */
-	public function MakePrependScript($selector = "body", $handler = null, $args = [], $direct = true)
-	{
-		return Internal::MakeScript(
-			$handler,
-			$args,
-			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").prepend(data??err)",
-			direct: $direct,
-			encrypt: false
+			fn() => $this->Append("body", Struct::Script(Script::Prepend($selector, $handler, $args, false)))
 		);
 	}
 	/**
@@ -755,26 +652,9 @@ abstract class FrontBase
 	public function Append($selector = "body", $handler = null, ...$args)
 	{
 		return beforeUsing(
-			\_::$Address->GlobalDirectory,
+			\_::$Address->RootDirectory,
 			"finalize",
-			fn() => $this->Append("body", Struct::Script($this->MakeAppendScript($selector, $handler, $args, false)))
-		);
-	}
-	/**
-	 * Make a script to
-	 * Append output on a special part of client side
-	 * @param mixed $selector The destination selector
-	 * @param mixed $handler The data that is ready to print
-	 * @param mixed $args Handler input arguments
-	 */
-	public function MakeAppendScript($selector = "body", $handler = null, $args = [], $direct = true)
-	{
-		return Internal::MakeScript(
-			$handler,
-			$args,
-			"(data,err)=>_(" . Script::Convert($selector ?? $this->DefaultDestinationSelector) . ").append(data??err)",
-			direct: $direct,
-			encrypt: false
+			fn() => $this->Append("body", Struct::Script(Script::Append($selector, $handler, $args, false)))
 		);
 	}
 }

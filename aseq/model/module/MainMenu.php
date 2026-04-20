@@ -224,15 +224,15 @@ class MainMenu extends Module
 				["class" => "header"]
 			);
 		if ($this->AllowItems)
-			if (count($this->Items) > 0)
+			if (count($this->Items) > 0) {
 				yield Struct::Items(
 					function () {
 						foreach ($this->Items as $item)
 							yield $this->CreateItem($item, 1);
-					}
-					,
+					},
 					["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : "") . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : "")]
 				);
+			}
 		if ($this->AllowOthers) {
 			$defaultButtons = [];
 			if ($this->AllowDefaultButtons) {
@@ -247,10 +247,10 @@ class MainMenu extends Module
 					$defaultButtons[] = $usermenu;
 				}
 			}
-			yield Struct::Division(
+			yield Struct::Box(
 				[
 					...($this->Content ? (is_array($this->Content) ? $this->Content : [$this->Content]) : []),
-					...($defaultButtons ? $defaultButtons : [])
+					...$defaultButtons
 				],
 				["class" => "other view {$this->ShowOthersScreenSize}-show {$this->HideOthersScreenSize}-hide"]
 			);
@@ -265,7 +265,8 @@ class MainMenu extends Module
 		$path = getBetween($item, "Path");
 		$act = endsWith(\_::$Address->UrlBase, $path) ? 'active' : "";
 		$ind++;
-		$count = count(getValid($item, "Items", []));
+		$itms = loop(get($item, "Items")??[], fn($itm) => $this->CreateItem($itm, $ind));
+		$count = count($itms);
 		return Struct::Item(
 			($ind <= 2 ? Struct::Button(
 				($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
@@ -287,7 +288,7 @@ class MainMenu extends Module
 			($count > 0 ?
 				Struct::Division(
 					Struct::Items(
-						loop($item["Items"], fn($itm) => $this->CreateItem($itm, $ind)),
+						$itms,
 						["class" => "sub-items sub-items-$ind", "overflow" => $this->SubItemsOverflow]
 					),
 					["class" => "dropdown-items"]

@@ -121,7 +121,7 @@ class Struct
                                             preg_replace_callback(
                                                 "/[ \t]*([^|\r\n]+)[ \t]*(((\|\|?$)|(\|\|?)|$))/u",
                                                 function ($cmatches) {
-                                                    return self::Cell($cmatches[1], strlen($cmatches[2]) > 1 ? ["Type" => "head"] : []);
+                                                    return self::Cell(self::Convert($cmatches[1]), strlen($cmatches[2]) > 1 ? ["Type" => "head"] : []);
                                                 },
                                                 $rmatches[1]
                                             ) ?? $rmatches[1]
@@ -167,12 +167,12 @@ class Struct
                                             $list[count($list) - 1] .= self::Convert(join("\n", $inlines));
                                             $inlines = [];
                                         }
-                                        $list[] = self::Item($ms[5], ["id" => ($ms[6] ?? null)], empty($ms[4]) ? [] : ["number" => $ms[4], "class" => ($ms[7] ?? null)], $ms[8] ?? []);
+                                        $list[] = self::Item(self::Convert($ms[5]), ["id" => ($ms[6] ?? null)], empty($ms[4]) ? [] : ["number" => $ms[4], "class" => ($ms[7] ?? null)], $ms[8] ?? []);
                                     } else
-                                        $inlines[] = $line;
+                                        $inlines[] = self::Convert($line);
                                 }
                                 if ($inlines && $list) {
-                                    $list[count($list) - 1] .= self::Convert(join("\n", $inlines));
+                                    $list[count($list) - 1] .= (join("\n", $inlines));
                                     $inlines = [];
                                 }
                                 return $ordered
@@ -294,7 +294,8 @@ class Struct
             }
             if (is_callable($object) || $object instanceof \Closure)
                 return self::Convert($object(...$args));
-            if (is_bool($object)) return self::Icon($object?"check":"close");
+            if (is_bool($object))
+                return self::Icon($object ? "check" : "close");
             return self::Division(Convert::ToString($object));
         }
         return "";
@@ -422,6 +423,9 @@ class Struct
                         case "placeholder":
                             $attrs .= " " . self::Attribute($key, __($value));
                             break;
+                        case "animation":
+                            $attrs .= " " . self::Attribute("data-aos", __($value));
+                            break;
                         case "href":
                             if (get($attrdic, "rel"))
                                 $attrs .= " " . self::Attribute($key, \MiMFa\Library\Storage::GetUrl($value));
@@ -429,7 +433,7 @@ class Struct
                                 $attrs .= " " . self::Attribute($key, $value);
                             break;
                         case "src":
-                            $attrs .= " " . self::Attribute($key, \MiMFa\Library\Storage::GetUrl($value));
+                            $attrs .= " " . self::Attribute($key, isUri($value) ? $value : \MiMFa\Library\Storage::GetUrl($value));
                             break;
                         default:
                             if (startsWith($key, "on")) {
@@ -770,7 +774,7 @@ class Struct
                 "class" => 'modal-overlay',
                 "onclick" => "if(event.target.classList.contains('modal-overlay')) event.target.remove();event.preventDefault();"
             ]
-        ) . self::Script("_('#$id').appendTo(_('body'));");
+        ) . self::Script("_('body').append(_('#$id'));");
     }
     public static function Result($content, $icon = "circle", $timeout = null, ...$attributes)
     {
@@ -930,16 +934,48 @@ class Struct
                 case ".mp3":
                 case ".wav":
                 case ".flac":
-                    return self::Audio($content, $source, ["class" => "media"], $attributes);
+                    return self::Audio($content, getUrl($source), ["class" => "media"], $attributes);
                 case ".3gp":
                 case ".avi":
                 case ".mp4":
                 case ".mov":
                 case ".mkv":
                 case ".webm":
-                    return self::Video($content, $source, ["class" => "media"], $attributes);
+                    return self::Video($content, getUrl($source), ["class" => "media"], $attributes);
+                case ".png":
+                case ".jpg":
+                case ".jpeg":
+                case ".webp":
+                case ".jiff":
+                case ".gif":
+                case ".tif":
+                case ".tiff":
+                case ".bmp":
+                case ".ico":
+                    if (isUri($source))
+                        return self::Image($content, $source, ["class" => "media"], $attributes);
+                    else
+                        return self::Image($content, Convert::ToUri($source), ["class" => "media"], $attributes);
+                case ".svg":
+                    return self::Image($content, getUrl($source), ["class" => "media"], $attributes);
+                case ".htm":
+                case ".html":
+                case ".shtm":
+                case ".shtml":
+                    return self::Embed(open($source) ?: $content, null, ["class" => "media"], $attributes);
+                case ".pdf":
+                    return self::Embed($content, getUrl($source), ["class" => "media"], $attributes);
+                case ".md":
+                case ".markdown":
+                    return self::Element(self::Convert(open($source) ?: $content), "div", ["class" => "media"], $attributes);
+                case ".csv":
+                    return self::Table(Convert::ToCells(open($source) ?: $content, ","), ["class" => "media"], $attributes);
+                case ".tsv":
+                    return self::Table(Convert::ToCells(open($source) ?: $content, "\t"), ["class" => "media"], $attributes);
+                case null:
+                case "":
                 default:
-                    return self::Image($content, $source, ["class" => "media"], $attributes);
+                    return self::CodeBlock(open($source) ?: $content, ["class" => "media", "title" => $source], $attributes);
             }
         return self::Element(self::Convert($content ?? ""), "div", ["style" => "background-image: url('" . \MiMFa\Library\Storage::GetUrl($source) . "');", "class" => "media"], ...$attributes);
     }
@@ -1052,7 +1088,7 @@ class Struct
      */
     public static function Page($content, ...$attributes)
     {
-        return self::Element(is_countable($content) ? loop($content, fn($v) => self::Part($v)) : $content, "div", ["class" => "page"], $attributes);
+        return self::Element(is_countable($content) ? loop($content, fn($v) => self::Part($v)) : ($content ?? ""), "div", ["class" => "page"], $attributes);
     }
     /**
      * The \<DIV\> HTML Tag
@@ -1062,19 +1098,29 @@ class Struct
      */
     public static function Part($content, ...$attributes)
     {
-        return self::Element(is_countable($content) ? loop($content, fn($v) => self::Part($v)) : $content, "div", ["class" => "part"], $attributes);
+        return self::Element(is_countable($content) ? loop($content, fn($v) => self::Division($v)) : ($content ?? ""), "div", ["class" => "part"], $attributes);
     }
     /**
      * The \<DIV\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
-     * @deprecated
      * @return string
      */
-    public static function Panel($content, ...$attributes)
+    public static function Division($content, ...$attributes)
     {
-        return self::Element($content, "div", ["class" => "panel", "style" => "display: inline-block; width: fit-content; height: fit-content;"], ...$attributes);
+        return self::Element(is_countable($content) ? loop($content, fn($v) => self::Division($v)) : ($content ?? ""), "div", ["class" => "division"], $attributes);
     }
+    /**
+     * The \<DIV\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Box($content, ...$attributes)
+    {
+        return self::Element($content ?? "", "div", ["class" => "box"], $attributes);
+    }
+
     /**
      * The \<HEADER\> HTML Tag
      * @param mixed $content The content of the header Tag
@@ -1083,7 +1129,7 @@ class Struct
      */
     public static function Header($content, ...$attributes)
     {
-        return self::Element($content, "header", ["class" => "header"], $attributes);
+        return self::Element($content ?? "", "header", ["class" => "header"], $attributes);
     }
     /**
      * The \<NAV\> HTML Tag
@@ -1093,7 +1139,7 @@ class Struct
      */
     public static function Nav($content, ...$attributes)
     {
-        return self::Element($content, "nav", ["class" => "nav"], $attributes);
+        return self::Element($content ?? "", "nav", ["class" => "nav"], $attributes);
     }
     /**
      * The \<MAIN\> HTML Tag
@@ -1103,7 +1149,7 @@ class Struct
      */
     public static function Content($content, ...$attributes)
     {
-        return self::Element($content, "main", ["class" => "content"], $attributes);
+        return self::Element($content ?? "", "main", ["class" => "content"], $attributes);
     }
     /**
      * The \<SECTION\> HTML Tag
@@ -1113,7 +1159,7 @@ class Struct
      */
     public static function Section($content, ...$attributes)
     {
-        return self::Element($content, "section", ["class" => "section"], $attributes);
+        return self::Element($content ?? "", "section", ["class" => "section"], $attributes);
     }
     /**
      * The \<ASIDE\> HTML Tag
@@ -1123,7 +1169,7 @@ class Struct
      */
     public static function Aside($content, ...$attributes)
     {
-        return self::Element($content, "aside", ["class" => "aside"], $attributes);
+        return self::Element($content ?? "", "aside", ["class" => "aside"], $attributes);
     }
     /**
      * The \<FOOTER\> HTML Tag
@@ -1133,8 +1179,80 @@ class Struct
      */
     public static function Footer($content, ...$attributes)
     {
-        return self::Element($content, "footer", ["class" => "footer"], $attributes);
+        return self::Element($content ?? "", "footer", ["class" => "footer"], $attributes);
     }
+
+    /**
+     * The \<CENTER\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Center($content, ...$attributes)
+    {
+        return self::Element($content ?? "", "center", ["class" => "center"], $attributes);
+    }
+    /**
+     * The \<CENTER\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Middle($content, ...$attributes)
+    {
+        return self::Element($content ?? "", "div", ["class" => "be middle"], $attributes);
+    }
+    /**
+     * The \<PRE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Pre($content, ...$attributes)
+    {
+        return self::Element($content ?? "", "pre", ["class" => "pre", "ondblclick" => 'copy(this.innerText)'], $attributes);
+    }
+    /**
+     * The \<QOUTE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Quote($content, ...$attributes)
+    {
+        return self::Element($content ?? "", "quote", ["class" => "quote", "ondblclick" => 'copy(this.innerText)'], $attributes);
+    }
+    /**
+     * The \<BLOCKQOUTE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function QuoteBlock($content, ...$attributes)
+    {
+        return self::Element($content ?? "", "blockquote", ["class" => "quoteblock", "ondblclick" => 'copy(this.innerText)'], $attributes);
+    }
+    /**
+     * The \<CODE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Code($content, ...$attributes)
+    {
+        return self::Element($content ?? "", "code", ["class" => "code", "ondblclick" => 'copy(this.innerText)'], $attributes);
+    }
+    /**
+     * The \<BLOCKCODE\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function CodeBlock($content, ...$attributes)
+    {
+        return self::Element((($t = self::PopAttribute($attributes, "Title")) ? self::Heading5($t) : "") . self::Element($content ?? "", "blockcode", ["ondblclick" => 'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
+    }
+
     /**
      * The Container \<DIV\> HTML Tag
      * @param mixed $content The content of the Tag
@@ -1391,77 +1509,6 @@ class Struct
         }
         return self::Element($content, "div", ["class" => "slot small-slot col-sm"], $attributes);
     }
-
-    /**
-     * The \<DIV\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Division($content, ...$attributes)
-    {
-        return self::Element($content ?? "", "div", ["class" => "division"], $attributes);
-    }
-    /**
-     * The \<CENTER\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Center($content, ...$attributes)
-    {
-        return self::Element($content ?? "", "center", ["class" => "center"], $attributes);
-    }
-    /**
-     * The \<PRE\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Pre($content, ...$attributes)
-    {
-        return self::Element($content ?? "", "pre", ["class" => "pre", "ondblclick" => 'copy(this.innerText)'], $attributes);
-    }
-    /**
-     * The \<QOUTE\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Quote($content, ...$attributes)
-    {
-        return self::Element($content ?? "", "quote", ["class" => "quote", "ondblclick" => 'copy(this.innerText)'], $attributes);
-    }
-    /**
-     * The \<BLOCKQOUTE\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function QuoteBlock($content, ...$attributes)
-    {
-        return self::Element($content ?? "", "blockquote", ["class" => "quoteblock", "ondblclick" => 'copy(this.innerText)'], $attributes);
-    }
-    /**
-     * The \<CODE\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function Code($content, ...$attributes)
-    {
-        return self::Element($content ?? "", "code", ["class" => "code", "ondblclick" => 'copy(this.innerText)'], $attributes);
-    }
-    /**
-     * The \<BLOCKCODE\> HTML Tag
-     * @param mixed $content The content of the Tag
-     * @param mixed $attributes Other custom attributes of the Tag
-     * @return string
-     */
-    public static function CodeBlock($content, ...$attributes)
-    {
-        return self::Element(self::Element($content ?? "", "blockcode", ["ondblclick" => 'copy(this.innerText)']), "pre", ["class" => "codeblock"], $attributes);
-    }
     #endregion
 
 
@@ -1650,7 +1697,7 @@ class Struct
                 z-index: 9999;
             }
         ") . self::Menu($content, ["id" => $id, "class" => "contextmenu"], ...$attributes) .
-            script("
+            self::Script("
                 _(document).on('contextmenu', function(e) {
                     _('.menu.contextmenu:not(#$id)').removeClass('active');
                     var menu = document.getElementById('$id');
@@ -2231,7 +2278,7 @@ class Struct
         }
         if (is_null($content))
             $content = $reference;//getUrlDomain($reference);
-        return self::Element(__($content), "a", ["href" => $reference, "class" => "link"], $attributes);
+        return self::Element(__($content), "a", ["href" => $reference, "class" => "output link"], $attributes);
     }
     /**
      * The \<BUTTON\> HTML Tag
@@ -2244,8 +2291,8 @@ class Struct
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
             //$action = "load(" . Script::Convert($action) . ", ".Script::Convert(self::PopAttribute($attributes, "Target")??"_self").")";
-            return self::Element(__($content), "a", ["class" => "button", "type" => "button", "href" => $action], $attributes);
-        return self::Element(__($content), "button", ["class" => "button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
+            return self::Element(__($content), "a", ["class" => "output button", "type" => "button", "href" => $action], $attributes);
+        return self::Element(__($content), "button", ["class" => "output button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
     }
     /**
      * The \<BUTTON\> or \<A\> HTML Tag
@@ -2260,7 +2307,7 @@ class Struct
             return null;
         if (!$action)
             return self::Element("", "i", ["class" => "icon fa " . (preg_match("/\bfa-/", $content) ? "" : "fa-") . strtolower($content)], $attributes);
-        return self::Action(self::Icon($content, null), $action, ["class" => "icon"], $attributes);
+        return self::Action(self::Icon($content, null), $action, ["class" => "output icon"], $attributes);
     }
     /**
      * The \<ACTION\> HTML Tag
@@ -2273,7 +2320,7 @@ class Struct
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
             $action = "load(" . Script::Convert($action) . ")";
-        return self::Element($content, "action", ["class" => "action"], $action ? ["onclick" => $action] : [], $attributes);
+        return self::Element($content, "action", ["class" => "output action"], $action ? ["onclick" => $action] : [], $attributes);
     }
     #endregion
 
@@ -2283,12 +2330,12 @@ class Struct
      * The \<FORM\> HTML Tag (the default method is GET)
      * @param mixed $content The form fields
      * @param string|null|array|callable $action The action reference path
-     * @param mixed $attributes The custom attributes of the Tag
+     * @param mixed $attributes The custom attributes of the Tag, Send Interaction attr to make the form Interactable
      * @return string
      */
     public static function Form($content, $action = null, ...$attributes)
     {
-        $Interaction = self::PopAttribute($attributes, "Interactive");
+        $Interaction = self::PopAttribute($attributes, "Interaction");
         $id = self::PopAttribute($attributes, "Id") ?? ("_" . getId());
         if (!isValid($content))
             $content = self::SubmitButton();
@@ -2430,7 +2477,7 @@ class Struct
      *     'Reset' => "Form reset button."
      * @param mixed $key The default key and the name of the field
      * @param mixed $value The default value of the field
-     * @param mixed $description The more detaled text about the field
+     * @param mixed $description The more detaled text about the field, You can use markdown too
      * @param array|iterable|bool|string|null $options The other options of the field
      * @param array|string|null $attributes Other important attributes of the field
      * @param mixed $title The label text of the field
@@ -2452,6 +2499,7 @@ class Struct
                 $wrapper = get($type, "Wrapper") ?? $wrapper;
             }
         }
+        $wrapperAttr = self::PopAttribute($attributes, "Wrapper") ?? [];
         $content = self::Interactor(
             key: $key,
             value: $value,
@@ -2469,8 +2517,7 @@ class Struct
         $id = self::GetAttribute($attributes, "Id") ?? Convert::ToId($key);
         $titleOrKey = $title ?? Convert::ToTitle(Convert::ToString($key));
         $titleTag = ($title === false || !isValid($titleOrKey) ? "" : self::Label(__($titleOrKey) . ($isRequired ? self::Span("*", null, ["class" => "required"]) : ""), $id, ["class" => "title", "placeholder" => self::PopAttribute($attributes, "PlaceHolder")]));
-        $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label($description, $id, ["class" => "description", "placeholder" => self::PopAttribute($attributes, "PlaceHolder")]));
-        $wrapperAttr = self::PopAttribute($attributes, "Wrapper") ?? [];
+        $descriptionTag = ($description === false || !isValid($description) ? "" : self::Label(self::Convert($description), $id, ["class" => "description", "placeholder" => self::PopAttribute($attributes, "PlaceHolder")]));
         switch ($type) {
             // case null:
             // case 'null':
@@ -2687,9 +2734,15 @@ class Struct
             case 'object':
                 $content = $dataOptions($options, $attributes) . self::ObjectInput($key, Convert::ToString($value), $attributes);
                 break;
+            case 'pair':
+
+            case 'dictionary':
+            case 'pairs':
+                $content = self::PairsInput($key, $value, $options, $attributes);
+                break;
+            case 'array':
             case 'countable':
             case 'iterable':
-            case 'array':
             case 'collection'://A collection of Base based objects
                 $content = self::CollectionInput($key, $value, $options, $attributes);
                 break;
@@ -2731,7 +2784,6 @@ class Struct
                 $content = self::FindInput($key, $value, $options, $attributes);
                 break;
             case 'type':
-            case 'single':
             case 'enum':
             case 'dropdown':
             case 'select':
@@ -2828,10 +2880,11 @@ class Struct
                 $content = self::SymbolicInput($key, $value, $options, $attributes);
                 break;
             case 'float':
+            case 'single':
             case 'double':
             case 'decimal':
-                $min = PHP_FLOAT_MIN;
-                $max = PHP_FLOAT_MAX;
+                $min = null;
+                $max = null;
                 if (is_array($options) && count($options)) {
                     $min = min($options);
                     $max = max($options);
@@ -3256,7 +3309,7 @@ class Struct
                         "class" => "input",
                         "rows" => "10"
                     ], ...$attributes),
-                    ["class" => "markdowninput $class", "style" => $style]
+                    ["class" => "input markdowninput $class", "style" => $style]
                 );
     }
     /**
@@ -3274,33 +3327,49 @@ class Struct
         $class = self::PopAttribute($attributes, "Class");
         $eid = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
         $sid = "_" . getId();
-        return self::Tabs(
-            [
-                self::Action(self::Icon("edit")) =>
-                    self::Element(isJson($jvalue) ? json_encode(json_decode($jvalue), JSON_PRETTY_PRINT) : $jvalue, "textarea", [
-                        "id" => $eid,
-                        "name" => Convert::ToKey($key),
-                        "placeholder" => Convert::ToTitle($key),
-                        "class" => "input",
-                        "rows" => "10",
-                        "style" => "width: 100%; font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr; margin:0px;"
-                    ], ...$attributes),
-                self::Action(
-                    self::Icon("eye"),
-                    Internal::MakeScript(
-                        function ($nArgs) {
-                            return \MiMFa\Library\Struct::Convert(\MiMFa\Library\Convert::FromJson($nArgs));
-                        },
-                        ["\${_('#$eid').val()}"],
-                        "function(data,err){ return _('#$sid').html(data??err);}",
-                        direct: true,
-                        encrypt: false
-                    )
-                ) =>
-                    self::Division(self::Convert(isJson($value) ? Convert::FromJson($value) : $value), ["id" => $sid, "style" => "padding-bottom:var(--size-2);"])
-            ],
-            ["class" => "jsoninput $class", "style" => $style, "SelectedIndex" => $si]
-        );
+        return self::Style("
+            #$eid{
+                background-color:transparent;
+                color:inherit;
+                border:none;
+                outline:none;
+                margin:0px;
+                padding-inline-start:0px;
+                padding-inline-end:0px;
+                padding-bottom:0px;
+            }
+            #$eid:focus{
+                border:none;
+                outline:none;
+            }
+        ") .
+            self::Tabs(
+                [
+                    self::Action(self::Icon("edit")) =>
+                        self::Element(isJson($jvalue) ? json_encode(json_decode($jvalue), JSON_PRETTY_PRINT) : $jvalue, "textarea", [
+                            "id" => $eid,
+                            "name" => Convert::ToKey($key),
+                            "placeholder" => Convert::ToTitle($key),
+                            "class" => "input",
+                            "rows" => "10",
+                            "style" => "width: 100%; font-size: 75%; overflow:scroll; word-wrap: unset; direction: ltr; margin:0px;"
+                        ], ...$attributes),
+                    self::Action(
+                        self::Icon("eye"),
+                        Internal::MakeScript(
+                            function ($nArgs) {
+                                return \MiMFa\Library\Struct::Convert(\MiMFa\Library\Convert::FromJson($nArgs));
+                            },
+                            ["\${_('#$eid').val()}"],
+                            "function(data,err){ return _('#$sid').html(data??err);}",
+                            direct: true,
+                            encrypt: false
+                        )
+                    ) =>
+                        self::Division(self::Convert(isJson($value) ? Convert::FromJson($value) : $value), ["id" => $sid, "style" => "padding-bottom:var(--size-2);"])
+                ],
+                ["class" => "input jsoninput $class", "style" => $style, "SelectedIndex" => $si]
+            );
     }
     /**
      * The \<TEXTAREA\> HTML Tag
@@ -3312,6 +3381,88 @@ class Struct
     public static function ObjectInput($key, $value = null, ...$attributes)
     {
         return self::JsonInput($key, $value, ["class" => "objectinput", "SelectedIndex" => $value ? 1 : 0], $attributes);
+    }
+    /**
+     * A \<DIV\> HTML Tag contains an array of Inputs
+     * @param mixed $key The tag name, id, or placeholder
+     * @param array|iterable|null $value The tag default value
+     * @param array|object $options The other options, default are: ["add"=>true, "remove"=>true]
+     * @param mixed $attributes The custom attributes of the Tag
+     * @return string
+     */
+    public static function PairsInput($key, $value = null, $options = ["Type" => null, "Add" => true, "Remove" => true], ...$attributes)
+    {
+        if (is_null($value))
+            if (is_array($key)) {
+                $value = $key;
+                $key = "_" . getId();
+            } else
+                $value = [];
+        $key = Convert::ToKey($key);
+        return self::Division(function () use ($key, $value, $options, $attributes) {
+            $sample = null;
+            $attributes = [...($options ?? []), ...($attributes ?? [])];
+            $attrs = popValid($attributes, "Attributes", []);
+            $disabled = self::HasAttribute($attributes, "Disabled") || self::HasAttribute($attrs, "Disabled");
+            $add = $disabled ? false : popValid($attributes, "Add", true);
+            //$edit = $disabled?false:popValid($attributes, "edit", true);
+            $rem = $disabled ? false : popValid($attributes, "Remove", true);
+            $sep = popValid($attributes, "Separator", null);
+            $type = self::InputDetector(popValid($attributes, "Type"), popValid($attributes, "Value"));
+            $key = popValid($attributes, "Key", $key);
+            $options = popValid($attributes, "Options", null);
+            if (isEmpty($value))
+                $value = [];
+            elseif (is_string($value)) {
+                $value = is_null($sep) && startsWith($value, "[", "{") ? Convert::FromJson($value) ?? [] : explode($sep ?? "|", trim($value, $sep ?? "|"));
+            }
+
+            foreach ($value as $k => $item) {
+                $id = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
+                if (is_null($sample))
+                    $sample = $item;
+                yield self::Field(
+                    type: $type,
+                    wrapper: !$rem,
+                    key: $key,
+                    value: $item,
+                    title: false,
+                    description: false,
+                    options: $options,
+                    attributes: [($rem ? ["ondblclick" => "this.remove();"] : null), ...$attributes, ["id" => $id, ...(is_string($k) ? ["name" => "{$key}[$k]", "placeholder" => $k] : ["name" => "{$key}[]"])], ...$attrs]
+                );
+            }
+            if ($add) {
+                $aid = self::PopAttribute($attributes, "Id") ?? self::PopAttribute($attrs, "Id") ?? Convert::ToId($key) . "_add";
+                $kid = $key . getId();
+                yield self::Script("{$kid}Index = 0;");
+                $oc = "
+                        let placeHolder = " . Script::Prompt(self::PopAttribute($attributes, "PlaceHolder", 'Input a unigue key'), "\${{$kid}Index++}") . ";
+                        if(isNull(placeHolder)) {
+                            {$kid}Index--;
+                            return;
+                        }
+                        let tag = document.getElementById(`$aid`).cloneNode(true);
+                        tag.id = `{$kid}`;
+                        tag.name = `{$key}[`+placeHolder+`]`;
+                        tag.setAttribute(`placeholder`, placeHolder);
+                        tag.removeAttribute(`disabled`);
+                        tag.setAttribute(`class`,`input`);
+                        tag.setAttribute(`style`,``);
+                        " . ($rem ? "tag.ondblclick = function(){ this.remove(); };" : "") . "
+                        this.parentElement.appendChild(tag);
+                        tag.focus();";
+                yield self::Icon("plus", $oc);
+                yield self::Field(
+                    type: self::InputDetector($type, $sample),
+                    key: $key,
+                    value: null,
+                    title: false,
+                    options: $options,
+                    attributes: [...$attributes, "Id" => $aid, "name" => "", "disabled" => "disabled", "style" => "display: none;", ...$attrs]
+                );
+            }
+        }, ["id" => $key, "class" => "input pairsinput"]);
     }
     /**
      * A \<DIV\> HTML Tag contains an array of Inputs
@@ -3373,7 +3524,8 @@ class Struct
                         tag.setAttribute(`class`,`input`);
                         tag.setAttribute(`style`,``);
                         " . ($rem ? "tag.ondblclick = function(){ this.remove(); };" : "") . "
-                        this.parentElement.appendChild(tag);";
+                        this.parentElement.appendChild(tag);
+                        tag.focus();";
                 yield self::Icon("plus", $oc);
                 yield self::Field(
                     type: self::InputDetector($type, $sample),
@@ -3384,7 +3536,7 @@ class Struct
                     attributes: [...$attributes, "Id" => $aid, "name" => "", "disabled" => "disabled", "style" => "display: none;", ...$attrs]
                 );
             }
-        }, ["id" => $key, "class" => "collectioninput"]);
+        }, ["id" => $key, "class" => "input collectioninput"]);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3395,39 +3547,52 @@ class Struct
      */
     public static function SwitchInput($key, $value = null, ...$attributes)
     {
-        $class = "_" . getId();
-        return self::Action(
-            self::Icon($value ? "toggle-on" : "toggle-off", null, ["class" => $class]),
-            "icon_$class = document.querySelector('.icon.$class');
-            cb_$class = document.querySelector('.switchinput.$class');
-                    if(cb_$class.value == '0'){
-                        icon_$class.classList.remove('fa-toggle-off');
-                        icon_$class.classList.add('fa-toggle-on');
-                        cb_$class.value = 1;
-                    } else {
-                        icon_$class.classList.remove('fa-toggle-on');
-                        icon_$class.classList.add('fa-toggle-off');
-                        cb_$class.value = 0;
-                    }",
-            ["class" => "switchinput"],
-            [
-                "Class" => self::GetAttribute($attributes, "Class"),
-                "Style" => self::PopAttribute($attributes, "Style")
-            ]
-        ) .
-            self::Input($key, $value ? 1 : 0, "hidden", [
-                "class" => "switchinput $class",
-                "onchange" => "icon_$class = document.querySelector('.icon.$class');
-                    if(this.checked){
-                        icon_$class.classList.remove('fa-toggle-off');
-                        icon_$class.classList.add('fa-toggle-on');
+        $class = self::PopAttribute($attributes, "Class");
+        $style = self::PopAttribute($attributes, "Style");
+        return self::Element(
+            self::Icon($value ? "toggle-on" : "toggle-off") .
+            self::Element(null, "input", [
+                "name" => Convert::ToKey($key),
+                "type" => "hidden",
+                "value" => $value ? "1" : "0",
+                ...($value ? ["checked" => 'checked'] : []),
+                "class" => "switchinput",
+                "onchange" => "icon = this.previousElementSibling;
+                    if(this.value == 1){
+                        icon.classList.remove('fa-toggle-off');
+                        icon.classList.add('fa-toggle-on');
                         this.value = 1;
+                        this.setAttribute('checked','checked');
                     } else {
-                        icon_$class.classList.remove('fa-toggle-on');
-                        icon_$class.classList.add('fa-toggle-off');
+                        icon.classList.remove('fa-toggle-on');
+                        icon.classList.add('fa-toggle-off');
                         this.value = 0;
-                    }"
-            ], $attributes);
+                        this.removeAttribute('checked');
+                    }
+                "
+            ], $attributes),
+            "action",
+            [
+                "onclick" => "
+                    icon = this.children[0];
+                    cb = this.children[1];
+                    if(cb.value == 1){
+                        icon.classList.remove('fa-toggle-on');
+                        icon.classList.add('fa-toggle-off');
+                        cb.value = 0;
+                        cb.removeAttribute('checked');
+                    } else {
+                        icon.classList.remove('fa-toggle-off');
+                        icon.classList.add('fa-toggle-on');
+                        cb.value = 1;
+                        cb.setAttribute('checked','checked');
+                    }
+                    _(cb).change();
+                ",
+                "class" => "input switchinput $class",
+                "Style" => $style
+            ]
+        );
     }
     /**
      * The \<INPUT\> HTML Tag Collection
@@ -3453,7 +3618,7 @@ class Struct
                 else
                     $ops[$k] = $v ?? $value;
         return join(PHP_EOL, loop($ops, function ($v, $k) use ($key, $attributes) {
-            return self::Label($k, self::SwitchInput("{$key}[]", $v, ...$attributes), ["class" => "switchesinput"]);
+            return self::Label($k, self::SwitchInput("{$key}[]", $v, ...$attributes), ["class" => "input switchesinput"]);
         }));
     }
     /**
@@ -3491,7 +3656,7 @@ class Struct
                 else
                     $ops[$k] = $v ?? $value;
         return join(PHP_EOL, loop($ops, function ($v, $k) use ($key, $attributes) {
-            return self::Label($k, self::CheckInput("{$key}[]", $v, ...$attributes), ["class" => "checksinput"]);
+            return self::Label($k, self::CheckInput("{$key}[]", $v, ...$attributes), ["class" => "input checksinput"]);
         }));
     }
     /**
@@ -3529,7 +3694,7 @@ class Struct
                 else
                     $ops[$k] = $v ?? $value;
         return join(PHP_EOL, loop($ops, function ($v, $k) use ($key, $attributes) {
-            return self::Label($k, self::RadioInput("{$key}[]", $v, ...$attributes), ["class" => "radiosinput"]);
+            return self::Label($k, self::RadioInput("{$key}[]", $v, ...$attributes), ["class" => "input radiosinput"]);
         }));
     }
     /**
@@ -3551,10 +3716,22 @@ class Struct
                     yield self::Element(__(self::PopAttribute($attributes, "PlaceHolder", "")), "option", ["value" => "", "selected" => "true"]);
                 // else yield self::Element("", "option", ["value" => ""]);
                 foreach ($options as $k => $v)
-                    if (!$f && ($f = in_array($k, $value)))
-                        yield self::Element(__($v ?? ""), "option", ["value" => $k, "selected" => "true"]);
-                    else
-                        yield self::Element(__($v ?? ""), "option", ["value" => $k]);
+                    if (is_array($v)) {
+                        if (!is_numeric($k))
+                            yield self::OpenTag("optgroup", ["label" => __($k ?? "")]);
+                        foreach ($v as $k2 => $v2)
+                            if (!$f && ($f = in_array($k2, $value)))
+                                yield self::Element(__($v2 ?? $k2 ?? ""), "option", ["value" => $k2, "selected" => "true"]);
+                            else
+                                yield self::Element(__($v2 ?? $k2 ?? ""), "option", ["value" => $k2]);
+                        if (!is_numeric($k))
+                            yield self::CloseTag("optgroup");
+                    } else {
+                        if (!$f && ($f = in_array($k, $value)))
+                            yield self::Element(__($v ?? $k ?? ""), "option", ["value" => $k, "selected" => "true"]);
+                        else
+                            yield self::Element(__($v ?? $k ?? ""), "option", ["value" => $k]);
+                    }
             })())
             : Convert::ToString($options, assignFormat: "<option value='{0}'>{1}</option>\r\n"),
             "select",
@@ -3572,7 +3749,7 @@ class Struct
      */
     public static function SelectsInput($key, $value = null, $options = [], ...$attributes)
     {
-        return self::SelectInput("{$key}[]", $value, $options, ["class" => "selectsinput", "multiple" => null], ...$attributes);
+        return self::SelectInput("{$key}[]", $value, $options, ["class" => "input selectsinput", "multiple" => null], ...$attributes);
     }
     /**
      * The \<INPUT\> HTML Tag
@@ -3891,7 +4068,7 @@ class Struct
         #$id>.collection>div>span{
             font-size: var(--size-0);
         }
-        ") . self::Division([
+        ") . self::Box([
                         self::Input($value ? null : $name, null, "file", [
                             "class" => "input",
                             "style" => "display:none!important;",
@@ -4091,14 +4268,13 @@ class Struct
         }
         ") . self::Map($value, null, [
                         "id" => "_input$id",
-                        "class" => "input",
+                        "class" => "input mapinput",
                         "onchange" => "{$id}=document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
                             Convert::ToString($onChange, ";
             ")
                     ], $attributes) .
             self::HiddenInput($key, Convert::ToString($value, ","), [
                 "id" => $id,
-                "class" => "mapinput",
                 "onchange" => "setTimeout(function(){{$id}_update();}, 2000)",
                 "name" => $name
             ]) . self::Script("setInterval(function(){{$id}_update();}, 2000)");
@@ -4140,7 +4316,7 @@ class Struct
                         ])
                     ]))
                 ],
-                ["class" => "symbolicinput", "id" => $id],
+                ["class" => "input symbolicinput", "id" => $id],
                 [
                     "class" => $class,
                     "style" => $style
@@ -4171,36 +4347,33 @@ class Struct
      */
     public static function NumberInput($key, $value = null, ...$attributes)
     {
-        $class = self::GetAttribute($attributes, "Class");
-        $style = self::PopAttribute($attributes, "Style");
         $id = self::PopAttribute($attributes, "Id") ?? Convert::ToId($key);
         return self::Element(null, "input", [
             "name" => self::PopAttribute($attributes, "Name") ?? ($key ? Convert::ToKey($key) : null),
-            "type" => "number",
+            "type" => "text",
             "value" => $value,
             "class" => "input",
-            "style" => "display:none!important;"
-        ], $attributes) .
+            "style" => "display:none !important;"
+        ]) .
             self::Element(
                 null,
                 "input",
                 [
                     "id" => $id,
                     "type" => "text",
-                    "value" => number_format($value ?? 0, self::PopAttribute($attributes, "Decimals") ?: 0, '.', ','),
+                    "value" => is_numeric($value) ? number_format($value, self::PopAttribute($attributes, "Decimals") ?: self::$MaxDecimalPrecision, '.', ',') : null,
                     ...($key ? ["autocomplete" => self::PopAttribute($attributes, "AutoComplete") ?? $key] : []),
                     "placeholder" => self::PopAttribute($attributes, "placeholder") ?? Convert::ToTitle($key),
                     "class" => "input numberinput",
                     "inputmode" => "numeric",
                     "oninput" => "
-                    let se = this.selectionEnd+1;
-                    this.value = Number(this.previousElementSibling.value = Number((this.value?this.value:'0').match(/[\d\.]+/gi).join(''))).toLocaleString('en-US');
-                    this.selectionEnd = se;",
+                        if(this.value.includes('.')) return this.previousElementSibling.value = Number(this.value);
+                        let se = this.selectionEnd+1;
+                        this.value = Number(this.previousElementSibling.value = Number((this.value?this.value:'0').match(/[+-]?[\d\.]+/gi).join(''))).toLocaleString('en-US');
+                        this.selectionEnd = se;
+                    ",
                 ],
-                [
-                    "class" => $class,
-                    "style" => $style
-                ]
+                $attributes
             );
     }
     /**
@@ -4797,7 +4970,7 @@ class Struct
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading3($title) .
-                script(null, asset(\_::$Address->GlobalStructDirectory, "Chart/Chart.js")) .
+                script(null, asset(\_::$Address->StructRootDirectory, "Chart/Chart.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {

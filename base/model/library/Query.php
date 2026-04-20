@@ -37,7 +37,7 @@ class Query
     {
         $sources = $sources ?? $this->Sources;
         if ($sources) {
-            $q = $this->NormalizeForSearch($query);
+            $q = $this->ConvertToPattern($query);
             foreach ($sources as $source) foreach ($source($query, $direction, $type, $tag, $condition, $order, $limit, $params) as $record) foreach ($record as $name => $value)
                         if (preg_match($q, $value ?? "")) {
                             if ($limit-- === 0)
@@ -70,7 +70,7 @@ class Query
             $condit .= " AND $table->Name.Type=:Type";
         }
         if (isValid($query)) {
-            $qs = $this->NormalizeForDataBaseSearch($query);
+            $qs = $this->ConvertToCondition($query);
             $condit .= " AND ($table->Name.Title $qs OR $table->Name.Name $qs OR $table->Name.Description $qs OR $table->Name.Content $qs)";
         }
         $order = $this->DataBase->OrderNormalization($order);
@@ -108,7 +108,7 @@ class Query
         }
         return $table->SelectRow(
             $this->ColumnNames,
-            $condit . " ORDER BY $table->Name.Priority DESC, $table->Name.UpdateTime DESC",
+            $condit,
             $params);
     }
 
@@ -254,13 +254,13 @@ class Query
     }
 
 
-    public function NormalizeForSearch(string|null $query)
+    public function ConvertToPattern(string|null $query)
     {
         if (is_null($query))
             return "/\w*/i";
         return "/" . trim(preg_replace("/[\s\-\{\}\/\?\.\,\<\>\'\"\&\*\(\)\!\@\#\$\~\`\+\=\:\;\|]+/", "|", $query), "|") . "/i";
     }
-    public function NormalizeForDataBaseSearch(string|null $query)
+    public function ConvertToCondition(string|null $query)
     {
         if (is_null($query))
             return "REGEXP '\w*'";

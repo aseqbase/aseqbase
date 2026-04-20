@@ -7,10 +7,35 @@ namespace MiMFa\Library;
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Libraries#database See the Library Documentation
  */
-class DataBase {
+class DataBase
+{
 	protected $DefaultConnection = null;
 	protected $UserName = null;
 	protected $Password = null;
+	public bool $Active = true;
+	public bool $Procedural = false;
+	/**
+	 * function ($database, $query, $params) => return false to cancel executing
+	 * @var array
+	 */
+	public array $ExecutingHandlers = [];
+	/**
+	 * function ($database, $query, $params, $succeed, $statements) => return $statements
+	 * @var array
+	 */
+	public array $ExecutedHandlers = [];
+	/**
+	 * function ($database, $query, $params, $results, $defaultValue) =>  return $results or $defaultValue
+	 * @var array
+	 */
+	public array $ResultedHandlers = [];
+	/**
+	 * function ($database, $query, $params, $ex, $defaultValue) => return $defaultValue
+	 * @var array
+	 */
+	public array $ExceptedHandlers = [];
+	public $Result = null;
+	public $Fault = null;
 	public $Name = null;
 	public $StartWrap = "`";
 	public $EndWrap = "`";
@@ -21,7 +46,7 @@ class DataBase {
 	public $ReportLevel = null;
 	public $AllowNormalization = null;
 
-	public function __construct($type="mysql", $host= "localhost", $port= null,  $name= "localhost", $userName= "root", $password = "root", $encoding = "utf8")
+	public function __construct($type = "mysql", $host = "localhost", $port = null, $name = "localhost", $userName = "root", $password = "root", $encoding = "utf8")
 	{
 		$this->DefaultConnection = "$type:host=$host" . ($port ? ";port=$port" : "") . ";dbname=" . ($this->Name = $name) . ";charset=" . preg_replace("/\W/", "", $encoding);
 		$this->UserName = $userName;
@@ -30,23 +55,51 @@ class DataBase {
 
 	public function Connection(): \PDO
 	{
+		$this->Fault = null;
 		$conn = new \PDO($this->DefaultConnection, $this->UserName, $this->Password);
 		if ($this->ReportLevel)
 			$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-		if($this->Timeout) $conn->setAttribute(\PDO::ATTR_TIMEOUT, $this->Timeout/1000);
+		if ($this->Timeout)
+			$conn->setAttribute(\PDO::ATTR_TIMEOUT, $this->Timeout / 1000);
 		return $conn;
 	}
-	public function Reset(){
-		$this->PreQuery = 
-		$this->MidQuery = 
-		$this->PostQuery = 
-		$this->Timeout = null;
+	public function Reset()
+	{
+		$this->Active = true;
+		$this->Fault =
+			$this->PreQuery =
+			$this->MidQuery =
+			$this->PostQuery =
+			$this->Timeout = null;
+		return $this;
 	}
-	
+
+	public function OnExecuting($query, $params){
+		foreach ($this->ExecutingHandlers as $key => $value)
+			if(($value)($this, $query, $params)  === false)
+				return false;
+		return true;
+	}
+	public function OnExecuted($query, $params, $succeed, $statements){
+		foreach ($this->ExecutedHandlers as $key => $value)
+			$statements = ($value)($this, $query, $params, $succeed, $statements)??$statements;
+		return $statements;
+	}
+	public function OnResulted($query, $params, $results, $defaultValue){
+		foreach ($this->ResultedHandlers as $key => $value)
+			$results = ($value)($this, $query, $params, $results, $defaultValue);
+		return $results;
+	}
+	public function OnExcepted($query, $params, $exception, $defaultValue){
+		foreach ($this->ExceptedHandlers as $key => $value)
+			$exception = ($value)($this, $query, $params, $exception, $defaultValue)??$exception;
+		return $exception;
+	}
+
 	public function SessionTimeout($millisecond = 30000)
 	{
 		$millisecond /= 1000;
-		$this->PreQuery = "SET SESSION wait_timeout = $millisecond; SET SESSION interactive_timeout = $millisecond;".$this->PreQuery;
+		$this->PreQuery = "SET SESSION wait_timeout = $millisecond; SET SESSION interactive_timeout = $millisecond;" . $this->PreQuery;
 		return $this;
 	}
 	public function Timeout($millisecond = 30000)
@@ -100,9 +153,9 @@ class DataBase {
 				array_filter(
 					loop(
 						$columns,
-						fn ($v, $k) => is_int($k) ? $this->ColumnNameNormalization($v) : ($this->ColumnNameNormalization($v) . " AS \"$k\"")
+						fn($v, $k) => is_int($k) ? $this->ColumnNameNormalization($v) : ($this->ColumnNameNormalization($v) . " AS \"$k\"")
 					),
-					fn ($v)  =>!is_null($v)
+					fn($v) => !is_null($v)
 				)
 			);
 		elseif (is_callable($columns) || $columns instanceof \Closure)
@@ -211,37 +264,145 @@ class DataBase {
 			return $value;
 	}
 
-	public function ReturnArray($result, $defaultValue = [])
+	public function if($condition = true)
 	{
-		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
+		$this->Procedural = true;
+		if (!$condition) $this->Active = false;
+		return $this;
 	}
-	public function ReturnValue($result, $defaultValue = null)
+	public function else($condition = true)
 	{
-		return isEmpty($result) ? $defaultValue : $result;
+		$this->Procedural = true;
+		if (!$this->Active && $condition)
+			$this->Active = true;
+		else
+			$this->Active = false;
+		return $this;
+	}
+	public function then(callable|null $action = null)
+	{
+		$this->Procedural = true;
+		if (!$this->Active)
+			return $this;
+		elseif ($this->Fault) {
+			$this->Active = false;
+			return $this;
+		}
+		else return $action ? $action($this) : $this;
+	}
+	public function try(callable|null $action = null)
+	{
+		$this->Procedural = true;
+		if ($this->Fault) {
+			$this->Active = false;
+			return $this;
+		}
+		elseif ($this->Active)
+			return $action ? $action($this) : $this;
+		else return $this;
+	}
+	public function catch(callable|null $action = null)
+	{
+		$this->Procedural = true;
+		if ($this->Fault)
+			if ($this->Active)
+				return $action ? $action($this) : $this;
+		$this->Active = false;
+		return $this;
+	}
+	public function finally(callable|null $action = null)
+	{
+		$this->Procedural = true;
+		if (!$this->Active && !$this->Fault)
+			return $this;
+		$this->Reset();
+		return $action ? $action($this) : $this;
 	}
 
-	public function Execute($query, $params = [], &$isDone = null, &$connection = null)
+	public function ReturnArray($result, $query = null, $params = [], $defaultValue = [])
 	{
+		$result = $this->OnResulted($query, $params, $result, $defaultValue);
+		if ($this->Procedural) {
+			$this->Result = $result;
+			return $this;
+		}
+		return is_array($result) && count($result) > 0 ? $result : $defaultValue;
+	}
+	public function ReturnValue($result, $query = null, $params = [], $defaultValue = null)
+	{
+		$result = $this->OnResulted($query, $params, $result, $defaultValue);
+		if ($this->Procedural) {
+			$this->Result = $result;
+			return $this;
+		}
+		return isEmpty($result) ? $defaultValue : $result;
+	}
+	public function ReturnFault(\Exception $ex, $query = null, $params = [], $defaultValue = null)
+	{
+		$ex = $this->OnExcepted($query, $params, $ex, $defaultValue);
+		$this->Fault = $ex;
+		switch ($this->ReportLevel) {
+			case null:
+			case 0:
+				break;
+			case 1:
+				echo Struct::Error($ex->getMessage());
+				break;
+			case 2:
+				error($ex);
+				echo $query;
+				break;
+			case 3:
+				error($ex);
+				echo $query, "PARAMS{" . ($params ? count($params) : 0) . "}: ", Convert::ToString($params, arrayFormat: "{{0}}");
+				break;
+			case 4:
+				error($ex);
+				echo $query, "PARAMS{" . ($params ? count($params) : 0) . "}: ", Convert::ToString($params, arrayFormat: "{{0}}");
+				$defaultValue = null;
+				break;
+			case 5:
+				error($ex);
+				echo $query, "PARAMS{" . ($params ? count($params) : 0) . "}: ", Convert::ToString($params, arrayFormat: "{{0}}");
+				$defaultValue = $ex;
+			default:
+				throw $ex;
+		}
+		if ($this->Procedural) {
+			$this->Result = $defaultValue;
+			return $this;
+		}
+		return $defaultValue;
+	}
+
+	public function Execute($query, &$params = [], &$isDone = null, &$connection = null)
+	{
+		if (!$this->Active || !$this->OnExecuting($query, $params = $this->ParametersNormalization($params)))
+			return false;
 		$connection = $this->Connection();
 		$stmt = $connection->prepare($query);
 		// foreach ($this->ParametersNormalization($params) as $key => $value) 
 		// 	 $stmt->bindValue($key, $value, \PDO::PARAM_STR);
-		$isDone = $stmt->execute($this->ParametersNormalization($params));
+		$isDone = $stmt->execute($params);
 		$this->Reset();
-		return $stmt;
+		return $this->OnExecuted($query, $params, $isDone, $stmt);
 	}
-	public function TryExecute($query, $params = [], &$isDone = null, &$connection = null)
+	public function TryExecute($query, $params = [], $defaultValue = null, &$connection = null)
 	{
 		try {
-			return $this->Execute($query, $params, $isDone,$connection);
+			$res = $this->Execute($query, $params, $isDone, $connection);
+			return $this->ReturnValue($isDone ? $res : $defaultValue, $query, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $query, $params);
-			return null;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $query, $params);
+		} finally {
+			$this->Reset();
+		}
 	}
 
 	public function TransactionExecute($queries, $params = [], &$connection = null)
 	{
+		if (!$this->Active)
+			return false;
 		$connection = $this->Connection();
 		try {
 			if (is_string($queries))
@@ -250,40 +411,55 @@ class DataBase {
 			if (is_array(first($params))) {
 				if (($qc = count($queries)) >= ($pc = count($params))) {
 					$i = 0;
+					$keys  = array_keys($params);
 					foreach ($queries as $query) {
+						$param = $this->ParametersNormalization($params[$keys[$i++ % $pc]]);
+						if(!$this->OnExecuting($query, $param)) continue;
 						$stmt = $connection->prepare($query);
-						$stmt->execute($this->ParametersNormalization($params[$i++ % $pc]));
+						$stmt->execute($param);
+						$this->OnExecuted($query, $param, null, $stmt);
 					}
 				} else {
 					$i = 0;
+					$keys  = array_keys($queries);
 					foreach ($params as $param) {
-						$stmt = $connection->prepare($queries[$i++ % $qc]);
-						$stmt->execute($this->ParametersNormalization($param));
+						$param = $this->ParametersNormalization($param);
+						$query = $queries[$keys[$i++ % $qc]];
+						if(!$this->OnExecuting($query, $param)) continue;
+						$stmt = $connection->prepare($query);
+						$stmt->execute($param);
+						$this->OnExecuted($query, $param, null, $stmt);
 					}
 				}
-			} else
+			} else{
+				$params = $this->ParametersNormalization($params);
 				foreach ($queries as $query) {
+					if(!$this->OnExecuting($query, $params)) continue;
 					$stmt = $connection->prepare($query);
-					$stmt->execute($this->ParametersNormalization($params));
+					$stmt->execute($params);
+					$this->OnExecuted($query, $params, null, $stmt);
 				}
+			}
 			return $connection->commit();
 		} catch (\Exception $ex) {
 			if ($connection->inTransaction())
 				$connection->rollBack();
 			return false;
-		} finally{
+		} finally {
 			$this->Reset();
 		}
 	}
 	public function TryTransaction($queries, $params = [], $defaultValue = false, &$connection = null)
 	{
 		try {
-			return $this->ReturnValue($this->TransactionExecute($queries, $params,$connection), $defaultValue);
+			return $this->ReturnValue($this->TransactionExecute($queries, $params, $connection), $queries, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $this->TransactionQuery($queries), $params);
-			return $defaultValue;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $this->TransactionQuery($queries), $params, $defaultValue);
+		} finally {
+			$this->Reset();
+		}
 	}
+
 
 	public function FetchRowsExecute($query, $params = [])
 	{
@@ -294,11 +470,12 @@ class DataBase {
 	public function TryFetchRows($query, $params = [], $defaultValue = [])
 	{
 		try {
-			return $this->ReturnArray($this->FetchRowsExecute($query, $params), $defaultValue);
+			return $this->ReturnArray($this->FetchRowsExecute($query, $params), $query, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $query, $params);
-			return $defaultValue;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $query, $params,$defaultValue);
+		} finally {
+			$this->Reset();
+		}
 	}
 
 	public function FetchRowExecute($query, $params = [])
@@ -306,15 +483,17 @@ class DataBase {
 		$stmt = $this->Execute($query, $params);
 		$stmt->setFetchMode(\PDO::FETCH_ASSOC);
 		$result = $stmt->fetch();
-		return $result?$result:null;
+		return $result ? $result : null;
 	}
-	public function TryFetchRow($query, $params = [], $defaultValue = []) {
+	public function TryFetchRow($query, $params = [], $defaultValue = [])
+	{
 		try {
-			return $this->ReturnArray($this->FetchRowExecute($query, $params), $defaultValue);
+			return $this->ReturnArray($this->FetchRowExecute($query, $params), $query, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $query, $params);
-			return $defaultValue;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $query, $params, $defaultValue);
+		} finally {
+			$this->Reset();
+		}
 	}
 
 	public function FetchColumnExecute($query, $params = [])
@@ -324,33 +503,36 @@ class DataBase {
 		$result = loop($stmt->fetchAll(), function ($v) {
 			return first($v);
 		}, false);
-		return $result?$result:null;
+		return $result ? $result : null;
 	}
 	public function TryFetchColumn($query, $params = [], $defaultValue = [])
 	{
 		try {
-			return $this->ReturnArray($this->FetchColumnExecute($query, $params), $defaultValue);
+			return $this->ReturnArray($this->FetchColumnExecute($query, $params), $query, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $query, $params);
-			return $defaultValue;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $query, $params, $defaultValue);
+		} finally {
+			$this->Reset();
+		}
 	}
 
 	public function FetchRowIdExecute($query, $params = [])
 	{
-		$this->Execute($query, $params, connection:$connection);
-		return $connection->lastInsertId();
+		$this->Execute($query, $params, connection: $connection);
+		return $connection?$connection->lastInsertId():null;
 	}
-	public function TryFetchRowId($query, $params = [], $defaultValue = null) {
+	public function TryFetchRowId($query, $params = [], $defaultValue = null)
+	{
 		try {
-			return $this->ReturnValue($this->FetchRowIdExecute($query, $params), $defaultValue);
+			return $this->ReturnValue($this->FetchRowIdExecute($query, $params), $query, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $query, $params);
-			return $defaultValue;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $query, $params, $defaultValue);
+		} finally {
+			$this->Reset();
+		}
 	}
 
-	public function FetchPairsExecute($query, $params = []) 
+	public function FetchPairsExecute($query, $params = [])
 	{
 		$res = [];
 		$k = $v = null;
@@ -358,47 +540,49 @@ class DataBase {
 			$res[count($row) < 2 ? $i : $row[$k = $k ?? array_key_first($row)]] = $row[$v = $v ?? array_key_last($row)];
 		return $res;
 	}
-	public function TryFetchPairs($query, $params = [],  $defaultValue = [])
+	public function TryFetchPairs($query, $params = [], $defaultValue = [])
 	{
 		try {
-			return $this->ReturnArray($this->FetchPairsExecute($query, $params), $defaultValue);
+			return $this->ReturnArray($this->FetchPairsExecute($query, $params), $query, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $query, $params);
-			return $defaultValue;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $query, $params, $defaultValue);
+		} finally {
+			$this->Reset();
+		}
 	}
 
 	public function FetchValueExecute($query, $params = [])
 	{
 		$stmt = $this->Execute($query, $params);
 		$v = $stmt->fetchColumn();
-		return $v === false? null:$v;
+		return $v === false ? null : $v;
 	}
 	public function TryFetchValue($query, $params = [], $defaultValue = null)
 	{
 		try {
-			return $this->ReturnValue($this->FetchValueExecute($query, $params), $defaultValue);
+			return $this->ReturnValue($this->FetchValueExecute($query, $params), $query, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $query, $params);
-			return $defaultValue;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $query, $params, $defaultValue);
+		} finally {
+			$this->Reset();
+		}
 	}
 
 	public function FetchChangesExecute($query, $params = [])
 	{
 		$stmt = $this->Execute($query, $params, $isDone);
-		return $isDone ? ($stmt->rowCount()?: ($stmt->columnCount()?:true)) : false;
+		return $isDone ? ($stmt->rowCount() ?: ($stmt->columnCount() ?: true)) : false;
 	}
 	public function TryFetchChanges($query, $params = [], $defaultValue = false)
 	{
 		try {
-			return $this->FetchChangesExecute($query, $params)?: $defaultValue;
+			return $this->ReturnValue($this->FetchChangesExecute($query, $params), $query, $params, $defaultValue);
 		} catch (\Exception $ex) {
-			$this->Error($ex, $query, $params);
-			return $defaultValue;
-		} finally {$this->Reset();}
+			return $this->ReturnFault($ex, $query, $params, $defaultValue);
+		} finally {
+			$this->Reset();
+		}
 	}
-
 
 
 	public function Transaction($queries, $params = [], $defaultValue = false)
@@ -418,18 +602,26 @@ COMMIT;";
 
 	public function Create($name, $configs = "DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci", $defaultValue = null)
 	{
-		$res = $this->TryExecute($this->CreateQuery($name, $configs), [], $isDone);
-		return $isDone? $res : $defaultValue;
+		return $this->TryExecute($this->CreateQuery($name, $configs), [], $defaultValue);
 	}
 	public function CreateQuery($name, $configs = "DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
 	{
 		return "{$this->PreQuery} CREATE DATABASE IF NOT EXISTS " . $this->NameNormalization($name) . " {$this->MidQuery} $configs {$this->PostQuery}";
 	}
 
+	public function Table(string $name, bool $prefix = true)
+	{
+		return new DataTable(
+			$this,
+			$name,
+			$prefix ? \_::$Back->DataBasePrefix : null,
+			\_::$Back->DataTableNameConvertors
+		);
+	}
+	
 	public function CreateTable($tableName, $column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin", $defaultValue = null)
 	{
-		$res = $this->TryExecute($this->CreateTableQuery($tableName, $column_types, $configs), [], $isDone);
-		return $isDone? $res : $defaultValue;
+		return $this->TryExecute($this->CreateTableQuery($tableName, $column_types, $configs), [], $defaultValue);
 	}
 	public function CreateTableQuery($tableName, $column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin")
 	{
@@ -437,6 +629,14 @@ COMMIT;";
 			" (" .
 			join("," . PHP_EOL, [...loop($column_types, fn($v, $k) => is_numeric($k) ? $v : $this->NameNormalization($k) . " $v"), ...(is_numeric($k = array_key_first($column_types)) ? [] : ["PRIMARY KEY (" . $this->NameNormalization($k) . ")"]), ...($this->MidQuery ? [$this->MidQuery] : [])]) .
 			") $configs {$this->PostQuery}";
+	}
+	public function DropTable($tableName, $defaultValue = null)
+	{
+		return $this->TryExecute($this->DropTableQuery($tableName), [], $defaultValue);
+	}
+	public function DropTableQuery($tableName)
+	{
+		return "{$this->PreQuery} DROP TABLE " . $this->NameNormalization($tableName) . " {$this->PostQuery}";
 	}
 
 	public function Select($tableName, $columns = "*", $condition = null, $params = [], $defaultValue = [])
@@ -466,7 +666,7 @@ COMMIT;";
 		return "{$this->PreQuery} SELECT " . $this->ColumnNameNormalization($column ?? "Id") . " FROM " . $this->NameNormalization($tableName) . " {$this->MidQuery} " . $this->ConditionNormalization($condition) . " " . $this->PostQuery;
 	}
 
-	public function SelectPairs($tableName, $key = "Id", $value = "Name", $condition = null, $params = [], $defaultValue = []) 
+	public function SelectPairs($tableName, $key = "Id", $value = "Name", $condition = null, $params = [], $defaultValue = [])
 	{
 		return $this->TryFetchPairs($this->SelectPairsQuery($tableName, $key, $value, $condition), $params, $defaultValue);
 	}
@@ -493,7 +693,7 @@ COMMIT;";
 	public function InsertQuery($tableName, &$params)
 	{
 		if (is_array(first($params)))
-			return loop($params, function($p,$k) use($tableName, &$params) {
+			return loop($params, function ($p, $k) use ($tableName, &$params) {
 				return self::InsertQuery($tableName, $params[$k]);
 			});
 		$vals = [];
@@ -513,12 +713,12 @@ COMMIT;";
 	{
 		if (is_array(first($params)))
 			return $this->TryTransaction($this->ReplaceQuery($tableName, $params), $params, $defaultValue);
-		return $this->TryFetchChanges($this->ReplaceQuery($tableName, $params), $params, $defaultValue);
+		return $this->TryFetchRowId($this->ReplaceQuery($tableName, $params), $params, $defaultValue);
 	}
 	public function ReplaceQuery($tableName, &$params)
 	{
 		if (is_array(first($params)))
-			return loop($params, function($p,$k) use($tableName, &$params) {
+			return loop($params, function ($p, $k) use ($tableName, &$params) {
 				return self::ReplaceQuery($tableName, $params[$k]);
 			});
 		$vals = [];
@@ -539,7 +739,7 @@ COMMIT;";
 					$k = trim($key, ":`[]");
 					$args[$vs[] = ":$k$i"] = $value;
 				}
-			$vals[] = join(",", $vs);
+				$vals[] = join(",", $vs);
 			}
 		} else {
 			$vs = [];
@@ -553,11 +753,13 @@ COMMIT;";
 		$params = $args;
 		$c = count($vals);
 		//if(!$this->Timeout) $this->Timeout(max(10000, $c*2000));
-		if($c>100) {
+		if ($c > 100) {
 			$queries = [];
-			for ($i=0; $i < $c; $i+=100) $queries[] = "{$this->PreQuery} REPLACE INTO " . $this->NameNormalization($tableName) . " {$this->MidQuery} ($this->StartWrap" . implode("$this->EndWrap, $this->StartWrap", $sets) . "$this->EndWrap) VALUES (" . implode("), (", array_slice($vals, $i, min($c, 100))) . ") " . $this->PostQuery;
-			return join(";".PHP_EOL, $queries);
-		} else return "{$this->PreQuery} REPLACE INTO " . $this->NameNormalization($tableName) . " {$this->MidQuery} ($this->StartWrap" . implode("$this->EndWrap, $this->StartWrap", $sets) . "$this->EndWrap) VALUES (" . implode("), (", $vals) . ") " . $this->PostQuery;
+			for ($i = 0; $i < $c; $i += 100)
+				$queries[] = "{$this->PreQuery} REPLACE INTO " . $this->NameNormalization($tableName) . " {$this->MidQuery} ($this->StartWrap" . implode("$this->EndWrap, $this->StartWrap", $sets) . "$this->EndWrap) VALUES (" . implode("), (", array_slice($vals, $i, min($c, 100))) . ") " . $this->PostQuery;
+			return join(";" . PHP_EOL, $queries);
+		} else
+			return "{$this->PreQuery} REPLACE INTO " . $this->NameNormalization($tableName) . " {$this->MidQuery} ($this->StartWrap" . implode("$this->EndWrap, $this->StartWrap", $sets) . "$this->EndWrap) VALUES (" . implode("), (", $vals) . ") " . $this->PostQuery;
 	}
 
 	public function Update($tableName, $condition = null, $params = [], $defaultValue = false)
@@ -569,7 +771,7 @@ COMMIT;";
 	public function UpdateQuery($tableName, $condition, &$params)
 	{
 		if (is_array(first($params)))
-			return loop($params, function($p,$k) use($tableName, $condition, &$params) {
+			return loop($params, function ($p, $k) use ($tableName, $condition, &$params) {
 				return self::UpdateQuery($tableName, $condition, $params[$k]);
 			});
 		$sets = [];
@@ -594,32 +796,9 @@ COMMIT;";
 	public function DeleteQuery($tableName, $condition = null, &$params = [])
 	{
 		if (is_array(first($params)))
-			return loop($params, function($p,$k) use($tableName, $condition, &$params) {
+			return loop($params, function ($p, $k) use ($tableName, $condition, &$params) {
 				return self::DeleteQuery($tableName, $condition, $params[$k]);
 			});
 		return "{$this->PreQuery} DELETE FROM " . $this->NameNormalization($tableName) . " {$this->MidQuery} " . $this->ConditionNormalization($condition) . " " . $this->PostQuery;
-	}
-
-
-	public function Error(\Exception $ex, $query = null, $params = [])
-	{
-		switch ($this->ReportLevel) {
-			case null:
-			case 0:
-				break;
-			case 1:
-				echo Struct::Error($ex->getMessage());
-				break;
-			case 2:
-				error($ex);
-				echo $query;
-				break;
-			case 3:
-				error($ex);
-				echo $query, "PARAMS{" . ($params ? count($params) : 0) . "}: ", Convert::ToString($params, arrayFormat: "{{0}}");
-				break;
-			default:
-				throw $ex;
-		}
 	}
 }

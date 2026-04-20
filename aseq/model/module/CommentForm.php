@@ -35,7 +35,7 @@ class CommentForm extends Form
 	public $SigningLabel = "'Sign in' or 'create an account' to 'leave a message'";
 	public $BlockTimeout = 60000;
 	public $ResponseView = null;
-	public $RootId = null;
+	public $ParentId = null;
 	public $Relation = null;
 	public $DefaultAccess = 0;
 	public $DefaultStatus = 1;
@@ -125,8 +125,8 @@ class CommentForm extends Form
 				title: $this->AttachLabel,
 				attributes: ["placeholder" => $this->AttachPlaceHolder, "autocomplete" => "Attach"]
 			);
-		if ($this->RootId)
-			yield Struct::HiddenInput("Root", $this->RootId);
+		if ($this->ParentId)
+			yield Struct::HiddenInput("Root", $this->ParentId);
 		yield from parent::GetFields();
 	}
 	public function GetFooter()
@@ -164,7 +164,7 @@ class CommentForm extends Form
 					}
 					if ((\_::$User && \_::$User->Email) || isValid($received, "Contact"))
 						$res = table("Comment")->Insert([
-							"RootId" => $rid,
+							"ParentId" => $rid,
 							"Relation" => $this->Relation,
 							"UserId" => \_::$User ? \_::$User->Id : null,
 							"Name" => Convert::ToText(getValid($received, "Name", \_::$User ? \_::$User->Name : null)),
@@ -230,8 +230,8 @@ class CommentForm extends Form
 	{
 		$received = receivePatch();
 		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false, reaction: true)) {
-			$rootId = get($received, "Root");
-			if (isValid($rootId)) {
+			$parentId = get($received, "Root");
+			if (isValid($parentId)) {
 				popTimer();
 				$this->AllowAnimate =
 				$this->AllowHeader =
@@ -239,8 +239,8 @@ class CommentForm extends Form
 				$this->ContentClass = "";
 				$this->SubjectLabel = null;
 				$this->SubmitLabel = $this->ReplyLabel;
-				$this->Relation = table("Message")->GetValue($rootId, "Relation");
-				$this->RootId = $rootId;
+				$this->Relation = table("Message")->GetValue($parentId, "Relation");
+				$this->ParentId = $parentId;
 				$this->Router->Initial()->Get()->Switch();
 				return $this->Handle();
 			} elseif (isValid($received, "Status") && \_::$User->HasAccess(\_::$User->AdminAccess)) {
@@ -275,7 +275,7 @@ class CommentForm extends Form
 						$this->Status = 200;
 						return $this->GetWarning("This comment removed successfuly!");
 					} else
-						return $this->GetError("You have not enough access to remove this comment!");
+						return $this->GetError("You do not have enough access to remove this comment!");
 				return $this->GetError("Could not remove this comment!");
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);

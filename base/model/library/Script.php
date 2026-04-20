@@ -26,7 +26,7 @@ class Script
                 $object = str_replace("\\", "\\\\", $object);
                 // if(preg_match("/\n|(\\$\\{[\w\W]*\\})/",$object))
                 //     $object = str_replace(["`", '$'], ["\\`", '\\$'], $object);
-                if (preg_match("/\n|(\\$\{[\w\W]*\})/", $object))
+                if (preg_match("/[\n\r]|(\\$\{[\w\W]*\})/", $object))
                     $object = str_replace("`", "\\`", $object);
                 else
                     $object = str_replace($sp = "\"", "\\\"", $object);
@@ -154,17 +154,17 @@ class Script
         return isEmpty($val) ? "0" : ($isarr ? "[" + $val + "]" : $val);
     }
 
-    public static function Send($method = null, $target = null, $data = null, $selector = 'body', $onSuccessScript = null, $onErrorScript = null, $onMessageScript = null, $onProgressScript = null, $timeout = null, $async = true)
+    public static function Send($method = null, $target = null, $data = null, $selector = 'body', $successScript = null, $errorScript = null, $messageScript = null, $progressScript = null, $timeout = null, $async = true)
     {
         return "send(" .
             self::Convert($method) . "," .
             self::Convert($target) . "," .
             self::Convert($data) . "," .
             self::Convert($selector) . "," .
-            (is_string($onSuccessScript) ? $onSuccessScript : (is_null($onSuccessScript) ? "null" : ("(data,err)=>" . self::Convert($onSuccessScript)))) . "," .
-            (is_string($onErrorScript) ? $onErrorScript : (is_null($onErrorScript) ? "null" : ("(data,err)=>" . self::Convert($onErrorScript)))) . "," .
-            (is_string($onMessageScript) ? $onMessageScript : (is_null($onMessageScript) ? "null" : ("(data,err)=>" . self::Convert($onMessageScript)))) . "," .
-            (is_string($onProgressScript) ? $onProgressScript : (is_null($onProgressScript) ? "null" : ("(data,err)=>" . self::Convert($onProgressScript)))) . "," .
+            (is_string($successScript) ? $successScript : (is_null($successScript) ? "null" : ("(data,err)=>" . self::Convert($successScript)))) . "," .
+            (is_string($errorScript) ? $errorScript : (is_null($errorScript) ? "null" : ("(data,err)=>" . self::Convert($errorScript)))) . "," .
+            (is_string($messageScript) ? $messageScript : (is_null($messageScript) ? "null" : ("(data,err)=>" . self::Convert($messageScript)))) . "," .
+            (is_string($progressScript) ? $progressScript : (is_null($progressScript) ? "null" : ("(data,err)=>" . self::Convert($progressScript)))) . "," .
             self::Convert($timeout) . "," .
             self::Convert($async)
             . ")";
@@ -177,7 +177,7 @@ class Script
      * @param int $timeout The timeout for uploading the file in milliseconds
      * @return string The script part
      */
-    public static function Upload($target = null, $extensions = null, $minSize = null, $maxSize = null, $onSuccessScript = null, $onErrorScript = null, $onMessageScript = null, $onProgressScript = null, $timeout = null, $multiple = false, $method = "FILE")
+    public static function Upload($target = null, $extensions = null, $minSize = null, $maxSize = null, $successScript = null, $errorScript = null, $messageScript = null, $progressScript = null, $timeout = null, $multiple = false, $method = "FILE")
     {
         return "
             var input = document.createElement('input');
@@ -209,12 +209,12 @@ class Script
                             data = btoa(data);
                             reader.addEventListener('load', (event) => {
                             " . self::Send($method, $target, [
-                                    "name" => "\${file.name}",
-                                    "size" => "\${file.size}",
-                                    "count" => "\${count}",
-                                    "number" => "\${number}",
-                                    "data" => "\${encodeURIComponent(data)}"
-                                ], null, $onSuccessScript, $onErrorScript, $onMessageScript, $onProgressScript, $timeout, false) . ";
+                        "name" => "\${file.name}",
+                        "size" => "\${file.size}",
+                        "count" => "\${count}",
+                        "number" => "\${number}",
+                        "data" => "\${encodeURIComponent(data)}"
+                    ], null, $successScript, $errorScript, $messageScript, $progressScript, $timeout, false) . ";
                             });
                             reader.readAsArrayBuffer(file);
                             number++;
@@ -227,14 +227,14 @@ class Script
     }
     public static function Download($target = null, $name = null, $type = null)
     {
-        if(isUrl($target))
+        if (isUrl($target))
             return "load('" . self::Convert($target) . "', true)";
         else
-            return self::Convert(function($target, $name, $type){
+            return self::Convert(function ($target, $name, $type) {
                 upload($target, $name, $type);
-        }, $target, $name, $type);
+            }, $target, $name, $type);
     }
-    
+
     /**
      * To upload any types of files from the client device
      * This method sends files by a chunks-based algorithm
@@ -244,12 +244,12 @@ class Script
      * @param int|null $speed The chunk size in bytes, default is 100KB
      * @return string The script part
      */
-    public static function UploadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $onSuccessScript = null, $onErrorScript = null, $onMessageScript = null, $onProgressScript = null, $timeout = 999999999, $speed = null, $multiple = false, $method = "STREAM")
+    public static function UploadStream($target = null, $extensions = null, $minSize = null, $maxSize = null, $successScript = null, $errorScript = null, $messageScript = null, $progressScript = null, $timeout = 999999999, $speed = null, $multiple = false, $method = "STREAM")
     {
         return "
             var input = document.createElement('input');
             input.setAttribute('Type' , 'file');
-            ".(count($extensions = $extensions ?? \_::$Back->GetAcceptableFormats())>0?"input.setAttribute('accept', " . self::Convert($extensions) . ");":"")."
+            " . (count($extensions = $extensions ?? \_::$Back->GetAcceptableFormats()) > 0 ? "input.setAttribute('accept', " . self::Convert($extensions) . ");" : "") . "
             input.setAttribute('multiple', " . ($multiple ? "true" : "false") . ");
             input.onchange = evt => {
                 try{
@@ -279,17 +279,17 @@ class Script
                                     // for(let j = 0; j < chunkData.length; j++)
                                     //     chunkData[j] = String.fromCharCode(chunkData[j]);
                                     chunkData = String.fromCharCode(...chunkData);
-                                    //chunkData = encrypt(chunkData, ".self::Convert(getClientCode()).");
+                                    //chunkData = encrypt(chunkData, " . self::Convert(getClientCode()) . ");
                                     chunkData = btoa(chunkData);
                                     " . self::Send($method, $target, [
-                                        "name" => "\${file.name}",
-                                        "size" => "\${file.size}",
-                                        "chunk" => "\${i}",
-                                        "total" => "\${totalChunks}",
-                                        "number" => "\${number}",
-                                        "count" => "\${count}",
-                                        "data" => "\${encodeURIComponent(chunkData)}"
-                                    ], null, $onSuccessScript, $onErrorScript, $onMessageScript, $onProgressScript, $timeout, true) . ";
+                        "name" => "\${file.name}",
+                        "size" => "\${file.size}",
+                        "chunk" => "\${i}",
+                        "total" => "\${totalChunks}",
+                        "number" => "\${number}",
+                        "count" => "\${count}",
+                        "data" => "\${encodeURIComponent(chunkData)}"
+                    ], null, $successScript, $errorScript, $messageScript, $progressScript, $timeout, true) . ";
                                 }
                             });
                             reader.readAsArrayBuffer(file);
@@ -374,7 +374,7 @@ class Script
      */
     public static function Prompt($message = "", $default = null)
     {
-        return "prompt(" . self::Convert(__($message)) . ", " . self::Convert($default) . ")";
+        return "prompt(" . self::Convert(__($message)) . ($default?", " . self::Convert($default):null) . ")";
     }
     /**
      * Show message on the client side console
@@ -448,5 +448,164 @@ class Script
     public static function Relocate($url = null)
     {
         return "relocate(" . self::Convert($url) . ")";
+    }
+
+    /**
+     * @field value
+     * @category Template
+     * @var string
+     */
+    public $DefaultSourceSelector = "body";
+    /**
+     * @field value
+     * @category Template
+     * @var string
+     */
+    public $DefaultDestinationSelector = "body";
+
+    /**
+     * RPC (Remote Procedure Call) Request
+     * @param mixed $script The front JS codes to collect requested thing from the client side 
+     * @param mixed $handler The call back handler
+     * @example request('_("body").html', function(selectedHtml)=>{ //do somework })
+     */
+    public static function Action($script = null, $handler = null, &$wrapperId = null)
+    {
+        $callbackScript = "(data,err)=>_('body').after(data??err)";
+        $progressScript = "null";
+        $timeout = 60000;
+        $start = Internal::MakeStartScript(true);
+        $end = Internal::MakeEndScript(true);
+        $wrapperId = $wrapperId ?? ("S_" . getID(true));
+        if (isStatic($handler))
+            return "$start(" . $callbackScript . ")(" .
+                self::Convert($handler) . ",$script);try{_('#$wrapperId').remove();}catch{}$end";
+        else
+            return $handler ? $start .
+                'sendInternal(null,{"' . Internal::Set($handler) . '":JSON.stringify(' . $script . ")}, null,$callbackScript,$callbackScript, null,$progressScript,$timeout);try{_('#$wrapperId').remove();}catch{}$end"
+                : $script;
+    }
+    /**
+     * Make a script to
+     * Get all specific parts of the client side
+     * @param mixed $selector The source selector
+     * @param mixed $callback The call back handler
+     * @example get("body", function(selectedHtml)=>{ //do somework })
+     */
+    public static function Get($selector = null, $callback = null)
+    {
+        return self::Action("Array.from(document.querySelectorAll(" . self::Convert($selector ?? self::$DefaultSourceSelector) . ").values().map(el=>el.outerHTML))", $callback);
+    }
+    /**
+     * Make a script to
+     * Replace the output with a special part of client side
+     * @param mixed $selector The destination selector
+     * @param mixed $handler The data that is ready to print
+     * @param mixed $args Handler input arguments
+     */
+    public static function Set($selector = null, $handler = null, $args = [], $direct = true)
+    {
+        return Internal::MakeScript(
+            $handler,
+            $args,
+            "(data,err)=>_(" . self::Convert($selector ?? self::$DefaultDestinationSelector) . ").replace(data??err)",
+            direct: $direct,
+            encrypt: false
+        );
+    }
+    /**
+     * Make a script to Delete a special part of client side
+     * @param mixed $selector The destination selector
+     */
+    public static function Delete($selector = "body", $direct = true)
+    {
+        return Internal::MakeStartScript(direct: $direct) . "document.querySelectorAll(" . self::Convert($selector ?? self::$DefaultSourceSelector) . ").forEach(el=>el.remove())" . Internal::MakeEndScript(direct: $direct);
+    }
+    /**
+     * Make a script to
+     * Insert output before a special part of client side
+     * @param mixed $selector The destination selector
+     * @param mixed $handler The data that is ready to print
+     * @param mixed $args Handler input arguments
+     */
+    public static function Before($selector = "body", $handler = null, $args = [], $direct = true)
+    {
+        return Internal::MakeScript(
+            $handler,
+            $args,
+            "(data,err)=>_(" . self::Convert($selector ?? self::$DefaultDestinationSelector) . ").before(data??err)"
+            ,
+            direct: $direct,
+            encrypt: false
+        );
+    }
+    /**
+     * Make a script to
+     * Insert output after a special part of client side
+     * @param mixed $selector The destination selector
+     * @param mixed $handler The data that is ready to print
+     * @param mixed $args Handler input arguments
+     */
+    public static function After($selector = "body", $handler = null, $args = [], $direct = true)
+    {
+        return Internal::MakeScript(
+            $handler,
+            $args,
+            "(data,err)=>_(" . self::Convert($selector ?? self::$DefaultDestinationSelector) . ").after(data??err)",
+            direct: $direct,
+            encrypt: false
+        );
+    }
+    /**
+     * Make a script to
+     * Print output inside a special part of client side
+     * @param mixed $selector The destination selector
+     * @param mixed $handler The data that is ready to print
+     * @param mixed $args Handler input arguments
+     */
+    public static function Fill($selector = "body", $handler = null, $args = [], $direct = true)
+    {
+        return Internal::MakeScript(
+            $handler,
+            $args,
+            //"(data,err)=>document.querySelectorAll(" . self::Convert($selector ?? self::$DefaultDestinationSelector) . ").forEach(l=>l.replaceChildren(...((html)=>{el=document.createElement('qb');el.innerHTML=html;return el.childNodes;})(data??err)))"
+            "(data,err)=>_(" . self::Convert($selector ?? self::$DefaultDestinationSelector) . ").html(data??err)",
+            direct: $direct,
+            encrypt: false
+        );
+    }
+    /**
+     * Make a script to
+     * Prepend output on a special part of client side
+     * @param mixed $selector The destination selector
+     * @param mixed $handler The data that is ready to print
+     * @param mixed $args Handler input arguments
+     */
+    public static function Prepend($selector = "body", $handler = null, $args = [], $direct = true)
+    {
+        return Internal::MakeScript(
+            $handler,
+            $args,
+            "(data,err)=>_(" . self::Convert($selector ?? self::$DefaultDestinationSelector) . ").prepend(data??err)",
+            direct: $direct,
+            encrypt: false
+        );
+    }
+    /**
+     * Make a script to
+     * Append output on a special part of client side
+     * @param mixed $selector The destination selector
+     * @param mixed $handler The data that is ready to print
+     * @param mixed $args Handler input arguments
+     */
+    public static function Append($selector = "body", $handler = null, $args = [], $direct = true)
+    {
+        return Internal::MakeScript(
+            $handler,
+            $args,
+            "(data,err)=>_(" . self::Convert($selector ?? self::$DefaultDestinationSelector) . ").append(data??err)",
+            direct: $direct,
+            encrypt: false
+        );
     }
 }

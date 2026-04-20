@@ -3,8 +3,30 @@
  Responsive Styles
  */
 
+
 .show {
+  display: inherit !important;
+}
+.revert {
   display: revert-layer !important;
+}
+.flex {
+  display: flex !important;
+}
+.block {
+  display: block !important;
+}
+.grid {
+  display: grid !important;
+}
+.inline-flex {
+  display: inline-flex !important;
+}
+.inline-block {
+  display: inline-block !important;
+}
+.inline-grid {
+  display: inline-grid !important;
 }
 
 .hide {
@@ -38,7 +60,7 @@
 }
 .hover-hide,
 .parent-hover-hide {
-  display: revert-layer !important;
+  display: inherit !important;
 }
 
 :hover>.hover-hide,
@@ -52,8 +74,37 @@
 
 :hover>.hover-show,
 :hover>*>.parent-hover-show {
+  display: inherit !important;
+}
+:hover>.hover-revert,
+:hover>*>.parent-hover-revert {
   display: revert-layer !important;
 }
+:hover>.hover-flex,
+:hover>*>.parent-hover-flex {
+  display: flex !important;
+}
+:hover>.hover-block,
+:hover>*>.parent-hover-block {
+  display: block !important;
+}
+:hover>.hover-grid,
+:hover>*>.parent-hover-grid {
+  display: grid !important;
+}
+:hover>.hover-inline-flex,
+:hover>*>.parent-hover-inline-flex {
+  display: inline-flex !important;
+}
+:hover>.hover-inline-block,
+:hover>*>.parent-hover-inline-block {
+  display: inline-block !important;
+}
+:hover>.hover-inline-grid,
+:hover>*>.parent-hover-inline-grid {
+  display: inline-grid !important;
+}
+
 .hover-visible,
 .parent-hover-visible {
   visibility: hidden !important;
@@ -82,8 +133,20 @@
 }
 .xxl-show,
 .xxl-range-show,
+.xxl-revert,
+.xxl-range-revert,
+.xxl-flex,
+.xxl-range-flex,
 .xxl-block,
-.xxl-range-block {
+.xxl-range-block,
+.xxl-grid,
+.xxl-range-grid,
+.xxl-inline-flex,
+.xxl-range-inline-flex,
+.xxl-inline-block,
+.xxl-range-inline-block,
+.xxl-inline-grid,
+.xxl-range-inline-grid {
   display: none !important;
 }
 
@@ -92,10 +155,28 @@
     visibility: visible !important;
   }
   .xxl-show {
+    display: inherit !important;
+  }
+  .xxl-revert {
     display: revert-layer !important;
+  }
+  .xxl-flex {
+    display: flex !important;
   }
   .xxl-block {
     display: block !important;
+  }
+  .xxl-grid {
+    display: grid !important;
+  }
+  .xxl-inline-flex {
+    display: inline-flex !important;
+  }
+  .xxl-inline-block {
+    display: inline-block !important;
+  }
+  .xxl-inline-grid {
+    display: inline-grid !important;
   }
   .xxl-invisible {
     visibility: hidden !important;
@@ -110,10 +191,28 @@
     visibility: visible !important;
   }
   .xxl-range-show {
+    display: inherit !important;
+  }
+  .xxl-range-revert {
     display: revert-layer !important;
+  }
+  .xxl-range-flex {
+    display: flex !important;
   }
   .xxl-range-block {
     display: block !important;
+  }
+  .xxl-range-grid {
+    display: grid !important;
+  }
+  .xxl-range-inline-flex {
+    display: inline-flex !important;
+  }
+  .xxl-range-inline-block {
+    display: inline-block !important;
+  }
+  .xxl-range-inline-grid {
+    display: inline-grid !important;
   }
   .xxl-range-invisible {
     visibility: hidden !important;
@@ -132,8 +231,20 @@
 }
 .xl-show,
 .xl-range-show,
+.xl-revert,
+.xl-range-revert,
+.xl-flex,
+.xl-range-flex,
 .xl-block,
-.xl-range-block {
+.xl-range-block,
+.xl-grid,
+.xl-range-grid,
+.xl-inline-flex,
+.xl-range-inline-flex,
+.xl-inline-block,
+.xl-range-inline-block,
+.xl-inline-grid,
+.xl-range-inline-grid {
   display: none !important;
 }
 
@@ -142,10 +253,28 @@
     visibility: visible !important;
   }
   .xl-show {
+    display: inherit !important;
+  }
+  .xl-revert {
     display: revert-layer !important;
+  }
+  .xl-flex {
+    display: flex !important;
   }
   .xl-block {
     display: block !important;
+  }
+  .xl-grid {
+    display: grid !important;
+  }
+  .xl-inline-flex {
+    display: inline-flex !important;
+  }
+  .xl-inline-block {
+    display: inline-block !important;
+  }
+  .xl-inline-grid {
+    display: inline-grid !important;
   }
   .xl-invisible {
     visibility: hidden !important;
@@ -160,10 +289,28 @@
     visibility: visible !important;
   }
   .xl-range-show {
+    display: inherit !important;
+  }
+  .xl-range-revert {
     display: revert-layer !important;
+  }
+  .xl-range-flex {
+    display: flex !important;
   }
   .xl-range-block {
     display: block !important;
+  }
+  .xl-range-grid {
+    display: grid !important;
+  }
+  .xl-range-inline-flex {
+    display: inline-flex !important;
+  }
+  .xl-range-inline-block {
+    display: inline-block !important;
+  }
+  .xl-range-inline-grid {
+    display: inline-grid !important;
   }
   .xl-range-invisible {
     visibility: hidden !important;
@@ -182,8 +329,20 @@
 }
 .lg-show,
 .lg-range-show,
+.lg-revert,
+.lg-range-revert,
+.lg-flex,
+.lg-range-flex,
 .lg-block,
-.lg-range-block {
+.lg-range-block,
+.lg-grid,
+.lg-range-grid,
+.lg-inline-flex,
+.lg-range-inline-flex,
+.lg-inline-block,
+.lg-range-inline-block,
+.lg-inline-grid,
+.lg-range-inline-grid {
   display: none !important;
 }
 
@@ -192,10 +351,28 @@
     visibility: visible !important;
   }
   .lg-show {
+    display: inherit !important;
+  }
+  .lg-revert {
     display: revert-layer !important;
+  }
+  .lg-flex {
+    display: flex !important;
   }
   .lg-block {
     display: block !important;
+  }
+  .lg-grid {
+    display: grid !important;
+  }
+  .lg-inline-flex {
+    display: inline-flex !important;
+  }
+  .lg-inline-block {
+    display: inline-block !important;
+  }
+  .lg-inline-grid {
+    display: inline-grid !important;
   }
   .lg-invisible {
     visibility: hidden !important;
@@ -210,10 +387,28 @@
     visibility: visible !important;
   }
   .lg-range-show {
+    display: inherit !important;
+  }
+  .lg-range-revert {
     display: revert-layer !important;
+  }
+  .lg-range-flex {
+    display: flex !important;
   }
   .lg-range-block {
     display: block !important;
+  }
+  .lg-range-grid {
+    display: grid !important;
+  }
+  .lg-range-inline-flex {
+    display: inline-flex !important;
+  }
+  .lg-range-inline-block {
+    display: inline-block !important;
+  }
+  .lg-range-inline-grid {
+    display: inline-grid !important;
   }
   .lg-range-invisible {
     visibility: hidden !important;
@@ -232,8 +427,20 @@
 }
 .md-show,
 .md-range-show,
+.md-revert,
+.md-range-revert,
+.md-flex,
+.md-range-flex,
 .md-block,
-.md-range-block {
+.md-range-block,
+.md-grid,
+.md-range-grid,
+.md-inline-flex,
+.md-range-inline-flex,
+.md-inline-block,
+.md-range-inline-block,
+.md-inline-grid,
+.md-range-inline-grid {
   display: none !important;
 }
 
@@ -242,10 +449,28 @@
     visibility: visible !important;
   }
   .md-show {
+    display: inherit !important;
+  }
+  .md-revert {
     display: revert-layer !important;
+  }
+  .md-flex {
+    display: flex !important;
   }
   .md-block {
     display: block !important;
+  }
+  .md-grid {
+    display: grid !important;
+  }
+  .md-inline-flex {
+    display: inline-flex !important;
+  }
+  .md-inline-block {
+    display: inline-block !important;
+  }
+  .md-inline-grid {
+    display: inline-grid !important;
   }
   .md-invisible {
     visibility: hidden !important;
@@ -260,10 +485,28 @@
     visibility: visible !important;
   }
   .md-range-show {
+    display: inherit !important;
+  }
+  .md-range-revert {
     display: revert-layer !important;
+  }
+  .md-range-flex {
+    display: flex !important;
   }
   .md-range-block {
     display: block !important;
+  }
+  .md-range-grid {
+    display: grid !important;
+  }
+  .md-range-inline-flex {
+    display: inline-flex !important;
+  }
+  .md-range-inline-block {
+    display: inline-block !important;
+  }
+  .md-range-inline-grid {
+    display: inline-grid !important;
   }
   .md-range-invisible {
     visibility: hidden !important;
@@ -282,8 +525,20 @@
 }
 .sm-show,
 .sm-range-show,
+.sm-revert,
+.sm-range-revert,
+.sm-flex,
+.sm-range-flex,
 .sm-block,
-.sm-range-block {
+.sm-range-block,
+.sm-grid,
+.sm-range-grid,
+.sm-inline-flex,
+.sm-range-inline-flex,
+.sm-inline-block,
+.sm-range-inline-block,
+.sm-inline-grid,
+.sm-range-inline-grid {
   display: none !important;
 }
 
@@ -292,10 +547,28 @@
     visibility: visible !important;
   }
   .sm-show {
+    display: inherit !important;
+  }
+  .sm-revert {
     display: revert-layer !important;
+  }
+  .sm-flex {
+    display: flex !important;
   }
   .sm-block {
     display: block !important;
+  }
+  .sm-grid {
+    display: grid !important;
+  }
+  .sm-inline-flex {
+    display: inline-flex !important;
+  }
+  .sm-inline-block {
+    display: inline-block !important;
+  }
+  .sm-inline-grid {
+    display: inline-grid !important;
   }
   .sm-invisible {
     visibility: hidden !important;
@@ -310,10 +583,28 @@
     visibility: visible !important;
   }
   .sm-range-show {
+    display: inherit !important;
+  }
+  .sm-range-revert {
     display: revert-layer !important;
+  }
+  .sm-range-flex {
+    display: flex !important;
   }
   .sm-range-block {
     display: block !important;
+  }
+  .sm-range-grid {
+    display: grid !important;
+  }
+  .sm-range-inline-flex {
+    display: inline-flex !important;
+  }
+  .sm-range-inline-block {
+    display: inline-block !important;
+  }
+  .sm-range-inline-grid {
+    display: inline-grid !important;
   }
   .sm-range-invisible {
     visibility: hidden !important;
@@ -335,8 +626,20 @@
 }
 .xs-show,
 .xs-range-show,
+.xs-revert,
+.xs-range-revert,
+.xs-flex,
+.xs-range-flex,
 .xs-block,
-.xs-range-block {
+.xs-range-block,
+.xs-grid,
+.xs-range-grid,
+.xs-inline-flex,
+.xs-range-inline-flex,
+.xs-inline-block,
+.xs-range-inline-block,
+.xs-inline-grid,
+.xs-range-inline-grid {
   display: none !important;
 }
 
@@ -345,10 +648,28 @@
     visibility: visible !important;
   }
   .xs-show {
+    display: inherit !important;
+  }
+  .xs-revert {
     display: revert-layer !important;
+  }
+  .xs-flex {
+    display: flex !important;
   }
   .xs-block {
     display: block !important;
+  }
+  .xs-grid {
+    display: grid !important;
+  }
+  .xs-inline-flex {
+    display: inline-flex !important;
+  }
+  .xs-inline-block {
+    display: inline-block !important;
+  }
+  .xs-inline-grid {
+    display: inline-grid !important;
   }
   .xs-invisible {
     visibility: hidden !important;
@@ -363,10 +684,28 @@
     visibility: visible !important;
   }
   .xs-range-show {
+    display: inherit !important;
+  }
+  .xs-range-revert {
     display: revert-layer !important;
+  }
+  .xs-range-flex {
+    display: flex !important;
   }
   .xs-range-block {
     display: block !important;
+  }
+  .xs-range-grid {
+    display: grid !important;
+  }
+  .xs-range-inline-flex {
+    display: inline-flex !important;
+  }
+  .xs-range-inline-block {
+    display: inline-block !important;
+  }
+  .xs-range-inline-grid {
+    display: inline-grid !important;
   }
   .xs-range-invisible {
     visibility: hidden !important;
@@ -385,8 +724,20 @@
 }
 .xxs-show,
 .xxs-range-show,
+.xxs-revert,
+.xxs-range-revert,
+.xxs-flex,
+.xxs-range-flex,
 .xxs-block,
-.xxs-range-block {
+.xxs-range-block,
+.xxs-grid,
+.xxs-range-grid,
+.xxs-inline-flex,
+.xxs-range-inline-flex,
+.xxs-inline-block,
+.xxs-range-inline-block,
+.xxs-inline-grid,
+.xxs-range-inline-grid {
   display: none !important;
 }
 
@@ -395,10 +746,28 @@
     visibility: visible !important;
   }
   .xxs-show {
+    display: inherit !important;
+  }
+  .xxs-revert {
     display: revert-layer !important;
+  }
+  .xxs-flex {
+    display: flex !important;
   }
   .xxs-block {
     display: block !important;
+  }
+  .xxs-grid {
+    display: grid !important;
+  }
+  .xxs-inline-flex {
+    display: inline-flex !important;
+  }
+  .xxs-inline-block {
+    display: inline-block !important;
+  }
+  .xxs-inline-grid {
+    display: inline-grid !important;
   }
   .xxs-invisible {
     visibility: hidden !important;
@@ -413,10 +782,28 @@
     visibility: visible !important;
   }
   .xxs-range-show {
+    display: inherit !important;
+  }
+  .xxs-range-revert {
     display: revert-layer !important;
+  }
+  .xxs-range-flex {
+    display: flex !important;
   }
   .xxs-range-block {
     display: block !important;
+  }
+  .xxs-range-grid {
+    display: grid !important;
+  }
+  .xxs-range-inline-flex {
+    display: inline-flex !important;
+  }
+  .xxs-range-inline-block {
+    display: inline-block !important;
+  }
+  .xxs-range-inline-grid {
+    display: inline-grid !important;
   }
   .xxs-range-invisible {
     visibility: hidden !important;

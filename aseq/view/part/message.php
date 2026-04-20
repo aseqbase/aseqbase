@@ -10,6 +10,7 @@ $form->Template = get($data, "Template") ?? "t";
 $form->BlockTimeout = get($data, "BlockTimeout") ?? 60000;
 $form->BackLabel = get($data, "BackLabel") ?? null;
 $form->BackPath = get($data, "BackPath") ?? null;
+$form->ReceiverEmail = \_::$Front->ReceiverEmail;
 $form->ContentClass = "col-lg-8";
 $name = get(\_::$User, "Name") ?? receiveGet("Name");
 $email = get(\_::$User, "Email") ?? receiveGet("Email");

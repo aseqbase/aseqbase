@@ -17,7 +17,7 @@ class Article extends Content
      public function GetStyle()
      {
           yield parent::GetStyle();
-          yield  Struct::Style("
+          yield Struct::Style("
           .{$this->MainClass}{
                position: relative;
                inset: 0;
@@ -33,18 +33,18 @@ class Article extends Content
                position: relative;
                width: 100%;
           }
-          ".($this->AllowShade?".{$this->MainClass} .header.cover>.media::after{
+          " . ($this->AllowShade ? ".{$this->MainClass} .header.cover>.media::after{
                content: '';
                display: block;
                width: 100%;
                height: 100%;
                background-blend-mode: multiply;
-               background: linear-gradient(".(\_::$Front->Translate->Direction === "rtl"?"-":"")."90deg, rgba(24, 24, 24, .9) 0%, rgba(43, 43, 43, 0) 100%);
+               background: linear-gradient(" . (\_::$Front->Translate->Direction === "rtl" ? "-" : "") . "90deg, rgba(24, 24, 24, .9) 0%, rgba(43, 43, 43, 0) 100%);
                position: absolute;
                top: 0;
                left: 0;
                z-index: 0;
-          }":"")."
+          }" : "") . "
           .{$this->MainClass} .header.cover :is(.title, .description, .title a:not(.button), .description a:not(.button)) {
                color: var(--color-white);
           }
@@ -98,21 +98,23 @@ class Article extends Content
                     $nameOrId = trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
           }
 
+          $this->Description = getValid($this->Item, 'Description', $this->Description);
           return Struct::Cover(
-               Struct::Container(Struct::Rack(
-                    Struct::MediumSlot(
-                         ($this->AllowTitle ? Struct::Heading1(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
-                         $this->GetDetails($this->CollectionRoot . $nameOrId),
-                         ["style" => "z-index: 1;"]
-                    ) .
-                    $this->GetButtons(),
-                    ["class" => "title"],
-                    $attributes
-               ) . ($this->AllowDescription && $this->Description? Struct::Rack(
-                         $this->Description,
-                         ["class" => "description"],
+               Struct::Container(
+                    Struct::Rack(
+                         Struct::MediumSlot(
+                              ($this->AllowTitle ? Struct::Heading1(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
+                              $this->GetDetails($this->CollectionRoot . $nameOrId),
+                              ["style" => "z-index: 1;"]
+                         ) .
+                         $this->GetButtons(),
+                         ["class" => "title"],
                          $attributes
-                    ) : "")
+                    ) . (($this->AllowDescription && $this->Description) ? Struct::Rack(
+                              Struct::MediumSlot($this->Description),
+                              ["class" => "description"],
+                              $attributes
+                         ) : "")
                ),
                $p_image,
                [
@@ -137,12 +139,13 @@ class Article extends Content
      }
      public function GetSpecials($content)
      {
-          return $content?Struct::Division(Struct::Container($content), ["class"=>"special"]):null;
+          return $content ? Struct::Division(Struct::Container($content), ["class" => "special"]) : null;
      }
-     
-     public function GetScript(){
-		yield parent::GetScript();
-		yield Struct::Script("
+
+     public function GetScript()
+     {
+          yield parent::GetScript();
+          yield Struct::Script("
                _('.{$this->MainClass}>:not(.header, .container-fluid, .special)').addClass('container');
           ");
      }

@@ -324,7 +324,7 @@ class CommentCollection extends Collection
                 $p_groupid = get($item, "GroupId");
                 $p_status = get($item, "Status");
                 if (
-                    isValid($item, "RootId") ||
+                    isValid($item, "ParentId") ||
                     (
                         (
                             !$p_status
@@ -362,9 +362,9 @@ class CommentCollection extends Collection
                 if ($p_replyes) {
                     $p_replyes = [];
                     foreach (Convert::ToItems($this->Items) as $k1 => $item1)
-                        if ($item1["RootId"] == $p_id) {
+                        if ($item1["ParentId"] == $p_id) {
                             $p_replyes[] = $item1;
-                            $p_replyes[count($p_replyes) - 1]["RootId"] = null;
+                            $p_replyes[count($p_replyes) - 1]["ParentId"] = null;
                         }
                 } else
                     $p_replyes = [];

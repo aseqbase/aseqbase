@@ -247,6 +247,31 @@
   justify-content: end;
 }
 
+.be.no-gap{
+  gap: unset;
+}
+.be.gap-0{
+  gap: var(--size-0);
+}
+.be.gap-1{
+  gap: var(--size-1);
+}
+.be.gap-2{
+  gap: var(--size-2);
+}
+.be.gap-3{
+  gap: var(--size-3);
+}
+.be.gap-4{
+  gap: var(--size-4);
+}
+.be.gap-5{
+  gap: var(--size-5);
+}
+.be.gap-6{
+  gap: var(--size-6);
+}
+
 .be.ltr {
   direction: ltr;
 }

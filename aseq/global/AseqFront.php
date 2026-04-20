@@ -130,7 +130,7 @@ class AseqFront extends FrontBase
 
 	/**
      * The main menu to show on the most pages
-     * @field array<array>
+     * @field object
 	 * @category Render
      * @var array|null
 	 */
@@ -140,7 +140,7 @@ class AseqFront extends FrontBase
 
 	/**
      * The side menu to show on the most pages
-     * @field array<array>
+     * @field object
 	 * @category Render
      * @var array|null
 	 */
@@ -148,7 +148,7 @@ class AseqFront extends FrontBase
 
 	/**
      * The main shortcut menu to show on the most pages
-     * @field array<array>
+     * @field object
 	 * @category Render
      * @var array|null
 	 */
@@ -162,7 +162,7 @@ class AseqFront extends FrontBase
 
 	/**
      * The main menu items to show on the first page
-     * @field array<array>
+     * @field object
 	 * @category Render
      * @var array|null
 	 */
@@ -170,7 +170,7 @@ class AseqFront extends FrontBase
 
 	/**
      * The main members and personnel of the website
-     * @field array<array>
+     * @field object
 	 * @category Render
      * @var array|null
 	 */
@@ -178,7 +178,7 @@ class AseqFront extends FrontBase
 
 	/**
      * The main contacts details to show on the most pages and contact page
-     * @field array<array>
+     * @field object
 	 * @category Render
      * @var array|null
 	 */
@@ -277,7 +277,7 @@ class AseqFront extends FrontBase
 	/**
 	 * The Date Time Format
 	 * @var string
-	 * @example: "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
+	 * @example "Y-m-d H:i:s" To show like 2018-08-10 14:46:45
 	 * @field value
 	 * @category Time
 	 */
@@ -322,7 +322,22 @@ class AseqFront extends FrontBase
 	public $AllowTagReferring = true;
 	public $AllowUserReferring = false;
 	
-	
+	/**
+	 * A specific view for admin
+	 * @internal
+	 */
+	public $AdminView = null;
+	/**
+     * The admin menu to show on the admin side
+     * @internal
+	 */
+	public $AdminMenus = [];
+	/**
+     * The admin menu to show on the admin side
+     * @internal
+	 */
+	public $AdminShortcuts = [];
+
 	public function __construct(){
 		parent::__construct();
 		

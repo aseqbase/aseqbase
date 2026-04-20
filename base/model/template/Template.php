@@ -173,7 +173,7 @@ class Template extends \Base
             border-radius: var(--radius-1);
             box-shadow: var(--shadow-5);
             padding: 9px 9px;
-            z-index: -999;
+            z-index: -999999;
             transition: var(--transition-0);
         }
         :not(html,head,body,style,script,link,meta,title):hover>.tooltip {
@@ -301,14 +301,8 @@ class Template extends \Base
             font-family: var(--font-input), var(--font-special-input), var(--font);
             line-height: 1.5em;
         }
-        :is(input,.input):is(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+        :is(input,.input):is(.switchinput, [type='radiobutton'], [type='checkbox']){
             width: fit-content;
-        }
-        .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
-            cursor: text;
-            background-color: var(--back-color-input);
-            color: var(--fore-color-input);
-            border: var(--border-1) var(--fore-color-input);
         }
         .input[type=file]:not(:disabled,[readonly]) {
             cursor: pointer;

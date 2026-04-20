@@ -92,13 +92,13 @@ class RouterBase extends ArrayObject
 
     /**
      * The current handled request part of the url
-     * @example: "/Category/mimfa/service/web.php?p=3&l=10#serp"
+     * @example "/Category/mimfa/service/web.php?p=3&l=10#serp"
      * @var string|null
      */
     public string|null $CurrentRequest = null;
     /**
      * The current handled direction part of the url from the root
-     * @example: "Category/mimfa/service/web.php"
+     * @example "Category/mimfa/service/web.php"
      * @var string|null
      */
     public string|null $CurrentRoute = null;
@@ -226,9 +226,9 @@ class RouterBase extends ArrayObject
 
     /**
      * To change the default method to handle
-     * @example: ->Post()->Switch()
-     * @example: ->Delete()->Switch()
-     * @example: ->Switch("Get")
+     * @example ->Post()->Switch()
+     * @example ->Delete()->Switch()
+     * @example ->Switch("Get")
      * @return
      */
     public function Switch($method = null)

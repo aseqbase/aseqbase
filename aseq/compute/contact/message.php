@@ -9,12 +9,12 @@ if (!get($received, "Message"))
 else {
 	$form->MailSubject = \_::$Address->UrlDomain . ": Message from '" . (get($received, "Name") ?? get(\_::$User, "Name")) . "'";
 	$form->ReceiverEmail = \_::$Front->ReceiverEmail;
-	$form->SenderEmail = get($received, "Email") ?? get(\_::$User, "Email");
+	$form->SenderEmail = \_::$Front->SenderEmail;
 	table("Message")->Insert([
 		"UserId" => \_::$User ? \_::$User->Id : null,
 		"Relation" => \_::$Address->Url,
 		"Name" => Convert::ToText(getValid($received, "Name", \_::$User ? \_::$User->Name : null)),
-		"From" => $form->SenderEmail,
+		"From" => get($received, "Email") ?: \_::$User->Email,
 		"To" => $form->ReceiverEmail,
 		"Subject" => Convert::ToText(get($received, "Subject")),
 		"Content" => Convert::ToText(get($received, "Message")),
@@ -23,4 +23,5 @@ else {
 	]);
 	pod($form, $data);
 	$form->Render();
+	if($form->Status >=200 && $form->Status < 400) reload();
 }

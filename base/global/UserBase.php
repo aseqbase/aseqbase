@@ -265,8 +265,8 @@ class UserBase
 		$this->GroupDataTable = table("UserGroup");
 
 		if ($this->Active) $this->Refresh();
-		Revise::Decode($this, takeValid($this->GetGroup(), "MetaData", "[]"));
-		Revise::Decode($this, takeValid($this->Get(), "MetaData", "[]"));
+		Revise::Decode($this, null, takeValid($this->GetGroup(), "MetaData", "[]"));
+		Revise::Decode($this, null, takeValid($this->Get(), "MetaData", "[]"));
 	}
 
 	public function Refresh()
@@ -429,11 +429,11 @@ class UserBase
 			$id = takeValid($this->Find($signature, $password), "Id");
 		return is_null($id) ? null : $this->DataTable->SetMetaValue($id, $key, $value);
 	}
-	public function PopMetaValue($key, $signature = null, $password = null)
+	public function DelMetaValue($key, $signature = null, $password = null)
 	{
 		if (is_null($id = $this->Id) || !is_null($signature))
 			$id = takeValid($this->Find($signature, $password), "Id");
-		return is_null($id) ? null : $this->DataTable->PopMetaValue($id, $key);
+		return is_null($id) ? null : $this->DataTable->DelMetaValue($id, $key);
 	}
 
 	public function GetGroup($signature = null, $password = null)

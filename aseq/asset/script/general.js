@@ -12,7 +12,7 @@ let submitForm = function (selector = 'form', success = null, error = null, read
 		form = selector;
 		selector = getQuery(form);
 	}
-	if (!form) return null;
+	if (!form || !form.reportValidity()) return null;
 	let fd = new FormData(form);
 	let sb = form.querySelector("[type='submit']");
 	if (sb) {
@@ -39,6 +39,7 @@ let handleForm = function (selector = 'form', success = null, error = null, read
 
 	if (form) form.onsubmit = function (e) {
 		e.preventDefault();
+		if(!form.reportValidity()) return;
 		let fd = new FormData(form);
 		let sb = ClickedFormButton ?? form.querySelector("[type='submit']");
 		if (sb) {

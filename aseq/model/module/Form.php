@@ -5,7 +5,6 @@ use MiMFa\Library\Struct;
 use MiMFa\Library\Convert;
 use MiMFa\Library\Style;
 
-
 class Form extends Module
 {
 	/**
@@ -55,7 +54,7 @@ class Form extends Module
 	public $FooterAnimation = "fade-up";
 	public $Class = "container";
 	public $ContentClass = "col-lg-6";
-	public $Interactive = true;
+	public $Interaction = true;
 
 	/**
 	 * A function to check received values before accepting
@@ -121,7 +120,7 @@ class Form extends Module
 	public function CheckAccess($access = 0, $blocking = true, $reaction = false, &$message = null)
 	{
 		if (!\_::$User->HasAccess($access)) {
-			$message = $this->GetError("You have not enough access!");
+			$message = $this->GetError("You do not have enough access!");
 			if ($reaction)
 				response($this->GetSigning());
 			return false;
@@ -165,10 +164,13 @@ class Form extends Module
 					align-items: center;
 				}
 				.{$this->MainClass} .content {
-					padding-top: var(--size-0);
-					padding-bottom: var(--size-0);
 					background-color: var(--back-color);
 					color: var(--fore-color);
+					display: flex;
+					justify-content: center;
+					align-content: center;
+					flex-direction: column;
+					align-items: center;
 				}
 				.{$this->MainClass} form {
     				position: relative;
@@ -179,17 +181,20 @@ class Form extends Module
 					min-width: 100%;
 					gap: var(--size-0);
 				}
-				.{$this->MainClass} :is(input,.input):is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				.{$this->MainClass} .field>:is(input,.input){
     				display: inline-block;
 					margin: 0px;
 					margin-inline-start: calc(var(--size-0) / 2);
 					margin-inline-end: var(--size-0);
 				}
-				.{$this->MainClass} .field .input[type='color'] {
-    				display: inline-block;
-					margin: var(--size-0);
-					padding: 0px;
+				.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+					border:none;
+					outline:none;
+				}
+				.{$this->MainClass} .field>.input[type='color'] {
 					aspect-ratio: 1;
+					width: var(--size-1);
+					padding: 0px;
 				}
 				.{$this->MainClass} .header {
 					position: sticky;
@@ -259,6 +264,7 @@ class Form extends Module
 					return $style . $this->GetFieldsBothStyle();
 				case 's':
 				case 'special':
+					return $style . $this->GetFieldsSpecialStyle();
 				case 't':
 				case 'table':
 					return $style . $this->GetFieldsTableStyle();
@@ -308,33 +314,27 @@ class Form extends Module
 					border-top: none;
 					border-bottom: 1px solid var(--fore-color-special-input);
 				}
-				.{$this->MainClass} .field .input {
+				.{$this->MainClass} .field>.input {
 					font-size: 125%;
-					display: inline-flex;
 					border: none;
+					max-width: 55vw;
+					max-width: -webkit-fill-available;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.{$this->MainClass} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+				.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 					" . Style::DoProperty("color", $this->FieldsForeColor) . "
 					" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 					width: 100%;
-					max-width: 55vw;
-					max-width: -webkit-fill-available;
 					border-bottom: var(--border-1);
 					border-color: transparent;
 					border-radius: var(--radius-0);
 				}
-				.{$this->MainClass} .field .input[type='color'] {
-					min-width: auto;
-					width: revert;
-					aspect-ratio: 1;
-				}
-				.{$this->MainClass} .field .input::placeholder {
+				.{$this->MainClass} .field>.input::placeholder {
 					color: #888;
 					font-weight: bold;
 					font-size: 0.9rem;
 				}
-				.{$this->MainClass} .field .input:focus {
+				.{$this->MainClass} .field>.input:focus {
 					box-shadow: none;
 					" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
@@ -372,7 +372,7 @@ class Form extends Module
 				text-align: start;
 				display: table-row;
 			}
-			.{$this->MainClass} .field label.title{
+			.{$this->MainClass} .field>label.title{
 				width: fit-content;
 				max-width: 30vw;
 				text-wrap: auto;
@@ -383,29 +383,26 @@ class Form extends Module
 				padding: calc(var(--size-0) + var(--size-0) / 4) var(--size-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field .input{
+			.{$this->MainClass} .field>.input{
 				font-size: 125%;
+				max-width: 65vw;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
-				padding: calc(var(--size-0) + var(--size-0) / 4) 0px;
+			.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				padding: calc(var(--size-0) / 4);
+				width: 100%;
+				text-align: end;
 			}
-			.{$this->MainClass} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(200px, 30vw);
-				max-width: 65vw;
 				border: none;
 				border-bottom: var(--border-1);
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
 				border-radius: var(--radius-0);
 				margin: calc(var(--size-0) / 2) 0px;
-			}
-			.{$this->MainClass} .field .input[type='color'] {
-				min-width: auto;
-				width: revert;
-				aspect-ratio: 1;
 			}
 			.{$this->MainClass} .field label.description{
 				text-align: initial;
@@ -416,7 +413,7 @@ class Form extends Module
 				opacity: 0.5;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field:hover .input{
+			.{$this->MainClass} .field:hover>.input{
 				" . Style::DoProperty("outline-color", $this->FieldsBorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -448,7 +445,7 @@ class Form extends Module
 				padding: calc(var(--size-0) / 2) 0px;
 				padding-bottom: var(--size-1);
 			}
-			.{$this->MainClass} .field label.title{
+			.{$this->MainClass} .field>label.title{
 				width: fit-content;
 				max-width: 30vw;
 				text-wrap: auto;
@@ -460,32 +457,29 @@ class Form extends Module
 				border-radius: calc(var(--size-0) / 2) 0px 0px calc(var(--size-0) / 2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field .input{
+			.{$this->MainClass} .field>.input{
 				display: table-cell;
 				font-size: 125%;
 				height: 100%;
+				max-width: 65vw;
+				border-radius: var(--radius-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
-				padding: var(--size-0) 0px;
+			.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				padding: var(--size-0) calc(var(--size-0) / 3);
+				width: 100%;
+				text-align: end;
 			}
-			.{$this->MainClass} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
-				max-width: 65vw;
 				border-radius: 0px calc(var(--size-0) / 2) calc(var(--size-0) / 2) 0px;
 				outline: none;
 				border: none;
 				border-bottom: var(--border-1);
 				border-color: transparent;
-				border-radius: var(--radius-0);
-			}
-			.{$this->MainClass} .field .input[type='color'] {
-				min-width: auto;
-				width: revert;
-				aspect-ratio: 1;
 			}
 			.{$this->MainClass} .field label.description{
 				text-align: initial;
@@ -497,10 +491,10 @@ class Form extends Module
 				opacity: 0;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field:hover label.title{
+			.{$this->MainClass} .field:hover>label.title{
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field:hover .input{
+			.{$this->MainClass} .field:hover>.input{
 				outline: none;
 				" . Style::DoProperty("border-color", $this->FieldsBorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
@@ -528,7 +522,7 @@ class Form extends Module
 				text-align: start;
 				display: table-row;
 			}
-			.{$this->MainClass} .field label.title{
+			.{$this->MainClass} .field>label.title{
 				background-color: var(--back-color);
 				color: var(--fore-color);
 				width: fit-content;
@@ -545,25 +539,22 @@ class Form extends Module
 				z-index: 1;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field .input{
+			.{$this->MainClass} .field>.input{
 				font-size: 100%;
+				max-width: 95vw;
+				border-radius: var(--radius-0);
+				margin-inline-start: 0px;
+				margin-inline-end: 0px;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
-				max-width: 95vw;
 				border-radius: 0px calc(var(--size-0) / 2) calc(var(--size-0) / 2) calc(var(--size-0) / 2);
 				border: var(--border-1);
 				border-color: transparent;
-				border-radius: var(--radius-0);
-			}
-			.{$this->MainClass} .field .input[type='color'] {
-				min-width: auto;
-				width: revert;
-				aspect-ratio: 1;
 			}
 			.{$this->MainClass} .field label.description{
 				text-align: initial;
@@ -619,7 +610,7 @@ class Form extends Module
 				display: table-row;
 				border-spacing: var(--size-0);
 			}
-			.{$this->MainClass} .field label.title{
+			.{$this->MainClass} .field>label.title{
 				width: fit-content;
 				max-width: 30vw;
 				text-wrap: auto;
@@ -630,28 +621,25 @@ class Form extends Module
 				padding: var(--size-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field .input{
+			.{$this->MainClass} .field>.input{
 				font-size: 125%;
+				max-width: 65vw;
+				border-radius: var(--radius-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
-				padding: var(--size-0) 0px;
+			.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				padding: var(--size-0) calc(var(--size-0) / 3);
+				width: 100%;
+				text-align: end;
 			}
-			.{$this->MainClass} .input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
 				min-width: min(300px, 40vw);
-				max-width: 65vw;
 				border: none;
 				border-color: transparent;
 				border-bottom: var(--border-1);
-				border-radius: var(--radius-0);
-			}
-			.{$this->MainClass} .field .input[type='color'] {
-				min-width: auto;
-				width: revert;
-				aspect-ratio: 1;
 			}
 			.{$this->MainClass} .field label.description{
 				opacity: 0;
@@ -670,7 +658,92 @@ class Form extends Module
 				z-index: 1;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field:hover .input{
+			.{$this->MainClass} .field:hover>.input{
+				" . Style::DoProperty("outline-color", $this->FieldsBorderColor) . "
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .field:hover label.description{
+				opacity: 1;
+				display: block;
+				font-size: 75%;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+					
+			.{$this->MainClass} .group.buttons {
+				justify-content: end;
+			}
+		");
+	}
+	public function GetFieldsSpecialStyle()
+	{
+		return Struct::Style("
+			.{$this->MainClass} form .fields {
+				display: inline-flex;
+				justify-content: space-between;
+				align-items: start;
+				align-items: center;
+			}
+			.{$this->MainClass} .field{
+				" . Style::DoProperty("min-width", $this->FieldsMinWidth) . "
+				" . Style::DoProperty("min-height", $this->FieldsMinHeight) . "
+				" . Style::DoProperty("max-width", $this->FieldsMaxWidth) . "
+				" . Style::DoProperty("max-height", $this->FieldsMaxHeight) . "
+				" . Style::DoProperty("width", $this->FieldsWidth) . "
+				" . Style::DoProperty("height", $this->FieldsHeight) . "
+				font-size: var(--size-1);
+				text-align: start;
+				display: inline-flex;
+				justify-content: space-between;
+				align-items: center;
+				flex-wrap: wrap;
+			}
+			.{$this->MainClass} .field>label.title{
+				width: fit-content;
+				max-width: 40vw;
+				text-wrap: auto;
+				position: relative;
+				text-align: initial;
+    			vertical-align: top;
+				padding: var(--size-0);
+				padding-inline-start: 0px;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .field>.input{
+				font-size: 125%;
+				max-width: 65vw;
+				border-radius: var(--radius-0);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				padding: var(--size-0) 0px;
+			}
+			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+				" . Style::DoProperty("color", $this->FieldsForeColor) . "
+				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
+				width: 100%;
+				min-width: min(300px, 40vw);
+				border: none;
+				border-color: transparent;
+				border-bottom: var(--border-1);
+			}
+			.{$this->MainClass} .field label.description{
+				opacity: 0;
+				display: none;
+				font-size: 0%;
+				line-height: 100%;
+				text-align: initial;
+				border-radius: var(--radius-1);
+				box-shadow: var(--shadow-5);
+				border: var(--border-1) var(--fore-color-special);
+				color: var(--fore-color-special);
+				background-color: var(--back-color-special);
+				position: absolute;
+				margin: 0px;
+				padding: calc(var(--size-0) / 2) var(--size-0);
+				z-index: 1;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .field:hover>.input{
 				" . Style::DoProperty("outline-color", $this->FieldsBorderColor) . "
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -699,7 +772,7 @@ class Form extends Module
 			module("Field");
 			$attr = $this->Method ? [] : ["disabled"];
 			$this->Items = isEmpty($this->FieldsTypes)
-				? iteration($this->Items, function ($v, $k) use ($attr) {
+				? iterate($this->Items, function ($v, $k) use ($attr) {
 					if (is_int($k))
 						if ($v instanceof \Base)
 							return $v->ToString();
@@ -724,7 +797,7 @@ class Form extends Module
 							attributes: $attr
 						);
 				})
-				: iteration($this->FieldsTypes, function ($type, $k) use ($attr) {
+				: iterate($this->FieldsTypes, function ($type, $k) use ($attr) {
 					$v = getValid($this->Items, $k, null);
 					if ($type === false)
 						return null;
@@ -750,27 +823,28 @@ class Form extends Module
 							$this->GetHeader() .
 							$this->GetTitle(["class" => "form-title"]) .
 							$this->GetDescription(["class" => "form-description"]) .
-							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$Address->UrlOrigin, ["class" => "back-button"]) : "")
-							,
+							(isValid($this->BackLabel) ? Struct::Link($this->BackLabel, $this->BackPath ?? \_::$Address->UrlOrigin, ["class" => "back-button"]) : ""),
 							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => $this->HeaderAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
 						) : "") .
 						Struct::LargeSlot(
-							Struct::Form(
-								Struct::Rack(
-									($this->Target ? Struct::HiddenInput($this->TargetKey, $this->Target) : "") .
-									($this->AllowContent ? $this->GetContent() : "") .
-									Convert::ToString($this->GetFields()),
-									["class" => "group fields"]
+							Struct::Box(
+								Struct::Form(
+									Struct::Rack(
+										($this->Target ? Struct::HiddenInput($this->TargetKey, $this->Target) : "") .
+										($this->AllowContent ? $this->GetContent() : "") .
+										Convert::ToString($this->GetFields()),
+										["class" => "group fields"]
+									) .
+									Struct::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
+									,
+									$src,
+									["Id" => $name,"class" => "be wide", "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method, "interaction" => $this->Interaction]
 								) .
-								Struct::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
-								,
-								$src,
-								["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method, "interactive" => $this->Interactive]
-							) .
-							($this->AllowFooter ? Struct::Division(
-								$this->GetFooter(),
-								...($this->AllowAnimate ? ["data-aos" => $this->FooterAnimation, "data-aos-offset" => $this->AnimationOffset] : [])
-							) : "")
+								($this->AllowFooter ? Struct::Division(
+									$this->GetFooter(),
+									...($this->AllowAnimate ? ["data-aos" => $this->FooterAnimation, "data-aos-offset" => $this->AnimationOffset] : [])
+								) : "")
+							)
 							,
 							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate ? ["data-aos" => $this->ContentAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
 						)
@@ -800,7 +874,7 @@ class Form extends Module
 							"Name" => $name,
 							"enctype" => $this->EncType,
 							"method" => $this->Method,
-							"interactive" => $this->Interactive,
+							"Interaction" => $this->Interaction,
 							...($this->AllowAnimate ? ["data-aos" => $this->ContentAnimation, "data-aos-offset" => $this->AnimationOffset] : [])
 						]
 					) .
@@ -817,8 +891,8 @@ class Form extends Module
 	}
 	public function GetContent($args = [])
 	{
-		return parent::GetContent($args).
-		Convert::ToString($this->Items);
+		return parent::GetContent($args) .
+			Convert::ToString($this->Items);
 	}
 	public function GetFields()
 	{
@@ -907,9 +981,9 @@ class Form extends Module
 
 	public function Handler($received = null)
 	{
-		if (!isEmpty($received) && $this->ReceiverEmail)
+		if (!isEmpty($received) && ($this->ReceiverEmail = (get($received, "ReceiverEmail") ?: $this->ReceiverEmail)))
 			try {
-				return $this->Mail($received) ? $this->GetSuccess(null, ["class" => "page"]) : $this->GetError("Could not email the message!");
+				return $this->Mail($received) ? $this->GetSuccess("The email sent successfully!") : $this->GetError("Could not email the message!");
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);
 			}
@@ -920,13 +994,13 @@ class Form extends Module
 	{
 		library("Contact");
 		$ex = null;
-		if (count($data) > 0 && get($data, "ReceiverEmail") ?? $this->ReceiverEmail)
+		if (count($data) > 0 && ($this->ReceiverEmail = (get($data, "ReceiverEmail") ?: $this->ReceiverEmail)))
 			if (
 				\MiMFa\Library\Contact::SendHtmlEmail(
-					pop($data, "SenderEmail") ?? $this->SenderEmail ?? \_::$Front->SenderEmail,
-					pop($data, "ReceiverEmail") ?? $this->ReceiverEmail,
-					pop($data, "MailSubject") ?? $this->MailSubject ?? (\_::$Address->UrlDomain . ": A new form submitted"),
-					pop($data, "MailMessage") ?? $data,
+					pop($data, "SenderEmail") ?: $this->SenderEmail ?? \_::$Front->SenderEmail,
+					$this->ReceiverEmail,
+					pop($data, "MailSubject") ?: $this->MailSubject ?? (\_::$Address->UrlDomain . ": A new " . $this->Name . " submitted"),
+					pop($data, "MailMessage") ?: $data,
 					exception: $ex
 				)
 			)

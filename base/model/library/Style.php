@@ -70,45 +70,44 @@ class Style extends \ArrayObject
 	/**
 	 * To create a universal value with all vendor prefixes
 	 * @param string $prop The property name
-	 * @param mixed ...$args The property values
+	 * @param mixed ...$values The property values
 	 * @return string The universal value
 	 */
-	public static function UniversalValue()
+	public static function UniversalValue($prop, ...$values)
 	{
-		$prop = func_get_arg(0);
-		$argn = func_num_args();
+		$argn = count($values);
 		$res = $prop . ":";
-		for ($i = 1; $i < $argn; $i++) {
+		for ($i = 0; $i < $argn; $i++) {
 			$res .= "
-			-webkit-" . func_get_arg($i) . ",";
+			-webkit-" . $values[$i] . ",";
 		}
 		$res = rtrim($res, ",");
 		$res .= ";
 		" . $prop . ":";
-		for ($i = 1; $i < $argn; $i++) {
+		for ($i = 0; $i < $argn; $i++) {
 			$res .= "
-			-moz-" . func_get_arg($i) . ",";
+			-moz-" . $values[$i] . ",";
 		}
 		$res = rtrim($res, ",");
 		$res .= ";
 		" . $prop . ":";
-		for ($i = 1; $i < $argn; $i++) {
+		for ($i = 0; $i < $argn; $i++) {
 			$res .= "
-			-ms-" . func_get_arg($i) . ",";
+			-ms-" . $values[$i] . ",";
 		}
 		$res = rtrim($res, ",");
 		$res .= ";
 		" . $prop . ":";
-		for ($i = 1; $i < $argn; $i++) {
+		for ($i = 0; $i < $argn; $i++) {
 			$res .= "
-			-o-" . func_get_arg($i) . ",";
+			-o-" . $values[$i] . ",";
 		}
 		$res = rtrim($res, ",");
 		$res .= ";
 		" . $prop . ":";
-		for ($i = 1; $i < $argn; $i++) {
+		for ($i = 0; $i < $argn; $i++) {
 			$res .= "
-			" . func_get_arg($i) . ",";
+			" . $values[$i] . ",";
 		}
 		$res = rtrim($res, ",");
 

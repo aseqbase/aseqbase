@@ -1,7 +1,7 @@
 <?php
-\_::$User->Authorize = function(){
+\_::$User->Authorize = function () {
     eraseResponse();
-    return view("part",["Name"=>\_::$User->InHandlerPath]);
+    return view("part", ["Name" => \_::$User->InHandlerPath]);
 };
 
 
@@ -41,3 +41,27 @@
 \_::$Router->On("user")->Default("user");
 \_::$Router->On("group")->Default("group");
 \_::$Router->On("contact/.+")->Default("contact");
+
+
+$data = $data ?? [];
+\_::$Front->AdminView = function ($handler, $args = []) use ($data) {
+    if ($args) {
+        $templ = \_::$Front->CreateTemplate("Administrator");
+        $templ->WindowTitle = pop($args, "WindowTitle") ?? get($args, 'Title') ?? get($args, 'Name');
+        module("PrePage");
+        $module = new MiMFa\Module\PrePage();
+        $module->Title = pop($args, 'Title');
+        $module->Path = pop($args, 'Path');
+        $module->Description = pop($args, 'Description');
+        $module->Content = pop($args, 'Content');
+        $module->Image = pop($args, 'Image');
+        $alternative = pop($args, "Alternative") ?? 404;
+        $args = [...$args, ...$data];
+        if ($handler)
+            $templ->Content = fn() => view(\_::$Front->DefaultViewName, ["Content" => fn() => \MiMFa\Library\Struct::Page(($module->Title || $module->Description || $module->Content || $module->Image ? $module->ToString() : "") . $handler($args))], print: false);
+        else
+            $templ->Content = $module->Handle() . view($alternative, data: $args, print: false);
+        $templ->Render();
+    } else
+        $handler($data);
+};

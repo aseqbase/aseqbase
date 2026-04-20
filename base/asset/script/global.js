@@ -388,16 +388,31 @@ let clearMemos = function () {
 	}
 };
 
+let _SENT = null;
+let _RECEIVED = null;
+
+let downloadContent = function (content = null, name = null, type = null, encoding = null, status = null){
+	content = content??_RECEIVED;
+	name = name??'download.txt';
+	type = type??'application/octet-stream';
+	const link = document.createElement('a');
+	const blob = content instanceof Blob ? content : new Blob([content], { type: type });
+	link.href = URL.createObjectURL(blob);
+	link.download = name.replace(/['"]/g, '');
+	link.click();
+	link.remove();
+	return name;
+}
 
 let send = function (
 	method = 'POST',
 	url = null,
 	data = null,
 	selector = 'body',
-	onSuccess = null,
-	onError = null,
-	onMessage = null,
-	onProgress = null,
+	success = null,
+	error = null,
+	message = null,
+	progress = null,
 	timeout = null,
 	async = true) {
 
@@ -434,7 +449,7 @@ let send = function (
 			break;
 	}
 
-	if (data) {
+	if (_SENT = data) {
 		if (method === "GET") {
 			url += (url.includes('?') ? '&' : '?') + new URLSearchParams(data).toString();
 			contentType = false;
@@ -448,7 +463,7 @@ let send = function (
 		}
 	}
 
-	onSuccess = onSuccess ?? function (result = null, err = null, xhr = null) {
+	success = success ?? function (result = null, err = null, xhr = null) {
 		if (err) console.error(err);
 		if (!isEmpty(result)) {
 			result += "";
@@ -457,12 +472,12 @@ let send = function (
 			// If server returned a full HTML document, replace the whole page instead of appending it.
 			// This prevents browsers (notably Firefox) from appending full pages into containers
 			// and causing "chained pages" behavior.
-			if (typeof result === 'string' && /<!doctype\s+html|<\s*html|<\s*body/i.test(result)) {
-				document.open();
-				document.write(result);
-				document.close();
-				return;
-			}
+			// if (typeof result === 'string' && /<!doctype\s+html|<\s*html|<\s*body/i.test(result)) {
+			// 	document.open();
+			// 	document.write(result);
+			// 	document.close();
+			// 	return;
+			// }
 			if (!isEmpty(result)) {
 				if (!result.match(/class\s*\=\s*("|')[\s\S]*\bresult\b[\s\S]*\1/)) result = Struct.result(result);
 				if (isForm) _(selector).append(result);
@@ -471,7 +486,7 @@ let send = function (
 		}
 	};
 
-	onError = onError ?? function (result = null, err = null, xhr = null) {
+	error = error ?? function (result = null, err = null, xhr = null) {
 		if (!isEmpty(result)) {
 			result = ((typeof (result) === 'object') ? result.statusText : result) ?? 'There was a problem!';
 			if (!isEmpty(result)) {
@@ -483,7 +498,7 @@ let send = function (
 		}
 	};
 
-	onMessage = onMessage ?? function (result = null, err = null, xhr = null) {
+	message = message ?? function (result = null, err = null, xhr = null) {
 		if (!isEmpty(result)) {
 			result = (typeof (result) === 'object') ? result.statusText : result;
 			if (result) {
@@ -494,7 +509,7 @@ let send = function (
 		}
 	};
 
-	onProgress = onProgress ?? function (result = null, err = null, xhr = null) {
+	progress = progress ?? function (result = null, err = null, xhr = null) {
 		if (!isEmpty(result)) {
 			result = (typeof (result) === 'object') ? result.statusText : result;
 			if (result) {
@@ -508,39 +523,47 @@ let send = function (
 	const xhr = new XMLHttpRequest();
 	xhr.open(method, url, async);
 
+	// Set responseType to blob for file downloads to handle binary data properly
+	if (method === 'FILE' || method === 'STREAM') xhr.responseType = 'blob';
+
 	if (contentType) xhr.setRequestHeader('Content-Type', contentType);
 
 	if (async && timeout) xhr.timeout = timeout || 60000;
 
-	xhr.upload.addEventListener('progress', (xhr)=>onProgress(xhr.response, null, xhr));
+	xhr.upload.addEventListener('progress', (xhr) => progress(xhr.response, null, xhr));
 
 	xhr.onload = function () {
 		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
+		_RECEIVED = xhr.response;
 		if (xhr.status >= 200 && xhr.status < 300)
 			try {
+				cDisposition = xhr.getResponseHeader('Content-Disposition');
+				if (cDisposition && (/attachment/).test(cDisposition))
+					if ((/filename=/).test(cDisposition))
+						return downloadContent(xhr.response, cDisposition.split('filename=')[1], xhr.getResponseHeader('Content-Type'));
 				let response = xhr.response;
-				if(response) try { response = JSON.parse(response); } catch { }
-				if (xhr.status <= 201 || xhr.status >= 290) onSuccess(response, null, xhr);
-				else onMessage(response, null, xhr);
+				if (response) try { response = JSON.parse(response); } catch { }
+				if (xhr.status <= 201 || xhr.status >= 290) success(response, null, xhr);
+				else message(response, null, xhr);
 			} catch (e) {
 				err = "There was a problem on retrieving data! \n" + e.message;
-				if (xhr.status <= 201 || xhr.status >= 290) onSuccess(null, err, xhr);
-				else onMessage(null, err, xhr);
+				if (xhr.status <= 201 || xhr.status >= 290) success(null, err, xhr);
+				else message(null, err, xhr);
 			}
-		else onError(xhr.response, xhr.status, xhr);
+		else error(xhr.response, xhr.status, xhr);
 	};
 
 	xhr.onerror = function () {
 		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
-		onError('Network Error' + (xhr.statusText ? " \n" + xhr.statusText : ""), xhr.status, xhr);
+		error('Network Error' + (xhr.statusText ? " \n" + xhr.statusText : ""), xhr.status, xhr);
 	};
 
 	xhr.ontimeout = function () {
 		btns.forEach(btn => btn.classList.remove('prevent-events'));
 		elems.forEach(elem => elem.style.opacity = opacity);
-		onError('Timeout' + (xhr.statusText ? " \n" + xhr.statusText : ""), xhr.status ?? 'timeout', xhr);
+		error('Timeout' + (xhr.statusText ? " \n" + xhr.statusText : ""), xhr.status ?? 'timeout', xhr);
 	};
 
 	xhr.onloadstart = function () {
@@ -550,7 +573,7 @@ let send = function (
 	};
 
 	xhr.send(data || null);
-
+	
 	return xhr;
 };
 // Retry wrapper for transient network errors (ERR_NETWORK_CHANGED, Network Error, timeouts)
@@ -559,10 +582,10 @@ let sendWithRetry = function (
 	url = null,
 	data = null,
 	selector = 'body',
-	onSuccess = null,
-	onError = null,
-	onMessage = null,
-	onProgress = null,
+	success = null,
+	error = null,
+	message = null,
+	progress = null,
 	timeout = null,
 	retryOptions = null,
 	async = true) {
@@ -576,23 +599,23 @@ let sendWithRetry = function (
 
 	function tryOnce(resolve, reject) {
 		attempt++;
-		const onSuccessN = function (res, st) {
-			if (onSuccess) try { onSuccess(res, st); } catch (e) { /* ignore callback errors */ }
+		const successN = function (res, st) {
+			if (success) try { success(res, st); } catch (e) { /* ignore callback errors */ }
 			resolve(res);
 		};
-		const onErrorN = function (res, st) {
+		const errorN = function (res, st) {
 			if (isTransientError(res, st) && attempt <= opts.retries) {
 				const delay = opts.backoff * Math.pow(2, attempt - 1);
 				setTimeout(() => tryOnce(resolve, reject), delay);
 			} else {
-				if (onError) try { onError(res, st); } catch (e) { /* ignore callback errors */ }
+				if (error) try { error(res, st); } catch (e) { /* ignore callback errors */ }
 				reject({ response: res, status: st });
 			}
 		};
 
 		// call underlying send (keeps original behavior)
 		try {
-			send(method, url, data, selector, onSuccessN, onErrorN, onMessage, onProgress, timeout, async);
+			send(method, url, data, selector, successN, errorN, message, progress, timeout, async);
 		} catch (e) {
 			// if send itself throws, treat as transient and retry if possible
 			if (attempt <= opts.retries) setTimeout(() => tryOnce(resolve, reject), opts.backoff * Math.pow(2, attempt - 1));
@@ -600,8 +623,8 @@ let sendWithRetry = function (
 		}
 	}
 
-	// If caller provided callbacks (onSuccess/onError) we behave callback-style and return undefined
-	if (isDefined(onSuccess) && onSuccess !== null) {
+	// If caller provided callbacks (success/error) we behave callback-style and return undefined
+	if (isDefined(success) && success !== null) {
 		tryOnce(() => { }, () => { });
 		return;
 	}
@@ -609,48 +632,48 @@ let sendWithRetry = function (
 	// Promise-style
 	return new Promise((resolve, reject) => tryOnce(resolve, reject));
 };
-let sendGet = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return send('GET', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendGet = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return send('GET', url, data, selector, success, error, message, progress, timeout);
 };
-let sendPost = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return send('POST', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendPost = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return send('POST', url, data, selector, success, error, message, progress, timeout);
 };
-let sendPut = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return send('PUT', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendPut = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return send('PUT', url, data, selector, success, error, message, progress, timeout);
 };
-let sendPatch = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return send('PATCH', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendPatch = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return send('PATCH', url, data, selector, success, error, message, progress, timeout);
 };
-let sendDelete = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return send('DELETE', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendDelete = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return send('DELETE', url, data, selector, success, error, message, progress, timeout);
 };
-let sendFile = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	if (data) return send('FILE', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendFile = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	if (data) return send('FILE', url, data, selector, success, error, message, progress, timeout);
 	else {
 		input.setAttribute('type', 'file');
 		res = null;
 		input.onchange = evt => {
-			const [file] = input.files;
-			if (file) {
-				const reader = new FileReader();
-				reader.addEventListener('load', (event) => {
-					res = send('FILE', url, encodeURIComponent(event.target.result), selector, onSuccess, onError, onMessage, onProgress, timeout);
-				});
-				reader.readAsDataURL(file);
-			}
+			for(const file of input.files)
+				if (file) {
+					const reader = new FileReader();
+					reader.addEventListener('load', (event) => {
+						res = send('FILE', url, encodeURIComponent(event.target.result), selector, success, error, message, progress, timeout);
+					});
+					reader.readAsDataURL(file);
+				}
 		}
 		_(input).trigger('click');
 		return res;
 	}
 };
-let sendStream = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return send('STREAM', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendStream = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return send('STREAM', url, data, selector, success, error, message, progress, timeout);
 };
-let sendInternal = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return send('INTERNAL', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendInternal = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return send('INTERNAL', url, data, selector, success, error, message, progress, timeout);
 };
-let sendExternal = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return send('EXTERNAL', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendExternal = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return send('EXTERNAL', url, data, selector, success, error, message, progress, timeout);
 };
 
 let sendRequest = function (
@@ -658,44 +681,44 @@ let sendRequest = function (
 	url = null,
 	data = null,
 	selector = 'body',
-	onSuccess = null,
-	onError = null,
-	onMessage = null,
-	onProgress = null,
+	success = null,
+	error = null,
+	message = null,
+	progress = null,
 	timeout = null) {
-	return send(method, url, data, selector, onSuccess, onError, onMessage, onProgress, timeout, false);
+	return send(method, url, data, selector, success, error, message, progress, timeout, false);
 };
 let trySendRequest = function (
 	method = 'POST',
 	url = null,
 	data = null,
 	selector = 'body',
-	onSuccess = null,
-	onError = null,
-	onMessage = null,
-	onProgress = null,
+	success = null,
+	error = null,
+	message = null,
+	progress = null,
 	timeout = null,
 	retryOptions = null) {
 	// keep parity with sendRequest which sets async to false by default
-	return trySend(method, url, data, selector, onSuccess, onError, onMessage, onProgress, timeout, retryOptions, false);
+	return trySend(method, url, data, selector, success, error, message, progress, timeout, retryOptions, false);
 };
-let sendGetRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return sendRequest('GET', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendGetRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return sendRequest('GET', url, data, selector, success, error, message, progress, timeout);
 };
-let sendPostRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return sendRequest('POST', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendPostRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return sendRequest('POST', url, data, selector, success, error, message, progress, timeout);
 };
-let sendPutRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return sendRequest('PUT', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendPutRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return sendRequest('PUT', url, data, selector, success, error, message, progress, timeout);
 };
-let sendPatchRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return sendRequest('PATCH', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendPatchRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return sendRequest('PATCH', url, data, selector, success, error, message, progress, timeout);
 };
-let sendDeleteRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return sendRequest('DELETE', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendDeleteRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return sendRequest('DELETE', url, data, selector, success, error, message, progress, timeout);
 };
-let sendFileRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	if (data) return sendRequest('FILE', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendFileRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	if (data) return sendRequest('FILE', url, data, selector, success, error, message, progress, timeout);
 	else {
 		input.setAttribute('type', 'file');
 		res = null;
@@ -704,7 +727,7 @@ let sendFileRequest = function (url = null, data = null, selector = 'body', onSu
 			if (file) {
 				const reader = new FileReader();
 				reader.addEventListener('load', (event) => {
-					res = sendRequest('FILE', url, encodeURIComponent(event.target.result), selector, onSuccess, onError, onMessage, onProgress, timeout);
+					res = sendRequest('FILE', url, encodeURIComponent(event.target.result), selector, success, error, message, progress, timeout);
 				});
 				reader.readAsDataURL(file);
 			}
@@ -713,12 +736,12 @@ let sendFileRequest = function (url = null, data = null, selector = 'body', onSu
 		return res;
 	}
 };
-let sendStreamRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return sendRequest('STREAM', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendStreamRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return sendRequest('STREAM', url, data, selector, success, error, message, progress, timeout);
 };
-let sendInternalRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return sendRequest('INTERNAL', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendInternalRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return sendRequest('INTERNAL', url, data, selector, success, error, message, progress, timeout);
 };
-let sendExternalRequest = function (url = null, data = null, selector = 'body', onSuccess = null, onError = null, onMessage = null, onProgress = null, timeout = null) {
-	return sendRequest('EXTERNAL', url, data, selector, onSuccess, onError, onMessage, onProgress, timeout);
+let sendExternalRequest = function (url = null, data = null, selector = 'body', success = null, error = null, message = null, progress = null, timeout = null) {
+	return sendRequest('EXTERNAL', url, data, selector, success, error, message, progress, timeout);
 };

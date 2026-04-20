@@ -37,6 +37,7 @@ class DataTable
 	}
 	public function Reset()
 	{
+		$this->DataBase->Reset();
 		$this->AlternativeName = null;
 		$this->PreQuery = null;
 		$this->MidQuery = null;
@@ -53,6 +54,7 @@ class DataTable
 		return $this->GetDatabase()->Timeout($millisecond);
 	}
 
+
 	public function Create($column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin", $defaultValue = null)
 	{
 		return $this->GetDatabase()->CreateTable($this->Name, $column_types, $configs, $defaultValue);
@@ -60,6 +62,14 @@ class DataTable
 	public function CreateQuery($column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin")
 	{
 		return $this->GetDatabase()->CreateTableQuery($this->Name, $column_types, $configs);
+	}
+	public function Drop($defaultValue = null)
+	{
+		return $this->GetDatabase()->DropTable($this->Name, $defaultValue);
+	}
+	public function DropQuery()
+	{
+		return $this->GetDatabase()->DropTableQuery($this->Name);
 	}
 
 	public function SelectValue($column = "Id", $condition = null, $params = [], $defaultValue = null)
@@ -313,20 +323,11 @@ class DataTable
 		return $defaultValue;
 	}
 	/**
-	 * To insert or replace record or records
-	 * @param mixed $params
-	 * @param mixed $defaultValue
-	 */
-	public function Put($params = [], $defaultValue = false)
-	{
-		return $this->Replace($params, $defaultValue);
-	}
-	/**
 	 * To delete a record or records
 	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue
 	 */
-	public function Pop(array|int|string|null $id, $defaultValue = false)
+	public function Del(array|int|string|null $id, $defaultValue = false)
 	{
 		if (is_null($id))
 			return $this->Delete(null, [], $defaultValue);
@@ -362,7 +363,8 @@ class DataTable
 			return getValid($this->Get($id), $key, $defaultValue);
 		else
 			return loop($this->Get($id), function ($v, $k) use ($key) {
-				return [$k => $v[$key]]; }, pair: true) ?: $defaultValue;
+				return [$k => $v[$key]];
+			}, pair: true) ?: $defaultValue;
 	}
 	/**
 	 * To set a specific column value of a record or records
@@ -381,7 +383,7 @@ class DataTable
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function PopValue(array|int|string|null $id, $key, $defaultValue = false)
+	public function DelValue(array|int|string|null $id, $key, $defaultValue = false)
 	{
 		return $this->Set($id, [$key => null], $defaultValue);
 	}
@@ -395,7 +397,7 @@ class DataTable
 	{
 		return self::GetValue($id, $key, null) ? true : false;
 	}
-	
+
 	/**
 	 * To get the record or records metadata value
 	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
@@ -408,7 +410,8 @@ class DataTable
 			return Convert::FromJson($this->GetValue($id, "MetaData", $defaultValue));
 		else
 			return loop($this->GetValue($id, "MetaData", $defaultValue), function ($v, $k) {
-				return [$k => Convert::FromJson($v)]; }, pair: true) ?: $defaultValue;
+				return [$k => Convert::FromJson($v)];
+			}, pair: true) ?: $defaultValue;
 	}
 	/**
 	 * To set the record or records metadata value
@@ -425,9 +428,9 @@ class DataTable
 	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
 	 * @param mixed $defaultValue
 	 */
-	public function PopMetaData(array|int|string|null $id, $defaultValue = false)
+	public function DelMetaData(array|int|string|null $id, $defaultValue = false)
 	{
-		return $this->PopValue($id, "MetaData", $defaultValue);
+		return $this->DelValue($id, "MetaData", $defaultValue);
 	}
 	/**
 	 * To check if the record or records has metadata value or not
@@ -451,7 +454,8 @@ class DataTable
 			return getValid($this->GetMetaData($id), $key, $defaultValue);
 		else
 			return loop($this->GetMetaData($id), function ($v, $k) use ($key) {
-				return [$k => $v[$key]]; }, pair: true) ?: $defaultValue;
+				return [$k => $v[$key]];
+			}, pair: true) ?: $defaultValue;
 	}
 	/**
 	 * To set the metadata value by the specific $key
@@ -462,7 +466,7 @@ class DataTable
 	 */
 	public function SetMetaValue(array|int|string|null $id, $key, $value, $defaultValue = false)
 	{
-		$metadata = self::GetMetaData($id, [])??[];
+		$metadata = self::GetMetaData($id, []) ?? [];
 		if (isStatic($id)) {
 			$metadata[$key] = $value;
 			return $this->SetMetaData($id, $metadata, $defaultValue);
@@ -481,9 +485,9 @@ class DataTable
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function PopMetaValue(array|int|string|null $id, $key, $defaultValue = false)
+	public function DelMetaValue(array|int|string|null $id, $key, $defaultValue = false)
 	{
-		$metadata = self::GetMetaData($id, [])??[];
+		$metadata = self::GetMetaData($id, []) ?? [];
 		if (isStatic($id)) {
 			unset($metadata[$key]);
 			return $this->SetMetaData($id, $metadata, $defaultValue);
@@ -507,7 +511,7 @@ class DataTable
 		return self::GetMetaValue($id, $key) ? true : false;
 	}
 
-	
+
 	/**
 	 * To get the metadata Array value by the specific $key
 	 * @param array|int|string|null $id An array of specific ids or an specific id, or null to apply globally
@@ -520,7 +524,8 @@ class DataTable
 			return getValid(get($this->GetMetaData($id), $key), $item, $defaultValue);
 		else
 			return loop($this->GetMetaValue($id, $key), function ($v, $k) use ($item) {
-				return [$k => $v[$item]]; }, pair: true) ?: $defaultValue;
+				return [$k => $v[$item]];
+			}, pair: true) ?: $defaultValue;
 	}
 	/**
 	 * To set the metadata Array value by the specific $key
@@ -531,16 +536,20 @@ class DataTable
 	 */
 	public function SetMetaItemValue(array|int|string|null $id, $key, $item, $value, $defaultValue = false)
 	{
-		$metadata = self::GetMetaData($id, [])??[];
+		$metadata = self::GetMetaData($id, []) ?? [];
 		if (isStatic($id)) {
-			if(isset($metadata[$key])) $metadata[$key][$item] = $value;
-			else $metadata[$key] = [$item=>$value];
+			if (isset($metadata[$key]))
+				$metadata[$key][$item] = $value;
+			else
+				$metadata[$key] = [$item => $value];
 			return $this->SetMetaData($id, $metadata, $defaultValue);
 		} else {
 			$params = [];
 			foreach ($metadata as $k => $md) {
-                if(isset($md[$key])) $md[$key][$item] = $value;
-                else $md[$key] = [$item=>$value];
+				if (isset($md[$key]))
+					$md[$key][$item] = $value;
+				else
+					$md[$key] = [$item => $value];
 				$params[] = [":Id" => $k, "MetaData" => Convert::ToJson($md)];
 			}
 			return $this->Update("Id=:Id", $params, $defaultValue);
@@ -552,16 +561,16 @@ class DataTable
 	 * @param mixed $key
 	 * @param mixed $defaultValue
 	 */
-	public function PopMetaItemValue(array|int|string|null $id, $key, $item, $defaultValue = false)
+	public function DelMetaItemValue(array|int|string|null $id, $key, $item, $defaultValue = false)
 	{
-		$metadata = self::GetMetaData($id, [])??[];
+		$metadata = self::GetMetaData($id, []) ?? [];
 		if (isStatic($id)) {
 			unset($metadata[$key][$item]);
 			return $this->SetMetaData($id, $metadata, $defaultValue);
 		} else {
 			$params = [];
 			foreach ($metadata as $k => $md) {
-			    unset($md[$key][$item]);
+				unset($md[$key][$item]);
 				$params[] = [":Id" => $k, "MetaData" => Convert::ToJson($md)];
 			}
 			return $this->Update("Id=:Id", $params, $defaultValue);
@@ -578,7 +587,7 @@ class DataTable
 		return self::GetMetaItemValue($id, $key, $item) ? true : false;
 	}
 
-	public function GetColumnName($name)
+	public function NormalizeColumnName($name)
 	{
 		return $this->Name . "." . $this->DataBase->StartWrap . $name . $this->DataBase->EndWrap;
 	}

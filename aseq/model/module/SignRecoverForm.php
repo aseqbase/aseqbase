@@ -43,7 +43,13 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 		$this->Action = \_::$User->RecoverHandlerPath;
 		$this->SuccessPath = \_::$User->InHandlerPath;
 	}
-
+	public function GetStyle()
+	{
+		return parent::GetStyle() . Struct::Style("
+			.{$this->MainClass} .form {
+				max-width: 720px;
+			}");
+	}
 	public function GetFields()
 	{
 		if (!is_null($rrk = received($this->TokenKey))) {
@@ -102,7 +108,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 					}
 					return true;
                 });
-				else " . ($this->Interactive ? "handleForm('.{$this->MainClass} form', null, null, null, null, " . ($this->Timeout * 1000) . ");" : "") . "
+				else " . ($this->Interaction ? "handleForm('.{$this->MainClass} form', null, null, null, null, " . ($this->Timeout * 1000) . ");" : "") . "
 			});
 		");
 	}

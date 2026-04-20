@@ -34,7 +34,7 @@ class MessageCollection extends Collection
     public $AllowContent = true;
     public $AllowAttach = true;
     /**
-     * Used for Quoting a parent message ID (RootId) inside the bubble.
+     * Used for Quoting a parent message ID (ParentId) inside the bubble.
      * @var mixed
      */
     public $AllowReplies = true;
@@ -236,7 +236,7 @@ class MessageCollection extends Collection
             $p_message = getValid($item, 'Content', $this->DefaultDescription);
             $p_attach = Convert::FromJson(getValid($item, 'Attach', $this->DefaultContent));
             $p_email = get($item, 'Contact');
-            $p_rootid = get($item, 'RootId'); // For quoting/replying
+            $p_ParentId = get($item, 'ParentId'); // For quoting/replying
 
             $p_showmessage = $this->AllowContent;
             $p_showattach = $this->AllowAttach;
@@ -275,16 +275,16 @@ class MessageCollection extends Collection
                     ["class" => 'sidebtn']
                 );
 
-            // --- 3. QUOTED REPLY (If RootId is present) ---
-            if ($this->AllowReplies && $p_rootid) {
-                $parent_message = take($items, fn($v) => $v["Id"] == $p_rootid) ?? ["Id" => $p_rootid, "Name" => "Unknown User", "Content" => "Original message not found."];
+            // --- 3. QUOTED REPLY (If ParentId is present) ---
+            if ($this->AllowReplies && $p_ParentId) {
+                $parent_message = take($items, fn($v) => $v["Id"] == $p_ParentId) ?? ["Id" => $p_ParentId, "Name" => "Unknown User", "Content" => "Original message not found."];
                 $quoted_author = get($parent_message, "Name");
                 $quoted_text = Convert::ToExcerpt(Convert::ToText(getValid($parent_message, "Content", "")), 0, 50, "...");
 
                 yield Struct::Span(
                     ($this->AllowAuthor && $quoted_author ? Struct::Span($quoted_author, null, ["class" => "author"]) : "") .
                     Struct::Span($quoted_text, null, ["class" => "content"]),
-                    "#m_$p_rootid",
+                    "#m_$p_ParentId",
                     ["class" => "quote"]
                 );
             }

@@ -420,5 +420,6 @@ FodyWeavers.xsd
 /Front.php
 /User.php
 bootstrap.json
+*.revise
 *.zip
 *.rar

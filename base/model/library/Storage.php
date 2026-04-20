@@ -55,7 +55,7 @@ class Storage
 	}
 	/**
 	 * Get the relative address from a url
-	 * @example: "Category/mimfa/service/web.php?p=3&l=10#serp"
+	 * @example "Category/mimfa/service/web.php?p=3&l=10#serp"
 	 * @return string|null
 	 */
 	public static function GetRelativeUrl($url): string|null
@@ -130,10 +130,10 @@ class Storage
 			if (startsWith($path, $directory))
 				return $path;
 			elseif (startsWith($path, $root))
-				return \_::$Address->GlobalDirectory . ltrim(self::GetPath(substr($path, strlen($root))), DIRECTORY_SEPARATOR);
+				return \_::$Address->RootDirectory . ltrim(self::GetPath(substr($path, strlen($root))), DIRECTORY_SEPARATOR);
 		if (preg_match("/^[a-z]+\:/i", $path))
 			return self::GetPath($path);
-		return \_::$Address->GlobalDirectory . ltrim(self::GetPath($path), DIRECTORY_SEPARATOR);
+		return \_::$Address->RootDirectory . ltrim(self::GetPath($path), DIRECTORY_SEPARATOR);
 	}
 	/**
 	 * To get the relative address from a path
@@ -166,12 +166,10 @@ class Storage
 		$directory = $destDirectory ?: \_::$Address->TempDirectory;
 		if (endswith($prefix, $suffix))
 			$prefix = substr($prefix, 0, strlen($prefix) - strlen($suffix));
-		$name = null;
 		$prefix = Convert::ToExcerpt(self::SanitizeName($prefix), 0, 50, "");
-		do {
-			$path = $directory . $prefix . $name . $suffix;
-			$name = "-" . getId($random);
-		} while (file_exists($path));
+		$path = $directory . $prefix . $suffix;
+		while (file_exists($path))
+			$path = $directory . $prefix . "-" . getId($random) . $suffix;
 		return $path;
 	}
 	/**
@@ -181,7 +179,7 @@ class Storage
 	 */
 	public static function CreateUniqueDirectory(string|null $destDirectory = null, string $prefix = "", string $suffix = "", $random = false): string
 	{
-		return self::CreateDirectory(self::GenerateUniquePath($destDirectory, $prefix, $suffix.DIRECTORY_SEPARATOR, $random));
+		return self::CreateDirectory(self::GenerateUniquePath($destDirectory, $prefix, $suffix . DIRECTORY_SEPARATOR, $random));
 	}
 	/**
 	 * Generate a new Organized Directory or File path
@@ -199,7 +197,7 @@ class Storage
 	 */
 	public static function CreateOrganizedDirectory(string|null $destDirectory = null, string $prefix = "", string $suffix = ""): string
 	{
-		return self::CreateDirectory(self::GenerateOrganizedPath($destDirectory, $prefix, $suffix.DIRECTORY_SEPARATOR));
+		return self::CreateDirectory(self::GenerateOrganizedPath($destDirectory, $prefix, $suffix . DIRECTORY_SEPARATOR));
 	}
 
 	public static function SanitizeName(string $name): string
@@ -259,6 +257,15 @@ class Storage
 	}
 
 	/**
+	 * Check if the path is a directory
+	 * @param mixed $directory Probable file internal path
+	 * @return string|null
+	 */
+	public static function IsDirectory($directory)
+	{
+		return endswith($directory, "\\", "/") || (!isEmpty($directory = self::GetPath(rtrim($directory, "\\\/"))) && is_dir($directory));
+	}
+	/**
 	 * Find an exists directory, then get the internal path
 	 * @param mixed $path Probable file internal path
 	 * @return string|null
@@ -284,7 +291,7 @@ class Storage
 	 * For more information on permissions, read the details on the chmod() page
 	 * @return string|null The last created directory
 	 */
-	public static function CreateDirectory($directory, $permissions = 0777)
+	public static function CreateDirectory($directory, $permissions = 0777, $secure = true)
 	{
 		$dir = "";
 		$directory = self::GetPath($directory);
@@ -298,13 +305,15 @@ class Storage
 				$dir .= DIRECTORY_SEPARATOR;
 			else {
 				mkdir($dir, $permissions, true);
-				self::CreateFile(($dir .= DIRECTORY_SEPARATOR) . "index.html", "<!--Silence is the Best-->");
+				if ($secure)
+					self::CreateFile(($dir .= DIRECTORY_SEPARATOR) . "index.html", "<!--Silence is the Best-->");
 			}
 		return $dir;
 	}
 	public static function DeleteDirectory($directory)
 	{
-		$directory = rtrim($directory, "/\\");
+		$directory = self::FindDirectory($directory);
+		$directory = rtrim($directory??"", "/\\");
 		$i = 0;
 		if (empty($directory))
 			return true;
@@ -323,8 +332,9 @@ class Storage
 		}
 		return $i;
 	}
-	public static function RenameDirectory(string $directory, string $newName)
+	public static function RenameDirectory($directory, $newName)
 	{
+		$directory = self::FindDirectory($directory);
 		$newDirectory = Storage::GenerateUniquePath(dirname($directory = rtrim($directory, "\\\/")) . DIRECTORY_SEPARATOR, $newName);
 		return rename($directory, $newDirectory);
 	}
@@ -335,7 +345,7 @@ class Storage
 		self::CreateDirectory(dirname($destDirectory));
 		return rename($sourceDirectory, $destDirectory);
 	}
-	public static function CopyDirectory($sourceDirectory, $destDirectory): bool
+	public static function CopyDirectory($sourceDirectory, $destDirectory)
 	{
 		$sourceDirectory = rtrim($sourceDirectory, "\\\/");
 		$destDirectory = rtrim($destDirectory, "\\\/");
@@ -357,21 +367,13 @@ class Storage
 		}
 		return true;
 	}
-	public static function CopyDirectories($sourceDirectories, $destDirectories): bool
+	public static function GetDirectory($directory)
 	{
-		set_time_limit(24 * 60 * 60);
-		$b = true;
-		foreach ($sourceDirectories as $s_dir)
-			foreach ($destDirectories as $d_dir)
-				$b = self::CopyDirectory($s_dir, $d_dir) && $b;
-		return $b;
-	}
-	public static function GetDirectoryContents(string $directory): array
-	{
-		if (!is_dir($directory))
+		$directory = self::FindDirectory($directory);
+		if (empty($directory))
 			return [];
+		$files = new \DirectoryIterator(rtrim($directory, "\\\/"));
 		$items = [];
-		$files = new \DirectoryIterator($directory);
 		foreach ($files as $file) {
 			$name = $file->getFilename();
 			if ($name === '.' || $name === '..')
@@ -383,12 +385,47 @@ class Storage
 		}
 		return $items;
 	}
-	public static function GetDirectoryItems(string $directory): \Generator
+	public static function SetDirectory($directory, ...$sourcePathes)
 	{
-		$nd = rtrim($directory, "/\/");
-		if (!is_dir($nd))
+		$directory = self::FindDirectory($directory);
+		if (empty($directory))
+			return [];
+		$files = new \DirectoryIterator(rtrim($directory, "\\\/"));
+		$c = 0;
+		foreach ($files as $file) {
+			$name = $file->getFilename();
+			if ($name === '.' || $name === '..')
+				continue;
+			$path = $file->getPathname();
+			if ($file->isDir())
+				$path .= DIRECTORY_SEPARATOR;
+			if (find($sourcePathes, $path, $key))
+				unset($sourcePathes[$key]);
+			else {
+				self::Delete($path);
+				$c++;
+			}
+		}
+		foreach ($sourcePathes as $path)
+			if (self::Copy($path, $directory . basename($path)))
+				$c++;
+		return $c;
+	}
+	public static function MergeDirectories($destDirectory, ...$sourceDirectories): bool
+	{
+		set_time_limit(24 * 60 * 60);
+		$b = 0;
+		foreach ($sourceDirectories as $s_dir)
+			if (self::CopyDirectory($s_dir, $destDirectory))
+				$b++;
+		return $b;
+	}
+	public static function GetDirectoryItems($directory): \Generator
+	{
+		$directory = self::FindDirectory($directory);
+		if (empty($directory))
 			return;
-		$files = new \DirectoryIterator($directory);
+		$files = new \DirectoryIterator(rtrim($directory, "\\\/"));
 		foreach ($files as $file) {
 			$name = $file->getFilename();
 			if ($name === '.' || $name === '..')
@@ -410,6 +447,15 @@ class Storage
 
 
 	/**
+	 * Check if the path is file
+	 * @param mixed $path Probable file internal path
+	 * @return string|null
+	 */
+	public static function IsFile($path)
+	{
+		return !self::IsDirectory($path);
+	}
+	/**
 	 * Find an exists file, then get the internal path
 	 * @param mixed $path Probable file internal path
 	 * @return string|null
@@ -417,9 +463,7 @@ class Storage
 	public static function FindFile($path)
 	{
 		$path = self::GetPath($path);
-		if (empty($path))
-			return null;
-		if (file_exists($path))
+		if (empty($path) || file_exists($path))
 			return $path;
 		if (startsWith($path, \_::$Address->Directory))
 			$path = substr($path, strlen(\_::$Address->Directory));
@@ -442,8 +486,9 @@ class Storage
 		$path = self::FindFile($path);
 		return empty($path) || unlink($path);
 	}
-	public static function RenameFile(string $path, string $newName)
+	public static function RenameFile($path, $newName)
 	{
+		$path = self::FindFile($path);
 		$extension = preg_find("/(\.[^.]*)$/u", $newName) ?? "";
 		$newName = $extension ? substr($newName, 0, -strlen($extension)) : $newName;
 		$newPath = Storage::GenerateUniquePath(dirname($path) . DIRECTORY_SEPARATOR, $newName, $extension);
@@ -461,59 +506,59 @@ class Storage
 		$destPath = self::GetPath($destPath);
 		return copy($sourcePath, $destPath);
 	}
-	public static function CopyFiles($sourcePaths, $destPaths): bool
-	{
-		$b = true;
-		foreach ($sourcePaths as $s_path)
-			foreach ($destPaths as $d_path)
-				$b = self::CopyFile($s_path, $d_path) && $b;
-		return $b;
-	}
-
 	/**
 	 * To reads entire file into a string
 	 * This function is similar to file(),
 	 * except that this returns the file in a string,
 	 * starting at the specified offset up to length bytes. On failure, this will return false.
-	 * @param string|null $path The relative file or directory path
+	 * @param $path The relative file or directory path
 	 * @param int $depth How much layers it should iterate to find the correct address
 	 * @param int $offset [optional] The offset where the reading starts.
 	 * @param int|null $length [optional] Maximum length of data read. The default is to read until end of file is reached.
 	 * @return string|false|null The function returns the read data or flse on failure or null if could not find the file.
 	 */
-	public static function GetFileContent(string|null $path = null, int $offset = 0, int|null $length = null)
+	public static function GetFile($path = null, int $offset = 0, int|null $length = null)
 	{
 		return $path ? file_get_contents(self::FindFile($path), offset: $offset, length: $length) : null;
 	}
 	/**
 	 * To write data into an exists file or the new file
-	 * @param string $path The relative file path
+	 * @param $path The relative file path
 	 * @param $data The data to write. Can be either a string, an array or a each other data types.
 	 * @return string|false|null The function returns the number of bytes that were written to the file, or false on failure.
 	 */
-	public static function SetFileContent(string $path, $data = null, int $flags = 0)
+	public static function SetFile($path, $data = null, int $flags = 0)
 	{
-		return file_put_contents(self::GetAbsolutePath($path), Convert::ToString($data), flags: $flags);
+		return file_put_contents(self::GetAbsolutePath($path), is_string($data) ? $data : Convert::ToString($data), flags: $flags);
 	}
 	/**
 	 * To prepend data into an exists file or the new file
-	 * @param string $path The relative file path
+	 * @param $path The relative file path
 	 * @param $data The data to write. Can be either a string, an array or a each other data types.
 	 * @return string|false|null The function returns the number of bytes that were written to the file, or false on failure.
 	 */
-	public static function PrependFileContent(string $path, $data = null)
+	public static function PrependFile($path, $data = null)
 	{
-		return file_put_contents($path = self::GetAbsolutePath($path), Convert::ToString($data).(file_exists($path)?file_get_contents($path):""));
+		return file_put_contents($path = self::GetAbsolutePath($path), is_string($data) ? $data : Convert::ToString($data) . (file_exists($path) ? file_get_contents($path) : ""));
 	}
 	/**
 	 * To append data into an exists file or the new file
-	 * @param string $path The relative file path
+	 * @param $path The relative file path
 	 * @param $data The data to write. Can be either a string, an array or a each other data types.
 	 * @return string|false|null The function returns the number of bytes that were written to the file, or false on failure.
 	 */
-	public static function AppendFileContent(string $path, $data = null)
+	public static function AppendFile($path, $data = null)
 	{
-		return file_put_contents(self::GetAbsolutePath($path), Convert::ToString($data), flags: FILE_APPEND);
+		return file_put_contents(self::GetAbsolutePath($path), is_string($data) ? $data : Convert::ToString($data), flags: FILE_APPEND);
+	}
+	public static function MergeFiles($destPath, ...$sourcePaths)
+	{
+		$b = 0;
+		$destPath = self::GetAbsolutePath($destPath);
+		foreach ($sourcePaths as $s_path)
+			if (file_put_contents($destPath, self::GetFile($s_path), flags: FILE_APPEND))
+				$b++;
+		return $b;
 	}
 
 
@@ -565,13 +610,13 @@ class Storage
 			// 	throw new \SilentException("The 'file size' is 'very small'!");
 			// elseif ($objectsize > $maxSize)
 			// 	throw new \SilentException("The 'file size' is 'very big'!");
-			if (self::SetFileContent($path = self::GenerateUniquePath($directory, "new", first($extensions) ?? ""), $object))
+			if (self::SetFile($path = self::GenerateUniquePath($directory, "new", first($extensions) ?? ""), $object))
 				return $path;
 			return null;
 		}
 
 		$fileType = strtolower(pathinfo($object["name"], PATHINFO_EXTENSION));
-		$fileName = strtolower(pathinfo($object["name"], PATHINFO_FILENAME)) . "_";
+		$fileName = strtolower(pathinfo($object["name"], PATHINFO_FILENAME));
 
 		// Allow certain file formats
 		$allow = true;
@@ -780,8 +825,12 @@ class Storage
 	public static function ParentDirectory(...$paths)
 	{
 		if ($paths) {
-			$sep = str_contains(first($paths), "/") ? "/" : "\\";
-			$sepPat = "/" . preg_quote($sep) . "/";
+			$sep = "\\";
+			$sepPat = "/\\\\/";
+			if (str_contains(first($paths), "/")) {
+				$sep = "/";
+				$sepPat = "/\//";
+			}
 			$l = count($paths);
 			for ($i = 0; $i < $l; $i++)
 				$paths[$i] = preg_split($sepPat, rtrim($paths[$i], $sep));

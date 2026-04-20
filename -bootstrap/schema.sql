@@ -63,11 +63,11 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Content` (
   `EditorId` int(11) DEFAULT NULL,
   `Type` enum('Item', 'Post', 'Text', 'Image', 'Animation', 'Video', 'Audio', 'File', 'Service', 'Product', 'Merchandise', 'News', 'Article', 'Document', 'Collection', 'Course', 'Query', 'Form', 'Advertisement', 'Forum') NOT NULL DEFAULT 'Item',
   `Name` varchar(256) DEFAULT NULL,
-  `Image` varchar(1024) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `Title` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Description` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `Path` text DEFAULT NULL,
+  `Image` varchar(1024) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `Content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `Path` text DEFAULT NULL,
   `Attach` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Priority` int(11) NOT NULL DEFAULT 0,
   `Access` int(11) DEFAULT 0,
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Content` (
 
 CREATE TABLE IF NOT EXISTS `%%PREFIX%%Comment` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
-  `RootId` int(11) DEFAULT NULL,
+  `ParentId` int(11) DEFAULT NULL,
   `GroupId` int(11) DEFAULT NULL,
   `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `%%PREFIX%%Comment` (
 
 CREATE TABLE IF NOT EXISTS `%%PREFIX%%Message` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
-  `RootId` int(11) DEFAULT NULL,
+  `ParentId` int(11) DEFAULT NULL,
   `UserId` int(11) DEFAULT NULL,
   `Relation` VARCHAR(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `Name` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,

@@ -46,6 +46,12 @@ class BackBase
 	 * @category Optimization
 	 */
 	public $ReportLevel = 2;
+	/**
+	 * The target for reporting: 0: Not report; 1: Back report; 2: Front report; 3: Back and Front report
+	 * @var int|null
+	 * @category Optimization
+	 */
+	public $ReportTarget = 3;
 
 	/**
 	 * Encrypt the name of elements and everything to reduce the possibility of scraping data by robots
@@ -94,7 +100,7 @@ class BackBase
 	 * @var array<string>
 	 * @category Security
 	 */
-	public $AcceptableDocumentFormats = [".txt", ".rtf", ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".sls", ".slx", ".csv", ".tsv"];
+	public $AcceptableDocumentFormats = [".txt", ".rtf", ".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".csv", ".tsv"];
 	/**
 	 * Acceptable document formats
 	 * @field array
@@ -194,7 +200,7 @@ class BackBase
 	 * @field value
 	 * @category DataBase
 	 */
-	public $DataBaseEncoding = "utf8";
+	public $DataBaseEncoding = "utf8mb4";
 	/**
 	 * The database Type
 	 * @var string
@@ -328,7 +334,7 @@ class BackBase
 	{
 		return crypt($this->SecretKey, $seed);
 	}
-
+	
 	public function IsLatestVersion(): bool|null
 	{
 		return \_::$Version >= $this->GetLatestVersion();

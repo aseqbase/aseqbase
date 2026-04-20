@@ -28,7 +28,7 @@ class MessageForm extends Form
 	public $SigningLabel = "Log in or create an account to leave your message";
 	public $BlockTimeout = 10000;
 	public $ResponseView = null;
-	public $RootId = null;
+	public $ParentId = null;
 	public $Relation = null;
 	public $DefaultAccess = 0;
 	public $DefaultStatus = 1;
@@ -118,8 +118,8 @@ class MessageForm extends Form
 				title: false,
 				attributes: ["placeholder" => $this->AttachLabel, "autocomplete" => "Attach"]
 			);
-		if ($this->RootId)
-			yield Struct::HiddenInput("Root", $this->RootId);
+		if ($this->ParentId)
+			yield Struct::HiddenInput("Root", $this->ParentId);
 		yield from parent::GetFields();
 	}
 	public function GetFooter()
@@ -158,7 +158,7 @@ class MessageForm extends Form
 					$rid = get($received, "Root");
 					if (\_::$User->Id)
 						$res = table("Message")->Insert([
-							"RootId" => $rid,
+							"ParentId" => $rid,
 							"Relation" => $this->Relation,
 							"UserId" => \_::$User->Id,
 							"From" => get($received, "From"),
@@ -224,8 +224,8 @@ class MessageForm extends Form
 	{
 		$received = receivePatch();
 		if ($this->CheckAccess(access: $this->Access ?? \_::$User->UserAccess, blocking: false, reaction: true)){
-			$rootId = get($received, "Root");
-			if (isValid($rootId)) {
+			$parentId = get($received, "Root");
+			if (isValid($parentId)) {
 				popTimer();
 				$this->AllowAnimate =
 				$this->AllowHeader =
@@ -233,8 +233,8 @@ class MessageForm extends Form
 				$this->ContentClass = "";
 				$this->SubjectLabel = null;
 				$this->SubmitLabel = $this->ReplyLabel;
-				$this->Relation = table("Message")->GetValue($rootId, "Relation");
-				$this->RootId = $rootId;
+				$this->Relation = table("Message")->GetValue($parentId, "Relation");
+				$this->ParentId = $parentId;
 				$this->Router->Initial()->Get()->Switch();
 				return $this->Handle();
 			} elseif (isValid($received, "Status") && \_::$User->HasAccess(\_::$User->AdminAccess)) {
@@ -269,7 +269,7 @@ class MessageForm extends Form
 						$this->Status = 200;
 						return $this->GetWarning("This comment removed successfuly!");
 					} else
-						return $this->GetError("You have not enough access to remove this comment!");
+						return $this->GetError("You do not have enough access to remove this comment!");
 				return $this->GetError("Could not remove this comment!");
 			} catch (\Exception $ex) {
 				return $this->GetError($ex);

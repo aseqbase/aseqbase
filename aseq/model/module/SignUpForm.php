@@ -99,6 +99,9 @@ class SignUpForm extends Form
 		if ($this->AllowDecoration) {
 			yield parent::GetStyle();
 			yield Struct::Style("
+			.{$this->MainClass} .form {
+				max-width: 720px;
+			}
 			.{$this->MainClass} .btn.facebook {
 				background-color: #405D9D55 !important;
 			}

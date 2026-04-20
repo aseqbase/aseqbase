@@ -49,7 +49,7 @@ style(get($data, "Style") ?? "
     }
 ");
 response(Struct::MediumFrame(
-    Struct::Center(get($data, "Title")) .
+    Struct::Center(__(get($data, "Title"))) .
     (
         is_countable($items) ? join(PHP_EOL, loop($items, function ($v, $k, $i) use ($animation) {
             return Struct::Link(Struct::Rack(

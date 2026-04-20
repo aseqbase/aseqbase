@@ -58,6 +58,8 @@ class Convert
     {
         if (is_null($object))
             return $default;
+        if (is_bool($object))
+            return $object?"true":"false";
         if (isStatic($object))
             return "$object";
         if ($object instanceof \Base)
@@ -134,7 +136,7 @@ class Convert
      */
     public static function ToText($html)
     {
-        $html = strip_tags($html ?? "", '<br><hr><section><content><main><header><footer><p><li><tr><h1><h2><h3><h3><h4><h5><h6>');
+        $html = strip_tags(self::ToString($html) ?? "", '<br><hr><section><content><main><header><footer><p><li><tr><h1><h2><h3><h3><h4><h5><h6>');
         return preg_replace('/(\s*<[^>]*>\s*)+/', PHP_EOL, $html);
     }
 
@@ -320,12 +322,39 @@ class Convert
     }
     /**
      * To convert a value to its useable Data URI
+     * @param mixed $path The internal path
+     */
+    public static function ToUri($path)
+    {
+        return $path && function_exists("mime_content_type")?self::ToDataUri(open($path),mime_content_type($path)):getUrl($path);
+    }
+    /**
+     * To convert a useable Data URI to the value
+     * @param mixed $uri
+     */
+    public static function FromUri($uri, $path)
+    {
+        $content = self::FromDataUri($uri, $mime);
+        return file_put_contents($path, $content);
+    }
+    /**
+     * To convert a value to its useable Data URI
      * @param mixed $object
      * @param mixed $mime
      */
     public static function ToDataUri($object, $mime)
     {
         return $object ? 'data:' . $mime . ';base64,' . base64_encode(self::ToString($object)) : null;
+    }
+    /**
+     * To convert a useable Data URI to the value
+     * @param mixed $uri
+     */
+    public static function FromDataUri($uri, &$mime = null)
+    {
+        if (!$uri) return null;
+        $mime = preg_find("/(?<=^data\:)[^;](?=;)/i", $uri)?:$mime;
+        return base64_decode(preg_find("/(?<=;base64,).+/i", $uri));
     }
 
     public static function ToJson($object, $flags = null)
@@ -412,7 +441,7 @@ class Convert
                             $files[$key] = array(
                                 'name' => $filename,
                                 'type' => $type,
-                                'temp_name' => Storage::GenerateUniquePath(\_::$Address->GlobalTempDirectory, $filename, ".tmp"),
+                                'temp_name' => Storage::GenerateUniquePath(\_::$Address->TempRootDirectory, $filename, ".tmp"),
                                 'error' => UPLOAD_ERR_OK,
                                 'size' => strlen($body)
                             );

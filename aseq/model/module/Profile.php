@@ -214,7 +214,7 @@ class Profile extends Table{
         $secret = received("secret")??$this->ViewSecret;
         $res = Struct::Division(
             ($maccess? Struct::Icon("edit","{$this->MainClass}_Modify(`$key`);", ["class"=>"table-item-modify"]) : "").
-            ($raccess? Struct::Icon("trash","{$this->MainClass}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")
+            ($raccess? Struct::Icon("trash-alt","{$this->MainClass}_Delete(`$key`);", ["class"=>"table-item-delete"]) : "")
         );
         if($secret === $this->ViewSecret)
             $res .= $this->GetViewFields($key);
@@ -265,7 +265,7 @@ class Profile extends Table{
 
 	public function GetViewFields($value){
         if(is_null($value)) return null;
-        if(!\_::$User->HasAccess($this->ViewAccess)) return Struct::Error("You have not access to see datails!");
+        if(!\_::$User->HasAccess($this->ViewAccess)) return Struct::Error("You do not have enough access to see datails!");
         if(isEmpty($this->Items)) return Struct::Error("You can not 'see' this item!");
         $form = $this->GetForm();
         $form->Set(
@@ -316,7 +316,7 @@ class Profile extends Table{
 
 	public function GetAddFields($value){
         if(is_null($value)) return null;
-        if(!\_::$User->HasAccess($this->AddAccess)) return Struct::Error("You have not access to add!");
+        if(!\_::$User->HasAccess($this->AddAccess)) return Struct::Error("You do not have enough access to add!");
         module("Form");
         $record = [];
         if(count($this->CellsTypes)>0)
@@ -348,7 +348,7 @@ class Profile extends Table{
 	public function DoAddHandle($value){
         if(is_null($value)) return null;
         $vals = $this->NormalizeValues(receivePost());
-        if(!\_::$User->HasAccess($this->AddAccess)) return Struct::Error("You have not access to modify!");
+        if(!\_::$User->HasAccess($this->AddAccess)) return Struct::Error("You do not have enough access to modify!");
         unset($vals[$this->KeyColumn]);
         foreach ($vals as $k=>$v)
             if(isEmpty($v)) unset($vals[$k]);
@@ -359,7 +359,7 @@ class Profile extends Table{
 
 	public function GetModifyFields($value){
         if(is_null($value)) return null;
-        if(!\_::$User->HasAccess($this->ModifyAccess)) return Struct::Error("You have not access to modify!");
+        if(!\_::$User->HasAccess($this->ModifyAccess)) return Struct::Error("You do not have enough access to modify!");
         module("Form");
         if(isEmpty($this->Items)) return Struct::Error("You can not 'modify' this item!");
         $form = $this->GetForm();
@@ -386,7 +386,7 @@ class Profile extends Table{
 	public function DoModifyHandle($value){
         if(is_null($value)) return null;
         $vals = $this->NormalizeValues(receivePut());
-        if(!\_::$User->HasAccess($this->ModifyAccess)) return Struct::Error("You have not access to modify!");
+        if(!\_::$User->HasAccess($this->ModifyAccess)) return Struct::Error("You do not have enough access to modify!");
         if($this->DataTable->Update([$this->ModifyCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], $vals))
             return Struct::Success("The information updated successfully!");
         return Struct::Error("You can not 'update' this item!");
@@ -394,7 +394,7 @@ class Profile extends Table{
 
 	public function DoRemoveHandle($value){
         if(is_null($value)) return null;
-        if(!\_::$User->HasAccess($this->RemoveAccess)) return Struct::Error("You have not access to delete!");
+        if(!\_::$User->HasAccess($this->RemoveAccess)) return Struct::Error("You do not have enough access to delete!");
         if($this->DataTable->Delete([$this->RemoveCondition, "`{$this->KeyColumn}`=:{$this->KeyColumn}"], [":{$this->KeyColumn}"=>$value]))
             return Struct::Success("The 'items' removed successfully!");
         return Struct::Error("You can not 'remove' this item!");
