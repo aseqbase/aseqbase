@@ -515,11 +515,12 @@ class Storage
 	 * @param int $depth How much layers it should iterate to find the correct address
 	 * @param int $offset [optional] The offset where the reading starts.
 	 * @param int|null $length [optional] Maximum length of data read. The default is to read until end of file is reached.
-	 * @return string|false|null The function returns the read data or flse on failure or null if could not find the file.
+	 * @return string|false|null The function returns the read data or false on failure or null if could not find the file.
 	 */
 	public static function GetFile($path = null, int $offset = 0, int|null $length = null)
 	{
-		return $path ? file_get_contents(self::FindFile($path), offset: $offset, length: $length) : null;
+		$path = self::FindFile($path);
+		return $path ? file_get_contents($path, offset: $offset, length: $length) : null;
 	}
 	/**
 	 * To write data into an exists file or the new file

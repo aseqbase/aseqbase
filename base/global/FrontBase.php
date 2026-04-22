@@ -90,51 +90,20 @@ class FrontBase
 	 */
 	public $FullDescription = null;
 
-	/**
-	 * Default mail sender
-	 * @example "do-not-reply@mimfa.net"
-	 * @field array
-	 * @var string|null|array<string>
-	 * @category Security
-	 */
-	public $SenderEmail = null;
-	/**
-	 * Default mail reciever
-	 * @example "info@mimfa.net"
-	 * @field array
-	 * @var string|null|array<string>
-	 * @category Security
-	 */
-	public $ReceiverEmail = null;
-
     /**
-     * The status of all server response: 400, 404, 500, etc.
-     * @default null
-     * @var mixed
+     * The view name to show pages
+     * @var string
+     * @default "main"
      * @category Security
      */
-    public $StatusMode = null;
-
+    public string $DefaultRouteName = "main";
     /**
      * The default view name to show when restriction
      * @var string
      * @category Security
      */
     public $RestrictionRouteName = "403";
-    /**
-     * Default message to show when restriction
-     * @var string
-     * @category Security
-     */
-    public $RestrictionContent = "Unfortunately, you have no access to the site now!<br>Please try a few minutes later...";
 
-    /**
-     * The view name to show pages
-     * @var string
-     * @default "main"
-     * @category Template
-     */
-    public string $DefaultRouteName = "main";
 	/**
 	 * The website default template class
 	 * @default "Template"
@@ -413,8 +382,8 @@ class FrontBase
 			);
 		}
 
-		$this->SenderEmail = $this->SenderEmail ?: createEmail("do-not-reply", $this->Path);
-		$this->ReceiverEmail = $this->ReceiverEmail ?: createEmail("info", $this->Path);
+		\_::$User->SenderEmail = \_::$User->SenderEmail ?: createEmail("do-not-reply", $this->Path);
+		\_::$User->ReceiverEmail = \_::$User->ReceiverEmail ?: createEmail("info", $this->Path);
 	}
 
 	public function __get($name)

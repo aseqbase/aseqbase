@@ -1261,17 +1261,7 @@ function share($output = null, $with = null)
  */
 function auth($minaccess = 0, bool|string $assign = true, bool|string|int|null $exit = true)
 {
-	if (isValid(\_::$Front->StatusMode)) {
-		if ($assign) {
-			if (is_string($assign))
-				load($assign);
-			else
-				route(\_::$Front->StatusMode ?? \_::$Front->RestrictionRouteName, alternative: "403");
-		}
-		if ($exit !== false)
-			finalize($exit);
-		return false;
-	} elseif (isValid(\_::$Back->AccessMode)) {
+	if (isValid(\_::$Back->AccessMode)) {
 		$ip = getClientIp();
 		$cip = false;
 		foreach (\_::$Back->AccessPatterns as $pat)

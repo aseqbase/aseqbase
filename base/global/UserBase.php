@@ -26,6 +26,21 @@ class UserBase
 	public $DashboardHandlerPath = "/sign/dashboard";
 	public $RecoverHandlerPath = "/sign/recover";
 	public $ActiveHandlerPath = "/sign/active";
+	
+	/**
+	 * Default mail sender
+	 * @example "do-not-reply@mimfa.net"
+	 * @field array
+	 * @var string|null|array<string>
+	 */
+	public $SenderEmail = null;
+	/**
+	 * Default mail reciever
+	 * @example "info@mimfa.net"
+	 * @field array
+	 * @var string|null|array<string>
+	 */
+	public $ReceiverEmail = null;
 
 	/**
 	 * @var bool

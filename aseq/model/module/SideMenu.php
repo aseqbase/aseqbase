@@ -29,10 +29,9 @@ class SideMenu extends Module
 	public $AllowTemplate = true;
 	public $AllowProfile = true;
 	public $AllowDefaultButtons = true;
-	public $ButtonsScreenSize = "md";
-	public $AllowSignButton = true;
-	public $SignButtonText = "&#9776;";
-	public $SignButtonScreenSize = "md";
+	public $AllowFloatButton = true;
+	public $FloatButtonText = "&#9776;";
+	public $FloatButtonScreenSize = "md";
 	public $ToggleLabel;
 	public $LogoWidth = "calc(1.25 * var(--size-5))";
 	public $LogoHeight = "calc(1.25 * var(--size-5))";
@@ -44,7 +43,7 @@ class SideMenu extends Module
 		parent::__construct();
 		$this->Items = $items ?? $this->Items;
 		$this->Direction = \_::$Front->Translate->Direction ?? \_::$Front->Direction;
-		$this->ToggleLabel = Struct::Icon("angle-down");
+		$this->ToggleLabel = Struct::Icon("angle-down", null, ["class"=>"hoverable"]);
 	}
 
 	public function GetStyle()
@@ -52,9 +51,9 @@ class SideMenu extends Module
 		$this->Direction = strtolower($this->Direction);
 		$sdir = ($this->Direction == "rtl") ? "left" : "right";
 		$activeselector = $this->AllowHoverable ? ".{$this->MainClass}:is(.active, :hover)" : ".{$this->MainClass}.active";
-		$notactiveselector = ".{$this->MainClass}:not(.active)";
-        yield parent::GetStyle();
-        yield Struct::Style("
+		$notactiveselector = ".{$this->MainClass}:not(.active, :hover)";
+		yield parent::GetStyle();
+		yield Struct::Style(content: "
 			.{$this->MainClass}{
 				background-color: var(--fore-color-output);
 				color: var(--back-color-output);
@@ -62,7 +61,7 @@ class SideMenu extends Module
 				position: fixed;
 				max-height: 100%;
 				height: 100vh;
-				max-width: 70%;
+				max-width: 80%;
 				top: 0px;
 				margin-inline-start: -100vmax;
 				overflow-y: auto;
@@ -80,7 +79,30 @@ class SideMenu extends Module
 				background-color: var(--fore-color-5);
 				color: var(--back-color-5);
 				padding: 5px;
+			    display: flex;
+				gap: var(--size-0);
+    			align-items: center;
 			}
+			.{$this->MainClass} .header, .{$this->MainClass} .header a, .{$this->MainClass} .header a:visited{
+				color: var(--back-color-5);
+			}
+			.{$this->MainClass} .header .title{
+				font-size: var(--size-2);
+				" . (isValid($this->Description) ? "line-height: var(--size-2);" : "") . "
+			}
+			.{$this->MainClass} .header .description{
+				font-size: var(--size-0);
+			}
+			.{$this->MainClass} .header .image{
+				background-position: center;
+				background-repeat: no-repeat;
+				background-size: 80% auto;
+				background-color: transparent;
+				font-size: var(--size-0);
+				width: {$this->LogoWidth};
+				height: {$this->LogoHeight};
+			}
+
 			.{$this->MainClass} .footer{
 				width:100%;
 				display: flex;
@@ -89,34 +111,6 @@ class SideMenu extends Module
 				align-content: space-between;
 				justify-content: space-around;
 				align-items: stretch;
-			}
-			.{$this->MainClass} .header, .{$this->MainClass} .header a, .{$this->MainClass} .header a:visited{
-				color: var(--back-color-5);
-			}
-			$notactiveselector .header .branding{
-				display: none;
-			}
-			$activeselector .header .branding{
-				display: table-cell;
-			}
-			.{$this->MainClass} .header .title{
-				font-size: var(--size-2);
-				padding: 0px 10px;
-				" . (isValid($this->Description) ? "line-height: var(--size-2);" : "") . "
-			}
-			.{$this->MainClass} .header .description{
-				font-size: var(--size-0);
-				padding: 0px 10px;
-			}
-			.{$this->MainClass} .header .image{
-				background-position: center;
-				background-repeat: no-repeat;
-				background-size: 80% auto;
-				background-color: transparent;
-				display: table-cell;
-				font-size: var(--size-0);
-				width: {$this->LogoWidth};
-				height: {$this->LogoHeight};
 			}
 
 			.{$this->MainClass} :is(button, .button){
@@ -132,7 +126,6 @@ class SideMenu extends Module
 				column-gap: var(--size-1);
 				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
-
 			.{$this->MainClass} .row{
 				margin: 0px;
 			}
@@ -143,17 +136,22 @@ class SideMenu extends Module
 				background-color: inherit;
 				width: 100%;
 				color: inherit;
+				padding: calc(var(--size-0) / 4);
 			}
 				
-			.{$this->MainClass} ul li .image{
+			$activeselector ul li .image{
 				margin-inline-end: var(--size-0);
 			}
-			.{$this->MainClass} ul li .button>.description{
-				opacity: 0.7;
-				font-size: var(--size-0);
+			$activeselector ul li .button>.title{
+				font-size: 110%;
 			}
-			.{$this->MainClass} ul li .button:hover>.description{
-				opacity: 1;
+			$activeselector ul li .button>.description{
+				opacity: 0.7;
+				font-size: 90%;
+				line-height: 150%;
+			}
+			$activeselector ul li .button:hover>.description{
+				opacity: 0.9;
 			}
 
 			.{$this->MainClass} ul li .icon{
@@ -164,10 +162,11 @@ class SideMenu extends Module
 				position: initial;
 			}
 			.{$this->MainClass} ul li.dropdown ul{
+				margin-inline-start: var(--size-0);
 				text-align: start;
 			}
 
-			.{$this->MainClass} ul:not(.sub-items) {
+			.{$this->MainClass} .main-items {
 				list-style: none;
 				list-style-type: none;
 				margin: 0;
@@ -179,11 +178,17 @@ class SideMenu extends Module
 				flex-direction: column;
 				flex-wrap: nowrap;
 			}
-
-			.{$this->MainClass} ul:not(.sub-items)>li.active{
+			$notactiveselector .main-items {
+				padding-top: var(--size-1);
+			}
+			$notactiveselector ul>li.active{
+				background-color: var(--back-color-special);
+				color: var(--fore-color-special);
+			}
+			$activeselector .main-items>li.active{
 				border-inline-start: var(--border-2) var(--back-color-special);
 			}
-			.{$this->MainClass} ul:not(.sub-items)>li>:is(.button, .button:visited){
+			$activeselector .main-items>li>:is(.button, .button:visited){
 				border: none;
 				font-size: inherit;
 				border-radius: unset;
@@ -192,43 +197,22 @@ class SideMenu extends Module
 				display: block;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
+			.{$this->MainClass} .main-items>li:hover>:is(.button, .button:visited) {
 				font-weight: bold;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} ul:not(.sub-items)>li.dropdown:hover>ul.sub-items {
-				display: block;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-
 			.{$this->MainClass} ul.sub-items {
 				display: none;
+				font-size: var(--size-0);
 				padding: 0px;
 				box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} ul.sub-items .sub-items {
-				display: flex;
-				position: relative;
-				font-size: 80%;
-				padding: 0px;
-				padding-inline-start: var(--size-5);
-				padding-bottom: calc(var(--size-0) / 2);
-				box-shadow: var(--shadow-1);
-				flex-wrap: wrap;
-				flex-direction: row;
-				align-content: stretch;
-				justify-content: flex-start;
-				align-items: stretch;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			.{$this->MainClass} ul.sub-items .sub-items li :is(.button, .button:visited) {
-				padding: calc(var(--size-0) / 2) var(--size-1);
-				border-color: transparent;
+			.{$this->MainClass} ul.sub-items.active {
+				display: block;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 			.{$this->MainClass} ul.sub-items>li {
-				font-size: 80%;
 				display: block;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
@@ -268,8 +252,8 @@ class SideMenu extends Module
 				background: {$this->BackgroundMask};
 				z-index:1;
 			}
-			" : "") . ($this->AllowSignButton ? "
-				.{$this->MainClass}-sign-button-menu{
+			" : "") . ($this->AllowFloatButton ? "
+				.{$this->MainClass}-float-button-menu{
 					font-size:  var(--size-5);
 					line-height:  var(--size-max);
 					cursor: pointer;
@@ -279,23 +263,24 @@ class SideMenu extends Module
 					padding: 0px 5px;
 					position: fixed;
 					z-index: 9999;
-					color:  var(--fore-color-special-output);
+					color:  var(--fore-color-special);
 					" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
 				}
-				.{$this->MainClass}-sign-button-menu:hover{
+				.{$this->MainClass}-float-button-menu:hover{
 					color: var(--fore-color);
 				}
 		" : "") . ($this->AllowDefaultButtons ? "
 				.{$this->MainClass} .other{
 					text-align: center;
-					display: flex !important;
+					display: flex;
 					justify-content: flex-start;
 					gap: var(--size-0);
 					padding: var(--size-0);
 				}
-				.{$this->MainClass} .other :is(button, .button){
-					aspect-ratio: 1;
+				.{$this->MainClass} .other :is(button, .button, .icon){
 					border-radius: var(--radius-max);
+					padding: calc(var(--size-0) / 4);
+					aspect-ratio: 1;
 				}
 
 				.{$this->MainClass} .other form{
@@ -332,74 +317,45 @@ class SideMenu extends Module
 				}
 					
         " : "") . ($this->AllowHide ? ("
-			.{$this->MainClass}{
+			$notactiveselector{
 				width: 50vmax;
 				margin-inline-start: -100vmax;
 				display: none;
 			}
 			$activeselector{
-				margin-inline-start: 0;
-				display: block !important;
-				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
+				margin-inline-start: 0px;
+				display: block;
 			}
 			.{$this->MainClass} .header .image{
 				width: var(--size-5);
 				aspect-ratio: 1;
-			}") : ("
+			}
+			") : 
+			("
+			body{
+    			margin-inline-start: var(--size-max) !important;
+			}
 			.{$this->MainClass}{
 				width: auto;
-				margin-inline-start: 0;
+				margin-inline-start: calc(-1 * var(--size-max));
 			}
-			$activeselector{
-				display: block !important;
-			}
-			$notactiveselector .header .image{
-				display: block;
-				width: 100%;
-				height: var(--size-5);
-				" . (Style::UniversalProperty("transition", "var(--transition-0)")) . "
-			}
-			$activeselector .header .image{
-				display: table-cell;
-				width: var(--size-3);
-				aspect-ratio: 1;
-				" . (Style::UniversalProperty("transition", "var(--transition-0)")) . "
+			$notactiveselector .header{
+    			justify-content: center;
 			}
 			.{$this->MainClass} .pin-button{
 				background-color: transparent;
 				color: inherit;
 				border: none;
 				padding: calc(var(--size-0) / 3);
-				aspect-ratio: 1;
+				display:flex;
+				justify-content: flex-end;
 				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 			.{$this->MainClass} .pin-button:hover{
 				background-color: #8881;
 			}
-			$notactiveselector .main-items .box{
+			$notactiveselector .hoverable{
 				display: none;
-				width: 0px;
-				overflow: hidden;
-				opacity: 0;
-				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
-			}
-			$activeselector .main-items .box{
-				display: inherit;
-				width: 100%;
-				opacity: 1;
-				padding-inline-end: var(--size-5);
-				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
-			}
-			$notactiveselector>:not(.container, .header), $notactiveselector .header .division{
-				height: 0px;
-				width: 0px;
-				overflow: hidden;
-				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
-			}
-			$activeselector>:not(.container, .header), $activeselector .header .division{
-				height: fit-content;
-				width: inherit;
-				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
 			}
 		")));
 	}
@@ -413,7 +369,7 @@ class SideMenu extends Module
 					(isValid($this->Description) ? Struct::Division(__($this->Description), ["class" => "td description"]) : "") .
 					(isValid($this->Title) ? Struct::Division(Struct::Link(__($this->Title), '/'), ["class" => "td title"]) : "")
 					,
-					["class" => "td branding"]
+					["class" => "td branding hoverable"]
 				)
 				,
 				["class" => "td header"]
@@ -435,31 +391,27 @@ class SideMenu extends Module
 					...($defaultButtons ? $defaultButtons : []),
 					...($this->Buttons ? (is_array($this->Buttons) ? $this->Buttons : [$this->Buttons]) : [])
 				],
-				["class" => "other view {$this->ButtonsScreenSize}-show"]
+				["class" => "other hoverable"]
 			);
 		}
 		if ($this->AllowItems)
 			if (count($this->Items) > 0)
 				yield Struct::Items(
 					function () {
-						foreach ($this->Items as $item) {
-							if ($item["Items"] ?? null)
-								$item["Path"] = null;
+						foreach ($this->Items as $item)
 							yield $this->CreateItem($item, 1);
-						}
 					},
-					["onclick" => "{$this->MainClass}_ViewSideMenu(false);"],
-					["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : '') . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : '')]
+					["class" => "main-items ".(isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : '') . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : '')]
 				);
 		yield $this->GetContent();
 		if ($this->AllowDefaultButtons && !isEmpty($this->Shortcuts)) {
-			yield "<div class='footer'>";
+			yield "<div class='footer hoverable'>";
 			module("Shortcuts");
 			$module = new Shortcuts();
 			$module->Items = $this->Shortcuts;
 			yield $module->ToString();
 			if (!$this->AllowHide)
-				yield Struct::Icon("map-pin", "_('.{$this->MainClass}').toggleClass('active')", ["class" => "btn pin-button"]);
+				yield Struct::Icon("map-pin", "_('.{$this->MainClass}').toggleClass('active')", ["class" => "pin-button", "Tooltip"=>"To pin or unpin the menu"]);
 			yield "</div>";
 		}
 	}
@@ -468,31 +420,46 @@ class SideMenu extends Module
 	{
 		if (!\_::$User->HasAccess(getValid($item, "Access", \_::$User->VisitAccess)))
 			return null;
-		$path = getBetween($item, "Path");
-		$act = endsWith(\_::$Address->UrlBase, $path) ? 'active' : '';
 		$ind++;
-		$itms = loop(get($item, "Items")??[], fn($itm) => $this->CreateItem($itm, $ind));
+		$itms = loop(get($item, "Items") ?? [], fn($itm) => $this->CreateItem($itm, $ind));
 		$count = count($itms);
+		$path = $count ? "if(this.nextElementSibling.classList.contains('active'))
+			_('.{$this->MainClass} ul.sub-items').removeClass('active');
+		else {
+			_(getQuery(this.parentElement.parentElement)+' .active').removeClass('active');
+			this.nextElementSibling.classList.add('active');
+		}" : getBetween($item, "Path");
+		$act = endsWith(\_::$Address->UrlBase, $path) ? 'active' : '';
 		return Struct::Item(
 			($ind <= 2 ? Struct::Button(
-				($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
-				($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name")) ? __($t) : "") .
-				($count > 0 ? $this->ToggleLabel : "") .
-				($this->AllowItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description"]) : ""),
+				Struct::Box(
+					Struct::Box(
+						($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
+						($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name")) ? Struct::Span($t, null, ["class"=>"title hoverable"]) : "")
+					) .
+					($count > 0 ? $this->ToggleLabel : ""),
+					["class" => "be flex justify"]
+				) .
+				($this->AllowItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description hoverable"]) : ""),
 				$path,
 				get($item, "Attributes")
 			) :
 				Struct::Button(
-					($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
-					($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name")) ? __($t) : "") .
-					($count > 0 ? $this->ToggleLabel : "") .
-					($this->AllowSubItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description"]) : ""),
+					Struct::Box(
+						Struct::Box(
+							($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
+							($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name")) ? Struct::Span($t, null, ["class"=>"title hoverable"]) : "")
+						) .
+						($count > 0 ? $this->ToggleLabel : ""),
+						["class" => "be flex justify"]
+					) .
+					($this->AllowSubItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description hoverable"]) : ""),
 					$path,
 					get($item, "Attributes")
 				)
 			) .
 			($count > 0 ?
-				Struct::Items($itms,["class" => "sub-items sub-items-$ind"])
+				Struct::Items($itms, ["class" => "sub-items sub-items-$ind"])
 				: ""),
 			["class" => $count > 0 ? "dropdown $act" : $act]
 		);
@@ -507,11 +474,11 @@ class SideMenu extends Module
 	public function AfterHandle()
 	{
 		return parent::AfterHandle() .
-			($this->AllowSignButton ?
+			($this->AllowFloatButton ?
 				Struct::Division(
-					$this->SignButtonText,
+					$this->FloatButtonText,
 					[
-						"class" => "{$this->MainClass}-sign-button-menu view {$this->SignButtonScreenSize}-show",
+						"class" => "{$this->MainClass}-float-button-menu view {$this->FloatButtonScreenSize}-show",
 						"onclick" => "{$this->MainClass}_ViewSideMenu()"
 					]
 				) : ""
@@ -531,6 +498,7 @@ class SideMenu extends Module
 				else {
 					document.querySelector('.{$this->MainClass}').classList.remove('active');
 					document.querySelector('.{$this->MainClass}-background-mask').classList.add('hide');
+					_('.{$this->MainClass} ul.sub-items').removeClass('active');
 				}
 			}
 		");

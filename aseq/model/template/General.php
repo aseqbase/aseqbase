@@ -20,7 +20,6 @@ class General extends Template
 		component("General");
         component("View");
         component("Be");
-		//component("Evaluate");
         component("Promote");
 		component("Animate");
 		component("Fonts");
@@ -142,7 +141,7 @@ class General extends Template
 				font-size: var(--size-0);
 				color: #888b;
 				font-weight: normal;
-				line-height: 2em;
+    			line-height: 150%;
 			}
 			body>nav:has(.inside) ul li:hover .description{
 				font-size: var(--size-0);

@@ -6,6 +6,7 @@ class MainMenu extends Module
 {
 	public string|null $TagName = "nav";
 	public $Class = "row";
+	public $InsideClass = null;
 	public $Image = null;
 	public $Items = null;
 	public $Shortcuts = null;
@@ -60,7 +61,7 @@ class MainMenu extends Module
 			}") . "
 			.{$this->MainClass} .inside{
 				display: flex;
-				flex-wrap: wrap;
+				justify-content: space-between;
 			}
 			.{$this->MainClass} .header{
 				margin: 0;
@@ -87,21 +88,11 @@ class MainMenu extends Module
 				height: {$this->LogoHeight};
 				font-size: var(--size-0);
 			}
-			" . ($this->AllowDefaultButtons ? "
-			.{$this->MainClass} ul:not(.sub-items) {
-				min-width: fit-content;
-				max-width: 70%;
-				margin-inline-end: 100px;
-			}
-			" : "") . "
 			.{$this->MainClass} ul:not(.sub-items) {
 				list-style: none;
 				list-style-type: none;
 				margin: 0;
 				padding: 0;
-				overflow: hidden;
-				display: flex;
-				align-items: center;
 			}
 
 			.{$this->MainClass} .dropdown-items {
@@ -138,11 +129,9 @@ class MainMenu extends Module
 			.{$this->MainClass} .other{
 				text-align: end;
 				width: fit-content;
-				position: absolute;
-				clear: both;
 				display: flex;
 				align-items: center;
-				justify-content: space-around;
+				justify-content: flex-end;
 				flex-wrap: nowrap;
 				padding: calc(var(--size-0) / 3) var(--size-0);
 				gap: calc(var(--size-0) * 0.5);
@@ -212,7 +201,8 @@ class MainMenu extends Module
 
 	public function GetInner()
 	{
-		yield Struct::OpenTag("div", ["class" => "inside"]);
+		yield Struct::OpenTag("div", ["class" => "inside {$this->InsideClass}"]);
+		yield Struct::OpenTag("div", ["class"=>"be flex middle"]);
 		if ($this->AllowBranding)
 			yield Struct::Division(
 				(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Front->Path) : "") .
@@ -233,6 +223,7 @@ class MainMenu extends Module
 					["class" => (isValid($this->ShowItemsScreenSize) ? $this->ShowItemsScreenSize . '-show' : "") . ' ' . (isValid($this->HideItemsScreenSize) ? $this->HideItemsScreenSize . '-hide' : "")]
 				);
 			}
+		yield Struct::CloseTag("div");
 		if ($this->AllowOthers) {
 			$defaultButtons = [];
 			if ($this->AllowDefaultButtons) {
@@ -260,12 +251,12 @@ class MainMenu extends Module
 
 	protected function CreateItem($item, $ind = 1)
 	{
-		if (!\_::$User->HasAccess(getValid($item, "Access", \_::$User->VisitAccess)))
+		if (!\_::$User->HasAccess(get($item, "Access")?? \_::$User->VisitAccess))
 			return null;
 		$path = getBetween($item, "Path");
 		$act = endsWith(\_::$Address->UrlBase, $path) ? 'active' : "";
 		$ind++;
-		$itms = loop(get($item, "Items")??[], fn($itm) => $this->CreateItem($itm, $ind));
+		$itms = loop(get($item, "Items") ?? [], fn($itm) => $this->CreateItem($itm, $ind));
 		$count = count($itms);
 		return Struct::Item(
 			($ind <= 2 ? Struct::Button(
@@ -287,9 +278,15 @@ class MainMenu extends Module
 			) .
 			($count > 0 ?
 				Struct::Division(
-					Struct::Items(
-						$itms,
-						["class" => "sub-items sub-items-$ind", "overflow" => $this->SubItemsOverflow]
+					Struct::Division(
+						Struct::Division(
+							Struct::Items(
+								$itms,
+								["class" => "sub-items sub-items-$ind col-lg", "overflow" => $this->SubItemsOverflow]
+							),
+							["class" => "row"]
+						),
+						["class" => "container"]
 					),
 					["class" => "dropdown-items"]
 				)

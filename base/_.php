@@ -1,4 +1,7 @@
 <?php
+
+use MiMFa\Module\Route;
+
 /**
  * The Global Static Variables
  * It contains the most useful objects along developments
@@ -35,34 +38,34 @@ class _
 	 * ]
 	 */
 	public static array $Sequence;
-	public static $Address;
+	public static Address $Address;
 
 	/**
 	 * The environment stdClass to store and share objects
 	 * @var stdClass
 	 */
-	public static $Joint;
+	public static stdClass $Joint;
 
 	/**
 	 * To access all back-end tools
 	 */
-	public static $Back;
+	public static BackBase|Back $Back;
 
 	/**
 	 * To access all addresses to a sequence of the website
 	 * and an array of all method=>patterns=>handler view names to handle all type request virtual paths
 	 */
-	public static $Router;
+	public static RouterBase|Router $Router;
 
 	/**
 	 * To access all front-end tools
 	 */
-	public static $Front;
+	public static FrontBase|Front $Front;
 
 	/**
 	 * To access the user service
 	 */
-	public static $User;
+	public static UserBase|User $User;
 	
 	/**
 	 * A Directory=>Name=>Fucntion array to apply the Function before using the Path

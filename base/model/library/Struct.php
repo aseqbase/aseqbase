@@ -4970,7 +4970,7 @@ class Struct
         return self::Style(".canvasjs-chart-credit{display:none !important;}") .
             self::Division(
                 self::Heading3($title) .
-                script(null, asset(\_::$Address->StructRootDirectory, "Chart/Chart.js")) .
+                script(null, asset(\_::$Address->StructRootDirectory, "chart/Chart.js")) .
                 self::Script("
                     window.addEventListener(`load`, function()
                         {

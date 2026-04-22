@@ -619,6 +619,15 @@ COMMIT;";
 		);
 	}
 	
+	public function TableNames($defaultValue = null)
+	{
+		return $this->TryFetchColumn($this->TableNamesQuery(), [], $defaultValue);
+	}
+	public function TableNamesQuery()
+	{
+		return "{$this->PreQuery} SHOW {$this->MidQuery} TABLES {$this->PostQuery}";
+	}
+	
 	public function CreateTable($tableName, $column_types = [], $configs = "ENGINE = InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin", $defaultValue = null)
 	{
 		return $this->TryExecute($this->CreateTableQuery($tableName, $column_types, $configs), [], $defaultValue);
