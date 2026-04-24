@@ -2,7 +2,6 @@
 namespace MiMFa\Module;
 
 use \MiMFa\Library\Struct;
-use \MiMFa\Library\Convert;
 
 /**
  * To show a simple box to show and edit codes

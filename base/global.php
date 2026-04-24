@@ -1272,7 +1272,7 @@ function auth($minaccess = 0, bool|string $assign = true, bool|string|int|null $
 				if (is_string($assign))
 					load($assign);
 				else
-					route(\_::$Front->RestrictionRouteName, alternative: "401");
+					route(\_::$Router->RestrictionRouteName, alternative: "401");
 			}
 			if ($exit !== false)
 				finalize($exit);
@@ -1802,7 +1802,7 @@ function compute($name, mixed $data = [], bool $print = true, string|int $origin
  */
 function route($name = null, mixed $data = null, bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
-	return using(\_::$Address->RouteRootDirectory, $name ?? \_::$Front->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
+	return using(\_::$Address->RouteRootDirectory, $name ?? \_::$Router->DefaultRouteName, $data, $print, $origin, $depth, $alternative, $default);
 }
 
 /**
@@ -3134,6 +3134,16 @@ function isInBase(string|null $filePath): bool
 }
 
 /**
+ * Check if the string is a relative or absolute file address
+ * @param null|string $filePath The file path
+ * @test It shold test again
+ * @return bool
+ */
+function isFile(string|null $filePath): bool
+{
+	return (!empty($filePath)) && preg_match("/^([A-z0-9\-]+\:)?([\/\\\][^:\\\\\/\{\}\|\^\[\]\"\`\r\n\t\f]*)+$/", $filePath);
+}
+/**
  * Check file format by thats extension
  * @param null|string $path
  * @param array<string> $formats
@@ -3157,10 +3167,10 @@ function isFormat(string|null $path, string|array ...$formats)
  * @param null|string $url The url string
  * @return bool
  */
-function isFile(string|null $url, string ...$formats): bool
+function isMedia(string|null $url, string ...$formats): bool
 {
 	if (count($formats) == 0)
-		array_push($formats, \_::$Back->AcceptableFileFormats, \_::$Back->AcceptableDocumentFormats, \_::$Back->AcceptableImageFormats, \_::$Back->AcceptableAudioFormats, \_::$Back->AcceptableVideoFormats);
+		array_push($formats, \_::$Back->GetAcceptableFormats());
 	return isUrl($url) && isFormat(getUrlBase($url), $formats);
 }
 /**

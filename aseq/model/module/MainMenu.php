@@ -205,10 +205,10 @@ class MainMenu extends Module
 		yield Struct::OpenTag("div", ["class"=>"be flex middle"]);
 		if ($this->AllowBranding)
 			yield Struct::Division(
-				(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Front->Path) : "") .
+				(isValid($this->Image) ? Struct::Link(Struct::Media("", $this->Image, ['class' => 'col-sm image']), \_::$Front->DirectPath) : "") .
 				Struct::Division(
 					(isValid($this->Description) ? Struct::Division(__($this->Description), ['class' => 'description']) : "") .
-					(isValid($this->Title) ? Struct::Link(Struct::Division(__($this->Title), ['class' => 'title']), \_::$Front->Path) : ""),
+					(isValid($this->Title) ? Struct::Link(Struct::Division(__($this->Title), ['class' => 'title']), \_::$Front->DirectPath) : ""),
 					["class" => "brand"]
 				),
 				["class" => "header"]

@@ -137,6 +137,10 @@ class General extends Template
 			body>nav:has(.inside) ul li .image{
 				margin-inline-end: var(--size-0);
 			}
+			body>nav:has(.inside) ul li .image img{
+			    max-width: calc(var(--size-max) * 4);
+			    max-height: calc(var(--size-max) * 4);
+			}
 			body>nav:has(.inside) ul li .description{
 				font-size: var(--size-0);
 				color: #888b;

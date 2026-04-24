@@ -90,20 +90,6 @@ class FrontBase
 	 */
 	public $FullDescription = null;
 
-    /**
-     * The view name to show pages
-     * @var string
-     * @default "main"
-     * @category Security
-     */
-    public string $DefaultRouteName = "main";
-    /**
-     * The default view name to show when restriction
-     * @var string
-     * @category Security
-     */
-    public $RestrictionRouteName = "403";
-
 	/**
 	 * The website default template class
 	 * @default "Template"
@@ -122,12 +108,12 @@ class FrontBase
 	public string $DefaultViewName = "main";
 
 	/**
-	 * The main path
+	 * The main website path
 	 * @field path
 	 * @category Information
 	 * @var mixed
 	 */
-	public $Path = null;
+	public $DirectPath = null;
 	/**
 	 * The website main logo path
 	 * @field image
@@ -382,8 +368,8 @@ class FrontBase
 			);
 		}
 
-		\_::$User->SenderEmail = \_::$User->SenderEmail ?: createEmail("do-not-reply", $this->Path);
-		\_::$User->ReceiverEmail = \_::$User->ReceiverEmail ?: createEmail("info", $this->Path);
+		\_::$User->SenderEmail = \_::$User->SenderEmail ?: createEmail("do-not-reply", $this->DirectPath);
+		\_::$User->ReceiverEmail = \_::$User->ReceiverEmail ?: createEmail("info", $this->DirectPath);
 	}
 
 	public function __get($name)

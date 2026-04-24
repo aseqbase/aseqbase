@@ -103,6 +103,18 @@ class RouterBase extends ArrayObject
      */
     public string|null $CurrentRoute = null;
 
+    /**
+     * The view name to show pages
+     * @var string
+     * @default "main"
+     */
+    public string $DefaultRouteName = "main";
+    /**
+     * The default view name to show when restriction
+     * @var string
+     */
+    public string $RestrictionRouteName = "403";
+
     public function __construct(
         $pattern = null,
         $handler = null,

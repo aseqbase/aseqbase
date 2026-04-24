@@ -478,7 +478,7 @@ class UserBase
 			"*" . $this->Name . "*",
 			get($this->GetGroup(), "Title") . " at " . \_::$Front->Name,
 			$this->Access >= $this->AdminAccess ? \_::$Front->ReceiverEmail ?? $this->Email : $this->Email,
-			"[" . \_::$Front->FullName . "](" . \_::$Front->Path . ")"
+			"[" . \_::$Front->FullName . "](" . \_::$Front->DirectPath . ")"
 		]));
 	}
 	public function GenerateEmail($name = null, $fake = false)

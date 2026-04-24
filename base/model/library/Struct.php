@@ -742,12 +742,14 @@ class Struct
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                align-content: center;
                 z-index: 999999999;
             }
             #$id.modal-overlay>.modal {
                 background-color: var(--back-color-special);
                 color: var(--fore-color-special);
-                position: fixed;
+                display: block;
+                position: relative;
                 padding: var(--size-3);
                 border-radius: var(--radius-3);
                 max-width: 90%;
@@ -755,14 +757,30 @@ class Struct
                 overflow: auto;
                 box-shadow: var(--shadow-max);
             }
-            #$id.modal-overlay>.modal>.modal-close {
-                position: absolute;
-                top: 0px; right: 0px;
+            #$id.modal-overlay>.modal>.modal-controls {
+                position: sticky;
+                top: 0px; right: 0px; left: 0px;
+                height: fit-content;
+                width: 100%;
+                display: flex;
+                flex-direction: row-reverse;
+            }
+            #$id.modal-overlay>.modal>.modal-controls>.modal-close {
+                background-color: var(--back-color-special);
+                color: var(--fore-color-special);
+                height: fit-content;
+                width: fit-content;
+                border-radius: var(--radius-max);
+                aspect-ratio:1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                align-content: center;
             }
         ") .
-            self::Division(
+            self::Box(
                 [
-                    self::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']),
+                    self::Box(self::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']), ["class"=>"modal-controls"]),
                     $content
                 ]
                 ,
@@ -928,7 +946,7 @@ class Struct
             return null;
         if (isIdentifier($source))
             return self::Icon($source, null, ["class" => "media"], $attributes);
-        if (isUrl($source))
+        if (isUrl($source) || isFile($source))
             switch (strtolower(preg_find("/\.\w+$/", $source) ?? "")) {
                 case ".ogg":
                 case ".mp3":
@@ -952,7 +970,7 @@ class Struct
                 case ".tiff":
                 case ".bmp":
                 case ".ico":
-                    if (isUri($source))
+                    if (isUrl($source))
                         return self::Image($content, $source, ["class" => "media"], $attributes);
                     else
                         return self::Image($content, Convert::ToUri($source), ["class" => "media"], $attributes);
@@ -2380,7 +2398,7 @@ class Struct
                 return "text";
             elseif (is_string($value))
                 if (isUrl($value))
-                    if (isFile($value))
+                    if (isMedia($value))
                         return "file";
                     else
                         return "url";

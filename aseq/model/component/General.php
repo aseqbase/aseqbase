@@ -64,7 +64,7 @@ class GeneralStyle
 			--name: \"" . __(\_::$Front->Name, true, false) . "\";
 			--slogan: \"" . __(\_::$Front->Slogan, true, false) . "\";
 
-			--path: \"" . \_::$Front->Path . "\";
+			--path: \"" . \_::$Front->DirectPath . "\";
 			--home-path: \"" . \_::$Front->HomePath . "\";
 			--logo-path: \"" . asset(\_::$Front->LogoPath) . "\";
 			--full-logo-path: \"" . asset(\_::$Front->FullLogoPath) . "\";

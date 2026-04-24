@@ -922,7 +922,7 @@ class Table extends Module
         if ($isHead) {
             $value = Convert::ToString($value);
             $st = "<th data-key=\"" . str_replace("\"", "-", $key) . "\">";
-            if (isFile($value))
+            if (isMedia($value))
                 return $st . Struct::Media($value) . "</th>";
             else if (isAbsoluteUrl($value))
                 return $st . Struct::Link(getUrlResource($value), $value) . "</th>";
@@ -937,7 +937,7 @@ class Table extends Module
         //    $value->MaxHeight = $this->MediaHeight;
         //    return $st.Convert::ToString($value).$et;
         //}
-        if (isFile($value) || in_array($key, ["Audio", "Video", "Image", "Icon", "Media"]))
+        if (isMedia($value) || in_array($key, ["Audio", "Video", "Image", "Icon", "Media"]))
             return $st . Struct::Media($value) . $et;
         if (isUrl($value))
             return $st . Struct::Link(getUrlResource($value), $value) . "</td>";

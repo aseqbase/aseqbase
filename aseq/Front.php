@@ -1,7 +1,7 @@
 <?php
 run("global/AseqFront");
 class Front extends AseqFront {
-	public $Path = "https://aseqbase.ir";
+	public $DirectPath = "https://aseqbase.ir";
 	public $DownloadPath = "https://github.com/aseqbase/aseqbase";
 	public $Payment = '{"Network":"TRC-20","Currency":"USDT","DestinationContent":"TLQrvG1sNKY2kNRfcBUgW4QLfe1zAtZQds"}';
 

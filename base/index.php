@@ -7,6 +7,6 @@ if (auth(\_::$User->VisitAccess, assign: true)) {
     if (isValid(\_::$Address->UrlRequest))
         \_::$Router->Handle();
     else
-        route(\_::$Front->DefaultRouteName);
+        route(\_::$Router->DefaultRouteName);
 }
 finalize();
