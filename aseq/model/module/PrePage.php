@@ -1,7 +1,6 @@
 <?php
 namespace MiMFa\Module;
 
-use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
 class PrePage extends Module
 {

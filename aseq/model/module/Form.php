@@ -187,7 +187,7 @@ class Form extends Module
 					margin-inline-start: calc(var(--size-0) / 2);
 					margin-inline-end: var(--size-0);
 				}
-				.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+				.{$this->MainClass} .field>.input:is(.input-interactive, [type='radiobutton'], [type='checkbox']){
 					border:none;
 					outline:none;
 				}
@@ -321,7 +321,7 @@ class Form extends Module
 					max-width: -webkit-fill-available;
 					" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 				}
-				.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+				.{$this->MainClass} .field>.input:not(.input-interactive, [type='radiobutton'], [type='checkbox'], [type='color']){
 					" . Style::DoProperty("color", $this->FieldsForeColor) . "
 					" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 					width: 100%;
@@ -388,12 +388,12 @@ class Form extends Module
 				max-width: 65vw;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+			.{$this->MainClass} .field>.input:is(.input-interactive, [type='radiobutton'], [type='checkbox']){
 				padding: calc(var(--size-0) / 4);
 				width: 100%;
 				text-align: end;
 			}
-			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.input-interactive, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
@@ -465,12 +465,12 @@ class Form extends Module
 				border-radius: var(--radius-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+			.{$this->MainClass} .field>.input:is(.input-interactive, [type='radiobutton'], [type='checkbox']){
 				padding: var(--size-0) calc(var(--size-0) / 3);
 				width: 100%;
 				text-align: end;
 			}
-			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.input-interactive, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
@@ -547,7 +547,7 @@ class Form extends Module
 				margin-inline-end: 0px;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.input-interactive, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
@@ -627,12 +627,12 @@ class Form extends Module
 				border-radius: var(--radius-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+			.{$this->MainClass} .field>.input:is(.input-interactive, [type='radiobutton'], [type='checkbox']){
 				padding: var(--size-0) calc(var(--size-0) / 3);
 				width: 100%;
 				text-align: end;
 			}
-			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.input-interactive, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
@@ -714,10 +714,10 @@ class Form extends Module
 				border-radius: var(--radius-0);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .field>.input:is(.switchinput, [type='radiobutton'], [type='checkbox']){
+			.{$this->MainClass} .field>.input:is(.input-interactive, [type='radiobutton'], [type='checkbox']){
 				padding: var(--size-0) 0px;
 			}
-			.{$this->MainClass} .field>.input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']){
+			.{$this->MainClass} .field>.input:not(.input-interactive, [type='radiobutton'], [type='checkbox'], [type='color']){
 				" . Style::DoProperty("color", $this->FieldsForeColor) . "
 				" . Style::DoProperty("background-color", $this->FieldsBackColor) . "
 				width: 100%;
@@ -827,7 +827,7 @@ class Form extends Module
 							["class" => "header", ...($this->AllowAnimate ? ["data-aos" => $this->HeaderAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
 						) : "") .
 						Struct::LargeSlot(
-							Struct::Box(
+							//Struct::Box(
 								Struct::Form(
 									Struct::Rack(
 										($this->Target ? Struct::HiddenInput($this->TargetKey, $this->Target) : "") .
@@ -844,7 +844,8 @@ class Form extends Module
 									$this->GetFooter(),
 									...($this->AllowAnimate ? ["data-aos" => $this->FooterAnimation, "data-aos-offset" => $this->AnimationOffset] : [])
 								) : "")
-							)
+							// 	,["class"=>"be wide"]
+							// )
 							,
 							["class" => "{$this->ContentClass} content", ...($this->AllowAnimate ? ["data-aos" => $this->ContentAnimation, "data-aos-offset" => $this->AnimationOffset] : [])]
 						)

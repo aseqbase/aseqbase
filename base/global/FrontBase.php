@@ -408,6 +408,25 @@ class FrontBase
 	}
 
 	/**
+	 * Get the lightness of a color with a number between -255 to +255
+	 * @param mixed $color A three, four, six or eight characters hexadecimal color numbers for example #f80 or #ff8800
+	 * @return float|int A number between -255 (for maximum in darkness) to +255 (for maximum in lightness)
+	 */
+	public function GetLuminance($color = null)
+	{
+		if (!isValid($color))
+			if (!is_null($this->CurrentMode))
+				return $this->CurrentMode;
+			else
+				return $this->GetLuminance($this->BackColor(0));
+		$l = strlen($color) > 6;
+		$rgb = preg_find_all($l ? '/\w\w/' : '/\w/', $color);
+		$sc = ($l ? hexdec(getValid($rgb, 0, 0)) + hexdec(getValid($rgb, 1, 0)) + hexdec(getValid($rgb, 2, 0)) :
+			hexdec(getValid($rgb, 0, 0)) * 16 + hexdec(getValid($rgb, 1, 0)) * 16 + hexdec(getValid($rgb, 2, 0)) * 16 - 3);
+		return $sc > 510 ? $sc - 510 : ($sc < 255 ? $sc - 255 : $sc - 382.5);
+	}
+
+	/**
 	 * To get the Color by index
 	 * @param int $index 0:Black, 1:Red, 2:Green, 3:Blue, 4:Yellow, 5:Cyan, 6:Violet, 7:White
 	 */

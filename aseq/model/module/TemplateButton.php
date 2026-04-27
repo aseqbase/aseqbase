@@ -18,7 +18,7 @@ class TemplateButton extends Module{
 		if(!$this->Class) 
 			if($this->LightLabel || $this->DarkLabel) $this->Class = "button";
 			else $this->Class = "icon";
-		$isDark = \_::$Front->GetMode() < 0 && !\_::$Front->SwitchMode;
+		$isDark = \_::$Front->GetLuminance() < 0 && !\_::$Front->SwitchMode;
 		$this->Attributes["onclick"] = "
 		switchStyleId = '{$this->MainClass}-switch-styles';
 		switchStyle = document.getElementById(switchStyleId);
@@ -47,7 +47,7 @@ class TemplateButton extends Module{
 	}
 	public function GetInner(){
 		return $this->GetTitle().$this->GetDescription().
-		(\_::$Front->GetMode() < 0?
+		(\_::$Front->GetLuminance() < 0?
 			Struct::Media($this->LightLabel, $this->LightIcon):
 			Struct::Media($this->DarkLabel, $this->DarkIcon)
 	    ).

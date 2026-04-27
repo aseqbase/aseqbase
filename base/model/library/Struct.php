@@ -780,7 +780,7 @@ class Struct
         ") .
             self::Box(
                 [
-                    self::Box(self::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']), ["class"=>"modal-controls"]),
+                    self::Box(self::Icon("close", "this.closest('#$id.modal-overlay').remove();event.preventDefault();", ["class" => 'modal-close']), ["class" => "modal-controls"]),
                     $content
                 ]
                 ,
@@ -934,7 +934,8 @@ class Struct
      */
     public static function Media($content, $source = null, ...$attributes)
     {
-        if (!isValid($source)) {
+        if (isEmpty($source)) {
+            if (isEmpty($content)) return $content;
             $source = $content;
             $content = null;
         } elseif (is_array($source)) {
@@ -1758,15 +1759,17 @@ class Struct
     {
         $rowHeaders = pop($options, "RowHeaders") ?? [intval(pop($options, "RowHeader") ?? 0)];
         $colHeaders = pop($options, "ColHeaders") ?? [intval(pop($options, "ColHeader") ?? 0)];
+        $caption = pop($options, "Caption");
         return self::Element(
-            is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $rowHeaders, $colHeaders) {
+            ($caption ? self::Element(Convert::ToString($caption), "caption") : "") .
+            (is_countable($content) ? join(PHP_EOL, iterator_to_array((function () use ($content, $rowHeaders, $colHeaders) {
                 foreach ($content as $k => $v) {
                     if (in_array($k, $rowHeaders))
                         yield self::Column($v);
                     else
                         yield self::Row($v, ["Type" => in_array($k, $colHeaders) ? "head" : "cell"]);
                 }
-            })())) : $content ?? "",
+            })())) : $content ?? ""),
             "table",
             $options,
             ["class" => "table"],
@@ -2280,7 +2283,6 @@ class Struct
      * The \<A\> HTML Tag
      * @param mixed $content The anchor text of the Tag
      * @param string|null|array $reference The hyper reference path
-     * @param array $source Other custom attributes of the Tag
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
@@ -3607,7 +3609,7 @@ class Struct
                     }
                     _(cb).change();
                 ",
-                "class" => "input switchinput $class",
+                "class" => "input input-interactive switchinput $class",
                 "Style" => $style
             ]
         );
@@ -3648,7 +3650,7 @@ class Struct
      */
     public static function CheckInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "checkbox", ["class" => "checkinput"], $attributes);
+        return self::Input($key, $value, "checkbox", ["class" => "input-interactive checkinput"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag Collection
@@ -3686,7 +3688,7 @@ class Struct
      */
     public static function RadioInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "radio", ["class" => "radioinput"], $attributes);
+        return self::Input($key, $value, "radio", ["class" => "input-interactive radioinput"], $attributes);
     }
     /**
      * The \<INPUT\> HTML Tag Collection
@@ -3821,7 +3823,7 @@ class Struct
      */
     public static function ColorInput($key, $value = null, ...$attributes)
     {
-        return self::Input($key, $value, "color", ["class" => "colorinput"], $attributes);
+        return self::Input($key, $value, "color", ["class" => "input-interactive colorinput"], $attributes);
     }
     /**
      * The Calendar \<INPUT\> HTML Tag
@@ -4102,7 +4104,7 @@ class Struct
                             "ondblclick" => "document.querySelector('#$id>input[type=\"file\"]').click();"
                         ]),
                         "<div class='collection'></div>",
-                        self::Division([
+                        self::Box([
                             self::Icon("close", "document.querySelector('#$id>input[type=\"file\"]').value='';{$id}_Update();", ["class" => "close", "style" => "display:none"]),
                             self::Icon("folder-open", "document.querySelector('#$id>input[type=\"file\"]').click();", ["class" => "browse"])
                         ])
@@ -4286,7 +4288,7 @@ class Struct
         }
         ") . self::Map($value, null, [
                         "id" => "_input$id",
-                        "class" => "input mapinput",
+                        "class" => "input input-interactive mapinput",
                         "onchange" => "{$id}=document.getElementById('$id').value = e.latlng.lat+','+e.latlng.lng;" .
                             Convert::ToString($onChange, ";
             ")
@@ -4321,7 +4323,7 @@ class Struct
                 opacity: 0.5;
             }
         ") .
-            self::Division(
+            self::Box(
                 [
                     self::HiddenInput($key, $value, ...$attributes),
                     loop($symbols, fn($v, $k) => self::Action($v, null, [
@@ -4334,7 +4336,7 @@ class Struct
                         ])
                     ]))
                 ],
-                ["class" => "input symbolicinput", "id" => $id],
+                ["class" => "input input-interactive symbolicinput", "id" => $id],
                 [
                     "class" => $class,
                     "style" => $style
@@ -4749,7 +4751,7 @@ class Struct
             }
             ") .
             self::Division(
-                self::Division([
+                self::Box([
                     self::Span(self::Media("", "calendar", ["onclick" => "{$uniq}_ToggleWeek();"])) .
                     self::Span($dt->format("Y"), ["class" => "Y$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .Y$uniq', parseInt(this.innerText), 0, 9999)"]) .
                     self::Span("/") .
@@ -4798,7 +4800,7 @@ class Struct
                     })())
                 ) .
                 "</table> &nbsp; " .
-                self::Division([
+                self::Box([
                     self::Span(self::Media("", "clock", ["onclick" => "{$uniq}_ToggleWeek();"])) .
                     self::Span($dt->format("H"), ["class" => "h$uniq clickable", "onclick" => "{$uniq}_ShowOptions('.$uniq .h$uniq', parseInt(this.innerText), 0, 23)"]) .
                     self::Span(":") .

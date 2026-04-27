@@ -301,7 +301,7 @@ class Template extends \Base
             font-family: var(--font-input), var(--font-special-input), var(--font);
             line-height: 1.5em;
         }
-        :is(input,.input):is(.switchinput, [type='radiobutton'], [type='checkbox']){
+        :is(input,.input):is(.input-interactive, [type='radiobutton'], [type='checkbox']){
             width: fit-content;
         }
         .input[type=file]:not(:disabled,[readonly]) {

@@ -42,7 +42,7 @@ class Contacts extends Module
 				min-height: 200px;
 				padding:0px;
 				margin:0px;
-				" . (\_::$Front->GetMode() < 0 ? \MiMFa\Library\Style::UniversalProperty("filter", "invert(90%)") : "") . "
+				" . (\_::$Front->GetLuminance() < 0 ? \MiMFa\Library\Style::UniversalProperty("filter", "invert(90%)") : "") . "
 			}
 		");
 	}

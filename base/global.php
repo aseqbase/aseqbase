@@ -573,7 +573,6 @@ function upload($sourcePath = null, ?string $name = null, $type = null, null|str
  * @param string $content The output content to be sent.
  * @param string|null $name Optional filename to force download with a specific name.
  * @param string|null $type The file content type (e.g., "application/pdf", "image/jpeg").
- * @param bool $attached Whether to display the file inline in the browser or as an attachment.
  * @param int|null $status The HTTP status code (e.g., 200, 404).
  * @throws \Exception If the file path is invalid or the file cannot be read.
  */
@@ -1174,7 +1173,6 @@ function deliverProcedure($script = null, $status = 211)
 
 /**
  * Print only this output on the client side then reload the page
- * @param mixed $message The data that is ready to print
  * @param string|bool|null $target Send the target url or
  * true to go forward,
  * false to go to the previous page,
@@ -2839,6 +2837,24 @@ function getMethodIndex(string|int|null $method = null)
 			return 10;
 	}
 }
+/**
+ * If the the request method name or index be as the same =>
+ * GET:1,
+ * POST:2,
+ * PUT:3,
+ * FILE:4,
+ * PATCH:5,
+ * DELETE:6,
+ * STREAM:7,
+ * INTERNAL:8,
+ * EXTERNAL:9,
+ * OTHER:0
+ * @param string|int|null $method
+ */
+function isMethod(string|int|null $method = null)
+{
+	return getMethodIndex($method) === getMethodIndex();
+}
 
 function getClientIp($version = null): string|null
 {
@@ -3235,8 +3251,7 @@ function isJson($json)
 	return preg_match("/^\s*[\{\[][\s\S]*[\}\]]\s*$/", $json) > 0;
 }
 /**
- * Check if the string is a relative or absolute URL
- * @param null|string $url The url string
+ * Check if the string is an email or not
  * @return bool
  */
 function isEmail(string|null $email): bool
@@ -3539,7 +3554,6 @@ function array_insert(&$array, $position, $insert)
  * Find everythings are match from an array by a callable function
  * @param array      $array
  * @param callable $searching function($val, $key){ return true; }
- * @param array $array_find_keys
  */
 function array_find_keys($array, callable $searching)
 {

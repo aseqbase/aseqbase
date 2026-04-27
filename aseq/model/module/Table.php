@@ -68,9 +68,9 @@ class Table extends Module
     public $FilterColumns = null;
     /**
      * To use the column keys as the column labels
-     * @var null Auto detection
-     * @var true To use
-     * @var false To unuse
+     * null: Auto detection
+     * true: To use
+     * false: To unuse
      */
     public $ColumnsKeysAsLabels = true;
     /**
@@ -102,9 +102,9 @@ class Table extends Module
     public $ExcludeRows = null;
     /**
      * To use the row keys as the row labels
-     * @var null Auto detection
-     * @var true To use
-     * @var false To unuse
+     * null: Auto detection
+     * true: To use
+     * false: To unuse
      */
     public $RowsKeysAsLabels = false;
     /**
@@ -131,6 +131,7 @@ class Table extends Module
      */
     public $CellsValues = [];
 
+    public $Caption = false;
     public $Header = true;
     /**
      * A custom Callback to execute when the header is loading
@@ -890,13 +891,13 @@ class Table extends Module
             return ($isc ? $this->HandleModal() : "") .
                 $toolBar(true, "Import items", "Export items", "Clear items", "Search") .
                 (($this->TopNavigation && !empty($this->NavigationBar)) ? $this->NavigationBar->ToString() : "") .
-                Struct::Table(join(PHP_EOL, $cells)) .
+                Struct::Table(join(PHP_EOL, $cells), attributes:["caption"=>$this->Caption]) .
                 (($this->BottomNavigation && !empty($this->NavigationBar)) ? $this->NavigationBar->ToString() : "");
         } elseif ($aaccess || $iaccess)
             return ($isc ? $this->HandleModal() : "") .
                 $toolBar(true, "Import items", "Export items", "Clear items", "Search") .
-                Struct::Table("");
-        return ($isc ? $this->HandleModal() : "") . Struct::Table("");
+                Struct::Table("", attributes:["caption"=>$this->Caption]);
+        return ($isc ? $this->HandleModal() : "") . Struct::Table("", attributes:["caption"=>$this->Caption]);
     }
     public function FilterItems($items)
     {

@@ -519,7 +519,7 @@ class General extends Template
 				border-color: var(--back-color-output);
 			}
 
-			input:not(.switchinput, [type='radiobutton'], [type='checkbox'], [type='color']), select, textarea{
+			input:not(.input-interactive, [type='radiobutton'], [type='checkbox'], [type='color']), select, textarea{
 				padding: calc(var(--size-0) / 2) var(--size-0);
 			}
 			input[type='range'].rangeinput {

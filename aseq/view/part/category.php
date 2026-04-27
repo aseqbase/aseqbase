@@ -31,7 +31,7 @@ if ($items) {
         .$name .categories .button{
             border: none;
         }
-    ").Struct::Division(loop($items, function ($v) use ($Root) {
+    ").Struct::Box(loop($items, function ($v) use ($Root) {
                 $n = get($v, "Name");
                 $t = get($v, "Title") ?? $n;
                 $p = getBetween($v, "Path", "Route") ?? $n;

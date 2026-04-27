@@ -85,7 +85,7 @@ class BarMenu extends Module
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 60%;
-				" . (($this->AllowChangeColor) ? \MiMFa\Library\Style::ToggleFilter(\_::$Front->GetMode()) : "") . "
+				" . (($this->AllowChangeColor) ? \MiMFa\Library\Style::ToggleFilter(\_::$Front->GetLuminance()) : "") . "
 			}
 			.{$this->MainClass} .button:hover>.media{
 				background-size: auto 70%;" .

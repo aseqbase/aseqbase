@@ -341,14 +341,14 @@ class AseqFront extends FrontBase
 	public function __construct(){
 		parent::__construct();
 		
-		$this->DefaultMode = $this->CurrentMode = $this->GetMode($this->BackColor(0));
+		$this->DefaultMode = $this->CurrentMode = $this->GetLuminance($this->BackColor(0));
 		$this->SwitchMode = received($this->SwitchRequest) ?? getMemo($this->SwitchRequest) ?? $this->SwitchMode;
 		
 		if ($this->SwitchMode) {
 			$middle = $this->ForeColorPalette;
 			$this->ForeColorPalette = $this->BackColorPalette;
 			$this->BackColorPalette = $middle;
-			$this->CurrentMode = $this->GetMode($this->BackColor(0));
+			$this->CurrentMode = $this->GetLuminance($this->BackColor(0));
 		}
 
 		$menu = between($this->MainMenus,$this->SideMenus,$this->Shortcuts,$this->Services);
@@ -373,7 +373,7 @@ class AseqFront extends FrontBase
 			if (!is_null($this->CurrentMode))
 				return $this->CurrentMode;
 			else
-				return $this->GetMode($this->BackColor(0));
+				return $this->GetLuminance($this->BackColor(0));
 		$l = strlen($color) > 6;
 		$rgb = preg_find_all($l ? '/\w\w/' : '/\w/', $color);
 		$sc = ($l ? hexdec(getValid($rgb, 0, 0)) + hexdec(getValid($rgb, 1, 0)) + hexdec(getValid($rgb, 2, 0)) :

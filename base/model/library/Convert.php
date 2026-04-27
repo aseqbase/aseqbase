@@ -59,7 +59,7 @@ class Convert
         if (is_null($object))
             return $default;
         if (is_bool($object))
-            return $object?"true":"false";
+            return $object ? "true" : "false";
         if (isStatic($object))
             return "$object";
         if ($object instanceof \Base)
@@ -326,7 +326,7 @@ class Convert
      */
     public static function ToUri($path)
     {
-        return $path && function_exists("mime_content_type")?self::ToDataUri(open($path),mime_content_type($path)):getUrl($path);
+        return $path && function_exists("mime_content_type") ? self::ToDataUri(open($path), mime_content_type($path)) : getUrl($path);
     }
     /**
      * To convert a useable Data URI to the value
@@ -352,8 +352,9 @@ class Convert
      */
     public static function FromDataUri($uri, &$mime = null)
     {
-        if (!$uri) return null;
-        $mime = preg_find("/(?<=^data\:)[^;](?=;)/i", $uri)?:$mime;
+        if (!$uri)
+            return null;
+        $mime = preg_find("/(?<=^data\:)[^;](?=;)/i", $uri) ?: $mime;
         return base64_decode(preg_find("/(?<=;base64,).+/i", $uri));
     }
 
@@ -777,7 +778,7 @@ class Convert
 
     public static function ToSeparatedValuesFile($cells, $path = null, $delimiter = ',', $enclosure = '"', $eol = "\n"): string
     {
-        $path = $path ?? Storage::GenerateUniquePath(prefix:"table", suffix:".csv", random: false);
+        $path = $path ?? Storage::GenerateUniquePath(prefix: "table", suffix: ".csv", random: false);
         $fstream = fopen($path, 'r+b');
         foreach ($cells as $fields)
             fputcsv($fstream, $fields, $delimiter, $enclosure, "\\", $eol);
