@@ -504,7 +504,7 @@ class Storage
 	{
 		$sourcePath = self::FindFile($sourcePath);
 		$destPath = self::GetPath($destPath);
-		return copy($sourcePath, $destPath);
+		return $sourcePath?copy($sourcePath, $destPath):false;
 	}
 	/**
 	 * To reads entire file into a string

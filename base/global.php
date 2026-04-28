@@ -621,7 +621,52 @@ function uploadContent($content, $name = null, $type = null, ?string $encoding =
  * or an address otherwise
  * @return string|null The file content, address (if sent null for $destPath) or null otherwise
  */
-function download($destPath = null, $extensions = null, $minSize = null, $maxSize = null, $method = "FILE")
+function download($url, $destPath = null, $extensions = null, $minSize = null, $maxSize = null, $method = "FILE")
+{
+	if(!$url) return null;
+	
+	$objectName = Convert::ToKey(preg_find("/[\w -\(\)\[\]]+$/", urldecode($url)))?:"new";
+
+	$allow = true;
+	foreach (($extensions ?? \_::$Back->GetAcceptableFormats()) as $ext)
+		if ($allow = endsWith($objectName, $ext))
+			break;
+	if (!$allow)
+		throw new \SilentException("The 'file format' is not 'acceptable'!");
+
+	$contentResult = false;
+	if ($destPath === true) {
+		$destPath = Storage::GenerateUniquePath(\_::$Address->PublicDirectory, $objectName, random: true);
+	} elseif ($destPath === false) {
+		$destPath = Storage::GenerateUniquePath(\_::$Address->TempDirectory, $objectName, random: true);
+	} elseif ($destPath) {
+		if (endsWith($destPath, DIRECTORY_SEPARATOR))
+			$destPath = Storage::GenerateUniquePath($destPath, $objectName);
+	} else {
+		$destPath = \_::$Address->TempDirectory . $objectName;
+		$contentResult = true;
+	}
+
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	if (!file_put_contents($destPath, curl_exec($ch)))
+	//if (!file_put_contents($destPath, file_get_contents($url)))
+		return false;
+	elseif ($contentResult)
+		return Storage::GetFile($destPath);
+	else
+		return $destPath;
+}
+
+/**
+ * To download a file from the client device
+ * @param string|bool|null $destPath Set true to store in public directory,
+ * false to store in temp,
+ * null to dont store,
+ * or an address otherwise
+ * @return string|null The file content, address (if sent null for $destPath) or null otherwise
+ */
+function downloadFile($destPath = null, $extensions = null, $minSize = null, $maxSize = null, $method = "FILE")
 {
 	$object = receive($method);
 	if (!$object || !is_array($object))

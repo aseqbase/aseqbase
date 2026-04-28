@@ -18,7 +18,7 @@ class _
 	 * Generation	.	Major	Minor	1:test|2:alpha|3:beta|4:release|5<=9:stable|0:base
 	 * X			.	xx		xx		x
 	 */
-	public static float $Version = 7.99904;
+	public static float $Version = 7.93904;
 	/**
 	 * The default files extensions
 	 * @example
