@@ -155,8 +155,7 @@ function send($method = null, $url = null, mixed $data = [], array|null $options
 	if (!is_null($options))
 		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
-	if ($response === false && curl_errno($curl))
-		report(curl_error($curl), "error");
+	if (curl_errno($curl)) report(curl_error($curl), $response === false?"error":"warning");
 	curl_close($curl);
 	return $response;
 }
@@ -185,8 +184,7 @@ function sendGet($url = null, mixed $data = [], array|null $options = null, arra
 	if (!is_null($options))
 		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
-	if ($response === false && curl_errno($curl))
-		report(curl_error($curl), "error");
+	if (curl_errno($curl)) report(curl_error($curl), $response === false?"error":"warning");
 	curl_close($curl);
 	return $response;
 }
@@ -214,8 +212,7 @@ function sendPost($url = null, mixed $data = [], array|null $options = null, arr
 	if (!is_null($options))
 		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
-	if ($response === false && curl_errno($curl))
-		report(curl_error($curl), "error");
+	if (curl_errno($curl)) report(curl_error($curl), $response === false?"error":"warning");
 	curl_close($curl);
 	return $response;
 }
@@ -273,8 +270,7 @@ function sendFile($url = null, mixed $data = [], array|null $options = null, arr
 	if (!is_null($options))
 		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
-	if ($response === false && curl_errno($curl))
-		report(curl_error($curl), "error");
+	if (curl_errno($curl)) report(curl_error($curl), $response === false?"error":"warning");
 	curl_close($curl);
 	return $response;
 }
@@ -621,18 +617,18 @@ function uploadContent($content, $name = null, $type = null, ?string $encoding =
  * or an address otherwise
  * @return string|null The file content, address (if sent null for $destPath) or null otherwise
  */
-function download($url, $destPath = null, $extensions = null, $minSize = null, $maxSize = null, $method = "FILE")
+function download($url, $destPath = null, $extensions = null, $minSize = null, $maxSize = null, $method = "GET")
 {
 	if(!$url) return null;
 	
-	$objectName = Convert::ToKey(preg_find("/[\w -\(\)\[\]]+$/", urldecode($url)))?:"new";
+	$objectName = preg_replace("/[\/\\\'\"\|\[\]\{\}\?]/", "", getUrlResource(urldecode($url)));
 
 	$allow = true;
 	foreach (($extensions ?? \_::$Back->GetAcceptableFormats()) as $ext)
 		if ($allow = endsWith($objectName, $ext))
 			break;
 	if (!$allow)
-		throw new \SilentException("The 'file format' is not 'acceptable'!");
+		throw new \SilentException("The '$objectName' 'file format' is not 'acceptable'!");
 
 	$contentResult = false;
 	if ($destPath === true) {
@@ -643,14 +639,12 @@ function download($url, $destPath = null, $extensions = null, $minSize = null, $
 		if (endsWith($destPath, DIRECTORY_SEPARATOR))
 			$destPath = Storage::GenerateUniquePath($destPath, $objectName);
 	} else {
-		$destPath = \_::$Address->TempDirectory . $objectName;
+		$destPath = \_::$Address->TempDirectory . "d-" . getId(false) . "-" . $objectName;
 		$contentResult = true;
 	}
-
-	$ch = curl_init($url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	if (!file_put_contents($destPath, curl_exec($ch)))
-	//if (!file_put_contents($destPath, file_get_contents($url)))
+	
+	$data = send($method, $url, secure:true);
+	if (!$data || !file_put_contents($destPath, $data))
 		return false;
 	elseif ($contentResult)
 		return Storage::GetFile($destPath);
@@ -704,7 +698,7 @@ function downloadFile($destPath = null, $extensions = null, $minSize = null, $ma
 		if (endsWith($destPath, DIRECTORY_SEPARATOR))
 			$destPath = Storage::GenerateUniquePath($destPath, $objectName);
 	} else {
-		$destPath = \_::$Address->TempDirectory . $objectName;
+		$destPath = \_::$Address->TempDirectory . "d-" . getId(false) . "-". $objectName;
 		$contentResult = true;
 	}
 

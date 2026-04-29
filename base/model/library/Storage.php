@@ -126,6 +126,7 @@ class Storage
 			return null;
 		$path = preg_match("/^[a-z]+\:/i", $path) ? $path :
 			(preg_match("/^[\/\\\]/i", $path) ? $GLOBALS["ROOT"] . ltrim($path, "\\\/") : (\_::$Address->Directory . $path));
+		$path = preg_replace("/[\/\\\]/i", DIRECTORY_SEPARATOR, $path);
 		foreach (\_::$Sequence as $directory => $root)
 			if (startsWith($path, $directory))
 				return $path;
@@ -145,6 +146,7 @@ class Storage
 		if (empty($path))
 			return null;
 		$path = preg_replace("/^file:[\/\\\]+/", "", $path);
+		$path = preg_replace("/[\/\\\]/i", DIRECTORY_SEPARATOR, $path);
 		foreach (\_::$Sequence as $directory => $root)
 			if (startsWith($path, $directory))
 				return substr($path, strlen($directory));
@@ -242,7 +244,9 @@ class Storage
 		$sourceAddress = self::GetPath($sourceAddress);
 		if (!$sourceAddress)
 			return false;
-		return is_dir(rtrim($sourceAddress, "/\\")) ?
+		$src = rtrim($sourceAddress, "/\\");
+		self::CreateDirectory(dirname($src));
+		return is_dir($src) ?
 			self::MoveDirectory($sourceAddress, $destAddress) :
 			self::MoveFile($sourceAddress, $destAddress);
 	}
@@ -251,7 +255,9 @@ class Storage
 		$sourceAddress = self::GetPath($sourceAddress);
 		if (!$sourceAddress)
 			return false;
-		return is_dir(rtrim($sourceAddress, "/\\")) ?
+		$src = rtrim($sourceAddress, "/\\");
+		self::CreateDirectory(dirname($src));
+		return is_dir($src) ?
 			self::CopyDirectory($sourceAddress, $destAddress) :
 			self::CopyFile($sourceAddress, $destAddress);
 	}
@@ -267,7 +273,7 @@ class Storage
 	}
 	/**
 	 * Find an exists directory, then get the internal path
-	 * @param mixed $path Probable file internal path
+	 * @param mixed $directory Probable file internal directory path
 	 * @return string|null
 	 */
 	public static function FindDirectory($directory)
@@ -317,7 +323,7 @@ class Storage
 		$i = 0;
 		if (empty($directory))
 			return true;
-		elseif (is_dir(filename: $directory)) {
+		elseif (is_dir($directory)) {
 			foreach (scandir($directory, SCANDIR_SORT_NONE) as $item) {
 				if ($item === '.' || $item === '..')
 					continue;
@@ -343,7 +349,7 @@ class Storage
 		$sourceDirectory = rtrim($sourceDirectory, "\\\/");
 		$destDirectory = rtrim($destDirectory, "\\\/");
 		self::CreateDirectory(dirname($destDirectory));
-		return rename($sourceDirectory, $destDirectory);
+		return is_dir($sourceDirectory)?rename($sourceDirectory, $destDirectory):false;
 	}
 	public static function CopyDirectory($sourceDirectory, $destDirectory)
 	{
@@ -484,7 +490,7 @@ class Storage
 	public static function DeleteFile($path)
 	{
 		$path = self::FindFile($path);
-		return empty($path) || unlink($path);
+		return empty($path) || (!is_dir($path) && unlink($path));
 	}
 	public static function RenameFile($path, $newName)
 	{
@@ -504,7 +510,8 @@ class Storage
 	{
 		$sourcePath = self::FindFile($sourcePath);
 		$destPath = self::GetPath($destPath);
-		return $sourcePath?copy($sourcePath, $destPath):false;
+		self::CreateDirectory(dirname($destPath));
+		return $sourcePath && !is_dir($sourcePath)?copy($sourcePath, $destPath):false;
 	}
 	/**
 	 * To reads entire file into a string
@@ -812,7 +819,8 @@ class Storage
 		if ($zip->open($sourcePath) === TRUE) {
 			$extractPath = $destDirectory ? Storage::GetAbsolutePath($destDirectory) : Storage::GetAbsolutePath(dirname($sourcePath));
 			if (!is_dir($extractPath))
-				$extractPath = Storage::CreateDirectory($extractPath);
+				$extractPath = Storage::CreateDirectory($extractPath, secure:false);
+			$extractPath = rtrim($extractPath, "\/\\");
 			$zip->extractTo($extractPath);
 			for ($i = 0; $i < $zip->numFiles; $i++) {
 				$stat = $zip->statIndex($i);
@@ -839,7 +847,7 @@ class Storage
 			while (true) {
 				$part = null;
 				for ($i = 0; $i < $l; $i++) {
-					if (count($paths[$i]) <= 1)
+					if (count($paths[$i]) < 1)
 						return join($sep, $parts) . $sep;
 					$p = array_shift($paths[$i]);
 					if ($part === null)
