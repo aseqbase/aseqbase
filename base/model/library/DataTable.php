@@ -9,7 +9,13 @@ namespace MiMFa\Library;
  */
 class DataTable
 {
+	/**
+	 * The table name
+	 */
 	public $Name = null;
+	/**
+	 * The raw table name
+	 */
 	public $MainName = null;
 	public $AlternativeName = null;
 	public \MiMFa\Library\DataBase $DataBase;

@@ -408,7 +408,7 @@ class DataBase
 			if (is_string($queries))
 				$queries = Convert::ToSequence($queries);
 			$connection->beginTransaction();
-			if (is_array(first($params))) {
+			if ($this->IsTransaction($params)) {
 				if (($qc = count($queries)) >= ($pc = count($params))) {
 					$i = 0;
 					$keys  = array_keys($params);
@@ -695,15 +695,15 @@ COMMIT;";
 
 	public function Insert($tableName, $params = [], $defaultValue = false)
 	{
-		if (is_array(first($params)))
+		if ($this->IsTransaction($params))
 			return $this->TryTransaction($this->InsertQuery($tableName, $params), $params, $defaultValue);
 		return $this->TryFetchRowId($this->InsertQuery($tableName, $params), $params, $defaultValue);
 	}
 	public function InsertQuery($tableName, &$params)
 	{
-		if (is_array(first($params)))
+		if ($this->IsTransaction($params))
 			return loop($params, function ($p, $k) use ($tableName, &$params) {
-				return self::InsertQuery($tableName, $params[$k]);
+				return $this->InsertQuery($tableName, $params[$k]);
 			});
 		$vals = [];
 		$sets = [];
@@ -720,20 +720,21 @@ COMMIT;";
 
 	public function Replace($tableName, $params = [], $defaultValue = false)
 	{
-		if (is_array(first($params)))
+		if ($this->IsTransaction($params))
 			return $this->TryTransaction($this->ReplaceQuery($tableName, $params), $params, $defaultValue);
 		return $this->TryFetchRowId($this->ReplaceQuery($tableName, $params), $params, $defaultValue);
 	}
 	public function ReplaceQuery($tableName, &$params)
 	{
-		if (is_array(first($params)))
+		$istr = $this->IsTransaction($params);
+		if ($istr)
 			return loop($params, function ($p, $k) use ($tableName, &$params) {
-				return self::ReplaceQuery($tableName, $params[$k]);
+				return $this->ReplaceQuery($tableName, $params[$k]);
 			});
 		$vals = [];
 		$sets = [];
 		$args = [];
-		if (is_array(first($params))) {
+		if ($istr) {
 			$vs = [];
 			$i = 0;
 			foreach ($this->ParametersNormalization($params[$i]) as $key => $value) {
@@ -773,15 +774,15 @@ COMMIT;";
 
 	public function Update($tableName, $condition = null, $params = [], $defaultValue = false)
 	{
-		if (is_array(first($params)))
+		if ($this->IsTransaction($params))
 			return $this->TryTransaction($this->UpdateQuery($tableName, $condition, $params), $params, $defaultValue);
 		return $this->TryFetchChanges($this->UpdateQuery($tableName, $condition, $params), $params, $defaultValue);
 	}
 	public function UpdateQuery($tableName, $condition, &$params)
 	{
-		if (is_array(first($params)))
+		if ($this->IsTransaction($params))
 			return loop($params, function ($p, $k) use ($tableName, $condition, &$params) {
-				return self::UpdateQuery($tableName, $condition, $params[$k]);
+				return $this->UpdateQuery($tableName, $condition, $params[$k]);
 			});
 		$sets = [];
 		$args = [];
@@ -798,16 +799,25 @@ COMMIT;";
 
 	public function Delete($tableName, $condition = null, $params = [], $defaultValue = false)
 	{
-		if (is_array(first($params)))
+		if ($this->IsTransaction($params))
 			return $this->TryTransaction($this->DeleteQuery($tableName, $condition, $params), $params, $defaultValue);
 		return $this->TryFetchChanges($this->DeleteQuery($tableName, $condition), $params, $defaultValue);
 	}
 	public function DeleteQuery($tableName, $condition = null, &$params = [])
 	{
-		if (is_array(first($params)))
+		if ($this->IsTransaction($params))
 			return loop($params, function ($p, $k) use ($tableName, $condition, &$params) {
-				return self::DeleteQuery($tableName, $condition, $params[$k]);
+				return $this->DeleteQuery($tableName, $condition, $params[$k]);
 			});
 		return "{$this->PreQuery} DELETE FROM " . $this->NameNormalization($tableName) . " {$this->MidQuery} " . $this->ConditionNormalization($condition) . " " . $this->PostQuery;
+	}
+
+	public function IsTransaction($params){
+		$tr = false;
+		foreach ($params as $key => $value) 
+			if(is_array($value))
+				$tr = true;
+			else return false;
+		return $tr;
 	}
 }

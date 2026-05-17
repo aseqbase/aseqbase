@@ -2,6 +2,7 @@
 use \MiMFa\Library\Struct;
 use MiMFa\Library\Script;
 if (\_::$Front->AnimationSpeed) {
+	$data = $data??[];
 	$data["easing"] = get($data, "easing") ?? "ease-in-out-sine";
 	$data["once"] = get($data, "once") ?? true;
 	$data["duration"] = get($data, "duration") ?? \_::$Front->AnimationSpeed;

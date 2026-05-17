@@ -265,7 +265,6 @@ class Storage
 	/**
 	 * Check if the path is a directory
 	 * @param mixed $directory Probable file internal path
-	 * @return string|null
 	 */
 	public static function IsDirectory($directory)
 	{
@@ -453,9 +452,26 @@ class Storage
 
 
 	/**
-	 * Check if the path is file
+	 * To get the file extention color
 	 * @param mixed $path Probable file internal path
 	 * @return string|null
+	 */
+	public static function FileColor($path)
+	{
+		$ext = preg_find("/(?<=\.)\w+$/", $path);
+		if(!$ext) return;
+		$ext = strtolower($ext);
+		$ext = array_map("ord", str_split($ext));
+		$l = count($ext);
+		$r = $l>0?256-(122-max(min(122,$ext[0]),97))*10:175;
+		$g = $l>1?256-(122-max(min(122,$ext[1]),97))*10:175;
+		$b = $l>2?256-(122-max(min(122,$ext[2]),97))*10:175;
+		return "rgb($r,$g,$b)";
+	}
+
+	/**
+	 * Check if the path is file
+	 * @param mixed $path Probable file internal path
 	 */
 	public static function IsFile($path)
 	{

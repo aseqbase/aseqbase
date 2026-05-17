@@ -390,7 +390,7 @@ class Table extends Module
 
     /**
      * Create the module
-     * @param array|null $items The module source items
+     * @param $itemsOrDataTable The module source items
      */
     public function __construct($itemsOrDataTable = null)
     {
@@ -437,7 +437,7 @@ class Table extends Module
     }
     /**
      * Set the main properties of module
-     * @param array|null $items The module source items
+     * @param $itemsOrDataTable The module source items
      */
     public function Set($itemsOrDataTable = null)
     {
