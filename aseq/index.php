@@ -26,7 +26,7 @@ $GLOBALS["NEST"] = empty($GLOBALS["ASEQ"])?0:preg_match_all("/(?<=\S|\s)\.(?=\S|
 if(!isset($GLOBALS["HOST"])){
 	$GLOBALS["HOST"] = (isset($_SERVER['HTTPS'])?"https://":"http://");
 	$http_host = strtolower(trim($_SERVER["HTTP_HOST"]??""));
-	if($NEST > 0){
+	if($GLOBALS["NEST"] > 0){
 		$host_parts = [];
 		if(preg_match("/(\d+\.)+$/",$http_host))
 			$host_parts = explode(".", $http_host);
@@ -34,8 +34,8 @@ if(!isset($GLOBALS["HOST"])){
 			$host_parts = [...explode(".", $http_host), ""];
 		else $host_parts = explode(".", $http_host);
 		$hpc = count($host_parts);
-		$GLOBALS["HOST"] .= $host_parts[$hpc-(1+$NEST)];
-		for ($i = $NEST; $i > 0; $i--) $GLOBALS["HOST"] .= ".".$host_parts[$hpc-$i];
+		$GLOBALS["HOST"] .= $host_parts[$hpc-(1+$GLOBALS["NEST"])];
+		for ($i = $GLOBALS["NEST"]; $i > 0; $i--) $GLOBALS["HOST"] .= ".".$host_parts[$hpc-$i];
 		$GLOBALS["HOST"] = trim($GLOBALS["HOST"], ".");
     }
 	else $GLOBALS["HOST"] .= $http_host;
@@ -43,7 +43,7 @@ if(!isset($GLOBALS["HOST"])){
 
 $GLOBALS["BASE_ROOT"] = $GLOBALS["HOST"]."/".$GLOBALS["BASE"]."/";
 $GLOBALS["BASE_DIR"] = $directory;
-for ($i = $NEST; $i > 0; $i--) $GLOBALS["BASE_DIR"] .= "..".DIRECTORY_SEPARATOR;
+for ($i = $GLOBALS["NEST"]; $i > 0; $i--) $GLOBALS["BASE_DIR"] .= "..".DIRECTORY_SEPARATOR;
 $GLOBALS["BASE_DIR"] .= $GLOBALS["BASE"].DIRECTORY_SEPARATOR;
 
 /* Convert sub domains to sub directories */

@@ -139,10 +139,15 @@ class SideMenu extends Module
 				padding: calc(var(--size-0) / 4);
 			}
 				
+			$activeselector ul li .button .title{
+				display: flex;
+				align-items: center;
+			}
 			$activeselector ul li .image{
+				display: inline-block;
 				margin-inline-end: var(--size-0);
 			}
-			$activeselector ul li .button>.title{
+			$activeselector ul li .button .title>.span{
 				font-size: 110%;
 			}
 			$activeselector ul li .button>.description{
@@ -435,8 +440,8 @@ class SideMenu extends Module
 				Struct::Box(
 					Struct::Box(
 						($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
-						($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name")) ? Struct::Span($t, null, ["class"=>"title hoverable"]) : "")
-					) .
+						($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name")) ? Struct::Span($t, null, ["class"=>"hoverable"]) : "")
+					, ["class"=>"title"]) .
 					($count > 0 ? $this->ToggleLabel : ""),
 					["class" => "be flex justify"]
 				) .
@@ -448,8 +453,8 @@ class SideMenu extends Module
 					Struct::Box(
 						Struct::Box(
 							($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
-							($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name")) ? Struct::Span($t, null, ["class"=>"title hoverable"]) : "")
-						) .
+							($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name")) ? Struct::Span($t, null, ["class"=>"hoverable"]) : "")
+						, ["class"=>"title"]) .
 						($count > 0 ? $this->ToggleLabel : ""),
 						["class" => "be flex justify"]
 					) .

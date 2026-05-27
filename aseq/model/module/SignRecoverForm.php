@@ -23,7 +23,7 @@ class SignRecoverForm extends Form
 	public $PasswordPattern = "/[^\"'`]{8,100}/";
 	public $PasswordTip = "Your password should be strong and between 8-100 characters!";
 
-	public $BlockTimeout = 30000;
+	public $BlockTimeout = 0;
 	public $ResponseView = null;
 	public $Printable = false;
 

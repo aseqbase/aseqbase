@@ -151,7 +151,7 @@ class Form extends Module
 		$remains = getTimer();
 		if ($remains > 0) {
 			$this->Status = 403;
-			return $this->GetError("Please try about '" . Struct::Timer($remains / 1000, 0, "reload();", attributes: ["class" => "be inline"]) . "' later!");
+			return $this->GetWarning("Please try about '" . Struct::Timer(($remains + 1000) / 1000, 0, "reload();", attributes: ["class" => "be inline"]) . "' later!");
 		} else
 			return false;
 	}
@@ -888,7 +888,7 @@ class Form extends Module
 	}
 	public function GetHeader()
 	{
-
+		return null;
 	}
 	public function GetContent($args = [])
 	{
@@ -914,7 +914,7 @@ class Form extends Module
 	}
 	public function GetFooter()
 	{
-
+		return null;
 	}
 	public function GetScript()
 	{
