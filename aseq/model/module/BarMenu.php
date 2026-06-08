@@ -47,16 +47,16 @@ class BarMenu extends Module
 				" . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->MainClass} :is(button, .button, .icon[onclick]){
+			.{$this->MainClass} :is(button, .anchor, .icon[onclick]){
 				border: var(--border-0);
 				border-radius: var(--radius-0);
 				box-shadow: var(--shadow-0);
 			}
-			.{$this->MainClass} :is(button, .button, .icon[onclick]):hover{
+			.{$this->MainClass} :is(button, .anchor, .icon[onclick]):hover{
 				box-shadow: var(--shadow-2);
 			}
 			
-			.{$this->MainClass} .button {
+			.{$this->MainClass} .anchor {
 				border: none;
 				display: flex;
 				border-radius: var(--radius-0);
@@ -68,7 +68,7 @@ class BarMenu extends Module
 				height: {$this->Height}px;
 				aspect-ratio: 1;
 			}
-			.{$this->MainClass} .button:hover {
+			.{$this->MainClass} .anchor:hover {
 				cursor: pointer;
 				border: none;
 				" . (($this->AllowAnimate) ? "background-color: var(--fore-color-output);
@@ -76,39 +76,39 @@ class BarMenu extends Module
 			\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->MainClass} .button>.media{
+			.{$this->MainClass} .anchor>.media{
 				height: 55%;
     			margin: 15%;" .
 			\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .button>.media:not(.icon){
+			.{$this->MainClass} .anchor>.media:not(.icon){
 				background-position: center;
 				background-repeat: no-repeat;
 				background-size: auto 60%;
 				" . (($this->AllowChangeColor) ? \MiMFa\Library\Style::ToggleFilter(\_::$Front->GetLuminance()) : "") . "
 			}
-			.{$this->MainClass} .button:hover>.media{
+			.{$this->MainClass} .anchor:hover>.media{
 				background-size: auto 70%;" .
 			(($this->AllowAnimate) ? \MiMFa\Library\Style::UniversalProperty("filter", "none") : "") .
 			\MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->MainClass} .button>.media>span {
+			.{$this->MainClass} .anchor>.media>span {
 				text-shadow: 0px 5px 10px #000000aa;
 				display:none;
 			}
 			" . (($this->AllowLabels) ? "
-			.{$this->MainClass} .button:hover>.media>span {
+			.{$this->MainClass} .anchor:hover>.media>span {
 				display:block;
 			}
 			" : "") . "
 
-			.{$this->MainClass} .button:not(:last-child) {
+			.{$this->MainClass} .anchor:not(:last-child) {
 				border-right: none; /* Prevent double borders */
 			}
 			" .
 			(($this->AllowMiddle) ? "
-				.{$this->MainClass} .button.middle {
+				.{$this->MainClass} .anchor.middle {
 					margin-top: -" . ($this->Height * 0.25) . "px;
 					height: " . ($this->Height * 1.25) . "px;
 					border-radius: 100% 100% 0px 0px;
@@ -118,21 +118,21 @@ class BarMenu extends Module
 					border-bottom: none !important;
 					outline: none !important;
 				}
-				.{$this->MainClass} .button.middle:hover{
+				.{$this->MainClass} .anchor.middle:hover{
 					box-shadow:var(--shadow-2);
 				}
 
-				.{$this->MainClass} .button.right{
+				.{$this->MainClass} .anchor.right{
 					border-radius: 35% 0px 0px 0px;
 				}
-				.{$this->MainClass} .button.left{
+				.{$this->MainClass} .anchor.left{
 					border-radius: 0px 35% 0px 0px;
 				}" : ""
 			) . ($this->AllowSides ? "
-				.{$this->MainClass} .button.first{
+				.{$this->MainClass} .anchor.first{
 					border-radius: 50% 0px 0px 0px;
 				}
-				.{$this->MainClass} .button.last{
+				.{$this->MainClass} .anchor.last{
 					border-radius: 0px 50% 0px 0px;
 				}" : "")
 		);
@@ -165,14 +165,12 @@ class BarMenu extends Module
 						$cls = $rtl ? "left" : "right";
 					elseif ($ism = ((($i - 1) <= $m) && (($i + 1) >= $m)))
 						$cls = "middle";
-					yield Struct::Button(
+					yield Struct::Anchor(
 						Struct::Media(
 							$this->AllowLabels ? Struct::Span(getBetween($item, "Title", 'Name')) : null,
 							getBetween($item, "Image", 'Icon')
-						)
-						,
-						get($item, 'Path') ?? ""
-						,
+						),
+						get($item, 'Path') ?? "",
 						['class' => "item $cls"],
 						get($item, "Attributes") ?? []
 					);

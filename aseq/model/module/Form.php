@@ -170,7 +170,7 @@ class Form extends Module
 					justify-content: center;
 					align-content: center;
 					flex-direction: column;
-					align-items: center;
+				    align-items: flex-start;
 				}
 				.{$this->MainClass} form {
     				position: relative;

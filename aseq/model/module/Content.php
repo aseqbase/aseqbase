@@ -274,7 +274,7 @@ class Content extends Module
           $this->CommentForm->SubjectLabel =
                $this->CommentForm->AttachLabel =
                null;
-          $this->CheckAccess = fn($item) => \_::$User->HasAccess(getValid($item, 'Access', 0));
+          $this->CheckAccess = fn($item) => \_::$User->HasAccess(get($item, 'Access')?:0);
      }
 
      public function BeforeHandle()
@@ -319,6 +319,10 @@ class Content extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
+			.{$this->MainClass} h1.heading{
+                    padding-top: 0px;
+                    margin-top: 0px;
+			}
 			.{$this->MainClass} .heading{
                     text-align: start;
                     padding: 0px;
@@ -439,8 +443,7 @@ class Content extends Module
      {
           return Struct::Rack(
                ($this->AllowDescription = ($this->AllowDescription ? $this->GetExcerpt() : null)) . $this->GetImage(),
-               ["class" => "description"]
-               ,
+               ["class" => "description"],
                $attributes
           );
      }
@@ -470,7 +473,9 @@ class Content extends Module
                     module("MediaFrame");
                     if ($p_showmorebutton)
                          return join(PHP_EOL, loop($paths, action: function ($v, $k) use ($p_image, $p_morebuttontext) {
-                              return (new MediaFrame($v, logo: $p_image, name: is_numeric($k) ? $p_morebuttontext : $k))->Render();
+                              $mf = new MediaFrame($v, logo: $p_image, name: is_numeric($k) ? $p_morebuttontext : $k);
+                              $mf->Attributes = ["class"=>"be flex center middle"];
+                              return $mf->Handle();
                          })) . Struct::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
                               return Struct::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
                          }), ["class" => "more view md-show"]);

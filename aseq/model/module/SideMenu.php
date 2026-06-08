@@ -428,38 +428,39 @@ class SideMenu extends Module
 		$ind++;
 		$itms = loop(get($item, "Items") ?? [], fn($itm) => $this->CreateItem($itm, $ind));
 		$count = count($itms);
-		$path = $count ? "if(this.nextElementSibling.classList.contains('active'))
+		$path = getBetween($item, "Path");
+		$pathT = "if(this.parentElement.parentElement.nextElementSibling.classList.contains('active'))
 			_('.{$this->MainClass} ul.sub-items').removeClass('active');
 		else {
 			_(getQuery(this.parentElement.parentElement)+' .active').removeClass('active');
-			this.nextElementSibling.classList.add('active');
-		}" : getBetween($item, "Path");
+			this.parentElement.parentElement.nextElementSibling.classList.add('active');
+		}";
 		$act = endsWith(\_::$Address->UrlBase, $path) ? 'active' : '';
 		return Struct::Item(
 			($ind <= 2 ? Struct::Button(
 				Struct::Box(
-					Struct::Box(
+					Struct::Anchor(
 						($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
 						($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name")) ? Struct::Span($t, null, ["class"=>"hoverable"]) : "")
-					, ["class"=>"title"]) .
-					($count > 0 ? $this->ToggleLabel : ""),
+					, $path, ["class"=>"title"]) .
+					($count > 0 ? Struct::Action($this->ToggleLabel, $pathT) : ""),
 					["class" => "be flex justify"]
 				) .
 				($this->AllowItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description hoverable"]) : ""),
-				$path,
+				null,
 				get($item, "Attributes")
 			) :
 				Struct::Button(
 					Struct::Box(
-						Struct::Box(
+						Struct::Anchor(
 							($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
 							($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name")) ? Struct::Span($t, null, ["class"=>"hoverable"]) : "")
-						, ["class"=>"title"]) .
-						($count > 0 ? $this->ToggleLabel : ""),
+						, $path, ["class"=>"title"]) .
+						($count > 0 ? Struct::Action($this->ToggleLabel, $pathT) : ""),
 						["class" => "be flex justify"]
 					) .
 					($this->AllowSubItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description hoverable"]) : ""),
-					$path,
+					null,
 					get($item, "Attributes")
 				)
 			) .

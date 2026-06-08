@@ -463,9 +463,9 @@ class Storage
 		$ext = strtolower($ext);
 		$ext = array_map("ord", str_split($ext));
 		$l = count($ext);
-		$r = $l>0?256-(122-max(min(122,$ext[0]),97))*10:175;
-		$g = $l>1?256-(122-max(min(122,$ext[1]),97))*10:175;
-		$b = $l>2?256-(122-max(min(122,$ext[2]),97))*10:175;
+		$r = $l>0?250-(120-max(min(120,$ext[0]),97))*10:170;
+		$g = $l>1?250-(120-max(min(120,$ext[1]),97))*10:170;
+		$b = $l>2?250-(120-max(min(120,$ext[2]),97))*10:170;
 		return "rgb($r,$g,$b)";
 	}
 

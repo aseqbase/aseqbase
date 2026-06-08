@@ -1,5 +1,7 @@
 <?php
 namespace MiMFa\Module;
+
+use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
 
 module("Form");
@@ -20,6 +22,7 @@ class SignRecoverForm extends Form
 	public $PasswordPlaceHolder = "Password";
 	public $PasswordConfirmationPlaceHolder = "Confirm Password";
 
+	public $ResetPassword = false;
 	public $PasswordPattern = "/[^\"'`]{8,100}/";
 	public $PasswordTip = "Your password should be strong and between 8-100 characters!";
 
@@ -52,7 +55,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	}
 	public function GetFields()
 	{
-		if (!is_null($rrk = received($this->TokenKey))) {
+		if ($this->ResetPassword = !is_null($rrk = received($this->TokenKey))) {
 			yield Struct::HiddenInput($this->TokenKey, $rrk);
 			yield Struct::Rack(
 				Struct::LargeSlot(
@@ -134,7 +137,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	{
 		try {
 			$received = receivePost();
-			if (isValid($received, "Password") && received($this->TokenKey)) {
+			if ($this->ResetPassword = (isValid($received, "Password") && received($this->TokenKey))) {
 				$res = $this->ReceiveRecoveryEmail();
 				if ($res)
 					return $this->GetSuccess("Dear '" . \_::$User->TemporaryName . "', your password changed successfully!");
@@ -144,11 +147,8 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 				\_::$User->Find(get($received, "Signature"));
 				$res = $this->SendRecoveryEmail();
 				if ($res === true)
-					return $this->GetSuccess("Dear user, the reset password sent to your email successfully!");
-				elseif ($res === false)
-					return $this->GetError("Something went wrong!");
-				else
-					return $this->GetError($res);
+					return $this->GetSuccess("Dear user, the reset password sent to your email (".Convert::ToSecret(\_::$User->TemporaryEmail, "*", 2, 5).") successfully!");
+				else return $this->GetError("Something went wrong!");
 			} else
 				return $this->GetWarning("Please fill fields correctly!");
 		} catch (\Exception $ex) {
@@ -159,9 +159,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 
 	/**
 	 * Send a Recovery Email
-	 * @param string $emailFrom Sender
-	 * @param string $emailTo Receiver
-	 * @param string The email text or html contents, contains:
+	 * @param string $content The email text or html contents, contains:
 	 * $HYPERLINK: for the reset password hyperlink tag
 	 * $LINK: for the reset password link
 	 * $PATH: for the reset password link address

@@ -19,8 +19,8 @@ if (\_::$Front->AllowTranslate) {
 }
 pod($module, $data);
 $module->Render();
-response(Struct::Script("
+script("
 	function viewSideMenu(show){
 		{$module->MainClass}_ViewSideMenu(show);
 	}
-"));
+");

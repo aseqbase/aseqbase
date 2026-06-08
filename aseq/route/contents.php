@@ -1,6 +1,7 @@
 <?php
 use MiMFa\Library\Convert;
 $received = receive();
+$data = $data??[];
 $computeData = get($data, "Compute") ?? [];
 $filter = pop($computeData, "Filter") ?? [];
 $cat = pop($filter, "Category") ?? get($received, "Category");

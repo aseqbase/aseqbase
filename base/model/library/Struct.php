@@ -2310,12 +2310,25 @@ class Struct
     public static function Button($content, $action = null, ...$attributes)
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
-            //$action = "load(" . Script::Convert($action) . ", ".Script::Convert(self::PopAttribute($attributes, "Target")??"_self").")";
-            return self::Element(__($content), "a", ["class" => "output button", "type" => "button", "href" => $action], $attributes);
+            $action = Script::Load($action);
+            // return self::Element(__($content), "a", ["class" => "output button", "type" => "button", "href" => $action], $attributes);
         return self::Element(__($content), "button", ["class" => "output button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
     }
     /**
-     * The \<BUTTON\> or \<A\> HTML Tag
+     * The \<ACTION\> HTML Tag
+     * @param mixed $content The content of the Tag
+     * @param string|null|array|callable $action The source path or onclick event script, (Use class names with full namespaces in callable references)
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Action($content, $action = null, ...$attributes)
+    {
+        if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
+            $action = "load(" . Script::Convert($action) . ")";
+        return self::Element($content, "action", ["class" => "output action"], $action ? ["onclick" => $action] : [], $attributes);
+    }
+    /**
+     * An \<I\> or \<ACTION\> HTML Tag
      * @param mixed $content The source icon image or the regular name
      * @param string|null|array|callable $action The source path or onclick event script, (Use class names with full namespaces in callable references)
      * @param mixed $attributes Other custom attributes of the Tag
@@ -2330,17 +2343,17 @@ class Struct
         return self::Action(self::Icon($content, null), $action, ["class" => "output icon"], $attributes);
     }
     /**
-     * The \<ACTION\> HTML Tag
+     * An \<A\> or \<ACTION\> HTML Tag
      * @param mixed $content The content of the Tag
      * @param string|null|array|callable $action The source path or onclick event script, (Use class names with full namespaces in callable references)
      * @param mixed $attributes Other custom attributes of the Tag
      * @return string
      */
-    public static function Action($content, $action = null, ...$attributes)
+    public static function Anchor($content, $action = null, ...$attributes)
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
-            $action = "load(" . Script::Convert($action) . ")";
-        return self::Element($content, "action", ["class" => "output action"], $action ? ["onclick" => $action] : [], $attributes);
+            return self::Element(__($content), "a", ["class" => "output anchor", "href" => $action], $attributes);
+        return self::Element(__($content), "action", ["class" => "output anchor" ], $action ? ["onclick" => $action] : [], $attributes);
     }
     #endregion
 

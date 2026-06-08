@@ -187,7 +187,6 @@ class General extends Template
 			body>nav:has(.inside) ul:not(.sub-items)>li {
 				background-color: transparent;
 				color: inherit;
-				display: inline-block;
 			}
 			body>nav:has(.inside) ul:not(.sub-items)>li.active{
 				box-shadow: var(--shadow-2);

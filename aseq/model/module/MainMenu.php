@@ -93,6 +93,31 @@ class MainMenu extends Module
 				list-style-type: none;
 				margin: 0;
 				padding: 0;
+				display: flex;
+				align-items: center;
+				flex-direction: row;
+				flex-wrap: wrap;
+				align-content: center;
+				justify-content: flex-start;
+			}
+			body>nav:has(.inside) ul:not(.sub-items)>li>.button {
+				display: flex;
+				align-items: center;
+				flex-direction: row;
+				flex-wrap: no-wrap;
+				align-content: center;
+				justify-content: center;
+			}
+			body>nav:has(.inside) .dropdown-items ul>li {
+				display: flex;
+				flex-wrap: nowrap;
+				flex-direction: row;
+				align-items: center;
+				justify-content: flex-start;
+    			width: max-content;
+			}
+			body>nav:has(.inside) .dropdown-items ul>li>* {
+				width: max-content;
 			}
 
 			.{$this->MainClass} .dropdown-items {
@@ -258,23 +283,22 @@ class MainMenu extends Module
 		$ind++;
 		$itms = loop(get($item, "Items") ?? [], fn($itm) => $this->CreateItem($itm, $ind));
 		$count = count($itms);
-		return Struct::Item(
-			($ind <= 2 ? Struct::Button(
-				($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
-				($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name")) ? __($t) : "") .
-				($count > 0 ? $this->ToggleLabel : "") .
-				($this->AllowItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description"]) : ""),
-				$path,
-				get($item, "Attributes")
-			) :
-				Struct::Button(
-					($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
-					($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name")) ? __($t) : "") .
-					($count > 0 ? $this->ToggleLabel : "") .
-					($this->AllowSubItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description"]) : ""),
+		return Struct::Item(Struct::Button(
+				($ind <= 2 ? Struct::Anchor(
+					($this->AllowItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
+					($this->AllowItemsTitle && ($t = getBetween($item, "Title", "Name")) ? __($t) : "") .
+					($this->AllowItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description"]) : ""),
 					$path,
 					get($item, "Attributes")
-				)
+				) :
+					Struct::Anchor(
+						($this->AllowSubItemsImage && ($t = getBetween($item, "Icon", "Image")) ? Struct::Image(null, $t) : "") .
+						($this->AllowSubItemsTitle && ($t = getBetween($item, "Title", "Name")) ? __($t) : "") .
+						($this->AllowSubItemsDescription && ($t = get($item, "Description")) ? Struct::Division(__($t), ["class" => "description"]) : ""),
+						$path,
+						get($item, "Attributes")
+					)
+				) . ($count > 0 ? $this->ToggleLabel : "")
 			) .
 			($count > 0 ?
 				Struct::Division(
