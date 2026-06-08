@@ -1,5 +1,5 @@
 <?php
-$path = implode("/", array_slice(explode("/", \_::$Address->UrlRoute), 1));
+$path = urldecode(implode("/", array_slice(explode("/", \_::$Address->UrlRoute), 1)));
 $parent = compute( "tag/get", ["Name" =>$path]);
 $computeData = pop($data, "Compute") ?? [];
 $filter = pop($computeData, "Filter") ?? [];
@@ -15,4 +15,3 @@ return route("contents", [
     ...$parent??[],
     ...$data??[]
 ]);
-?>

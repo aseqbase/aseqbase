@@ -213,6 +213,12 @@ class Content extends Module
       * @var bool
       * @category Parts
       */
+     public $Transformable = true;
+
+     /**
+      * @var bool
+      * @category Parts
+      */
      public $AllowAttaches = true;
      /**
       * The label text of Attaches part
@@ -267,7 +273,7 @@ class Content extends Module
           $this->AllowComments = \_::$User->AllowReadComment;
           $this->AllowCommentsAccess = \_::$User->ReadCommentAccess;
           $this->Root = $this->Root ?? \_::$Address->ContentRootUrlPath;
-          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Address->ContentRootUrlPath;
+          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Address->CategoryRootUrlPath;
           $this->CommentForm = new CommentForm();
           $this->CommentForm->MessageType = "texts";
           $this->CommentForm->Access = \_::$User->WriteCommentAccess;
@@ -452,7 +458,7 @@ class Content extends Module
           if (!$this->AllowContent)
                return null;
           $p_content = getValid($this->Item, 'Content', $this->Content);
-          return (isValid($p_content) ? Struct::Division(__(Struct::Convert($p_content), styling: true, referring: $this->AutoReferring), ["class" => "content"], $attributes) : null);
+          return (isValid($p_content) ? Struct::Division(!$this->Transformable?$p_content:__(Struct::Convert($p_content), styling: true, referring: $this->AutoReferring), ["class" => "content"], $attributes) : null);
      }
      public function GetSpecial()
      {

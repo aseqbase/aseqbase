@@ -2,20 +2,20 @@
 
 use MiMFa\Library\Convert;
 
-$path = implode("/", array_slice(explode("/", \_::$Address->UrlRoute), 1));
-$parent = compute( "category/get", ["Direction" =>$path]);
+$direction = urldecode(implode("/", array_slice(explode("/", \_::$Address->UrlRoute), 1)));
+$parent = compute( "category/get", ["Direction" =>$direction]);
 if(isEmpty($parent)) view(\_::$Front->DefaultViewName, ["Name" =>404]);
 else {
     $data = $data??[];
     (new Router())
-        ->Get(function ($router) use ($parent, $data, $path) {
+        ->Get(function ($router) use ($parent, $data, $direction) {
             $viewData = get($data, "View")??[];
             if(!is_array($viewData)) return Convert::By($viewData, $doc);
             $c = get($viewData, "ErrorHandler");
             if($c) return Convert::By($c, $router);
             $computeData = pop($data, "Compute") ?? [];
             $items = compute( "category/all", [
-                "Direction" =>$path,
+                "Direction" =>$direction,
                 ...$computeData??[]
             ]);
             

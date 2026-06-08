@@ -1675,9 +1675,9 @@ function data(...$hierarchy)
  */
 function runSequence($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null, ?string $extension = null, bool $require = false, bool $once = true)
 {
+	$directory = \_::$Address->RootDirectory;
 	try {
 		$depth = min($depth, count(\_::$Sequence));
-		$directory = \_::$Address->RootDirectory;
 		$res = [];
 		usingBefores($directory, $name);
 		for (; $origin <= $depth; $depth--)
@@ -1726,6 +1726,7 @@ function model($name, mixed $data = [], bool $print = true, string|int $origin =
  */
 function library($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
+	$used = null;
 	return using(\_::$Address->LibraryRootDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Library\\$used" : null;
 }
 /**
@@ -1737,6 +1738,7 @@ function library($name, mixed $data = [], bool $print = true, string|int $origin
  */
 function component($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
+	$used = null;
 	return using(\_::$Address->ComponentRootDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Component\\$used" : null;
 }
 /**
@@ -1748,6 +1750,7 @@ function component($name, mixed $data = [], bool $print = true, string|int $orig
  */
 function module($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
+	$used = null;
 	return using(\_::$Address->ModuleRootDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Module\\$used" : null;
 }
 /**
@@ -1759,6 +1762,7 @@ function module($name, mixed $data = [], bool $print = true, string|int $origin 
  */
 function template($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
+	$used = null;
 	return using(\_::$Address->TemplateRootDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Template\\$used" : null;
 }
 /**
@@ -1770,6 +1774,7 @@ function template($name, mixed $data = [], bool $print = true, string|int $origi
  */
 function plugin($name, mixed $data = [], bool $print = true, string|int $origin = 0, int $depth = 999999, string|null $alternative = null, $default = null)
 {
+	$used = null;
 	return using(\_::$Address->PluginRootDirectory, $name, $data, $print, $origin, $depth, $alternative, $default, once: true, used: $used) ? "\\MiMFa\\Plugin\\$used" : null;
 }
 
@@ -2109,6 +2114,8 @@ function set(&$object, $hierarchy)
 		} else {
 		$sat = [];
 		foreach ($hierarchy as $k => $v) {
+			$key = null;
+			$index = null;
 			take($object, $k, $key, $index);
 			if ($key)
 				if (is_null($index))
@@ -2138,6 +2145,8 @@ function pod(&$object, &$hierarchy)
 		} else {
 		$sat = [];
 		foreach ($hierarchy as $k => $v) {
+			$key = null;
+			$index = null;
 			take($object, $k, $key, $index);
 			if ($key) {
 				if (is_null($index))
@@ -2241,9 +2250,11 @@ function take($object, callable|string|int|null $sampler, &$key = null, int|null
 				if ($sampler($object, null, $index))
 					return $object;
 			} else
-				foreach ($object as $key => $value)
-					if ($sampler($value, $key, $index++))
+				foreach ($object as $k => $value)
+					if ($sampler($value, $k, $index++)){
+						$key = $k;
 						return $value;
+					}
 		}
 		$index = null;
 		return $default;
@@ -2265,6 +2276,7 @@ function take($object, callable|string|int|null $sampler, &$key = null, int|null
 		}
 	}
 	$index = null;
+	if(is_int($sampler)) return null;
 	return
 		isset($object->{$key = $sampler}) ? $object->$key : (
 			isset($object->{$key = strtoproper($sampler)}) ? $object->$key : (
@@ -2895,17 +2907,20 @@ function isMethod(string|int|null $method = null)
 	return getMethodIndex($method) === getMethodIndex();
 }
 
-function getClientIp($version = null): string|null
+function getClientIp(): string|null
 {
-	foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key) {
-		if (array_key_exists($key, $_SERVER) === true) {
-			foreach (explode(',', $_SERVER[$key]) as $ip)
-				$ip = trim($ip); // just to be safe
-			if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false)
-				return $version == 6 ? gethostbyaddr($ip) : $ip;
-		}
-	}
-	return null;
+	// Define a list of IP addresses for trusted proxies/load balancers
+    $trustedProxies = ['127.0.0.1']; // The actual proxy IPs here
+
+    $clientIp = $_SERVER['REMOTE_ADDR'];
+
+    // If the request came from a trusted proxy, trust the forwarded header
+    if (in_array($clientIp, $trustedProxies) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $forwardedIps = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        $clientIp = trim($forwardedIps[0]);
+    }
+
+    return $clientIp;
 }
 function getClientCode($key = null): string|null
 {

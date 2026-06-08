@@ -7,7 +7,7 @@ function findContent($router, &$data)
     $computeData = get($data, "Compute")??[];
     if(!is_array($computeData)) return Convert::By($computeData);
     $path = explode("/", trim(urldecode($router->CurrentRoute) ?? "", "/\\"));
-    $name = last($path);
+    $name = urldecode(last($path));
     if (count($path) > 1)
         $path = implode("/", array_slice($path, 0, count($path) - 1));
     else
@@ -18,7 +18,7 @@ function findContent($router, &$data)
         "Name"=>$name,
         "Filter" => [
             "Query"=> pop($filter, "Query")??getBetween($received, "Query")??$name,
-            "Category" => pop($filter, "Category")??getBetween($received, "Category")??$path,
+            "Category" => pop($filter, "Category")??getBetween($received, "Category")??urldecode($path),
             "Type"=> pop($filter, "Type")??get($received, "Type"),
             "Tag"=> pop($filter, "Tag")??get($received, "Tag"),
             ...$filter??[]

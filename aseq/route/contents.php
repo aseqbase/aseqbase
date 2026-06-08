@@ -1,7 +1,7 @@
 <?php
 use MiMFa\Library\Convert;
-$received = receive();
 $data = $data??[];
+$received = receive();
 $computeData = get($data, "Compute") ?? [];
 $filter = pop($computeData, "Filter") ?? [];
 $cat = pop($filter, "Category") ?? get($received, "Category");
@@ -10,7 +10,7 @@ $tag = pop($filter, "Tag") ?? get($received, "Tag");
 $items = !is_array($computeData)?Convert::By($computeData):compute(pop($computeData, "ComputeName") ?? "content/all", [
     "Filter" => [
         "Query" => pop($filter, "Query") ?? get($received, "Query"),
-        "Category" => $cat??\_::$Address->UrlRoute,
+        "Category" => $cat??urldecode(\_::$Address->UrlRoute),
         "Type" => $type,
         "Tag" => $tag,
         ...$filter??[]
@@ -31,7 +31,7 @@ if (isEmpty($items)) {
 }
 
 view(pop($viewData, "ViewName") ?? "contents", [
-    "Title" => pop($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", \_::$Address->UrlResource), $cat, pop($data, "DefaultTitle") ?? "Contents"),
+    "Title" => pop($viewData, "Title") ??  between($type, $tag, preg_replace("/\..*$/", "", urldecode(\_::$Address->UrlResource)), $cat, pop($data, "DefaultTitle") ?? "Contents"),
     "Root" => pop($viewData, "Root") ?? \_::$Address->ContentRootUrlPath,
     "Description" => pop($viewData, "Description"),
     "Items" => $items,

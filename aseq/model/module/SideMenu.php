@@ -122,10 +122,6 @@ class SideMenu extends Module
 				box-shadow: var(--shadow-2);
 			}
 
-			$activeselector .main-items .item :is(a, a:visited){
-				column-gap: var(--size-1);
-				" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
-			}
 			.{$this->MainClass} .row{
 				margin: 0px;
 			}
