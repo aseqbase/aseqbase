@@ -454,7 +454,7 @@ class Table extends Module
     {
         return Struct::Style("
 		.dataTables_wrapper :is(input, select, textarea) {
-			backgroound-color: var(--back-color-input);
+			background-color: var(--back-color-input);
 			color: var(--fore-color-input);
 		}
 		.{$this->MainClass} :is(.toolbar, .toolbar>*){
@@ -697,7 +697,7 @@ class Table extends Module
 
         $prefix = uniqid("b_");
         $toolBar = fn($add = true, $import = false, $export = false, $clear = false, $search = false, $class = "toolbar", $default = false) =>
-            $aaccess || $iaccess || $eaccess || $caccess || $saccess ? Struct::Division(
+            ($aaccess || $iaccess || $eaccess || $caccess || $saccess) ? Struct::Division(
                 Struct::Box(
                     ($default ? "" : Convert::ToString($this->PrependToolsBar)) . (!$default && $this->ToolsBar ? Convert::ToString($this->ToolsBar) :
                         ($add === false || !$aaccess ? "" :
@@ -1011,6 +1011,17 @@ class Table extends Module
                                 " . $this->Modal->InitializeScript(null, null, '${data}') . "
                             }
                         );
+                    }" : "") . (\_::$User->HasAccess($this->ExportAccess) ? "
+                    function {$this->Modal->MainClass}_Export(defaultValues = null, path = null){
+                        sendRequest('{$this->Method}', path, {{$this->SecretRequestKey}:'{$this->ExportSecret}','{$this->KeyColumn}':'{$this->ExportSecret}'}, `.{$this->MainClass}`,
+                            (data, err)=>{
+                                " . $this->Modal->InitializeScript(null, null, '${data}') . "
+                                if(defaultValues)
+                                    for(x in defaultValues)try{
+                                        document.querySelector('.{$this->Modal->MainClass} *[name=\"'+x+'\"]').value = defaultValues[x];
+                                    }catch{}
+                            }
+                        );
                     }" : "") . (\_::$User->HasAccess($this->SearchAccess) ? ($this->FilterColumns ?
                     join("\n", loop($this->FilterColumns, function ($v, $k) {
                         if(is_numeric($k)){
@@ -1035,17 +1046,6 @@ class Table extends Module
                     (\_::$User->HasAccess($this->ImportAccess) ? "
                     function {$this->Modal->MainClass}_Import(defaultValues = null, path = null){
                         send('{$this->Method}', path, {{$this->SecretRequestKey}:'{$this->ImportSecret}','{$this->KeyColumn}':'{$this->ImportSecret}'}, `.{$this->MainClass}`,
-                            (data, err)=>{
-                                " . $this->Modal->InitializeScript(null, null, '${data}') . "
-                                if(defaultValues)
-                                    for(x in defaultValues)try{
-                                        document.querySelector('.{$this->Modal->MainClass} *[name=\"'+x+'\"]').value = defaultValues[x];
-                                    }catch{}
-                            }
-                        );
-                    }" : "") . (\_::$User->HasAccess($this->ExportAccess) ? "
-                    function {$this->Modal->MainClass}_Export(defaultValues = null, path = null){
-                        sendRequest('{$this->Method}', path, {{$this->SecretRequestKey}:'{$this->ExportSecret}','{$this->KeyColumn}':'{$this->ExportSecret}'}, `.{$this->MainClass}`,
                             (data, err)=>{
                                 " . $this->Modal->InitializeScript(null, null, '${data}') . "
                                 if(defaultValues)
