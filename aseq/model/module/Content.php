@@ -1,11 +1,10 @@
 <?php
 namespace MiMFa\Module;
-
-use MiMFa\Library\Convert;
+module("CommentForm");
 use MiMFa\Library\Struct;
-use Override;
-
-module("ContentCollection");
+use MiMFa\Library\Style;
+use MiMFa\Library\Convert;
+use MiMFa\Module\CommentForm;
 /**
  * To show data as posts
  *@copyright All rights are reserved for MiMFa Development Group
@@ -13,219 +12,681 @@ module("ContentCollection");
  *@see https://aseqbase.ir, https://github.com/aseqbase/aseqbase
  *@link https://github.com/aseqbase/aseqbase/wiki/Modules See the Documentation
  */
-class CoverCollection extends ContentCollection
+class Content extends Module
 {
-    public $ShadeRtlAngle = "-90deg";
-    public $ShadeLtrAngle = "90deg";
-    public $ShadeSize = "40%";
-    public $ShadeColor = "var(--back-color)";
-    public $CoverSize = "100% auto";
-    public $HoverSize = "105% auto";
+     public $Root = null;
+     public $CollectionRoot = null;
 
-    #[Override]
-    public function GetStyle()
-    {
-        return Struct::Style("
-            .{$this->MainClass} {
-                gap: var(--size-max);
-            }
-            .{$this->MainClass} .heading {
-                text-align: start;
-                margin-top: 0px;
-            }
-            .{$this->MainClass}>.row {
-                gap: var(--size-max);
-            }
-            .{$this->MainClass} article.item{
-                background-repeat: no-repeat;
-                background-position: center;
-                background-size: {$this->CoverSize};
-                padding: 0px;
-                overflow: hidden;
-                transition: var(--transition-1);
-            }
-            .{$this->MainClass} article.item:hover{
-                background-size: {$this->HoverSize};
-            }
-            .{$this->MainClass} article.item > .inside:dir(ltr){
-                background-image: linear-gradient({$this->ShadeLtrAngle},{$this->ShadeColor} {$this->ShadeSize}, transparent);
-            }
-            .{$this->MainClass} article.item > .inside:dir(rtl){
-                background-image: linear-gradient({$this->ShadeRtlAngle},{$this->ShadeColor} {$this->ShadeSize}, transparent);
-            }
-            .{$this->MainClass} article.item > .inside{
-                padding: var(--size-5) var(--size-3);
-                width: stretch;
-                height: stretch;
-            }
-            .{$this->MainClass} article.item > .inside .more{
-                width: 100%;
-                text-align: end;
-            }
+     public string|null $TagName = "article";
+     public $Class = "container";
+     public $CommentForm = null;
+     /**
+      * A Check Access function
+      */
+     public $CheckAccess = null;
+
+     /**
+      * The whole document Item
+      * @var object|array|null
+      */
+     public $Item = null;
+     public $CompressPath = false;
+
+     /**
+      * The default Path for more button reference
+      * @var string|null
+      */
+     public $Path = null;
+     /**
+      * The featured image
+      * @var string|null
+      */
+     public $Image = null;
+
+     /**
+      * The Width of Image
+      * @var string
+      */
+     public $ImageWidth = "auto";
+     /**
+      * The Height of thumbnail preshow
+      * @var string
+      */
+     public $ImageHeight = "auto";
+     /**
+      * The Minimum Width of Image
+      * @var string
+      */
+     public $ImageMinWidth = "auto";
+     /**
+      * The Minimum Height of Image
+      * @var string
+      */
+     public $ImageMinHeight = "10vmax";
+     /**
+      * The Maximum Width of Image
+      * @var string
+      */
+     public $ImageMaxWidth = "100%";
+     /**
+      * The Maximum Height of thumbnail preshow
+      * @var string
+      */
+     public $ImageMaxHeight = "40vh";
+
+     /**
+      * @var string|null
+      * @category Part
+      */
+     public $Animation = "flip-up";
+
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowTitle = true;
+     /**
+      * Read more through clicking on the title
+      * @var bool
+      * @category Part
+      */
+     public $LinkedTitle = true;
+
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowDetails = true;
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowRoute = true;
+
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowTags = true;
+     /**
+      * The label text of Tags
+      * @var string|array|null
+      * @example ["News"=>"Find More: ", "Article"=>"Keywords: ", "Document: "=>"Keywords: ", "Post"=>"", "Default"=>"Tags: "]
+      * @category Parts
+      */
+     public $TagsLabel = ["News" => "'Find More': ", "Article" => "'Keywords': ", "Document" => "'Keywords': ", "Post" => "", "Default" => "'Tags': "];
+     /**
+      * Order of Tags to show
+      * @var string|array|null
+      * @example ["News"=>10, "Default"=>5]
+      * @category Parts
+      */
+     public $TagsOrder = ["News" => "`CreateTime` DESC", "Post" => "`CreateTime` DESC", "Default" => ""];
+     /**
+      * Maximum number of Tags to show
+      * @var array|int
+      * @example ["News"=>10, "Default"=>5]
+      * @category Parts
+      */
+     public $TagsCount = ["News" => 20, "Article" => 10, "Default" => 15];
+
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowRelateds = true;
+     /**
+      * The label text of Related posts
+      * @var string|array|null
+      * @example ["News"=>"Read Also: ", "Default"=>"Relateds: "]
+      * @category Parts
+      */
+     public $RelatedsLabel = ["News" => "'Read Also': ", "Default" => "'Relateds': "];
+     /**
+      * Order of Related posts to show
+      * @var array|int
+      * @example ["News"=>10, "Default"=>5]
+      * @category Parts
+      */
+     public $RelatedsOrder = ["News" => "`CreateTime` DESC", "Post" => "`Priority` DESC, `CreateTime` DESC", "Default" => "`UpdateTime` DESC"];
+     /**
+      * Maximum number of Related posts to show
+      * @var array|int
+      * @example ["News"=>10, "Default"=>5]
+      * @category Parts
+      */
+     public $RelatedsCount = ["News" => 10, "Default" => 4];
+
+     public $AllowLeaveComment = true;
+
+     public $AllowModifyComment = true;
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowComments = true;
+     /**
+      * @var int
+      * @category Parts
+      */
+     public $AllowCommentsAccess = 0;
+     /**
+      * @var string|null
+      * @category Management
+      */
+     public $CommentsLimitation = "ORDER BY `CreateTime` ASC, `UpdateTime` ASC";
+
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowCreateTime = true;
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowUpdateTime = false;
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowAuthor = true;
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowStatus = false;
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowButtons = true;
+     /**
+      * The label text of More button
+      * @var string|array|null
+      * @example ["News"=>"Source" ,"Post"=>"Refer","Text"=>"Refer","File"=>"Download","Document"=>"Download","Default"=>"Visit"]
+      * @category Excerption
+      */
+     public $ButtonsLabel = ["News" => "Source", "Post" => "Refer", "Text" => "Refer", "File" => "Download File", "Document" => "Download Document", "Video" => "Watch", "Audio" => "Listen", "Image" => "Look", "Default" => "Visit"];
+
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $Transformable = true;
+
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowAttaches = true;
+     /**
+      * The label text of Attaches part
+      * @var string|array|null
+      * @example ["News"=>"Read Also: ", "Default"=>"Relateds: "]
+      * @category Parts
+      */
+     public $AttachesLabel = ["Default" => "'Attaches':"];
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowImage = true;
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowContent = true;
+     /**
+      * @var bool
+      * @category Parts
+      */
+     public $AllowDescription = true;
+     /**
+      * @var bool
+      * @category Excerption
+      */
+     public $AutoExcerpt = false;
+     /**
+      * Allow to analyze all text and linking categories and tags to their descriptions, to improve the website's SEO
+      * @var mixed
+      */
+     public $AutoReferring = true;
+     /**
+      * The length of selected Excerpt text characters
+      * @var int
+      * @category Excerption
+      */
+     public $ExcerptLength = 150;
+     /**
+      * @var string
+      * @category Excerption
+      */
+     public $ExcerptSign = "...";
+     public $Template = ["Default" => null];
+
+
+     function __construct()
+     {
+          parent::__construct();
+          $this->AllowLeaveComment = \_::$User->AllowWriteComment;
+          $this->AllowComments = \_::$User->AllowReadComment;
+          $this->AllowCommentsAccess = \_::$User->ReadCommentAccess;
+          $this->Root = $this->Root ?? \_::$Address->ContentRootUrlPath;
+          $this->CollectionRoot = $this->CollectionRoot ?? \_::$Address->CategoryRootUrlPath;
+          $this->CommentForm = new CommentForm();
+          $this->CommentForm->MessageType = "texts";
+          $this->CommentForm->Access = \_::$User->WriteCommentAccess;
+          $this->CommentForm->SubjectLabel =
+               $this->CommentForm->AttachLabel =
+               null;
+          $this->CheckAccess = fn($item) => \_::$User->HasAccess(get($item, 'Access')?:0);
+     }
+
+     public function BeforeHandle()
+     {
+          $item = $this->Item;
+          $p_type = get($item, 'Type');
+          $p_class = get($item, 'class');
+          $this->Class .= " $p_type $p_class";
+          if ($this->Animation)
+               $this->Attributes = "data-aos='{$this->Animation}'";
+     }
+
+     public function Set()
+     {
+          $p_meta = getValid($this->Item, 'MetaData', null);
+          if ($p_meta !== null) {
+               $p_meta = Convert::FromJson($p_meta);
+               set($this, $p_meta);
+               return true;
+          }
+          return false;
+     }
+
+     public function GetStyle()
+     {
+          $ralign = \_::$Front->Translate->Direction == "rtl" ? "left" : "right";
+          return Struct::Style("
+			.{$this->MainClass} {
+				height: fit-content;
+				background-Color: var(--back-color-special);
+				color: var(--fore-color-special);
+                    margin-top: var(--size-3);
+                    margin-bottom: var(--size-3);
+                    padding: var(--size-4) max(2vw,var(--size-3));
+				font-size:  var(--size-0);
+				box-shadow:  var(--shadow-1);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+
+			.{$this->MainClass} .title{
+				margin-bottom: var(--size-2);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+
+			.{$this->MainClass} h1.heading{
+                    padding-top: 0px;
+                    margin-top: 0px;
+			}
+			.{$this->MainClass} .heading{
+                    text-align: start;
+                    padding: 0px;
+                    margin-bottom: calc(var(--size-0) / 2);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .details{
+				font-size: var(--size-0);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .details .route{
+                    opacity: 0.9;
+				padding-$ralign: var(--size-0);
+			}
+			.{$this->MainClass} .buttons{
+				text-align: $ralign;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .buttons>.button{
+            	     opacity: 0;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass}:hover .buttons>.button{
+            	     opacity: 1;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .tags a{
+                    line-height: 100%;
+				background-Color: inherit;
+				color: inherit;
+            		padding: calc(var(--size-0) / 5) calc(var(--size-0) / 4);
+				border-radius: var(--radius-1);
+            		margin: calc(var(--size-0) / 3);
+			}
+			.{$this->MainClass} .relateds a{
+                	display: block;
+				background-Color: inherit;
+				color: inherit;
+				text-align: initial;
+            		padding: calc(var(--size-0) / 3) calc(var(--size-0) / 2);
+            		margin: calc(var(--size-0) / 3) 0px;
+			}
+			/* Style the images inside the grid */
+			.{$this->MainClass} .description .image {
+				width: $this->ImageWidth;
+				height: $this->ImageHeight;
+				min-height: $this->ImageMinHeight;
+				min-width: $this->ImageMinWidth;
+				max-height: $this->ImageMaxHeight;
+				max-width: $this->ImageMaxWidth;
+				overflow: hidden;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .description{
+            	     font-size: var(--size-2);
+                    gap: var(--size-2);
+                    text-align: justify;
+				position: relative;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			.{$this->MainClass} .content{
+                    line-height: 2em;
+                    font-size: var(--size-1);
+                    text-align: justify;
+				padding-top: var(--size-3);
+				padding-bottom: var(--size-3);
+			}
+               .{$this->MainClass}>:not(.title, .description, .content){
+                    padding-top: var(--size-max);
+                    padding-bottom: var(--size-max);
+               }
         ");
-    }
-    #[Override]
-    public function GetItemInner(array $item, int $index)
-    {
-        $rout = null;
-        if ($this->AllowRoot) {
-            module("Route");
-            $rout = new \MiMFa\Module\Route();
-            $rout->Class = "route";
-            $rout->TagName = "span";
-        }
-        $p_meta = getValid($item, 'MetaData', null);
-        if ($p_meta !== null) {
-            $p_meta = Convert::FromJson($p_meta);
-            pod($this, $p_meta);
-        }
-        $p_meta = null;
-        $p_id = get($item, 'Id');
-        $p_type = get($item, 'Type');
-        $p_class = get($item, 'Class');
-        $p_image = getValid($item, 'Image', $this->DefaultImage);
-        $p_name = getBetween($item, 'Name', 'Title') ?? $this->DefaultTitle;
-        $p_title = getValid($item, 'Title', $p_name);
-        $p_description = getValid($item, 'Description', $this->DefaultDescription);
-        $p_content = getValid($item, 'Content', $this->DefaultContent);
+     }
 
-        $p_showexcerpt = $this->AllowExcerpt;
-        $p_showcontent = $this->AllowContent;
-        $p_showdescription = $this->AllowDescription;
-        $p_showimage = $this->AllowImage;
-        $p_showtitle = $this->AllowTitle;
-        $p_showmeta = $this->AllowMetaData;
-        $p_referring = $this->AutoReferring;
-        $p_inselflink = (!$p_showcontent && (!$p_showexcerpt || !$p_showdescription)) ? (getBetween($item, "Reference") ?? $this->Root . getValid($item, 'Name', $p_id)) : null;
-        if (!$this->CompressPath) {
-            $catDir = \_::$Back->Query->GetContentCategoryRoute($item);
-            if (isValid($catDir))
-                $p_inselflink = $this->CollectionRoot . trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
-        }
-        $p_path = first(Convert::FromJson(getValid($item, 'Path', $this->DefaultPath)));
-        if ($this->AllowRoot)
-            $rout->Set($p_inselflink);
-        $hasl = isValid($p_inselflink);
-        $p_showmorebutton = $hasl && $this->AllowMoreButton;
-        $p_morebuttontext = Convert::FromSwitch($this->MoreButtonLabel, $p_type);
-        $p_showpathbutton = isValid($p_path) && $this->AllowPathButton;
-        $p_pathbuttontext = Convert::FromSwitch($this->PathButtonLabel, $p_type);
+     public function GetInner()
+     {
+          $this->Set();
+          if (!$this->GetAccess())
+               return part(\_::$User->InHandlerPath, print: false);
 
-        $p_excerpt = null;
-        if ($this->AutoExcerpt) {
-            $p_description = __(Convert::ToExcerpt(
-                Convert::ToText($p_description),
-                0,
-                $this->ExcerptLength,
-                $this->ExcerptSign
-            ), styling: false, referring: $p_referring);
-            if ($p_showexcerpt)
-                $p_excerpt = __(Convert::ToExcerpt(
-                    Convert::ToText($p_content),
+          yield $this->GetTitle();
+          yield $this->GetDescription();
+          yield $this->GetContent();
+          yield $this->GetSpecial();
+          yield $this->GetAttaches();
+          yield $this->GetTags();
+          yield $this->GetRelateds();
+          yield $this->GetCommentsCollection();
+          yield $this->GetCommentForm();
+     }
+
+     public function GetAccess()
+     {
+          $p_status = intval(getValid($this->Item, 'Status', 1));
+          return !($p_status < 1 || !($this->CheckAccess)($this->Item));
+     }
+     public function GetTitle($attributes = null)
+     {
+          $p_id = get($this->Item, 'Id');
+          $p_name = getValid($this->Item, 'Name') ?? $p_id ?? $this->Title;
+          $nameOrId = $p_id ?? $p_name;
+          if (!$this->CompressPath) {
+               $catDir = \_::$Back->Query->GetContentCategoryRoute($this->Item);
+               if (isValid($catDir))
+                    $nameOrId = trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
+          }
+          return Struct::Rack(
+               Struct::MediumSlot(
+                    ($this->AllowTitle ? Struct::Heading1(getValid($this->Item, 'Title', $this->Title), $this->LinkedTitle ? $this->Root . $nameOrId : null, ['class' => 'heading']) : "") .
+                    $this->GetDetails($this->CollectionRoot . $nameOrId)
+               ) .
+               $this->GetButtons(),
+               ["class" => "title"],
+               $attributes
+          );
+     }
+     public function GetDescription($attributes = null)
+     {
+          return Struct::Rack(
+               ($this->AllowDescription = ($this->AllowDescription ? $this->GetExcerpt() : null)) . $this->GetImage(),
+               ["class" => "description"],
+               $attributes
+          );
+     }
+     public function GetContent($attributes = null)
+     {
+          if (!$this->AllowContent)
+               return null;
+          $p_content = getValid($this->Item, 'Content', $this->Content);
+          return (isValid($p_content) ? Struct::Division(!$this->Transformable?$p_content:__(Struct::Convert($p_content), styling: true, referring: $this->AutoReferring), ["class" => "content"], $attributes) : null);
+     }
+     public function GetSpecial()
+     {
+          $paths = Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
+          if (isEmpty($paths))
+               return null;
+          $p_type = get($this->Item, 'Type');
+          $p_morebuttontext = __(Convert::FromSwitch($this->ButtonsLabel, get($this->Item, 'Type')));
+          $p_image = getValid($this->Item, 'Image', $this->Image);
+          $p_showmorebutton = $this->AllowButtons && !isEmpty($paths);
+          $p_template = Convert::FromSwitch($this->Template, $p_type) ?? $p_type;
+          switch ($p_template) {
+               case "Media":
+               case "Image":
+               case "Audio":
+               case "Video":
+               case "Course":
+                    module("MediaFrame");
+                    if ($p_showmorebutton)
+                         return join(PHP_EOL, loop($paths, action: function ($v, $k) use ($p_image, $p_morebuttontext) {
+                              $mf = new MediaFrame($v, logo: $p_image, name: is_numeric($k) ? $p_morebuttontext : $k);
+                              $mf->Attributes = ["class"=>"be flex center middle"];
+                              return $mf->Handle();
+                         })) . Struct::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
+                              return Struct::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
+                         }), ["class" => "more view md-show"]);
+                    break;
+               default:
+                    if ($p_showmorebutton)
+                         return Struct::Division(loop($paths, function ($v, $k) use ($p_morebuttontext) {
+                              return Struct::Link(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn block btn outline"]);
+                         }), ["class" => "more view md-show"]);
+                    break;
+          }
+     }
+     public function GetExcerpt()
+     {
+          $excerpt = Struct::Convert(getValid($this->Item, 'Description') ?? (
+               $this->AutoExcerpt ? Convert::ToExcerpt(
+                    Convert::ToText(getValid($this->Item, 'Content', $this->Content)),
                     0,
                     $this->ExcerptLength,
                     $this->ExcerptSign
-                ), styling: false, referring: $p_referring);
-        } else
-            $p_description = __($p_description, styling: false, referring: $p_referring);
-
-        if ($p_showmeta) {
-            if ($this->AllowAuthor)
-                doValid(
-                    function ($val) use (&$p_meta) {
-                        $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
-                        if (!isEmpty($authorName))
-                            $p_meta .= " " . Struct::Link($authorName["Name"], \_::$Address->UserRootUrlPath . $authorName["Signature"], ["class" => "author"]);
-                    },
-                    $item,
-                    'AuthorId'
-                );
-            if ($this->AllowCreateTime)
-                doValid(
-                    function ($val) use (&$p_meta) {
-                        if (isValid($val))
-                            $p_meta .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'createtime']);
-                    },
-                    $item,
-                    'CreateTime'
-                );
-            if ($this->AllowUpdateTime)
-                doValid(
-                    function ($val) use (&$p_meta) {
-                        if (isValid($val))
-                            $p_meta .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'updatetime']);
-                    },
-                    $item,
-                    'UpdateTime'
-                );
-            if ($this->AllowStatus)
-                doValid(
-                    function ($val) use (&$p_meta) {
-                        if (isValid($val))
-                            $p_meta .= " <span class='status'>$val</span>";
-                    },
-                    $item,
-                    'Status'
-                );
-            if ($this->AllowButtons)
-                doValid(
-                    function ($val) use (&$p_meta) {
-                        if (isValid($val))
-                            $p_meta .= " " . $val;
-                        else
-                            $p_meta .= " " . $this->DefaultButtons;
-                    },
-                    $item,
-                    'Buttons'
-                );
-        }
-        yield Struct::OpenTag("article", [
-            "class" => "item $p_type $p_class col-lg",
-            ...($p_showimage ? ["style" => "background-image: url(\"$p_image\");"] : []),
-            ...($this->Animation ? [
-                "data-aos-delay" => ($index % $this->MaximumColumns * \_::$Front->AnimationSpeed),
-                "data-aos" => $this->Animation
-            ] : [])
-        ]);
-        yield Struct::OpenTag("div",["class"=>"inside"]);
-        yield "<div class='head row'>";
-        yield "<div class='col-lg'>";
-        $lt = $this->LinkedTitle && $hasl;
-        if ($p_showtitle)
-            yield Struct::Heading2($p_title, $lt ? $p_inselflink : null, ['class' => 'title']);
-        if ($p_showmeta && isValid($p_meta)) {
-            yield "<sub class='metadata'>";
-            if ($this->AllowRoot)
-                yield $rout->ToString();
-            yield $p_meta . "</sub>";
-        }
-        yield "</div>";
-        if ($p_showmorebutton || $p_showpathbutton) {
-            yield "<div class='more col col-3 view md-hide'>";
-            if ($p_showmorebutton)
-                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'alt']);
-            if ($p_showpathbutton)
-                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => '']);
-            yield "</div>";
-        }
-        yield "</div>";
-        yield "<div class='description row'>";
-        yield "<div class='excerpt col-md'>";
-        if ($p_showdescription && !isEmpty($p_description))
-            yield $p_description;
-        if ($p_showexcerpt)
-            yield $p_excerpt;
-        if ($p_showcontent && isValid($p_content))
-            yield "<div class='content'>" . __($p_content, styling: true, referring: $p_referring) . "</div>";
-        if ($p_showmorebutton || $p_showpathbutton) {
-            yield "<div class='more view md-show'>";
-            if ($p_showmorebutton)
-                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'alt']);
-            if ($p_showpathbutton)
-                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => '']);
-            yield "</div>";
-        }
-        yield Struct::CloseTag("div");
-        yield Struct::CloseTag("article");
-    }
+               ) : $this->Description));
+          return $excerpt ? Struct::MediumSlot(
+               __(
+                    $excerpt,
+                    styling: true,
+                    referring: $this->AutoReferring
+               )
+               ,
+               ["class" => "excerpt"]
+          ) : null;
+     }
+     public function GetImage()
+     {
+          if (!$this->AllowImage)
+               return null;
+          $p_image = getValid($this->Item, 'Image', $this->Image);
+          return isValid($p_image) ? Struct::Division(Struct::Image(getValid($this->Item, 'Title', $this->Title), $p_image), ["class" => "col-lg" . ($this->AllowDescription ? "-4" : null), "style" => "text-align: center;"]) : "";
+     }
+     public function GetDetails($path = null)
+     {
+          $authorName = null;
+          $createTime = get($this->Item, 'CreateTime');
+          $modifyTime = get($this->Item, 'UpdateTime');
+          $p_meta = null;
+          if ($this->AllowRoute) {
+               module("Route");
+               $route = new \MiMFa\Module\Route($path);
+               $route->TagName = "span";
+               $route->Class = "route";
+               $p_meta = $route->ToString();
+          }
+          if ($this->AllowDetails) {
+               if ($this->AllowAuthor)
+                    doValid(
+                         function ($val) use (&$p_meta) {
+                              $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
+                              if (!isEmpty($authorName))
+                                   $p_meta .= " " . Struct::Link($authorName["Name"], \_::$Address->UserRootUrlPath . $authorName["Signature"], ["class" => "author"]);
+                         },
+                         $this->Item,
+                         'AuthorId'
+                    );
+               if ($this->AllowCreateTime)
+                    if (isValid($createTime))
+                         $p_meta .= " <span class='createtime'>" . Convert::ToShownDateTimeString($createTime) . "</span>";
+               if ($this->AllowUpdateTime)
+                    if (isValid($modifyTime))
+                         $p_meta .= " <span class='updatetime'>" . Convert::ToShownDateTimeString($modifyTime) . "</span>";
+               if ($this->AllowStatus)
+                    doValid(
+                         function ($val) use (&$p_meta) {
+                              if (isValid($val))
+                                   $p_meta .= " <span class='status'>$val</span>";
+                         },
+                         $this->Item,
+                         'Status'
+                    );
+          }
+          return \MiMFa\Component\Promote::Article(
+               title: __(getValid($this->Item, 'Title', $this->Title)),
+               excerpt: __(getValid($this->Item, 'Description', $this->Description)),
+               image: getValid($this->Item, 'Image', $this->Image),
+               author: ["Name" => $authorName],
+               datePublished: $createTime ? explode(" ", $createTime)[0] : null,
+               dateModified: $modifyTime ? explode(" ", $modifyTime)[0] : null
+          ) .
+               ($p_meta ? Struct::Sub($p_meta, null, ["class" => "details"]) : "");
+     }
+     public function GetButtons()
+     {
+          if (!$this->AllowButtons)
+               return null;
+          $paths = Convert::FromJson(getValid($this->Item, 'Path', $this->Path));
+          $p_morebuttontext = __(value: Convert::FromSwitch($this->ButtonsLabel, get($this->Item, 'Type')));
+          return Struct::SmallSlot(
+               loop($paths, function ($v, $k, $i) use ($p_morebuttontext) {
+                    return Struct::Button(is_numeric($k) ? $p_morebuttontext : $k, $v, ["class" => "btn " . ($i < 1 ? "main" : "outline")]);
+               }),
+               attributes: ["class" => "buttons col-md-3 view md-hide"]
+          );
+     }
+     public function GetAttaches()
+     {
+          if (!$this->AllowAttaches)
+               return null;
+          $p_attaches = Convert::FromJson(get($this->Item, 'Attach'));
+          if (!isEmpty($p_attaches))
+               return Struct::Division(
+                    Struct::Heading5(Convert::FromSwitch($this->AttachesLabel, get($this->Item, 'Type'))) .
+                    Struct::Convert($p_attaches)
+               );
+     }
+     public function GetTags()
+     {
+          if (!$this->AllowTags)
+               return null;
+          $p_tags = Convert::FromJson(get($this->Item, 'TagIds'));
+          if (!isEmpty($p_tags)) {
+               $p_type = get($this->Item, 'Type');
+               $p_tagscount = Convert::FromSwitch($this->TagsCount, $p_type);
+               $p_tagsorder = Convert::FromSwitch($this->TagsOrder, $p_type);
+               $tags = table("Tag")->SelectPairs("Name", "Title", "`Id` IN (" . join(",", $p_tags) . ") " . (isEmpty($p_tagsorder) ? "" : "ORDER BY $p_tagsorder") . " LIMIT $p_tagscount");
+               if (count($tags) > 0)
+                    return Struct::Division(
+                         Struct::Heading6(Convert::FromSwitch($this->TagsLabel, $p_type)) .
+                         join(PHP_EOL, loop(
+                              $tags,
+                              function ($v, $k) {
+                                   return Struct::Link(
+                                        isValid($v)
+                                        ? __(strtolower(preg_replace("/\W*/", "", $k)) != strtolower(preg_replace("/\W*/", "", $v)) ? "$v ($k)" : $v)
+                                        : $k
+                                        ,
+                                        \_::$Address->TagRootUrlPath . $k,
+                                        ["class" => "btn"]
+                                   );
+                              }
+                         )),
+                         ["class" => "tags"]
+                    );
+          }
+     }
+     public function GetRelateds()
+     {
+          if (!$this->AllowRelateds)
+               return null;
+          $p_tags = Convert::FromJson(get($this->Item, 'TagIds'));
+          if (isEmpty($p_tags))
+               return null;
+          $p_type = get($this->Item, 'Type');
+          $p_relatedstext = Convert::FromSwitch($this->RelatedsLabel, $p_type);
+          $p_relatedscount = Convert::FromSwitch($this->RelatedsCount, $p_type) ?? 4;
+          $p_relatedsorder = Convert::FromSwitch($this->RelatedsOrder, $p_type);
+          //$rels = table("Content")->SelectPairs("Id", "Title", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Front->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Front->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
+          $rels = table("Content")->Select("*", "Id!=" . get($this->Item, 'Id') . " AND `TagIds` REGEXP '\\\\D(" . join("|", $p_tags) . ")\\\\D'" . (\_::$Front->Translate->Language ? " AND (MetaData IS NULL OR JSON_CONTAINS(MetaData, '\"" . \_::$Front->Translate->Language . "\"', '$.lang'))" : "") . (isEmpty($p_relatedsorder) ? "" : " ORDER BY $p_relatedsorder") . " LIMIT $p_relatedscount");
+          if (count($rels) > 0) {
+               module("CoverCollection");
+               $cc = new CoverCollection($rels);
+               return ($p_relatedstext ? Struct::Heading3($p_relatedstext) : "") . $cc->ToString();
+               // return Struct::Division($p_relatedstext . join(PHP_EOL, loop(
+               //      $rels,
+               //      function ($v, $k) {
+               //           return Struct::Link(isValid($v) ? $v : $k, $this->Root . $k, ["class" => "btn"]);
+               //      }
+               // )), ["class" => "relateds"]);
+          }
+     }
+     public function GetCommentsCollection()
+     {
+          if ($this->AllowComments && \_::$User->HasAccess($this->AllowCommentsAccess)) {
+               module("CommentCollection");
+               $cc = new CommentCollection();
+               $cc->Items = table("Comment")->Select(
+                    "*",
+                    "Relation=:rid AND " . authCondition(checkStatus: false) . " " . $this->CommentsLimitation,
+                    [":rid" => get($this->Item, 'Id')]
+               );
+               if (!$this->AllowLeaveComment) {
+                    $cc->ReplyButtonLabel =
+                         $cc->DeleteButtonLabel = null;
+               }
+               if (!$this->AllowModifyComment) {
+                    $cc->EditButtonLabel =
+                         $cc->DeleteButtonLabel = null;
+               }
+               switch (strtolower(get($this->Item, 'Type') ?? "")) {
+                    case "merchandise":
+                    case "course":
+                    case "query":
+                    case "forum":
+                         $cc->ShowMedia = true;
+                         break;
+                    default:
+                         $cc->ShowMedia = false;
+                         break;
+               }
+               if (count($cc->Items) > 0)
+                    return $cc->ToString();
+          }
+     }
+     public function GetCommentForm()
+     {
+          if (!$this->AllowLeaveComment)
+               return null;
+          $this->CommentForm->Relation = get($this->Item, 'Id');
+          return $this->CommentForm->Handle();
+     }
 }
