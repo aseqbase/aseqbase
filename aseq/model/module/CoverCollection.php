@@ -3,6 +3,7 @@ namespace MiMFa\Module;
 
 use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
+use MiMFa\Library\Style;
 use Override;
 
 module("ContentCollection");
@@ -15,41 +16,76 @@ module("ContentCollection");
  */
 class CoverCollection extends ContentCollection
 {
-    public $ShadeAngle = "90deg";
-    public $ShadeSize = "40%";
-    public $ShadeColor = "var(--back-color)";
-    public $CoverSize = "100% auto";
-    public $HoverSize = "105% auto";
+    public string|null $CoverShadeRtlAngle = "-90deg";
+    public string|null $HoverShadeRtlAngle = "-75deg";
+    public string|null $CoverShadeLtrAngle = "90deg";
+    public string|null $HoverShadeLtrAngle = "75deg";
+    public string|null $CoverShadeColor = "var(--back-color)";
+    public string|null $HoverShadeColor = "var(--back-color)";
+    public string|null $CoverShadeSize = "40%";
+    public string|null $HoverShadeSize = "50%";
+    public string|null $CoverSize = "cover";
+    public string|null $HoverSize = "cover";
+    public string|null $CoverFilter = "blur(0px)";
+    public string|null $HoverFilter = "blur(10px)";
+    public string|null $CoverMask = "linear-gradient(to top, #0000, #000, #000)";
+    public string|null $HoverMask = "none";
 
     #[Override]
     public function GetStyle()
     {
         return Struct::Style("
             .{$this->MainClass} {
+                display: grid;
+                gap: var(--size-max);
+            }
+            .{$this->MainClass} .row {
                 gap: var(--size-max);
             }
             .{$this->MainClass} .heading {
                 text-align: start;
                 margin-top: 0px;
             }
-            .{$this->MainClass}>.row {
-                gap: var(--size-max);
+            .{$this->MainClass} article.item{
+                padding: 0px;
             }
             .{$this->MainClass} article.item{
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: {$this->CoverSize};
+                " . ($this->CoverSize ? "background-size: {$this->CoverSize};" : "") . "
+                " . ($this->CoverFilter ? Style::UniversalProperty("backdrop-filter", $this->CoverFilter) : "") . "
+                " . ($this->CoverMask ? Style::UniversalProperty("mask", $this->CoverMask) : "") . "
                 padding: 0px;
-                transition: var(--transition-1);
+                transition: all var(--transition-1);
             }
             .{$this->MainClass} article.item:hover{
-                background-size: {$this->HoverSize};
+                " . ($this->HoverSize ? "background-size: {$this->HoverSize};" : "") . "
+                " . ($this->HoverFilter ? Style::UniversalProperty("backdrop-filter", $this->HoverFilter) : "") . "
+                " . ($this->HoverMask ? Style::UniversalProperty("mask", $this->HoverMask) : "") . "
+                transition: all var(--transition-1);
             }
             .{$this->MainClass} article.item > .inside{
-                background-image: linear-gradient({$this->ShadeAngle},{$this->ShadeColor} {$this->ShadeSize}, transparent);
-                padding: var(--size-3);
+                padding: var(--size-max) var(--size-4);
                 width: stretch;
                 height: stretch;
+            }
+            .{$this->MainClass} article.item > .inside:dir(ltr){
+                background-image: linear-gradient({$this->CoverShadeLtrAngle},{$this->CoverShadeColor} {$this->CoverShadeSize}, transparent);
+            }
+            .{$this->MainClass} article.item > .inside:dir(rtl){
+                background-image: linear-gradient({$this->CoverShadeRtlAngle},{$this->CoverShadeColor} {$this->CoverShadeSize}, transparent);
+            }
+            .{$this->MainClass} article.item:hover > .inside:dir(ltr){
+                background-image: linear-gradient({$this->HoverShadeLtrAngle},{$this->HoverShadeColor} {$this->HoverShadeSize}, transparent);
+            }
+            .{$this->MainClass} article.item:hover > .inside:dir(rtl){
+                background-image: linear-gradient({$this->HoverShadeRtlAngle},{$this->HoverShadeColor} {$this->HoverShadeSize}, transparent);
+            }
+            .{$this->MainClass} article.item > .inside .more{
+                text-align: end;
+            }
+            .{$this->MainClass} article.item > .inside .more.md-show{
+                width: 100%;
             }
         ");
     }
@@ -176,7 +212,7 @@ class CoverCollection extends ContentCollection
                 "data-aos" => $this->Animation
             ] : [])
         ]);
-        yield Struct::OpenTag("div",["class"=>"inside"]);
+        yield Struct::OpenTag("div", ["class" => "inside"]);
         yield "<div class='head row'>";
         yield "<div class='col-lg'>";
         $lt = $this->LinkedTitle && $hasl;
@@ -192,9 +228,9 @@ class CoverCollection extends ContentCollection
         if ($p_showmorebutton || $p_showpathbutton) {
             yield "<div class='more col col-3 view md-hide'>";
             if ($p_showmorebutton)
-                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'main']);
+                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'alt']);
             if ($p_showpathbutton)
-                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => 'alt']);
+                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => '']);
             yield "</div>";
         }
         yield "</div>";
@@ -209,9 +245,9 @@ class CoverCollection extends ContentCollection
         if ($p_showmorebutton || $p_showpathbutton) {
             yield "<div class='more view md-show'>";
             if ($p_showmorebutton)
-                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'main']);
+                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'alt']);
             if ($p_showpathbutton)
-                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => 'alt']);
+                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => '']);
             yield "</div>";
         }
         yield Struct::CloseTag("div");

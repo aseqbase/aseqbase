@@ -571,7 +571,8 @@ class General extends Template
 			}
 
 			:is(article, content).item {
-                border-radius: 0px var(--size-0) var(--size-0) 0px;
+                border-end-end-radius: var(--radius-1);
+                border-start-end-radius: var(--radius-1);
 			}
 
 			footer{
