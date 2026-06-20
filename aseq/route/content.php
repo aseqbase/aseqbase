@@ -18,7 +18,7 @@ function findContent($router, &$data)
         "Name"=>$name,
         "Filter" => [
             "Query"=> pop($filter, "Query")??getBetween($received, "Query")??$name,
-            "Category" => pop($filter, "Category")??getBetween($received, "Category")??urldecode($path),
+            "Category" => pop($filter, "Category")??getBetween($received, "Category")??$path,
             "Type"=> pop($filter, "Type")??get($received, "Type"),
             "Tag"=> pop($filter, "Tag")??get($received, "Tag"),
             ...$filter??[]

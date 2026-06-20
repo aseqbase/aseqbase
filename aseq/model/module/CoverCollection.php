@@ -3,6 +3,8 @@ namespace MiMFa\Module;
 
 use MiMFa\Library\Convert;
 use MiMFa\Library\Struct;
+use Override;
+
 module("ContentCollection");
 /**
  * To show data as posts
@@ -13,12 +15,206 @@ module("ContentCollection");
  */
 class CoverCollection extends ContentCollection
 {
-    public function GetItemInner($item)
+    public $ShadeAngle = "90deg";
+    public $ShadeSize = "40%";
+    public $ShadeColor = "var(--back-color)";
+    public $CoverSize = "100% auto";
+    public $HoverSize = "105% auto";
+
+    #[Override]
+    public function GetStyle()
     {
-        $p_image = popValid($item, 'Image', $this->DefaultImage);
-        $im = $this->DefaultImage;
-        $this->DefaultImage = null;
-        yield Struct::Cover(Convert::ToString($this->GetItemInner($item)), $p_image);
-        $this->DefaultImage = $im;
+        return Struct::Style("
+            .{$this->MainClass} {
+                gap: var(--size-max);
+            }
+            .{$this->MainClass} .heading {
+                text-align: start;
+                margin-top: 0px;
+            }
+            .{$this->MainClass}>.row {
+                gap: var(--size-max);
+            }
+            .{$this->MainClass} article.item{
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: {$this->CoverSize};
+                padding: 0px;
+                transition: var(--transition-1);
+            }
+            .{$this->MainClass} article.item:hover{
+                background-size: {$this->HoverSize};
+            }
+            .{$this->MainClass} article.item > .inside{
+                background-image: linear-gradient({$this->ShadeAngle},{$this->ShadeColor} {$this->ShadeSize}, transparent);
+                padding: var(--size-3);
+                width: stretch;
+                height: stretch;
+            }
+        ");
+    }
+    #[Override]
+    public function GetItemInner(array $item, int $index)
+    {
+        $rout = null;
+        if ($this->AllowRoot) {
+            module("Route");
+            $rout = new \MiMFa\Module\Route();
+            $rout->Class = "route";
+            $rout->TagName = "span";
+        }
+        $p_meta = getValid($item, 'MetaData', null);
+        if ($p_meta !== null) {
+            $p_meta = Convert::FromJson($p_meta);
+            pod($this, $p_meta);
+        }
+        $p_meta = null;
+        $p_id = get($item, 'Id');
+        $p_type = get($item, 'Type');
+        $p_class = get($item, 'Class');
+        $p_image = getValid($item, 'Image', $this->DefaultImage);
+        $p_name = getBetween($item, 'Name', 'Title') ?? $this->DefaultTitle;
+        $p_title = getValid($item, 'Title', $p_name);
+        $p_description = getValid($item, 'Description', $this->DefaultDescription);
+        $p_content = getValid($item, 'Content', $this->DefaultContent);
+
+        $p_showexcerpt = $this->AllowExcerpt;
+        $p_showcontent = $this->AllowContent;
+        $p_showdescription = $this->AllowDescription;
+        $p_showimage = $this->AllowImage;
+        $p_showtitle = $this->AllowTitle;
+        $p_showmeta = $this->AllowMetaData;
+        $p_referring = $this->AutoReferring;
+        $p_inselflink = (!$p_showcontent && (!$p_showexcerpt || !$p_showdescription)) ? (getBetween($item, "Reference") ?? $this->Root . getValid($item, 'Name', $p_id)) : null;
+        if (!$this->CompressPath) {
+            $catDir = \_::$Back->Query->GetContentCategoryRoute($item);
+            if (isValid($catDir))
+                $p_inselflink = $this->CollectionRoot . trim($catDir, "/\\") . "/" . ($p_name ?? $p_id);
+        }
+        $p_path = first(Convert::FromJson(getValid($item, 'Path', $this->DefaultPath)));
+        if ($this->AllowRoot)
+            $rout->Set($p_inselflink);
+        $hasl = isValid($p_inselflink);
+        $p_showmorebutton = $hasl && $this->AllowMoreButton;
+        $p_morebuttontext = Convert::FromSwitch($this->MoreButtonLabel, $p_type);
+        $p_showpathbutton = isValid($p_path) && $this->AllowPathButton;
+        $p_pathbuttontext = Convert::FromSwitch($this->PathButtonLabel, $p_type);
+
+        $p_excerpt = null;
+        if ($this->AutoExcerpt) {
+            $p_description = __(Convert::ToExcerpt(
+                Convert::ToText($p_description),
+                0,
+                $this->ExcerptLength,
+                $this->ExcerptSign
+            ), styling: false, referring: $p_referring);
+            if ($p_showexcerpt)
+                $p_excerpt = __(Convert::ToExcerpt(
+                    Convert::ToText($p_content),
+                    0,
+                    $this->ExcerptLength,
+                    $this->ExcerptSign
+                ), styling: false, referring: $p_referring);
+        } else
+            $p_description = __($p_description, styling: false, referring: $p_referring);
+
+        if ($p_showmeta) {
+            if ($this->AllowAuthor)
+                doValid(
+                    function ($val) use (&$p_meta) {
+                        $authorName = table("User")->SelectRow("Signature , Name", "Id=:Id", [":Id" => $val]);
+                        if (!isEmpty($authorName))
+                            $p_meta .= " " . Struct::Link($authorName["Name"], \_::$Address->UserRootUrlPath . $authorName["Signature"], ["class" => "author"]);
+                    },
+                    $item,
+                    'AuthorId'
+                );
+            if ($this->AllowCreateTime)
+                doValid(
+                    function ($val) use (&$p_meta) {
+                        if (isValid($val))
+                            $p_meta .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'createtime']);
+                    },
+                    $item,
+                    'CreateTime'
+                );
+            if ($this->AllowUpdateTime)
+                doValid(
+                    function ($val) use (&$p_meta) {
+                        if (isValid($val))
+                            $p_meta .= Struct::Span(Convert::ToShownDateTimeString($val), ["class" => 'updatetime']);
+                    },
+                    $item,
+                    'UpdateTime'
+                );
+            if ($this->AllowStatus)
+                doValid(
+                    function ($val) use (&$p_meta) {
+                        if (isValid($val))
+                            $p_meta .= " <span class='status'>$val</span>";
+                    },
+                    $item,
+                    'Status'
+                );
+            if ($this->AllowButtons)
+                doValid(
+                    function ($val) use (&$p_meta) {
+                        if (isValid($val))
+                            $p_meta .= " " . $val;
+                        else
+                            $p_meta .= " " . $this->DefaultButtons;
+                    },
+                    $item,
+                    'Buttons'
+                );
+        }
+        yield Struct::OpenTag("article", [
+            "class" => "item $p_type $p_class col-lg",
+            ...($p_showimage ? ["style" => "background-image: url(\"$p_image\");"] : []),
+            ...($this->Animation ? [
+                "data-aos-delay" => ($index % $this->MaximumColumns * \_::$Front->AnimationSpeed),
+                "data-aos" => $this->Animation
+            ] : [])
+        ]);
+        yield Struct::OpenTag("div",["class"=>"inside"]);
+        yield "<div class='head row'>";
+        yield "<div class='col-lg'>";
+        $lt = $this->LinkedTitle && $hasl;
+        if ($p_showtitle)
+            yield Struct::Heading2($p_title, $lt ? $p_inselflink : null, ['class' => 'title']);
+        if ($p_showmeta && isValid($p_meta)) {
+            yield "<sub class='metadata'>";
+            if ($this->AllowRoot)
+                yield $rout->ToString();
+            yield $p_meta . "</sub>";
+        }
+        yield "</div>";
+        if ($p_showmorebutton || $p_showpathbutton) {
+            yield "<div class='more col col-3 view md-hide'>";
+            if ($p_showmorebutton)
+                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'main']);
+            if ($p_showpathbutton)
+                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => 'alt']);
+            yield "</div>";
+        }
+        yield "</div>";
+        yield "<div class='description row'>";
+        yield "<div class='excerpt col-md'>";
+        if ($p_showdescription && !isEmpty($p_description))
+            yield $p_description;
+        if ($p_showexcerpt)
+            yield $p_excerpt;
+        if ($p_showcontent && isValid($p_content))
+            yield "<div class='content'>" . __($p_content, styling: true, referring: $p_referring) . "</div>";
+        if ($p_showmorebutton || $p_showpathbutton) {
+            yield "<div class='more view md-show'>";
+            if ($p_showmorebutton)
+                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'main']);
+            if ($p_showpathbutton)
+                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => 'alt']);
+            yield "</div>";
+        }
+        yield Struct::CloseTag("div");
+        yield Struct::CloseTag("article");
     }
 }

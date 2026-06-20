@@ -920,7 +920,7 @@ class Struct
                     else
                         $srcs[] = self::Element("source", ["srcset" => $value, "media" => $key]);
             }
-            $srcs[] = self::Element("img", ["src" => $src, "alt" => $content], self::FilterAttributes($attributes, fn($v, $k) => preg_match("/^((on\w+)|alt|src|id)$/i", $k)));
+            $srcs[] = self::Element("img", ["src" => $src, ...($content?["alt" => htmlspecialchars($content)]:[])], self::FilterAttributes($attributes, fn($v, $k) => preg_match("/^((on\w+)|alt|src|id)$/i", $k)));
             return self::Element(join(PHP_EOL, $srcs), "picture", ["class" => "image"], $attributes);
         }
         //return self::Element("img", ["src" => $source, "alt" => __($content ?? ""), "class" => "image"], $attributes);

@@ -570,6 +570,10 @@ class General extends Template
 				margin-inline-start: 2em;
 			}
 
+			:is(article, content).item {
+                border-radius: 0px var(--size-0) var(--size-0) 0px;
+			}
+
 			footer{
 				color: var(--fore-color-special);
 				background-color: var(--back-color-special);

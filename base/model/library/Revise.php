@@ -27,9 +27,10 @@ class Revise
      */
     public static $Extension = ".revise";
     /**
+     * To set JSON encode and decode flags for the library
      * @internal
      */
-    public static $Flags = JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION;
+    public static int|null $Flags = JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION;
 
     /**
      * To get the Revise file Path of an object
