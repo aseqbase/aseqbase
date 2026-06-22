@@ -115,222 +115,6 @@ class General extends Template
 				color: var(--color-white);
 			}
 
-			body>nav {
-				background-color: var(--back-color-special);
-				color: var(--fore-color-special);
-				box-shadow: var(--shadow-2);
-			}
-			body>nav:has(.inside) .header{
-				color: var(--fore-color-special);
-				padding: calc(var(--size-0) / 2) var(--size-0);
-			}
-			body>nav:has(.inside) :is(.header, .header a, .header a:visited, .header a:hover){
-				text-decoration: none;
-				font-weight: normal !important;
-			}
-			body>nav:has(.inside) .header .title{
-				font-size: var(--size-2);
-			}
-			body>nav:has(.inside) .header .description{
-				font-size: 75%;
-			}
-			body>nav:has(.inside) ul li .image{
-				margin-inline-end: var(--size-0);
-			}
-			body>nav:has(.inside) ul li .image img{
-			    max-width: calc(var(--size-max) * 4);
-			    max-height: calc(var(--size-max) * 4);
-			}
-			body>nav:has(.inside) ul li .description{
-				font-size: var(--size-0);
-				color: #888b;
-				font-weight: normal;
-    			line-height: 150%;
-			}
-			body>nav:has(.inside) ul li:hover .description{
-				font-size: var(--size-0);
-				color: unset;
-			}
-
-			body>nav:has(.inside) ul li .icon{
-				font-size: var(--size-1);
-			}
-
-			body>nav:has(.inside) ul li.dropdown{
-				position: initial;
-			}
-			body>nav:has(.inside) ul li.dropdown ul{
-				text-align: start;
-			}
-
-			body>nav:has(.inside) :is(button, .button, .icon[onclick]){
-				border: var(--border-0);
-				border-radius: var(--radius-0);
-				box-shadow: var(--shadow-0);
-			}
-			body>nav:has(.inside) :is(button, .button, .icon[onclick]):hover{
-				box-shadow: var(--shadow-2);
-			}
-			body>nav:has(.inside) .dropdown-items {
-				padding: calc(var(--size-0) / 2);
-				color: var(--fore-color-special);
-				background-color: var(--back-color-special);
-				box-shadow: 0px 16px 16px 0px rgba(0,0,0,0.2);
-				border-end-start-radius: var(--radius-2);
-				border-end-end-radius: var(--radius-3);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body>nav>.inside>ul>li:not(.sub-items)>.button{
-				text-transform: uppercase;
-			}
-				
-			body>nav:has(.inside) ul:not(.sub-items)>li {
-				background-color: transparent;
-				color: inherit;
-			}
-			body>nav:has(.inside) ul:not(.sub-items)>li.active{
-				box-shadow: var(--shadow-2);
-			}
-			body>nav:has(.inside) ul:not(.sub-items)>li>:is(.button, .button:visited){
-				background-color: transparent;
-				color: var(--fore-color-special);
-				border: none;
-				font-size: inherit;
-				border-radius: unset;
-				text-decoration: none;
-				padding: var(--size-0) var(--size-1);
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				align-content: center;
-				flex-direction: row;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body>nav:has(.inside) ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
-				font-weight: bold;
-				background-color: var(--back-color-output);
-				color: var(--fore-color-output);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body>nav:has(.inside) ul:not(.sub-items)>li.active>:is(.button, .button:visited){
-				color: var(--fore-color);
-			}
-			body>nav:has(.inside) ul:not(.sub-items)>li.active:hover>:is(.button, .button:visited){
-				color: var(--fore-color);
-			}
-			body>nav:has(.inside) ul:not(.sub-items)>li.dropdown:hover>:is(.button, .button:visited) {
-				color: var(--fore-color-output);
-				background-color: var(--back-color-output);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body>nav:has(.inside) ul.sub-items .sub-items li :is(.button, .button:visited) {
-				padding: calc(var(--size-0) / 2) var(--size-1);
-				background: transparent;
-				border: none;
-			}
-			body>nav:has(.inside) ul.sub-items>li {
-				display: block;
-			}
-			body>nav:has(.inside) ul.sub-items>li>:is(.button, .button:visited){
-				padding-inline-end: var(--size-max);
-				color: var(--fore-color-input);
-			}
-			body>nav:has(.inside) ul.sub-items>li.dropdown{
-				display: block;
-				border-bottom: var(--border-1) transparent;
-			}
-			body>nav:has(.inside) ul.sub-items>li.dropdown.active{
-				box-shadow: var(--shadow-2);
-				border: none;
-			}
-			body>nav:has(.inside) ul.sub-items>li.dropdown.active>:is(.button, .button:visited){
-				font-weight: bold;
-				border: none;
-			}
-			body>nav:has(.inside) ul.sub-items>li.dropdown:hover{
-				border-bottom-color: var(--back-color-output);
-				box-shadow: var(--shadow-1);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body>nav:has(.inside) ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
-				font-weight: bold;
-				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body>nav:has(.inside) ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
-				font-weight: bold;
-				background-color: var(--back-color-output);
-				color: var(--fore-color-output);
-				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body>nav:has(.inside) ul.sub-items>li:not(.dropdown).active>:is(.button, .button:visited){
-				font-weight: bold;
-				box-shadow: var(--shadow-2);
-				border: none;
-			}
-			body>nav:has(.inside) ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
-				font-weight: bold;
-				background-color: var(--back-color-output);
-				color: var(--fore-color-output);
-				border: none;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body .contextmenu{
-                background-color: var(--back-color-special);
-                color: var(--fore-color-special);
-				box-shadow: var(--shadow-max);
-				flex-direction: column;
-			}
-			body .contextmenu>*{
-				padding: calc(var(--size-0) / 2) var(--size-1);
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				flex-direction: row;
-				gap: var(--size-0);
-				width: 100%;
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body .contextmenu>*>:not(.contextmenu){
-				display: flex;
-				align-items: center;
-				flex-direction: row;
-				gap: var(--size-0);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body .contextmenu>:is(*[onclick],*[href]){
-				cursor: pointer;
-			}
-			body .contextmenu>:is(action, *[onclick],*[href]):hover{
-				background-color: var(--back-color-output);
-				color: var(--fore-color-output);
-				font-weight: bold;
-				box-shadow: var(--shadow-1);
-				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
-			}
-			body .contextmenu>:is(hr,br){
-				padding: 0px;
-				margin: calc(var(--size-0) / 2) var(--size-1);
-			}
-			body>.prepage {
-				padding-top: calc(1.5 * var(--size-max));
-			}
-			body>.prepage:has(>.cover){
-				padding: 0px;
-			}
-			body>.prepage>.cover {
-				padding-top: calc(4 * var(--size-max));
-			}
-			.page{
-				padding: var(--size-1);
-				display: flex;
-				align-items: stretch;
-				justify-content: center;
-				flex-direction: column;
-				flex-grow: 1;
-			}
-
 			:is(h1,h2,h3,h4,h5,h6) strong{
 				font-weight: normal;
 			}
@@ -434,13 +218,6 @@ class General extends Template
 				font-weight: bold;
 			}
 
-			:is(.button, .icon[onclick]), :is(.button, .icon[onclick]):is(:visited, :active){
-				border: var(--border-1) transparent;
-			}
-			:is(.button, .icon[onclick]):is(:hover, :focus){
-				border-color: var(--fore-color-output);
-			}
-
 			.icon[onclick]{
 				text-decoration: none;
 				display: inline-flex;
@@ -462,6 +239,7 @@ class General extends Template
 				justify-content: center;
 				flex-direction: column;
 				align-items: center;
+				border: var(--border-0);
 				border-radius: var(--radius-1);
 				padding: calc(var(--size-3) / 2) var(--size-3);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
@@ -470,7 +248,7 @@ class General extends Template
 				background-color: var(--back-color-output);
 				color: var(--fore-color-output);
 				text-decoration: none;
-				border-color: var(--fore-color-output);
+				border: var(--border-0);
 				border-radius: var(--radius-0);
 				box-shadow: var(--shadow-2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
@@ -640,6 +418,196 @@ class General extends Template
 				box-shadow: var(--shadow-2);
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
+
+			
+			body>nav:has(.inside) {
+				padding: 0px var(--size-0);
+				box-shadow: var(--shadow-2);
+			}
+			body>nav:has(.inside) .header{
+				color: var(--fore-color-special);
+				padding: calc(var(--size-0) / 2) var(--size-0);
+			}
+			body>nav:has(.inside) :is(.header, .header a, .header a:visited, .header a:hover){
+				text-decoration: none;
+				font-weight: normal !important;
+			}
+			body>nav:has(.inside) .header .title{
+				font-size: var(--size-2);
+			}
+			body>nav:has(.inside) .header .description{
+				font-size: 75%;
+			}
+			body>nav:has(.inside) ul li .image{
+				margin-inline-end: var(--size-0);
+			}
+			body>nav:has(.inside) ul li .image img{
+			    max-width: calc(var(--size-max) * 4);
+			    max-height: calc(var(--size-max) * 4);
+			}
+			body>nav:has(.inside) ul li .description{
+				font-size: var(--size-0);
+				color: #888b;
+				font-weight: normal;
+    			line-height: 150%;
+			}
+			body>nav:has(.inside) ul li:hover .description{
+				font-size: var(--size-0);
+				color: unset;
+			}
+
+			body>nav:has(.inside) ul li .icon{
+				font-size: var(--size-1);
+			}
+
+			body>nav:has(.inside) ul li.dropdown{
+				position: initial;
+			}
+			body>nav:has(.inside) ul li.dropdown ul{
+				text-align: start;
+			}
+
+			body>nav:has(.inside) ul :is(button, .button, .icon[onclick]){
+				background-color: transparent;
+				padding: calc(var(--size-0) / 2) var(--size-0);
+				border: var(--border-0);
+				border-radius: var(--radius-0);
+				box-shadow: var(--shadow-0);
+				align-content: flex-start;
+			}
+			body>nav:has(.inside) :is(button, .button, .icon[onclick]):hover{
+				border: var(--border-0);
+				box-shadow: var(--shadow-1);
+			}
+			body>nav:has(.inside) .dropdown-items {
+				padding: calc(var(--size-0) / 2);
+				color: var(--fore-color-special);
+				background-color: var(--back-color-special);
+				box-shadow: 0px 16px 16px 0px rgba(0,0,0,0.2);
+				border-end-start-radius: var(--radius-2);
+				border-end-end-radius: var(--radius-3);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body>nav>.inside>ul>li:not(.sub-items)>.button{
+				text-transform: uppercase;
+			}
+				
+			body>nav:has(.inside) ul:not(.sub-items)>li {
+				background-color: transparent;
+				color: inherit;
+			}
+			body>nav:has(.inside) li.active{
+				opacity: 0.5;
+			}
+			body>nav:has(.inside) ul:not(.sub-items)>li>:is(.button, .button:visited){
+				border: none;
+				font-size: inherit;
+				border-radius: unset;
+				text-decoration: none;
+				padding: var(--size-0) var(--size-1);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				align-content: center;
+				flex-direction: row;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body>nav:has(.inside) ul:not(.sub-items)>li:hover>:is(.button, .button:visited) {
+				font-weight: bold;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body>nav:has(.inside) ul.sub-items .sub-items li :is(.button, .button:visited) {
+				padding: calc(var(--size-0) / 2) var(--size-1);
+				background: transparent;
+				border: none;
+			}
+			body>nav:has(.inside) ul.sub-items>li {
+				display: block;
+			}
+			body>nav:has(.inside) ul.sub-items>li>:is(.button, .button:visited){
+				padding-inline-end: var(--size-max);
+				color: var(--fore-color-input);
+			}
+			body>nav:has(.inside) ul.sub-items>li.dropdown{
+				display: block;
+				border-bottom: var(--border-1) transparent;
+			}
+			body>nav:has(.inside) ul.sub-items>li.dropdown:hover{
+				border-bottom-color: var(--back-color-output);
+				box-shadow: var(--shadow-1);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body>nav:has(.inside) ul.sub-items>li.dropdown:hover>:is(.button, .button:visited){
+				font-weight: bold;
+				border: none;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body>nav:has(.inside) ul.sub-items>li.dropdown>:is(.button, .button:visited):hover{
+				font-weight: bold;
+				border: none;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body>nav:has(.inside) ul.sub-items>li:not(.dropdown):hover>:is(.button, .button:visited){
+				font-weight: bold;
+				border: none;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+
+			body .contextmenu{
+                background-color: var(--back-color-special);
+                color: var(--fore-color-special);
+				box-shadow: var(--shadow-max);
+				flex-direction: column;
+			}
+			body .contextmenu>*{
+				padding: calc(var(--size-0) / 2) var(--size-1);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				flex-direction: row;
+				gap: var(--size-0);
+				width: 100%;
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body .contextmenu>*>:not(.contextmenu){
+				display: flex;
+				align-items: center;
+				flex-direction: row;
+				gap: var(--size-0);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body .contextmenu>:is(*[onclick],*[href]){
+				cursor: pointer;
+			}
+			body .contextmenu>:is(action, *[onclick],*[href]):hover{
+				background-color: var(--back-color-output);
+				color: var(--fore-color-output);
+				font-weight: bold;
+				box-shadow: var(--shadow-1);
+				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
+			}
+			body .contextmenu>:is(hr,br){
+				padding: 0px;
+				margin: calc(var(--size-0) / 2) var(--size-1);
+			}
+			body>.prepage {
+				padding-top: calc(1.5 * var(--size-max));
+			}
+			body>.prepage:has(>.cover){
+				padding: 0px;
+			}
+			body>.prepage>.cover {
+				padding-top: calc(4 * var(--size-max));
+			}
+			.page{
+				padding: var(--size-1);
+				display: flex;
+				align-items: stretch;
+				justify-content: center;
+				flex-direction: column;
+				flex-grow: 1;
+			}
+
 		");
 		echo Struct::Script("
 			for(const slider of document.querySelectorAll(`input[type='range'].rangeinput`)){

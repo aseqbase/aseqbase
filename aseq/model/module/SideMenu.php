@@ -334,11 +334,11 @@ class SideMenu extends Module
 			") : 
 			("
 			body{
-    			margin-inline-start: var(--size-max) !important;
+    			margin-inline-start: calc(3 * var(--size-2)) !important;
 			}
 			.{$this->MainClass}{
 				width: auto;
-				margin-inline-start: calc(-1 * var(--size-max));
+				margin-inline-start: calc(-3 * var(--size-2));
 			}
 			$notactiveselector .header{
     			justify-content: center;

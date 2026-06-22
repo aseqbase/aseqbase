@@ -16,14 +16,10 @@ module("ContentCollection");
  */
 class CoverCollection extends ContentCollection
 {
-    public string|null $CoverShadeRtlAngle = "-90deg";
-    public string|null $HoverShadeRtlAngle = "-75deg";
-    public string|null $CoverShadeLtrAngle = "90deg";
-    public string|null $HoverShadeLtrAngle = "75deg";
-    public string|null $CoverShadeColor = "var(--back-color)";
-    public string|null $HoverShadeColor = "var(--back-color)";
-    public string|null $CoverShadeSize = "40%";
-    public string|null $HoverShadeSize = "50%";
+    public string|null $CoverLtrShade = "linear-gradient(90deg, var(--back-color-special) 40%, transparent)";
+    public string|null $HoverLtrShade = "linear-gradient(75deg, var(--back-color-special) 50%, transparent)";
+    public string|null $CoverRtlShade = "linear-gradient(-90deg, var(--back-color-special) 40%, transparent)";
+    public string|null $HoverRtlShade = "linear-gradient(-75deg, var(--back-color-special) 50%, transparent)";
     public string|null $CoverSize = "cover";
     public string|null $HoverSize = "cover";
     public string|null $CoverFilter = "blur(0px)";
@@ -56,13 +52,13 @@ class CoverCollection extends ContentCollection
                 " . ($this->CoverFilter ? Style::UniversalProperty("backdrop-filter", $this->CoverFilter) : "") . "
                 " . ($this->CoverMask ? Style::UniversalProperty("mask", $this->CoverMask) : "") . "
                 padding: 0px;
-                transition: all var(--transition-1);
+                ".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
             .{$this->MainClass} article.item:hover{
                 " . ($this->HoverSize ? "background-size: {$this->HoverSize};" : "") . "
                 " . ($this->HoverFilter ? Style::UniversalProperty("backdrop-filter", $this->HoverFilter) : "") . "
                 " . ($this->HoverMask ? Style::UniversalProperty("mask", $this->HoverMask) : "") . "
-                transition: all var(--transition-1);
+                ".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
             .{$this->MainClass} article.item > .inside{
                 padding: var(--size-max) var(--size-4);
@@ -70,19 +66,41 @@ class CoverCollection extends ContentCollection
                 height: stretch;
             }
             .{$this->MainClass} article.item > .inside:dir(ltr){
-                background-image: linear-gradient({$this->CoverShadeLtrAngle},{$this->CoverShadeColor} {$this->CoverShadeSize}, transparent);
+                ".($this->CoverLtrShade?"background-image: {$this->CoverLtrShade};":"")."
+                ".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
             .{$this->MainClass} article.item > .inside:dir(rtl){
-                background-image: linear-gradient({$this->CoverShadeRtlAngle},{$this->CoverShadeColor} {$this->CoverShadeSize}, transparent);
+                ".($this->CoverRtlShade?"background-image: {$this->CoverRtlShade};":"")."
+                ".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
             .{$this->MainClass} article.item:hover > .inside:dir(ltr){
-                background-image: linear-gradient({$this->HoverShadeLtrAngle},{$this->HoverShadeColor} {$this->HoverShadeSize}, transparent);
+                ".($this->HoverLtrShade?"background-image: {$this->HoverLtrShade};":"")."
+                ".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
             .{$this->MainClass} article.item:hover > .inside:dir(rtl){
-                background-image: linear-gradient({$this->HoverShadeRtlAngle},{$this->HoverShadeColor} {$this->HoverShadeSize}, transparent);
+                ".($this->HoverRtlShade?"background-image: {$this->HoverRtlShade};":"")."
+                ".Style::UniversalProperty("transition", "var(--transition-1)")."
+            }
+            .{$this->MainClass} article.item > .inside .head {
+                display: flex;
+                gap: var(--size-0);
+                flex-direction: row;
+                justify-content: space-between;
+                align-content: flex-start;
+                align-items: flex-start;
             }
             .{$this->MainClass} article.item > .inside .more{
+                opacity: 0;
                 text-align: end;
+                display: flex;
+                gap: calc(var(--size-0) / 2);
+                flex-direction: row-reverse;
+                flex-wrap: wrap;
+                ".Style::UniversalProperty("transition", "var(--transition-1)")."
+            }
+            .{$this->MainClass} article.item:hover > .inside .more{
+                opacity: 0.9;
+                ".Style::UniversalProperty("transition", "var(--transition-1)")."
             }
             .{$this->MainClass} article.item > .inside .more.md-show{
                 width: 100%;
@@ -213,26 +231,26 @@ class CoverCollection extends ContentCollection
             ] : [])
         ]);
         yield Struct::OpenTag("div", ["class" => "inside"]);
-        yield "<div class='head row'>";
-        yield "<div class='col-lg'>";
-        $lt = $this->LinkedTitle && $hasl;
-        if ($p_showtitle)
-            yield Struct::Heading2($p_title, $lt ? $p_inselflink : null, ['class' => 'title']);
-        if ($p_showmeta && isValid($p_meta)) {
-            yield "<sub class='metadata'>";
-            if ($this->AllowRoot)
-                yield $rout->ToString();
-            yield $p_meta . "</sub>";
-        }
-        yield "</div>";
-        if ($p_showmorebutton || $p_showpathbutton) {
-            yield "<div class='more col col-3 view md-hide'>";
-            if ($p_showmorebutton)
-                yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'alt']);
-            if ($p_showpathbutton)
-                yield Struct::Button($p_pathbuttontext, $p_path, ["class" => '']);
+        yield "<div class='head'>";
+            yield "<div>";
+            $lt = $this->LinkedTitle && $hasl;
+            if ($p_showtitle)
+                yield Struct::Heading($p_title, $lt ? $p_inselflink : null, ['class' => 'title']);
+            if ($p_showmeta && isValid($p_meta)) {
+                yield "<sub class='metadata'>";
+                if ($this->AllowRoot)
+                    yield $rout->ToString();
+                yield $p_meta . "</sub>";
+            }
             yield "</div>";
-        }
+            if ($p_showmorebutton || $p_showpathbutton) {
+                yield "<div class='more view md-hide'>";
+                if ($p_showmorebutton)
+                    yield Struct::Button($p_morebuttontext, $p_inselflink, ["class" => 'alt']);
+                if ($p_showpathbutton)
+                    yield Struct::Button($p_pathbuttontext, $p_path, ["class" => '']);
+                yield "</div>";
+            }
         yield "</div>";
         yield "<div class='description row'>";
         yield "<div class='excerpt col-md'>";

@@ -355,6 +355,7 @@ class FrontBase
 	public function __construct()
 	{
 		Revise::Load($this);
+		$this->DirectPath = $this->DirectPath?:\_::$Address->UrlOrigin;
 
 		$this->Translate = new \MiMFa\Library\Translate(new \MiMFa\Library\DataTable(\_::$Back->DataBase, $this->TranslateTableName, $this->TranslateTableNamePrefix, \_::$Back->DataTableNameConvertors));
 		if ($this->AllowTranslate || $this->AutoUpdateLanguage) {

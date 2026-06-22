@@ -16,6 +16,6 @@ $module->AllowItemsDescription =
 $module->AllowSubItemsDescription = 
 $module->AllowSubItemsImage = 
 $module->AllowItemsImage = false;
-$module->AllowFixed = false;
+$module->AllowFixed = true;
 pod($module, $data);
 $module->Render();

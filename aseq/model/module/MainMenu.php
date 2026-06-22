@@ -28,7 +28,7 @@ class MainMenu extends Module
 	public $SubItemsOverflow = 4;
 	public $LogoWidth = "auto";
 	public $LogoHeight = "calc(var(--size-5) - var(--size-0) / 2)";
-	public $FixedMargin = "calc(var(--size-1) * 3)";
+	public $FixedMargin = "calc(var(--size-2) * 3)";
 	public $ToggleLabel;
 	public $Printable = false;
 	public $ZIndex = "9999";
@@ -50,9 +50,10 @@ class MainMenu extends Module
 				opacity: 0.95;
 				position: fixed;
 				top:0;
-				left:0;
-				right:0;
+				width: 100%;
+				width: stretch;
 				z-index: 999;
+				".(Style::UniversalProperty("backdrop-filter", "blur(50px)"))."
 			}
 			.{$this->MainClass}-margin{
 				min-height: {$this->FixedMargin};
@@ -114,14 +115,9 @@ class MainMenu extends Module
 				flex-direction: row;
 				align-items: center;
 				justify-content: flex-start;
-    			width: max-content;
 			}
-			body>nav:has(.inside) .dropdown-items ul>li>* {
-				width: max-content;
-			}
-
 			.{$this->MainClass} .dropdown-items {
-				display: none;
+				display:none;
 				position: fixed;
 				min-width: 160px;
 				max-width: 90vw;
@@ -132,7 +128,7 @@ class MainMenu extends Module
 				z-index: $this->ZIndex;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
-			.{$this->MainClass} .dropdown-items ul.sub-items{
+			.{$this->MainClass} .dropdown-items ul.sub-items {
 				padding: 0px;
 			}
 
@@ -141,11 +137,13 @@ class MainMenu extends Module
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "
 			}
 
-			.{$this->MainClass} ul.sub-items>li>:is(.button, .button:visited){
+			.{$this->MainClass} .dropdown-items *:is(.button, .button:visited){
 				width: 100%;
+				width: stretch;
 				text-decoration: none;
-				display: block;
 				text-align: start;
+    			justify-content: flex-start;
+				flex-direction: row;
 				border: none;
 			}
 
@@ -211,7 +209,6 @@ class MainMenu extends Module
 				border-radius: var(--radius-max);
 				display: inline-flex;
 				aspect-ratio: 1;
-				text-align: center;
 				justify-content: center;
 				align-items: center;
 				" . Style::UniversalProperty("transition", "var(--transition-1)") . "

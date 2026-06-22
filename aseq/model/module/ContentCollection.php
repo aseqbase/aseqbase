@@ -428,7 +428,7 @@ class ContentCollection extends Collection
         yield "<div class='col-lg'>";
         $lt = $this->LinkedTitle && $hasl;
         if ($p_showtitle)
-            yield Struct::Heading2($p_title, $lt ? $p_inselflink : null, ['class' => 'title']);
+            yield Struct::Heading3($p_title, $lt ? $p_inselflink : null, ['class' => 'title']);
         if ($p_showmeta && isValid($p_meta)) {
             yield "<sub class='metadata'>";
             if ($this->AllowRoot)

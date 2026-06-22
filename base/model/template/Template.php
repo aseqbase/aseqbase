@@ -275,6 +275,7 @@ class Template extends \Base
             justify-content: center;
             align-items: center;
             gap: var(--size-0);
+            border: var(--border-0);
             " . \MiMFa\Library\Style::UniversalProperty("transition", "var(--transition-1)") . "
         }
         :is(button, .button):hover{
