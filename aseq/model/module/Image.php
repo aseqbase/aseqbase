@@ -81,7 +81,7 @@ class Image extends Module
 		yield parent::GetTitle();
 		yield (
 			isValid($src) ? (
-				preg_match('/^\s*<\w+/', $src) ? preg_replace("/(^\s*<\w+)/", "$1 " . $this->GetDefaultAttributes(), $src) :
+				preg_match('/^\s*<\w+/', $src) ? preg_replace("/(^\s*<\w+)/", "$1 " . Struct::Attributes($this->GetDefaultAttributes()), $src) :
 				(
 					$this->AllowOrigin ? (
 						isFormat($src, ".svg") ? Struct::Embed($this->Content, $src, $this->GetDefaultAttributes())
