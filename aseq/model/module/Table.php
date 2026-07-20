@@ -686,7 +686,7 @@ class Table extends Module
         $colCount = $ick ? count($icks) : 0;
 
         $vaccess = \_::$User->HasAccess($this->ViewAccess);
-        $saccess = $isc && \_::$User->HasAccess($this->SearchAccess);
+        $saccess = $isc && \_::$User->HasAccess($this->SearchAccess) && $this->AllowServerSide;
         $aaccess = $isu && \_::$User->HasAccess($this->AddAccess);
         $iaccess = $isu && \_::$User->HasAccess($this->ImportAccess);
         $eaccess = $isc && \_::$User->HasAccess($this->ExportAccess);
@@ -957,7 +957,7 @@ class Table extends Module
                 join(", ", [
                     ...(is_null($this->AllowCache) ? [] : ["stateSave: " . ($this->AllowCache ? "true" : "false")]),
                     ...(is_null($this->AllowPaging) ? [] : ["paging: " . ($this->AllowPaging ? ($localPaging ? "true" : "false") : "false")]),
-                    ...(is_null($this->AllowSearching) ? [] : ["searching: " . ((!$this->DataTable && $this->AllowSearching) ? "true" : "false")]),
+                    ...(is_null($this->AllowSearching) ? [] : ["searching: " . (((!$this->DataTable || !$this->AllowServerSide) && $this->AllowSearching) ? "true" : "false")]),
                     ...(is_null($this->AllowOrdering) ? [] : ["ordering: " . ($this->AllowOrdering ? "true" : "false")]),
                     ...(is_null($this->AllowProcessing) ? [] : ["processing: " . ($this->AllowProcessing ? "true" : "false")]),
                     ...(is_null($this->AllowServerSide) ? [] : ["serverSide: " . ($this->AllowServerSide ? ($localPaging ? "true" : "false") : "false")]),
