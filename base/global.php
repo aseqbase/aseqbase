@@ -1260,8 +1260,8 @@ function load($url = null, $target = null)
 {
 	if (is_null($target))
 		deliverScript("window.location.href = " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ";");
-	else
-		deliverScript("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '" . ($target === true ? "_blank" : ($target === false ? "_self" : $target)) . "');");
+	else if($target === true) script("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '_blank');");
+	else deliverScript("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '" . ($target === false ? "_self" : $target) . "');");
 }
 /**
  * Reload the current location

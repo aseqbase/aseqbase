@@ -110,7 +110,7 @@ class Convert
 
     /**
      * Separate a text to multiple paragraphs
-     * @param string $string
+     * @param string $html
      * @return array<string>
      */
     public static function ToParagraphs($html, $getText = false)
@@ -220,7 +220,6 @@ class Convert
 
     /**
      * Convert a text to normal Title
-     * @param string[] $texts Parts of title
      * @return string
      */
     public static function ToTitle()
@@ -842,7 +841,7 @@ class Convert
                 return (strlen($a) == strlen($b)) ? 0 : ((strlen($a) < strlen($b)) ? 1 : -1);
             });
         }
-        $string = str_replace(array_keys($additionalKeys), array_values($additionalKeys), $string);
+        if($string) $string = str_replace(array_keys($additionalKeys), array_values($additionalKeys), $string);
         //foreach ($additionalKeys as $key => $value)
         //    $string = str_replace($key, $value??"", $string);
         return $string;

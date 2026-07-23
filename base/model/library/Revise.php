@@ -125,6 +125,7 @@ class Revise
         foreach (self::Get(fn($property) => self::GetType($object, $property), $object, $category) as $key => $type) {
             if (isset($metadata[$key]) && isset($object->$key))
                 switch ($type) {
+                    case "password":
                     case "string":
                         $object->$key = Convert::ToString($metadata[$key]);
                         break;
@@ -142,6 +143,10 @@ class Revise
                         break;
                     case "double":
                         $object->$key = doubleval($metadata[$key]);
+                        break;
+                    case "array":
+                    case "object":
+                        $object->$key = $metadata[$key]?:[];
                         break;
                     default:
                         $object->$key = $metadata[$key];
@@ -464,7 +469,7 @@ class Revise
 
                     foreach ($newValues as $key => $value)
                         if (isset($object->$key) && isset($types[$key]))
-                            if ($types[$key] === "object" && $value)
+                            if ($types[$key] === "object")
                                 $object->$key = json_decode($value, flags: self::$Flags);
                             elseif (startsWith($types[$key] ?? "", "bool"))
                                 $object->$key = boolval($value);
