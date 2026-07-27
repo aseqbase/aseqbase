@@ -145,7 +145,6 @@ class RouterBase extends ArrayObject
     }
     /**
      * To handle routing for the received request
-     * @param string|null|int $alternative An alternative route name
      */
     public function Handle()
     {

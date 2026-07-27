@@ -1,4 +1,5 @@
 <?php
+$data = $data??[];
 module("SignUpForm");
 $module = new \MiMFa\Module\SignUpForm();
 $module->SignatureValue = get($data, "Signature");

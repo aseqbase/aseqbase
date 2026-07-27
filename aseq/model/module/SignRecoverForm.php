@@ -7,7 +7,7 @@ use MiMFa\Library\Struct;
 module("Form");
 class SignRecoverForm extends Form
 {
-	public $Action = null;
+	public $Action = "/sign/recover";
 	public $Title = "Account Recovery";
 	public $Image = "undo-alt";
 	public $SubmitLabel = "Submit";
@@ -33,11 +33,11 @@ class SignRecoverForm extends Form
 	public $TokenKey = "rt";
 
 	public $EmailSubject = 'Account Recovery Request';
-	public $EmailContent = 'Hello dear $NAME,<br><br>
-We received an account recovery request on $HOSTLINK for $EMAILLINK.<br>
+	public $EmailContent = 'Hello dear {UserName},<br><br>
+We received an account recovery request on {HostTag} for {UserEmailTag}.<br>
 This email address is associated with an account but no password is associated with it yet, so it can\'t be used to log in.<br>
 Please $HYPERLINK or the below link if you want to reset your password... else ignore this message.<br>$LINK<br><br>
-With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
+With Respect,<br>{HostTag}<br>{HostEmailTag}';
 	public $EmailLinkLabel = "CLICK ON THIS LINK";
 
 	public function __construct()
@@ -163,9 +163,9 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK';
 	 * $HYPERLINK: for the reset password hyperlink tag
 	 * $LINK: for the reset password link
 	 * $PATH: for the reset password link address
-	 * $NAME: for the user name
-	 * $SIGNATURE: for the user Signature
-	 * $IMAGE: for the user image path
+	 * {UserName}: for the user name
+	 * {UserSignature}: for the user Signature
+	 * {UserImage}: for the user image path
 	 * @return bool
 	 */
 	public function SendRecoveryEmail($subject = null, $content = null, $linkAnchor = null)

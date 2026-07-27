@@ -13,11 +13,11 @@ try {
             \_::$Front->SenderEmail,
             $email ?? \_::$User->TemporaryEmail,
             "Account Activation Request",
-            'Hello dear $NAME,<br><br>
-We received an account activation request on $HOSTLINK for $EMAILLINK.<br>
+            'Hello dear {UserName},<br><br>
+We received an account activation request on {HostTag} for {UserEmailTag}.<br>
 Thank you for registration, This email address is associated with an account but is not activated yet, so it can�t be used to log in.<br>
 Please $HYPERLINK or the below link to active your account!<br>$LINK<br><br>
-With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK',
+With Respect,<br>{HostTag}<br>{HostEmailTag}',
             "CLICK ON THIS LINK",
             \_::$User->ActiveHandlerPath,
             $activationTokenKey
@@ -39,8 +39,9 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK',
     ) {
         success("Dear '" . \_::$User->TemporaryName . "', Your account activated successfully!");
         part("access");
-    } else
-        error("A problem is occoured here!") .
+    } else {
+        error("A problem is occoured here!");
+        response(
             Struct::Form(
                 [
                     Struct::Field("Email", "Email", $email, attributes: ["wrapper" => ["class" => "be flex justify middle", "style" => "gap:var(--size-0);"]]),
@@ -52,9 +53,12 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK',
                     "class" => "be flex middle center justify vertical",
                     "style" => "gap:var(--size-0); padding:var(--size-0);"
                 ]
-            );
+            )
+        );
+    }
 } catch (\Exception $ex) {
-    error($ex) .
+    error($ex);
+    response(
         Struct::Form(
             [
                 Struct::Field("Email", "Email", $email, attributes: ["wrapper" => ["class" => "be flex justify middle", "style" => "gap:var(--size-0);"]]),
@@ -66,6 +70,7 @@ With Respect,<br>$HOSTLINK<br>$HOSTEMAILLINK',
                 "class" => "be flex middle center justify vertical",
                 "style" => "gap:var(--size-0); padding:var(--size-0);"
             ]
-        );
+        )
+    );
 }
 ?>

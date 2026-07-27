@@ -155,7 +155,8 @@ function send($method = null, $url = null, mixed $data = [], array|null $options
 	if (!is_null($options))
 		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
-	if (curl_errno($curl)) report(curl_error($curl), $response === false?"error":"warning");
+	if (curl_errno($curl))
+		report(curl_error($curl), $response === false ? "error" : "warning");
 	curl_close($curl);
 	return $response;
 }
@@ -184,7 +185,8 @@ function sendGet($url = null, mixed $data = [], array|null $options = null, arra
 	if (!is_null($options))
 		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
-	if (curl_errno($curl)) report(curl_error($curl), $response === false?"error":"warning");
+	if (curl_errno($curl))
+		report(curl_error($curl), $response === false ? "error" : "warning");
 	curl_close($curl);
 	return $response;
 }
@@ -212,7 +214,8 @@ function sendPost($url = null, mixed $data = [], array|null $options = null, arr
 	if (!is_null($options))
 		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
-	if (curl_errno($curl)) report(curl_error($curl), $response === false?"error":"warning");
+	if (curl_errno($curl))
+		report(curl_error($curl), $response === false ? "error" : "warning");
 	curl_close($curl);
 	return $response;
 }
@@ -270,7 +273,8 @@ function sendFile($url = null, mixed $data = [], array|null $options = null, arr
 	if (!is_null($options))
 		curl_setopt_array($curl, $options);
 	$response = curl_exec($curl);
-	if (curl_errno($curl)) report(curl_error($curl), $response === false?"error":"warning");
+	if (curl_errno($curl))
+		report(curl_error($curl), $response === false ? "error" : "warning");
 	curl_close($curl);
 	return $response;
 }
@@ -619,8 +623,9 @@ function uploadContent($content, $name = null, $type = null, ?string $encoding =
  */
 function download($url, $destPath = null, $extensions = null, $minSize = null, $maxSize = null, $method = "GET")
 {
-	if(!$url) return null;
-	
+	if (!$url)
+		return null;
+
 	$objectName = preg_replace("/[\/\\\'\"\|\[\]\{\}\?]/", "", getUrlResource(urldecode($url)));
 
 	$allow = true;
@@ -642,8 +647,8 @@ function download($url, $destPath = null, $extensions = null, $minSize = null, $
 		$destPath = \_::$Address->TempDirectory . "d-" . getId(false) . "-" . $objectName;
 		$contentResult = true;
 	}
-	
-	$data = send($method, $url, secure:true);
+
+	$data = send($method, $url, secure: true);
 	if (!$data || !file_put_contents($destPath, $data))
 		return false;
 	elseif ($contentResult)
@@ -698,7 +703,7 @@ function downloadFile($destPath = null, $extensions = null, $minSize = null, $ma
 		if (endsWith($destPath, DIRECTORY_SEPARATOR))
 			$destPath = Storage::GenerateUniquePath($destPath, $objectName);
 	} else {
-		$destPath = \_::$Address->TempDirectory . "d-" . getId(false) . "-". $objectName;
+		$destPath = \_::$Address->TempDirectory . "d-" . getId(false) . "-" . $objectName;
 		$contentResult = true;
 	}
 
@@ -1005,10 +1010,10 @@ function report($message = null, $type = "log", $secret = null, $status = null)
 				$log = \_::$Back->ReportLevel > 2 ? "logs-" . date('Y-M-d') : false;
 				break;
 		}
-	$message = Convert::ToString($message??"");
+	$message = Convert::ToString($message ?? "");
 	if ($log) {
 		if (\_::$Back->ReportTarget === 1 || \_::$Back->ReportTarget === 3)
-			file_put_contents(\_::$Address->LogDirectory . "$log.log", date('d/M/Y H:i:s') . "\t\"" . str_replace(["\"", "\r\n", "\n\r", "\n"], ["\"\""," "," "," "], $message) . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
+			file_put_contents(\_::$Address->LogDirectory . "$log.log", date('d/M/Y H:i:s') . "\t\"" . str_replace(["\"", "\r\n", "\n\r", "\n"], ["\"\"", " ", " ", " "], $message) . "\"\t\"" . getClientIp() . "\"\t\"" . getUrl() . "\"\n", FILE_APPEND);
 		//To print on the server console
 	}
 	if (!$secret)
@@ -1260,8 +1265,10 @@ function load($url = null, $target = null)
 {
 	if (is_null($target))
 		deliverScript("window.location.href = " . (empty($url) ? "location.href" : "`" . getFullUrl($url) . "`") . ";");
-	else if($target === true) script("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '_blank');");
-	else deliverScript("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '" . ($target === false ? "_self" : $target) . "');");
+	else if ($target === true)
+		script("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '_blank');");
+	else
+		deliverScript("window.open(" . (isValid($url) ? "'" . getFullUrl($url) . "'" : "location.href") . ", '" . ($target === false ? "_self" : $target) . "');");
 }
 /**
  * Reload the current location
@@ -1533,9 +1540,13 @@ function including(string $path, mixed $data = [], bool $print = true, $default 
 			ob_start();
 		$result = [];
 		if (endsWith($path, DIRECTORY_SEPARATOR)) {
-			foreach (glob($path . "*" . \_::$Extension) as $path)
-				if (!is_null($r = $once ? include_once $path : include $path))
-					$result[] = $r;
+			foreach (glob($path."*") as $p)
+				if (is_file($p)) {
+					if (endsWith($p, \_::$Extension))
+						if (!is_null($r = $once ? include_once $p : include $p))
+							$result[] = $r;
+				} elseif (is_dir($p))
+					$result[] = including($p . DIRECTORY_SEPARATOR, $data, $print, $default, $once);
 		} else
 			$result = $once ? include_once $path : include $path;
 		if (!$print)
@@ -1561,9 +1572,13 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
 			ob_start();
 		$result = [];
 		if (endsWith($path, DIRECTORY_SEPARATOR)) {
-			foreach (glob($path) as $file)
-				if (!is_null($r = $once ? require_once $file : require $file))
-					$result[] = $r;
+			foreach (glob($path."*") as $p)
+				if (is_file($p)) {
+					if (endsWith($p, \_::$Extension))
+						if (!is_null($r = $once ? require_once $p : require $p))
+							$result[] = $r;
+				} elseif (is_dir($p))
+					$result[] = including($p . DIRECTORY_SEPARATOR, $data, $print, $default, $once);
 		} else
 			$result = $once ? require_once $path : require $path;
 		if (!$print)
@@ -2186,7 +2201,7 @@ function graphOr($object = null, $condition = [])
 				if (is_array($value)) {
 					if (graphAnd(get($object, $key), $value))
 						return true;
-				} else if (is_string($value) && isPattern($value)) {
+				} elseif (is_string($value) && isPattern($value)) {
 					if (preg_match($value, Convert::ToString(get($object, $key))))
 						return true;
 				} else {
@@ -2251,7 +2266,7 @@ function take($object, callable|string|int|null $sampler, &$key = null, int|null
 					return $object;
 			} else
 				foreach ($object as $k => $value)
-					if ($sampler($value, $k, $index++)){
+					if ($sampler($value, $k, $index++)) {
 						$key = $k;
 						return $value;
 					}
@@ -2276,7 +2291,8 @@ function take($object, callable|string|int|null $sampler, &$key = null, int|null
 		}
 	}
 	$index = null;
-	if(is_int($sampler)) return null;
+	if (is_int($sampler))
+		return null;
 	return
 		isset($object->{$key = $sampler}) ? $object->$key : (
 			isset($object->{$key = strtoproper($sampler)}) ? $object->$key : (
@@ -2910,17 +2926,17 @@ function isMethod(string|int|null $method = null)
 function getClientIp(): string|null
 {
 	// Define a list of IP addresses for trusted proxies/load balancers
-    $trustedProxies = ['127.0.0.1']; // The actual proxy IPs here
+	$trustedProxies = ['127.0.0.1']; // The actual proxy IPs here
 
-    $clientIp = $_SERVER['REMOTE_ADDR'];
+	$clientIp = $_SERVER['REMOTE_ADDR'] ?? "";
 
-    // If the request came from a trusted proxy, trust the forwarded header
-    if (in_array($clientIp, $trustedProxies) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $forwardedIps = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        $clientIp = trim($forwardedIps[0]);
-    }
+	// If the request came from a trusted proxy, trust the forwarded header
+	if (in_array($clientIp, $trustedProxies) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+		$forwardedIps = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+		$clientIp = trim($forwardedIps[0]);
+	}
 
-    return $clientIp;
+	return $clientIp;
 }
 function getClientCode($key = null): string|null
 {

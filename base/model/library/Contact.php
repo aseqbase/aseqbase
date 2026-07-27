@@ -60,9 +60,9 @@ class Contact extends ArrayObject
 			...($this->UserNameKey?[$this->UserNameKey => $this->UserName]:[]),
 			...($this->PasswordKey?[$this->PasswordKey => $this->Password]:[]),
 			...($this->ToKey?[$this->ToKey => $to]:[]),
-			...($this->FromKey?[$this->FromKey => $this->Identifier]:[]),
+			...($this->FromKey && $this->Identifier?[$this->FromKey => $this->Identifier]:[]),
 			...($this->TextKey?[$this->TextKey => $message]:[])
-		], $attributes));
+		], Convert::FromJson($attributes)??[]));
 		$this->Headers[] = "Content-Length: " . strlen($message);
 		return send(
 			$this->Method,

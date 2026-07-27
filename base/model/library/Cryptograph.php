@@ -37,7 +37,7 @@ class Cryptograph
      *
      * @param string $message - ciphertext message
      * @param string $key - encryption key (raw binary expected)
-     * @param boolean $encoded - are we expecting an encoded string?
+     * @param boolean $decode - are we expecting an encoded string?
      * @return string
      */
     public function Decrypt($message, $key, $decode = false)

@@ -8,7 +8,7 @@ use MiMFa\Library\Script;
 module("Form");
 class SignUpForm extends Form
 {
-	public $Action = null;
+	public $Action = "/sign/up";
 	public $Title = "Sign Up";
 	public $Image = "user-plus";
 	public $SubmitLabel = "Register";
@@ -62,7 +62,7 @@ class SignUpForm extends Form
 	public $SignInLabel = "Do you have an account?";
 	public $SignInPath = null;
 	public $Welcome = null;
-	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "$NAME",<br>You are signed in now!</p></div>';
+	public $WelcomeFormat = null;//'<div class="welcome result success"><br><p class="welcome">Hello dear "{UserName}",<br>You are signed in now!</p></div>';
 	public $ContactCountryCode = null;
 	public $ContactPattern = "/^\d{4,10}$/";
 	public $AllowInternalMethod = true;
@@ -84,7 +84,6 @@ class SignUpForm extends Form
 	public function __construct()
 	{
 		parent::__construct();
-		$this->Action = \_::$User->UpHandlerPath;
 		$this->InitialStatus = \_::$User->InitialStatus;
 		$this->Welcome = $this->InitialStatus ? function () {
 			return part(\_::$User->DashboardHandlerPath, print: false);

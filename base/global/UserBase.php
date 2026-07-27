@@ -636,7 +636,7 @@ class UserBase
 		$dic['$HYPERLINK'] = Struct::Link($linkAnchor, $path);
 		$dic['$LINK'] = Struct::Link($path, $path);
 		$dic['$PATH'] = $path;
-		$dic['$SIGNATURE'] = $this->TemporarySignature;
+		$dic['{UserSignature}'] = $this->TemporarySignature;
 		$subject = Convert::FromDynamicString($subject ?? "", $dic, true);
 		$content = Convert::FromDynamicString($content ?? "", $dic, false);
 		return Contact::SendHtmlEmail($from, $this->TemporaryEmail, __($subject), __($content)) ? true : false;

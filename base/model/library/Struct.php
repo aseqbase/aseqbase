@@ -724,6 +724,63 @@ class Struct
     #region NOTIFICATION
 
     /**
+     * To show a Dialog tag
+     * @param string $content The dialog text or html tags
+     * @param mixed $attributes Other custom attributes of the Tag
+     * @return string
+     */
+    public static function Dialog($content, ...$attributes)
+    {
+        $id = "_" . getId(true);
+        return self::Element(
+            [
+                self::Style("
+                    #$id.dialog {
+                        background-color: var(--back-color-special);
+                        color: var(--fore-color-special);
+                        display: block;
+                        position: relative;
+                        padding: var(--size-3);
+                        border-radius: var(--radius-3);
+                        max-width: 90%;
+                        max-height: 90%;
+                        overflow: auto;
+                        box-shadow: var(--shadow-max);
+                    }
+                    #$id.dialog>.dialog-controls {
+                        position: sticky;
+                        top: 0px; right: 0px; left: 0px;
+                        height: fit-content;
+                        width: 100%;
+                        display: flex;
+                        flex-direction: row-reverse;
+                    }
+                    #$id.dialog>.dialog-controls>.dialog-close {
+                        background-color: var(--back-color-special);
+                        color: var(--fore-color-special);
+                        height: fit-content;
+                        width: fit-content;
+                        border-radius: var(--radius-max);
+                        aspect-ratio:1;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        align-content: center;
+                    }
+                "),
+                self::Box(self::Icon("close", "this.closest('#$id.dialog').removeAttribute('open');event.preventDefault();", ["class" => 'dialog-close']), ["class" => "dialog-controls"]),
+                $content
+            ],
+            "dialog",
+            [
+                "id" => $id,
+                "class" => "dialog"
+            ],
+            ...$attributes
+        );
+    }
+
+    /**
      * To show a modal tag
      * @param string $content The modal text or html tags
      * @param mixed $attributes Other custom attributes of the Tag
@@ -754,6 +811,8 @@ class Struct
                 border-radius: var(--radius-3);
                 max-width: 90%;
                 max-height: 90%;
+                width: auto;
+                height: auto;
                 overflow: auto;
                 box-shadow: var(--shadow-max);
             }
@@ -920,7 +979,7 @@ class Struct
                     else
                         $srcs[] = self::Element("source", ["srcset" => $value, "media" => $key]);
             }
-            $srcs[] = self::Element("img", ["src" => $src, ...($content?["alt" => htmlspecialchars($content)]:[])], self::FilterAttributes($attributes, fn($v, $k) => preg_match("/^((on\w+)|alt|src|id)$/i", $k)));
+            $srcs[] = self::Element("img", ["src" => $src, ...($content ? ["alt" => htmlspecialchars($content)] : [])], self::FilterAttributes($attributes, fn($v, $k) => preg_match("/^((on\w+)|alt|src|id)$/i", $k)));
             return self::Element(join(PHP_EOL, $srcs), "picture", ["class" => "image"], $attributes);
         }
         //return self::Element("img", ["src" => $source, "alt" => __($content ?? ""), "class" => "image"], $attributes);
@@ -935,7 +994,8 @@ class Struct
     public static function Media($content, $source = null, ...$attributes)
     {
         if (isEmpty($source)) {
-            if (isEmpty($content)) return $content;
+            if (isEmpty($content))
+                return $content;
             $source = $content;
             $content = null;
         } elseif (is_array($source)) {
@@ -2311,7 +2371,7 @@ class Struct
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
             $action = Script::Load($action);
-            // return self::Element(__($content), "a", ["class" => "output button", "type" => "button", "href" => $action], $attributes);
+        // return self::Element(__($content), "a", ["class" => "output button", "type" => "button", "href" => $action], $attributes);
         return self::Element(__($content), "button", ["class" => "output button", "type" => "button"], $action ? ["onclick" => $action] : [], $attributes);
     }
     /**
@@ -2353,7 +2413,7 @@ class Struct
     {
         if (!isEmpty($action) && (!isScript($action) && isUrl($action)))
             return self::Element(__($content), "a", ["class" => "output anchor", "href" => $action], $attributes);
-        return self::Element(__($content), "action", ["class" => "output anchor" ], $action ? ["onclick" => $action] : [], $attributes);
+        return self::Element(__($content), "action", ["class" => "output anchor"], $action ? ["onclick" => $action] : [], $attributes);
     }
     #endregion
 

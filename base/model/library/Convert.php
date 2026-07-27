@@ -94,6 +94,26 @@ class Convert
         }
         return (self::ToStatic($object) ?? $default) . "";
     }
+    /**
+     * Convert everything to its object type from a simple string format
+     * @param mixed $string
+     * @return null|bool|int|float|string
+     */
+    public static function FromString($string, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", string $default = ""){
+        switch ($string) {
+            case '':
+                return null;
+            case 'true':
+                return true;
+            case 'false':
+                return false;
+            default:
+                if(is_numeric($string))
+                    if(str_contains($string, ".")) return floatval($string);
+                    else return intval($string);
+                return $string;
+        }
+    }
 
     public static function ToHtml($object, ...$args)
     {
@@ -369,6 +389,8 @@ class Convert
             return $json;
         if (isEmpty($json) || (trim(strtolower($json)) === "null"))
             return null;
+        if (is_array($json))
+            return loop($json, fn($v, $k)=>[$k=>self::FromString($v)], pair:true);
         if (isJson($json))
             return json_decode($json, flags: $flags ?? (JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
         return preg_split('/\r?\n/', $json . "");
@@ -792,50 +814,57 @@ class Convert
         return null;
     }
 
-    public static function FromDynamicString($string, &$additionalKeys = array(), $addDefaultKeys = true)
+    public static function FromDynamicString(string $string, &$additionalKeys = array(), $addDefaultKeys = true)
     {
         if ($addDefaultKeys) {
             $email = \_::$Front->ReceiverEmail;
-            if (!isset($additionalKeys['$HOSTEMAILLINK']))
-                $additionalKeys['$HOSTEMAILLINK'] = Struct::Link($email, "mailto:$email");
-            if (!isset($additionalKeys['$HOSTEMAIL']))
-                $additionalKeys['$HOSTEMAIL'] = $email;
-            if (!isset($additionalKeys['$HOSTLINK']))
-                $additionalKeys['$HOSTLINK'] = Struct::Link(\_::$Address->UrlHost, \_::$Address->UrlOrigin);
-            if (!isset($additionalKeys['$HOST']))
-                $additionalKeys['$HOST'] = \_::$Address->UrlOrigin;
-            if (!isset($additionalKeys['$URLLINK']))
-                $additionalKeys['$URLLINK'] = Struct::Link(\_::$Address->Url, \_::$Address->Url);
-            if (!isset($additionalKeys['$URL']))
-                $additionalKeys['$URL'] = \_::$Address->Url;
-            if (!isValid($additionalKeys, '$SIGNATURE'))
-                $additionalKeys['$SIGNATURE'] = \_::$User->TemporarySignature;
-            if (!isValid($additionalKeys, '$NAME'))
-                $additionalKeys['$NAME'] = \_::$User->TemporaryName;
+            if (!isset($additionalKeys['{HostEmailTag}']))
+                $additionalKeys['{HostEmailTag}'] = Struct::Link($email, "mailto:$email");
+            if (!isset($additionalKeys['{HostEmail}']))
+                $additionalKeys['{HostEmail}'] = $email;
+            if (!isset($additionalKeys['{HostTag}']))
+                $additionalKeys['{HostTag}'] = Struct::Link(\_::$Front->FullName, \_::$Address->UrlOrigin);
+            if (!isset($additionalKeys['{HostUrl}']))
+                $additionalKeys['{HostUrl}'] = \_::$Address->UrlOrigin;
+            if (!isset($additionalKeys['{Host}']))
+                $additionalKeys['{Host}'] = \_::$Front->FullName;
+            if (!isset($additionalKeys['{HostName}']))
+                $additionalKeys['{HostName}'] = \_::$Front->Name;
+            if (!isset($additionalKeys['{UrlTag}']))
+                $additionalKeys['{UrlTag}'] = Struct::Link(\_::$Address->Url, \_::$Address->Url);
+            if (!isset($additionalKeys['{Url}']))
+                $additionalKeys['{Url}'] = \_::$Address->Url;
+            if (!isValid($additionalKeys, '{UserSignature}'))
+                $additionalKeys['{UserSignature}'] = \_::$User->TemporarySignature;
+            if (!isValid($additionalKeys, '{User}'))
+                $additionalKeys['{User}'] = \_::$User->TemporaryName;
+            if (!isValid($additionalKeys, '{UserName}'))
+                $additionalKeys['{UserName}'] = \_::$User->TemporaryName;
             $email = \_::$User->TemporaryEmail;
-            if (!isset($additionalKeys['$EMAILLINK']))
-                $additionalKeys['$EMAILLINK'] = Struct::Link($email, "mailto:$email");
-            if (!isset($additionalKeys['$EMAIL']))
-                $additionalKeys['$EMAIL'] = $email;
-            if (!isset($additionalKeys['$IMAGE']))
-                $additionalKeys['$IMAGE'] = \_::$User->TemporaryImage;
+            if (!isset($additionalKeys['{UserEmailTag}']))
+                $additionalKeys['{UserEmailTag}'] = Struct::Link($email, "mailto:$email");
+            if (!isset($additionalKeys['{UserEmail}']))
+                $additionalKeys['{UserEmail}'] = $email;
+            if (!isset($additionalKeys['{UserImage}']))
+                $additionalKeys['{UserImage}'] = \_::$User->TemporaryImage;
 
             if (isValid(\_::$User->Id)) {
-                $person = \_::$User->Get(takeValid($additionalKeys, '$SIGNATURE'));
-                $additionalKeys['$SIGNATURE'] = get($person, "Signature") ?? \_::$User->TemporarySignature;
-                $additionalKeys['$NAME'] = get($person, "Name") ?? \_::$User->TemporaryName;
+                $person = \_::$User->Get(takeValid($additionalKeys, '{UserSignature}'));
+                $additionalKeys['{UserSignature}'] = get($person, "Signature") ?? \_::$User->TemporarySignature;
+                $additionalKeys['{UserName}'] = get($person, "Name") ?? \_::$User->TemporaryName;
+                $additionalKeys['{User}'] = get($person, "Name") ?? \_::$User->TemporaryName;
                 $email = get($person, "Email") ?? \_::$User->TemporaryEmail;
-                $additionalKeys['$EMAILLINK'] = Struct::Link($email, "mailto:$email");
-                $additionalKeys['$EMAIL'] = $email;
-                $additionalKeys['$IMAGE'] = get($person, "Image") ?? \_::$User->TemporaryImage;
-                if (!isset($additionalKeys['$IMAGETAG']))
-                    $additionalKeys['$IMAGETAG'] = Struct::Image($additionalKeys['$SIGNATURE'], get($person, "Image"));
-                if (!isset($additionalKeys['$ADDRESS']))
-                    $additionalKeys['$ADDRESS'] = get($person, "Address");
-                if (!isset($additionalKeys['$CONTACT']))
-                    $additionalKeys['$CONTACT'] = get($person, "Contact");
-                if (!isset($additionalKeys['$ORGANIZATION']))
-                    $additionalKeys['$ORGANIZATION'] = get($person, "Organization");
+                $additionalKeys['{UserEmailTag}'] = Struct::Link($email, "mailto:$email");
+                $additionalKeys['{UserEmail}'] = $email;
+                $additionalKeys['{UserImage}'] = get($person, "Image") ?? \_::$User->TemporaryImage;
+                if (!isset($additionalKeys['{UserImageTag}']))
+                    $additionalKeys['{UserImageTag}'] = Struct::Image($additionalKeys['{UserSignature}'], get($person, "Image"));
+                if (!isset($additionalKeys['{UserAddress}']))
+                    $additionalKeys['{UserAddress}'] = get($person, "Address");
+                if (!isset($additionalKeys['{UserContact}']))
+                    $additionalKeys['{UserContact}'] = get($person, "Contact");
+                if (!isset($additionalKeys['{UserOrganization}']))
+                    $additionalKeys['{UserOrganization}'] = get($person, "Organization");
             }
             uksort($additionalKeys, function ($a, $b) {
                 return (strlen($a) == strlen($b)) ? 0 : ((strlen($a) < strlen($b)) ? 1 : -1);

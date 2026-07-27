@@ -38,9 +38,10 @@ class Revise
      */
     public static function Path($object, $category = null, $language = null)
     {
-        if(is_null($language) && is_null($category)){
+        if (is_null($language) && is_null($category)) {
             $path = self::Path($object, null, \_::$Front->Translate->Language);
-            if(file_exists($path)) return $path;
+            if (file_exists($path))
+                return $path;
         }
         return (new \ReflectionClass($object))->getFileName() . ($category ? ".$category" : "") . ($language ? ".$language" : "") . self::$Extension;
     }
@@ -146,7 +147,7 @@ class Revise
                         break;
                     case "array":
                     case "object":
-                        $object->$key = $metadata[$key]?:[];
+                        $object->$key = $metadata[$key] ?: [];
                         break;
                     default:
                         $object->$key = $metadata[$key];
@@ -336,7 +337,9 @@ class Revise
                             $res[$key] = [];
                         $val = trim(preg_replace($reppat, "", $value));
                         $k = preg_find("/^\s*\w+\s*(?=:)/u", $val);
-                        if ($k)
+                        if(preg_match("/\s*\{[\W\w]*\}\s*$/i", $val))
+                            $res[$key] = Convert::FromJson($val);
+                        elseif ($k)
                             $res[$key][trim($k, " \n\r\t\v\x00\"'")] = preg_replace("/(^\s*\w+\s*:\s*([\"\']))|(\2$)/u", "", $val);
                         else
                             $res[$key][] = $val;
@@ -410,7 +413,7 @@ class Revise
         $form->SubmitLabel = "Update";
         $form->ResetLabel = "Reset";
         $form->AllowHeader = false;
-        $form->Buttons = Struct::Button("Recover to Defaults", "if(".Script::Confirm("All of your special values will be reset to the default values.\rAre you sure you want to reset all manual values?").") send('" . self::$DelMethod . "', null, {Name:'{$form->MainClass}'})");
+        $form->Buttons = Struct::Button("Recover to Defaults", "if(" . Script::Confirm("All of your special values will be reset to the default values.\rAre you sure you want to reset all manual values?") . ") send('" . self::$DelMethod . "', null, {Name:'{$form->MainClass}'})");
         return Struct::Style("
             #{$name}Form>*>*>.box{
                 width: 100%;
