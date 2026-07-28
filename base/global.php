@@ -777,7 +777,7 @@ function downloadStream($destPath = null, $extensions = null, $minSize = null, $
 
 	$tmpdir = $destPath . "-tmp-$total" . DIRECTORY_SEPARATOR;
 	Storage::CreateDirectory($tmpdir, secure: false);
-	if (!Storage::SetFile($tmpdir . str_repeat("0", 20 - intval($chunk / 10)) . $chunk, $object))
+	if (!Storage::SetFile($tmpdir . str_repeat("0", max(0, 20 - intval(pow($total, 1 / 10)))) . $chunk, $object))
 		return false;
 	$parts = Storage::GetDirectory($tmpdir);
 	$rchc = count($parts);
@@ -1540,7 +1540,7 @@ function including(string $path, mixed $data = [], bool $print = true, $default 
 			ob_start();
 		$result = [];
 		if (endsWith($path, DIRECTORY_SEPARATOR)) {
-			foreach (glob($path."*") as $p)
+			foreach (glob($path . "*") as $p)
 				if (is_file($p)) {
 					if (endsWith($p, \_::$Extension))
 						if (!is_null($r = $once ? include_once $p : include $p))
@@ -1572,7 +1572,7 @@ function requiring(string $path, mixed $data = [], bool $print = true, $default 
 			ob_start();
 		$result = [];
 		if (endsWith($path, DIRECTORY_SEPARATOR)) {
-			foreach (glob($path."*") as $p)
+			foreach (glob($path . "*") as $p)
 				if (is_file($p)) {
 					if (endsWith($p, \_::$Extension))
 						if (!is_null($r = $once ? require_once $p : require $p))

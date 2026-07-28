@@ -95,24 +95,33 @@ class Convert
         return (self::ToStatic($object) ?? $default) . "";
     }
     /**
-     * Convert everything to its object type from a simple string format
-     * @param mixed $string
-     * @return null|bool|int|float|string
+     * Convert everything to its object type from a simple string format or an object contains a string
+     * @param mixed $object
+     * @return null|bool|int|float|string|array|mixed
      */
-    public static function FromString($string, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", string $default = ""){
-        switch ($string) {
-            case '':
-                return null;
-            case 'true':
-                return true;
-            case 'false':
-                return false;
-            default:
-                if(is_numeric($string))
-                    if(str_contains($string, ".")) return floatval($string);
-                    else return intval($string);
-                return $string;
-        }
+    public static function FromString($object, $separator = PHP_EOL, $assignFormat = "{0}:{1},", $arrayFormat = "{0}", string $default = "")
+    {
+        if (isStatic($object))
+            switch ($object . "") {
+                case '':
+                    return null;
+                case 'true':
+                    return true;
+                case 'false':
+                    return false;
+                default:
+                    if (preg_match("/^[1-9\-]\d*\.?\d*$/", $object))
+                        if (str_contains($object, "."))
+                            return floatval($object);
+                        else
+                            return intval($object);
+                    if (startsWith($object, "\"") && endsWith($object, "\""))
+                        return substr($object, 1, strlen($object) - 1);
+                    return $object;
+            }
+        elseif (is_array($object))
+            return loop($object, fn($v, $k) => [$k => self::FromString($v)], true, true);
+        return $object;
     }
 
     public static function ToHtml($object, ...$args)
@@ -390,7 +399,7 @@ class Convert
         if (isEmpty($json) || (trim(strtolower($json)) === "null"))
             return null;
         if (is_array($json))
-            return loop($json, fn($v, $k)=>[$k=>self::FromString($v)], pair:true);
+            return loop($json, fn($v, $k) => [$k => self::FromJson($v)], pair: true);
         if (isJson($json))
             return json_decode($json, flags: $flags ?? (JSON_ERROR_NONE | JSON_OBJECT_AS_ARRAY | JSON_NUMERIC_CHECK | JSON_BIGINT_AS_STRING | JSON_PRESERVE_ZERO_FRACTION));
         return preg_split('/\r?\n/', $json . "");
@@ -870,7 +879,8 @@ class Convert
                 return (strlen($a) == strlen($b)) ? 0 : ((strlen($a) < strlen($b)) ? 1 : -1);
             });
         }
-        if($string) $string = str_replace(array_keys($additionalKeys), array_values($additionalKeys), $string);
+        if ($string)
+            $string = str_replace(array_keys($additionalKeys), array_values($additionalKeys), $string);
         //foreach ($additionalKeys as $key => $value)
         //    $string = str_replace($key, $value??"", $string);
         return $string;

@@ -28,6 +28,8 @@ class Contact extends ArrayObject
 	public $TextKey = "text";
 	public $CountKey = "count";
 
+	public $DataConvertor = "json_encode";
+
 	/**
 	 * Summary of __construct
 	 * @param mixed $identifier
@@ -44,7 +46,7 @@ class Contact extends ArrayObject
 	}
 
 	/**
-	 * Send aaa message
+	 * Send a sms message
 	 * @param string|array $to One or multiple recipient(s)
 	 * @param mixed $message
 	 */
@@ -56,13 +58,17 @@ class Contact extends ArrayObject
 				$res[] = $this->Send($value, $message, $attributes);
 			return $res;
 		}
-		$message = json_encode(array_merge($this->ToArray(), [
-			...($this->UserNameKey?[$this->UserNameKey => $this->UserName]:[]),
-			...($this->PasswordKey?[$this->PasswordKey => $this->Password]:[]),
-			...($this->ToKey?[$this->ToKey => $to]:[]),
-			...($this->FromKey && $this->Identifier?[$this->FromKey => $this->Identifier]:[]),
-			...($this->TextKey?[$this->TextKey => $message]:[])
-		], Convert::FromJson($attributes)??[]));
+		$message = ($this->DataConvertor)([
+			...$this->ToArray(),
+			...[
+				...($this->UserNameKey ? [$this->UserNameKey => $this->UserName] : []),
+				...($this->PasswordKey ? [$this->PasswordKey => $this->Password] : []),
+				...($this->ToKey ? [$this->ToKey => $to] : []),
+				...($this->FromKey && $this->Identifier ? [$this->FromKey => $this->Identifier] : []),
+				...($this->TextKey ? [$this->TextKey => $message] : [])
+			],
+			...$attributes
+		]);
 		$this->Headers[] = "Content-Length: " . strlen($message);
 		return send(
 			$this->Method,
@@ -90,7 +96,7 @@ class Contact extends ArrayObject
 		return send(
 			$this->Method,
 			$this->MakeApi($path),
-			json_encode(array_merge($this->ToArray(), [
+			($this->DataConvertor)(array_merge($this->ToArray(), [
 				$this->UserNameKey => $this->UserName,
 				$this->PasswordKey => $this->Password,
 				$this->FromKey => $from,
@@ -159,7 +165,7 @@ class Contact extends ArrayObject
 			$tos = is_array($to) ? $to : preg_split("/[,; ><\[\](){}&#\|!~\'\"`\*=^%\$\s]+/", Convert::ToString($to));
 			$i = 0;
 			foreach ($tos as $t)
-				if (isEmail($t) && mail($t, $subject, $message . PHP_EOL . Convert::ToString($attaches), $header))
+				if (isEmail($t) && mail($t, $subject??\_::$Front->Name." Message", $message . PHP_EOL . Convert::ToString($attaches), $header))
 					$i++;
 			return $i;
 		} catch (\Exception $ex) {

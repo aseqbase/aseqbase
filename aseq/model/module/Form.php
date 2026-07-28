@@ -173,6 +173,8 @@ class Form extends Module
 				    align-items: flex-start;
 				}
 				.{$this->MainClass} form {
+    				display: grid;
+					width: 100%;
     				position: relative;
 					padding: 0px var(--size-0);
 				}
@@ -184,8 +186,6 @@ class Form extends Module
 				.{$this->MainClass} .field>:is(input,.input){
     				display: inline-block;
 					margin: 0px;
-					margin-inline-start: calc(var(--size-0) / 2);
-					margin-inline-end: var(--size-0);
 				}
 				.{$this->MainClass} .field>.input:is(.input-interactive, [type='radiobutton'], [type='checkbox']){
 					border:none;
@@ -240,8 +240,7 @@ class Form extends Module
 				}
 				
 				.{$this->MainClass} .group.buttons {
-					margin: 0px;
-					padding: var(--size-0) 0px;
+					padding: var(--size-2) 0px;
 					gap: calc(var(--size-0) / 2) var(--size-0);
 					justify-content: end;
 					flex-direction: row-reverse;
@@ -285,7 +284,6 @@ class Form extends Module
 					" . Style::DoProperty("width", $this->FieldsWidth) . "
 					" . Style::DoProperty("height", $this->FieldsHeight) . "
 					display: flex;
-					padding: 0px var(--size-0) var(--size-1);
 					padding: calc(var(--size-0) / 2) 0px;
 				}
 
@@ -838,7 +836,7 @@ class Form extends Module
 									Struct::Rack(Convert::ToString($this->GetButtons()), ["class" => "group buttons"])
 									,
 									$src,
-									["Id" => $name,"class" => "be wide", "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method, "interaction" => $this->Interaction]
+									["Id" => $name, "Name" => $name, "enctype" => $this->EncType, "method" => $this->Method, "interaction" => $this->Interaction]
 								) .
 								($this->AllowFooter ? Struct::Division(
 									$this->GetFooter(),
