@@ -264,11 +264,11 @@ class SideMenu extends Module
 					padding: 0px 5px;
 					position: fixed;
 					z-index: 9999;
-					color:  var(--fore-color-special);
+					color:  var(--fore-color);
 					" . (Style::UniversalProperty("transition", "var(--transition-1)")) . "
 				}
 				.{$this->MainClass}-float-button-menu:hover{
-					color: var(--fore-color);
+					color: var(--fore-color-special);
 				}
 		" : "") . ($this->AllowDefaultButtons ? "
 				.{$this->MainClass} .other{

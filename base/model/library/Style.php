@@ -186,7 +186,7 @@ class Style extends \ArrayObject
 			$dic,
 			wrapStart: "<",
 			wrapEnd: ">",
-			pattern: '/(`\S[^`]*`)|("\S[^"]*")|(\'\S[^\']*\')|(\<\/?[A-z]+[^>]*[^\\\\]?\>)/iU'
+			pattern: '/(`\S[^`]*`)|("\S[^"]*")|(\'\S[^\']*\')|(\<(button|a|strong|b|i)[\s\S]*\>[\s\S]*\<\/\5\>)|(\<\/?[A-z]+[^>]*[^\\\\]?\>)/iU'
 		);
 		$start = "/(?<=[ \.,;]|^)(?<!\<)(";
 		$end = ")(?!\>)(?=[ \.,;]|^)/" . ($caseSensitive ? "" : "i") . ($multiline ? "m" : "");
