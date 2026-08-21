@@ -2,9 +2,11 @@
 namespace MiMFa;
 class Bootstrap
 {
+    public static $OnlyBase = false;
     public static $Arguments = [];
     public static $Configurations = [];
     public static $ServerPID = null;
+
     public static $ConfigurationsFile = 'bootstrap.json';
     public static $DataBaseSchemaFile = 'schema.sql';
     public static $DestinationDirectory = null;
@@ -134,6 +136,10 @@ class Bootstrap
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
         self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
 
+        self::$OnlyBase = self::$Configurations["Basic"] == 1? true:false;
+        self::GetBooleanInput("Do you want to install only basic directories and files?", $force, self::$OnlyBase, self::$OnlyBase, "basic");
+        self::$Configurations["Basic"] = self::$OnlyBase?1:0;
+
         $source = dirname(__DIR__) . DIRECTORY_SEPARATOR;// Source folder (your framework package root)
         $isInVendor = preg_match("/vendor[\/\\\]aseqbase[\/\\\][\w\s\-\.\~]+[\/\\\]$/i", $source);
         if ($isInVendor) {
@@ -159,7 +165,8 @@ class Bootstrap
                 if (
                     str_starts_with($relPath, "~") ||
                     str_starts_with($relPath, ".git" . DIRECTORY_SEPARATOR) ||
-                    str_starts_with($relPath, "vendor" . DIRECTORY_SEPARATOR)
+                    str_starts_with($relPath, "vendor" . DIRECTORY_SEPARATOR) ||
+                    (self::$OnlyBase && str_starts_with($relPath, "aseq" . DIRECTORY_SEPARATOR))
                 )
                     continue;
                 $targetPath = self::$DestinationDirectory . $relPath;
@@ -277,7 +284,7 @@ class Bootstrap
             self::CreateInitializeFile($force);
     }
 
-
+    
     public static function Uninstall()
     {
         self::LoadConfig();
@@ -425,7 +432,7 @@ class Bootstrap
     }
     public static function CreateGlobalFile($force = null)
     {
-        $parent = (self::$Arguments["b"] ?? null) ? "base" : "aseq";
+        $parent = (self::$Arguments["b"] ?? null) ? "base" : (self::$OnlyBase?"base":"aseq");
         if (!isset(self::$Configurations["Global"]))
             self::$Configurations["Global"] = [];
         return self::CreateFile(self::$DestinationDirectory . "global.php", fn() => "<?php
@@ -464,8 +471,8 @@ class Bootstrap
                 return null;
             }
             return "<?php
-" . ((self::$Arguments["b"] ?? null) ? "class Back extends BackBase" : "run(\"global/AseqBack\");
-class Back extends AseqBack") . " {
+" . ((self::$Arguments["b"] ?? null) ? "class Back extends BackBase" : "run(\"global/".(self::$OnlyBase?"BackBase":"AseqBack")."\");
+class Back extends ".(self::$OnlyBase?"BackBase":"AseqBack")) . " {
 	/**
 	 * A special key for the website, be sure to change this
 	 * @field password
@@ -520,8 +527,8 @@ class Back extends AseqBack") . " {
             if (!isset(self::$Configurations["Front"]))
                 self::$Configurations["Front"] = [];
             return "<?php
-" . ((self::$Arguments["b"] ?? null) ? "class Front extends FrontBase" : "run(\"global/AseqFront\");
-class Front extends AseqFront") . " {
+" . ((self::$Arguments["b"] ?? null) ? "class Front extends FrontBase" : "run(\"global/".(self::$OnlyBase?"FrontBase":"AseqFront")."\");
+class Front extends ".(self::$OnlyBase?"FrontBase":"AseqFront")) . " {
     public \$Owner = " . self::GetInput("OwnerName", $force, "MiMFa", self::$Configurations["Info"]["Owner"], "owner") . ";
 	public \$FullOwner = " . self::GetInput("FullOwnerName", $force, "MiMFa", self::$Configurations["Info"]["FullOwner"], "full-owner") . ";
 	public \$Name = " . self::GetInput("Name", $force, "aseqbase", self::$Configurations["Info"]["Name"], "name") . ";
@@ -659,6 +666,11 @@ class Front extends AseqFront") . " {
         if (preg_match("/^\"[\w\W]*[^\\\]\"$/", trim($input), $matches))
             return $matches[0];
         return preg_match(self::$ScriptsPattern, $input) ? $input : "\"$input\"";
+    }
+    public static function GetBooleanInput($message, $force = false, $default = null, &$input = null, $argument = "arg")
+    {
+        self::GetInput($message." (Y:yes, N:no)", $force, $default, $res, $argument);
+        return $input = in_array($res, ["yes", "true", "y"])?true:(in_array($res, ["no", "false", "n"])?false:null);
     }
     public static function SetOutput($message = null)
     {
