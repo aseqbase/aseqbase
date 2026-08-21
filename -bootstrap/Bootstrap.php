@@ -670,6 +670,7 @@ class Front extends ".(self::$OnlyBase?"FrontBase":"AseqFront")) . " {
     public static function GetBooleanInput($message, $force = false, $default = null, &$input = null, $argument = "arg")
     {
         self::GetInput($message." (Y:yes, N:no)", $force, $default, $res, $argument);
+        $res = trim(strtolower($res??""));
         return $input = in_array($res, ["yes", "true", "y"])?true:(in_array($res, ["no", "false", "n"])?false:null);
     }
     public static function SetOutput($message = null)
