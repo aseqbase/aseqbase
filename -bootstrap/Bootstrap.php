@@ -136,7 +136,7 @@ class Bootstrap
             self::$DestinationDirectory .= DIRECTORY_SEPARATOR;
         self::$Configurations["Destination"]["Path"] = self::$DestinationDirectory;
 
-        self::$OnlyBase = self::$Configurations["Basic"] == 1? true:false;
+        self::$OnlyBase = (self::$Configurations["Basic"]??0) == 1? true:false;
         self::GetBooleanInput("Do you want to install only basic directories and files?", $force, self::$OnlyBase, self::$OnlyBase, "basic");
         self::$Configurations["Basic"] = self::$OnlyBase?1:0;
 
